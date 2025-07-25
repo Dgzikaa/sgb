@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import * as React from 'react';
 
 interface CheckboxProps {
   checked?: boolean;
@@ -15,12 +15,12 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
       ref={ref}
       type="checkbox"
       checked={checked || false}
-      onChange={(e) => onCheckedChange?.(e.target.checked)}
+      onChange={e => onCheckedChange?.(e.target.checked)}
       disabled={disabled}
       className={`h-4 w-4 rounded border border-gray-300 text-blue-600 focus:ring-blue-500 ${className || ''}`}
     />
   )
-)
-Checkbox.displayName = "Checkbox"
+);
+Checkbox.displayName = 'Checkbox';
 
-export { Checkbox } 
+export { Checkbox };

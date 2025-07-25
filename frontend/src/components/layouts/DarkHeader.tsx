@@ -1,49 +1,53 @@
-'use client'
+'use client';
 
-import { useState, useRef, useEffect } from 'react'
-import { usePageTitle } from '@/contexts/PageTitleContext'
-import { useBar } from '@/contexts/BarContext'
-import { useUser } from '@/contexts/UserContext'
-import { ChevronDown, User, LogOut, Moon, Sun, ChevronRight, Home } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useTheme } from '@/contexts/ThemeContext'
-import { CommandPaletteSearchPlaceholder, CommandPaletteIconTrigger } from '@/components/ui/command-palette-trigger'
-import { NotificationCenter } from '@/components/NotificationCenter'
+import { useState, useRef, useEffect } from 'react';
+import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
+import { useUser } from '@/contexts/UserContext';
+import {
+  ChevronDown,
+  User,
+  LogOut,
+  Moon,
+  Sun,
+  ChevronRight,
+  Home,
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useTheme } from '@/contexts/ThemeContext';
+import {
+  CommandPaletteSearchPlaceholder,
+  CommandPaletteIconTrigger,
+} from '@/components/ui/command-palette-trigger';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 // Mapeamento de rotas para breadcrumbs
-const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ className?: string }> }> = {
+const routeMapping: Record<
+  string,
+  { name: string; icon?: React.ComponentType<{ className?: string }> }
+> = {
   '/home': { name: 'Home', icon: Home },
-  
+
   // Operações
   '/operacoes': { name: 'Operações' },
   '/operacoes/checklists': { name: 'Checklists' },
   '/operacoes/checklists/checklists-funcionario': { name: 'Meus Checklists' },
   '/operacoes/receitas': { name: 'Receitas' },
   '/operacoes/terminal': { name: 'Terminal de Produção' },
-  
+
   // Relatórios
   '/relatorios': { name: 'Relatórios' },
   '/relatorios/visao-geral': { name: 'Visão Geral' },
-  '/relatorios/tempo': { name: 'Gestão de Tempo' },
-  '/relatorios/recorrencia': { name: 'Recorrência' },
-  '/relatorios/analitico': { name: 'Analítico' },
-  '/relatorios/contahub-teste': { name: 'ContaHub' },
-  '/relatorios/windsor-analytics': { name: 'Windsor.ai' },
-  
+
   // Marketing
   '/marketing': { name: 'Marketing' },
   '/marketing/marketing-360': { name: 'Marketing 360' },
-  '/marketing/campanhas': { name: 'Campanhas' },
-  '/marketing/whatsapp': { name: 'WhatsApp' },
-  '/marketing/analytics': { name: 'Analytics' },
-  '/marketing/redes-sociais': { name: 'Redes Sociais' },
-  '/marketing/automacao': { name: 'Automação' },
-  
+
   // Financeiro
   '/financeiro': { name: 'Financeiro' },
   '/financeiro/agendamento': { name: 'Agendamento' },
-  
+
   // Configurações
   '/configuracoes': { name: 'Configurações' },
   '/configuracoes/checklists': { name: 'Checklists' },
@@ -56,101 +60,107 @@ const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ 
   '/configuracoes/templates': { name: 'Templates' },
   '/configuracoes/analytics': { name: 'Analytics' },
   '/configuracoes/pwa': { name: 'PWA' },
-  
+
   // Outras páginas
-  '/minha-conta': { name: 'Minha Conta' },
+  '/usuarios/minha-conta': { name: 'Minha Conta' },
   '/login': { name: 'Login' },
-}
+};
 
 function generateBreadcrumbs(pathname: string) {
-  const segments = pathname.split('/').filter(Boolean)
+  const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs: Array<{
-    name: string
-    href: string
-    icon?: React.ComponentType<{ className?: string }>
-    isLast?: boolean
-  }> = []
-  
+    name: string;
+    href: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    isLast?: boolean;
+  }> = [];
+
   // Add home always
   breadcrumbs.push({
     name: 'SGB',
     href: '/home',
-    icon: Home
-  })
-  
+    icon: Home,
+  });
+
   // Build progressive paths
-  let currentPath = ''
+  let currentPath = '';
   segments.forEach((segment, index) => {
-    currentPath += `/${segment}`
-    const route = routeMapping[currentPath]
-    
+    currentPath += `/${segment}`;
+    const route = routeMapping[currentPath];
+
     if (route) {
       breadcrumbs.push({
         name: route.name,
         href: currentPath,
         icon: route.icon,
-        isLast: index === segments.length - 1
-      })
+        isLast: index === segments.length - 1,
+      });
     } else {
       // Fallback para rotas não mapeadas
       breadcrumbs.push({
-        name: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
+        name:
+          segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
         href: currentPath,
-        isLast: index === segments.length - 1
-      })
+        isLast: index === segments.length - 1,
+      });
     }
-  })
-  
-  return breadcrumbs
+  });
+
+  return breadcrumbs;
 }
 
 export function DarkHeader() {
-  const { selectedBar, availableBars, setSelectedBar } = useBar()
-  const { user, logout } = useUser()
-  const pathname = usePathname()
-  const { theme, setTheme } = useTheme()  // Usando o contexto global
-  
-  const [showUserMenu, setShowUserMenu] = useState(false)
-  const [showBarMenu, setShowBarMenu] = useState(false)
-  
-  const userMenuRef = useRef<HTMLDivElement>(null)
-  const barMenuRef = useRef<HTMLDivElement>(null)
+  const { selectedBar, availableBars, setSelectedBar } = useBar();
+  const { user, logout } = useUser();
+  const pathname = usePathname();
+  const { theme, setTheme } = useTheme(); // Usando o contexto global
 
-  const breadcrumbs = generateBreadcrumbs(pathname)
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showBarMenu, setShowBarMenu] = useState(false);
+
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const barMenuRef = useRef<HTMLDivElement>(null);
+
+  const breadcrumbs = generateBreadcrumbs(pathname);
 
   // Removendo o useEffect local para dark mode, pois agora é gerenciado pelo contexto
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false)
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowUserMenu(false);
       }
-      if (barMenuRef.current && !barMenuRef.current.contains(event.target as Node)) {
-        setShowBarMenu(false)
+      if (
+        barMenuRef.current &&
+        !barMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowBarMenu(false);
       }
-
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const toggleDarkMode = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
-  }
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   const handleLogout = async () => {
-    await logout()
-    setShowUserMenu(false)
-  }
+    await logout();
+    setShowUserMenu(false);
+  };
 
   const handleBarSelect = (bar: typeof selectedBar) => {
     if (bar) {
-      setSelectedBar(bar)
+      setSelectedBar(bar);
     }
-    setShowBarMenu(false)
-  }
+    setShowBarMenu(false);
+  };
 
   // Mock notifications - REMOVIDO
   // const notifications = [
@@ -186,12 +196,15 @@ export function DarkHeader() {
         <div className="flex items-center gap-1 flex-1 min-w-0">
           {breadcrumbs.length > 0 ? (
             breadcrumbs.map((crumb, index) => (
-              <div key={`${crumb.href}-${index}`} className="flex items-center gap-1">
+              <div
+                key={`${crumb.href}-${index}`}
+                className="flex items-center gap-1"
+              >
                 {/* Separador */}
                 {index > 0 && (
                   <ChevronRight className="w-3 h-3 text-gray-400 dark:text-gray-600 flex-shrink-0" />
                 )}
-                
+
                 {/* Link do breadcrumb */}
                 <Link
                   href={crumb.href}
@@ -217,8 +230,8 @@ export function DarkHeader() {
 
         {/* Centro - Busca */}
         <div className="flex-1 max-w-xs lg:max-w-md mx-2 lg:mx-4 hidden md:block">
-          <CommandPaletteSearchPlaceholder 
-            placeholder="Buscar..." 
+          <CommandPaletteSearchPlaceholder
+            placeholder="Buscar..."
             className="w-full"
           />
         </div>
@@ -229,7 +242,7 @@ export function DarkHeader() {
           <div className="md:hidden">
             <CommandPaletteIconTrigger className="mr-1" />
           </div>
-          
+
           {/* Notificações */}
           <div className="relative">
             <NotificationCenter />
@@ -254,7 +267,7 @@ export function DarkHeader() {
                     Estabelecimentos
                   </span>
                 </div>
-                {availableBars.map((bar) => (
+                {availableBars.map(bar => (
                   <button
                     key={bar.id}
                     onClick={() => handleBarSelect(bar)}
@@ -309,7 +322,7 @@ export function DarkHeader() {
                 {/* Menu Items */}
                 <div>
                   <Link
-                    href="/minha-conta"
+                    href="/usuarios/minha-conta"
                     onClick={() => setShowUserMenu(false)}
                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
@@ -352,5 +365,5 @@ export function DarkHeader() {
         </div>
       </div>
     </header>
-  )
-} 
+  );
+}

@@ -1,6 +1,12 @@
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -10,7 +16,9 @@ export interface ThemeContextType {
   isLoading: boolean;
 }
 
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(
+  undefined
+);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark'); // Default para dark
@@ -39,7 +47,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
       const newTheme = e.matches ? 'dark' : 'light';
-      if (!localStorage.getItem('theme')) {  // Só atualiza se não houver preferência salva
+      if (!localStorage.getItem('theme')) {
+        // Só atualiza se não houver preferência salva
         setTheme(newTheme);
         document.documentElement.classList.toggle('dark', e.matches);
       }
@@ -67,4 +76,4 @@ export const useTheme = () => {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-}; 
+};

@@ -1,61 +1,67 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { 
-  MessageSquare, 
-  Settings, 
-  Smartphone, 
-  Send, 
-  CheckCircle, 
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import {
+  MessageSquare,
+  Settings,
+  Smartphone,
+  Send,
+  CheckCircle,
   AlertTriangle,
   Zap,
   Clock,
   Shield,
   Globe,
   Key,
-  TestTube
-} from 'lucide-react'
+  TestTube,
+} from 'lucide-react';
 
 // =====================================================
 // 📱 CONFIGURAÇÃO WHATSAPP MULTI-PROVIDER
 // =====================================================
 
 interface WhatsAppProvider {
-  id: string
-  name: string
-  description: string
-  icon: string
-  difficulty: 'easy' | 'medium' | 'hard'
-  cost: 'free' | 'paid' | 'freemium'
-  reliability: number // 1-5
-  setup_time: string
-  features: string[]
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  cost: 'free' | 'paid' | 'freemium';
+  reliability: number; // 1-5
+  setup_time: string;
+  features: string[];
 }
 
 interface WhatsAppConfigData {
-  provider: string
-  enabled: boolean
-  phone_number: string
-  api_url?: string
-  api_key?: string
-  instance_id?: string
-  session_name?: string
-  webhook_url?: string
+  provider: string;
+  enabled: boolean;
+  phone_number: string;
+  api_url?: string;
+  api_key?: string;
+  instance_id?: string;
+  session_name?: string;
+  webhook_url?: string;
   settings: {
-    send_reminders: boolean
-    send_alerts: boolean
-    send_completions: boolean
-    reminder_hours_before: number
-    alert_repeat_minutes: number
-  }
+    send_reminders: boolean;
+    send_alerts: boolean;
+    send_completions: boolean;
+    reminder_hours_before: number;
+    alert_repeat_minutes: number;
+  };
 }
 
 const providers: WhatsAppProvider[] = [
@@ -68,7 +74,7 @@ const providers: WhatsAppProvider[] = [
     cost: 'free',
     reliability: 4,
     setup_time: '10 min',
-    features: ['Envio de mensagens', 'Webhook', 'Multi-instância', 'QR Code']
+    features: ['Envio de mensagens', 'Webhook', 'Multi-instância', 'QR Code'],
   },
   {
     id: 'twilio',
@@ -79,7 +85,7 @@ const providers: WhatsAppProvider[] = [
     cost: 'paid',
     reliability: 5,
     setup_time: '20 min',
-    features: ['Altamente confiável', 'Suporte 24/7', 'Analytics', 'Templates']
+    features: ['Altamente confiável', 'Suporte 24/7', 'Analytics', 'Templates'],
   },
   {
     id: 'whatsapp_business',
@@ -90,7 +96,12 @@ const providers: WhatsAppProvider[] = [
     cost: 'paid',
     reliability: 5,
     setup_time: '2-7 dias',
-    features: ['Oficial', 'Templates aprovados', 'Business features', 'Windsor.ai integration']
+    features: [
+      'Oficial',
+      'Templates aprovados',
+      'Business features',
+      'Windsor.ai integration',
+    ],
   },
   {
     id: 'baileys',
@@ -101,16 +112,24 @@ const providers: WhatsAppProvider[] = [
     cost: 'free',
     reliability: 3,
     setup_time: '60 min',
-    features: ['Open source', 'Self-hosted', 'Customização total', 'Sem custos']
-  }
-]
+    features: [
+      'Open source',
+      'Self-hosted',
+      'Customização total',
+      'Sem custos',
+    ],
+  },
+];
 
 interface WhatsAppConfigProps {
-  onConfigSave?: (config: WhatsAppConfigData) => void
-  onTestConnection?: (config: WhatsAppConfigData) => Promise<boolean>
+  onConfigSave?: (config: WhatsAppConfigData) => void;
+  onTestConnection?: (config: WhatsAppConfigData) => Promise<boolean>;
 }
 
-export default function WhatsAppConfig({ onConfigSave, onTestConnection }: WhatsAppConfigProps) {
+export default function WhatsAppConfig({
+  onConfigSave,
+  onTestConnection,
+}: WhatsAppConfigProps) {
   const [config, setConfig] = useState<WhatsAppConfigData>({
     provider: '',
     enabled: false,
@@ -125,15 +144,18 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
       send_alerts: true,
       send_completions: false,
       reminder_hours_before: 2,
-      alert_repeat_minutes: 30
-    }
-  })
+      alert_repeat_minutes: 30,
+    },
+  });
 
-  const [testing, setTesting] = useState(false)
-  const [testResult, setTestResult] = useState<{success: boolean, message: string} | null>(null)
-  const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const selectedProvider = providers.find(p => p.id === config.provider)
+  const selectedProvider = providers.find(p => p.id === config.provider);
 
   const handleProviderChange = (providerId: string) => {
     setConfig(prev => ({
@@ -143,69 +165,73 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
       api_url: '',
       api_key: '',
       instance_id: '',
-      session_name: ''
-    }))
-    setTestResult(null)
-  }
+      session_name: '',
+    }));
+    setTestResult(null);
+  };
 
   const handleTestConnection = async () => {
-    if (!onTestConnection) return
-    
-    setTesting(true)
-    setTestResult(null)
-    
+    if (!onTestConnection) return;
+
+    setTesting(true);
+    setTestResult(null);
+
     try {
-      const success = await onTestConnection(config)
+      const success = await onTestConnection(config);
       setTestResult({
         success,
-        message: success 
-          ? '✅ Conexão estabelecida com sucesso!' 
-          : '❌ Falha na conexão. Verifique as configurações.'
-      })
+        message: success
+          ? '✅ Conexão estabelecida com sucesso!'
+          : '❌ Falha na conexão. Verifique as configurações.',
+      });
     } catch (error) {
       setTestResult({
         success: false,
-        message: `❌ Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
-      })
+        message: `❌ Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+      });
     } finally {
-      setTesting(false)
+      setTesting(false);
     }
-  }
+  };
 
   const handleSave = async () => {
-    setSaving(true)
-    
+    setSaving(true);
+
     try {
       if (onConfigSave) {
-        await onConfigSave(config)
+        await onConfigSave(config);
       }
-      
+
       setTestResult({
         success: true,
-        message: '💾 Configurações salvas com sucesso!'
-      })
+        message: '💾 Configurações salvas com sucesso!',
+      });
     } catch (error) {
       setTestResult({
         success: false,
-        message: `❌ Erro ao salvar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
-      })
+        message: `❌ Erro ao salvar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+      });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const renderProviderConfig = () => {
-    if (!selectedProvider) return null
+    if (!selectedProvider) return null;
 
     switch (selectedProvider.id) {
       case 'evolution':
         return (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">URL da API Evolution</label>
+              <label className="text-sm font-medium mb-2 block">
+                URL da API Evolution
+              </label>
               <Input
                 value={config.api_url || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, api_url: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, api_url: e.target.value }))
+                }
                 placeholder="https://sua-evolution-api.com"
                 className="touch-manipulation"
               />
@@ -213,23 +239,29 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                 Ex: https://evolution.seudominio.com ou IP:porta
               </p>
             </div>
-            
+
             <div>
               <label className="text-sm font-medium mb-2 block">API Key</label>
               <Input
                 type="password"
                 value={config.api_key || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, api_key: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, api_key: e.target.value }))
+                }
                 placeholder="Sua chave de API"
                 className="touch-manipulation"
               />
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">Nome da Instância</label>
+              <label className="text-sm font-medium mb-2 block">
+                Nome da Instância
+              </label>
               <Input
                 value={config.instance_id || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, instance_id: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, instance_id: e.target.value }))
+                }
                 placeholder="minha-instancia"
                 className="touch-manipulation"
               />
@@ -238,43 +270,55 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
               </p>
             </div>
           </div>
-        )
+        );
 
       case 'twilio':
         return (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Account SID</label>
+              <label className="text-sm font-medium mb-2 block">
+                Account SID
+              </label>
               <Input
                 value={config.api_key || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, api_key: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, api_key: e.target.value }))
+                }
                 placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                 className="touch-manipulation"
               />
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">Auth Token</label>
+              <label className="text-sm font-medium mb-2 block">
+                Auth Token
+              </label>
               <Input
                 type="password"
                 value={config.session_name || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, session_name: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, session_name: e.target.value }))
+                }
                 placeholder="Seu Auth Token"
                 className="touch-manipulation"
               />
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">WhatsApp Number (Twilio)</label>
+              <label className="text-sm font-medium mb-2 block">
+                WhatsApp Number (Twilio)
+              </label>
               <Input
                 value={config.api_url || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, api_url: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, api_url: e.target.value }))
+                }
                 placeholder="whatsapp:+5511999999999"
                 className="touch-manipulation"
               />
             </div>
           </div>
-        )
+        );
 
       case 'whatsapp_business':
         return (
@@ -282,45 +326,60 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                <span className="font-medium text-yellow-800">Requer Aprovação</span>
+                <span className="font-medium text-yellow-800">
+                  Requer Aprovação
+                </span>
               </div>
               <p className="text-sm text-yellow-700">
-                A WhatsApp Business API requer aprovação e pode levar de 2-7 dias.
+                A WhatsApp Business API requer aprovação e pode levar de 2-7
+                dias.
               </p>
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">Business Account ID</label>
+              <label className="text-sm font-medium mb-2 block">
+                Business Account ID
+              </label>
               <Input
                 value={config.api_key || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, api_key: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, api_key: e.target.value }))
+                }
                 placeholder="Seu Business Account ID"
                 className="touch-manipulation"
               />
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">Access Token</label>
+              <label className="text-sm font-medium mb-2 block">
+                Access Token
+              </label>
               <Input
                 type="password"
                 value={config.session_name || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, session_name: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, session_name: e.target.value }))
+                }
                 placeholder="Seu Access Token"
                 className="touch-manipulation"
               />
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">Phone Number ID</label>
+              <label className="text-sm font-medium mb-2 block">
+                Phone Number ID
+              </label>
               <Input
                 value={config.instance_id || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, instance_id: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, instance_id: e.target.value }))
+                }
                 placeholder="ID do número de telefone"
                 className="touch-manipulation"
               />
             </div>
           </div>
-        )
+        );
 
       case 'baileys':
         return (
@@ -334,44 +393,56 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                 Você precisa hospedar sua própria instância do Baileys.
               </p>
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">URL do Servidor Baileys</label>
+              <label className="text-sm font-medium mb-2 block">
+                URL do Servidor Baileys
+              </label>
               <Input
                 value={config.api_url || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, api_url: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, api_url: e.target.value }))
+                }
                 placeholder="http://localhost:3000 ou sua URL"
                 className="touch-manipulation"
               />
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">Senha/Token (se configurado)</label>
+              <label className="text-sm font-medium mb-2 block">
+                Senha/Token (se configurado)
+              </label>
               <Input
                 type="password"
                 value={config.api_key || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, api_key: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, api_key: e.target.value }))
+                }
                 placeholder="Opcional"
                 className="touch-manipulation"
               />
             </div>
-            
+
             <div>
-              <label className="text-sm font-medium mb-2 block">Nome da Sessão</label>
+              <label className="text-sm font-medium mb-2 block">
+                Nome da Sessão
+              </label>
               <Input
                 value={config.session_name || ''}
-                onChange={(e) => setConfig(prev => ({ ...prev, session_name: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, session_name: e.target.value }))
+                }
                 placeholder="sgb-session"
                 className="touch-manipulation"
               />
             </div>
           </div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -379,10 +450,13 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
       <div className="text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
           <MessageSquare className="w-8 h-8 text-green-600" />
-                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Configuração WhatsApp</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Configuração WhatsApp
+          </h1>
         </div>
         <p className="text-gray-600">
-          Configure a integração WhatsApp para enviar lembretes e notificações automáticas
+          Configure a integração WhatsApp para enviar lembretes e notificações
+          automáticas
         </p>
       </div>
 
@@ -416,12 +490,12 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {providers.map((provider) => (
-                  <Card 
+                {providers.map(provider => (
+                  <Card
                     key={provider.id}
                     className={`cursor-pointer transition-all hover:shadow-md touch-manipulation ${
-                      config.provider === provider.id 
-                        ? 'ring-2 ring-blue-500 bg-blue-50' 
+                      config.provider === provider.id
+                        ? 'ring-2 ring-blue-500 bg-blue-50'
                         : 'hover:border-gray-300'
                     }`}
                     onClick={() => handleProviderChange(provider.id)}
@@ -432,30 +506,49 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-semibold">{provider.name}</h3>
-                            <Badge className={
-                              provider.cost === 'free' ? 'bg-green-100 text-green-800' :
-                              provider.cost === 'paid' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }>
-                              {provider.cost === 'free' ? 'Gratuito' : 
-                               provider.cost === 'paid' ? 'Pago' : 'Freemium'}
+                            <Badge
+                              className={
+                                provider.cost === 'free'
+                                  ? 'bg-green-100 text-green-800'
+                                  : provider.cost === 'paid'
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                              }
+                            >
+                              {provider.cost === 'free'
+                                ? 'Gratuito'
+                                : provider.cost === 'paid'
+                                  ? 'Pago'
+                                  : 'Freemium'}
                             </Badge>
                           </div>
-                          
-                          <p className="text-sm text-gray-600 mb-3">{provider.description}</p>
-                          
+
+                          <p className="text-sm text-gray-600 mb-3">
+                            {provider.description}
+                          </p>
+
                           <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 mb-3">
-                            <div>Dificuldade: {
-                              provider.difficulty === 'easy' ? '🟢 Fácil' :
-                              provider.difficulty === 'medium' ? '🟡 Médio' : '🔴 Difícil'
-                            }</div>
+                            <div>
+                              Dificuldade:{' '}
+                              {provider.difficulty === 'easy'
+                                ? '🟢 Fácil'
+                                : provider.difficulty === 'medium'
+                                  ? '🟡 Médio'
+                                  : '🔴 Difícil'}
+                            </div>
                             <div>Setup: {provider.setup_time}</div>
-                            <div>Confiabilidade: {'⭐'.repeat(provider.reliability)}</div>
+                            <div>
+                              Confiabilidade:{' '}
+                              {'⭐'.repeat(provider.reliability)}
+                            </div>
                           </div>
-                          
+
                           <div className="space-y-1">
-                            {provider.features.slice(0, 2).map((feature) => (
-                              <div key={feature} className="text-xs text-gray-600 flex items-center gap-1">
+                            {provider.features.slice(0, 2).map(feature => (
+                              <div
+                                key={feature}
+                                className="text-xs text-gray-600 flex items-center gap-1"
+                              >
                                 <CheckCircle className="w-3 h-3 text-green-500" />
                                 {feature}
                               </div>
@@ -477,7 +570,9 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
             <Card>
               <CardContent className="p-8 text-center">
                 <Smartphone className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="font-semibold text-gray-800 mb-2">Selecione um Provedor</h3>
+                <h3 className="font-semibold text-gray-800 mb-2">
+                  Selecione um Provedor
+                </h3>
                 <p className="text-gray-600">
                   Primeiro escolha um provedor na aba &quot;Provedor&quot;
                 </p>
@@ -491,7 +586,9 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                   <CardTitle className="flex items-center gap-2">
                     {selectedProvider.icon} {selectedProvider.name}
                   </CardTitle>
-                  <p className="text-sm text-gray-600">{selectedProvider.description}</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedProvider.description}
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Enable/Disable */}
@@ -504,7 +601,9 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                     </div>
                     <Switch
                       checked={config.enabled}
-                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, enabled: checked }))}
+                      onCheckedChange={checked =>
+                        setConfig(prev => ({ ...prev, enabled: checked }))
+                      }
                       className="touch-manipulation"
                     />
                   </div>
@@ -518,7 +617,12 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                         </label>
                         <Input
                           value={config.phone_number}
-                          onChange={(e) => setConfig(prev => ({ ...prev, phone_number: e.target.value }))}
+                          onChange={e =>
+                            setConfig(prev => ({
+                              ...prev,
+                              phone_number: e.target.value,
+                            }))
+                          }
                           placeholder="+5511999999999"
                           className="touch-manipulation"
                         />
@@ -537,8 +641,13 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                         </label>
                         <Input
                           value={config.webhook_url || ''}
-                          onChange={(e) => setConfig(prev => ({ ...prev, webhook_url: e.target.value }))}
-                          placeholder="https://seudominio.com/api/whatsapp/webhook"
+                          onChange={e =>
+                            setConfig(prev => ({
+                              ...prev,
+                              webhook_url: e.target.value,
+                            }))
+                          }
+                          placeholder="https://seudominio.com/api/configuracoes/whatsapp/webhook"
                           className="touch-manipulation"
                         />
                         <p className="text-xs text-gray-600 mt-1">
@@ -570,27 +679,39 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                         </div>
                         <Switch
                           checked={config.settings.send_reminders}
-                          onCheckedChange={(checked) => setConfig(prev => ({ 
-                            ...prev, 
-                            settings: { ...prev.settings, send_reminders: checked }
-                          }))}
+                          onCheckedChange={checked =>
+                            setConfig(prev => ({
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                send_reminders: checked,
+                              },
+                            }))
+                          }
                           className="touch-manipulation"
                         />
                       </div>
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <label className="font-medium">Alertas de Atraso</label>
+                          <label className="font-medium">
+                            Alertas de Atraso
+                          </label>
                           <p className="text-xs text-gray-600">
                             Notificar quando checklists estão atrasados
                           </p>
                         </div>
                         <Switch
                           checked={config.settings.send_alerts}
-                          onCheckedChange={(checked) => setConfig(prev => ({ 
-                            ...prev, 
-                            settings: { ...prev.settings, send_alerts: checked }
-                          }))}
+                          onCheckedChange={checked =>
+                            setConfig(prev => ({
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                send_alerts: checked,
+                              },
+                            }))
+                          }
                           className="touch-manipulation"
                         />
                       </div>
@@ -604,10 +725,15 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                         </div>
                         <Switch
                           checked={config.settings.send_completions}
-                          onCheckedChange={(checked) => setConfig(prev => ({ 
-                            ...prev, 
-                            settings: { ...prev.settings, send_completions: checked }
-                          }))}
+                          onCheckedChange={checked =>
+                            setConfig(prev => ({
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                send_completions: checked,
+                              },
+                            }))
+                          }
                           className="touch-manipulation"
                         />
                       </div>
@@ -620,10 +746,15 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                         </label>
                         <Select
                           value={config.settings.reminder_hours_before.toString()}
-                          onValueChange={(value) => setConfig(prev => ({ 
-                            ...prev, 
-                            settings: { ...prev.settings, reminder_hours_before: parseInt(value) }
-                          }))}
+                          onValueChange={value =>
+                            setConfig(prev => ({
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                reminder_hours_before: parseInt(value),
+                              },
+                            }))
+                          }
                         >
                           <SelectTrigger className="touch-manipulation">
                             <SelectValue />
@@ -644,10 +775,15 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                         </label>
                         <Select
                           value={config.settings.alert_repeat_minutes.toString()}
-                          onValueChange={(value) => setConfig(prev => ({ 
-                            ...prev, 
-                            settings: { ...prev.settings, alert_repeat_minutes: parseInt(value) }
-                          }))}
+                          onValueChange={value =>
+                            setConfig(prev => ({
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                alert_repeat_minutes: parseInt(value),
+                              },
+                            }))
+                          }
                         >
                           <SelectTrigger className="touch-manipulation">
                             <SelectValue />
@@ -677,12 +813,16 @@ export default function WhatsAppConfig({ onConfigSave, onTestConnection }: Whats
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {testResult && (
-                      <div className={`p-3 rounded-lg ${
-                        testResult.success 
-                          ? 'bg-green-50 border border-green-200' 
-                          : 'bg-red-50 border border-red-200'
-                      }`}>
-                        <p className="text-sm font-medium">{testResult.message}</p>
+                      <div
+                        className={`p-3 rounded-lg ${
+                          testResult.success
+                            ? 'bg-green-50 border border-green-200'
+                            : 'bg-red-50 border border-red-200'
+                        }`}
+                      >
+                        <p className="text-sm font-medium">
+                          {testResult.message}
+                        </p>
                       </div>
                     )}
 
@@ -745,7 +885,8 @@ _Sistema de Gestão de Bares_`}
                   className="touch-manipulation resize-none"
                 />
                 <p className="text-xs text-gray-600 mt-1">
-                  Variáveis disponíveis: {'{CHECKLIST_NOME}'}, {'{HORARIO}'}, {'{SETOR}'}, {'{FUNCIONARIO}'}
+                  Variáveis disponíveis: {'{CHECKLIST_NOME}'}, {'{HORARIO}'},{' '}
+                  {'{SETOR}'}, {'{FUNCIONARIO}'}
                 </p>
               </div>
 
@@ -792,7 +933,8 @@ _Sistema de Gestão de Bares_`}
                   className="touch-manipulation resize-none"
                 />
                 <p className="text-xs text-gray-600 mt-1">
-                  Variáveis: {'{TEMPO_EXECUCAO}'}, {'{STATUS}'}, {'{RESUMO_RESULTADOS}'}
+                  Variáveis: {'{TEMPO_EXECUCAO}'}, {'{STATUS}'},{' '}
+                  {'{RESUMO_RESULTADOS}'}
                 </p>
               </div>
             </CardContent>
@@ -800,5 +942,5 @@ _Sistema de Gestão de Bares_`}
         </TabsContent>
       </Tabs>
     </div>
-  )
-} 
+  );
+}

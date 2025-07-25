@@ -9,15 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { 
+import {
   ArrowLeft,
-  Target, 
-  TrendingUp, 
-  Users, 
-  Star, 
-  Coffee, 
-  Edit, 
-  Save, 
+  Target,
+  TrendingUp,
+  Users,
+  Star,
+  Coffee,
+  Edit,
+  Save,
   X,
   DollarSign,
   Activity,
@@ -28,7 +28,7 @@ import {
   Award,
   Zap,
   Share2,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 
 // Tipos
@@ -63,12 +63,12 @@ interface MetasOrganizadas {
 
 const formatarValor = (valor: number | null, tipo: string): string => {
   if (valor === null || valor === undefined) return '-';
-  
+
   switch (tipo) {
     case 'moeda':
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
-        currency: 'BRL'
+        currency: 'BRL',
       }).format(valor);
     case 'porcentagem':
       return `${valor}%`;
@@ -78,7 +78,14 @@ const formatarValor = (valor: number | null, tipo: string): string => {
   }
 };
 
-const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
+const MetaCard = ({
+  meta,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
+  isSaving,
+}: {
   meta: Meta;
   isEditing: boolean;
   onEdit: () => void;
@@ -89,14 +96,20 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   const [valores, setValores] = useState({
     meta_diaria: meta.meta_diaria || '',
     meta_semanal: meta.meta_semanal || '',
-    meta_mensal: meta.meta_mensal || ''
+    meta_mensal: meta.meta_mensal || '',
   });
 
   const handleSave = () => {
     const valoresParaSalvar = {
-      meta_diaria: valores.meta_diaria ? parseFloat(valores.meta_diaria.toString()) : 0,
-      meta_semanal: valores.meta_semanal ? parseFloat(valores.meta_semanal.toString()) : 0,
-      meta_mensal: valores.meta_mensal ? parseFloat(valores.meta_mensal.toString()) : 0
+      meta_diaria: valores.meta_diaria
+        ? parseFloat(valores.meta_diaria.toString())
+        : 0,
+      meta_semanal: valores.meta_semanal
+        ? parseFloat(valores.meta_semanal.toString())
+        : 0,
+      meta_mensal: valores.meta_mensal
+        ? parseFloat(valores.meta_mensal.toString())
+        : 0,
     };
     onSave(valoresParaSalvar);
   };
@@ -104,30 +117,30 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
   const getCategoryIcon = (categoria: string) => {
     switch (categoria.toLowerCase()) {
       case 'financeiro':
-        return <DollarSign className="w-5 h-5" />
+        return <DollarSign className="w-5 h-5" />;
       case 'avaliacoes':
-        return <Star className="w-5 h-5" />
+        return <Star className="w-5 h-5" />;
       case 'cockpit_produtos':
-        return <Coffee className="w-5 h-5" />
+        return <Coffee className="w-5 h-5" />;
       case 'marketing':
-        return <TrendingUp className="w-5 h-5" />
+        return <TrendingUp className="w-5 h-5" />;
       default:
-        return <Target className="w-5 h-5" />
+        return <Target className="w-5 h-5" />;
     }
   };
 
   const getCategoryColor = (categoria: string) => {
     switch (categoria.toLowerCase()) {
       case 'financeiro':
-        return 'from-green-500 to-green-600'
+        return 'from-green-500 to-green-600';
       case 'avaliacoes':
-        return 'from-yellow-500 to-yellow-600'
+        return 'from-yellow-500 to-yellow-600';
       case 'cockpit_produtos':
-        return 'from-purple-500 to-purple-600'
+        return 'from-purple-500 to-purple-600';
       case 'marketing':
-        return 'from-blue-500 to-blue-600'
+        return 'from-blue-500 to-blue-600';
       default:
-        return 'from-gray-500 to-gray-600'
+        return 'from-gray-500 to-gray-600';
     }
   };
 
@@ -136,7 +149,9 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
       <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg bg-gradient-to-r ${getCategoryColor(meta.categoria)} text-white`}>
+            <div
+              className={`p-2 rounded-lg bg-gradient-to-r ${getCategoryColor(meta.categoria)} text-white`}
+            >
               {getCategoryIcon(meta.categoria)}
             </div>
             <div>
@@ -149,9 +164,13 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge 
-              variant={meta.meta_ativa ? "default" : "secondary"}
-              className={meta.meta_ativa ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : ""}
+            <Badge
+              variant={meta.meta_ativa ? 'default' : 'secondary'}
+              className={
+                meta.meta_ativa
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                  : ''
+              }
             >
               {meta.meta_ativa ? 'Ativa' : 'Inativa'}
             </Badge>
@@ -181,7 +200,11 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                   disabled={isSaving}
                   className="flex items-center gap-2"
                 >
-                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
                   Salvar
                 </Button>
               </div>
@@ -189,23 +212,34 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-6">
-        <div className={`grid gap-4 ${
-          meta.categoria === 'metas_diarias' || meta.categoria === 'indicadores_mensais' 
-            ? 'grid-cols-1 md:grid-cols-1' 
-            : 'grid-cols-1 md:grid-cols-3'
-        }`}>
+        <div
+          className={`grid gap-4 ${
+            meta.categoria === 'metas_diarias' ||
+            meta.categoria === 'indicadores_mensais'
+              ? 'grid-cols-1 md:grid-cols-1'
+              : 'grid-cols-1 md:grid-cols-3'
+          }`}
+        >
           {(() => {
             // Para metas diárias, mostrar apenas meta diária
             if (meta.categoria === 'metas_diarias') {
               return [
-                { key: 'diario', label: 'Meta Diária', valor: meta.meta_diaria }
-              ].map((periodo) => {
-                const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
-                
+                {
+                  key: 'diario',
+                  label: 'Meta Diária',
+                  valor: meta.meta_diaria,
+                },
+              ].map(periodo => {
+                const chaveValor =
+                  `meta_${periodo.key}` as keyof typeof valores;
+
                 return (
-                  <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                  <div
+                    key={periodo.key}
+                    className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl"
+                  >
                     <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                       {periodo.label}
                     </Label>
@@ -214,10 +248,12 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                         type="number"
                         step="0.01"
                         value={valores[chaveValor]}
-                        onChange={(e) => setValores(prev => ({
-                          ...prev,
-                          [chaveValor]: e.target.value
-                        }))}
+                        onChange={e =>
+                          setValores(prev => ({
+                            ...prev,
+                            [chaveValor]: e.target.value,
+                          }))
+                        }
                         placeholder="0.00"
                         className="mt-2 bg-white dark:bg-gray-800"
                       />
@@ -232,16 +268,24 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                 );
               });
             }
-            
+
             // Para indicadores mensais, mostrar apenas meta mensal
             if (meta.categoria === 'indicadores_mensais') {
               return [
-                { key: 'mensal', label: 'Meta Mensal', valor: meta.meta_mensal }
-              ].map((periodo) => {
-                const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
-                
+                {
+                  key: 'mensal',
+                  label: 'Meta Mensal',
+                  valor: meta.meta_mensal,
+                },
+              ].map(periodo => {
+                const chaveValor =
+                  `meta_${periodo.key}` as keyof typeof valores;
+
                 return (
-                  <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                  <div
+                    key={periodo.key}
+                    className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl"
+                  >
                     <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                       {periodo.label}
                     </Label>
@@ -250,10 +294,12 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                         type="number"
                         step="0.01"
                         value={valores[chaveValor]}
-                        onChange={(e) => setValores(prev => ({
-                          ...prev,
-                          [chaveValor]: e.target.value
-                        }))}
+                        onChange={e =>
+                          setValores(prev => ({
+                            ...prev,
+                            [chaveValor]: e.target.value,
+                          }))
+                        }
                         placeholder="0.00"
                         className="mt-2 bg-white dark:bg-gray-800"
                       />
@@ -268,17 +314,20 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                 );
               });
             }
-            
+
             // Para outras categorias, mostrar os três períodos
             return [
               { key: 'diario', label: 'Diário', valor: meta.meta_diaria },
               { key: 'semanal', label: 'Semanal', valor: meta.meta_semanal },
-              { key: 'mensal', label: 'Mensal', valor: meta.meta_mensal }
-            ].map((periodo) => {
+              { key: 'mensal', label: 'Mensal', valor: meta.meta_mensal },
+            ].map(periodo => {
               const chaveValor = `meta_${periodo.key}` as keyof typeof valores;
-              
+
               return (
-                <div key={periodo.key} className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                <div
+                  key={periodo.key}
+                  className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl"
+                >
                   <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                     {periodo.label}
                   </Label>
@@ -287,10 +336,12 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
                       type="number"
                       step="0.01"
                       value={valores[chaveValor]}
-                      onChange={(e) => setValores(prev => ({
-                        ...prev,
-                        [chaveValor]: e.target.value
-                      }))}
+                      onChange={e =>
+                        setValores(prev => ({
+                          ...prev,
+                          [chaveValor]: e.target.value,
+                        }))
+                      }
                       placeholder="0.00"
                       className="mt-2 bg-white dark:bg-gray-800"
                     />
@@ -306,25 +357,28 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
             });
           })()}
         </div>
-        
+
         {meta.categoria === 'metas_diarias' ? (
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
                 <p className="text-sm text-green-700 dark:text-green-300">
-                  <strong>Ticket Entrada:</strong> R$ {meta.ticket_entrada?.toFixed(2) || '0.00'}
+                  <strong>Ticket Entrada:</strong> R${' '}
+                  {meta.ticket_entrada?.toFixed(2) || '0.00'}
                 </p>
               </div>
               <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
                 <p className="text-sm text-purple-700 dark:text-purple-300">
-                  <strong>Ticket Bar:</strong> R$ {meta.ticket_bar?.toFixed(2) || '0.00'}
+                  <strong>Ticket Bar:</strong> R${' '}
+                  {meta.ticket_bar?.toFixed(2) || '0.00'}
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
                 <p className="text-sm text-orange-700 dark:text-orange-300">
-                  <strong>Meta Pessoas:</strong> {meta.meta_pessoas || 0} pessoas
+                  <strong>Meta Pessoas:</strong> {meta.meta_pessoas || 0}{' '}
+                  pessoas
                 </p>
               </div>
               <div className="p-3 bg-red-50 dark:bg-red-900/30 rounded-lg">
@@ -336,12 +390,14 @@ const MetaCard = ({ meta, isEditing, onEdit, onSave, onCancel, isSaving }: {
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
                 <p className="text-sm text-indigo-700 dark:text-indigo-300">
-                  <strong>Custo Artístico:</strong> R$ {meta.custo_artistico?.toFixed(2) || '0.00'}
+                  <strong>Custo Artístico:</strong> R${' '}
+                  {meta.custo_artistico?.toFixed(2) || '0.00'}
                 </p>
               </div>
               <div className="p-3 bg-teal-50 dark:bg-teal-900/30 rounded-lg">
                 <p className="text-sm text-teal-700 dark:text-teal-300">
-                  <strong>Custo Produção:</strong> R$ {meta.custo_producao?.toFixed(2) || '0.00'}
+                  <strong>Custo Produção:</strong> R${' '}
+                  {meta.custo_producao?.toFixed(2) || '0.00'}
                 </p>
               </div>
             </div>
@@ -370,7 +426,7 @@ export default function MetasPage() {
     cockpit_marketing: [],
     indicadores_qualidade: [],
     indicadores_mensais: [],
-    metas_diarias: []
+    metas_diarias: [],
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -380,7 +436,7 @@ export default function MetasPage() {
       setLoading(true);
       const response = await fetch('/api/metas');
       const data = await response.json();
-      
+
       if (data.success) {
         setMetas(data.data);
       } else {
@@ -400,13 +456,13 @@ export default function MetasPage() {
   // Otimizar cálculo de estatísticas com useMemo
   const categoryStats = useMemo(() => {
     const stats: Record<string, { total: number; ativas: number }> = {};
-    
+
     Object.entries(metas).forEach(([categoria, metasCategoria]) => {
       const total = metasCategoria.length;
       const ativas = metasCategoria.filter(m => m.meta_ativa).length;
       stats[categoria] = { total, ativas };
     });
-    
+
     return stats;
   }, [metas]);
 
@@ -415,42 +471,48 @@ export default function MetasPage() {
     return Object.values(metas).reduce((acc, curr) => acc + curr.length, 0);
   }, [metas]);
 
-  const getCategoryStats = useCallback((categoria: keyof MetasOrganizadas) => {
-    return categoryStats[categoria] || { total: 0, ativas: 0 };
-  }, [categoryStats]);
+  const getCategoryStats = useCallback(
+    (categoria: keyof MetasOrganizadas) => {
+      return categoryStats[categoria] || { total: 0, ativas: 0 };
+    },
+    [categoryStats]
+  );
 
-  const salvarMeta = async (metaId: string, valores: Record<string, number | null>) => {
+  const salvarMeta = async (
+    metaId: string,
+    valores: Record<string, number | null>
+  ) => {
     try {
       setSavingId(metaId);
-      
+
       const response = await fetch('/api/metas', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.assign({ id: metaId }, valores))
+        body: JSON.stringify(Object.assign({ id: metaId }, valores)),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         await carregarMetas();
         setEditingId(null);
         toast({
-          title: "✅ Sucesso",
-          description: "Meta atualizada com sucesso!",
+          title: '✅ Sucesso',
+          description: 'Meta atualizada com sucesso!',
         });
       } else {
         toast({
-          title: "❌ Erro",
-          description: data.error || "Erro ao atualizar meta",
-          variant: "destructive"
+          title: '❌ Erro',
+          description: data.error || 'Erro ao atualizar meta',
+          variant: 'destructive',
         });
       }
     } catch (error) {
       console.error('Erro ao salvar meta:', error);
       toast({
-        title: "❌ Erro",
-        description: "Erro ao salvar meta",
-        variant: "destructive"
+        title: '❌ Erro',
+        description: 'Erro ao salvar meta',
+        variant: 'destructive',
       });
     } finally {
       setSavingId(null);
@@ -460,23 +522,23 @@ export default function MetasPage() {
   const getTabIcon = (categoria: string) => {
     switch (categoria.toLowerCase()) {
       case 'indicadores_estrategicos':
-        return <Target className="w-4 h-4" />
+        return <Target className="w-4 h-4" />;
       case 'cockpit_produtos':
-        return <Coffee className="w-4 h-4" />
+        return <Coffee className="w-4 h-4" />;
       case 'cockpit_vendas':
-        return <TrendingUp className="w-4 h-4" />
+        return <TrendingUp className="w-4 h-4" />;
       case 'cockpit_financeiro':
-        return <DollarSign className="w-4 h-4" />
+        return <DollarSign className="w-4 h-4" />;
       case 'cockpit_marketing':
-        return <Share2 className="w-4 h-4" />
+        return <Share2 className="w-4 h-4" />;
       case 'indicadores_qualidade':
-        return <Star className="w-4 h-4" />
+        return <Star className="w-4 h-4" />;
       case 'indicadores_mensais':
-        return <Calendar className="w-4 h-4" />
+        return <Calendar className="w-4 h-4" />;
       case 'metas_diarias':
-        return <Activity className="w-4 h-4" />
+        return <Activity className="w-4 h-4" />;
       default:
-        return <Target className="w-4 h-4" />
+        return <Target className="w-4 h-4" />;
     }
   };
 
@@ -485,7 +547,9 @@ export default function MetasPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando metas...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Carregando metas...
+          </p>
         </div>
       </div>
     );
@@ -507,24 +571,26 @@ export default function MetasPage() {
                   <ArrowLeft className="w-4 h-4" />
                   Voltar
                 </Button>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
                     <Target className="w-8 h-8" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold">Configuração de Metas</h1>
-                    <p className="text-orange-100 mt-1">Defina e acompanhe os KPIs do seu negócio</p>
+                    <h1 className="text-3xl font-bold">
+                      Configuração de Metas
+                    </h1>
+                    <p className="text-orange-100 mt-1">
+                      Defina e acompanhe os KPIs do seu negócio
+                    </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <div className="text-sm text-orange-200">Total de Metas</div>
-                  <div className="text-2xl font-bold">
-                    {totalMetas}
-                  </div>
+                  <div className="text-2xl font-bold">{totalMetas}</div>
                 </div>
                 <div className="p-3 bg-white/10 rounded-xl">
                   <Award className="w-8 h-8" />
@@ -534,31 +600,40 @@ export default function MetasPage() {
           </div>
         </div>
 
-                 {/* Overview Cards */}
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6">
-           {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => {
-             const stats = getCategoryStats(categoria);
-             return (
-               <Card key={categoria} className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                 <CardContent className="p-6">
-                   <div className="flex items-center justify-between">
-                     <div>
-                       <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 capitalize">
-                         {categoria.replace('_', ' ')}
-                       </p>
-                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                         {stats.ativas}/{stats.total}
-                       </p>
-                       <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Metas ativas</p>
-                     </div>
-                     <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-xl">
-                       {getTabIcon(categoria)}
-                     </div>
-                   </div>
-                 </CardContent>
-               </Card>
-             );
-           }) : null}
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6">
+          {metas && typeof metas === 'object'
+            ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(
+                ([categoria, metasCategoria]) => {
+                  const stats = getCategoryStats(categoria);
+                  return (
+                    <Card
+                      key={categoria}
+                      className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1 capitalize">
+                              {categoria.replace('_', ' ')}
+                            </p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                              {stats.ativas}/{stats.total}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                              Metas ativas
+                            </p>
+                          </div>
+                          <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                            {getTabIcon(categoria)}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+              )
+            : null}
         </div>
 
         {/* Tabs de Categorias */}
@@ -573,70 +648,97 @@ export default function MetasPage() {
                   Gerenciar Metas por Categoria
                 </CardTitle>
               </div>
-              
-                             <TabsList className="grid w-full grid-cols-8 bg-gray-100 dark:bg-gray-700">
-                 {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
-                   <TabsTrigger 
-                     key={categoria}
-                     value={categoria}
-                     className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600"
-                   >
-                     {getTabIcon(categoria)}
-                     <span className="capitalize">
-                       {categoria === 'indicadores_estrategicos' ? 'Estratégicos' :
-                        categoria === 'cockpit_produtos' ? 'Produtos' :
-                        categoria === 'cockpit_vendas' ? 'Vendas' :
-                        categoria === 'cockpit_financeiro' ? 'Financeiro' :
-                        categoria === 'cockpit_marketing' ? 'Marketing' :
-                        categoria === 'indicadores_qualidade' ? 'Qualidade' :
-                        categoria === 'indicadores_mensais' ? 'Mensais' :
-                        categoria === 'metas_diarias' ? 'Diárias' :
-                        String(categoria).replace('_', ' ')}
-                     </span>
-                     <Badge variant="outline" className="ml-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">
-                       {metasCategoria.length}
-                     </Badge>
-                   </TabsTrigger>
-                 )) : null}
+
+              <TabsList className="grid w-full grid-cols-8 bg-gray-100 dark:bg-gray-700">
+                {metas && typeof metas === 'object'
+                  ? (
+                      Object.entries(metas) as [
+                        keyof MetasOrganizadas,
+                        Meta[],
+                      ][]
+                    ).map(([categoria, metasCategoria]) => (
+                      <TabsTrigger
+                        key={categoria}
+                        value={categoria}
+                        className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600"
+                      >
+                        {getTabIcon(categoria)}
+                        <span className="capitalize">
+                          {categoria === 'indicadores_estrategicos'
+                            ? 'Estratégicos'
+                            : categoria === 'cockpit_produtos'
+                              ? 'Produtos'
+                              : categoria === 'cockpit_vendas'
+                                ? 'Vendas'
+                                : categoria === 'cockpit_financeiro'
+                                  ? 'Financeiro'
+                                  : categoria === 'cockpit_marketing'
+                                    ? 'Marketing'
+                                    : categoria === 'indicadores_qualidade'
+                                      ? 'Qualidade'
+                                      : categoria === 'indicadores_mensais'
+                                        ? 'Mensais'
+                                        : categoria === 'metas_diarias'
+                                          ? 'Diárias'
+                                          : String(categoria).replace('_', ' ')}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="ml-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
+                        >
+                          {metasCategoria.length}
+                        </Badge>
+                      </TabsTrigger>
+                    ))
+                  : null}
               </TabsList>
             </CardHeader>
 
-                         <CardContent className="p-6">
-               {metas && typeof metas === 'object' ? (Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]).map(([categoria, metasCategoria]) => (
-                 <TabsContent key={categoria} value={categoria} className="space-y-6 mt-0">
-                   {metasCategoria.length === 0 ? (
-                     <div className="text-center py-12">
-                       <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                         {getTabIcon(categoria)}
-                       </div>
-                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                         Nenhuma meta encontrada
-                       </h3>
-                       <p className="text-gray-600 dark:text-gray-400">
-                         Não há metas configuradas para a categoria {categoria.replace('_', ' ')}.
-                       </p>
-                     </div>
-                   ) : (
-                     <div className="space-y-6">
-                       {metasCategoria.map((meta: Meta) => (
-                         <MetaCard
-                           key={meta.id}
-                           meta={meta}
-                           isEditing={editingId === meta.id}
-                           onEdit={() => setEditingId(meta.id)}
-                           onSave={(valores) => salvarMeta(meta.id, valores)}
-                           onCancel={() => setEditingId(null)}
-                           isSaving={savingId === meta.id}
-                         />
-                       ))}
-                     </div>
-                   )}
-                 </TabsContent>
-               )) : null}
+            <CardContent className="p-6">
+              {metas && typeof metas === 'object'
+                ? (
+                    Object.entries(metas) as [keyof MetasOrganizadas, Meta[]][]
+                  ).map(([categoria, metasCategoria]) => (
+                    <TabsContent
+                      key={categoria}
+                      value={categoria}
+                      className="space-y-6 mt-0"
+                    >
+                      {metasCategoria.length === 0 ? (
+                        <div className="text-center py-12">
+                          <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                            {getTabIcon(categoria)}
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            Nenhuma meta encontrada
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400">
+                            Não há metas configuradas para a categoria{' '}
+                            {categoria.replace('_', ' ')}.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-6">
+                          {metasCategoria.map((meta: Meta) => (
+                            <MetaCard
+                              key={meta.id}
+                              meta={meta}
+                              isEditing={editingId === meta.id}
+                              onEdit={() => setEditingId(meta.id)}
+                              onSave={valores => salvarMeta(meta.id, valores)}
+                              onCancel={() => setEditingId(null)}
+                              isSaving={savingId === meta.id}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  ))
+                : null}
             </CardContent>
           </Tabs>
         </Card>
       </div>
     </div>
   );
-} 
+}

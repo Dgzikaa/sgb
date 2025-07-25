@@ -1,72 +1,77 @@
-﻿'use client'
+﻿'use client';
 
-import { useState, useMemo, ReactNode } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select'
-import { 
-  ChevronUp, 
-  ChevronDown, 
-  Filter, 
+import { useState, useMemo, ReactNode } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  ChevronUp,
+  ChevronDown,
+  Filter,
   Search,
   X,
-  ArrowUpDown 
-} from 'lucide-react'
+  ArrowUpDown,
+} from 'lucide-react';
 
 interface Column<T> {
-  key: keyof T | string
-  label: string
-  render?: (row: T, index: number) => ReactNode
-  sortable?: boolean
-  filterable?: boolean
-  filterType?: 'text' | 'select' | 'number' | 'date'
-  filterOptions?: Array<{ value: string; label: string }>
-  width?: string
-  sticky?: boolean
+  key: keyof T | string;
+  label: string;
+  render?: (row: T, index: number) => ReactNode;
+  sortable?: boolean;
+  filterable?: boolean;
+  filterType?: 'text' | 'select' | 'number' | 'date';
+  filterOptions?: Array<{ value: string; label: string }>;
+  width?: string;
+  sticky?: boolean;
 }
 
 interface AdvancedDataTableProps<T> {
-  data: T[]
-  columns: Column<T>[]
-  pageSize?: number
-  searchable?: boolean
-  searchPlaceholder?: string
-  className?: string
-  emptyMessage?: string
-  loading?: boolean
+  data: T[];
+  columns: Column<T>[];
+  pageSize?: number;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  className?: string;
+  emptyMessage?: string;
+  loading?: boolean;
 }
 
-type SortDirection = 'asc' | 'desc' | null
+type SortDirection = 'asc' | 'desc' | null;
 
-export function AdvancedDataTable<T extends Record<string, (unknown)>>({
+export function AdvancedDataTable<T extends Record<string, unknown>>({
   data,
   columns,
   pageSize = 10,
   searchable = true,
-  searchPlaceholder = "Pesquisar...",
-  className = "",
-  emptyMessage = "Nenhum dado encontrado",
-  loading = false
+  searchPlaceholder = 'Pesquisar...',
+  className = '',
+  emptyMessage = 'Nenhum dado encontrado',
+  loading = false,
 }: AdvancedDataTableProps<T>) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [globalFilter, setGlobalFilter] = useState("")
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
+  const [currentPage, setCurrentPage] = useState(1);
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
+    {}
+  );
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: SortDirection;
+  }>({
     key: '',
-    direction: null
-  })
-  const [showFilters, setShowFilters] = useState(false)
+    direction: null,
+  });
+  const [showFilters, setShowFilters] = useState(false);
 
   // Filtrar dados
   const filteredData = useMemo(() => {
-    let filtered = [...data]
+    let filtered = [...data];
 
     // Filtro global
     if (globalFilter) {
@@ -74,91 +79,95 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
         Object.values(row).some(value =>
           String(value).toLowerCase().includes(globalFilter.toLowerCase())
         )
-      )
+      );
     }
 
     // Filtros por coluna
     Object.entries(columnFilters).forEach(([key, filterValue]) => {
       if (filterValue) {
         filtered = filtered.filter(row => {
-          const cellValue = String(row[key] || '').toLowerCase()
-          return cellValue.includes(filterValue.toLowerCase())
-        })
+          const cellValue = String(row[key] || '').toLowerCase();
+          return cellValue.includes(filterValue.toLowerCase());
+        });
       }
-    })
+    });
 
-    return filtered
-  }, [data, globalFilter, columnFilters])
+    return filtered;
+  }, [data, globalFilter, columnFilters]);
 
   // Ordenar dados
   const sortedData = useMemo(() => {
     if (!sortConfig.key || !sortConfig.direction) {
-      return filteredData
+      return filteredData;
     }
 
     return [...filteredData].sort((a, b) => {
-      const aVal = a[sortConfig.key]
-      const bVal = b[sortConfig.key]
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
 
       if (aVal < bVal) {
-        return sortConfig.direction === 'asc' ? -1 : 1
+        return sortConfig.direction === 'asc' ? -1 : 1;
       }
       if (aVal > bVal) {
-        return sortConfig.direction === 'asc' ? 1 : -1
+        return sortConfig.direction === 'asc' ? 1 : -1;
       }
-      return 0
-    })
-  }, [filteredData, sortConfig])
+      return 0;
+    });
+  }, [filteredData, sortConfig]);
 
   // Paginar dados
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize
-    return sortedData.slice(startIndex, startIndex + pageSize)
-  }, [sortedData, currentPage, pageSize])
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedData.slice(startIndex, startIndex + pageSize);
+  }, [sortedData, currentPage, pageSize]);
 
   // Total de páginas
-  const totalPages = Math.ceil(sortedData.length / pageSize)
+  const totalPages = Math.ceil(sortedData.length / pageSize);
 
   // Lidar com ordenação
   const handleSort = (key: string) => {
-    if (!columns.find(col => col.key === key)?.sortable) return
+    if (!columns.find(col => col.key === key)?.sortable) return;
 
     setSortConfig(prev => {
       if (prev.key === key) {
-        if (prev.direction === 'asc') return { key, direction: 'desc' }
-        if (prev.direction === 'desc') return { key: '', direction: null }
+        if (prev.direction === 'asc') return { key, direction: 'desc' };
+        if (prev.direction === 'desc') return { key: '', direction: null };
       }
-      return { key, direction: 'asc' }
-    })
-  }
+      return { key, direction: 'asc' };
+    });
+  };
 
   // Atualizar filtro de coluna
   const updateColumnFilter = (key: string, value: string) => {
     setColumnFilters(prev => ({
       ...prev,
-      [key]: value
-    }))
-    setCurrentPage(1) // Reset to first page
-  }
+      [key]: value,
+    }));
+    setCurrentPage(1); // Reset to first page
+  };
 
   // Limpar todos os filtros
   const clearAllFilters = () => {
-    setGlobalFilter("")
-    setColumnFilters({})
-    setCurrentPage(1)
-  }
+    setGlobalFilter('');
+    setColumnFilters({});
+    setCurrentPage(1);
+  };
 
   // Obter ícone de ordenação
   const getSortIcon = (key: string) => {
-    if (sortConfig.key !== key) return <ArrowUpDown className="w-4 h-4 text-gray-400" />
-    if (sortConfig.direction === 'asc') return <ChevronUp className="w-4 h-4 text-blue-600" />
-    if (sortConfig.direction === 'desc') return <ChevronDown className="w-4 h-4 text-blue-600" />
-    return <ArrowUpDown className="w-4 h-4 text-gray-400" />
-  }
+    if (sortConfig.key !== key)
+      return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
+    if (sortConfig.direction === 'asc')
+      return <ChevronUp className="w-4 h-4 text-blue-600" />;
+    if (sortConfig.direction === 'desc')
+      return <ChevronDown className="w-4 h-4 text-blue-600" />;
+    return <ArrowUpDown className="w-4 h-4 text-gray-400" />;
+  };
 
   // Calcular estatísticas
-  const hasActiveFilters = globalFilter || Object.values(columnFilters).some(v => v)
-  const showingResults = `${((currentPage - 1) * pageSize) + 1}-${Math.min(currentPage * pageSize, sortedData.length)} de ${sortedData.length}`
+  const hasActiveFilters =
+    globalFilter || Object.values(columnFilters).some(v => v);
+  const showingResults = `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, sortedData.length)} de ${sortedData.length}`;
 
   if (loading) {
     return (
@@ -168,11 +177,13 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
           <p className="text-gray-600">Carregando dados...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className={`bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden ${className}`}>
+    <div
+      className={`bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden ${className}`}
+    >
       {/* Header com controles */}
       <div className="border-b border-gray-200 bg-gray-50 p-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -184,12 +195,12 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
                 <Input
                   placeholder={searchPlaceholder}
                   value={globalFilter}
-                  onChange={(e) => setGlobalFilter(e.target.value)}
+                  onChange={e => setGlobalFilter(e.target.value)}
                   className="pl-10 w-64"
                 />
               </div>
             )}
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -232,38 +243,44 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
         {/* Filtros por coluna */}
         {showFilters && (
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {columns.filter(col => col.filterable).map((column) => (
-              <div key={String(column.key)}>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  {column.label}
-                </label>
-                {column.filterType === 'select' && column.filterOptions ? (
-                  <Select
-                    value={columnFilters[String(column.key)] || ""}
-                    onValueChange={(value) => updateColumnFilter(String(column.key), value)}
-                  >
-                    <SelectTrigger className="h-8">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
-                      {column.filterOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    placeholder={`Filtrar ${column.label.toLowerCase()}...`}
-                    value={columnFilters[String(column.key)] || ""}
-                    onChange={(e) => updateColumnFilter(String(column.key), e.target.value)}
-                    className="h-8"
-                  />
-                )}
-              </div>
-            ))}
+            {columns
+              .filter(col => col.filterable)
+              .map(column => (
+                <div key={String(column.key)}>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    {column.label}
+                  </label>
+                  {column.filterType === 'select' && column.filterOptions ? (
+                    <Select
+                      value={columnFilters[String(column.key)] || ''}
+                      onValueChange={value =>
+                        updateColumnFilter(String(column.key), value)
+                      }
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Todos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos</SelectItem>
+                        {column.filterOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      placeholder={`Filtrar ${column.label.toLowerCase()}...`}
+                      value={columnFilters[String(column.key)] || ''}
+                      onChange={e =>
+                        updateColumnFilter(String(column.key), e.target.value)
+                      }
+                      className="h-8"
+                    />
+                  )}
+                </div>
+              ))}
           </div>
         )}
       </div>
@@ -273,7 +290,7 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              {columns.map((column) => (
+              {columns.map(column => (
                 <th
                   key={String(column.key)}
                   className={`
@@ -282,7 +299,9 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
                     ${column.sticky ? 'sticky left-0 bg-gray-50 z-10 border-r border-gray-200' : ''}
                     ${column.sortable ? 'cursor-pointer hover:bg-gray-100 select-none' : ''}
                   `}
-                  onClick={() => column.sortable && handleSort(String(column.key))}
+                  onClick={() =>
+                    column.sortable && handleSort(String(column.key))
+                  }
                   style={{ width: column.width }}
                 >
                   <div className="flex items-center gap-2">
@@ -293,11 +312,14 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
               ))}
             </tr>
           </thead>
-          
+
           <tbody>
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="py-12 text-center text-gray-500">
+                <td
+                  colSpan={columns.length}
+                  className="py-12 text-center text-gray-500"
+                >
                   <div className="flex flex-col items-center gap-2">
                     <Search className="w-8 h-8 text-gray-300" />
                     <p>{emptyMessage}</p>
@@ -306,8 +328,11 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
               </tr>
             ) : (
               paginatedData.map((row, index) => (
-                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  {columns.map((column) => (
+                <tr
+                  key={index}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  {columns.map(column => (
                     <td
                       key={String(column.key)}
                       className={`
@@ -316,10 +341,9 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
                       `}
                       style={{ width: column.width }}
                     >
-                      {column.render 
+                      {column.render
                         ? column.render(row, index)
-                        : String(row[column.key] || '-')
-                      }
+                        : String(row[column.key] || '-')}
                     </td>
                   ))}
                 </tr>
@@ -356,7 +380,9 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() =>
+                  setCurrentPage(prev => Math.min(totalPages, prev + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Próxima
@@ -374,5 +400,5 @@ export function AdvancedDataTable<T extends Record<string, (unknown)>>({
         </div>
       )}
     </div>
-  )
-} 
+  );
+}

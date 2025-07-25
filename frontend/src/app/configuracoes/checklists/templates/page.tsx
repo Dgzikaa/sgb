@@ -1,25 +1,31 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   ArrowLeft,
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  BookOpen, 
-  Settings, 
-  Trash2, 
-  Edit, 
-  Eye, 
-  Clock, 
+  Plus,
+  Search,
+  Filter,
+  Download,
+  BookOpen,
+  Settings,
+  Trash2,
+  Edit,
+  Eye,
+  Clock,
   Users,
   FileText,
   Grid3X3,
@@ -29,233 +35,255 @@ import {
   CheckSquare,
   TrendingUp,
   AlertTriangle,
-  RefreshCw
-} from 'lucide-react'
-import { api } from '@/lib/api-client'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
+  RefreshCw,
+} from 'lucide-react';
+import { api } from '@/lib/api-client';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 // =====================================================
 // TIPOS
 // =====================================================
 
 interface Template {
-  id: string
-  nome: string
-  descricao?: string
-  categoria: string
-  setor: string
-  tipo: string
-  frequencia: string
-  tempo_estimado: number
-  publico: boolean
-  predefinido: boolean
-  criado_em: string
+  id: string;
+  nome: string;
+  descricao?: string;
+  categoria: string;
+  setor: string;
+  tipo: string;
+  frequencia: string;
+  tempo_estimado: number;
+  publico: boolean;
+  predefinido: boolean;
+  criado_em: string;
   criado_por: {
-    nome: string
-    email: string
-  }
+    nome: string;
+    email: string;
+  };
   template_tags?: Array<{
     template_tags: {
-      nome: string
-      cor: string
-    }
-  }>
+      nome: string;
+      cor: string;
+    };
+  }>;
   estatisticas?: {
-    total_usos: number
-    usos_completados: number
-    usos_em_andamento: number
-  }
+    total_usos: number;
+    usos_completados: number;
+    usos_em_andamento: number;
+  };
 }
 
 interface Estatisticas {
-  total: number
-  por_categoria: Record<string, number>
-  publicos: number
-  predefinidos: number
+  total: number;
+  por_categoria: Record<string, number>;
+  publicos: number;
+  predefinidos: number;
 }
 
 export default function TemplatesPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  
+  const router = useRouter();
+  const { toast } = useToast();
+
   // Estados
-  const [templates, setTemplates] = useState<Template[]>([])
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [estatisticas, setEstatisticas] = useState<Estatisticas>({
     total: 0,
     por_categoria: {},
     publicos: 0,
-    predefinidos: 0
-  })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [instalandoPredefinidos, setInstalandoPredefinidos] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  
+    predefinidos: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [instalandoPredefinidos, setInstalandoPredefinidos] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
   // Filtros
-  const [busca, setBusca] = useState('')
-  const [categoriaFiltro, setCategoriaFiltro] = useState('all')
-  const [tipoFiltro, setTipoFiltro] = useState('all')
-  const [publicoFiltro, setPublicoFiltro] = useState('all')
-  const [predefinidoFiltro, setPredefinidoFiltro] = useState('all')
+  const [busca, setBusca] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState('all');
+  const [tipoFiltro, setTipoFiltro] = useState('all');
+  const [publicoFiltro, setPublicoFiltro] = useState('all');
+  const [predefinidoFiltro, setPredefinidoFiltro] = useState('all');
 
   const carregarTemplates = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
-      
-      const params = new URLSearchParams()
-      if (busca) params.append('busca', busca)
-      if (categoriaFiltro && categoriaFiltro !== 'all') params.append('categoria', categoriaFiltro)
-      if (tipoFiltro && tipoFiltro !== 'all') params.append('tipo', tipoFiltro)
-      if (publicoFiltro && publicoFiltro !== 'all') params.append('publico', publicoFiltro)
-      if (predefinidoFiltro && predefinidoFiltro !== 'all') params.append('predefinido', predefinidoFiltro)
+      setLoading(true);
+      setError(null);
 
-      const response = await api.get(`/api/templates?${params.toString()}`)
-      
+      const params = new URLSearchParams();
+      if (busca) params.append('busca', busca);
+      if (categoriaFiltro && categoriaFiltro !== 'all')
+        params.append('categoria', categoriaFiltro);
+      if (tipoFiltro && tipoFiltro !== 'all') params.append('tipo', tipoFiltro);
+      if (publicoFiltro && publicoFiltro !== 'all')
+        params.append('publico', publicoFiltro);
+      if (predefinidoFiltro && predefinidoFiltro !== 'all')
+        params.append('predefinido', predefinidoFiltro);
+
+      const response = await api.get(`/api/configuracoes/templates?${params.toString()}`);
+
       if (response.success) {
-        setTemplates(response.data || [])
-        setEstatisticas(response.estatisticas || {
-          total: 0,
-          por_categoria: {},
-          publicos: 0,
-          predefinidos: 0
-        })
+        setTemplates(response.data || []);
+        setEstatisticas(
+          response.estatisticas || {
+            total: 0,
+            por_categoria: {},
+            publicos: 0,
+            predefinidos: 0,
+          }
+        );
       } else {
-        setError(response.error || 'Erro ao carregar templates')
+        setError(response.error || 'Erro ao carregar templates');
       }
     } catch (err: unknown) {
-      console.error('Erro ao carregar templates:', err)
-      setError('Erro ao carregar templates')
+      console.error('Erro ao carregar templates:', err);
+      setError('Erro ao carregar templates');
       toast({
-        title: "❌ Erro",
-        description: "Erro ao carregar templates",
-        variant: "destructive"
-      })
+        title: '❌ Erro',
+        description: 'Erro ao carregar templates',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [busca, categoriaFiltro, tipoFiltro, publicoFiltro, predefinidoFiltro, toast]);
+  }, [
+    busca,
+    categoriaFiltro,
+    tipoFiltro,
+    publicoFiltro,
+    predefinidoFiltro,
+    toast,
+  ]);
 
   useEffect(() => {
-    carregarTemplates()
-  }, [carregarTemplates])
+    carregarTemplates();
+  }, [carregarTemplates]);
 
   const instalarTemplatesPredefinidos = async () => {
     try {
-      setInstalandoPredefinidos(true)
-      
-      const response = await api.post('/api/templates', {
-        action: 'install_predefined'
-      })
-      
+      setInstalandoPredefinidos(true);
+
+      const response = await api.post('/api/configuracoes/templates', {
+        action: 'install_predefined',
+      });
+
       if (response.success) {
-        await carregarTemplates()
+        await carregarTemplates();
         toast({
-          title: "✅ Sucesso",
-          description: response.message || "Templates predefinidos instalados!",
-        })
+          title: '✅ Sucesso',
+          description: response.message || 'Templates predefinidos instalados!',
+        });
       } else {
         toast({
-          title: "❌ Erro",
-          description: response.error || "Erro ao instalar templates",
-          variant: "destructive"
-        })
+          title: '❌ Erro',
+          description: response.error || 'Erro ao instalar templates',
+          variant: 'destructive',
+        });
       }
     } catch (err: unknown) {
-      console.error('Erro ao instalar templates:', err)
+      console.error('Erro ao instalar templates:', err);
       toast({
-        title: "❌ Erro",
-        description: "Erro ao instalar templates predefinidos",
-        variant: "destructive"
-      })
+        title: '❌ Erro',
+        description: 'Erro ao instalar templates predefinidos',
+        variant: 'destructive',
+      });
     } finally {
-      setInstalandoPredefinidos(false)
+      setInstalandoPredefinidos(false);
     }
-  }
+  };
 
   const deletarTemplate = async (template: Template) => {
-    if (!confirm(`Tem certeza que deseja deletar o template "${template.nome}"?`)) {
-      return
+    if (
+      !confirm(`Tem certeza que deseja deletar o template "${template.nome}"?`)
+    ) {
+      return;
     }
 
     try {
-      const response = await api.delete(`/api/templates/${template.id}`)
-      
+      const response = await api.delete(`/api/configuracoes/templates/${template.id}`);
+
       if (response.success) {
-        await carregarTemplates()
+        await carregarTemplates();
         toast({
-          title: "✅ Sucesso",
-          description: "Template deletado com sucesso!",
-        })
+          title: '✅ Sucesso',
+          description: 'Template deletado com sucesso!',
+        });
       } else {
         toast({
-          title: "❌ Erro",
-          description: response.error || "Erro ao deletar template",
-          variant: "destructive"
-        })
+          title: '❌ Erro',
+          description: response.error || 'Erro ao deletar template',
+          variant: 'destructive',
+        });
       }
     } catch (err: unknown) {
-      console.error('Erro ao deletar template:', err)
+      console.error('Erro ao deletar template:', err);
       toast({
-        title: "❌ Erro",
-        description: "Erro ao deletar template",
-        variant: "destructive"
-      })
+        title: '❌ Erro',
+        description: 'Erro ao deletar template',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const criarChecklistAPartirDeTemplate = (template: Template) => {
-    router.push(`/checklists/novo?template=${template.id}`)
-  }
+    router.push(`/checklists/novo?template=${template.id}`);
+  };
 
   const editarTemplate = (template: Template) => {
-    router.push(`/configuracoes/templates/editor?id=${template.id}`)
-  }
+    router.push(`/configuracoes/templates/editor?id=${template.id}`);
+  };
 
   const visualizarTemplate = (template: Template) => {
-    router.push(`/configuracoes/templates/visualizar?id=${template.id}`)
-  }
+    router.push(`/configuracoes/templates/visualizar?id=${template.id}`);
+  };
 
   const limparFiltros = () => {
-    setBusca('')
-    setCategoriaFiltro('all')
-    setTipoFiltro('all')
-    setPublicoFiltro('all')
-    setPredefinidoFiltro('all')
-  }
+    setBusca('');
+    setCategoriaFiltro('all');
+    setTipoFiltro('all');
+    setPublicoFiltro('all');
+    setPredefinidoFiltro('all');
+  };
 
   const getCategoriaColor = (categoria: string) => {
     const cores: Record<string, string> = {
-      'operacional': 'from-blue-500 to-blue-600',
-      'qualidade': 'from-green-500 to-green-600',
-      'seguranca': 'from-red-500 to-red-600',
-      'manutencao': 'from-yellow-500 to-yellow-600',
-      'atendimento': 'from-purple-500 to-purple-600',
-      'administrativo': 'from-gray-500 to-gray-600'
-    }
-    return cores[categoria?.toLowerCase()] || 'from-gray-500 to-gray-600'
-  }
+      operacional: 'from-blue-500 to-blue-600',
+      qualidade: 'from-green-500 to-green-600',
+      seguranca: 'from-red-500 to-red-600',
+      manutencao: 'from-yellow-500 to-yellow-600',
+      atendimento: 'from-purple-500 to-purple-600',
+      administrativo: 'from-gray-500 to-gray-600',
+    };
+    return cores[categoria?.toLowerCase()] || 'from-gray-500 to-gray-600';
+  };
 
   const getTipoIcon = (tipo: string) => {
     switch (tipo?.toLowerCase()) {
-      case 'abertura': return <CheckSquare className="w-4 h-4" />
-      case 'fechamento': return <Clock className="w-4 h-4" />
-      case 'diario': return <Star className="w-4 h-4" />
-      case 'semanal': return <TrendingUp className="w-4 h-4" />
-      case 'mensal': return <BookOpen className="w-4 h-4" />
-      default: return <FileText className="w-4 h-4" />
+      case 'abertura':
+        return <CheckSquare className="w-4 h-4" />;
+      case 'fechamento':
+        return <Clock className="w-4 h-4" />;
+      case 'diario':
+        return <Star className="w-4 h-4" />;
+      case 'semanal':
+        return <TrendingUp className="w-4 h-4" />;
+      case 'mensal':
+        return <BookOpen className="w-4 h-4" />;
+      default:
+        return <FileText className="w-4 h-4" />;
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando templates...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Carregando templates...
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -275,22 +303,30 @@ export default function TemplatesPage() {
                     <ArrowLeft className="w-4 h-4" />
                     Voltar
                   </Button>
-                  
+
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
                       <FileText className="w-8 h-8" />
                     </div>
                     <div>
-                      <h1 className="text-3xl font-bold">Templates de Checklists</h1>
-                      <p className="text-indigo-100 mt-1">Gerencie e organize templates reutilizáveis</p>
+                      <h1 className="text-3xl font-bold">
+                        Templates de Checklists
+                      </h1>
+                      <p className="text-indigo-100 mt-1">
+                        Gerencie e organize templates reutilizáveis
+                      </p>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <div className="text-sm text-indigo-200">Total de Templates</div>
-                    <div className="text-2xl font-bold">{estatisticas.total}</div>
+                    <div className="text-sm text-indigo-200">
+                      Total de Templates
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {estatisticas.total}
+                    </div>
                   </div>
                   <div className="p-3 bg-white/10 rounded-xl">
                     <BookOpen className="w-8 h-8" />
@@ -306,9 +342,15 @@ export default function TemplatesPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.total}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Templates</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Total
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {estatisticas.total}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                      Templates
+                    </p>
                   </div>
                   <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                     <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -321,9 +363,15 @@ export default function TemplatesPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Públicos</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.publicos}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Compartilhados</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Públicos
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {estatisticas.publicos}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                      Compartilhados
+                    </p>
                   </div>
                   <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
                     <Users className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -336,9 +384,15 @@ export default function TemplatesPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Predefinidos</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas.predefinidos}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Sistema</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Predefinidos
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      {estatisticas.predefinidos}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                      Sistema
+                    </p>
                   </div>
                   <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
                     <Settings className="w-8 h-8 text-purple-600 dark:text-purple-400" />
@@ -351,11 +405,15 @@ export default function TemplatesPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Categorias</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Categorias
+                    </p>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">
                       {Object.keys(estatisticas.por_categoria || {}).length}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Diferentes</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                      Diferentes
+                    </p>
                   </div>
                   <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
                     <Grid3X3 className="w-8 h-8 text-orange-600 dark:text-orange-400" />
@@ -395,7 +453,9 @@ export default function TemplatesPage() {
                     </Button>
                   </div>
                   <Button
-                    onClick={() => router.push('/configuracoes/templates/editor')}
+                    onClick={() =>
+                      router.push('/configuracoes/templates/editor')
+                    }
                     className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -412,13 +472,16 @@ export default function TemplatesPage() {
                     <Input
                       placeholder="Buscar templates..."
                       value={busca}
-                      onChange={(e) => setBusca(e.target.value)}
+                      onChange={e => setBusca(e.target.value)}
                       className="pl-10 bg-white dark:bg-gray-700"
                     />
                   </div>
                 </div>
 
-                <Select value={categoriaFiltro} onValueChange={setCategoriaFiltro}>
+                <Select
+                  value={categoriaFiltro}
+                  onValueChange={setCategoriaFiltro}
+                >
                   <SelectTrigger className="bg-white dark:bg-gray-700">
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
@@ -429,7 +492,9 @@ export default function TemplatesPage() {
                     <SelectItem value="seguranca">Segurança</SelectItem>
                     <SelectItem value="manutencao">Manutenção</SelectItem>
                     <SelectItem value="atendimento">Atendimento</SelectItem>
-                    <SelectItem value="administrativo">Administrativo</SelectItem>
+                    <SelectItem value="administrativo">
+                      Administrativo
+                    </SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -477,9 +542,12 @@ export default function TemplatesPage() {
                     <div className="flex items-center gap-3">
                       <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       <div>
-                        <h4 className="font-semibold text-blue-800 dark:text-blue-200">Templates Predefinidos</h4>
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-200">
+                          Templates Predefinidos
+                        </h4>
                         <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
-                          Instale templates prontos para usar em seu estabelecimento
+                          Instale templates prontos para usar em seu
+                          estabelecimento
                         </p>
                       </div>
                     </div>
@@ -513,7 +581,9 @@ export default function TemplatesPage() {
                 <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                   <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Erro ao Carregar</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Erro ao Carregar
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
                 <Button onClick={carregarTemplates} variant="outline">
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -527,7 +597,9 @@ export default function TemplatesPage() {
                 <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                   <FileText className="w-8 h-8 text-gray-600 dark:text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhum Template Encontrado</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Nenhum Template Encontrado
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Não há templates que correspondem aos filtros aplicados
                 </p>
@@ -535,7 +607,11 @@ export default function TemplatesPage() {
                   <Button onClick={limparFiltros} variant="outline">
                     Limpar Filtros
                   </Button>
-                  <Button onClick={() => router.push('/configuracoes/templates/editor')}>
+                  <Button
+                    onClick={() =>
+                      router.push('/configuracoes/templates/editor')
+                    }
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Primeiro Template
                   </Button>
@@ -543,17 +619,24 @@ export default function TemplatesPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className={`grid gap-6 ${
-              viewMode === 'grid' 
-                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                : 'grid-cols-1'
-            }`}>
-              {templates.map((template) => (
-                <Card key={template.id} className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div
+              className={`grid gap-6 ${
+                viewMode === 'grid'
+                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                  : 'grid-cols-1'
+              }`}
+            >
+              {templates.map(template => (
+                <Card
+                  key={template.id}
+                  className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                >
                   <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg bg-gradient-to-r ${getCategoriaColor(template.categoria)} text-white`}>
+                        <div
+                          className={`p-2 rounded-lg bg-gradient-to-r ${getCategoriaColor(template.categoria)} text-white`}
+                        >
                           {getTipoIcon(template.tipo)}
                         </div>
                         <div>
@@ -581,21 +664,33 @@ export default function TemplatesPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button size="sm" variant="ghost" onClick={() => visualizarTemplate(template)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => visualizarTemplate(template)}
+                        >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => editarTemplate(template)}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => editarTemplate(template)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         {!template.predefinido && (
-                          <Button size="sm" variant="ghost" onClick={() => deletarTemplate(template)}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deletarTemplate(template)}
+                          >
                             <Trash2 className="w-4 h-4 text-red-500" />
                           </Button>
                         )}
                       </div>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="p-6">
                     {template.descricao && (
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
@@ -611,7 +706,7 @@ export default function TemplatesPage() {
                         </div>
                         <div className="text-xs text-gray-500">Tempo</div>
                       </div>
-                      
+
                       <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <TrendingUp className="w-4 h-4 text-gray-500 mx-auto mb-1" />
                         <div className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -627,7 +722,9 @@ export default function TemplatesPage() {
                       </div>
                       <Button
                         size="sm"
-                        onClick={() => criarChecklistAPartirDeTemplate(template)}
+                        onClick={() =>
+                          criarChecklistAPartirDeTemplate(template)
+                        }
                         className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
                       >
                         <Plus className="w-4 h-4 mr-1" />
@@ -642,5 +739,5 @@ export default function TemplatesPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
-} 
+  );
+}

@@ -1,0 +1,3964 @@
+F:\SGB_v3\frontend>npx tsc --noEmit
+.next/types/app/api/checklist-execucoes/route.ts:2:24 - error TS2306: File 'F:/SGB_v3/frontend/src/app/api/checklist-execucoes/route.ts' is not a module.
+
+2 import * as entry from '../../../../../src/app/api/checklist-execucoes/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/checklist-execucoes/route.ts:5:29 - error TS2306: File 'F:/SGB_v3/frontend/src/app/api/checklist-execucoes/route.ts' is not a module.
+
+5 type TEntry = typeof import('../../../../../src/app/api/checklist-execucoes/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/[id]/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/[id]/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/[id]/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/[id]/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/[id]/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/[id]/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/analytics/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/analytics/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/analytics/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/analytics/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/analytics/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/analytics/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/fix-all/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/fix-all/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/fix-all/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/fix-all/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/fix-all/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/fix-all/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/fix-names/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/fix-names/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/fix-names/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/fix-names/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/fix-names/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/fix-names/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/fix-simple/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/fix-simple/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/fix-simple/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/fix-simple/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/fix-simple/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/fix-simple/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import-attractions/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import-attractions/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/import-attractions/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import-attractions/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import-attractions/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/import-attractions/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import-from-csv/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import-from-csv/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/import-from-csv/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import-from-csv/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import-from-csv/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/import-from-csv/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import-sheets/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import-sheets/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/import-sheets/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import-sheets/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import-sheets/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/import-sheets/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/import/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/import/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/import/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/import/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/remove-closed-days/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/remove-closed-days/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/remove-closed-days/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/remove-closed-days/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/remove-closed-days/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/remove-closed-days/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/route.ts:2:24 - error TS2307: Cannot find module '../../../../../src/app/api/eventos/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../src/app/api/eventos/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/route.ts:5:29 - error TS2307: Cannot find module '../../../../../src/app/api/eventos/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../src/app/api/eventos/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/sync-performance/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/sync-performance/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/sync-performance/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/sync-performance/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/sync-performance/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/sync-performance/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/update-performance/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/update-performance/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/eventos/update-performance/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/eventos/update-performance/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/eventos/update-performance/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/eventos/update-performance/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/metas/[id]/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/metas/[id]/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/metas/[id]/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/metas/[id]/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/metas/[id]/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/metas/[id]/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/metas/route.ts:2:24 - error TS2307: Cannot find module '../../../../../src/app/api/metas/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../src/app/api/metas/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/metas/route.ts:5:29 - error TS2307: Cannot find module '../../../../../src/app/api/metas/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../src/app/api/metas/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/producoes/route.ts:2:24 - error TS2307: Cannot find module '../../../../../src/app/api/producoes/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../src/app/api/producoes/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/producoes/route.ts:5:29 - error TS2307: Cannot find module '../../../../../src/app/api/producoes/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../src/app/api/producoes/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/calcular-insumos/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/calcular-insumos/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/calcular-insumos/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/calcular-insumos/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/calcular-insumos/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/calcular-insumos/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/criar/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/criar/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/criar/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/criar/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/criar/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/criar/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/editar/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/editar/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/editar/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/editar/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/editar/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/editar/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/insumos/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/insumos/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/insumos/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/insumos/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/insumos/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/insumos/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/producao/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/producao/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/producao/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/producao/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/producao/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/producao/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/produtos-completo/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/produtos-completo/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/produtos-completo/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/produtos-completo/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/produtos-completo/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/produtos-completo/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/produtos/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/produtos/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/produtos/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/produtos/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/produtos/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/produtos/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/proximo-codigo/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/proximo-codigo/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/proximo-codigo/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/proximo-codigo/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/proximo-codigo/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/proximo-codigo/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/route.ts:2:24 - error TS2307: Cannot find module '../../../../../src/app/api/receitas/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../src/app/api/receitas/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/route.ts:5:29 - error TS2307: Cannot find module '../../../../../src/app/api/receitas/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../src/app/api/receitas/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/todas/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/todas/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/receitas/todas/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/receitas/todas/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/receitas/todas/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/receitas/todas/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/audit/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/security/audit/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/security/audit/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/audit/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/security/audit/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/security/audit/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/events/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/security/events/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/security/events/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/events/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/security/events/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/security/events/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/metrics/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/security/metrics/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/security/metrics/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/metrics/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/security/metrics/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/security/metrics/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/rate-limit-status/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/security/rate-limit-status/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/security/rate-limit-status/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/rate-limit-status/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/security/rate-limit-status/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/security/rate-limit-status/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/test-webhook/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/security/test-webhook/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/security/test-webhook/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/security/test-webhook/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/security/test-webhook/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/security/test-webhook/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/config/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/config/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/whatsapp/config/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/config/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/config/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/whatsapp/config/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/messages/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/messages/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/whatsapp/messages/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/messages/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/messages/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/whatsapp/messages/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/send-notification/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/send-notification/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/whatsapp/send-notification/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/send-notification/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/send-notification/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/whatsapp/send-notification/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/send/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/send/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/whatsapp/send/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/send/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/send/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/whatsapp/send/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/test-number/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/test-number/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/whatsapp/test-number/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/test-number/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/test-number/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/whatsapp/test-number/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/webhook/route.ts:2:24 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/webhook/route.js' or its corresponding type declarations.
+
+2 import * as entry from '../../../../../../src/app/api/whatsapp/webhook/route.js'
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.next/types/app/api/whatsapp/webhook/route.ts:5:29 - error TS2307: Cannot find module '../../../../../../src/app/api/whatsapp/webhook/route.js' or its corresponding type declarations.
+
+5 type TEntry = typeof import('../../../../../../src/app/api/whatsapp/webhook/route.js')
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/security/metrics/route.ts:47:38 - error TS18046: 'e' is of type 'unknown'.
+
+47       events?.filter((e: unknown) => e.level === 'critical').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:49:38 - error TS18046: 'e' is of type 'unknown'.
+
+49       events?.filter((e: unknown) => e.level === 'warning').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:51:38 - error TS18046: 'e' is of type 'unknown'.
+
+51       events?.filter((e: unknown) => e.level === 'info').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:53:38 - error TS18046: 'e' is of type 'unknown'.
+
+53       events?.filter((e: unknown) => e.category === 'auth').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:55:38 - error TS18046: 'e' is of type 'unknown'.
+
+55       events?.filter((e: unknown) => e.category === 'access').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:57:38 - error TS18046: 'e' is of type 'unknown'.
+
+57       events?.filter((e: unknown) => e.category === 'injection').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:59:38 - error TS18046: 'e' is of type 'unknown'.
+
+59       events?.filter((e: unknown) => e.category === 'rate_limit').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:61:38 - error TS18046: 'e' is of type 'unknown'.
+
+61       events?.filter((e: unknown) => e.category === 'api_abuse').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:63:38 - error TS18046: 'e' is of type 'unknown'.
+
+63       events?.filter((e: unknown) => e.category === 'backup').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:65:38 - error TS18046: 'e' is of type 'unknown'.
+
+65       events?.filter((e: unknown) => e.category === 'system').length || 0;
+                                        ~
+
+src/app/api/configuracoes/security/metrics/route.ts:68:35 - error TS18046: 'e' is of type 'unknown'.
+
+68       events?.map((e: unknown) => e.ip_address).filter(Boolean)
+                                     ~
+
+src/app/api/configuracoes/security/metrics/route.ts:71:38 - error TS18046: 'e' is of type 'unknown'.
+
+71       events?.filter((e: unknown) => e.event_type === 'failed_login').length ||
+                                        ~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:68:9 - error TS18046: 'processedParams' is of type 'unknown'.
+
+68     if (processedParams.page)
+           ~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:69:7 - error TS18046: 'processedParams' is of type 'unknown'.
+
+69       processedParams.page = parseInt(processedParams.page);
+         ~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:69:39 - error TS18046: 'processedParams' is of type 'unknown'.
+
+69       processedParams.page = parseInt(processedParams.page);
+                                         ~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:70:9 - error TS18046: 'processedParams' is of type 'unknown'.
+
+70     if (processedParams.limit)
+           ~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:71:7 - error TS18046: 'processedParams' is of type 'unknown'.
+
+71       processedParams.limit = parseInt(processedParams.limit);
+         ~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:71:40 - error TS18046: 'processedParams' is of type 'unknown'.
+
+71       processedParams.limit = parseInt(processedParams.limit);
+                                          ~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:329:30 - error TS2698: Spread types may only be created from object types.
+
+329         data: { ...mensagem, ...updateData },
+                                 ~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:418:8 - error TS18046: 'contato' is of type 'unknown'.
+
+418   if (!contato.dias_semana.includes(currentDay)) {
+           ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:424:20 - error TS18046: 'contato' is of type 'unknown'.
+
+424     currentTime >= contato.horario_inicio && currentTime <= contato.horario_fim
+                       ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:424:61 - error TS18046: 'contato' is of type 'unknown'.
+
+424     currentTime >= contato.horario_inicio && currentTime <= contato.horario_fim
+                                                                ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:442:47 - error TS18046: 'config' is of type 'unknown'.
+
+442     const url = `https://graph.facebook.com/${config.api_version}/${config.phone_number_id}/messages`;
+                                                  ~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:442:69 - error TS18046: 'config' is of type 'unknown'.
+
+442     const url = `https://graph.facebook.com/${config.api_version}/${config.phone_number_id}/messages`;
+                                                                        ~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:446:11 - error TS18046: 'contato' is of type 'unknown'.
+
+446       to: contato.numero_whatsapp,
+              ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:449:9 - error TS18046: 'mensagem' is of type 'unknown'.
+
+449     if (mensagem.tipo_mensagem === 'template') {
+            ~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:450:7 - error TS18046: 'payload' is of type 'unknown'.
+
+450       payload.type = 'template';
+          ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:451:7 - error TS18046: 'payload' is of type 'unknown'.
+
+451       payload.template = {
+          ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:452:15 - error TS18046: 'mensagem' is of type 'unknown'.
+
+452         name: mensagem.template_name,
+                  ~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:453:27 - error TS18046: 'config' is of type 'unknown'.
+
+453         language: { code: config.idioma },
+                              ~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:459:9 - error TS18046: 'mensagem' is of type 'unknown'.
+
+459         mensagem.template_parameters &&
+            ~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:460:9 - error TS18046: 'mensagem' is of type 'unknown'.
+
+460         mensagem.template_parameters.length > 0
+            ~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:462:9 - error TS18046: 'payload' is of type 'unknown'.
+
+462         payload.template.components.push({
+            ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:464:23 - error TS18046: 'mensagem' is of type 'unknown'.
+
+464           parameters: mensagem.template_parameters.map((param: string) => ({
+                          ~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:471:7 - error TS18046: 'payload' is of type 'unknown'.
+
+471       payload.type = 'text';
+          ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:472:7 - error TS18046: 'payload' is of type 'unknown'.
+
+472       payload.text = { body: mensagem.conteudo };
+          ~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:472:30 - error TS18046: 'mensagem' is of type 'unknown'.
+
+472       payload.text = { body: mensagem.conteudo };
+                                 ~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/messages/route.ts:478:34 - error TS18046: 'config' is of type 'unknown'.
+
+478         Authorization: `Bearer ${config.access_token}`,
+                                     ~~~~~~
+
+src/app/api/configuracoes/whatsapp/send/route.ts:85:11 - error TS2698: Spread types may only be created from object types.
+
+85           ...(media && { media }),
+             ~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/send/route.ts:91:24 - error TS2345: Argument of type '{ number: string; status: string; message_id: any; timestamp: string; }' is not assignable to parameter of type 'never'.
+
+ 91           results.push({
+                           ~
+ 92             number: cleanNumber,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+ 95             timestamp: new Date().toISOString(),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 96           });
+    ~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/send/route.ts:98:23 - error TS2345: Argument of type '{ number: string; error: any; }' is not assignable to parameter of type 'never'.
+
+ 98           errors.push({
+                          ~
+ 99             number: cleanNumber,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+100             error: response.error || 'Erro desconhecido',
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+101           });
+    ~~~~~~~~~~~
+
+src/app/api/configuracoes/whatsapp/send/route.ts:104:21 - error TS2345: Argument of type '{ number: string; error: string; }' is not assignable to parameter of type 'never'.
+
+104         errors.push({
+                        ~
+105           number,
+    ~~~~~~~~~~~~~~~~~
+106           error: `Erro ao enviar: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+107         });
+    ~~~~~~~~~
+
+src/app/api/dashboard/recorrencia-semanal/route.ts:129:33 - error TS18046: 'reserva' is of type 'unknown'.
+
+129         const telefone = String(reserva.phone).replace(/\D/g, ''); // remover caracteres não numéricos
+                                    ~~~~~~~
+
+src/app/api/dashboard/recorrencia-semanal/route.ts:136:21 - error TS18046: 'reserva' is of type 'unknown'.
+
+136               nome: reserva.name || 'Cliente',
+                        ~~~~~~~
+
+src/app/api/dashboard/recorrencia-semanal/route.ts:145:19 - error TS18046: 'reserva' is of type 'unknown'.
+
+145             data: reserva.date,
+                      ~~~~~~~
+
+src/app/api/dashboard/recorrencia-semanal/route.ts:146:31 - error TS18046: 'reserva' is of type 'unknown'.
+
+146             pessoas: parseInt(reserva.people || '1'),
+                                  ~~~~~~~
+
+src/app/api/dashboard/recorrencia-semanal/route.ts:149:45 - error TS18046: 'reserva' is of type 'unknown'.
+
+149           cliente.total_pessoas += parseInt(reserva.people || '1');
+                                                ~~~~~~~
+
+src/app/api/dashboard/recorrencia-semanal/route.ts:197:62 - error TS18046: 'v' is of type 'unknown'.
+
+197           datas_visitas: cliente.visitas.map((v: unknown) => v.data).join(', '),
+                                                                 ~
+
+src/app/api/dashboard/relatorio-produtos/estatisticas/route.ts:211:7 - error TS18048: 'produto' is possibly 'undefined'.
+
+211       produto.tempos.push(item.t1_t2);
+          ~~~~~~~
+
+src/app/api/dashboard/relatorio-produtos/estatisticas/route.ts:212:7 - error TS18048: 'produto' is possibly 'undefined'.
+
+212       produto.pedidos += item.itm_qtd || 1;
+          ~~~~~~~
+
+src/app/api/dashboard/relatorio-produtos/estatisticas/route.ts:227:7 - error TS18048: 'produto' is possibly 'undefined'.
+
+227       produto.tempos.push(item.t1_t2);
+          ~~~~~~~
+
+src/app/api/dashboard/relatorio-produtos/estatisticas/route.ts:228:7 - error TS18048: 'produto' is possibly 'undefined'.
+
+228       produto.pedidos += item.itm_qtd || 1;
+          ~~~~~~~
+
+src/app/api/dashboard/relatorio-produtos/grupos/route.ts:35:66 - error TS18046: 'g' is of type 'unknown'.
+
+35     const gruposUnicos = [...new Set(grupos?.map((g: unknown) => g.grp_desc))]
+                                                                    ~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:77:20 - error TS18046: 'item' is of type 'unknown'.
+
+77       const data = item.t0_lancamento.split('T')[0];
+                      ~~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:89:28 - error TS18046: 'item' is of type 'unknown'.
+
+89       dadosDia.tempos.push(item.t1_t2);
+                              ~~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:90:27 - error TS18046: 'item' is of type 'unknown'.
+
+90       dadosDia.pedidos += item.itm_qtd || 1;
+                             ~~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:93:11 - error TS18046: 'item' is of type 'unknown'.
+
+93       if (item.t1_t2 > 1200) {
+             ~~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:94:40 - error TS18046: 'item' is of type 'unknown'.
+
+94         dadosDia.produtos_problema.add(item.prd_desc);
+                                          ~~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:101:9 - error TS18046: 'dia' is of type 'unknown'.
+
+101         dia.tempos.length > 0
+            ~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:102:13 - error TS18046: 'dia' is of type 'unknown'.
+
+102           ? dia.tempos.reduce((a: number, b: number) => a + b, 0) /
+                ~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:103:13 - error TS18046: 'dia' is of type 'unknown'.
+
+103             dia.tempos.length
+                ~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:107:24 - error TS18046: 'dia' is of type 'unknown'.
+
+107         data: new Date(dia.data).toLocaleDateString('pt-BR'),
+                           ~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:109:24 - error TS18046: 'dia' is of type 'unknown'.
+
+109         total_pedidos: dia.pedidos,
+                           ~~~
+
+src/app/api/dashboard/relatorio-produtos/historico/route.ts:110:39 - error TS18046: 'dia' is of type 'unknown'.
+
+110         produtos_problema: Array.from(dia.produtos_problema),
+                                          ~~~
+
+src/app/api/dashboard/semanal/route.ts:136:38 - error TS18046: 'result' is of type 'unknown'.
+
+136           .then((result: unknown) => result.data || []),
+                                         ~~~~~~
+
+src/app/api/dashboard/semanal/route.ts:145:38 - error TS18046: 'result' is of type 'unknown'.
+
+145           .then((result: unknown) => result.data || []),
+                                         ~~~~~~
+
+src/app/api/dashboard/semanal/route.ts:254:36 - error TS18046: 'item' is of type 'unknown'.
+
+254           return sum + (parseFloat(item.liquido) || 0);
+                                       ~~~~
+
+src/app/api/dashboard/semanal/route.ts:262:36 - error TS18046: 'item' is of type 'unknown'.
+
+262           return sum + (parseFloat(item.total_liquido) || 0);
+                                       ~~~~
+
+src/app/api/dashboard/semanal/route.ts:270:36 - error TS18046: 'item' is of type 'unknown'.
+
+270           return sum + (parseFloat(item.valor_total) || 0);
+                                       ~~~~
+
+src/app/api/dashboard/semanal/route.ts:278:36 - error TS18046: 'item' is of type 'unknown'.
+
+278           return sum + (parseFloat(item.valor_total) || 0);
+                                       ~~~~
+
+src/app/api/dashboard/semanal/route.ts:286:36 - error TS18046: 'item' is of type 'unknown'.
+
+286           return sum + (parseFloat(item.vr_couvert) || 0);
+                                       ~~~~
+
+src/app/api/dashboard/semanal/route.ts:326:30 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+
+326         diasSemanaArray.push(d.toISOString().split('T')[0]);
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/dashboard/semanal/route.ts:356:39 - error TS18046: 'item' is of type 'unknown'.
+
+356         (item: unknown) => parseFloat(item.vr_pagamentos || '0') > 0
+                                          ~~~~
+
+src/app/api/dashboard/semanal/route.ts:362:54 - error TS18046: 'y' is of type 'unknown'.
+
+362         ...new Set(yuzerIngresso.map((y: unknown) => y.pedido_id)),
+                                                         ~
+
+src/app/api/dashboard/semanal/route.ts:373:25 - error TS18046: 'p' is of type 'unknown'.
+
+373           dt_gerencial: p.dt_gerencial,
+                            ~
+
+src/app/api/dashboard/semanal/route.ts:374:20 - error TS18046: 'p' is of type 'unknown'.
+
+374           pessoas: p.pessoas,
+                       ~
+
+src/app/api/dashboard/semanal/route.ts:375:26 - error TS18046: 'p' is of type 'unknown'.
+
+375           vr_pagamentos: p.vr_pagamentos,
+                             ~
+
+src/app/api/dashboard/semanal/route.ts:376:20 - error TS18046: 'p' is of type 'unknown'.
+
+376           cli_cel: p.cli_cel?.slice(0, 4) + '***',
+                       ~
+
+src/app/api/dashboard/semanal/route.ts:426:34 - error TS18046: 'item' is of type 'unknown'.
+
+426           return sum + (parseInt(item.pessoas_na_mesa) || 0);
+                                     ~~~~
+
+src/app/api/dashboard/semanal/route.ts:470:27 - error TS18046: 'p' is of type 'unknown'.
+
+470           (p: unknown) => p.dt_gerencial === dia.data
+                              ~
+
+src/app/api/dashboard/semanal/route.ts:473:27 - error TS18046: 's' is of type 'unknown'.
+
+473           (s: unknown) => s.data_evento === dia.data
+                              ~
+
+src/app/api/dashboard/semanal/route.ts:476:27 - error TS18046: 'y' is of type 'unknown'.
+
+476           (y: unknown) => y.data_pedido === dia.data
+                              ~
+
+src/app/api/dashboard/semanal/route.ts:479:27 - error TS18046: 'y' is of type 'unknown'.
+
+479           (y: unknown) => y.data_pedido === dia.data
+                              ~
+
+src/app/api/dashboard/semanal/route.ts:482:27 - error TS18046: 'p' is of type 'unknown'.
+
+482           (p: unknown) => p.dt_gerencial === dia.data
+                              ~
+
+src/app/api/dashboard/semanal/route.ts:485:27 - error TS18046: 'v' is of type 'unknown'.
+
+485           (v: unknown) => v.data_visita === dia.data
+                              ~
+
+src/app/api/dashboard/semanal/route.ts:489:61 - error TS18046: 'item' is of type 'unknown'.
+
+489           (sum: number, item: unknown) => sum + (parseFloat(item.liquido) || 0),
+                                                                ~~~~
+
+src/app/api/dashboard/semanal/route.ts:494:31 - error TS18046: 'item' is of type 'unknown'.
+
+494             sum + (parseFloat(item.total_liquido) || 0),
+                                  ~~~~
+
+src/app/api/dashboard/semanal/route.ts:499:31 - error TS18046: 'item' is of type 'unknown'.
+
+499             sum + (parseFloat(item.valor_total) || 0),
+                                  ~~~~
+
+src/app/api/dashboard/semanal/route.ts:504:31 - error TS18046: 'item' is of type 'unknown'.
+
+504             sum + (parseFloat(item.valor_total) || 0),
+                                  ~~~~
+
+src/app/api/dashboard/semanal/route.ts:509:31 - error TS18046: 'item' is of type 'unknown'.
+
+509             sum + (parseFloat(item.vr_couvert) || 0),
+                                  ~~~~
+
+src/app/api/dashboard/semanal/route.ts:562:41 - error TS18046: 'item' is of type 'unknown'.
+
+562           (item: unknown) => parseFloat(item.vr_pagamentos || '0') > 0
+                                            ~~~~
+
+src/app/api/dashboard/semanal/route.ts:584:61 - error TS18046: 'y' is of type 'unknown'.
+
+584           ...new Set(yuzer_ingresso_dia.map((y: unknown) => y.pedido_id)),
+                                                                ~
+
+src/app/api/dashboard/semanal/route.ts:591:36 - error TS18046: 'item' is of type 'unknown'.
+
+591             return sum + (parseInt(item.pessoas_na_mesa) || 0);
+                                       ~~~~
+
+src/app/api/dashboard/semanal/route.ts:598:52 - error TS18046: 'clientes_visitas_sympla_dia' is of type 'unknown'.
+
+598           clientes_base_dia + clientes_yuzer_dia + clientes_visitas_sympla_dia;
+                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/dashboard/semanal/route.ts:664:27 - error TS18046: 'p' is of type 'unknown'.
+
+664             dt_gerencial: p.dt_gerencial,
+                              ~
+
+src/app/api/dashboard/semanal/route.ts:665:22 - error TS18046: 'p' is of type 'unknown'.
+
+665             pessoas: p.pessoas,
+                         ~
+
+src/app/api/dashboard/semanal/route.ts:666:28 - error TS18046: 'p' is of type 'unknown'.
+
+666             vr_pagamentos: p.vr_pagamentos,
+                               ~
+
+src/app/api/dashboard/semanal/route.ts:667:39 - error TS18046: 'p' is of type 'unknown'.
+
+667             tem_pagamento: parseFloat(p.vr_pagamentos || '0') > 0,
+                                          ~
+
+src/app/api/dashboard/stats/route.ts:177:49 - error TS18046: 'error' is of type 'unknown'.
+
+177       { success: false, error: `Erro interno: ${error.message}` },
+                                                    ~~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:214:25 - error TS18046: 'item' is of type 'unknown'.
+
+214         const produto = item.prd_desc || '';
+                            ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:215:23 - error TS18046: 'item' is of type 'unknown'.
+
+215         const grupo = item.grp_desc || '';
+                          ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:216:37 - error TS18046: 'item' is of type 'unknown'.
+
+216         const quantidade = parseInt(item.itm_qtd || '1');
+                                        ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:223:15 - error TS18046: 'item' is of type 'unknown'.
+
+223           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 2700) {
+                  ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:223:29 - error TS18046: 'item' is of type 'unknown'.
+
+223           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 2700) {
+                                ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:223:47 - error TS18046: 'item' is of type 'unknown'.
+
+223           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 2700) {
+                                                  ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:225:21 - error TS18046: 'item' is of type 'unknown'.
+
+225             tempo = item.t1_t2;
+                        ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:231:15 - error TS18046: 'item' is of type 'unknown'.
+
+231           if (item.t0_t3 && item.t0_t3 > 0 && item.t0_t3 <= 1200) {
+                  ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:231:29 - error TS18046: 'item' is of type 'unknown'.
+
+231           if (item.t0_t3 && item.t0_t3 > 0 && item.t0_t3 <= 1200) {
+                                ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:231:47 - error TS18046: 'item' is of type 'unknown'.
+
+231           if (item.t0_t3 && item.t0_t3 > 0 && item.t0_t3 <= 1200) {
+                                                  ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:233:21 - error TS18046: 'item' is of type 'unknown'.
+
+233             tempo = item.t0_t3;
+                        ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:239:15 - error TS18046: 'item' is of type 'unknown'.
+
+239           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 3600) {
+                  ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:239:29 - error TS18046: 'item' is of type 'unknown'.
+
+239           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 3600) {
+                                ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:239:47 - error TS18046: 'item' is of type 'unknown'.
+
+239           if (item.t1_t2 && item.t1_t2 > 0 && item.t1_t2 <= 3600) {
+                                                  ~~~~
+
+src/app/api/dashboard/tempos-medios/route.ts:241:21 - error TS18046: 'item' is of type 'unknown'.
+
+241             tempo = item.t1_t2;
+                        ~~~~
+
+src/app/api/discord/checklist-test/route.ts:146:76 - error TS2345: Argument of type '{ titulo: string; tipo_anomalia: string; severidade: string; confianca_deteccao: number; valor_esperado: number; valor_observado: number; desvio_percentual: number; possivel_causa: string; acoes_sugeridas: string[]; }' is not assignable to parameter of type 'AIAnomaly'.
+  Type '{ titulo: string; tipo_anomalia: string; severidade: string; confianca_deteccao: number; valor_esperado: number; valor_observado: number; desvio_percentual: number; possivel_causa: string; acoes_sugeridas: string[]; }' is missing the following properties from type 'AIAnomaly': subtipo, descricao, impacto_estimado, metricas_anomalia, and 2 more.
+
+146         const anomalyTest = await DiscordChecklistService.sendAnomalyAlert({
+                                                                               ~
+147           titulo: 'Queda na Taxa de Conclusão de Checklists',
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+160           ],
+    ~~~~~~~~~~~~
+161         });
+    ~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:86:30 - error TS2345: Argument of type 'AuthenticatedUser' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'AuthenticatedUser'.
+
+86     if (!podeAcessarExecucao(user, execucao)) {
+                                ~~~~
+
+src/app/api/execucoes/[id]/route.ts:157:29 - error TS2345: Argument of type 'AuthenticatedUser' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'AuthenticatedUser'.
+
+157     if (!podeEditarExecucao(user, execucao)) {
+                                ~~~~
+
+src/app/api/execucoes/[id]/route.ts:310:29 - error TS2345: Argument of type 'AuthenticatedUser' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'AuthenticatedUser'.
+
+310     if (!podeEditarExecucao(user, execucao)) {
+                                ~~~~
+
+src/app/api/execucoes/[id]/route.ts:398:40 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+
+398   if (['admin', 'financeiro'].includes(user.role)) return true;
+                                           ~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:422:29 - error TS18046: 'estruturaChecklist.secoes' is of type 'unknown'.
+
+422       const secaoOriginal = estruturaChecklist.secoes[secaoIndex];
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:470:61 - error TS2339: Property 'length' does not exist on type '{}'.
+
+470             if (!itemResposta.anexos || itemResposta.anexos.length === 0) {
+                                                                ~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:501:38 - error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+
+501       if (!valor || isNaN(Date.parse(valor))) {
+                                         ~~~~~
+
+src/app/api/execucoes/[id]/route.ts:592:5 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Record<string, unknown>'.
+
+592     execucao.respostas,
+        ~~~~~~~~~~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:598:58 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+
+598     pode_continuar: ['em_andamento', 'pausado'].includes(execucao.status),
+                                                             ~~~~~~~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:608:5 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Record<string, unknown>'.
+
+608     execucao.respostas,
+        ~~~~~~~~~~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:613:31 - error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | number'.
+
+613   const iniciadoEm = new Date(execucao.iniciado_em);
+                                  ~~~~~~~~~~~~~~~~~~~~
+
+
+src/app/api/execucoes/[id]/route.ts:624:42 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+
+624     status_descricao: getStatusDescricao(execucao.status),
+                                             ~~~~~~~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:626:23 - error TS2339: Property 'tempo_estimado' does not exist on type '{}'.
+
+626       progressoBasico.tempo_estimado > 0
+                          ~~~~~~~~~~~~~~
+
+src/app/api/execucoes/[id]/route.ts:628:54 - error TS2339: Property 'tempo_estimado' does not exist on type '{}'.
+
+628             (tempoDecorridoMinutos / progressoBasico.tempo_estimado) * 100
+                                                         ~~~~~~~~~~~~~~
+
+src/app/api/financeiro/inter/webhook/route.ts:127:21 - error TS18048: 'accessToken' is possibly 'undefined'.
+
+127       token_length: accessToken.length,
+                        ~~~~~~~~~~~
+
+src/app/api/financeiro/inter/webhook/route.ts:128:22 - error TS18048: 'accessToken' is possibly 'undefined'.
+
+128       token_preview: accessToken.substring(0, 20) + '...',
+                         ~~~~~~~~~~~
+
+src/app/api/financeiro/inter/webhook/route.ts:153:32 - error TS18048: 'accessToken' is possibly 'undefined'.
+
+153       Authorization: `Bearer ${accessToken.substring(0, 20)}...`,
+                                   ~~~~~~~~~~~
+
+src/app/api/financeiro/inter/webhook/route.ts:173:17 - error TS18048: 'res.statusCode' is possibly 'undefined'.
+
+173             if (res.statusCode >= 200 && res.statusCode < 300) {
+                    ~~~~~~~~~~~~~~
+
+src/app/api/financeiro/inter/webhook/route.ts:173:42 - error TS18048: 'res.statusCode' is possibly 'undefined'.
+
+173             if (res.statusCode >= 200 && res.statusCode < 300) {
+                                             ~~~~~~~~~~~~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:63:9 - error TS18046: 'acc' is of type 'unknown'.
+
+63         acc[evento.status] = (acc[evento.status] || 0) + 1;
+           ~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:63:13 - error TS18046: 'evento' is of type 'unknown'.
+
+63         acc[evento.status] = (acc[evento.status] || 0) + 1;
+               ~~~~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:63:31 - error TS18046: 'acc' is of type 'unknown'.
+
+63         acc[evento.status] = (acc[evento.status] || 0) + 1;
+                                 ~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:63:35 - error TS18046: 'evento' is of type 'unknown'.
+
+63         acc[evento.status] = (acc[evento.status] || 0) + 1;
+                                     ~~~~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:70:30 - error TS18046: 'evento' is of type 'unknown'.
+
+70         const mes = new Date(evento.data_evento).toLocaleDateString('pt-BR', {
+                                ~~~~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:73:14 - error TS18046: 'acc' is of type 'unknown'.
+
+73         if (!acc[mes]) {
+                ~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:74:11 - error TS18046: 'acc' is of type 'unknown'.
+
+74           acc[mes] = {
+             ~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:80:9 - error TS18046: 'acc' is of type 'unknown'.
+
+80         acc[mes].eventos++;
+           ~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:81:9 - error TS18046: 'acc' is of type 'unknown'.
+
+81         acc[mes].valor += evento.valor || 0;
+           ~~~
+
+src/app/api/gestao/eventos/analytics/route.ts:81:27 - error TS18046: 'evento' is of type 'unknown'.
+
+81         acc[mes].valor += evento.valor || 0;
+                             ~~~~~~
+
+src/app/api/gestao/eventos/fix-all/route.ts:40:23 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+
+40           errors.push(`Error fixing ${mapping.name}: ${error.message}`);
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/gestao/eventos/fix-all/route.ts:47:21 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+
+47         errors.push(`Exception fixing ${mapping.name}: ${errorMessage}`);
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/gestao/eventos/fix-names/route.ts:214:60 - error TS18046: 'p' is of type 'unknown'.
+
+214       const partes = linha.split('\t').map((p: unknown) => p.trim());
+                                                               ~
+
+src/app/api/gestao/eventos/fix-names/route.ts:268:22 - error TS2345: Argument of type '{ id: any; data_evento: any; old_name: any; new_name: string; }' is not assignable to parameter of type 'never'.
+
+268         updates.push({
+                         ~
+269           id: evento.id,
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+...
+272           new_name: correctName,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+273         });
+    ~~~~~~~~~
+
+src/app/api/gestao/eventos/fix-names/route.ts:305:39 - error TS2339: Property 'new_name' does not exist on type 'never'.
+
+305         .update({ nome_evento: update.new_name })
+                                          ~~~~~~~~
+
+src/app/api/gestao/eventos/fix-names/route.ts:306:26 - error TS2339: Property 'id' does not exist on type 'never'.
+
+306         .eq('id', update.id);
+                             ~~
+
+src/app/api/gestao/eventos/fix-names/route.ts:309:54 - error TS2339: Property 'id' does not exist on type 'never'.
+
+309         console.error(`Error updating event ${update.id}:`, updateError);
+                                                         ~~
+
+src/app/api/gestao/eventos/fix-names/route.ts:312:31 - error TS2339: Property 'data_evento' does not exist on type 'never'.
+
+312           `✅ Updated ${update.data_evento}: "${update.old_name}" → "${update.new_name}"`
+                                  ~~~~~~~~~~~
+
+src/app/api/gestao/eventos/fix-names/route.ts:312:55 - error TS2339: Property 'old_name' does not exist on type 'never'.
+
+312           `✅ Updated ${update.data_evento}: "${update.old_name}" → "${update.new_name}"`
+                                                          ~~~~~~~~
+
+src/app/api/gestao/eventos/fix-names/route.ts:312:78 - error TS2339: Property 'new_name' does not exist on type 'never'.
+
+312           `✅ Updated ${update.data_evento}: "${update.old_name}" → "${update.new_name}"`
+                                                                                 ~~~~~~~~
+
+src/app/api/gestao/eventos/fix-simple/route.ts:42:22 - error TS2345: Argument of type '{ date: string; status: string; error: string; }' is not assignable to parameter of type 'never'.
+
+ 42         results.push({
+                         ~
+ 43           date: update.date,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+ 45           error: error.message,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 46         });
+    ~~~~~~~~~
+
+src/app/api/gestao/eventos/fix-simple/route.ts:50:22 - error TS2345: Argument of type '{ date: string; status: string; rowsAffected: number; }' is not assignable to parameter of type 'never'.
+
+ 50         results.push({
+                         ~
+ 51           date: update.date,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+ 53           rowsAffected: data?.length || 0,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 54         });
+    ~~~~~~~~~
+
+src/app/api/gestao/eventos/import-from-csv/route.ts:87:31 - error TS2345: Argument of type '{ bar_id: number; nome_evento: string; nome_artista: string | null; genero_musical: string; observacoes: string | null; data_evento: string; horario_inicio: string; horario_fim: string; ... 5 more ...; updated_at: string; }' is not assignable to parameter of type 'never'.
+
+ 87       eventosParaInserir.push({
+                                  ~
+ 88         bar_id: 1,
+    ~~~~~~~~~~~~~~~~~~
+...
+101         updated_at: new Date().toISOString(),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+102       });
+    ~~~~~~~
+
+src/app/api/gestao/eventos/import-sheets/route.ts:56:13 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+
+56             `Evento ${evento.nome || 'sem nome'}: campos obrigatórios faltando`
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/gestao/eventos/import-sheets/route.ts:134:22 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+
+134           erros.push(`Evento ${evento.nome}: ${error.message}`);
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/gestao/eventos/import-sheets/route.ts:144:20 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'never'.
+
+144         erros.push(`Evento ${evento.nome}: ${error.message}`);
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/gestao/eventos/import-sheets/route.ts:144:46 - error TS18046: 'error' is of type 'unknown'.
+
+144         erros.push(`Evento ${evento.nome}: ${error.message}`);
+                                                 ~~~~~
+
+src/app/api/gestao/eventos/import-sheets/route.ts:164:18 - error TS18046: 'error' is of type 'unknown'.
+
+164         details: error.message,
+                     ~~~~~
+
+src/app/api/gestao/eventos/import/route.ts:239:58 - error TS18046: 'p' is of type 'unknown'.
+
+239     const partes = linha.split('\t').map((p: unknown) => p.trim());
+                                                             ~
+
+src/app/api/gestao/eventos/import/route.ts:563:11 - error TS18046: 'e' is of type 'unknown'.
+
+563           e.data_evento.includes('-02-')
+              ~
+
+src/app/api/gestao/eventos/import/route.ts:566:11 - error TS18046: 'e' is of type 'unknown'.
+
+566           e.data_evento.includes('-03-')
+              ~
+
+src/app/api/gestao/eventos/import/route.ts:569:11 - error TS18046: 'e' is of type 'unknown'.
+
+569           e.data_evento.includes('-04-')
+              ~
+
+src/app/api/gestao/eventos/import/route.ts:572:11 - error TS18046: 'e' is of type 'unknown'.
+
+572           e.data_evento.includes('-05-')
+              ~
+
+src/app/api/gestao/eventos/import/route.ts:575:11 - error TS18046: 'e' is of type 'unknown'.
+
+575           e.data_evento.includes('-06-')
+              ~
+
+src/app/api/gestao/eventos/import/route.ts:579:60 - error TS18046: 'e' is of type 'unknown'.
+
+579         ...new Set(eventosParaImportar.map((e: unknown) => e.genero_musical)),
+                                                               ~
+
+src/app/api/gestao/eventos/import/route.ts:584:34 - error TS18046: 'e' is of type 'unknown'.
+
+584             .map((e: unknown) => e.nome_artista)
+                                     ~
+
+src/app/api/gestao/eventos/sync-performance/route.ts:106:29 - error TS18046: 'item' is of type 'unknown'.
+
+106       return sum + parseInt(item.pessoas || '0');
+                                ~~~~
+
+src/app/api/gestao/eventos/sync-performance/route.ts:112:33 - error TS18046: 'item' is of type 'unknown'.
+
+112         return sum + parseFloat(item.liquido || '0');
+                                    ~~~~
+
+src/app/api/gestao/eventos/sync-performance/route.ts:119:31 - error TS18046: 'item' is of type 'unknown'.
+
+119       return sum + parseFloat(item.vr_couvert || '0');
+                                  ~~~~
+
+src/app/api/gestao/eventos/sync-performance/route.ts:124:33 - error TS18046: 'item' is of type 'unknown'.
+
+124         return sum + parseFloat(item.vr_couvert || '0');
+                                    ~~~~
+
+src/app/api/gestao/eventos/sync-performance/route.ts:133:31 - error TS18046: 'item' is of type 'unknown'.
+
+133       return sum + parseFloat(item.total_liquido || '0');
+                                  ~~~~
+
+src/app/api/gestao/eventos/sync-performance/route.ts:138:31 - error TS18046: 'item' is of type 'unknown'.
+
+138       return sum + parseFloat(item.vr_produtos || '0');
+                                  ~~~~
+
+src/app/api/gestao/eventos/sync-performance/route.ts:144:31 - error TS18046: 'item' is of type 'unknown'.
+
+144         return sum + parseInt(item.qtd_checkins_realizados || '0');
+                                  ~~~~
+
+src/app/api/lgpd/data-portability/route.ts:46:7 - error TS18046: 'exportData' is of type 'unknown'.
+
+46       exportData.data.profile = profile;
+         ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:57:7 - error TS18046: 'exportData' is of type 'unknown'.
+
+57       exportData.data.lgpdSettings = lgpdSettings;
+         ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:66:5 - error TS18046: 'exportData' is of type 'unknown'.
+
+66     exportData.data.userSettings = userSettings || [];
+       ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:76:5 - error TS18046: 'exportData' is of type 'unknown'.
+
+76     exportData.data.loginHistory = loginHistory || [];
+       ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:85:5 - error TS18046: 'exportData' is of type 'unknown'.
+
+85     exportData.data.auditTrail = auditLogs || [];
+       ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:102:5 - error TS18046: 'exportData' is of type 'unknown'.
+
+102     exportData.data.associatedBars = userBars || [];
+        ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:112:5 - error TS18046: 'exportData' is of type 'unknown'.
+
+112     exportData.data.checklistExecutions = checklistExecutions || [];
+        ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:122:5 - error TS18046: 'exportData' is of type 'unknown'.
+
+122     exportData.data.notifications = notifications || [];
+        ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:130:5 - error TS18046: 'exportData' is of type 'unknown'.
+
+130     exportData.data.uploads = uploads || [];
+        ~~~~~~~~~~
+
+src/app/api/lgpd/data-portability/route.ts:139:32 - error TS18046: 'exportData' is of type 'unknown'.
+
+139         dataTypes: Object.keys(exportData.data),
+                                   ~~~~~~~~~~
+
+src/app/api/notifications/[id]/route.ts:160:29 - error TS2339: Property 'dados_extras' does not exist on type '{ usuario_id: any; role_alvo: any; status: any; }'.
+
+160         ...notificacaoAtual.dados_extras,
+                                ~~~~~~~~~~~~
+
+src/app/api/notifications/route.ts:469:22 - error TS18046: 'error' is of type 'unknown'.
+
+469       erro_detalhes: error.message,
+                         ~~~~~
+
+src/app/api/notifications/route.ts:502:38 - error TS18046: 'n' is of type 'unknown'.
+
+502     ['pendente', 'enviada'].includes(n.status)
+                                         ~
+
+src/app/api/notifications/route.ts:505:24 - error TS18046: 'n' is of type 'unknown'.
+
+505     const prioridade = n.dados?.prioridade || 'media';
+                           ~
+
+src/app/api/notifications/route.ts:510:5 - error TS18046: 'acc' is of type 'unknown'.
+
+510     acc[n.tipo] = (acc[n.tipo] || 0) + 1;
+        ~~~
+
+src/app/api/notifications/route.ts:510:9 - error TS18046: 'n' is of type 'unknown'.
+
+510     acc[n.tipo] = (acc[n.tipo] || 0) + 1;
+            ~
+
+src/app/api/notifications/route.ts:510:20 - error TS18046: 'acc' is of type 'unknown'.
+
+510     acc[n.tipo] = (acc[n.tipo] || 0) + 1;
+                       ~~~
+
+src/app/api/notifications/route.ts:510:24 - error TS18046: 'n' is of type 'unknown'.
+
+510     acc[n.tipo] = (acc[n.tipo] || 0) + 1;
+                           ~
+
+src/app/api/notifications/route.ts:515:20 - error TS18046: 'n' is of type 'unknown'.
+
+515     const modulo = n.dados?.modulo || 'sistema';
+                       ~
+
+src/app/api/notifications/route.ts:516:5 - error TS18046: 'acc' is of type 'unknown'.
+
+516     acc[modulo] = (acc[modulo] || 0) + 1;
+        ~~~
+
+src/app/api/notifications/route.ts:516:20 - error TS18046: 'acc' is of type 'unknown'.
+
+516     acc[modulo] = (acc[modulo] || 0) + 1;
+                       ~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:102:26 - error TS18046: 'item' is of type 'unknown'.
+
+102       (item: unknown) => item.status === 'concluido'
+                             ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:105:26 - error TS18046: 'item' is of type 'unknown'.
+
+105       (item: unknown) => item.status === 'problema'
+                             ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:151:16 - error TS18046: 'item' is of type 'unknown'.
+
+151       item_id: item.id,
+                   ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:152:15 - error TS18046: 'item' is of type 'unknown'.
+
+152       titulo: item.titulo,
+                  ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:153:18 - error TS18046: 'item' is of type 'unknown'.
+
+153       descricao: item.descricao,
+                     ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:154:13 - error TS18046: 'item' is of type 'unknown'.
+
+154       area: item.area,
+                ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:155:19 - error TS18046: 'item' is of type 'unknown'.
+
+155       prioridade: item.prioridade,
+                      ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:156:23 - error TS18046: 'item' is of type 'unknown'.
+
+156       tempo_estimado: item.tempo_estimado,
+                          ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:157:20 - error TS18046: 'item' is of type 'unknown'.
+
+157       responsavel: item.responsavel,
+                       ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:158:15 - error TS18046: 'item' is of type 'unknown'.
+
+158       status: item.status,
+                  ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:159:20 - error TS18046: 'item' is of type 'unknown'.
+
+159       observacoes: item.observacoes,
+                       ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:160:23 - error TS18046: 'item' is of type 'unknown'.
+
+160       horario_inicio: item.horario_inicio,
+                          ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:161:26 - error TS18046: 'item' is of type 'unknown'.
+
+161       horario_conclusao: item.horario_conclusao,
+                             ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:162:23 - error TS18046: 'item' is of type 'unknown'.
+
+162       verificado_por: item.verificado_por,
+                          ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:245:28 - error TS18046: 'item' is of type 'unknown'.
+
+245         (item: unknown) => item.status === 'concluido'
+                               ~~~~
+
+src/app/api/operacoes/checklist-abertura/route.ts:248:28 - error TS18046: 'item' is of type 'unknown'.
+
+248         (item: unknown) => item.status === 'problema'
+                               ~~~~
+
+src/app/api/operacoes/checklist-execucoes/route.ts:101:15 - error TS2339: Property 'calcularScoreTotal' does not exist on type 'typeof import("F:/SGB_v3/frontend/src/lib/checklist-scoring")'.
+
+101       const { calcularScoreTotal } = await import('@/lib/checklist-scoring');
+                  ~~~~~~~~~~~~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:87:9 - error TS18046: 'receita' is of type 'unknown'.
+
+87         receita.quantidade_necessaria * fatorProporcional;
+           ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:90:20 - error TS18046: 'receita' is of type 'unknown'.
+
+90         insumo_id: receita.insumos.id,
+                      ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:91:17 - error TS18046: 'receita' is of type 'unknown'.
+
+91         codigo: receita.insumos.codigo,
+                   ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:92:15 - error TS18046: 'receita' is of type 'unknown'.
+
+92         nome: receita.insumos.nome,
+                 ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:93:20 - error TS18046: 'receita' is of type 'unknown'.
+
+93         categoria: receita.insumos.categoria,
+                      ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:94:25 - error TS18046: 'receita' is of type 'unknown'.
+
+94         unidade_medida: receita.insumos.unidade_medida,
+                           ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:95:28 - error TS18046: 'receita' is of type 'unknown'.
+
+95         quantidade_padrao: receita.quantidade_necessaria,
+                              ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:98:25 - error TS18046: 'receita' is of type 'unknown'.
+
+98         custo_unitario: receita.custo_unitario,
+                           ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:99:44 - error TS18046: 'receita' is of type 'unknown'.
+
+99         custo_total: quantidadePlanejada * receita.custo_unitario,
+                                              ~~~~~~~
+
+src/app/api/operacoes/receitas/calcular-insumos/route.ts:127:55 - error TS18046: 'insumo' is of type 'unknown'.
+
+127           (total: number, insumo: unknown) => total + insumo.custo_total,
+                                                          ~~~~~~
+
+src/app/api/operacoes/receitas/editar/route.ts:46:51 - error TS18046: 'i' is of type 'unknown'.
+
+46     const temChefe = insumos.some((i: unknown) => i.is_chefe);
+                                                     ~
+
+src/app/api/operacoes/receitas/editar/route.ts:75:54 - error TS18046: 'i' is of type 'unknown'.
+
+75     const insumoChefe = insumos.find((i: unknown) => i.is_chefe);
+                                                        ~
+
+src/app/api/operacoes/receitas/editar/route.ts:90:18 - error TS18046: 'insumo' is of type 'unknown'.
+
+90       insumo_id: insumo.id,
+                    ~~~~~~
+
+src/app/api/operacoes/receitas/editar/route.ts:91:30 - error TS18046: 'insumo' is of type 'unknown'.
+
+91       quantidade_necessaria: insumo.quantidade_necessaria || 0,
+                                ~~~~~~
+
+src/app/api/operacoes/receitas/editar/route.ts:93:28 - error TS18046: 'insumo' is of type 'unknown'.
+
+93       rendimento_esperado: insumo.is_chefe ? rendimento_esperado : 0,
+                              ~~~~~~
+
+src/app/api/operacoes/receitas/producao/route.ts:236:9 - error TS2698: Spread types may only be created from object types.
+
+236         ...producao,
+            ~~~~~~~~~~~
+
+src/app/api/operacoes/receitas/producao/route.ts:237:25 - error TS18046: 'producao' is of type 'unknown'.
+
+237         produto_codigo: producao.produtos?.codigo,
+                            ~~~~~~~~
+
+src/app/api/operacoes/receitas/producao/route.ts:238:23 - error TS18046: 'producao' is of type 'unknown'.
+
+238         produto_nome: producao.produtos?.nome,
+                          ~~~~~~~~
+
+src/app/api/operacoes/receitas/producao/route.ts:239:21 - error TS18046: 'producao' is of type 'unknown'.
+
+239         tipo_local: producao.produtos?.tipo_local,
+                        ~~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:6:27 - error TS18046: 'supabase' is of type 'unknown'.
+
+6   const { error } = await supabase.rpc('exec_sql', {
+                            ~~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:119:15 - error TS18046: 'receita' is of type 'unknown'.
+
+119               receita.quantidade_receita * receita.insumos.custo_unitario;
+                  ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:119:44 - error TS18046: 'receita' is of type 'unknown'.
+
+119               receita.quantidade_receita * receita.insumos.custo_unitario;
+                                               ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:123:30 - error TS18046: 'receita' is of type 'unknown'.
+
+123               insumo_codigo: receita.insumos.codigo,
+                                 ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:124:28 - error TS18046: 'receita' is of type 'unknown'.
+
+124               insumo_nome: receita.insumos.nome,
+                               ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:125:35 - error TS18046: 'receita' is of type 'unknown'.
+
+125               quantidade_receita: receita.quantidade_receita,
+                                      ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:126:31 - error TS18046: 'receita' is of type 'unknown'.
+
+126               custo_unitario: receita.insumos.custo_unitario,
+                                  ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:128:24 - error TS18046: 'receita' is of type 'unknown'.
+
+128               unidade: receita.insumos.unidade,
+                           ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:224:55 - error TS18046: 'r' is of type 'unknown'.
+
+224     const insumoCodigos = receita.map((r: unknown) => r.insumo_codigo);
+                                                          ~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:232:46 - error TS18046: 'i' is of type 'unknown'.
+
+232       insumosExistentes?.map((i: unknown) => i.codigo) || [];
+                                                 ~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:276:22 - error TS18046: 'r' is of type 'unknown'.
+
+276       insumo_codigo: r.insumo_codigo,
+                         ~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:277:38 - error TS18046: 'r' is of type 'unknown'.
+
+277       quantidade_receita: parseFloat(r.quantidade_receita),
+                                         ~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:386:24 - error TS18046: 'r' is of type 'unknown'.
+
+386         insumo_codigo: r.insumo_codigo,
+                           ~
+
+src/app/api/operacoes/receitas/produtos-completo/route.ts:387:40 - error TS18046: 'r' is of type 'unknown'.
+
+387         quantidade_receita: parseFloat(r.quantidade_receita),
+                                           ~
+
+src/app/api/operacoes/receitas/produtos/route.ts:96:31 - error TS18046: 'produto' is of type 'unknown'.
+
+96             .eq('produto_id', produto.id);
+                                 ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:100:50 - error TS18046: 'produto' is of type 'unknown'.
+
+100               `⚠️ Erro nas receitas do produto ${produto.codigo}:`,
+                                                     ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:104:15 - error TS2698: Spread types may only be created from object types.
+
+104               ...produto,
+                  ~~~~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:105:27 - error TS18046: 'produto' is of type 'unknown'.
+
+105               tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
+                              ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:114:21 - error TS18046: 'receita' is of type 'unknown'.
+
+114                 id: receita.id,
+                        ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:115:40 - error TS18046: 'receita' is of type 'unknown'.
+
+115                 quantidade_necessaria: receita.quantidade_necessaria,
+                                           ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:116:34 - error TS18046: 'receita' is of type 'unknown'.
+
+116                 insumo_chefe_id: receita.insumo_chefe_id,
+                                     ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:117:38 - error TS18046: 'receita' is of type 'unknown'.
+
+117                 rendimento_esperado: receita.rendimento_esperado,
+                                         ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:119:23 - error TS18046: 'receita' is of type 'unknown'.
+
+119                   id: receita.insumos.id,
+                          ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:120:27 - error TS18046: 'receita' is of type 'unknown'.
+
+120                   codigo: receita.insumos.codigo,
+                              ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:121:25 - error TS18046: 'receita' is of type 'unknown'.
+
+121                   nome: receita.insumos.nome,
+                            ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:122:35 - error TS18046: 'receita' is of type 'unknown'.
+
+122                   unidade_medida: receita.insumos.unidade_medida,
+                                      ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:129:13 - error TS2698: Spread types may only be created from object types.
+
+129             ...produto,
+                ~~~~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:130:25 - error TS18046: 'produto' is of type 'unknown'.
+
+130             tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
+                            ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:134:57 - error TS18046: 'produto' is of type 'unknown'.
+
+134           console.warn(`⚠️ Erro na receita do produto ${produto.codigo}:`, err);
+                                                            ~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:136:13 - error TS2698: Spread types may only be created from object types.
+
+136             ...produto,
+                ~~~~~~~~~~
+
+src/app/api/operacoes/receitas/produtos/route.ts:137:25 - error TS18046: 'produto' is of type 'unknown'.
+
+137             tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
+                            ~~~~~~~
+
+src/app/api/operacoes/receitas/route.ts:120:71 - error TS2339: Property 'id' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+120           const isChefe = receita.insumo_chefe_id === receita.insumos.id;
+                                                                          ~~
+
+src/app/api/operacoes/receitas/route.ts:126:124 - error TS2339: Property 'nome' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+126               `🎯 Receita ${codigo}: rendimento ${receita.rendimento_esperado}g aplicado do insumo chefe ${receita.insumos.nome}`
+                                                                                                                               ~~~~
+
+src/app/api/operacoes/receitas/route.ts:133:54 - error TS2339: Property 'nome' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+133               `🔍 pc0005 - insumo: ${receita.insumos.nome}, is_chefe: ${isChefe}, rendimento: ${receita.rendimento_esperado}`
+                                                         ~~~~
+
+src/app/api/operacoes/receitas/route.ts:138:33 - error TS2339: Property 'id' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+138             id: receita.insumos.id,
+                                    ~~
+
+src/app/api/operacoes/receitas/route.ts:139:37 - error TS2339: Property 'codigo' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+139             codigo: receita.insumos.codigo,
+                                        ~~~~~~
+
+src/app/api/operacoes/receitas/route.ts:140:35 - error TS2339: Property 'nome' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+140             nome: receita.insumos.nome,
+                                      ~~~~
+
+src/app/api/operacoes/receitas/route.ts:142:45 - error TS2339: Property 'unidade_medida' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+142             unidade_medida: receita.insumos.unidade_medida,
+                                                ~~~~~~~~~~~~~~
+
+src/app/api/operacoes/receitas/route.ts:143:40 - error TS2339: Property 'categoria' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+143             categoria: receita.insumos.categoria,
+                                           ~~~~~~~~~
+
+src/app/api/operacoes/receitas/todas/route.ts:92:69 - error TS2339: Property 'id' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+92         const isChefe = receita.insumo_chefe_id === receita.insumos.id;
+                                                                       ~~
+
+src/app/api/operacoes/receitas/todas/route.ts:100:31 - error TS2339: Property 'id' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+100           id: receita.insumos.id,
+                                  ~~
+
+src/app/api/operacoes/receitas/todas/route.ts:101:35 - error TS2339: Property 'codigo' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+101           codigo: receita.insumos.codigo,
+                                      ~~~~~~
+
+src/app/api/operacoes/receitas/todas/route.ts:102:33 - error TS2339: Property 'nome' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+102           nome: receita.insumos.nome,
+                                    ~~~~
+
+src/app/api/operacoes/receitas/todas/route.ts:104:43 - error TS2339: Property 'unidade_medida' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+104           unidade_medida: receita.insumos.unidade_medida,
+                                              ~~~~~~~~~~~~~~
+
+src/app/api/operacoes/receitas/todas/route.ts:105:38 - error TS2339: Property 'categoria' does not exist on type '{ id: any; codigo: any; nome: any; unidade_medida: any; categoria: any; }[]'.
+
+105           categoria: receita.insumos.categoria,
+                                         ~~~~~~~~~
+
+src/app/api/templates/[id]/route.ts:307:11 - error TS18047: 'tags' is possibly 'null'.
+
+307       if (tags.length > 0) {
+              ~~~~
+
+src/app/api/templates/[id]/route.ts:307:16 - error TS2339: Property 'length' does not exist on type '{}'.
+
+307       if (tags.length > 0) {
+                   ~~~~~~
+
+src/app/api/templates/[id]/route.ts:308:31 - error TS2488: Type '{}' must have a '[Symbol.iterator]()' method that returns an iterator.
+
+308         for (const tagNome of tags) {
+                                  ~~~~
+
+src/app/api/templates/[id]/route.ts:308:31 - error TS18047: 'tags' is possibly 'null'.
+
+308         for (const tagNome of tags) {
+                                  ~~~~
+
+src/app/api/templates/route.ts:506:38 - error TS2345: Argument of type '{ publico: boolean; predefinido: boolean; bar_id: null; criado_por: string; nome: string; descricao: string; categoria: string; setor: string; tipo: string; frequencia: string; tempo_estimado: number; tags: string[]; estrutura: TemplateEstrutura; }' is not assignable to parameter of type 'never'.
+
+506           templatesParaInstalar.push({
+                                         ~
+507             ...template,
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+...
+511             criado_por: user.user_id,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+512           });
+    ~~~~~~~~~~~
+
+src/app/api/timezone/test/route.ts:48:49 - error TS2339: Property 'timezone_config' does not exist on type 'never'.
+
+48             timezone_config: supabaseResult[0]?.timezone_config,
+                                                   ~~~~~~~~~~~~~~~
+
+src/app/api/timezone/test/route.ts:49:42 - error TS2339: Property 'utc_time' does not exist on type 'never'.
+
+49             utc_time: supabaseResult[0]?.utc_time,
+                                            ~~~~~~~~
+
+src/app/api/timezone/test/route.ts:50:45 - error TS2339: Property 'brasil_time' does not exist on type 'never'.
+
+50             brasil_time: supabaseResult[0]?.brasil_time,
+                                               ~~~~~~~~~~~
+
+src/app/api/timezone/test/route.ts:51:51 - error TS2339: Property 'agora_brasil_func' does not exist on type 'never'.
+
+51             agora_brasil_func: supabaseResult[0]?.agora_brasil_func,
+                                                     ~~~~~~~~~~~~~~~~~
+
+src/app/api/timezone/test/route.ts:52:50 - error TS2339: Property 'formatado_brasil' does not exist on type 'never'.
+
+52             formatado_brasil: supabaseResult[0]?.formatado_brasil,
+                                                    ~~~~~~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:43:26 - error TS2345: Argument of type '{ id: any; success: boolean; }' is not assignable to parameter of type 'never'.
+
+43             results.push({ id: userId, success: true });
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:46:26 - error TS2345: Argument of type '{ id: any; success: boolean; error: string; }' is not assignable to parameter of type 'never'.
+
+ 46             results.push({
+                             ~
+ 47               id: userId,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+ 50                 error instanceof Error ? error.message : 'Erro desconhecido',
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 51             });
+    ~~~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:66:24 - error TS2345: Argument of type '{ success: boolean; affected: number; }' is not assignable to parameter of type 'never'.
+
+66           results.push({ success: true, affected: userIds.length });
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:69:24 - error TS2345: Argument of type '{ success: boolean; error: string; }' is not assignable to parameter of type 'never'.
+
+69           results.push({
+                          ~
+70             success: false,
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+71             error: error instanceof Error ? error.message : 'Erro desconhecido',
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+72           });
+   ~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:86:24 - error TS2345: Argument of type '{ success: boolean; affected: number; }' is not assignable to parameter of type 'never'.
+
+86           results.push({ success: true, affected: userIds.length });
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:89:24 - error TS2345: Argument of type '{ success: boolean; error: string; }' is not assignable to parameter of type 'never'.
+
+89           results.push({
+                          ~
+90             success: false,
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+91             error: error instanceof Error ? error.message : 'Erro desconhecido',
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+92           });
+   ~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:118:24 - error TS2345: Argument of type '{ success: boolean; affected: number; }' is not assignable to parameter of type 'never'.
+
+118           results.push({ success: true, affected: userIds.length });
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:121:24 - error TS2345: Argument of type '{ success: boolean; error: string; }' is not assignable to parameter of type 'never'.
+
+121           results.push({
+                           ~
+122             success: false,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+123             error: error instanceof Error ? error.message : 'Erro desconhecido',
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+124           });
+    ~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:150:24 - error TS2345: Argument of type '{ success: boolean; affected: number; }' is not assignable to parameter of type 'never'.
+
+150           results.push({ success: true, affected: userIds.length });
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/api/usuarios/bulk/route.ts:153:24 - error TS2345: Argument of type '{ success: boolean; error: string; }' is not assignable to parameter of type 'never'.
+
+153           results.push({
+                           ~
+154             success: false,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+155             error: error instanceof Error ? error.message : 'Erro desconhecido',
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+156           });
+    ~~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:120:29 - error TS18046: 'updateData' is of type 'unknown'.
+
+120     if (nome !== undefined) updateData.nome = nome;
+                                ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:121:32 - error TS18046: 'updateData' is of type 'unknown'.
+
+121     if (celular !== undefined) updateData.celular = celular;
+                                   ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:122:33 - error TS18046: 'updateData' is of type 'unknown'.
+
+122     if (telefone !== undefined) updateData.telefone = telefone;
+                                    ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:123:28 - error TS18046: 'updateData' is of type 'unknown'.
+
+123     if (cpf !== undefined) updateData.cpf = cpf;
+                               ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:125:7 - error TS18046: 'updateData' is of type 'unknown'.
+
+125       updateData.data_nascimento = data_nascimento;
+          ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:126:33 - error TS18046: 'updateData' is of type 'unknown'.
+
+126     if (endereco !== undefined) updateData.endereco = endereco;
+                                    ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:127:28 - error TS18046: 'updateData' is of type 'unknown'.
+
+127     if (cep !== undefined) updateData.cep = cep;
+                               ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:128:31 - error TS18046: 'updateData' is of type 'unknown'.
+
+128     if (cidade !== undefined) updateData.cidade = cidade;
+                                  ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:129:31 - error TS18046: 'updateData' is of type 'unknown'.
+
+129     if (estado !== undefined) updateData.estado = estado;
+                                  ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:130:28 - error TS18046: 'updateData' is of type 'unknown'.
+
+130     if (bio !== undefined) updateData.bio = bio;
+                               ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:131:36 - error TS18046: 'updateData' is of type 'unknown'.
+
+131     if (foto_perfil !== undefined) updateData.foto_perfil = foto_perfil;
+                                       ~~~~~~~~~~
+
+src/app/api/usuarios/perfil/route.ts:132:37 - error TS18046: 'updateData' is of type 'unknown'.
+
+132     if (preferencias !== undefined) updateData.preferencias = preferencias;
+                                        ~~~~~~~~~~
+
+src/app/api/usuarios/with-whatsapp/route.ts:70:7 - error TS18046: 'response' is of type 'unknown'.
+
+70       response.sem_whatsapp = usuariosSemWhatsApp;
+         ~~~~~~~~
+
+src/app/api/usuarios/with-whatsapp/route.ts:71:7 - error TS18046: 'response' is of type 'unknown'.
+
+71       response.total_sem_whatsapp = usuariosSemWhatsApp.length;
+         ~~~~~~~~
+
+src/app/api/usuarios/with-whatsapp/route.ts:74:5 - error TS18046: 'response' is of type 'unknown'.
+
+74     response.total_usuarios = usuarios?.length || 0;
+       ~~~~~~~~
+
+src/app/api/usuarios/with-whatsapp/route.ts:99:27 - error TS2345: Argument of type '{ id: any; valido: boolean; erro: string; }' is not assignable to parameter of type 'never'.
+
+ 99           resultados.push({
+                              ~
+100             id: usuario.id,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+102             erro: 'Número inválido',
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+103           });
+    ~~~~~~~~~~~
+
+src/app/api/usuarios/with-whatsapp/route.ts:115:27 - error TS2345: Argument of type '{ id: any; valido: boolean; numero: any; }' is not assignable to parameter of type 'never'.
+
+115           resultados.push({
+                              ~
+116             id: usuario.id,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+118             numero: numero,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+119           });
+    ~~~~~~~~~~~
+
+src/app/api/usuarios/with-whatsapp/route.ts:121:27 - error TS2345: Argument of type '{ id: any; valido: boolean; erro: string; }' is not assignable to parameter of type 'never'.
+
+121           resultados.push({
+                              ~
+122             id: usuario.id,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+124             erro: 'Erro na validação',
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+125           });
+    ~~~~~~~~~~~
+
+src/app/auth/success/page.tsx:133:25 - error TS18046: 'tokenData' is of type 'unknown'.
+
+133           access_token: tokenData.access_token,
+                            ~~~~~~~~~
+
+src/app/auth/success/page.tsx:207:33 - error TS2339: Property 'token_type' does not exist on type '{}'.
+
+207                     {tokenData?.token_type || 'Bearer'}
+                                    ~~~~~~~~~~
+
+src/app/auth/success/page.tsx:213:33 - error TS2339: Property 'expires_in' does not exist on type '{}'.
+
+213                     {tokenData?.expires_in || 0} segundos
+                                    ~~~~~~~~~~
+
+src/app/auth/success/page.tsx:221:33 - error TS2339: Property 'refresh_token' does not exist on type '{}'.
+
+221                     {tokenData?.refresh_token ? '✅ Sim' : '❌ Não'}
+                                    ~~~~~~~~~~~~~
+
+src/app/auth/success/page.tsx:224:29 - error TS2339: Property 'my_business_accounts' does not exist on type '{}'.
+
+224                 {tokenData?.my_business_accounts && (
+                                ~~~~~~~~~~~~~~~~~~~~
+
+src/app/auth/success/page.tsx:230:34 - error TS2339: Property 'my_business_accounts' does not exist on type '{}'.
+
+230                       {tokenData.my_business_accounts.length}
+                                     ~~~~~~~~~~~~~~~~~~~~
+
+src/app/configuracoes/checklists/templates/editor/[id]/page.tsx:882:49 - error TS2322: Type 'string' is not assignable to type '"data" | "numero" | "sim_nao" | "avaliacao" | "texto" | "foto_camera" | "foto_upload" | "assinatura" | undefined'.
+
+882                                                 tipo: value,
+                                                    ~~~~
+
+  src/app/configuracoes/checklists/templates/editor/[id]/page.tsx:61:3
+    61   tipo:
+         ~~~~
+    The expected type comes from property 'tipo' which is declared here on type 'Partial<ItemChecklist>'
+
+src/app/configuracoes/dashboard-admin.tsx:2349:29 - error TS2345: Argument of type 'Element' is not assignable to parameter of type 'never'.
+
+2349                             <div
+                                 ~~~~
+2350                               key={date.toISOString()}
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ ...
+2410                               </div>
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2411                             </div>
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/configuracoes/dashboard-admin.tsx:2469:63 - error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+
+2469                                   onClick={() => deleteEvento(evento.id)}
+                                                                   ~~~~~~~~~
+
+src/app/configuracoes/dashboard-admin.tsx:2674:27 - error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+
+2674                           valor_cover: e.target.value
+                               ~~~~~~~~~~~
+
+src/app/configuracoes/dashboard-admin.tsx:2693:27 - error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+
+2693                           valor_show: e.target.value
+                               ~~~~~~~~~~
+
+src/app/configuracoes/dashboard-admin.tsx:2711:27 - error TS2322: Type 'number | null' is not assignable to type 'number'.
+  Type 'null' is not assignable to type 'number'.
+
+2711                           capacidade_estimada: e.target.value
+                               ~~~~~~~~~~~~~~~~~~~
+
+src/app/configuracoes/privacidade/page.tsx:49:21 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<UserData | null>'.
+
+49         setUserData(data);
+                       ~~~~
+
+src/app/configuracoes/privacidade/page.tsx:477:53 - error TS2339: Property 'lastLogin' does not exist on type 'UserData'.
+
+477                           • Último login: {userData.lastLogin || 'Nunca'}
+                                                        ~~~~~~~~~
+
+src/app/configuracoes/privacidade/page.tsx:479:37 - error TS2339: Property 'createdAt' does not exist on type 'UserData'.
+
+479                           {userData.createdAt || 'Não informado'}
+                                        ~~~~~~~~~
+
+src/app/configuracoes/privacidade/page.tsx:480:63 - error TS2339: Property 'loginCount' does not exist on type 'UserData'.
+
+480                           <br />• Total de acessos: {userData.loginCount || 0}
+                                                                  ~~~~~~~~~~
+
+src/app/configuracoes/timezone-debug/page.tsx:43:23 - error TS2345: Argument of type 'object' is not assignable to parameter of type 'SetStateAction<TimezoneInfo | null>'.
+
+43       setTimezoneInfo(debugTimezone());
+                         ~~~~~~~~~~~~~~~
+
+src/app/configuracoes/timezone-debug/page.tsx:51:21 - error TS2345: Argument of type 'object' is not assignable to parameter of type 'SetStateAction<TimezoneInfo | null>'.
+
+51     setTimezoneInfo(debugTimezone());
+                       ~~~~~~~~~~~~~~~
+
+src/app/configuracoes/timezone-debug/page.tsx:203:65 - error TS2339: Property 'utc' does not exist on type 'TimezoneInfo'.
+
+203                     <div className="text-sm">UTC: {timezoneInfo.utc}</div>
+                                                                    ~~~
+
+src/app/configuracoes/timezone-debug/page.tsx:204:68 - error TS2339: Property 'brasil' does not exist on type 'TimezoneInfo'.
+
+204                     <div className="text-sm">Brasil: {timezoneInfo.brasil}</div>
+                                                                       ~~~~~~
+
+src/app/configuracoes/timezone-debug/page.tsx:206:45 - error TS2339: Property 'offset_horas' does not exist on type 'TimezoneInfo'.
+
+206                       Offset: {timezoneInfo.offset_horas}h
+                                                ~~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:252:14 - error TS2339: Property 'nome_evento' does not exist on type 'Evento'.
+
+252       evento.nome_evento.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                 ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:562:5 - error TS2353: Object literal may only specify known properties, and 'nome_evento' does not exist in type 'Partial<Evento> | (() => Partial<Evento>)'.
+
+562     nome_evento: '',
+        ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:578:9 - error TS2353: Object literal may only specify known properties, and 'data_evento' does not exist in type 'SetStateAction<Partial<Evento>>'.
+
+578         data_evento: evento.data_evento.split('T')[0],
+            ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:578:29 - error TS2339: Property 'data_evento' does not exist on type 'Evento'.
+
+578         data_evento: evento.data_evento.split('T')[0],
+                                ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:579:29 - error TS2339: Property 'hora_inicio' does not exist on type 'Evento'.
+
+579         hora_inicio: evento.hora_inicio || '',
+                                ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:580:26 - error TS2339: Property 'hora_fim' does not exist on type 'Evento'.
+
+580         hora_fim: evento.hora_fim || '',
+                             ~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:597:29 - error TS2339: Property 'nome_evento' does not exist on type 'Partial<Evento>'.
+
+597             value={formData.nome_evento}
+                                ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:599:42 - error TS2353: Object literal may only specify known properties, and 'nome_evento' does not exist in type 'SetStateAction<Partial<Evento>>'.
+
+599               setFormData({ ...formData, nome_evento: e.target.value })
+                                             ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:624:29 - error TS2339: Property 'data_evento' does not exist on type 'Partial<Evento>'.
+
+624             value={formData.data_evento}
+                                ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:626:42 - error TS2353: Object literal may only specify known properties, and 'data_evento' does not exist in type 'SetStateAction<Partial<Evento>>'.
+
+626               setFormData({ ...formData, data_evento: e.target.value })
+                                             ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:658:29 - error TS2339: Property 'hora_inicio' does not exist on type 'Partial<Evento>'.
+
+658             value={formData.hora_inicio}
+                                ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:660:42 - error TS2353: Object literal may only specify known properties, and 'hora_inicio' does not exist in type 'SetStateAction<Partial<Evento>>'.
+
+660               setFormData({ ...formData, hora_inicio: e.target.value })
+                                             ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:670:29 - error TS2339: Property 'hora_fim' does not exist on type 'Partial<Evento>'.
+
+670             value={formData.hora_fim}
+                                ~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:672:42 - error TS2353: Object literal may only specify known properties, and 'hora_fim' does not exist in type 'SetStateAction<Partial<Evento>>'.
+
+672               setFormData({ ...formData, hora_fim: e.target.value })
+                                             ~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:799:35 - error TS2339: Property 'nome_evento' does not exist on type 'Evento'.
+
+799                     title={evento.nome_evento}
+                                      ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:803:58 - error TS2339: Property 'nome_evento' does not exist on type 'Evento'.
+
+803                       <span className="truncate">{evento.nome_evento}</span>
+                                                             ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:878:29 - error TS2339: Property 'nome_evento' does not exist on type 'Evento'.
+
+878                     {evento.nome_evento}
+                                ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:893:27 - error TS2339: Property 'hora_inicio' does not exist on type 'Evento'.
+
+893                   {evento.hora_inicio && (
+                              ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:896:31 - error TS2339: Property 'hora_inicio' does not exist on type 'Evento'.
+
+896                       {evento.hora_inicio}
+                                  ~~~~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:897:31 - error TS2339: Property 'hora_fim' does not exist on type 'Evento'.
+
+897                       {evento.hora_fim && ` - ${evento.hora_fim}`}
+                                  ~~~~~~~~
+
+src/app/gestao/eventos/page.tsx:897:56 - error TS2339: Property 'hora_fim' does not exist on type 'Evento'.
+
+897                       {evento.hora_fim && ` - ${evento.hora_fim}`}
+                                                           ~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:579:46 - error TS2339: Property 'rendimento_esperado' does not exist on type 'Receita'.
+
+579         rendimento_esperado: receitaEditando.rendimento_esperado,
+                                                 ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:581:32 - error TS2339: Property 'ativo' does not exist on type 'Receita'.
+
+581         ativo: receitaEditando.ativo,
+                                   ~~~~~
+
+src/app/operacoes/receitas/page.tsx:595:48 - error TS2339: Property 'rendimento_esperado' does not exist on type 'Receita'.
+
+595           rendimento_esperado: receitaEditando.rendimento_esperado,
+                                                   ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:597:34 - error TS2339: Property 'ativo' does not exist on type 'Receita'.
+
+597           ativo: receitaEditando.ativo,
+                                     ~~~~~
+
+src/app/operacoes/receitas/page.tsx:1281:41 - error TS2339: Property 'ativo' does not exist on type 'Receita'.
+
+1281                                 receita.ativo !== false
+                                             ~~~~~
+
+src/app/operacoes/receitas/page.tsx:1287:40 - error TS2339: Property 'ativo' does not exist on type 'Receita'.
+
+1287                               {receita.ativo !== false ? 'Ativa' : 'Inativa'}
+                                            ~~~~~
+
+src/app/operacoes/receitas/page.tsx:1310:38 - error TS2339: Property 'rendimento_esperado' does not exist on type 'Receita'.
+
+1310                             {receita.rendimento_esperado && (
+                                          ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:1316:44 - error TS2339: Property 'rendimento_esperado' does not exist on type 'Receita'.
+
+1316                                   {receita.rendimento_esperado}g
+                                                ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:1327:48 - error TS2339: Property 'nome' does not exist on type '{ id: number; quantidade_necessaria: number; is_chefe: boolean; }'.
+
+1327                                   {insumoChefe.nome}
+                                                    ~~~~
+
+src/app/operacoes/receitas/page.tsx:1724:36 - error TS2339: Property 'rendimento_esperado' does not exist on type 'Receita'.
+
+1724                   {receitaEditando.rendimento_esperado && (
+                                        ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:1730:42 - error TS2339: Property 'rendimento_esperado' does not exist on type 'Receita'.
+
+1730                         {receitaEditando.rendimento_esperado}g
+                                              ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:1740:41 - error TS2339: Property 'ativo' does not exist on type 'Receita'.
+
+1740                         receitaEditando.ativo !== false
+                                             ~~~~~
+
+src/app/operacoes/receitas/page.tsx:1745:40 - error TS2339: Property 'ativo' does not exist on type 'Receita'.
+
+1745                       {receitaEditando.ativo !== false ? 'Ativa' : 'Inativa'}
+                                            ~~~~~
+
+src/app/operacoes/receitas/page.tsx:1777:45 - error TS2339: Property 'nome' does not exist on type '{ id: number; quantidade_necessaria: number; is_chefe: boolean; }'.
+
+1777                                     {insumo.nome}
+                                                 ~~~~
+
+src/app/operacoes/receitas/page.tsx:1780:46 - error TS2339: Property 'codigo' does not exist on type '{ id: number; quantidade_necessaria: number; is_chefe: boolean; }'.
+
+1780                                     ({insumo.codigo})
+                                                  ~~~~~~
+
+src/app/operacoes/receitas/page.tsx:1787:43 - error TS2339: Property 'unidade_medida' does not exist on type '{ id: number; quantidade_necessaria: number; is_chefe: boolean; }'.
+
+1787                                   {insumo.unidade_medida}
+                                               ~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:2167:46 - error TS2339: Property 'rendimento_esperado' does not exist on type 'Receita'.
+
+2167                       value={receitaEditando.rendimento_esperado || ''}
+                                                  ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:2171:27 - error TS2353: Object literal may only specify known properties, and 'rendimento_esperado' does not exist in type 'Receita | ((prevState: Receita | null) => Receita | null)'.
+
+2171                           rendimento_esperado: e.target.value
+                               ~~~~~~~~~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:2186:46 - error TS2339: Property 'ativo' does not exist on type 'Receita'.
+
+2186                       value={receitaEditando.ativo !== false ? 'true' : 'false'}
+                                                  ~~~~~
+
+src/app/operacoes/receitas/page.tsx:2190:27 - error TS2353: Object literal may only specify known properties, and 'ativo' does not exist in type 'Receita | ((prevState: Receita | null) => Receita | null)'.
+
+2190                           ativo: value === 'true',
+                               ~~~~~
+
+src/app/operacoes/receitas/page.tsx:2214:44 - error TS2339: Property 'observacoes' does not exist on type 'Receita'.
+
+2214                     value={receitaEditando.observacoes || ''}
+                                                ~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:2218:25 - error TS2353: Object literal may only specify known properties, and 'observacoes' does not exist in type 'Receita | ((prevState: Receita | null) => Receita | null)'.
+
+2218                         observacoes: e.target.value,
+                             ~~~~~~~~~~~
+
+src/app/operacoes/receitas/page.tsx:2268:47 - error TS2339: Property 'nome' does not exist on type '{ id: number; quantidade_necessaria: number; is_chefe: boolean; }'.
+
+2268                                       {insumo.nome}
+                                                   ~~~~
+
+src/app/operacoes/receitas/page.tsx:2271:48 - error TS2339: Property 'codigo' does not exist on type '{ id: number; quantidade_necessaria: number; is_chefe: boolean; }'.
+
+2271                                       ({insumo.codigo})
+                                                    ~~~~~~
+
+src/app/operacoes/receitas/page.tsx:2279:61 - error TS2339: Property 'unidade_medida' does not exist on type '{ id: number; quantidade_necessaria: number; is_chefe: boolean; }'.
+
+2279                                         Quantidade ({insumo.unidade_medida})
+                                                                 ~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1431:21 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(o: { [s: string]: TabelaContaHubInfo; } | ArrayLike<TabelaContaHubInfo>): [string, TabelaContaHubInfo][]', gave the following error.
+    Argument of type 'Record<string, TabelaContaHubInfo> | undefined' is not assignable to parameter of type '{ [s: string]: TabelaContaHubInfo; } | ArrayLike<TabelaContaHubInfo>'.
+      Type 'undefined' is not assignable to type '{ [s: string]: TabelaContaHubInfo; } | ArrayLike<TabelaContaHubInfo>'.
+  Overload 2 of 2, '(o: {}): [string, any][]', gave the following error.
+    Argument of type 'Record<string, TabelaContaHubInfo> | undefined' is not assignable to parameter of type '{}'.
+      Type 'undefined' is not assignable to type '{}'.
+
+1431                     (result.status as StatusResult).tabelas_contahub
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+src/app/relatorios/contahub-teste/page.tsx:1594:26 - error TS18048: 'debugData.clientes_cpf.analise.diferenca' is possibly 'undefined'.
+
+1594                         {debugData.clientes_cpf.analise?.diferenca > 0
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1608:20 - error TS18048: 'debugData.clientes_cpf.analise.cpfsExtras.length' is possibly 'undefined'.
+
+1608                   {debugData.clientes_cpf.analise?.cpfsExtras?.length > 0 && (
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1614:26 - error TS18048: 'debugData.clientes_cpf.analise' is possibly 'undefined'.
+
+1614                         {debugData.clientes_cpf.analise.cpfsExtras.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1614:26 - error TS18048: 'debugData.clientes_cpf.analise.cpfsExtras' is possibly 'undefined'.
+
+1614                         {debugData.clientes_cpf.analise.cpfsExtras.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1629:20 - error TS18048: 'debugData.clientes_cpf.analise.cpfsFaltando.length' is possibly 'undefined'.
+
+1629                   {debugData.clientes_cpf.analise?.cpfsFaltando?.length > 0 && (
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1635:26 - error TS18048: 'debugData.clientes_cpf.analise' is possibly 'undefined'.
+
+1635                         {debugData.clientes_cpf.analise.cpfsFaltando.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1635:26 - error TS18048: 'debugData.clientes_cpf.analise.cpfsFaltando' is possibly 'undefined'.
+
+1635                         {debugData.clientes_cpf.analise.cpfsFaltando.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1650:20 - error TS18048: 'debugData.clientes_cpf.duplicatas.cpfs_duplicados.length' is possibly 'undefined'.
+
+1650                   {debugData.clientes_cpf.duplicatas?.cpfs_duplicados?.length >
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1657:26 - error TS18048: 'debugData.clientes_cpf.duplicatas' is possibly 'undefined'.
+
+1657                         {debugData.clientes_cpf.duplicatas.cpfs_duplicados.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1657:26 - error TS18048: 'debugData.clientes_cpf.duplicatas.cpfs_duplicados' is possibly 'undefined'.
+
+1657                         {debugData.clientes_cpf.duplicatas.cpfs_duplicados.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1673:20 - error TS18048: 'debugData.clientes_cpf.duplicatas.raw_ids_duplicados.length' is possibly 'undefined'.
+
+1673                   {debugData.clientes_cpf.duplicatas?.raw_ids_duplicados
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1674                     ?.length > 0 && (
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1680:26 - error TS18048: 'debugData.clientes_cpf.duplicatas' is possibly 'undefined'.
+
+1680                         {debugData.clientes_cpf.duplicatas.raw_ids_duplicados.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1680:26 - error TS18048: 'debugData.clientes_cpf.duplicatas.raw_ids_duplicados' is possibly 'undefined'.
+
+1680                         {debugData.clientes_cpf.duplicatas.raw_ids_duplicados.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1763:26 - error TS18048: 'debugData.periodo.analise.diferenca' is possibly 'undefined'.
+
+1763                         {debugData.periodo.analise?.diferenca > 0 ? '+' : ''}
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1775:20 - error TS18048: 'debugData.periodo.analise.vdsExtras.length' is possibly 'undefined'.
+
+1775                   {debugData.periodo.analise?.vdsExtras?.length > 0 && (
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1781:26 - error TS18048: 'debugData.periodo.analise' is possibly 'undefined'.
+
+1781                         {debugData.periodo.analise.vdsExtras
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1781:26 - error TS18048: 'debugData.periodo.analise.vdsExtras' is possibly 'undefined'.
+
+1781                         {debugData.periodo.analise.vdsExtras
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1791:26 - error TS18048: 'debugData.periodo.analise' is possibly 'undefined'.
+
+1791                         {debugData.periodo.analise.vdsExtras.length > 20 && (
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1791:26 - error TS18048: 'debugData.periodo.analise.vdsExtras' is possibly 'undefined'.
+
+1791                         {debugData.periodo.analise.vdsExtras.length > 20 && (
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1793:31 - error TS18048: 'debugData.periodo.analise' is possibly 'undefined'.
+
+1793                             +{debugData.periodo.analise.vdsExtras.length - 20}{' '}
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1793:31 - error TS18048: 'debugData.periodo.analise.vdsExtras' is possibly 'undefined'.
+
+1793                             +{debugData.periodo.analise.vdsExtras.length - 20}{' '}
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1802:20 - error TS18048: 'debugData.periodo.analise.vdsFaltando.length' is possibly 'undefined'.
+
+1802                   {debugData.periodo.analise?.vdsFaltando?.length > 0 && (
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1808:26 - error TS18048: 'debugData.periodo.analise' is possibly 'undefined'.
+
+1808                         {debugData.periodo.analise.vdsFaltando.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1808:26 - error TS18048: 'debugData.periodo.analise.vdsFaltando' is possibly 'undefined'.
+
+1808                         {debugData.periodo.analise.vdsFaltando.map(
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1881:29 - error TS2339: Property 'dados_reais_completos' does not exist on type 'string[]'.
+
+1881                           ?.dados_reais_completos || 0}
+                                 ~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1961:57 - error TS2339: Property 'map' does not exist on type 'true'.
+
+1961                                 {info.campos_existentes.map((campo: string) => (
+                                                             ~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1973:30 - error TS18048: 'info.total_inexistentes' is possibly 'undefined'.
+
+1973                             {info.total_inexistentes > 0 && (
+                                  ~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:1980:36 - error TS18048: 'info.campos_inexistentes' is possibly 'undefined'.
+
+1980                                   {info.campos_inexistentes.map(
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2044:38 - error TS2345: Argument of type '(analise: Analise, index: number) => JSX.Element' is not assignable to parameter of type '(value: AnaliseDados, index: number, array: AnaliseDados[]) => Element'.
+  Types of parameters 'analise' and 'value' are incompatible.
+    Type 'AnaliseDados' is missing the following properties from type 'Analise': id, titulo, descricao, status, and 2 more.
+
+2044                 {result.analises.map((analise: Analise, index: number) => (
+                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+2045                   <div
+     ~~~~~~~~~~~~~~~~~~~~~~
+ ...
+2190                   </div>
+     ~~~~~~~~~~~~~~~~~~~~~~~~
+2191                 ))}
+     ~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2072:74 - error TS2339: Property 'join' does not exist on type '{}'.
+
+2072                             {analise.estrutura_registro?.campos_diretos?.join(
+                                                                              ~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2084:29 - error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+
+2084                             {analise.estrutura_registro?.tipo_dados_campo}
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2105:63 - error TS2339: Property 'tem_vd' does not exist on type 'string[]'.
+
+2105                                 {analise.campos_identificacao.tem_vd
+                                                                   ~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2111:63 - error TS2339: Property 'tem_trn' does not exist on type 'string[]'.
+
+2111                                 {analise.campos_identificacao.tem_trn
+                                                                   ~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2117:63 - error TS2339: Property 'tem_dt_gerencial' does not exist on type 'string[]'.
+
+2117                                 {analise.campos_identificacao.tem_dt_gerencial
+                                                                   ~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2123:63 - error TS2339: Property 'tem_pag' does not exist on type 'string[]'.
+
+2123                                 {analise.campos_identificacao.tem_pag
+                                                                   ~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2129:63 - error TS2339: Property 'tem_itm' does not exist on type 'string[]'.
+
+2129                                 {analise.campos_identificacao.tem_itm
+                                                                   ~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2133:63 - error TS2339: Property 'tem_prd' does not exist on type 'string[]'.
+
+2133                                 {analise.campos_identificacao.tem_prd
+                                                                   ~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2139:63 - error TS2339: Property 'tem_hora' does not exist on type 'string[]'.
+
+2139                                 {analise.campos_identificacao.tem_hora
+                                                                   ~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2143:63 - error TS2339: Property 'tem_dds' does not exist on type 'string[]'.
+
+2143                                 {analise.campos_identificacao.tem_dds
+                                                                   ~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2148:34 - error TS2339: Property 'primeiros_campos' does not exist on type 'string[]'.
+
+2148                                 .primeiros_campos && (
+                                      ~~~~~~~~~~~~~~~~
+
+src/app/relatorios/contahub-teste/page.tsx:2151:65 - error TS2339: Property 'primeiros_campos' does not exist on type 'string[]'.
+
+2151                                   {analise.campos_identificacao.primeiros_campos.join(
+                                                                     ~~~~~~~~~~~~~~~~
+
+src/components/checklist/CopyItemsDialog.tsx:181:21 - error TS2322: Type '{ id: string; checked: boolean; onCheckedChange: Dispatch<SetStateAction<boolean>>; }' is not assignable to type 'IntrinsicAttributes & CheckboxProps & RefAttributes<HTMLInputElement>'.
+  Property 'id' does not exist on type 'IntrinsicAttributes & CheckboxProps & RefAttributes<HTMLInputElement>'.
+
+181                     id="only-required"
+                        ~~
+
+src/components/checklist/ScheduleDialog.tsx:222:31 - error TS2345: Argument of type '(prev: ScheduleConfig) => { frequencia: unknown; id?: string | undefined; checklistId: string; titulo: string; horario: string; diasSemana?: number[] | undefined; diaMes?: number | undefined; ativo: boolean; notificacoes: boolean; responsaveis?: string[] | undefined; observacoes?: string | undefined; }' is not assignable to parameter of type 'SetStateAction<ScheduleConfig>'.
+  Type '(prev: ScheduleConfig) => { frequencia: unknown; id?: string | undefined; checklistId: string; titulo: string; horario: string; diasSemana?: number[] | undefined; diaMes?: number | undefined; ativo: boolean; notificacoes: boolean; responsaveis?: string[] | undefined; observacoes?: string | undefined; }' is not assignable to type '(prevState: ScheduleConfig) => ScheduleConfig'.
+    Call signature return types '{ frequencia: unknown; id?: string | undefined; checklistId: string; titulo: string; horario: string; diasSemana?: number[] | undefined; diaMes?: number | undefined; ativo: boolean; notificacoes: boolean; responsaveis?: string[] | undefined; observacoes?: string | undefined; }' and 'ScheduleConfig' are incompatible.
+      The types of 'frequencia' are incompatible between these types.
+        Type 'unknown' is not assignable to type '"diaria" | "mensal" | "semanal" | "personalizada"'.
+
+222                     setConfig(prev => ({
+                                  ~~~~~~~~~~
+223                       ...prev,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+224                       frequencia: option.value as unknown,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+225                     }))
+    ~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:83:17 - error TS18046: 'c' is of type 'unknown'.
+
+83             id: c.id,
+                   ~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:84:20 - error TS18046: 'c' is of type 'unknown'.
+
+84             ordem: c.ordem,
+                      ~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:236:22 - error TS18046: 'checklist' is of type 'unknown'.
+
+236                     {checklist.nome}
+                         ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:241:54 - error TS18046: 'checklist' is of type 'unknown'.
+
+241                   <Badge className={getPriorityColor(checklist.prioridade)}>
+                                                         ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:242:22 - error TS18046: 'checklist' is of type 'unknown'.
+
+242                     {checklist.prioridade}
+                         ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:244:50 - error TS18046: 'checklist' is of type 'unknown'.
+
+244                   <Badge className={getAreaColor(checklist.area)}>
+                                                     ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:245:22 - error TS18046: 'checklist' is of type 'unknown'.
+
+245                     {checklist.area}
+                         ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:252:18 - error TS18046: 'checklist' is of type 'unknown'.
+
+252                 {checklist.descricao}
+                     ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:257:24 - error TS18046: 'checklist' is of type 'unknown'.
+
+257                 <span>{checklist.items_count} itens</span>
+                           ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:259:20 - error TS18046: 'checklist' is of type 'unknown'.
+
+259                   {checklist.ativo ? (
+                       ~~~~~~~~~
+
+src/components/configuracoes/ChecklistReorderManager.tsx:278:31 - error TS18046: 'checklist' is of type 'unknown'.
+
+278           getId={checklist => checklist.id}
+                                  ~~~~~~~~~
+
+src/components/configuracoes/NiboIntegrationCard.tsx:73:30 - error TS2339: Property 'id' does not exist on type '{}'.
+
+73   const barId = selectedBar?.id || barContext?.id;
+                                ~~
+
+src/components/configuracoes/NiboIntegrationCard.tsx:282:23 - error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+
+282                       {showApiKey
+                          ~~~~~~~~~~~
+283                         ? niboStatus.configuracao?.apiKeyMasked
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+284                         : '••••••••••••••••'}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  node_modules/@types/react/index.d.ts:2398:9
+    2398         children?: ReactNode | undefined;
+                 ~~~~~~~~
+    The expected type comes from property 'children' which is declared here on type 'DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>'
+
+src/components/configuracoes/NiboIntegrationCard.tsx:423:36 - error TS2339: Property 'message' does not exist on type 'NiboIntegrationData'.
+
+423                       {niboStatus?.message ||
+                                       ~~~~~~~
+
+src/components/drag-drop/DraggableItem.tsx:2:30 - error TS2307: Cannot find module '@dnd-kit/core' or its corresponding type declarations.
+
+2 import { useDraggable } from '@dnd-kit/core';
+                               ~~~~~~~~~~~~~~~
+
+src/components/drag-drop/DropZone.tsx:2:30 - error TS2307: Cannot find module '@dnd-kit/core' or its corresponding type declarations.
+
+2 import { useDroppable } from '@dnd-kit/core';
+                               ~~~~~~~~~~~~~~~
+
+src/components/drag-drop/SortableList.tsx:4:10 - error TS2614: Module '"./DraggableItem"' has no exported member 'DraggableItem'. Did you mean to use 'import DraggableItem from "./DraggableItem"' instead?
+
+4 import { DraggableItem } from './DraggableItem';
+           ~~~~~~~~~~~~~
+
+src/components/marketing/AdvancedCharts.tsx:276:15 - error TS2769: No overload matches this call.
+  Overload 1 of 2, '(props: TooltipProps<ValueType, string>): Tooltip<ValueType, string>', gave the following error.
+    Type '(value: unknown, name: string) => [unknown, string]' is not assignable to type 'Formatter<ValueType, string>'.
+      Type '[unknown, string]' is not assignable to type 'ReactNode | [ReactNode, string]'.
+        Type '[unknown, string]' is not assignable to type '[ReactNode, string]'.
+          Type at position 0 in source is not compatible with type at position 0 in target.
+            Type 'unknown' is not assignable to type 'ReactNode'.
+  Overload 2 of 2, '(props: TooltipProps<ValueType, string>, context: any): Tooltip<ValueType, string>', gave the following error.
+    Type '(value: unknown, name: string) => [unknown, string]' is not assignable to type 'Formatter<ValueType, string>'.
+      Type '[unknown, string]' is not assignable to type 'ReactNode | [ReactNode, string]'.
+        Type '[unknown, string]' is not assignable to type '[ReactNode, string]'.
+          Type at position 0 in source is not compatible with type at position 0 in target.
+            Type 'unknown' is not assignable to type 'ReactNode'.
+
+276               formatter={(value: unknown, name: string) => [
+                  ~~~~~~~~~
+
+  node_modules/recharts/types/component/DefaultTooltipContent.d.ts:29:5
+    29     formatter?: Formatter<TValue, TName>;
+           ~~~~~~~~~
+    The expected type comes from property 'formatter' which is declared here on type 'IntrinsicAttributes & IntrinsicClassAttributes<Tooltip<ValueType, string>> & Pick<Readonly<TooltipProps<ValueType, string>>, "content" | ... 12 more ... | "shared"> & InexactPartial<...> & InexactPartial<...>'
+  node_modules/recharts/types/component/DefaultTooltipContent.d.ts:29:5
+    29     formatter?: Formatter<TValue, TName>;
+           ~~~~~~~~~
+    The expected type comes from property 'formatter' which is declared here on type 'IntrinsicAttributes & IntrinsicClassAttributes<Tooltip<ValueType, string>> & Pick<Readonly<TooltipProps<ValueType, string>>, "content" | ... 12 more ... | "shared"> & InexactPartial<...> & InexactPartial<...>'
+
+src/components/marketing/AdvancedCharts.tsx:349:17 - error TS18046: 'value' is of type 'unknown'.
+
+349                 value.toLocaleString(),
+                    ~~~~~
+
+src/components/NotificationCenter.tsx:406:72 - error TS2345: Argument of type '{ label: string; action: "redirect" | "callback" | "download"; url?: string | undefined; callback?: string | undefined; }' is not assignable to parameter of type 'NotificacaoAcao'.
+  Types of property 'action' are incompatible.
+    Type '"redirect" | "callback" | "download"' is not assignable to type '"redirect" | "download"'.
+      Type '"callback"' is not assignable to type '"redirect" | "download"'.
+
+406                                   onClick={() => handleAcaoNotificacao(acao)}
+                                                                           ~~~~
+
+src/components/relatorios/RelatorioProdutos.tsx:67:9 - error TS2698: Spread types may only be created from object types.
+
+67         ...filtros,
+           ~~~~~~~~~~
+
+src/components/SGBAssistant.tsx:358:59 - error TS18046: 'venda' is of type 'unknown'.
+
+358         (sum: number, venda: unknown) => sum + parseFloat(venda.liquido || '0'),
+                                                              ~~~~~
+
+src/components/SGBAssistant.tsx:402:59 - error TS18046: 'venda' is of type 'unknown'.
+
+402         (sum: number, venda: unknown) => sum + parseFloat(venda.liquido || '0'),
+                                                              ~~~~~
+
+src/components/SGBAssistant.tsx:479:7 - error TS2322: Type 'Record<string, unknown>' is not assignable to type 'undefined'.
+
+479       contextData = await getBasicSalesData(barInfo);
+          ~~~~~~~~~~~
+
+src/components/ui/advanced-datatable.tsx:108:11 - error TS18046: 'aVal' is of type 'unknown'.
+
+108       if (aVal < bVal) {
+              ~~~~
+
+src/components/ui/advanced-datatable.tsx:108:18 - error TS18046: 'bVal' is of type 'unknown'.
+
+108       if (aVal < bVal) {
+                     ~~~~
+
+src/components/ui/advanced-datatable.tsx:111:11 - error TS18046: 'aVal' is of type 'unknown'.
+
+111       if (aVal > bVal) {
+              ~~~~
+
+src/components/ui/advanced-datatable.tsx:111:18 - error TS18046: 'bVal' is of type 'unknown'.
+
+111       if (aVal > bVal) {
+                     ~~~~
+
+src/components/ui/command-palette.tsx:349:47 - error TS2749: 'Command' refers to a value, but is being used as a type here. Did you mean 'typeof Command'?
+
+349   const handleSelectCommand = async (command: Command) => {
+                                                  ~~~~~~~
+
+src/components/ui/command-palette.tsx:413:28 - error TS2749: 'Command' refers to a value, but is being used as a type here. Did you mean 'typeof Command'?
+
+413       {} as Record<string, Command[]>
+                               ~~~~~~~
+
+src/components/ui/dialog.tsx:82:46 - error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '(Partial<unknown> & Attributes) | undefined'.
+
+82             return React.cloneElement(child, {
+                                                ~
+83               onClose: () => onOpenChange(false),
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+84             } as unknown);
+   ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  node_modules/@types/react/index.d.ts:605:14
+    605     function cloneElement<P>(
+                     ~~~~~~~~~~~~
+    The last overload is declared here.
+
+src/contexts/BarContext.tsx:162:11 - error TS2322: Type 'string' is not assignable to type 'null'.
+
+162           userEmail = session.user.email;
+              ~~~~~~~~~
+
+src/hooks/useDragAndDrop.ts:304:26 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'DragEvent<Element> | TouchEvent<Element>'.
+
+304               handleDrop(e as unknown, targetItem);
+                             ~~~~~~~~~~~~
+
+src/hooks/useDragAndDropPersistence.ts:83:31 - error TS2571: Object is of type 'unknown'.
+
+83         defaults.map(item => [(item as unknown).id, item])
+                                 ~~~~~~~~~~~~~~~~~
+
+src/hooks/useDragAndDropPersistence.ts:86:29 - error TS2571: Object is of type 'unknown'.
+
+86         stored.map(item => [(item as unknown).id, item])
+                               ~~~~~~~~~~~~~~~~~
+
+src/hooks/useDragAndDropPersistence.ts:94:28 - error TS2571: Object is of type 'unknown'.
+
+94         if (defaultMap.has((item as unknown).id)) {
+                              ~~~~~~~~~~~~~~~~~
+
+src/hooks/useDragAndDropPersistence.ts:101:28 - error TS2571: Object is of type 'unknown'.
+
+101         if (!storedMap.has((item as unknown).id)) {
+                               ~~~~~~~~~~~~~~~~~
+
+src/hooks/useFileUpload.ts:227:20 - error TS18046: 'error' is of type 'unknown'.
+
+227             error: error.message,
+                       ~~~~~
+
+src/lib/ai-agent-service.ts:181:9 - error TS18046: 'error' is of type 'unknown'.
+
+181         error.message || String(error)
+            ~~~~~
+
+src/lib/ai-agent-service.ts:313:26 - error TS18046: 'error' is of type 'unknown'.
+
+313           erro_detalhes: error.message || String(error),
+                             ~~~~~
+
+src/lib/ai-agent-service.ts:336:32 - error TS2345: Argument of type '"checklist_completion_rate"' is not assignable to parameter of type 'never'.
+
+336         metricsCalculated.push('checklist_completion_rate');
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/lib/ai-agent-service.ts:343:32 - error TS2345: Argument of type '"average_execution_time"' is not assignable to parameter of type 'never'.
+
+343         metricsCalculated.push('average_execution_time');
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/lib/ai-agent-service.ts:350:32 - error TS2345: Argument of type '"average_quality_score"' is not assignable to parameter of type 'never'.
+
+350         metricsCalculated.push('average_quality_score');
+                                   ~~~~~~~~~~~~~~~~~~~~~~~
+
+src/lib/ai-agent-service.ts:357:32 - error TS2345: Argument of type '"whatsapp_engagement"' is not assignable to parameter of type 'never'.
+
+357         metricsCalculated.push('whatsapp_engagement');
+                                   ~~~~~~~~~~~~~~~~~~~~~
+
+src/lib/ai-agent-service.ts:365:32 - error TS2345: Argument of type '"employee_productivity"' is not assignable to parameter of type 'never'.
+
+365         metricsCalculated.push('employee_productivity');
+                                   ~~~~~~~~~~~~~~~~~~~~~~~
+
+src/lib/ai-agent-service.ts:372:32 - error TS2345: Argument of type '"social_media_engagement"' is not assignable to parameter of type 'never'.
+
+372         metricsCalculated.push('social_media_engagement');
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/lib/ai-agent-service.ts:379:32 - error TS2345: Argument of type '"followers_growth"' is not assignable to parameter of type 'never'.
+
+379         metricsCalculated.push('followers_growth');
+                                   ~~~~~~~~~~~~~~~~~~
+
+src/lib/ai-agent-service.ts:571:24 - error TS2345: Argument of type '(exec: ChecklistExecution) => void' is not assignable to parameter of type '(value: { executado_por: any; status: any; pontuacao_final: any; tempo_execucao_minutos: any; usuarios_bar: { nome: any; }[]; }, index: number, array: { executado_por: any; status: any; pontuacao_final: any; tempo_execucao_minutos: any; usuarios_bar: { ...; }[]; }[]) => void'.
+  Types of parameters 'exec' and 'value' are incompatible.
+    Type '{ executado_por: any; status: any; pontuacao_final: any; tempo_execucao_minutos: any; usuarios_bar: { nome: any; }[]; }' is not assignable to type 'ChecklistExecution'.
+      Types of property 'usuarios_bar' are incompatible.
+        Property 'nome' is missing in type '{ nome: any; }[]' but required in type '{ nome: string; }'.
+
+571     executions.forEach((exec: ChecklistExecution) => {
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/lib/ai-agent-service.ts:27:5
+    27     nome: string;
+           ~~~~
+    'nome' is declared here.
+
+src/lib/ai-agent-service.ts:1332:9 - error TS18046: 'error' is of type 'unknown'.
+
+1332         error.message || String(error)
+             ~~~~~
+
+src/lib/ai-agent-service.ts:1417:9 - error TS18046: 'error' is of type 'unknown'.
+
+1417         error.message || String(error)
+             ~~~~~
+
+src/lib/ai-agent-service.ts:1545:9 - error TS18046: 'error' is of type 'unknown'.
+
+1545         error.message || String(error)
+             ~~~~~
+
+src/lib/analytics-service.ts:102:5 - error TS2571: Object is of type 'unknown'.
+
+102     funcionarios[id].total_execucoes++;
+        ~~~~~~~~~~~~~~~~
+
+src/lib/analytics-service.ts:103:5 - error TS2571: Object is of type 'unknown'.
+
+103     funcionarios[id].score_total += exec.pontuacao_final || 0;
+        ~~~~~~~~~~~~~~~~
+
+src/lib/analytics-service.ts:104:5 - error TS2571: Object is of type 'unknown'.
+
+104     funcionarios[id].tempo_total += exec.tempo_execucao_minutos || 0;
+        ~~~~~~~~~~~~~~~~
+
+src/lib/analytics-service.ts:105:5 - error TS2571: Object is of type 'unknown'.
+
+105     funcionarios[id].scores.push(exec.pontuacao_final || 0);
+        ~~~~~~~~~~~~~~~~
+
+src/lib/analytics-service.ts:110:7 - error TS2698: Spread types may only be created from object types.
+
+110       ...func,
+          ~~~~~~~
+
+src/lib/analytics-service.ts:112:9 - error TS18046: 'func' is of type 'unknown'.
+
+112         func.total_execucoes > 0 ? func.score_total / func.total_execucoes : 0,
+            ~~~~
+
+src/lib/analytics-service.ts:112:36 - error TS18046: 'func' is of type 'unknown'.
+
+112         func.total_execucoes > 0 ? func.score_total / func.total_execucoes : 0,
+                                       ~~~~
+
+src/lib/analytics-service.ts:112:55 - error TS18046: 'func' is of type 'unknown'.
+
+112         func.total_execucoes > 0 ? func.score_total / func.total_execucoes : 0,
+                                                          ~~~~
+
+src/lib/analytics-service.ts:114:9 - error TS18046: 'func' is of type 'unknown'.
+
+114         func.total_execucoes > 0 ? func.tempo_total / func.total_execucoes : 0,
+            ~~~~
+
+src/lib/analytics-service.ts:114:36 - error TS18046: 'func' is of type 'unknown'.
+
+114         func.total_execucoes > 0 ? func.tempo_total / func.total_execucoes : 0,
+                                       ~~~~
+
+src/lib/analytics-service.ts:114:55 - error TS18046: 'func' is of type 'unknown'.
+
+114         func.total_execucoes > 0 ? func.tempo_total / func.total_execucoes : 0,
+                                                          ~~~~
+
+src/lib/analytics-service.ts:116:9 - error TS18046: 'func' is of type 'unknown'.
+
+116         func.scores.length > 1
+            ~~~~
+
+src/lib/analytics-service.ts:117:13 - error TS18046: 'func' is of type 'unknown'.
+
+117           ? func.scores.reduce(
+                ~~~~
+
+src/lib/analytics-service.ts:119:40 - error TS18046: 'func' is of type 'unknown'.
+
+119                 sum + Math.abs(score - func.score_total / func.total_execucoes),
+                                           ~~~~
+
+src/lib/analytics-service.ts:119:59 - error TS18046: 'func' is of type 'unknown'.
+
+119                 sum + Math.abs(score - func.score_total / func.total_execucoes),
+                                                              ~~~~
+
+src/lib/analytics-service.ts:121:17 - error TS18046: 'func' is of type 'unknown'.
+
+121             ) / func.scores.length
+                    ~~~~
+
+src/lib/audit-logger.ts:313:26 - error TS18046: 'auditData' is of type 'unknown'.
+
+313             description: auditData.description,
+                             ~~~~~~~~~
+
+src/lib/audit-logger.ts:318:24 - error TS18046: 'auditData' is of type 'unknown'.
+
+318                 value: auditData.user_email || 'System',
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:323:24 - error TS18046: 'auditData' is of type 'unknown'.
+
+323                 value: auditData.operation,
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:328:24 - error TS18046: 'auditData' is of type 'unknown'.
+
+328                 value: auditData.ip_address || 'Unknown',
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:333:24 - error TS18046: 'auditData' is of type 'unknown'.
+
+333                 value: auditData.table_name || 'N/A',
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:338:24 - error TS18046: 'auditData' is of type 'unknown'.
+
+338                 value: auditData.record_id || 'N/A',
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:343:24 - error TS18046: 'auditData' is of type 'unknown'.
+
+343                 value: auditData.endpoint || 'N/A',
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:371:29 - error TS18046: 'eventData' is of type 'unknown'.
+
+371             description: `${eventData.event_type} detected`,
+                                ~~~~~~~~~
+
+src/lib/audit-logger.ts:376:24 - error TS18046: 'eventData' is of type 'unknown'.
+
+376                 value: eventData.event_type,
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:381:27 - error TS18046: 'eventData' is of type 'unknown'.
+
+381                 value: `${eventData.risk_score}/100`,
+                              ~~~~~~~~~
+
+src/lib/audit-logger.ts:386:24 - error TS18046: 'eventData' is of type 'unknown'.
+
+386                 value: eventData.ip_address || 'Unknown',
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:391:24 - error TS18046: 'eventData' is of type 'unknown'.
+
+391                 value: eventData.endpoint || 'N/A',
+                           ~~~~~~~~~
+
+src/lib/audit-logger.ts:396:39 - error TS18046: 'eventData' is of type 'unknown'.
+
+396                 value: JSON.stringify(eventData.details, null, 2).substring(
+                                          ~~~~~~~~~
+
+src/lib/backup-system.ts:175:22 - error TS2339: Property 'metadata' does not exist on type '{}'.
+
+175       if (backupData.metadata.version !== '2.0.0') {
+                         ~~~~~~~~
+
+src/lib/backup-system.ts:180:64 - error TS2339: Property 'data' does not exist on type '{}'.
+
+180       for (const [table, records] of Object.entries(backupData.data)) {
+                                                                   ~~~~
+
+src/lib/backup-system.ts:188:36 - error TS18046: 'record' is of type 'unknown'.
+
+188               (record: unknown) => record.bar_id === barId
+                                       ~~~~~~
+
+src/lib/backup-system.ts:346:20 - error TS18046: 'b' is of type 'unknown'.
+
+346           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                       ~
+
+src/lib/backup-system.ts:346:55 - error TS18046: 'a' is of type 'unknown'.
+
+346           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                                                          ~
+
+src/lib/backup-system.ts:637:15 - error TS18046: 'file' is of type 'unknown'.
+
+637               file.name.includes(backup.backup_id)
+                  ~~~~
+
+src/lib/backup-system.ts:641:54 - error TS18046: 'file' is of type 'unknown'.
+
+641               ...relatedFiles.map((file: unknown) => file.name)
+                                                         ~~~~
+
+src/lib/cookies.ts:82:11 - error TS18046: 'userData' is of type 'unknown'.
+
+82       id: userData.id,
+             ~~~~~~~~
+
+src/lib/cookies.ts:83:14 - error TS18046: 'userData' is of type 'unknown'.
+
+83       email: userData.email,
+                ~~~~~~~~
+
+src/lib/cookies.ts:84:13 - error TS18046: 'userData' is of type 'unknown'.
+
+84       nome: userData.nome,
+               ~~~~~~~~
+
+src/lib/cookies.ts:85:13 - error TS18046: 'userData' is of type 'unknown'.
+
+85       role: userData.role,
+               ~~~~~~~~
+
+src/lib/cookies.ts:86:27 - error TS18046: 'userData' is of type 'unknown'.
+
+86       modulos_permitidos: userData.modulos_permitidos || [],
+                             ~~~~~~~~
+
+src/lib/cookies.ts:87:14 - error TS18046: 'userData' is of type 'unknown'.
+
+87       ativo: userData.ativo !== false,
+                ~~~~~~~~
+
+src/lib/discord-bot-service.ts:70:13 - error TS18046: 'params' is of type 'unknown'.
+
+70             params.periodo_inicio,
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:71:13 - error TS18046: 'params' is of type 'unknown'.
+
+71             params.periodo_fim
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:78:13 - error TS18046: 'params' is of type 'unknown'.
+
+78             params.periodo_inicio,
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:79:13 - error TS18046: 'params' is of type 'unknown'.
+
+79             params.periodo_fim
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:86:13 - error TS18046: 'params' is of type 'unknown'.
+
+86             params.periodo_inicio,
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:87:13 - error TS18046: 'params' is of type 'unknown'.
+
+87             params.periodo_fim
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:94:13 - error TS18046: 'params' is of type 'unknown'.
+
+94             params.periodo_inicio,
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:95:13 - error TS18046: 'params' is of type 'unknown'.
+
+95             params.periodo_fim,
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:96:13 - error TS18046: 'params' is of type 'unknown'.
+
+96             params.limite
+               ~~~~~~
+
+src/lib/discord-bot-service.ts:103:13 - error TS18046: 'params' is of type 'unknown'.
+
+103             params.periodo_inicio,
+                ~~~~~~
+
+src/lib/discord-bot-service.ts:104:13 - error TS18046: 'params' is of type 'unknown'.
+
+104             params.periodo_fim
+                ~~~~~~
+
+src/lib/discord-bot-service.ts:111:13 - error TS18046: 'params' is of type 'unknown'.
+
+111             params.periodo_inicio,
+                ~~~~~~
+
+src/lib/discord-bot-service.ts:112:13 - error TS18046: 'params' is of type 'unknown'.
+
+112             params.periodo_fim
+                ~~~~~~
+
+src/lib/discord-bot-service.ts:125:17 - error TS2698: Spread types may only be created from object types.
+
+125                 ...params,
+                    ~~~~~~~~~
+
+src/lib/discord-bot-service.ts:266:30 - error TS18046: 'params' is of type 'unknown'.
+
+266       if (dates.length >= 1) params.periodo_inicio = dates[0];
+                                 ~~~~~~
+
+src/lib/discord-bot-service.ts:267:30 - error TS18046: 'params' is of type 'unknown'.
+
+267       if (dates.length >= 2) params.periodo_fim = dates[1];
+                                 ~~~~~~
+
+src/lib/discord-bot-service.ts:276:9 - error TS18046: 'params' is of type 'unknown'.
+
+276         params.limite = num;
+            ~~~~~~
+
+src/lib/discord-bot-service.ts:284:7 - error TS18046: 'params' is of type 'unknown'.
+
+284       params.periodo_inicio = ontem.toISOString().split('T')[0];
+          ~~~~~~
+
+src/lib/discord-bot-service.ts:290:7 - error TS18046: 'params' is of type 'unknown'.
+
+290       params.periodo_inicio = semanaAtras.toISOString().split('T')[0];
+          ~~~~~~
+
+src/lib/discord-bot-service.ts:296:7 - error TS18046: 'params' is of type 'unknown'.
+
+296       params.periodo_inicio = mesAtras.toISOString().split('T')[0];
+          ~~~~~~
+
+src/lib/discord-bot-service.ts:316:24 - error TS18046: 'data' is of type 'unknown'.
+
+316           description: data.mensagem,
+                           ~~~~
+
+src/lib/discord-bot-service.ts:321:30 - error TS18046: 'data' is of type 'unknown'.
+
+321               value: `**R$ ${data.maior_venda?.valor?.toFixed(2)}**\nData: ${new Date(data.maior_venda?.data).toLocaleDateString('pt-BR')}\nMeio: ${data.maior_venda?.meio_pagamento || 'N/A'}`,
+                                 ~~~~
+
+src/lib/discord-bot-service.ts:321:87 - error TS18046: 'data' is of type 'unknown'.
+
+321               value: `**R$ ${data.maior_venda?.valor?.toFixed(2)}**\nData: ${new Date(data.maior_venda?.data).toLocaleDateString('pt-BR')}\nMeio: ${data.maior_venda?.meio_pagamento || 'N/A'}`,
+                                                                                          ~~~~
+
+src/lib/discord-bot-service.ts:321:149 - error TS18046: 'data' is of type 'unknown'.
+
+321               value: `**R$ ${data.maior_venda?.valor?.toFixed(2)}**\nData: ${new Date(data.maior_venda?.data).toLocaleDateString('pt-BR')}\nMeio: ${data.maior_venda?.meio_pagamento || 'N/A'}`,
+                                                                                                                                                        ~~~~
+
+src/lib/discord-bot-service.ts:326:30 - error TS18046: 'data' is of type 'unknown'.
+
+326               value: `**R$ ${data.faturamento_total_dia?.toFixed(2)}**`,
+                                 ~~~~
+
+src/lib/discord-bot-service.ts:335:22 - error TS18046: 'data' is of type 'unknown'.
+
+335         const kpis = data.kpis_principais;
+                         ~~~~
+
+src/lib/discord-bot-service.ts:336:23 - error TS18046: 'data' is of type 'unknown'.
+
+336         const saude = data.score_saude;
+                          ~~~~
+
+src/lib/discord-bot-service.ts:339:24 - error TS18046: 'data' is of type 'unknown'.
+
+339           description: data.mensagem,
+                           ~~~~
+
+src/lib/discord-bot-service.ts:369:24 - error TS18046: 'data' is of type 'unknown'.
+
+369         const resumo = data.resumo;
+                           ~~~~
+
+src/lib/discord-bot-service.ts:372:24 - error TS18046: 'data' is of type 'unknown'.
+
+372           description: data.mensagem,
+                           ~~~~
+
+src/lib/discord-bot-service.ts:397:23 - error TS18046: 'data' is of type 'unknown'.
+
+397         const stats = data.estatisticas;
+                          ~~~~
+
+src/lib/discord-bot-service.ts:400:24 - error TS18046: 'data' is of type 'unknown'.
+
+400           description: data.mensagem,
+                           ~~~~
+
+src/lib/discord-bot-service.ts:427:28 - error TS18046: 'data' is of type 'unknown'.
+
+427               value: `R$ ${data.visao_geral.kpis_principais.faturamento_total?.toFixed(2)} em ${data.visao_geral.kpis_principais.total_transacoes} transações`,
+                               ~~~~
+
+src/lib/discord-bot-service.ts:427:97 - error TS18046: 'data' is of type 'unknown'.
+
+427               value: `R$ ${data.visao_geral.kpis_principais.faturamento_total?.toFixed(2)} em ${data.visao_geral.kpis_principais.total_transacoes} transações`,
+                                                                                                    ~~~~
+
+src/lib/discord-bot-service.ts:432:40 - error TS18046: 'data' is of type 'unknown'.
+
+432               value: `**Anomalias:** ${data.resumo_inteligencia.total_anomalias_ativas}\n**Insights Críticos:** ${data.resumo_inteligencia.insights_criticos}\n**Recomendações Altas:** ${data.resumo_inteligencia.recomendacoes_altas}`,
+                                           ~~~~
+
+src/lib/discord-bot-service.ts:432:115 - error TS18046: 'data' is of type 'unknown'.
+
+432               value: `**Anomalias:** ${data.resumo_inteligencia.total_anomalias_ativas}\n**Insights Críticos:** ${data.resumo_inteligencia.insights_criticos}\n**Recomendações Altas:** ${data.resumo_inteligencia.recomendacoes_altas}`,
+                                                                                                                      ~~~~
+
+src/lib/discord-bot-service.ts:432:187 - error TS18046: 'data' is of type 'unknown'.
+
+432               value: `**Anomalias:** ${data.resumo_inteligencia.total_anomalias_ativas}\n**Insights Críticos:** ${data.resumo_inteligencia.insights_criticos}\n**Recomendações Altas:** ${data.resumo_inteligencia.recomendacoes_altas}`,
+                                                                                                                                                                                              ~~~~
+
+src/lib/discord-bot-service.ts:437:49 - error TS18046: 'data' is of type 'unknown'.
+
+437               value: `**Melhor Funcionário:** ${data.equipe.ranking_funcionarios[0]?.nome || 'N/A'}\n**Total Funcionários:** ${data.equipe.estatisticas.total_funcionarios}`,
+                                                    ~~~~
+
+src/lib/discord-bot-service.ts:437:128 - error TS18046: 'data' is of type 'unknown'.
+
+437               value: `**Melhor Funcionário:** ${data.equipe.ranking_funcionarios[0]?.nome || 'N/A'}\n**Total Funcionários:** ${data.equipe.estatisticas.total_funcionarios}`,
+                                                                                                                                   ~~~~
+
+src/lib/discord-bot-service.ts:448:24 - error TS18046: 'data' is of type 'unknown'.
+
+448           description: data.mensagem || 'Consulta realizada com sucesso',
+                           ~~~~
+
+src/lib/discord-checklist-service.ts:325:18 - error TS18046: 'weeklyStats' is of type 'unknown'.
+
+325           value: weeklyStats.tendencia || 'Estável',
+                     ~~~~~~~~~~~
+
+src/lib/discord-checklist-service.ts:330:18 - error TS18046: 'weeklyStats' is of type 'unknown'.
+
+330           value: weeklyStats.melhor_dia || 'N/A',
+                     ~~~~~~~~~~~
+
+src/lib/discord-checklist-service.ts:335:18 - error TS18046: 'weeklyStats' is of type 'unknown'.
+
+335           value: weeklyStats.pior_dia || 'N/A',
+                     ~~~~~~~~~~~
+
+src/lib/discord-checklist-service.ts:340:18 - error TS18046: 'weeklyStats' is of type 'unknown'.
+
+340           value: weeklyStats.top_funcionario || 'N/A',
+                     ~~~~~~~~~~~
+
+src/lib/discord-checklist-service.ts:345:18 - error TS18046: 'weeklyStats' is of type 'unknown'.
+
+345           value: weeklyStats.top_checklist || 'N/A',
+                     ~~~~~~~~~~~
+
+src/lib/discord-checklist-service.ts:350:18 - error TS18046: 'weeklyStats' is of type 'unknown'.
+
+350           value: weeklyStats.meta_atingida ? '✅ Atingida' : '❌ Não atingida',
+                     ~~~~~~~~~~~
+
+src/lib/discord-checklist-service.ts:355:41 - error TS18046: 'weeklyStats' is of type 'unknown'.
+
+355         text: `SGB Analytics • Semana ${weeklyStats.semana || 'Atual'}`,
+                                            ~~~~~~~~~~~
+
+src/lib/discord-checklist-service.ts:489:11 - error TS2698: Spread types may only be created from object types.
+
+489           ...payload,
+              ~~~~~~~~~~
+
+src/lib/discord-marketing-service.ts:458:13 - error TS18046: 'dados' is of type 'unknown'.
+
+458         if (dados.iniciando) {
+                ~~~~~
+
+src/lib/discord-marketing-service.ts:459:64 - error TS18046: 'dados' is of type 'unknown'.
+
+459           return await sgbMarketingBot.notificarColetaIniciada(dados.tipo);
+                                                                   ~~~~~
+
+src/lib/discord-marketing-service.ts:462:13 - error TS18046: 'dados' is of type 'unknown'.
+
+462             dados.resultado
+                ~~~~~
+
+src/lib/discord-marketing-service.ts:467:52 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type '{ tipo: string; mensagem: string; detalhes?: string | undefined; acao_sugerida?: string | undefined; }'.
+
+467         return await sgbMarketingBot.notificarErro(dados);
+                                                       ~~~~~
+
+src/lib/discord-marketing-service.ts:470:61 - error TS18046: 'dados' is of type 'unknown'.
+
+470         return await sgbMarketingBot.alertarMarcoImportante(dados.tipo, dados);
+                                                                ~~~~~
+
+src/lib/discord-marketing-service.ts:470:73 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type '{ plataforma: "facebook" | "instagram"; valor_atual: number; marco_atingido: number; crescimento: number; }'.
+
+470         return await sgbMarketingBot.alertarMarcoImportante(dados.tipo, dados);
+                                                                            ~~~~~
+
+src/lib/discord-marketing-service.ts:473:62 - error TS18046: 'dados' is of type 'unknown'.
+
+473         return await sgbMarketingBot.enviarRelatorioMetricas(dados.metrics);
+                                                                 ~~~~~
+
+src/lib/discord-service.ts:151:26 - error TS2339: Property 'bar_id' does not exist on type 'AIAnomaly'.
+
+151         bar_id: anomalia.bar_id || 'unknown',
+                             ~~~~~~
+
+src/lib/discord-service.ts:205:17 - error TS18046: 'dashboardData' is of type 'unknown'.
+
+205         bar_id: dashboardData.bar_id || 'unknown',
+                    ~~~~~~~~~~~~~
+
+src/lib/discord-service.ts:212:20 - error TS18046: 'dashboardData' is of type 'unknown'.
+
+212             value: dashboardData.metricas_count?.toString() || '0',
+                       ~~~~~~~~~~~~~
+
+src/lib/discord-service.ts:217:20 - error TS18046: 'dashboardData' is of type 'unknown'.
+
+217             value: dashboardData.anomalias_count?.toString() || '0',
+                       ~~~~~~~~~~~~~
+
+src/lib/discord-service.ts:222:20 - error TS18046: 'dashboardData' is of type 'unknown'.
+
+222             value: dashboardData.insights_count?.toString() || '0',
+                       ~~~~~~~~~~~~~
+
+src/lib/discord-service.ts:227:20 - error TS18046: 'dashboardData' is of type 'unknown'.
+
+227             value: dashboardData.score_geral?.toString() || 'N/A',
+                       ~~~~~~~~~~~~~
+
+src/lib/discord-service.ts:261:7 - error TS2322: Type 'unknown[] | undefined' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[] | undefined'.
+  Type 'unknown[]' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[]'.
+    Type 'unknown' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }'.
+
+261       fields,
+          ~~~~~~
+
+  src/lib/discord-service.ts:46:3
+    46   fields?: {
+         ~~~~~~
+    The expected type comes from property 'fields' which is declared here on type 'DiscordNotificationData'
+
+src/lib/discord-service.ts:277:7 - error TS2322: Type 'unknown[] | undefined' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[] | undefined'.
+  Type 'unknown[]' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[]'.
+    Type 'unknown' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }'.
+
+277       fields,
+          ~~~~~~
+
+  src/lib/discord-service.ts:46:3
+    46   fields?: {
+         ~~~~~~
+    The expected type comes from property 'fields' which is declared here on type 'DiscordNotificationData'
+
+src/lib/discord-service.ts:293:7 - error TS2322: Type 'unknown[] | undefined' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[] | undefined'.
+  Type 'unknown[]' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[]'.
+    Type 'unknown' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }'.
+
+293       fields,
+          ~~~~~~
+
+  src/lib/discord-service.ts:46:3
+    46   fields?: {
+         ~~~~~~
+    The expected type comes from property 'fields' which is declared here on type 'DiscordNotificationData'
+
+src/lib/discord-service.ts:309:7 - error TS2322: Type 'unknown[] | undefined' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[] | undefined'.
+  Type 'unknown[]' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[]'.
+    Type 'unknown' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }'.
+
+309       fields,
+          ~~~~~~
+
+  src/lib/discord-service.ts:46:3
+    46   fields?: {
+         ~~~~~~
+    The expected type comes from property 'fields' which is declared here on type 'DiscordNotificationData'
+
+src/lib/discord-service.ts:325:7 - error TS2322: Type 'unknown[] | undefined' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[] | undefined'.
+  Type 'unknown[]' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[]'.
+    Type 'unknown' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }'.
+
+325       fields,
+          ~~~~~~
+
+  src/lib/discord-service.ts:46:3
+    46   fields?: {
+         ~~~~~~
+    The expected type comes from property 'fields' which is declared here on type 'DiscordNotificationData'
+
+src/lib/discord-service.ts:341:7 - error TS2322: Type 'unknown[] | undefined' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[] | undefined'.
+  Type 'unknown[]' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }[]'.
+    Type 'unknown' is not assignable to type '{ name: string; value: string; inline?: boolean | undefined; }'.
+
+341       fields,
+          ~~~~~~
+
+  src/lib/discord-service.ts:46:3
+    46   fields?: {
+         ~~~~~~
+    The expected type comes from property 'fields' which is declared here on type 'DiscordNotificationData'
+
+src/lib/notifications-enhanced.ts:97:30 - error TS2339: Property 'message' does not exist on type '{}'.
+
+97           `Browser: ${error?.message || 'Erro desconhecido'}`
+                                ~~~~~~~
+
+src/lib/notifications-enhanced.ts:111:31 - error TS2339: Property 'message' does not exist on type '{}'.
+
+111           `WhatsApp: ${error?.message || 'Erro desconhecido'}`
+                                  ~~~~~~~
+
+src/lib/notifications-enhanced.ts:121:46 - error TS2339: Property 'message' does not exist on type '{}'.
+
+121         results.errors.push(`Email: ${error?.message || 'Erro desconhecido'}`);
+                                                 ~~~~~~~
+
+src/lib/notifications-enhanced.ts:130:44 - error TS2339: Property 'message' does not exist on type '{}'.
+
+130         results.errors.push(`SMS: ${error?.message || 'Erro desconhecido'}`);
+                                               ~~~~~~~
+
+src/lib/notifications-enhanced.ts:135:52 - error TS2339: Property 'id' does not exist on type '{}'.
+
+135     await this.updateNotificationStats(notificacao.id, results);
+                                                       ~~
+
+src/lib/notifications-enhanced.ts:344:23 - error TS18046: 'notificacao' is of type 'unknown'.
+
+344           usuario_id: notificacao.usuario_id,
+                          ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:345:19 - error TS18046: 'notificacao' is of type 'unknown'.
+
+345           titulo: notificacao.titulo,
+                      ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:346:21 - error TS18046: 'notificacao' is of type 'unknown'.
+
+346           conteudo: notificacao.conteudo,
+                        ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:347:17 - error TS18046: 'notificacao' is of type 'unknown'.
+
+347           tipo: notificacao.tipo,
+                    ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:348:19 - error TS18046: 'notificacao' is of type 'unknown'.
+
+348           modulo: notificacao.modulo,
+                      ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:349:23 - error TS18046: 'notificacao' is of type 'unknown'.
+
+349           prioridade: notificacao.prioridade,
+                          ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:375:13 - error TS18046: 'notificacao' is of type 'unknown'.
+
+375         id: notificacao.id,
+                ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:376:21 - error TS18046: 'notificacao' is of type 'unknown'.
+
+376         usuario_id: notificacao.usuario_id,
+                        ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:377:17 - error TS18046: 'notificacao' is of type 'unknown'.
+
+377         titulo: notificacao.titulo,
+                    ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:378:9 - error TS2353: Object literal may only specify known properties, and 'conteudo' does not exist in type 'NotificationData'.
+
+378         conteudo: notificacao.conteudo,
+            ~~~~~~~~
+
+src/lib/notifications-enhanced.ts:378:19 - error TS18046: 'notificacao' is of type 'unknown'.
+
+378         conteudo: notificacao.conteudo,
+                      ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:379:15 - error TS18046: 'notificacao' is of type 'unknown'.
+
+379         tipo: notificacao.tipo,
+                  ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:380:17 - error TS18046: 'notificacao' is of type 'unknown'.
+
+380         modulo: notificacao.modulo,
+                    ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:397:54 - error TS18046: 'notificacao' is of type 'unknown'.
+
+397     console.log('Email notification (placeholder):', notificacao.titulo);
+                                                         ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:406:52 - error TS18046: 'notificacao' is of type 'unknown'.
+
+406     console.log('SMS notification (placeholder):', notificacao.titulo);
+                                                       ~~~~~~~~~~~
+
+src/lib/notifications-enhanced.ts:418:42 - error TS18046: 'results' is of type 'unknown'.
+
+418       const channelsUsed = Object.values(results.channels).filter(
+                                             ~~~~~~~
+
+src/lib/notifications-enhanced.ts:421:45 - error TS18046: 'results' is of type 'unknown'.
+
+421       const channelsSuccess = Object.values(results.channels).filter(
+                                                ~~~~~~~
+
+src/lib/notifications-enhanced.ts:430:24 - error TS18046: 'results' is of type 'unknown'.
+
+430           erros_envio: results.errors,
+                           ~~~~~~~
+
+src/lib/notifications-enhanced.ts:481:20 - error TS2345: Argument of type '{ usuario_id: number; success: boolean; error: string; }' is not assignable to parameter of type 'never'.
+
+481       results.push({
+                       ~
+482         usuario_id: usuarioId,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+484         error: result.errors.join(', '),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+485       });
+    ~~~~~~~
+
+src/lib/notifications-enhanced.ts:491:20 - error TS2345: Argument of type '{ usuario_id: number; success: boolean; error: any; }' is not assignable to parameter of type 'never'.
+
+491       results.push({
+                       ~
+492         usuario_id: usuarioId,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+...
+494         error: error.message,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+495       });
+    ~~~~~~~
+
+src/lib/notifications-enhanced.ts:494:16 - error TS18046: 'error' is of type 'unknown'.
+
+494         error: error.message,
+                   ~~~~~
+
+src/lib/supabase-edge-functions.ts:19:46 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+
+19       urlWithParams.searchParams.append(key, params[key]);
+                                                ~~~~~~~~~~~
+
+src/lib/whatsapp-service.ts:107:38 - error TS18047: 'supabase' is possibly 'null'.
+
+107       const { data: config } = await supabase
+                                         ~~~~~~~~
+
+src/lib/whatsapp-service.ts:143:39 - error TS18047: 'supabase' is possibly 'null'.
+
+143       const { data: contato } = await supabase
+                                          ~~~~~~~~
+
+src/lib/whatsapp-service.ts:164:39 - error TS18047: 'supabase' is possibly 'null'.
+
+164       const { data: contato } = await supabase
+                                          ~~~~~~~~
+
+src/lib/whatsapp-service.ts:187:39 - error TS18047: 'supabase' is possibly 'null'.
+
+187       const { data: contato } = await supabase
+                                          ~~~~~~~~
+
+src/lib/whatsapp-service.ts:216:40 - error TS18047: 'supabase' is possibly 'null'.
+
+216       const { data: template } = await supabase
+                                           ~~~~~~~~
+
+src/lib/whatsapp-service.ts:236:41 - error TS18047: 'supabase' is possibly 'null'.
+
+236       const { data: templates } = await supabase
+                                            ~~~~~~~~
+
+src/lib/whatsapp-service.ts:303:58 - error TS18047: 'supabase' is possibly 'null'.
+
+303       const { data: mensagem, error: saveError } = await supabase
+                                                             ~~~~~~~~
+
+src/lib/whatsapp-service.ts:317:13 - error TS18047: 'supabase' is possibly 'null'.
+
+317       await supabase
+                ~~~~~~~~
+
+src/lib/whatsapp-service.ts:384:39 - error TS18047: 'supabase' is possibly 'null'.
+
+384       const { data: usuario } = await supabase
+                                          ~~~~~~~~
+
+src/lib/whatsapp-service.ts:411:9 - error TS2345: Argument of type '{ id: any; nome: any; }' is not assignable to parameter of type 'UserData'.
+  Property 'email' is missing in type '{ id: any; nome: any; }' but required in type 'UserData'.
+
+411         usuario,
+            ~~~~~~~
+
+  src/lib/whatsapp-service.ts:63:3
+    63   email: string;
+         ~~~~~
+    'email' is declared here.
+
+src/lib/whatsapp-service.ts:497:11 - error TS18046: 'mensagem' is of type 'unknown'.
+
+497       if (mensagem.tipo_mensagem === 'template') {
+              ~~~~~~~~
+
+src/lib/whatsapp-service.ts:498:9 - error TS18046: 'payload' is of type 'unknown'.
+
+498         payload.type = 'template';
+            ~~~~~~~
+
+src/lib/whatsapp-service.ts:499:9 - error TS18046: 'payload' is of type 'unknown'.
+
+499         payload.template = {
+            ~~~~~~~
+
+src/lib/whatsapp-service.ts:500:17 - error TS18046: 'mensagem' is of type 'unknown'.
+
+500           name: mensagem.template_name,
+                    ~~~~~~~~
+
+src/lib/whatsapp-service.ts:506:11 - error TS18046: 'mensagem' is of type 'unknown'.
+
+506           mensagem.template_parameters &&
+              ~~~~~~~~
+
+src/lib/whatsapp-service.ts:507:11 - error TS18046: 'mensagem' is of type 'unknown'.
+
+507           mensagem.template_parameters.length > 0
+              ~~~~~~~~
+
+src/lib/whatsapp-service.ts:509:11 - error TS18046: 'payload' is of type 'unknown'.
+
+509           payload.template.components.push({
+              ~~~~~~~
+
+src/lib/whatsapp-service.ts:511:25 - error TS18046: 'mensagem' is of type 'unknown'.
+
+511             parameters: mensagem.template_parameters.map((param: string) => ({
+                            ~~~~~~~~
+
+src/lib/whatsapp-service.ts:518:9 - error TS18046: 'payload' is of type 'unknown'.
+
+518         payload.type = 'text';
+            ~~~~~~~
+
+src/lib/whatsapp-service.ts:519:9 - error TS18046: 'payload' is of type 'unknown'.
+
+519         payload.text = { body: mensagem.conteudo };
+            ~~~~~~~
+
+src/lib/whatsapp-service.ts:519:32 - error TS18046: 'mensagem' is of type 'unknown'.
+
+519         payload.text = { body: mensagem.conteudo };
+                                   ~~~~~~~~
+
+
+Found 712 errors in 115 files.
+
+Errors  Files
+     2  .next/types/app/api/checklist-execucoes/route.ts:2
+     2  .next/types/app/api/eventos/[id]/route.ts:2
+     2  .next/types/app/api/eventos/analytics/route.ts:2
+     2  .next/types/app/api/eventos/fix-all/route.ts:2
+     2  .next/types/app/api/eventos/fix-names/route.ts:2
+     2  .next/types/app/api/eventos/fix-simple/route.ts:2
+     2  .next/types/app/api/eventos/import-attractions/route.ts:2
+     2  .next/types/app/api/eventos/import-from-csv/route.ts:2
+     2  .next/types/app/api/eventos/import-sheets/route.ts:2
+     2  .next/types/app/api/eventos/import/route.ts:2
+     2  .next/types/app/api/eventos/remove-closed-days/route.ts:2
+     2  .next/types/app/api/eventos/route.ts:2
+     2  .next/types/app/api/eventos/sync-performance/route.ts:2
+     2  .next/types/app/api/eventos/update-performance/route.ts:2
+     2  .next/types/app/api/metas/[id]/route.ts:2
+     2  .next/types/app/api/metas/route.ts:2
+     2  .next/types/app/api/producoes/route.ts:2
+     2  .next/types/app/api/receitas/calcular-insumos/route.ts:2
+     2  .next/types/app/api/receitas/criar/route.ts:2
+     2  .next/types/app/api/receitas/editar/route.ts:2
+     2  .next/types/app/api/receitas/insumos/route.ts:2
+     2  .next/types/app/api/receitas/producao/route.ts:2
+     2  .next/types/app/api/receitas/produtos-completo/route.ts:2
+     2  .next/types/app/api/receitas/produtos/route.ts:2
+     2  .next/types/app/api/receitas/proximo-codigo/route.ts:2
+     2  .next/types/app/api/receitas/route.ts:2
+     2  .next/types/app/api/receitas/todas/route.ts:2
+     2  .next/types/app/api/security/audit/route.ts:2
+     2  .next/types/app/api/security/events/route.ts:2
+     2  .next/types/app/api/security/metrics/route.ts:2
+     2  .next/types/app/api/security/rate-limit-status/route.ts:2
+     2  .next/types/app/api/security/test-webhook/route.ts:2
+     2  .next/types/app/api/whatsapp/config/route.ts:2
+     2  .next/types/app/api/whatsapp/messages/route.ts:2
+     2  .next/types/app/api/whatsapp/send-notification/route.ts:2
+     2  .next/types/app/api/whatsapp/send/route.ts:2
+     2  .next/types/app/api/whatsapp/test-number/route.ts:2
+     2  .next/types/app/api/whatsapp/webhook/route.ts:2
+    12  src/app/api/configuracoes/security/metrics/route.ts:47
+    26  src/app/api/configuracoes/whatsapp/messages/route.ts:68
+     4  src/app/api/configuracoes/whatsapp/send/route.ts:85
+     6  src/app/api/dashboard/recorrencia-semanal/route.ts:129
+     4  src/app/api/dashboard/relatorio-produtos/estatisticas/route.ts:211
+     1  src/app/api/dashboard/relatorio-produtos/grupos/route.ts:35
+    11  src/app/api/dashboard/relatorio-produtos/historico/route.ts:77
+    34  src/app/api/dashboard/semanal/route.ts:136
+     1  src/app/api/dashboard/stats/route.ts:177
+    15  src/app/api/dashboard/tempos-medios/route.ts:214
+     1  src/app/api/discord/checklist-test/route.ts:146
+    14  src/app/api/execucoes/[id]/route.ts:86
+     5  src/app/api/financeiro/inter/webhook/route.ts:127
+    10  src/app/api/gestao/eventos/analytics/route.ts:63
+     2  src/app/api/gestao/eventos/fix-all/route.ts:40
+     8  src/app/api/gestao/eventos/fix-names/route.ts:214
+     2  src/app/api/gestao/eventos/fix-simple/route.ts:42
+     1  src/app/api/gestao/eventos/import-from-csv/route.ts:87
+     5  src/app/api/gestao/eventos/import-sheets/route.ts:56
+     8  src/app/api/gestao/eventos/import/route.ts:239
+     7  src/app/api/gestao/eventos/sync-performance/route.ts:106
+    10  src/app/api/lgpd/data-portability/route.ts:46
+     1  src/app/api/notifications/[id]/route.ts:160
+    10  src/app/api/notifications/route.ts:469
+    16  src/app/api/operacoes/checklist-abertura/route.ts:102
+     1  src/app/api/operacoes/checklist-execucoes/route.ts:101
+    10  src/app/api/operacoes/receitas/calcular-insumos/route.ts:87
+     5  src/app/api/operacoes/receitas/editar/route.ts:46
+     4  src/app/api/operacoes/receitas/producao/route.ts:236
+    14  src/app/api/operacoes/receitas/produtos-completo/route.ts:6
+    17  src/app/api/operacoes/receitas/produtos/route.ts:96
+     8  src/app/api/operacoes/receitas/route.ts:120
+     6  src/app/api/operacoes/receitas/todas/route.ts:92
+     4  src/app/api/templates/[id]/route.ts:307
+     1  src/app/api/templates/route.ts:506
+     5  src/app/api/timezone/test/route.ts:48
+    10  src/app/api/usuarios/bulk/route.ts:43
+    12  src/app/api/usuarios/perfil/route.ts:120
+     6  src/app/api/usuarios/with-whatsapp/route.ts:70
+     6  src/app/auth/success/page.tsx:133
+     1  src/app/configuracoes/checklists/templates/editor/[id]/page.tsx:882
+     5  src/app/configuracoes/dashboard-admin.tsx:2349
+     4  src/app/configuracoes/privacidade/page.tsx:49
+     5  src/app/configuracoes/timezone-debug/page.tsx:43
+    21  src/app/gestao/eventos/page.tsx:252
+    25  src/app/operacoes/receitas/page.tsx:579
+    42  src/app/relatorios/contahub-teste/page.tsx:1431
+     1  src/components/checklist/CopyItemsDialog.tsx:181
+     1  src/components/checklist/ScheduleDialog.tsx:222
+    11  src/components/configuracoes/ChecklistReorderManager.tsx:83
+     3  src/components/configuracoes/NiboIntegrationCard.tsx:73
+     1  src/components/drag-drop/DraggableItem.tsx:2
+     1  src/components/drag-drop/DropZone.tsx:2
+     1  src/components/drag-drop/SortableList.tsx:4
+     2  src/components/marketing/AdvancedCharts.tsx:276
+     1  src/components/NotificationCenter.tsx:406
+     1  src/components/relatorios/RelatorioProdutos.tsx:67
+     3  src/components/SGBAssistant.tsx:358
+     4  src/components/ui/advanced-datatable.tsx:108
+     2  src/components/ui/command-palette.tsx:349
+     1  src/components/ui/dialog.tsx:82
+     1  src/contexts/BarContext.tsx:162
+     1  src/hooks/useDragAndDrop.ts:304
+     4  src/hooks/useDragAndDropPersistence.ts:83
+     1  src/hooks/useFileUpload.ts:227
+    13  src/lib/ai-agent-service.ts:181
+    16  src/lib/analytics-service.ts:102
+    13  src/lib/audit-logger.ts:313
+     7  src/lib/backup-system.ts:175
+     6  src/lib/cookies.ts:82
+    40  src/lib/discord-bot-service.ts:70
+     8  src/lib/discord-checklist-service.ts:325
+     7  src/lib/discord-marketing-service.ts:458
+    12  src/lib/discord-service.ts:151
+    26  src/lib/notifications-enhanced.ts:97
+     1  src/lib/supabase-edge-functions.ts:19
+    21  src/lib/whatsapp-service.ts:107
+
+F:\SGB_v3\frontend>

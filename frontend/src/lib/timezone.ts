@@ -14,7 +14,9 @@ export const BRASIL_LOCALE = 'pt-BR';
  * Retorna a data/hora atual no timezone do Brasil
  */
 export function agora(): Date {
-  return new Date(new Date().toLocaleString("en-US", { timeZone: BRASIL_TIMEZONE }));
+  return new Date(
+    new Date().toLocaleString('en-US', { timeZone: BRASIL_TIMEZONE })
+  );
 }
 
 /**
@@ -22,7 +24,9 @@ export function agora(): Date {
  */
 export function paraBrasilia(data: string | Date): Date {
   const dateObj = typeof data === 'string' ? new Date(data) : data;
-  return new Date(dateObj.toLocaleString("en-US", { timeZone: BRASIL_TIMEZONE }));
+  return new Date(
+    dateObj.toLocaleString('en-US', { timeZone: BRASIL_TIMEZONE })
+  );
 }
 
 /**
@@ -30,16 +34,16 @@ export function paraBrasilia(data: string | Date): Date {
  */
 export function formatarData(data: string | Date): string {
   if (!data) return 'N/A';
-  
+
   try {
     const dateObj = paraBrasilia(data);
     if (isNaN(dateObj.getTime())) return 'N/A';
-    
+
     return new Intl.DateTimeFormat(BRASIL_LOCALE, {
       timeZone: BRASIL_TIMEZONE,
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     }).format(dateObj);
   } catch {
     return 'N/A';
@@ -51,18 +55,18 @@ export function formatarData(data: string | Date): string {
  */
 export function formatarDataHora(data: string | Date): string {
   if (!data) return 'N/A';
-  
+
   try {
     const dateObj = paraBrasilia(data);
     if (isNaN(dateObj.getTime())) return 'N/A';
-    
+
     return new Intl.DateTimeFormat(BRASIL_LOCALE, {
       timeZone: BRASIL_TIMEZONE,
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(dateObj);
   } catch {
     return 'N/A';
@@ -74,15 +78,15 @@ export function formatarDataHora(data: string | Date): string {
  */
 export function formatarHora(data: string | Date): string {
   if (!data) return 'N/A';
-  
+
   try {
     const dateObj = paraBrasilia(data);
     if (isNaN(dateObj.getTime())) return 'N/A';
-    
+
     return new Intl.DateTimeFormat(BRASIL_LOCALE, {
       timeZone: BRASIL_TIMEZONE,
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(dateObj);
   } catch {
     return 'N/A';
@@ -120,7 +124,9 @@ export function dataHojeBrasil(): string {
  */
 export function primeiroDiaDoMes(): string {
   const hoje = agora();
-  return new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+  return new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+    .toISOString()
+    .split('T')[0];
 }
 
 /**
@@ -128,7 +134,9 @@ export function primeiroDiaDoMes(): string {
  */
 export function ultimoDiaDoMes(): string {
   const hoje = agora();
-  return new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0];
+  return new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
+    .toISOString()
+    .split('T')[0];
 }
 
 /**
@@ -166,16 +174,16 @@ export function formatarTempoRelativo(dataString: string): string {
   const data = paraBrasilia(dataString);
   const agoraBrasil = agora();
   const diff = agoraBrasil.getTime() - data.getTime();
-  
+
   const minutos = Math.floor(diff / (1000 * 60));
   const horas = Math.floor(diff / (1000 * 60 * 60));
   const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
+
   if (minutos < 1) return 'agora';
   if (minutos < 60) return `${minutos}min`;
   if (horas < 24) return `${horas}h`;
   if (dias < 7) return `${dias}d`;
-  
+
   return formatarData(data);
 }
 
@@ -208,7 +216,7 @@ export const formatoBrasileiroData = {
   locale: BRASIL_LOCALE,
   day: '2-digit' as const,
   month: '2-digit' as const,
-  year: 'numeric' as const
+  year: 'numeric' as const,
 };
 
 /**
@@ -221,7 +229,7 @@ export const formatoBrasileiroDataHora = {
   month: '2-digit' as const,
   year: 'numeric' as const,
   hour: '2-digit' as const,
-  minute: '2-digit' as const
+  minute: '2-digit' as const,
 };
 
 /**
@@ -233,8 +241,18 @@ export const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
  * Lista dos meses em português
  */
 export const meses = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
 ];
 
 // =====================================================
@@ -255,13 +273,14 @@ export function logBrasilia(message: string, ...args: unknown[]): void {
 export function debugTimezone(): object {
   const agoraBrasil = agora();
   const agoraUTC = new Date();
-  
+
   return {
     utc: agoraUTC.toISOString(),
     brasil: agoraBrasil.toISOString(),
     brasil_formatado: formatarDataHora(agoraBrasil),
     timezone: BRASIL_TIMEZONE,
     locale: BRASIL_LOCALE,
-    offset_horas: (agoraUTC.getTime() - agoraBrasil.getTime()) / (1000 * 60 * 60)
+    offset_horas:
+      (agoraUTC.getTime() - agoraBrasil.getTime()) / (1000 * 60 * 60),
   };
-} 
+}

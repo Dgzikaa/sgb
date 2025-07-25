@@ -1,15 +1,21 @@
-'use client'
+'use client';
 
-import { useBar } from '@/contexts/BarContext'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MapPinIcon, CheckCircle2Icon } from 'lucide-react'
+import { useBar } from '@/contexts/BarContext';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { MapPinIcon, CheckCircle2Icon } from 'lucide-react';
 
 export default function BarSelector() {
-  const { selectedBar, setSelectedBar, bars, loading } = useBar()
+  const { selectedBar, setSelectedBar, availableBars, isLoading } = useBar();
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-3 border-t border-slate-700/50">
         <div className="bg-slate-700/50 rounded-xl p-3 animate-pulse">
@@ -17,7 +23,7 @@ export default function BarSelector() {
           <div className="h-3 bg-slate-600 rounded w-1/2"></div>
         </div>
       </div>
-    )
+    );
   }
 
   // Collapsed state
@@ -43,8 +49,11 @@ export default function BarSelector() {
               Estabelecimento
             </span>
           </div>
-          <Badge variant="outline" className="text-xs px-2 py-1 bg-slate-700/50 text-slate-300 border-slate-600">
-            {bars.length}
+          <Badge
+            variant="outline"
+            className="text-xs px-2 py-1 bg-slate-700/50 text-slate-300 border-slate-600"
+          >
+            {availableBars.length}
           </Badge>
         </div>
 
@@ -52,9 +61,9 @@ export default function BarSelector() {
         <div className="relative">
           <Select
             value={selectedBar?.id?.toString() || ''}
-            onValueChange={(value) => {
-              const bar = bars.find(b => b.id.toString() === value)
-              if (bar) setSelectedBar(bar)
+            onValueChange={value => {
+              const bar = availableBars.find(b => b.id.toString() === value);
+              if (bar) setSelectedBar(bar);
             }}
           >
             <SelectTrigger className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700/70 transition-all duration-200 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800">
@@ -79,9 +88,9 @@ export default function BarSelector() {
               </div>
             </SelectTrigger>
             <SelectContent className="w-full bg-slate-800 border-slate-700 max-h-60 overflow-y-auto">
-              {bars.map((bar) => (
-                <SelectItem 
-                  key={bar.id} 
+              {availableBars.map(bar => (
+                <SelectItem
+                  key={bar.id}
                   value={bar.id.toString()}
                   className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
                 >
@@ -122,5 +131,5 @@ export default function BarSelector() {
         )}
       </div>
     </div>
-  )
-} 
+  );
+}

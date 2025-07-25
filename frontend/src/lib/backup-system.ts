@@ -1,5 +1,5 @@
 ﻿// Sistema de backup automático para dados críticos
-import { getAdminClient } from '@/lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
 
 export interface BackupConfig {
   tables: string[];
@@ -22,10 +22,29 @@ export interface BackupResult {
   error?: string;
 }
 
+interface BackupData {
+  metadata: {
+    version: string;
+    timestamp: string;
+    tables: string[];
+    total_records: number;
+    bar_id?: number;
+  };
+  data: Record<string, any[]>;
+}
+
+interface BackupRecord {
+  id: string;
+  bar_id?: number;
+  created_at: string;
+  updated_at?: string;
+  [key: string]: any;
+}
+
 const DEFAULT_BACKUP_CONFIG: BackupConfig = {
   tables: [
     'usuarios_bar',
-    'checklists', 
+    'checklists',
     'checklist_execucoes',
     'bars',
     'receitas',
@@ -33,14 +52,15 @@ const DEFAULT_BACKUP_CONFIG: BackupConfig = {
     'api_credentials',
     'security_events',
     'windsor_analytics_data',
-'nibo_contabil_data'
+    'nibo_contabil_data',
   ],
   schedule: 'daily',
   retention_days: 30,
   compression: true,
   encryption: true,
-  notification_webhook: 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y',
-  storage_bucket: 'sgb-backups'
+  notification_webhook:
+    'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y',
+  storage_bucket: 'sgb-backups',
 };
 
 export class BackupSystem {
@@ -63,19 +83,27 @@ export class BackupSystem {
     try {
       console.log(`🔄 Iniciando backup ${backupId}...`);
 
-      const { getAdminClient } = await import('@/lib/supabase-admin');
-      const supabase = await getAdminClient();
+      const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
       let totalRecords = 0;
-      const backupData: Record<string, unknown[]> = {};
+      const backupData: BackupData = {
+        metadata: {
+          version: '2.0.0',
+          timestamp: new Date().toISOString(),
+          tables: [],
+          total_records: 0,
+          bar_id: barId,
+        },
+        data: {},
+      };
 
       // Backup de cada tabela
       for (const table of this.config.tables) {
         try {
           let query = supabase.from(table).select('*');
-          
+
           // Filtrar por bar_id se especificado e se a tabela tem essa coluna
-          if (barId && await this.tableHasBarId(table)) {
+          if (barId && (await this.tableHasBarId(table))) {
             query = query.eq('bar_id', barId);
           }
 
@@ -87,8 +115,9 @@ export class BackupSystem {
           }
 
           if (data) {
-            backupData[table] = data;
+            backupData.data[table] = data;
             totalRecords += data.length;
+            backupData.metadata.tables.push(table);
             console.log(`✅ ${table}: ${data.length} registros`);
           }
         } catch (tableError) {
@@ -97,63 +126,51 @@ export class BackupSystem {
       }
 
       // Adicionar metadados do backup
-      const backupMetadata = {
-        id: backupId,
-        timestamp: new Date().toISOString(),
-        bar_id: barId,
-        config: this.config,
-        total_records: totalRecords,
-        tables: Object.keys(backupData),
-        version: '2.0.0'
-      };
+      backupData.metadata.total_records = totalRecords;
 
-      const fullBackup = {
-        metadata: backupMetadata,
-        data: backupData
-      };
+      // Verificar se o backup tem dados
+      if (backupData.metadata.version !== '2.0.0') {
+        throw new Error('Versão de backup incompatível');
+      }
 
-      // Salvar backup e obter informações do storage
-      const saveResult = await this.saveBackup(backupId, fullBackup);
-      const durationSeconds = Math.round((Date.now() - startTime) / 1000);
+      // Salvar backup
+      const { fileSizeMb, storagePath } = await this.saveBackup(backupId, backupData);
 
       const result: BackupResult = {
         id: backupId,
-        timestamp: backupMetadata.timestamp,
-        tables_backed_up: Object.keys(backupData),
+        timestamp: new Date().toISOString(),
+        tables_backed_up: backupData.metadata.tables,
         total_records: totalRecords,
-        file_size_mb: saveResult.fileSizeMb,
-        duration_seconds: durationSeconds,
-        success: true
+        file_size_mb: fileSizeMb,
+        duration_seconds: (Date.now() - startTime) / 1000,
+        success: true,
       };
 
-      // Registrar backup no banco
-      await this.registerBackup(result, saveResult.storagePath);
+      // Registrar backup
+      await this.registerBackup(result, storagePath);
+
+      // Limpar backups antigos
+      await this.cleanupOldBackups();
 
       // Notificar sucesso
       await this.notifyBackupComplete(result);
 
-      // Limpeza de backups antigos
-      await this.cleanupOldBackups();
-
-      console.log(`✅ Backup ${backupId} concluído em ${durationSeconds}s`);
+      console.log(`✅ Backup ${backupId} concluído com sucesso!`);
       return result;
-
     } catch (error) {
-      const durationSeconds = Math.round((Date.now() - startTime) / 1000);
       const result: BackupResult = {
         id: backupId,
         timestamp: new Date().toISOString(),
         tables_backed_up: [],
         total_records: 0,
         file_size_mb: 0,
-        duration_seconds: durationSeconds,
+        duration_seconds: (Date.now() - startTime) / 1000,
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       };
 
       await this.notifyBackupError(result);
-      console.error(`❌ Backup ${backupId} falhou:`, error);
-      return result;
+      throw error;
     } finally {
       this.isRunning = false;
     }
@@ -161,54 +178,52 @@ export class BackupSystem {
 
   async restoreBackup(backupId: string, barId?: number): Promise<boolean> {
     try {
-      console.log(`🔄 Iniciando restore do backup ${backupId}...`);
+      console.log(`🔄 Restaurando backup ${backupId}...`);
 
-      const backupData = await this.loadBackup(backupId);
-      if (!backupData) {
-        throw new Error('Backup não encontrado');
-      }
-
+      const backupData = await this.loadBackup(backupId) as BackupData;
       const { getAdminClient } = await import('@/lib/supabase-admin');
       const supabase = await getAdminClient();
 
-      // Validar se backup é compatível
+      // Verificar versão
       if (backupData.metadata.version !== '2.0.0') {
-        throw new Error('Versão do backup incompatível');
+        throw new Error('Versão de backup incompatível');
       }
 
-      // Restaurar dados por tabela
+      // Restaurar cada tabela
       for (const [table, records] of Object.entries(backupData.data)) {
-        if (!Array.isArray(records) || records.length === 0) continue;
-
         try {
-          // Filtrar por bar_id se necessário
-          let filteredRecords = records;
-          if (barId && await this.tableHasBarId(table)) {
-            filteredRecords = records.filter((record: unknown) => record.bar_id === barId);
-          }
+          // Filtrar registros por bar_id se especificado
+          const filteredRecords = barId
+            ? records.filter((record: BackupRecord) => record.bar_id === barId)
+            : records;
 
           if (filteredRecords.length === 0) continue;
 
-          // Inserir dados (usando upsert para evitar conflitos)
-          const { error } = await supabase
-            .from(table)
-            .upsert(filteredRecords, { onConflict: 'id' });
+          // Limpar tabela existente (apenas registros do bar_id se especificado)
+          if (barId) {
+            await supabase.from(table).delete().eq('bar_id', barId);
+          } else {
+            await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          }
+
+          // Inserir registros do backup
+          const { error } = await supabase.from(table).insert(filteredRecords);
 
           if (error) {
             console.error(`❌ Erro ao restaurar tabela ${table}:`, error);
-          } else {
-            console.log(`✅ Restaurada tabela ${table}: ${filteredRecords.length} registros`);
+            continue;
           }
+
+          console.log(`✅ ${table}: ${filteredRecords.length} registros restaurados`);
         } catch (tableError) {
           console.error(`❌ Erro ao processar tabela ${table}:`, tableError);
         }
       }
 
-      console.log(`✅ Restore do backup ${backupId} concluído`);
+      console.log(`✅ Backup ${backupId} restaurado com sucesso!`);
       return true;
-
     } catch (error) {
-      console.error(`❌ Erro no restore do backup ${backupId}:`, error);
+      console.error(`❌ Erro ao restaurar backup ${backupId}:`, error);
       return false;
     }
   }
@@ -219,24 +234,33 @@ export class BackupSystem {
       const supabase = await getAdminClient();
 
       let query = supabase
-        .from('system_backups')
+        .from('backup_registry')
         .select('*')
-        .order('timestamp', { ascending: false })
-        .limit(50);
+        .order('timestamp', { ascending: false });
 
       if (barId) {
         query = query.eq('bar_id', barId);
       }
 
-      const { data, error } = await query;
+      const { data: backups, error } = await query;
 
       if (error) {
-        throw error;
+        console.error('❌ Erro ao listar backups:', error);
+        return [];
       }
 
-      return data || [];
+      return (backups || []).map((backup: any) => ({
+        id: backup.backup_id,
+        timestamp: backup.timestamp,
+        tables_backed_up: backup.tables_backed_up || [],
+        total_records: backup.total_records || 0,
+        file_size_mb: backup.file_size_mb || 0,
+        duration_seconds: backup.duration_seconds || 0,
+        success: backup.success || false,
+        error: backup.error,
+      }));
     } catch (error) {
-      console.error('Erro ao listar backups:', error);
+      console.error('❌ Erro ao listar backups:', error);
       return [];
     }
   }
@@ -251,121 +275,110 @@ export class BackupSystem {
   private async tableHasBarId(table: string): Promise<boolean> {
     // Lista de tabelas que têm coluna bar_id
     const barIdTables = [
-      'usuarios_bar', 'checklists', 'checklist_execucoes', 
-      'receitas', 'producoes', 'api_credentials', 
-      'windsor_analytics_data', 'nibo_contabil_data'
+      'usuarios_bar',
+      'checklists',
+      'checklist_execucoes',
+      'receitas',
+      'producoes',
+      'api_credentials',
+      'windsor_analytics_data',
+      'nibo_contabil_data',
     ];
     return barIdTables.includes(table);
   }
 
-  private async saveBackup(backupId: string, data: unknown): Promise<{fileSizeMb: number, storagePath: string}> {
+  private async saveBackup(
+    backupId: string,
+    data: BackupData
+  ): Promise<{ fileSizeMb: number; storagePath: string }> {
     try {
       const supabase = await getAdminClient();
-      
+
       // Converter dados para JSON
       const jsonString = JSON.stringify(data);
       let finalData = new TextEncoder().encode(jsonString);
-      
+
       // Aplicar compressão se habilitado
       if (this.config.compression) {
         finalData = await this.compressData(finalData);
-        console.log(`🗜️ Dados comprimidos de ${jsonString.length} para ${finalData.length} bytes`);
+        console.log(
+          `🗜️ Dados comprimidos de ${jsonString.length} para ${finalData.length} bytes`
+        );
       }
-      
+
       // Aplicar criptografia se habilitado
       if (this.config.encryption) {
         finalData = await this.encryptData(finalData);
         console.log(`🔒 Dados criptografados`);
       }
-      
+
       // Calcular tamanho em MB
-      const fileSizeMb = Math.round((finalData.length / 1024 / 1024) * 100) / 100;
-      
+      const fileSizeMb =
+        Math.round((finalData.length / 1024 / 1024) * 100) / 100;
+
       // Gerar nome do arquivo
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const fileName = `${backupId}_${timestamp}.backup`;
-      
+
       // Upload para Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from(this.config.storage_bucket || 'sgb-backups')
         .upload(fileName, finalData, {
           contentType: 'application/octet-stream',
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
         });
-      
+
       if (uploadError) {
         console.error('❌ Erro no upload do backup:', uploadError);
         throw new Error(`Falha no upload: ${uploadError.message}`);
       }
-      
+
       console.log(`✅ Backup ${fileName} salvo com sucesso (${fileSizeMb}MB)`);
       return {
         fileSizeMb,
-        storagePath: fileName
+        storagePath: fileName,
       };
-      
     } catch (error) {
       console.error('❌ Erro ao salvar backup:', error);
       throw error;
     }
   }
 
-  private async loadBackup(backupId: string): Promise<unknown> {
+  private async loadBackup(backupId: string): Promise<BackupData | null> {
     try {
       const supabase = await getAdminClient();
-      
-      // Listar arquivos para encontrar o backup
-      const { data: files, error: listError } = await supabase.storage
+
+      // Buscar backup do storage
+      const { data, error } = await supabase.storage
         .from(this.config.storage_bucket || 'sgb-backups')
-        .list('', {
-          search: backupId
-        });
-      
-      if (listError || !files || files.length === 0) {
-        console.error('❌ Backup não encontrado:', listError);
+        .download(`${backupId}.backup`);
+
+      if (error || !data) {
+        console.error('❌ Backup não encontrado:', backupId);
         return null;
       }
-      
-      // Pegar o arquivo mais recente se houver múltiplos
-      const backupFile = files.sort((a: unknown, b: unknown) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )[0];
-      
-      console.log(`📥 Carregando backup ${backupFile.name}...`);
-      
-      // Download do arquivo
-      const { data: fileData, error: downloadError } = await supabase.storage
-        .from(this.config.storage_bucket || 'sgb-backups')
-        .download(backupFile.name);
-      
-      if (downloadError || !fileData) {
-        console.error('❌ Erro no download do backup:', downloadError);
-        return null;
-      }
-      
-      // Converter para bytes
-      let finalData = new Uint8Array(await fileData.arrayBuffer());
-      
-      // Descriptografar se necessário
-      if (this.config.encryption) {
-        finalData = await this.decryptData(finalData);
-        console.log(`🔓 Dados descriptografados`);
-      }
-      
+
+      // Converter para array de bytes
+      const bytes = new Uint8Array(await data.arrayBuffer());
+
       // Descomprimir se necessário
+      let decompressedData = bytes;
       if (this.config.compression) {
-        finalData = await this.decompressData(finalData);
-        console.log(`🗜️ Dados descomprimidos`);
+        decompressedData = await this.decompressData(bytes);
       }
-      
-      // Converter de volta para JSON
-      const jsonString = new TextDecoder().decode(finalData);
-      const backupData = JSON.parse(jsonString);
-      
-      console.log(`✅ Backup ${backupFile.name} carregado com sucesso`);
+
+      // Descriptografar se necessário
+      let decryptedData = decompressedData;
+      if (this.config.encryption) {
+        decryptedData = await this.decryptData(decompressedData);
+      }
+
+      // Converter de volta para objeto
+      const jsonString = new TextDecoder().decode(decryptedData);
+      const backupData: BackupData = JSON.parse(jsonString);
+
       return backupData;
-      
     } catch (error) {
       console.error('❌ Erro ao carregar backup:', error);
       return null;
@@ -376,13 +389,14 @@ export class BackupSystem {
   private async encryptData(data: Uint8Array): Promise<Uint8Array> {
     try {
       // Gerar chave de criptografia a partir de uma senha mestra
-      const password = process.env.BACKUP_ENCRYPTION_KEY || 'sgb-backup-key-2024-secure';
+      const password =
+        process.env.BACKUP_ENCRYPTION_KEY || 'sgb-backup-key-2024-secure';
       const encoder = new TextEncoder();
       const passwordBuffer = encoder.encode(password);
-      
+
       // Gerar salt aleatório
       const salt = crypto.getRandomValues(new Uint8Array(16));
-      
+
       // Derivar chave usando PBKDF2
       const keyMaterial = await crypto.subtle.importKey(
         'raw',
@@ -391,36 +405,38 @@ export class BackupSystem {
         false,
         ['deriveKey']
       );
-      
+
       const key = await crypto.subtle.deriveKey(
         {
           name: 'PBKDF2',
           salt: salt,
           iterations: 100000,
-          hash: 'SHA-256'
+          hash: 'SHA-256',
         },
         keyMaterial,
         { name: 'AES-GCM', length: 256 },
         false,
         ['encrypt']
       );
-      
+
       // Gerar IV aleatório
       const iv = crypto.getRandomValues(new Uint8Array(12));
-      
+
       // Criptografar dados
       const encryptedData = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv: iv },
         key,
         data
       );
-      
+
       // Combinar salt + iv + dados criptografados
-      const result = new Uint8Array(salt.length + iv.length + encryptedData.byteLength);
+      const result = new Uint8Array(
+        salt.length + iv.length + encryptedData.byteLength
+      );
       result.set(salt, 0);
       result.set(iv, salt.length);
       result.set(new Uint8Array(encryptedData), salt.length + iv.length);
-      
+
       return result;
     } catch (error) {
       console.error('❌ Erro na criptografia:', error);
@@ -434,12 +450,13 @@ export class BackupSystem {
       const salt = data.slice(0, 16);
       const iv = data.slice(16, 28);
       const encryptedData = data.slice(28);
-      
+
       // Derivar chave usando a mesma senha
-      const password = process.env.BACKUP_ENCRYPTION_KEY || 'sgb-backup-key-2024-secure';
+      const password =
+        process.env.BACKUP_ENCRYPTION_KEY || 'sgb-backup-key-2024-secure';
       const encoder = new TextEncoder();
       const passwordBuffer = encoder.encode(password);
-      
+
       const keyMaterial = await crypto.subtle.importKey(
         'raw',
         passwordBuffer,
@@ -447,27 +464,27 @@ export class BackupSystem {
         false,
         ['deriveKey']
       );
-      
+
       const key = await crypto.subtle.deriveKey(
         {
           name: 'PBKDF2',
           salt: salt,
           iterations: 100000,
-          hash: 'SHA-256'
+          hash: 'SHA-256',
         },
         keyMaterial,
         { name: 'AES-GCM', length: 256 },
         false,
         ['decrypt']
       );
-      
+
       // Descriptografar dados
       const decryptedData = await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: iv },
         key,
         encryptedData
       );
-      
+
       return new Uint8Array(decryptedData);
     } catch (error) {
       console.error('❌ Erro na descriptografia:', error);
@@ -482,28 +499,31 @@ export class BackupSystem {
         const stream = new CompressionStream('gzip');
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
-        
+
         writer.write(data);
         writer.close();
-        
+
         const chunks: Uint8Array[] = [];
         let result = await reader.read();
-        
+
         while (!result.done) {
           chunks.push(result.value);
           result = await reader.read();
         }
-        
+
         // Combinar todos os chunks
-        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const totalLength = chunks.reduce(
+          (sum, chunk) => sum + chunk.length,
+          0
+        );
         const compressed = new Uint8Array(totalLength);
         let offset = 0;
-        
+
         for (const chunk of chunks) {
           compressed.set(chunk, offset);
           offset += chunk.length;
         }
-        
+
         return compressed;
       } else {
         // Fallback: retornar dados sem compressão
@@ -523,32 +543,37 @@ export class BackupSystem {
         const stream = new DecompressionStream('gzip');
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
-        
+
         writer.write(data);
         writer.close();
-        
+
         const chunks: Uint8Array[] = [];
         let result = await reader.read();
-        
+
         while (!result.done) {
           chunks.push(result.value);
           result = await reader.read();
         }
-        
+
         // Combinar todos os chunks
-        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const totalLength = chunks.reduce(
+          (sum, chunk) => sum + chunk.length,
+          0
+        );
         const decompressed = new Uint8Array(totalLength);
         let offset = 0;
-        
+
         for (const chunk of chunks) {
           decompressed.set(chunk, offset);
           offset += chunk.length;
         }
-        
+
         return decompressed;
       } else {
         // Fallback: retornar dados como estão
-        console.warn('⚠️ DecompressionStream não disponível, pulando descompressão');
+        console.warn(
+          '⚠️ DecompressionStream não disponível, pulando descompressão'
+        );
         return data;
       }
     } catch (error) {
@@ -557,11 +582,14 @@ export class BackupSystem {
     }
   }
 
-  private async registerBackup(result: BackupResult, storagePath?: string): Promise<void> {
+  private async registerBackup(
+    result: BackupResult,
+    storagePath?: string
+  ): Promise<void> {
     try {
       const supabase = await getAdminClient();
 
-      await supabase.from('system_backups').insert({
+      await supabase.from('backup_registry').insert({
         backup_id: result.id,
         timestamp: result.timestamp,
         tables_backed_up: result.tables_backed_up,
@@ -574,7 +602,7 @@ export class BackupSystem {
         storage_bucket: this.config.storage_bucket || 'sgb-backups',
         is_encrypted: this.config.encryption,
         is_compressed: this.config.compression,
-        config: this.config
+        config: this.config,
       });
     } catch (error) {
       console.error('❌ Erro ao registrar backup:', error);
@@ -590,56 +618,41 @@ export class BackupSystem {
 
       // Buscar registros antigos no banco
       const { data: oldBackups } = await supabase
-        .from('system_backups')
+        .from('backup_registry')
         .select('backup_id')
         .lt('timestamp', cutoffDate.toISOString());
 
-      if (oldBackups && oldBackups.length > 0) {
-        // Listar todos os arquivos no storage
-        const { data: allFiles, error: listError } = await supabase.storage
-          .from(this.config.storage_bucket || 'sgb-backups')
-          .list('');
+      if (!oldBackups || oldBackups.length === 0) {
+        console.log('✅ Nenhum backup antigo para limpar');
+        return;
+      }
 
-        if (!listError && allFiles) {
-          // Encontrar arquivos antigos para deletar
-          const filesToDelete: string[] = [];
-          
-          for (const backup of oldBackups) {
-            const relatedFiles = allFiles.filter((file: unknown) => 
-              file.name.includes(backup.backup_id)
-            );
-            
-            filesToDelete.push(...relatedFiles.map((file: unknown) => file.name));
-          }
+      // Remover arquivos do storage
+      const filesToDelete = oldBackups.map((backup: any) => `${backup.backup_id}.backup`);
 
-          // Deletar arquivos do storage
-          if (filesToDelete.length > 0) {
-            const { error: deleteError } = await supabase.storage
-              .from(this.config.storage_bucket || 'sgb-backups')
-              .remove(filesToDelete);
+      const { error: storageError } = await supabase.storage
+        .from(this.config.storage_bucket || 'sgb-backups')
+        .remove(filesToDelete);
 
-            if (deleteError) {
-              console.error('❌ Erro ao deletar arquivos antigos:', deleteError);
-            } else {
-              console.log(`🗑️ ${filesToDelete.length} arquivos de backup removidos do storage`);
-            }
-          }
-        }
+      if (storageError) {
+        console.error('❌ Erro ao remover arquivos antigos:', storageError);
+      } else {
+        console.log(`✅ Removidos ${filesToDelete.length} arquivos antigos do storage`);
+      }
 
-        // Remover registros antigos do banco
-        const { error: dbDeleteError } = await supabase
-          .from('system_backups')
-          .delete()
-          .lt('timestamp', cutoffDate.toISOString());
+      // Remover registros antigos do banco
+      const { error: dbDeleteError } = await supabase
+        .from('backup_registry')
+        .delete()
+        .lt('timestamp', cutoffDate.toISOString());
 
-        if (dbDeleteError) {
-          console.error('❌ Erro ao remover registros antigos do banco:', dbDeleteError);
-        } else {
-          console.log(`🧹 ${oldBackups.length} registros de backup antigos removidos do banco`);
-        }
+      if (dbDeleteError) {
+        console.error('❌ Erro ao remover registros antigos:', dbDeleteError);
+      } else {
+        console.log(`✅ Removidos ${oldBackups.length} registros antigos do banco`);
       }
     } catch (error) {
-      console.error('❌ Erro na limpeza de backups:', error);
+      console.error('❌ Erro na limpeza de backups antigos:', error);
     }
   }
 
@@ -648,40 +661,42 @@ export class BackupSystem {
 
     try {
       const message = {
-        embeds: [{
-          title: '✅ Backup Concluído com Sucesso',
-          description: `Backup ID: ${result.id}`,
-          color: 0x00ff00,
-          fields: [
-            {
-              name: 'Tabelas',
-              value: result.tables_backed_up.join(', '),
-              inline: false
-            },
-            {
-              name: 'Total de Registros',
-              value: result.total_records.toString(),
-              inline: true
-            },
-            {
-              name: 'Tamanho do Arquivo',
-              value: `${result.file_size_mb} MB`,
-              inline: true
-            },
-            {
-              name: 'Duração',
-              value: `${result.duration_seconds}s`,
-              inline: true
-            }
-          ],
-          timestamp: result.timestamp
-        }]
+        embeds: [
+          {
+            title: '✅ Backup Concluído com Sucesso',
+            description: `Backup ID: ${result.id}`,
+            color: 0x00ff00,
+            fields: [
+              {
+                name: 'Tabelas',
+                value: result.tables_backed_up.join(', '),
+                inline: false,
+              },
+              {
+                name: 'Total de Registros',
+                value: result.total_records.toString(),
+                inline: true,
+              },
+              {
+                name: 'Tamanho do Arquivo',
+                value: `${result.file_size_mb} MB`,
+                inline: true,
+              },
+              {
+                name: 'Duração',
+                value: `${result.duration_seconds}s`,
+                inline: true,
+              },
+            ],
+            timestamp: result.timestamp,
+          },
+        ],
       };
 
       await fetch(this.config.notification_webhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
+        body: JSON.stringify(message),
       });
     } catch (error) {
       console.error('Erro ao enviar notificação de backup:', error);
@@ -693,30 +708,32 @@ export class BackupSystem {
 
     try {
       const message = {
-        embeds: [{
-          title: '❌ Falha no Backup',
-          description: `Backup ID: ${result.id}`,
-          color: 0xff0000,
-          fields: [
-            {
-              name: 'Erro',
-              value: result.error || 'Erro desconhecido',
-              inline: false
-            },
-            {
-              name: 'Duração',
-              value: `${result.duration_seconds}s`,
-              inline: true
-            }
-          ],
-          timestamp: result.timestamp
-        }]
+        embeds: [
+          {
+            title: '❌ Falha no Backup',
+            description: `Backup ID: ${result.id}`,
+            color: 0xff0000,
+            fields: [
+              {
+                name: 'Erro',
+                value: result.error || 'Erro desconhecido',
+                inline: false,
+              },
+              {
+                name: 'Duração',
+                value: `${result.duration_seconds}s`,
+                inline: true,
+              },
+            ],
+            timestamp: result.timestamp,
+          },
+        ],
       };
 
       await fetch(this.config.notification_webhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
+        body: JSON.stringify(message),
       });
     } catch (error) {
       console.error('Erro ao enviar notificação de erro de backup:', error);
@@ -744,13 +761,13 @@ export class BackupScheduler {
       const now = new Date();
       const target = new Date();
       target.setHours(2, 0, 0, 0);
-      
+
       if (target <= now) {
         target.setDate(target.getDate() + 1);
       }
-      
+
       const msUntilBackup = target.getTime() - now.getTime();
-      
+
       setTimeout(async () => {
         try {
           await this.backupSystem.createBackup();
@@ -781,4 +798,4 @@ export class BackupScheduler {
 
 // Export instances
 export const backupSystem = new BackupSystem();
-export const backupScheduler = new BackupScheduler(); 
+export const backupScheduler = new BackupScheduler();

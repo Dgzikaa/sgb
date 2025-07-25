@@ -1,146 +1,150 @@
-'use client'
+'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { 
-  Camera, 
-  RotateCcw, 
-  X, 
-  Check, 
-  AlertTriangle 
-} from 'lucide-react'
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Camera, RotateCcw, X, Check, AlertTriangle } from 'lucide-react';
 
 interface CameraCaptureProps {
-  onCapture: (blob: Blob) => void
-  onClose: () => void
-  isOpen: boolean
-  title?: string
+  onCapture: (blob: Blob) => void;
+  onClose: () => void;
+  isOpen: boolean;
+  title?: string;
 }
 
-export default function CameraCapture({ 
-  onCapture, 
-  onClose, 
+export default function CameraCapture({
+  onCapture,
+  onClose,
   isOpen,
-  title = "Capturar Foto"
+  title = 'Capturar Foto',
 }: CameraCaptureProps) {
-  const [isStreaming, setIsStreaming] = useState(false)
-  const [capturedImage, setCapturedImage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
-  
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>(
+    'environment'
+  );
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // Iniciar stream da câmera
   const startCamera = useCallback(async () => {
     try {
-      setError(null)
-      
+      setError(null);
+
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
           width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          height: { ideal: 1080 },
         },
-        audio: false
-      })
+        audio: false,
+      });
 
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.play()
-        setIsStreaming(true)
-        streamRef.current = stream
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+        setIsStreaming(true);
+        streamRef.current = stream;
       }
     } catch (err) {
-      console.error('Erro ao acessar câmera:', err)
-      setError('Não foi possível acessar a câmera. Verifique as permissões.')
+      console.error('Erro ao acessar câmera:', err);
+      setError('Não foi possível acessar a câmera. Verifique as permissões.');
     }
-  }, [facingMode])
+  }, [facingMode]);
 
   // Parar stream da câmera
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop())
-      streamRef.current = null
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
-    setIsStreaming(false)
-  }, [])
+    setIsStreaming(false);
+  }, []);
 
   // Capturar foto
   const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return
+    if (!videoRef.current || !canvasRef.current) return;
 
-    const video = videoRef.current
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
 
-    if (!ctx) return
+    if (!ctx) return;
 
     // Definir tamanho do canvas baseado no vídeo
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
     // Desenhar frame atual do vídeo no canvas
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // Converter para blob e base64
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const imageUrl = canvas.toDataURL('image/jpeg', 0.8)
-        setCapturedImage(imageUrl)
-        stopCamera()
-      }
-    }, 'image/jpeg', 0.8)
-  }, [stopCamera])
+    canvas.toBlob(
+      blob => {
+        if (blob) {
+          const imageUrl = canvas.toDataURL('image/jpeg', 0.8);
+          setCapturedImage(imageUrl);
+          stopCamera();
+        }
+      },
+      'image/jpeg',
+      0.8
+    );
+  }, [stopCamera]);
 
   // Confirmar captura
   const confirmCapture = useCallback(() => {
-    if (!canvasRef.current) return
+    if (!canvasRef.current) return;
 
-    canvasRef.current.toBlob((blob) => {
-      if (blob) {
-        onCapture(blob)
-        setCapturedImage(null)
-        onClose()
-      }
-    }, 'image/jpeg', 0.8)
-  }, [onCapture, onClose])
+    canvasRef.current.toBlob(
+      blob => {
+        if (blob) {
+          onCapture(blob);
+          setCapturedImage(null);
+          onClose();
+        }
+      },
+      'image/jpeg',
+      0.8
+    );
+  }, [onCapture, onClose]);
 
   // Recomeçar captura
   const retakePhoto = useCallback(() => {
-    setCapturedImage(null)
-    startCamera()
-  }, [startCamera])
+    setCapturedImage(null);
+    startCamera();
+  }, [startCamera]);
 
   // Alternar câmera frontal/traseira
   const toggleCamera = useCallback(() => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user')
-  }, [])
+    setFacingMode(prev => (prev === 'user' ? 'environment' : 'user'));
+  }, []);
 
   // Efeitos para gerenciar o ciclo de vida da câmera
   useEffect(() => {
     if (isOpen && !capturedImage) {
-      startCamera()
+      startCamera();
     }
-    
+
     return () => {
-      stopCamera()
-    }
-  }, [isOpen, startCamera, stopCamera, capturedImage, facingMode])
+      stopCamera();
+    };
+  }, [isOpen, startCamera, stopCamera, capturedImage, facingMode]);
 
   // Cleanup quando componente desmonta
   useEffect(() => {
     return () => {
-      stopCamera()
-    }
-  }, [stopCamera])
+      stopCamera();
+    };
+  }, [stopCamera]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
@@ -246,5 +250,5 @@ export default function CameraCapture({
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

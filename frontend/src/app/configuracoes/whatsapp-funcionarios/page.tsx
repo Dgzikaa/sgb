@@ -1,127 +1,137 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { 
-  Phone, 
-  Users, 
-  CheckCircle, 
-  AlertTriangle, 
-  UserPlus, 
-  Edit, 
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import {
+  Phone,
+  Users,
+  CheckCircle,
+  AlertTriangle,
+  UserPlus,
+  Edit,
   TestTube,
   Search,
   Download,
-  Settings
-} from 'lucide-react'
-import UsuarioCelularForm from '@/components/forms/UsuarioCelularForm'
+  Settings,
+} from 'lucide-react';
+import UsuarioCelularForm from '@/components/forms/UsuarioCelularForm';
 
 interface Usuario {
-  id: number
-  nome: string
-  email: string
-  celular: string | null
-  whatsapp_valido?: boolean
-  numero_formatado?: string | null
-  cargo?: string
-  departamento?: string
-  ativo: boolean
+  id: number;
+  nome: string;
+  email: string;
+  celular: string | null;
+  whatsapp_valido?: boolean;
+  numero_formatado?: string | null;
+  cargo?: string;
+  departamento?: string;
+  ativo: boolean;
 }
 
 export default function WhatsAppFuncionariosPage() {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([])
-  const [usuariosSemWhatsApp, setUsuariosSemWhatsApp] = useState<Usuario[]>([])
-  const [loading, setLoading] = useState(false)
-  const [editandoUsuario, setEditandoUsuario] = useState<number | null>(null)
-  const [filtro, setFiltro] = useState('')
-  const [testingUser, setTestingUser] = useState<number | null>(null)
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [usuariosSemWhatsApp, setUsuariosSemWhatsApp] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [editandoUsuario, setEditandoUsuario] = useState<number | null>(null);
+  const [filtro, setFiltro] = useState('');
+  const [testingUser, setTestingUser] = useState<number | null>(null);
 
   const loadUsuarios = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch('/api/usuarios/with-whatsapp?include_without=true')
-      const data = await response.json()
+      const response = await fetch(
+        '/api/usuarios/with-whatsapp?include_without=true'
+      );
+      const data = await response.json();
 
       if (data.success) {
-        setUsuarios(data.com_whatsapp || [])
-        setUsuariosSemWhatsApp(data.sem_whatsapp || [])
+        setUsuarios(data.com_whatsapp || []);
+        setUsuariosSemWhatsApp(data.sem_whatsapp || []);
       }
     } catch (error) {
-      console.error('Erro ao carregar usuários:', error)
+      console.error('Erro ao carregar usuários:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadUsuarios()
-  }, [loadUsuarios])
+    loadUsuarios();
+  }, [loadUsuarios]);
 
   const testWhatsApp = async (usuario: Usuario) => {
-    if (!usuario.celular) return
-    
-    setTestingUser(usuario.id)
-    
+    if (!usuario.celular) return;
+
+    setTestingUser(usuario.id);
+
     try {
-      const response = await fetch('/api/whatsapp/test-number', {
+      const response = await fetch('/api/configuracoes/whatsapp/test-number', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           numero: usuario.celular,
-          mensagem: `📱 Teste WhatsApp - SGB\n\nOlá ${usuario.nome}!\n\nEste é um teste do sistema de notificações.\n\n✅ Seu WhatsApp está funcionando perfeitamente!\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
-        })
-      })
-      
-      const result = await response.json()
-      
+          mensagem: `📱 Teste WhatsApp - SGB\n\nOlá ${usuario.nome}!\n\nEste é um teste do sistema de notificações.\n\n✅ Seu WhatsApp está funcionando perfeitamente!\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`,
+        }),
+      });
+
+      const result = await response.json();
+
       if (result.success) {
-        alert(`✅ Teste enviado com sucesso para ${usuario.nome}!`)
+        alert(`✅ Teste enviado com sucesso para ${usuario.nome}!`);
       } else {
-        alert(`❌ Erro ao enviar teste: ${result.error}`)
+        alert(`❌ Erro ao enviar teste: ${result.error}`);
       }
-      
     } catch (error) {
-      console.error('Erro ao testar:', error)
-      alert('❌ Erro ao enviar teste')
+      console.error('Erro ao testar:', error);
+      alert('❌ Erro ao enviar teste');
     } finally {
-      setTestingUser(null)
+      setTestingUser(null);
     }
-  }
+  };
 
   const exportarRelatorio = () => {
-    const todosUsuarios = [...usuarios, ...usuariosSemWhatsApp]
+    const todosUsuarios = [...usuarios, ...usuariosSemWhatsApp];
     const csv = [
       'Nome,Email,Celular,WhatsApp Válido,Cargo,Departamento,Status',
-      ...todosUsuarios.map(u => 
-        `"${u.nome}","${u.email}","${u.numero_formatado || u.celular || 'Sem celular'}","${u.whatsapp_valido ? 'Sim' : 'Não'}","${u.cargo || ''}","${u.departamento || ''}","${u.ativo ? 'Ativo' : 'Inativo'}"`
-      )
-    ].join('\n')
+      ...todosUsuarios.map(
+        u =>
+          `"${u.nome}","${u.email}","${u.numero_formatado || u.celular || 'Sem celular'}","${u.whatsapp_valido ? 'Sim' : 'Não'}","${u.cargo || ''}","${u.departamento || ''}","${u.ativo ? 'Ativo' : 'Inativo'}"`
+      ),
+    ].join('\n');
 
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `whatsapp-funcionarios-${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-  }
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `whatsapp-funcionarios-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
 
-  const usuariosFiltrados = usuarios.filter(u =>
-    u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    u.email.toLowerCase().includes(filtro.toLowerCase())
-  )
+  const usuariosFiltrados = usuarios.filter(
+    u =>
+      u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
+      u.email.toLowerCase().includes(filtro.toLowerCase())
+  );
 
-  const usuariosSemWhatsAppFiltrados = usuariosSemWhatsApp.filter(u =>
-    u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-    u.email.toLowerCase().includes(filtro.toLowerCase())
-  )
+  const usuariosSemWhatsAppFiltrados = usuariosSemWhatsApp.filter(
+    u =>
+      u.nome.toLowerCase().includes(filtro.toLowerCase()) ||
+      u.email.toLowerCase().includes(filtro.toLowerCase())
+  );
 
-  const usuariosValidos = usuarios.filter(u => u.whatsapp_valido)
-  const usuariosInvalidos = usuarios.filter(u => !u.whatsapp_valido)
+  const usuariosValidos = usuarios.filter(u => u.whatsapp_valido);
+  const usuariosInvalidos = usuarios.filter(u => !u.whatsapp_valido);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -134,20 +144,21 @@ export default function WhatsAppFuncionariosPage() {
                 Gerenciar WhatsApp dos Funcionários
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Configure e valide os números de WhatsApp para notificações automáticas
+                Configure e valide os números de WhatsApp para notificações
+                automáticas
               </p>
             </div>
-            
+
             <div className="flex gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={exportarRelatorio}
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" />
                 Exportar
               </Button>
-              <Button 
+              <Button
                 onClick={loadUsuarios}
                 className="flex items-center gap-2"
               >
@@ -232,7 +243,7 @@ export default function WhatsAppFuncionariosPage() {
                 <Input
                   placeholder="Buscar funcionário por nome ou email..."
                   value={filtro}
-                  onChange={(e) => setFiltro(e.target.value)}
+                  onChange={e => setFiltro(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                 />
               </div>
@@ -247,8 +258,8 @@ export default function WhatsAppFuncionariosPage() {
                   <UsuarioCelularForm
                     usuarioId={editandoUsuario}
                     onSave={() => {
-                      setEditandoUsuario(null)
-                      loadUsuarios()
+                      setEditandoUsuario(null);
+                      loadUsuarios();
                     }}
                     showValidation={true}
                   />
@@ -269,13 +280,22 @@ export default function WhatsAppFuncionariosPage() {
           {/* Abas */}
           <Tabs defaultValue="com-whatsapp" className="space-y-4">
             <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700">
-              <TabsTrigger value="com-whatsapp" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
+              <TabsTrigger
+                value="com-whatsapp"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600"
+              >
                 WhatsApp Configurado ({usuarios.length})
               </TabsTrigger>
-              <TabsTrigger value="sem-whatsapp" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
+              <TabsTrigger
+                value="sem-whatsapp"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600"
+              >
                 Sem WhatsApp ({usuariosSemWhatsApp.length})
               </TabsTrigger>
-              <TabsTrigger value="alertas" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
+              <TabsTrigger
+                value="alertas"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600"
+              >
                 Alertas e Avisos
               </TabsTrigger>
             </TabsList>
@@ -287,14 +307,19 @@ export default function WhatsAppFuncionariosPage() {
                   <CardContent className="p-8 text-center">
                     <Phone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
-                      {filtro ? 'Nenhum funcionário encontrado com o filtro aplicado' : 'Nenhum funcionário com WhatsApp configurado'}
+                      {filtro
+                        ? 'Nenhum funcionário encontrado com o filtro aplicado'
+                        : 'Nenhum funcionário com WhatsApp configurado'}
                     </p>
                   </CardContent>
                 </Card>
               ) : (
                 <div className="grid gap-4">
-                  {usuariosFiltrados.map((usuario) => (
-                    <Card key={usuario.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  {usuariosFiltrados.map(usuario => (
+                    <Card
+                      key={usuario.id}
+                      className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
@@ -312,22 +337,24 @@ export default function WhatsAppFuncionariosPage() {
                                 </Badge>
                               )}
                             </div>
-                            
+
                             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                               📧 {usuario.email}
                             </div>
-                            
+
                             <div className="text-sm text-gray-700 dark:text-gray-300 font-mono">
                               📱 {usuario.numero_formatado}
                             </div>
-                            
+
                             {(usuario.cargo || usuario.departamento) && (
                               <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                {[usuario.cargo, usuario.departamento].filter(Boolean).join(' • ')}
+                                {[usuario.cargo, usuario.departamento]
+                                  .filter(Boolean)
+                                  .join(' • ')}
                               </div>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             {usuario.whatsapp_valido && (
                               <Button
@@ -338,10 +365,12 @@ export default function WhatsAppFuncionariosPage() {
                                 className="flex items-center gap-2"
                               >
                                 <TestTube className="h-4 w-4" />
-                                {testingUser === usuario.id ? 'Testando...' : 'Testar'}
+                                {testingUser === usuario.id
+                                  ? 'Testando...'
+                                  : 'Testar'}
                               </Button>
                             )}
-                            
+
                             <Button
                               variant="outline"
                               size="sm"
@@ -367,7 +396,9 @@ export default function WhatsAppFuncionariosPage() {
                   <CardContent className="p-8 text-center">
                     <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
-                      {filtro ? 'Nenhum funcionário encontrado com o filtro aplicado' : 'Todos os funcionários têm WhatsApp configurado!'}
+                      {filtro
+                        ? 'Nenhum funcionário encontrado com o filtro aplicado'
+                        : 'Todos os funcionários têm WhatsApp configurado!'}
                     </p>
                   </CardContent>
                 </Card>
@@ -376,14 +407,18 @@ export default function WhatsAppFuncionariosPage() {
                   <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
                     <UserPlus className="h-4 w-4 text-red-600" />
                     <AlertDescription className="text-red-700 dark:text-red-300">
-                      <strong>Atenção:</strong> Estes funcionários não podem receber notificações de checklist via WhatsApp. 
-                      Configure os números antes de atribuí-los como responsáveis.
+                      <strong>Atenção:</strong> Estes funcionários não podem
+                      receber notificações de checklist via WhatsApp. Configure
+                      os números antes de atribuí-los como responsáveis.
                     </AlertDescription>
                   </Alert>
-                  
+
                   <div className="grid gap-4">
-                    {usuariosSemWhatsAppFiltrados.map((usuario) => (
-                      <Card key={usuario.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    {usuariosSemWhatsAppFiltrados.map(usuario => (
+                      <Card
+                        key={usuario.id}
+                        className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                      >
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
@@ -395,18 +430,20 @@ export default function WhatsAppFuncionariosPage() {
                                   ❌ Sem WhatsApp
                                 </Badge>
                               </div>
-                              
+
                               <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                                 📧 {usuario.email}
                               </div>
-                              
+
                               {(usuario.cargo || usuario.departamento) && (
                                 <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                  {[usuario.cargo, usuario.departamento].filter(Boolean).join(' • ')}
+                                  {[usuario.cargo, usuario.departamento]
+                                    .filter(Boolean)
+                                    .join(' • ')}
                                 </div>
                               )}
                             </div>
-                            
+
                             <div className="flex items-center gap-2">
                               <Button
                                 onClick={() => setEditandoUsuario(usuario.id)}
@@ -444,11 +481,16 @@ export default function WhatsAppFuncionariosPage() {
                       </h4>
                       <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
                         <li>• Máximo 50 mensagens por dia por número</li>
-                        <li>• Intervalo mínimo de 30 segundos entre mensagens</li>
-                        <li>• Funcionamento apenas em horário comercial (8h às 18h)</li>
+                        <li>
+                          • Intervalo mínimo de 30 segundos entre mensagens
+                        </li>
+                        <li>
+                          • Funcionamento apenas em horário comercial (8h às
+                          18h)
+                        </li>
                       </ul>
                     </div>
-                    
+
                     <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <h4 className="font-medium text-green-900 dark:text-green-200 mb-2">
                         ✅ Proteções Ativas
@@ -473,21 +515,24 @@ export default function WhatsAppFuncionariosPage() {
                 <CardContent className="space-y-3">
                   <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
                     <AlertDescription className="text-blue-700 dark:text-blue-300">
-                      <strong>Campo Obrigatório:</strong> Recomendamos tornar o celular obrigatório no cadastro de novos funcionários 
-                      para evitar problemas na atribuição de checklists.
+                      <strong>Campo Obrigatório:</strong> Recomendamos tornar o
+                      celular obrigatório no cadastro de novos funcionários para
+                      evitar problemas na atribuição de checklists.
                     </AlertDescription>
                   </Alert>
-                  
+
                   <Alert className="border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20">
                     <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                      <strong>Backup:</strong> Mantenha sempre um responsável adicional nos checklists críticos 
-                      caso um número fique indisponível.
+                      <strong>Backup:</strong> Mantenha sempre um responsável
+                      adicional nos checklists críticos caso um número fique
+                      indisponível.
                     </AlertDescription>
                   </Alert>
-                  
+
                   <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20">
                     <AlertDescription className="text-green-700 dark:text-green-300">
-                      <strong>Teste Regular:</strong> Teste os números periodicamente para garantir que estão funcionando.
+                      <strong>Teste Regular:</strong> Teste os números
+                      periodicamente para garantir que estão funcionando.
                     </AlertDescription>
                   </Alert>
                 </CardContent>
@@ -497,5 +542,5 @@ export default function WhatsAppFuncionariosPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

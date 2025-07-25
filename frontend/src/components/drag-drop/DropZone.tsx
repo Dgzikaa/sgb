@@ -1,23 +1,28 @@
-import React, { useState } from 'react'
-import { useDroppable } from '@dnd-kit/core'
+import React, { useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 
 interface DropZoneProps {
-  id: string
-  children: React.ReactNode
-  className?: string
-  onDrop?: (item: Record<string, unknown>) => void
+  id: string;
+  children: React.ReactNode;
+  className?: string;
+  onDrop?: (item: Record<string, unknown>) => void;
 }
 
-export default function DropZone({ id, children, className = '', onDrop }: DropZoneProps) {
-  const [isOver, setIsOver] = useState(false)
-  
+export default function DropZone({
+  id,
+  children,
+  className = '',
+  onDrop,
+}: DropZoneProps) {
+  const [isOver, setIsOver] = useState(false);
+
   const { setNodeRef, isOver: isDroppableOver } = useDroppable({
     id,
-  })
+  });
 
   React.useEffect(() => {
-    setIsOver(isDroppableOver)
-  }, [isDroppableOver])
+    setIsOver(isDroppableOver);
+  }, [isDroppableOver]);
 
   return (
     <div
@@ -26,5 +31,5 @@ export default function DropZone({ id, children, className = '', onDrop }: DropZ
     >
       {children}
     </div>
-  )
-} 
+  );
+}

@@ -1,162 +1,168 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Phone, Check, X, AlertTriangle } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Phone, Check, X, AlertTriangle } from 'lucide-react';
 
 interface Usuario {
-  id: number
-  nome: string
-  email: string
-  celular: string | null
-  ativo: boolean
+  id: number;
+  nome: string;
+  email: string;
+  celular: string | null;
+  ativo: boolean;
 }
 
 interface UsuarioCelularFormProps {
-  usuarioId?: number
-  onSave?: (usuario: Usuario) => void
-  showValidation?: boolean
+  usuarioId?: number;
+  onSave?: (usuario: Usuario) => void;
+  showValidation?: boolean;
 }
 
-export default function UsuarioCelularForm({ 
-  usuarioId, 
+export default function UsuarioCelularForm({
+  usuarioId,
   onSave,
-  showValidation = true 
+  showValidation = true,
 }: UsuarioCelularFormProps) {
-  const [usuario, setUsuario] = useState<Usuario | null>(null)
-  const [celular, setCelular] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [testingWhatsApp, setTestingWhatsApp] = useState(false)
-  const [whatsappStatus, setWhatsappStatus] = useState<'unknown' | 'valid' | 'invalid'>('unknown')
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [celular, setCelular] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [testingWhatsApp, setTestingWhatsApp] = useState(false);
+  const [whatsappStatus, setWhatsappStatus] = useState<
+    'unknown' | 'valid' | 'invalid'
+  >('unknown');
 
   useEffect(() => {
     if (usuarioId) {
-      loadUsuario()
+      loadUsuario();
     }
-  }, [usuarioId])
+  }, [usuarioId]);
 
   const loadUsuario = async () => {
     try {
-      const response = await fetch(`/api/usuarios/${usuarioId}`)
-      const data = await response.json()
-      
+      const response = await fetch(`/api/usuarios/${usuarioId}`);
+      const data = await response.json();
+
       if (data.success) {
-        setUsuario(data.usuario)
-        setCelular(data.usuario.celular || '')
+        setUsuario(data.usuario);
+        setCelular(data.usuario.celular || '');
       }
     } catch (error) {
-      console.error('Erro ao carregar usuário:', error)
+      console.error('Erro ao carregar usuário:', error);
     }
-  }
+  };
 
   const formatCelular = (value: string) => {
     // Remove tudo que não é número
-    const numbers = value.replace(/\D/g, '')
-    
+    const numbers = value.replace(/\D/g, '');
+
     // Formatar: +55 (XX) 9XXXX-XXXX
     if (numbers.length <= 11) {
       return numbers
         .replace(/(\d{2})(\d)/, '+55 ($1) $2')
         .replace(/(\d{4})(\d)/, '$1-$2')
-        .replace(/(\d{4})-(\d{4})/, '$1-$2')
+        .replace(/(\d{4})-(\d{4})/, '$1-$2');
     }
-    
-    return value
-  }
+
+    return value;
+  };
 
   const validateCelular = (cel: string) => {
-    const numbers = cel.replace(/\D/g, '')
-    
+    const numbers = cel.replace(/\D/g, '');
+
     // Deve ter 11 dígitos: DD9XXXXXXXX
-    if (numbers.length !== 11) return false
-    
+    if (numbers.length !== 11) return false;
+
     // Deve começar com DDD válido (11-99)
-    const ddd = parseInt(numbers.substring(0, 2))
-    if (ddd < 11 || ddd > 99) return false
-    
+    const ddd = parseInt(numbers.substring(0, 2));
+    if (ddd < 11 || ddd > 99) return false;
+
     // Terceiro dígito deve ser 9 (celular)
-    if (numbers[2] !== '9') return false
-    
-    return true
-  }
+    if (numbers[2] !== '9') return false;
+
+    return true;
+  };
 
   const testWhatsApp = async () => {
-    if (!celular || !validateCelular(celular)) return
-    
-    setTestingWhatsApp(true)
-    setWhatsappStatus('unknown')
-    
+    if (!celular || !validateCelular(celular)) return;
+
+    setTestingWhatsApp(true);
+    setWhatsappStatus('unknown');
+
     try {
-      const numbers = celular.replace(/\D/g, '')
-      
-      const response = await fetch('/api/whatsapp/test-number', {
+      const numbers = celular.replace(/\D/g, '');
+
+      const response = await fetch('/api/configuracoes/whatsapp/test-number', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           numero: numbers,
-          mensagem: `📱 Teste de WhatsApp - SGB\n\nOlá! Este é um teste de conectividade.\n\nSe você recebeu esta mensagem, seu número está funcionando perfeitamente para receber notificações do sistema!\n\n✅ Número validado: +${numbers}\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`
-        })
-      })
-      
-      const result = await response.json()
-      
+          mensagem: `📱 Teste de WhatsApp - SGB\n\nOlá! Este é um teste de conectividade.\n\nSe você recebeu esta mensagem, seu número está funcionando perfeitamente para receber notificações do sistema!\n\n✅ Número validado: +${numbers}\n\n_Sistema SGB - ${new Date().toLocaleString('pt-BR')}_`,
+        }),
+      });
+
+      const result = await response.json();
+
       if (result.success) {
-        setWhatsappStatus('valid')
+        setWhatsappStatus('valid');
       } else {
-        setWhatsappStatus('invalid')
+        setWhatsappStatus('invalid');
       }
-      
     } catch (error) {
-      console.error('Erro ao testar WhatsApp:', error)
-      setWhatsappStatus('invalid')
+      console.error('Erro ao testar WhatsApp:', error);
+      setWhatsappStatus('invalid');
     } finally {
-      setTestingWhatsApp(false)
+      setTestingWhatsApp(false);
     }
-  }
+  };
 
   const handleSave = async () => {
     if (!validateCelular(celular)) {
-      alert('Número de celular inválido! Use o formato: +55 (XX) 9XXXX-XXXX')
-      return
+      alert('Número de celular inválido! Use o formato: +55 (XX) 9XXXX-XXXX');
+      return;
     }
 
-    setLoading(true)
-    
+    setLoading(true);
+
     try {
-      const numbers = celular.replace(/\D/g, '')
-      
+      const numbers = celular.replace(/\D/g, '');
+
       const response = await fetch(`/api/usuarios/${usuarioId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          celular: numbers // Salvar apenas números
-        })
-      })
-      
-      const result = await response.json()
-      
+        body: JSON.stringify({
+          celular: numbers, // Salvar apenas números
+        }),
+      });
+
+      const result = await response.json();
+
       if (result.success) {
         if (onSave && usuario) {
-          onSave({ ...usuario, celular: numbers })
+          onSave({ ...usuario, celular: numbers });
         }
-        alert('Celular salvo com sucesso!')
+        alert('Celular salvo com sucesso!');
       } else {
-        alert('Erro ao salvar celular: ' + result.error)
+        alert('Erro ao salvar celular: ' + result.error);
       }
-      
     } catch (error) {
-      console.error('Erro ao salvar:', error)
-      alert('Erro ao salvar celular')
+      console.error('Erro ao salvar:', error);
+      alert('Erro ao salvar celular');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const isValid = validateCelular(celular)
+  const isValid = validateCelular(celular);
 
   return (
     <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
@@ -166,10 +172,12 @@ export default function UsuarioCelularForm({
           WhatsApp do Funcionário
         </CardTitle>
         <CardDescription className="text-gray-600 dark:text-gray-400">
-          {usuario ? `Configure o WhatsApp de ${usuario.nome}` : 'Configure o número para receber notificações'}
+          {usuario
+            ? `Configure o WhatsApp de ${usuario.nome}`
+            : 'Configure o número para receber notificações'}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Campo de Celular */}
         <div className="space-y-2">
@@ -179,16 +187,16 @@ export default function UsuarioCelularForm({
           <div className="relative">
             <Input
               value={celular}
-              onChange={(e) => setCelular(formatCelular(e.target.value))}
+              onChange={e => setCelular(formatCelular(e.target.value))}
               placeholder="+55 (61) 99999-9999"
               className={`bg-white dark:bg-gray-700 border ${
-                celular && !isValid 
-                  ? 'border-red-300 dark:border-red-600' 
+                celular && !isValid
+                  ? 'border-red-300 dark:border-red-600'
                   : 'border-gray-300 dark:border-gray-600'
               } text-gray-900 dark:text-white`}
               maxLength={18}
             />
-            
+
             {/* Status de Validação */}
             {celular && (
               <div className="absolute right-3 top-3">
@@ -200,7 +208,7 @@ export default function UsuarioCelularForm({
               </div>
             )}
           </div>
-          
+
           {/* Mensagem de Validação */}
           {celular && !isValid && (
             <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
@@ -242,7 +250,7 @@ export default function UsuarioCelularForm({
               {testingWhatsApp ? 'Testando...' : 'Testar WhatsApp'}
             </Button>
           )}
-          
+
           <Button
             onClick={handleSave}
             disabled={!isValid || loading}
@@ -266,5 +274,5 @@ export default function UsuarioCelularForm({
         </div>
       </CardContent>
     </Card>
-  )
-} 
+  );
+}

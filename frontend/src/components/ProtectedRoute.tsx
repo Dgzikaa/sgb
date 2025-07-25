@@ -1,93 +1,108 @@
-﻿'use client'
+﻿'use client';
 
-import { usePermissions } from '@/hooks/usePermissions'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { 
-  RefreshCw, 
-  Shield, 
-  ArrowLeft, 
-  Home 
-} from 'lucide-react'
+import { usePermissions } from '@/hooks/usePermissions';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { RefreshCw, Shield, ArrowLeft, Home } from 'lucide-react';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode
-  requiredModule?: string
-  requiredRole?: 'admin' | 'manager' | 'funcionario'
-  requiredModules?: string[]
-  fallbackUrl?: string
-  errorMessage?: string
-  showInlineError?: boolean // Nova prop para controlar se mostra erro inline ou redireciona
+  children: React.ReactNode;
+  requiredModule?: string;
+  requiredRole?: 'admin' | 'manager' | 'funcionario';
+  requiredModules?: string[];
+  fallbackUrl?: string;
+  errorMessage?: string;
+  showInlineError?: boolean; // Nova prop para controlar se mostra erro inline ou redireciona
 }
 
-export function ProtectedRoute({ 
-  children, 
+export function ProtectedRoute({
+  children,
   requiredModule,
   requiredRole,
   requiredModules = [],
   fallbackUrl = '/home',
   errorMessage = 'acesso_negado',
-  showInlineError = true // Por padrão mostra erro inline
+  showInlineError = true, // Por padrão mostra erro inline
 }: ProtectedRouteProps) {
-  const { user, hasPermission, hasAnyPermission, isRole, loading } = usePermissions()
-  const router = useRouter()
-  const [accessDenied, setAccessDenied] = useState(false)
+  const { user, hasPermission, hasAnyPermission, isRole, loading } =
+    usePermissions();
+  const router = useRouter();
+  const [accessDenied, setAccessDenied] = useState(false);
   const [denialReason, setDenialReason] = useState<{
-    type: 'role' | 'module' | 'modules'
-    required: string
-    current?: string
-  } | null>(null)
+    type: 'role' | 'module' | 'modules';
+    required: string;
+    current?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!loading && user) {
       // Verificar role específico
       if (requiredRole && !isRole(requiredRole)) {
-        setAccessDenied(true)
+        setAccessDenied(true);
         setDenialReason({
           type: 'role',
           required: requiredRole,
-          current: user.role
-        })
-        
+          current: user.role,
+        });
+
         if (!showInlineError) {
-          router.push(`${fallbackUrl}?error=${errorMessage}&required_role=${requiredRole}`)
+          router.push(
+            `${fallbackUrl}?error=${errorMessage}&required_role=${requiredRole}`
+          );
         }
-        return
+        return;
       }
 
       // Verificar módulo específico
       if (requiredModule && !hasPermission(requiredModule)) {
-        setAccessDenied(true)
+        setAccessDenied(true);
         setDenialReason({
           type: 'module',
-          required: requiredModule
-        })
-        
+          required: requiredModule,
+        });
+
         if (!showInlineError) {
-          router.push(`${fallbackUrl}?error=${errorMessage}&required_module=${requiredModule}`)
+          router.push(
+            `${fallbackUrl}?error=${errorMessage}&required_module=${requiredModule}`
+          );
         }
-        return
+        return;
       }
 
       // Verificar múltiplos módulos
       if (requiredModules.length > 0 && !hasAnyPermission(requiredModules)) {
-        setAccessDenied(true)
+        setAccessDenied(true);
         setDenialReason({
           type: 'modules',
-          required: requiredModules.join(', ')
-        })
-        
+          required: requiredModules.join(', '),
+        });
+
         if (!showInlineError) {
-          router.push(`${fallbackUrl}?error=${errorMessage}&required_modules=${requiredModules.join(',')}`)
+          router.push(
+            `${fallbackUrl}?error=${errorMessage}&required_modules=${requiredModules.join(',')}`
+          );
         }
-        return
+        return;
       }
 
-      setAccessDenied(false)
-      setDenialReason(null)
+      setAccessDenied(false);
+      setDenialReason(null);
     }
-  }, [user, loading, hasPermission, hasAnyPermission, isRole, router, requiredModule, requiredRole, requiredModules, fallbackUrl, errorMessage, showInlineError])
+  }, [
+    user,
+    loading,
+    hasPermission,
+    hasAnyPermission,
+    isRole,
+    router,
+    requiredModule,
+    requiredRole,
+    requiredModules,
+    fallbackUrl,
+    errorMessage,
+    showInlineError,
+  ]);
 
   // Mostrar loading enquanto verifica permissões
   if (loading) {
@@ -98,12 +113,12 @@ export function ProtectedRoute({
           <p>Verificando permissões...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // Se não tem usuário, não renderizar (será redirecionado)
   if (!user) {
-    return null
+    return null;
   }
 
   // Se acesso negado e deve mostrar erro inline
@@ -137,7 +152,7 @@ export function ProtectedRoute({
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </Button>
-              
+
               <Button
                 onClick={() => router.push('/home')}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white"
@@ -146,17 +161,17 @@ export function ProtectedRoute({
                 Ir para Home
               </Button>
             </div>
-                      </div>
           </div>
+        </div>
       </div>
-    )
+    );
   }
 
   // Se acesso negado mas não deve mostrar erro inline, não renderizar (foi redirecionado)
   if (accessDenied && !showInlineError) {
-    return null
+    return null;
   }
 
   // Se chegou até aqui, tem permissão
-  return <>{children}</>
-} 
+  return <>{children}</>;
+}

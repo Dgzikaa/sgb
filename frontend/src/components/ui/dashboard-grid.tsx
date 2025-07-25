@@ -1,161 +1,181 @@
-'use client'
+'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { DashboardWidget, WidgetConfig, WIDGET_PRESETS } from './dashboard-widget'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Edit3, 
-  Save, 
-  Plus, 
-  Grid, 
-  Layers, 
+import { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  DashboardWidget,
+  WidgetConfig,
+  WIDGET_PRESETS,
+} from './dashboard-widget';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Edit3,
+  Save,
+  Plus,
+  Grid,
+  Layers,
   Eye,
   EyeOff,
   RotateCcw,
   Settings,
-  RefreshCw, 
-  Download, 
-  Share2 
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+  RefreshCw,
+  Download,
+  Share2,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface DashboardGridProps {
-  widgets: WidgetConfig[]
-  onWidgetsChange?: (widgets: WidgetConfig[]) => void
-  className?: string
+  widgets: WidgetConfig[];
+  onWidgetsChange?: (widgets: WidgetConfig[]) => void;
+  className?: string;
 }
 
-export function DashboardGrid({ 
-  widgets, 
-  onWidgetsChange, 
-  className 
+export function DashboardGrid({
+  widgets,
+  onWidgetsChange,
+  className,
 }: DashboardGridProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [draggedWidget, setDraggedWidget] = useState<string | null>(null)
-  const [dragOverPosition, setDragOverPosition] = useState<{ x: number; y: number } | null>(null)
-  const [showAddWidget, setShowAddWidget] = useState(false)
-  const gridRef = useRef<HTMLDivElement>(null)
+  const [isEditing, setIsEditing] = useState(false);
+  const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
+  const [dragOverPosition, setDragOverPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [showAddWidget, setShowAddWidget] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   // Auto-save quando widgets mudam
   useEffect(() => {
     if (onWidgetsChange) {
       const timeoutId = setTimeout(() => {
-        onWidgetsChange(widgets)
-      }, 500)
-      return () => clearTimeout(timeoutId)
+        onWidgetsChange(widgets);
+      }, 500);
+      return () => clearTimeout(timeoutId);
     }
-  }, [widgets, onWidgetsChange])
+  }, [widgets, onWidgetsChange]);
 
-  const handleWidgetConfigChange = useCallback((config: WidgetConfig) => {
-    if (onWidgetsChange) {
-      const updatedWidgets = widgets.map(w => 
-        w.id === config.id ? config : w
-      )
-      onWidgetsChange(updatedWidgets)
-    }
-  }, [widgets, onWidgetsChange])
+  const handleWidgetConfigChange = useCallback(
+    (config: WidgetConfig) => {
+      if (onWidgetsChange) {
+        const updatedWidgets = widgets.map(w =>
+          w.id === config.id ? config : w
+        );
+        onWidgetsChange(updatedWidgets);
+      }
+    },
+    [widgets, onWidgetsChange]
+  );
 
-  const handleWidgetRemove = useCallback((id: string) => {
-    if (onWidgetsChange) {
-      const updatedWidgets = widgets.filter(w => w.id !== id)
-      onWidgetsChange(updatedWidgets)
-    }
-  }, [widgets, onWidgetsChange])
+  const handleWidgetRemove = useCallback(
+    (id: string) => {
+      if (onWidgetsChange) {
+        const updatedWidgets = widgets.filter(w => w.id !== id);
+        onWidgetsChange(updatedWidgets);
+      }
+    },
+    [widgets, onWidgetsChange]
+  );
 
   const handleAddWidget = (presetId: string) => {
     if (onWidgetsChange) {
-      const preset = WIDGET_PRESETS[presetId as keyof typeof WIDGET_PRESETS]
+      const preset = WIDGET_PRESETS[presetId as keyof typeof WIDGET_PRESETS];
       if (preset) {
         const newWidget: WidgetConfig = {
           ...preset,
           id: `${presetId}_${Date.now()}`,
-          position: findEmptyPosition()
-        }
-        onWidgetsChange([...widgets, newWidget])
+          position: findEmptyPosition(),
+        };
+        onWidgetsChange([...widgets, newWidget]);
       }
     }
-    setShowAddWidget(false)
-  }
+    setShowAddWidget(false);
+  };
 
   const findEmptyPosition = (): { x: number; y: number } => {
     // Simples algoritmo para encontrar posição vazia
-    const occupied = widgets.map(w => w.position)
-    
+    const occupied = widgets.map(w => w.position);
+
     for (let y = 0; y < 10; y++) {
       for (let x = 0; x < 6; x++) {
-        const position = { x, y }
+        const position = { x, y };
         if (!occupied.some(pos => pos.x === x && pos.y === y)) {
-          return position
+          return position;
         }
       }
     }
-    
-    return { x: 0, y: widgets.length }
-  }
+
+    return { x: 0, y: widgets.length };
+  };
 
   const handleResetLayout = () => {
     if (onWidgetsChange) {
       const resetWidgets = Object.values(WIDGET_PRESETS).map(preset => ({
         ...preset,
         id: preset.id,
-        visible: true
-      }))
-      onWidgetsChange(resetWidgets)
+        visible: true,
+      }));
+      onWidgetsChange(resetWidgets);
     }
-  }
+  };
 
   const handleToggleAll = () => {
     if (onWidgetsChange) {
-      const allVisible = widgets.every(w => w.visible)
-      const updatedWidgets = widgets.map(w => ({ ...w, visible: !allVisible }))
-      onWidgetsChange(updatedWidgets)
+      const allVisible = widgets.every(w => w.visible);
+      const updatedWidgets = widgets.map(w => ({ ...w, visible: !allVisible }));
+      onWidgetsChange(updatedWidgets);
     }
-  }
+  };
 
   // Drag and drop handlers
   const handleDragStart = (e: React.DragEvent, widgetId: string) => {
-    setDraggedWidget(widgetId)
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', widgetId)
-  }
+    setDraggedWidget(widgetId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', widgetId);
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
     if (gridRef.current) {
-      const rect = gridRef.current.getBoundingClientRect()
-      const x = Math.floor((e.clientX - rect.left) / (rect.width / 6))
-      const y = Math.floor((e.clientY - rect.top) / 100)
-      setDragOverPosition({ x: Math.max(0, Math.min(5, x)), y: Math.max(0, y) })
+      const rect = gridRef.current.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / (rect.width / 6));
+      const y = Math.floor((e.clientY - rect.top) / 100);
+      setDragOverPosition({
+        x: Math.max(0, Math.min(5, x)),
+        y: Math.max(0, y),
+      });
     }
-  }
+  };
 
   const handleDragLeave = () => {
-    setDragOverPosition(null)
-  }
+    setDragOverPosition(null);
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const widgetId = e.dataTransfer.getData('text/plain')
-    
-    if (widgetId && dragOverPosition && onWidgetsChange) {
-      const updatedWidgets = widgets.map(w => 
-        w.id === widgetId 
-          ? { ...w, position: dragOverPosition }
-          : w
-      )
-      onWidgetsChange(updatedWidgets)
-    }
-    
-    setDraggedWidget(null)
-    setDragOverPosition(null)
-  }
+    e.preventDefault();
+    const widgetId = e.dataTransfer.getData('text/plain');
 
-  const visibleWidgets = widgets.filter(w => w.visible || isEditing)
-  const hiddenCount = widgets.filter(w => !w.visible).length
+    if (widgetId && dragOverPosition && onWidgetsChange) {
+      const updatedWidgets = widgets.map(w =>
+        w.id === widgetId ? { ...w, position: dragOverPosition } : w
+      );
+      onWidgetsChange(updatedWidgets);
+    }
+
+    setDraggedWidget(null);
+    setDragOverPosition(null);
+  };
+
+  const visibleWidgets = widgets.filter(w => w.visible || isEditing);
+  const hiddenCount = widgets.filter(w => !w.visible).length;
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -168,16 +188,12 @@ export function DashboardGrid({
               Dashboard Layout
             </span>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">
-              {visibleWidgets.length} widgets
-            </Badge>
-            
+            <Badge variant="secondary">{visibleWidgets.length} widgets</Badge>
+
             {hiddenCount > 0 && (
-              <Badge variant="outline">
-                {hiddenCount} ocultos
-              </Badge>
+              <Badge variant="outline">{hiddenCount} ocultos</Badge>
             )}
           </div>
         </div>
@@ -222,7 +238,7 @@ export function DashboardGrid({
 
           {/* Edit mode toggle */}
           <Button
-            variant={isEditing ? "default" : "outline"}
+            variant={isEditing ? 'default' : 'outline'}
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
             className="flex items-center gap-2"
@@ -302,24 +318,24 @@ export function DashboardGrid({
               left: `${(dragOverPosition.x / 6) * 100}%`,
               top: `${dragOverPosition.y * 100}px`,
               width: `${100 / 6}%`,
-              height: '100px'
+              height: '100px',
             }}
           />
         )}
 
         {/* Widgets */}
-        {visibleWidgets.map((widget) => (
+        {visibleWidgets.map(widget => (
           <div
             key={widget.id}
             draggable={isEditing}
-            onDragStart={(e) => handleDragStart(e, widget.id)}
+            onDragStart={e => handleDragStart(e, widget.id)}
             className={cn(
               'transition-all duration-200',
               draggedWidget === widget.id && 'opacity-50'
             )}
             style={{
               gridColumnStart: widget.position.x + 1,
-              gridRowStart: widget.position.y + 1
+              gridRowStart: widget.position.y + 1,
             }}
           >
             <DashboardWidget
@@ -363,12 +379,13 @@ export function DashboardGrid({
         <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           <span className="text-sm text-blue-800 dark:text-blue-200">
-            Modo de edição ativo: arraste widgets para reposicionar, use os controles para configurar ou remover
+            Modo de edição ativo: arraste widgets para reposicionar, use os
+            controles para configurar ou remover
           </span>
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Widget content component
@@ -385,8 +402,8 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
             +12% vs. período anterior
           </div>
         </div>
-      )
-    
+      );
+
     case 'status':
       return (
         <div className="space-y-2">
@@ -400,8 +417,8 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
             Última atualização: agora
           </div>
         </div>
-      )
-    
+      );
+
     case 'activity':
       return (
         <div className="space-y-2">
@@ -417,13 +434,13 @@ function WidgetContent({ widget }: { widget: WidgetConfig }) {
             </div>
           </div>
         </div>
-      )
-    
+      );
+
     default:
       return (
         <div className="text-sm text-gray-600 dark:text-gray-400">
           Widget personalizado
         </div>
-      )
+      );
   }
-} 
+}

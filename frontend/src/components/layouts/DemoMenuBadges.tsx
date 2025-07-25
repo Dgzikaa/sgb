@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useMenuBadgesMock } from '@/hooks/useMenuBadgesMock'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Home, 
-  CheckSquare, 
-  ChefHat, 
-  Calculator, 
-  TrendingUp, 
+import { useMenuBadgesMock } from '@/hooks/useMenuBadgesMock';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Home,
+  CheckSquare,
+  ChefHat,
+  Calculator,
+  TrendingUp,
   Settings,
   Users,
   Utensils,
@@ -20,18 +20,18 @@ import {
   MessageSquare,
   Clock,
   BarChart3,
-  Smartphone
-} from 'lucide-react'
+  Smartphone,
+} from 'lucide-react';
 
 export function DemoMenuBadges() {
-  const { badges } = useMenuBadgesMock()
+  const { badges } = useMenuBadgesMock();
 
   const menuStructure = [
     {
       icon: Home,
       label: 'Home',
       badge: badges.home,
-      color: 'text-blue-600'
+      color: 'text-blue-600',
     },
     {
       icon: CheckSquare,
@@ -39,9 +39,12 @@ export function DemoMenuBadges() {
       badge: badges.checklist,
       color: 'text-green-600',
       subItems: [
-        { icon: CheckSquare, label: 'Checklists', badge: badges.checklistAbertura },
-
-      ]
+        {
+          icon: CheckSquare,
+          label: 'Checklists',
+          badge: badges.checklistAbertura,
+        },
+      ],
     },
     {
       icon: ChefHat,
@@ -50,17 +53,15 @@ export function DemoMenuBadges() {
       color: 'text-orange-600',
       subItems: [
         { icon: Utensils, label: 'Receitas', badge: badges.producaoReceitas },
-        { icon: Zap, label: 'Terminal', badge: badges.producaoTerminal }
-      ]
+        { icon: Zap, label: 'Terminal', badge: badges.producaoTerminal },
+      ],
     },
     {
       icon: Calculator,
       label: 'Windsor.ai',
-badge: badges.windsor,
+      badge: badges.windsor,
       color: 'text-blue-500',
-      subItems: [
-        { icon: FileText, label: 'Analytics', badge: badges.windsor }
-      ]
+      subItems: [{ icon: FileText, label: 'Analytics', badge: badges.windsor }],
     },
     {
       icon: TrendingUp,
@@ -68,8 +69,12 @@ badge: badges.windsor,
       badge: badges.marketing,
       color: 'text-pink-600',
       subItems: [
-        { icon: BarChart3, label: 'Marketing 360', badge: badges.marketingWindsor }
-      ]
+        {
+          icon: BarChart3,
+          label: 'Marketing 360',
+          badge: badges.marketingWindsor,
+        },
+      ],
     },
     {
       icon: Settings,
@@ -77,21 +82,37 @@ badge: badges.windsor,
       badge: badges.configuracoes,
       color: 'text-gray-600',
       subItems: [
-        { icon: CheckSquare, label: 'Checklists', badge: badges.configChecklists },
+        {
+          icon: CheckSquare,
+          label: 'Checklists',
+          badge: badges.configChecklists,
+        },
         { icon: Target, label: 'Metas', badge: badges.configMetas },
-        { icon: Database, label: 'Integrações', badge: badges.configIntegracoes },
+        {
+          icon: Database,
+          label: 'Integrações',
+          badge: badges.configIntegracoes,
+        },
         { icon: Shield, label: 'Segurança', badge: badges.configSeguranca },
-        { icon: MessageSquare, label: 'WhatsApp', badge: badges.configWhatsapp },
+        {
+          icon: MessageSquare,
+          label: 'WhatsApp',
+          badge: badges.configWhatsapp,
+        },
         { icon: Zap, label: 'ContaHub Auto', badge: badges.configContahub },
         { icon: Clock, label: 'Meta Config', badge: badges.configMeta },
         { icon: FileText, label: 'Templates', badge: badges.configTemplates },
         { icon: BarChart3, label: 'Analytics', badge: badges.configAnalytics },
         { icon: Database, label: 'Cache', badge: badges.configCache },
         { icon: Smartphone, label: 'PWA', badge: badges.configPwa },
-        { icon: CheckSquare, label: 'Bulk Actions', badge: badges.configBulkActions }
-      ]
-    }
-  ]
+        {
+          icon: CheckSquare,
+          label: 'Bulk Actions',
+          badge: badges.configBulkActions,
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -106,7 +127,7 @@ badge: badges.windsor,
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            {menuStructure.map((item) => (
+            {menuStructure.map(item => (
               <Card key={item.label} className="border-l-4 border-l-blue-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -118,15 +139,21 @@ badge: badges.windsor,
                       </Badge>
                     )}
                   </div>
-                  
+
                   {item.subItems && (
                     <div className="ml-8 space-y-2">
-                      {item.subItems.map((subItem) => (
-                        <div key={subItem.label} className="flex items-center gap-2 text-sm">
+                      {item.subItems.map(subItem => (
+                        <div
+                          key={subItem.label}
+                          className="flex items-center gap-2 text-sm"
+                        >
                           <subItem.icon className="w-4 h-4 text-gray-500" />
                           <span>{subItem.label}</span>
                           {subItem.badge && subItem.badge > 0 && (
-                            <Badge variant="outline" className="ml-auto text-xs">
+                            <Badge
+                              variant="outline"
+                              className="ml-auto text-xs"
+                            >
                               {subItem.badge}
                             </Badge>
                           )}
@@ -138,21 +165,38 @@ badge: badges.windsor,
               </Card>
             ))}
           </div>
-          
+
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
               📊 Resumo dos Badges
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-              <div>Total Home: <Badge variant="secondary">{badges.home}</Badge></div>
-              <div>Total Checklist: <Badge variant="secondary">{badges.checklist}</Badge></div>
-              <div>Total Produção: <Badge variant="secondary">{badges.producao}</Badge></div>
-              <div>Total Windsor.ai: <Badge variant="secondary">{badges.windsor}</Badge></div>
-              <div>Total Marketing: <Badge variant="secondary">{badges.marketing}</Badge></div>
-              <div>Total Configurações: <Badge variant="secondary">{badges.configuracoes}</Badge></div>
+              <div>
+                Total Home: <Badge variant="secondary">{badges.home}</Badge>
+              </div>
+              <div>
+                Total Checklist:{' '}
+                <Badge variant="secondary">{badges.checklist}</Badge>
+              </div>
+              <div>
+                Total Produção:{' '}
+                <Badge variant="secondary">{badges.producao}</Badge>
+              </div>
+              <div>
+                Total Windsor.ai:{' '}
+                <Badge variant="secondary">{badges.windsor}</Badge>
+              </div>
+              <div>
+                Total Marketing:{' '}
+                <Badge variant="secondary">{badges.marketing}</Badge>
+              </div>
+              <div>
+                Total Configurações:{' '}
+                <Badge variant="secondary">{badges.configuracoes}</Badge>
+              </div>
             </div>
           </div>
-          
+
           <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
             <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
               ✅ Recursos Implementados
@@ -170,5 +214,5 @@ badge: badges.windsor,
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}

@@ -1,12 +1,12 @@
-import { 
-  SkeletonCard, 
-  SkeletonTable, 
-  SkeletonStats, 
-  SkeletonChart, 
+import {
+  SkeletonCard,
+  SkeletonTable,
+  SkeletonStats,
+  SkeletonChart,
   SkeletonPageHeader,
   SkeletonList,
-  SkeletonForm
-} from '@/components/ui/skeleton'
+  SkeletonForm,
+} from '@/components/ui/skeleton';
 
 // =====================================================
 // DASHBOARD SKELETONS
@@ -18,12 +18,12 @@ export function DashboardSkeleton() {
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SkeletonPageHeader />
         <SkeletonStats items={4} />
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SkeletonChart />
           <SkeletonChart />
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <SkeletonTable rows={6} columns={5} />
@@ -32,7 +32,7 @@ export function DashboardSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -44,7 +44,7 @@ export function ChecklistSkeleton() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SkeletonPageHeader />
-        
+
         {/* Filtros e controles */}
         <div className="card-dark p-4">
           <div className="animate-pulse">
@@ -57,7 +57,7 @@ export function ChecklistSkeleton() {
             </div>
           </div>
         </div>
-        
+
         {/* Lista de checklists */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -82,7 +82,7 @@ export function ChecklistSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -94,7 +94,7 @@ export function RelatorioSkeleton() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SkeletonPageHeader />
-        
+
         {/* Filtros de data */}
         <div className="card-dark p-6">
           <div className="animate-pulse">
@@ -117,13 +117,13 @@ export function RelatorioSkeleton() {
             </div>
           </div>
         </div>
-        
+
         <SkeletonStats items={3} />
         <SkeletonChart />
         <SkeletonTable rows={8} columns={6} />
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -135,7 +135,7 @@ export function ConfiguracoesSkeleton() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SkeletonPageHeader />
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <SkeletonForm fields={8} />
@@ -147,7 +147,7 @@ export function ConfiguracoesSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -159,7 +159,7 @@ export function OperacoesSkeleton() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6 space-y-6">
         <SkeletonPageHeader />
-        
+
         {/* Cards de operações */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -173,14 +173,14 @@ export function OperacoesSkeleton() {
             </div>
           ))}
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SkeletonTable rows={5} columns={4} />
           <SkeletonChart />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -206,14 +206,14 @@ export function VisaoGeralSkeleton() {
             </div>
           </div>
         </div>
-        
+
         <SkeletonStats items={4} />
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SkeletonChart />
           <SkeletonChart />
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <SkeletonChart />
           <SkeletonChart />
@@ -221,7 +221,7 @@ export function VisaoGeralSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -253,23 +253,26 @@ export function Marketing360Skeleton() {
                 <div className="h-6 bg-white/20 rounded mx-auto w-80"></div>
                 <div className="w-64 mx-auto">
                   <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-                    <div className="bg-white h-full rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                    <div
+                      className="bg-white h-full rounded-full animate-pulse"
+                      style={{ width: '60%' }}
+                    ></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         <SkeletonStats items={4} />
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <SkeletonChart />
           <SkeletonChart />
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -292,7 +295,7 @@ export function FuncionarioSkeleton() {
             </div>
           </div>
         </div>
-        
+
         {/* Cards de checklist mobile */}
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -313,7 +316,7 @@ export function FuncionarioSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -331,5 +334,5 @@ export function FullScreenSkeleton() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

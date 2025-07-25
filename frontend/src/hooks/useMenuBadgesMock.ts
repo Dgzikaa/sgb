@@ -1,32 +1,32 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 
 interface MenuBadges {
-  home: number
-  checklist: number
-  producao: number
-  windsor: number
-  marketing: number
-  configuracoes: number
-  checklistAbertura: number
-  checklistFuncionario: number
-  producaoReceitas: number
-  producaoTerminal: number
-  windsorAnalytics: number
-marketingWindsor: number
-  configChecklists: number
-  configMetas: number
-  configIntegracoes: number
-  configSeguranca: number
-  configWhatsapp: number
-  configContahub: number
-  configMeta: number
-  configTemplates: number
-  configAnalytics: number
-  configCache: number
-  configPwa: number
-  configBulkActions: number
+  home: number;
+  checklist: number;
+  producao: number;
+  windsor: number;
+  marketing: number;
+  configuracoes: number;
+  checklistAbertura: number;
+  checklistFuncionario: number;
+  producaoReceitas: number;
+  producaoTerminal: number;
+  windsorAnalytics: number;
+  marketingWindsor: number;
+  configChecklists: number;
+  configMetas: number;
+  configIntegracoes: number;
+  configSeguranca: number;
+  configWhatsapp: number;
+  configContahub: number;
+  configMeta: number;
+  configTemplates: number;
+  configAnalytics: number;
+  configCache: number;
+  configPwa: number;
+  configBulkActions: number;
 }
 
 export function useMenuBadgesMock() {
@@ -42,7 +42,7 @@ export function useMenuBadgesMock() {
     producaoReceitas: 0,
     producaoTerminal: 0,
     windsorAnalytics: 0,
-marketingWindsor: 0,
+    marketingWindsor: 0,
     configChecklists: 0,
     configMetas: 0,
     configIntegracoes: 0,
@@ -54,8 +54,8 @@ marketingWindsor: 0,
     configAnalytics: 0,
     configCache: 0,
     configPwa: 0,
-    configBulkActions: 0
-  })
+    configBulkActions: 0,
+  });
 
   useEffect(() => {
     // Simular badges com valores mocados
@@ -71,7 +71,7 @@ marketingWindsor: 0,
       producaoReceitas: 2,
       producaoTerminal: 1,
       windsorAnalytics: 1,
-marketingWindsor: 4,
+      marketingWindsor: 4,
       configChecklists: 2,
       configMetas: 1,
       configIntegracoes: 1,
@@ -83,16 +83,16 @@ marketingWindsor: 4,
       configAnalytics: 1,
       configCache: 0,
       configPwa: 0,
-      configBulkActions: 0
-    }
+      configBulkActions: 0,
+    };
 
-    setBadges(mockBadges)
-  }, [])
+    setBadges(mockBadges);
+  }, []);
 
   return {
     badges,
     refreshBadge: () => {},
     refreshAllBadges: () => {},
-    isLoading: false
-  }
-} 
+    isLoading: false,
+  };
+}

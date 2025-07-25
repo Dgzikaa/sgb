@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  agora, 
-  formatarData, 
-  formatarDataHora, 
+import {
+  agora,
+  formatarData,
+  formatarDataHora,
   formatarHora,
   formatarTempoRelativo,
   timestampBrasilia,
@@ -18,17 +18,17 @@ import {
   fimSemana,
   debugTimezone,
   isHorarioComercial,
-  isHorarioRelatorioMatinal
+  isHorarioRelatorioMatinal,
 } from '@/lib/timezone';
 import { Clock, MapPin, Monitor, Database, Server, Globe } from 'lucide-react';
 
 interface TimezoneInfo {
-  timezone: string
-  offset: number
-  isDST: boolean
-  currentTime: string
-  serverTime: string
-  difference: number
+  timezone: string;
+  offset: number;
+  isDST: boolean;
+  currentTime: string;
+  serverTime: string;
+  difference: number;
 }
 
 export default function TimezoneDebugPage() {
@@ -54,7 +54,7 @@ export default function TimezoneDebugPage() {
 
   const testarSupabaseTimezone = async () => {
     try {
-      const response = await fetch('/api/timezone/test');
+      const response = await fetch('/api/configuracoes/timezone/test');
       if (response.ok) {
         const data = await response.json();
         setSupabaseTime(data.timestamp);
@@ -121,8 +121,14 @@ export default function TimezoneDebugPage() {
               <Badge variant={isHorarioComercial() ? 'default' : 'secondary'}>
                 {isHorarioComercial() ? 'Horário Comercial' : 'Fora do Horário'}
               </Badge>
-              <Badge variant={isHorarioRelatorioMatinal() ? 'destructive' : 'outline'}>
-                {isHorarioRelatorioMatinal() ? 'Hora do Relatório' : 'Hora Normal'}
+              <Badge
+                variant={
+                  isHorarioRelatorioMatinal() ? 'destructive' : 'outline'
+                }
+              >
+                {isHorarioRelatorioMatinal()
+                  ? 'Hora do Relatório'
+                  : 'Hora Normal'}
               </Badge>
             </div>
           </CardContent>
@@ -147,7 +153,7 @@ export default function TimezoneDebugPage() {
                   {formatarDataHora(currentTime)}
                 </div>
               </div>
-              
+
               <div>
                 <strong>Timestamp ISO:</strong>
                 <div className="font-mono text-sm bg-gray-100 p-2 rounded mt-1">
@@ -159,9 +165,13 @@ export default function TimezoneDebugPage() {
                 <strong>Período Atual:</strong>
                 <div className="space-y-1 mt-1">
                   <div className="text-sm">Hoje: {dataHojeBrasil()}</div>
-                  <div className="text-sm">Início do Mês: {primeiroDiaDoMes()}</div>
+                  <div className="text-sm">
+                    Início do Mês: {primeiroDiaDoMes()}
+                  </div>
                   <div className="text-sm">Fim do Mês: {ultimoDiaDoMes()}</div>
-                  <div className="text-sm">Início da Semana: {inicioSemana()}</div>
+                  <div className="text-sm">
+                    Início da Semana: {inicioSemana()}
+                  </div>
                   <div className="text-sm">Fim da Semana: {fimSemana()}</div>
                 </div>
               </div>
@@ -192,7 +202,9 @@ export default function TimezoneDebugPage() {
                   <div className="space-y-1 mt-1">
                     <div className="text-sm">UTC: {timezoneInfo.utc}</div>
                     <div className="text-sm">Brasil: {timezoneInfo.brasil}</div>
-                    <div className="text-sm">Offset: {timezoneInfo.offset_horas}h</div>
+                    <div className="text-sm">
+                      Offset: {timezoneInfo.offset_horas}h
+                    </div>
                   </div>
                 )}
               </div>
@@ -215,19 +227,44 @@ export default function TimezoneDebugPage() {
             <div>
               <h4 className="font-semibold mb-2">Data Atual</h4>
               <div className="space-y-2 text-sm">
-                <div><strong>formatarData():</strong> {formatarData(currentTime)}</div>
-                <div><strong>formatarDataHora():</strong> {formatarDataHora(currentTime)}</div>
-                <div><strong>formatarHora():</strong> {formatarHora(currentTime)}</div>
+                <div>
+                  <strong>formatarData():</strong> {formatarData(currentTime)}
+                </div>
+                <div>
+                  <strong>formatarDataHora():</strong>{' '}
+                  {formatarDataHora(currentTime)}
+                </div>
+                <div>
+                  <strong>formatarHora():</strong> {formatarHora(currentTime)}
+                </div>
               </div>
             </div>
 
             <div>
               <h4 className="font-semibold mb-2">Tempo Relativo</h4>
               <div className="space-y-2 text-sm">
-                <div><strong>Há 1 hora:</strong> {formatarTempoRelativo(new Date(Date.now() - 60*60*1000).toISOString())}</div>
-                <div><strong>Há 30 min:</strong> {formatarTempoRelativo(new Date(Date.now() - 30*60*1000).toISOString())}</div>
-                <div><strong>Há 5 min:</strong> {formatarTempoRelativo(new Date(Date.now() - 5*60*1000).toISOString())}</div>
-                <div><strong>Agora:</strong> {formatarTempoRelativo(new Date().toISOString())}</div>
+                <div>
+                  <strong>Há 1 hora:</strong>{' '}
+                  {formatarTempoRelativo(
+                    new Date(Date.now() - 60 * 60 * 1000).toISOString()
+                  )}
+                </div>
+                <div>
+                  <strong>Há 30 min:</strong>{' '}
+                  {formatarTempoRelativo(
+                    new Date(Date.now() - 30 * 60 * 1000).toISOString()
+                  )}
+                </div>
+                <div>
+                  <strong>Há 5 min:</strong>{' '}
+                  {formatarTempoRelativo(
+                    new Date(Date.now() - 5 * 60 * 1000).toISOString()
+                  )}
+                </div>
+                <div>
+                  <strong>Agora:</strong>{' '}
+                  {formatarTempoRelativo(new Date().toISOString())}
+                </div>
               </div>
             </div>
           </div>
@@ -249,4 +286,4 @@ export default function TimezoneDebugPage() {
       )}
     </div>
   );
-} 
+}

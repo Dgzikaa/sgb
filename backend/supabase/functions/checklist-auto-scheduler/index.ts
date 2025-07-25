@@ -115,7 +115,7 @@ serve(async (req) => {
         // 4. Enviar notificação WhatsApp
         if (agendamento.responsaveis_whatsapp && agendamento.responsaveis_whatsapp.length > 0) {
           try {
-            const whatsappResponse = await fetch('https://sgbv2.vercel.app/api/whatsapp/send', {
+            const whatsappResponse = await fetch('https://sgbv2.vercel.app/api/configuracoes/whatsapp/send', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'

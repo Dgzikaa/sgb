@@ -4,13 +4,21 @@ export interface SecurityEvent {
   id?: string;
   timestamp: string;
   level: 'info' | 'warning' | 'critical';
-  category: 'auth' | 'access' | 'data' | 'injection' | 'rate_limit' | 'api_abuse' | 'system' | 'backup';
+  category:
+    | 'auth'
+    | 'access'
+    | 'data'
+    | 'injection'
+    | 'rate_limit'
+    | 'api_abuse'
+    | 'system'
+    | 'backup';
   event_type: string;
   user_id?: string;
   ip_address?: string;
   user_agent?: string;
   endpoint?: string;
-  details: Record<string, (unknown)>;
+  details: Record<string, unknown>;
   risk_score: number; // 0-100
   resolved?: boolean;
   action_taken?: string;
@@ -44,10 +52,11 @@ class SecurityMonitor {
 
   private async loadWebhookConfig(): Promise<void> {
     try {
-      if (typeof window === 'undefined') { // Server-side
+      if (typeof window === 'undefined') {
+        // Server-side
         const { getAdminClient } = await import('@/lib/supabase-admin');
         const supabase = await getAdminClient();
-        
+
         const { data, error } = await supabase
           .from('api_credentials')
           .select('configuracoes')
@@ -70,19 +79,24 @@ class SecurityMonitor {
     }
   }
 
-  async logEvent(event: Omit<SecurityEvent, 'id' | 'timestamp'>): Promise<void> {
+  async logEvent(
+    event: Omit<SecurityEvent, 'id' | 'timestamp'>
+  ): Promise<void> {
     const securityEvent: SecurityEvent = {
       id: this.generateEventId(),
       timestamp: new Date().toISOString(),
-      ...event
+      ...event,
     };
 
     // Armazenar evento
     this.events.push(securityEvent);
-    
+
     // Log no console (apenas em desenvolvimento)
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`🚨 Security Event [${securityEvent.level.toUpperCase()}]:`, securityEvent);
+      console.warn(
+        `🚨 Security Event [${securityEvent.level.toUpperCase()}]:`,
+        securityEvent
+      );
     }
 
     // Salvar no banco de dados
@@ -98,20 +112,30 @@ class SecurityMonitor {
   }
 
   // Eventos específicos de segurança
-  async logFailedLogin(ip: string, email: string, userAgent: string): Promise<void> {
+  async logFailedLogin(
+    ip: string,
+    email: string,
+    userAgent: string
+  ): Promise<void> {
     await this.logEvent({
       level: 'warning',
       category: 'auth',
       event_type: 'failed_login',
       ip_address: ip,
       user_agent: userAgent,
-      endpoint: '/api/auth/login',
+      endpoint: '/api/configuracoes/auth/login',
       details: { email, attempt_count: await this.getRecentFailedLogins(ip) },
-      risk_score: await this.calculateLoginRiskScore(ip, email)
+      risk_score: await this.calculateLoginRiskScore(ip, email),
     });
   }
 
-  async logSQLInjectionAttempt(ip: string, endpoint: string, sql: string, userAgent: string, userId?: string): Promise<void> {
+  async logSQLInjectionAttempt(
+    ip: string,
+    endpoint: string,
+    sql: string,
+    userAgent: string,
+    userId?: string
+  ): Promise<void> {
     await this.logEvent({
       level: 'critical',
       category: 'injection',
@@ -120,15 +144,19 @@ class SecurityMonitor {
       ip_address: ip,
       user_agent: userAgent,
       endpoint,
-      details: { 
+      details: {
         sql_snippet: sql.substring(0, 200) + (sql.length > 200 ? '...' : ''),
-        sql_length: sql.length 
+        sql_length: sql.length,
       },
-      risk_score: 95
+      risk_score: 95,
     });
   }
 
-  async logRateLimitViolation(ip: string, endpoint: string, userAgent: string): Promise<void> {
+  async logRateLimitViolation(
+    ip: string,
+    endpoint: string,
+    userAgent: string
+  ): Promise<void> {
     await this.logEvent({
       level: 'warning',
       category: 'rate_limit',
@@ -137,11 +165,16 @@ class SecurityMonitor {
       user_agent: userAgent,
       endpoint,
       details: { requests_in_window: await this.getRequestCount(ip, endpoint) },
-      risk_score: 60
+      risk_score: 60,
     });
   }
 
-  async logUnauthorizedAccess(ip: string, endpoint: string, userId?: string, userAgent?: string): Promise<void> {
+  async logUnauthorizedAccess(
+    ip: string,
+    endpoint: string,
+    userId?: string,
+    userAgent?: string
+  ): Promise<void> {
     await this.logEvent({
       level: 'critical',
       category: 'access',
@@ -151,11 +184,16 @@ class SecurityMonitor {
       user_agent: userAgent,
       endpoint,
       details: { attempted_resource: endpoint },
-      risk_score: 85
+      risk_score: 85,
     });
   }
 
-  async logAPIAbuse(ip: string, endpoint: string, pattern: string, userAgent: string): Promise<void> {
+  async logAPIAbuse(
+    ip: string,
+    endpoint: string,
+    pattern: string,
+    userAgent: string
+  ): Promise<void> {
     await this.logEvent({
       level: 'warning',
       category: 'api_abuse',
@@ -163,32 +201,50 @@ class SecurityMonitor {
       ip_address: ip,
       user_agent: userAgent,
       endpoint,
-      details: { pattern, frequency: await this.getEndpointFrequency(ip, endpoint) },
-      risk_score: 70
+      details: {
+        pattern,
+        frequency: await this.getEndpointFrequency(ip, endpoint),
+      },
+      risk_score: 70,
     });
   }
 
   // Métricas de segurança
   async getSecurityMetrics(): Promise<SecurityMetrics> {
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentEvents = this.events.filter(e => new Date(e.timestamp) > last24h);
+    const recentEvents = this.events.filter(
+      e => new Date(e.timestamp) > last24h
+    );
 
     return {
-      failed_logins_24h: recentEvents.filter(e => e.event_type === 'failed_login').length,
-      rate_limit_violations_24h: recentEvents.filter(e => e.event_type === 'rate_limit_exceeded').length,
-      sql_injection_attempts_24h: recentEvents.filter(e => e.event_type === 'sql_injection_attempt').length,
-      suspicious_api_calls_24h: recentEvents.filter(e => e.category === 'api_abuse').length,
-      unique_ips_24h: new Set(recentEvents.map(e => e.ip_address).filter(Boolean)).size,
-      critical_events_unresolved: this.events.filter(e => e.level === 'critical' && !e.resolved).length
+      failed_logins_24h: recentEvents.filter(
+        e => e.event_type === 'failed_login'
+      ).length,
+      rate_limit_violations_24h: recentEvents.filter(
+        e => e.event_type === 'rate_limit_exceeded'
+      ).length,
+      sql_injection_attempts_24h: recentEvents.filter(
+        e => e.event_type === 'sql_injection_attempt'
+      ).length,
+      suspicious_api_calls_24h: recentEvents.filter(
+        e => e.category === 'api_abuse'
+      ).length,
+      unique_ips_24h: new Set(
+        recentEvents.map(e => e.ip_address).filter(Boolean)
+      ).size,
+      critical_events_unresolved: this.events.filter(
+        e => e.level === 'critical' && !e.resolved
+      ).length,
     };
   }
 
   // Verificar se IP está em lista de bloqueio
   async isIPBlocked(ip: string): Promise<boolean> {
-    const recentEvents = this.events.filter(e => 
-      e.ip_address === ip && 
-      e.level === 'critical' &&
-      new Date(e.timestamp) > new Date(Date.now() - 60 * 60 * 1000) // última hora
+    const recentEvents = this.events.filter(
+      e =>
+        e.ip_address === ip &&
+        e.level === 'critical' &&
+        new Date(e.timestamp) > new Date(Date.now() - 60 * 60 * 1000) // última hora
     );
 
     return recentEvents.length >= 3; // Bloquear após 3 eventos críticos
@@ -201,14 +257,14 @@ class SecurityMonitor {
         // Bloquear IP temporariamente
         await this.temporaryIPBlock(event.ip_address!, 3600); // 1 hora
         break;
-        
+
       case 'failed_login':
         if (event.risk_score > 80) {
           // Aumentar delay para tentativas de login
           await this.increaseLoginDelay(event.ip_address!);
         }
         break;
-        
+
       case 'rate_limit_exceeded':
         if (event.risk_score > 70) {
           // Notificar administradores
@@ -226,10 +282,11 @@ class SecurityMonitor {
   private async persistEvent(event: SecurityEvent): Promise<void> {
     // Em produção, salvar no banco de dados
     try {
-      if (typeof window === 'undefined') { // Server-side
+      if (typeof window === 'undefined') {
+        // Server-side
         const { getAdminClient } = await import('@/lib/supabase-admin');
         const supabase = await getAdminClient();
-        
+
         await supabase.from('security_events').insert({
           event_id: event.id,
           timestamp: event.timestamp,
@@ -242,7 +299,7 @@ class SecurityMonitor {
           endpoint: event.endpoint,
           details: event.details,
           risk_score: event.risk_score,
-          resolved: false
+          resolved: false,
         });
       }
     } catch (error) {
@@ -257,53 +314,61 @@ class SecurityMonitor {
     }
 
     if (!this.webhookUrl) {
-      console.error('Discord webhook não configurado para alertas de segurança');
+      console.error(
+        'Discord webhook não configurado para alertas de segurança'
+      );
       return;
     }
 
     try {
       const message = {
-        embeds: [{
-          title: '🚨 ALERTA CRÍTICO DE SEGURANÇA',
-          description: `**Evento:** ${event.event_type}\n**IP:** ${event.ip_address}\n**Endpoint:** ${event.endpoint}`,
-          color: 0xff0000,
-          fields: [
-            {
-              name: 'Risk Score',
-              value: `${event.risk_score}/100`,
-              inline: true
+        embeds: [
+          {
+            title: '🚨 ALERTA CRÍTICO DE SEGURANÇA',
+            description: `**Evento:** ${event.event_type}\n**IP:** ${event.ip_address}\n**Endpoint:** ${event.endpoint}`,
+            color: 0xff0000,
+            fields: [
+              {
+                name: 'Risk Score',
+                value: `${event.risk_score}/100`,
+                inline: true,
+              },
+              {
+                name: 'Timestamp',
+                value: new Date(event.timestamp).toLocaleString('pt-BR'),
+                inline: true,
+              },
+              {
+                name: 'Categoria',
+                value: event.category.toUpperCase(),
+                inline: true,
+              },
+              {
+                name: 'Detalhes',
+                value: JSON.stringify(event.details, null, 2).substring(0, 500),
+                inline: false,
+              },
+            ],
+            timestamp: event.timestamp,
+            footer: {
+              text: '🔐 SGB Security Monitor - Sistema Automático',
             },
-            {
-              name: 'Timestamp',
-              value: new Date(event.timestamp).toLocaleString('pt-BR'),
-              inline: true
-            },
-            {
-              name: 'Categoria',
-              value: event.category.toUpperCase(),
-              inline: true
-            },
-            {
-              name: 'Detalhes',
-              value: JSON.stringify(event.details, null, 2).substring(0, 500),
-              inline: false
-            }
-          ],
-          timestamp: event.timestamp,
-          footer: {
-            text: '🔐 SGB Security Monitor - Sistema Automático'
-          }
-        }]
+          },
+        ],
       };
 
       const response = await fetch(this.webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
+        body: JSON.stringify(message),
       });
 
       if (!response.ok) {
-        console.error('Falha ao enviar alerta Discord:', response.status, response.statusText);
+        console.error(
+          'Falha ao enviar alerta Discord:',
+          response.status,
+          response.statusText
+        );
       } else {
         console.log('✅ Alerta crítico de segurança enviado para Discord');
       }
@@ -314,14 +379,18 @@ class SecurityMonitor {
 
   private async getRecentFailedLogins(ip: string): Promise<number> {
     const last10min = new Date(Date.now() - 10 * 60 * 1000);
-    return this.events.filter(e => 
-      e.ip_address === ip && 
-      e.event_type === 'failed_login' &&
-      new Date(e.timestamp) > last10min
+    return this.events.filter(
+      e =>
+        e.ip_address === ip &&
+        e.event_type === 'failed_login' &&
+        new Date(e.timestamp) > last10min
     ).length;
   }
 
-  private async calculateLoginRiskScore(ip: string, email: string): Promise<number> {
+  private async calculateLoginRiskScore(
+    ip: string,
+    email: string
+  ): Promise<number> {
     let score = 30; // Base score
 
     // Múltiplas tentativas do mesmo IP
@@ -329,12 +398,18 @@ class SecurityMonitor {
     score += recentFailures * 15;
 
     // Email suspeito (admin, test, etc.)
-    if (['admin', 'test', 'administrator', 'root'].some(word => email.includes(word))) {
+    if (
+      ['admin', 'test', 'administrator', 'root'].some(word =>
+        email.includes(word)
+      )
+    ) {
       score += 20;
     }
 
     // IP já teve eventos críticos
-    const criticalEvents = this.events.filter(e => e.ip_address === ip && e.level === 'critical').length;
+    const criticalEvents = this.events.filter(
+      e => e.ip_address === ip && e.level === 'critical'
+    ).length;
     score += criticalEvents * 10;
 
     return Math.min(score, 100);
@@ -342,26 +417,31 @@ class SecurityMonitor {
 
   private async getRequestCount(ip: string, endpoint: string): Promise<number> {
     const last5min = new Date(Date.now() - 5 * 60 * 1000);
-    return this.events.filter(e => 
-      e.ip_address === ip && 
-      e.endpoint === endpoint &&
-      new Date(e.timestamp) > last5min
+    return this.events.filter(
+      e =>
+        e.ip_address === ip &&
+        e.endpoint === endpoint &&
+        new Date(e.timestamp) > last5min
     ).length;
   }
 
-  private async getEndpointFrequency(ip: string, endpoint: string): Promise<number> {
+  private async getEndpointFrequency(
+    ip: string,
+    endpoint: string
+  ): Promise<number> {
     const lastHour = new Date(Date.now() - 60 * 60 * 1000);
-    return this.events.filter(e => 
-      e.ip_address === ip && 
-      e.endpoint === endpoint &&
-      new Date(e.timestamp) > lastHour
+    return this.events.filter(
+      e =>
+        e.ip_address === ip &&
+        e.endpoint === endpoint &&
+        new Date(e.timestamp) > lastHour
     ).length;
   }
 
   private async temporaryIPBlock(ip: string, seconds: number): Promise<void> {
     // Implementar bloqueio temporário (cache, banco de dados, etc.)
     console.warn(`🚫 IP ${ip} temporarily blocked for ${seconds} seconds`);
-    
+
     // Registrar evento de bloqueio
     await this.logEvent({
       level: 'warning',
@@ -370,11 +450,11 @@ class SecurityMonitor {
       ip_address: ip,
       user_agent: 'security-monitor',
       endpoint: '/system/ip-block',
-      details: { 
+      details: {
         block_duration: seconds,
-        reason: 'automated_security_response'
+        reason: 'automated_security_response',
       },
-      risk_score: 70
+      risk_score: 70,
     });
   }
 
@@ -385,38 +465,42 @@ class SecurityMonitor {
 
   private async notifyAdmins(event: SecurityEvent): Promise<void> {
     // Notificar administradores via Discord
-    console.warn(`📧 Admins notified about security event: ${event.event_type}`);
-    
+    console.warn(
+      `📧 Admins notified about security event: ${event.event_type}`
+    );
+
     if (this.webhookUrl) {
       try {
         const message = {
-          embeds: [{
-            title: '⚠️ Evento de Segurança - Atenção Necessária',
-            description: `**Evento:** ${event.event_type}\n**IP:** ${event.ip_address}`,
-            color: 0xffa500, // Orange
-            fields: [
-              {
-                name: 'Risk Score',
-                value: `${event.risk_score}/100`,
-                inline: true
+          embeds: [
+            {
+              title: '⚠️ Evento de Segurança - Atenção Necessária',
+              description: `**Evento:** ${event.event_type}\n**IP:** ${event.ip_address}`,
+              color: 0xffa500, // Orange
+              fields: [
+                {
+                  name: 'Risk Score',
+                  value: `${event.risk_score}/100`,
+                  inline: true,
+                },
+                {
+                  name: 'Endpoint',
+                  value: event.endpoint || 'N/A',
+                  inline: true,
+                },
+              ],
+              timestamp: event.timestamp,
+              footer: {
+                text: '⚠️ SGB Security - Notificação Admin',
               },
-              {
-                name: 'Endpoint',
-                value: event.endpoint || 'N/A',
-                inline: true
-              }
-            ],
-            timestamp: event.timestamp,
-            footer: {
-              text: '⚠️ SGB Security - Notificação Admin'
-            }
-          }]
+            },
+          ],
         };
 
         await fetch(this.webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(message)
+          body: JSON.stringify(message),
         });
       } catch (error) {
         console.error('Failed to notify admins:', error);
@@ -429,10 +513,12 @@ class SecurityMonitor {
 export const securityMonitor = SecurityMonitor.getInstance();
 
 // Helper functions para uso em middleware/APIs
-export async function logSecurityEvent(event: Omit<SecurityEvent, 'id' | 'timestamp'>) {
+export async function logSecurityEvent(
+  event: Omit<SecurityEvent, 'id' | 'timestamp'>
+) {
   return securityMonitor.logEvent(event);
 }
 
 export async function isIPBlocked(ip: string): Promise<boolean> {
   return securityMonitor.isIPBlocked(ip);
-} 
+}

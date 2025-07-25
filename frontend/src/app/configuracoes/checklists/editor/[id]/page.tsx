@@ -1,22 +1,28 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Save, 
-  ArrowLeft, 
-  Plus, 
-  Trash2, 
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { usePageTitle } from '@/contexts/PageTitleContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Save,
+  ArrowLeft,
+  Plus,
+  Trash2,
   GripVertical,
   History,
   RotateCcw,
@@ -26,78 +32,86 @@ import {
   Clock,
   User,
   GitBranch,
-  AlertTriangle
-} from 'lucide-react'
-import { api } from '@/lib/api-client'
+  AlertTriangle,
+} from 'lucide-react';
+import { api } from '@/lib/api-client';
 
 // =====================================================
 // TIPOS
 // =====================================================
 
 interface ItemChecklist {
-  id?: string
-  titulo: string
-  descricao?: string
-  tipo: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao'
-  obrigatorio: boolean
-  ordem: number
-  opcoes?: Record<string, string | number | boolean>
+  id?: string;
+  titulo: string;
+  descricao?: string;
+  tipo:
+    | 'texto'
+    | 'numero'
+    | 'sim_nao'
+    | 'data'
+    | 'assinatura'
+    | 'foto_camera'
+    | 'foto_upload'
+    | 'avaliacao';
+  obrigatorio: boolean;
+  ordem: number;
+  opcoes?: Record<string, string | number | boolean>;
   condicional?: {
-    dependeDe: string
-    valor: string | number | boolean | Date
-  }
-  validacao?: Record<string, string | number | boolean>
+    dependeDe: string;
+    valor: string | number | boolean | Date;
+  };
+  validacao?: Record<string, string | number | boolean>;
 }
 
 interface SecaoChecklist {
-  id?: string
-  nome: string
-  descricao?: string
-  cor: string
-  ordem: number
-  itens: ItemChecklist[]
+  id?: string;
+  nome: string;
+  descricao?: string;
+  cor: string;
+  ordem: number;
+  itens: ItemChecklist[];
 }
 
 interface ChecklistData {
-  id: string
-  nome: string
-  descricao?: string
-  setor: string
-  tipo: string
-  frequencia: string
-  tempo_estimado: number
-  ativo: boolean
-  versao: number
-  criado_em: string
-  atualizado_em: string
+  id: string;
+  nome: string;
+  descricao?: string;
+  setor: string;
+  tipo: string;
+  frequencia: string;
+  tempo_estimado: number;
+  ativo: boolean;
+  versao: number;
+  criado_em: string;
+  atualizado_em: string;
   criado_por: {
-    nome: string
-    email: string
-  }
+    nome: string;
+    email: string;
+  };
   atualizado_por?: {
-    nome: string
-    email: string
-  }
+    nome: string;
+    email: string;
+  };
   estrutura: {
-    secoes: SecaoChecklist[]
-  }
+    secoes: SecaoChecklist[];
+  };
   estatisticas?: {
-    total_execucoes: number
-    execucoes_completadas: number
-    execucoes_pendentes: number
-  }
+    total_execucoes: number;
+    execucoes_completadas: number;
+    execucoes_pendentes: number;
+  };
 }
 
 interface VersaoHistorico {
-  versao: number
-  nome: string
-  mudancas: string[]
-  comentario: string
-  data: string
-  tipo: string
-  usuario: string
-  pode_rollback: boolean
-  e_versao_atual: boolean
+  versao: number;
+  nome: string;
+  mudancas: string[];
+  comentario: string;
+  data: string;
+  tipo: string;
+  usuario: string;
+  pode_rollback: boolean;
+  e_versao_atual: boolean;
 }
 
 // =====================================================
@@ -105,146 +119,161 @@ interface VersaoHistorico {
 // =====================================================
 
 export default function ChecklistEditorPage() {
-  const router = useRouter()
-  const params = useParams()
-  const { id } = params
-  const { setPageTitle } = usePageTitle()
+  const router = useRouter();
+  const params = useParams();
+  const { id } = params;
+  const { setPageTitle } = usePageTitle();
 
-  const [checklist, setChecklist] = useState<ChecklistData | null>(null)
-  const [checklistOriginal, setChecklistOriginal] = useState<ChecklistData | null>(null)
-  const [versoes, setVersoes] = useState<VersaoHistorico[]>([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [mobilePreview, setMobilePreview] = useState(false)
-  const [comentarioEdicao, setComentarioEdicao] = useState('')
-  const [mudancasDetectadas, setMudancasDetectadas] = useState<string[]>([])
+  const [checklist, setChecklist] = useState<ChecklistData | null>(null);
+  const [checklistOriginal, setChecklistOriginal] =
+    useState<ChecklistData | null>(null);
+  const [versoes, setVersoes] = useState<VersaoHistorico[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mobilePreview, setMobilePreview] = useState(false);
+  const [comentarioEdicao, setComentarioEdicao] = useState('');
+  const [mudancasDetectadas, setMudancasDetectadas] = useState<string[]>([]);
 
   // =====================================================
   // EFEITOS
   // =====================================================
 
   useEffect(() => {
-    setPageTitle('✏️ Editor de Checklist')
-    return () => setPageTitle('')
-  }, [setPageTitle])
+    setPageTitle('✏️ Editor de Checklist');
+    return () => setPageTitle('');
+  }, [setPageTitle]);
 
   const carregarChecklist = useCallback(async () => {
     try {
-      setLoading(true)
-      const response = await api.get(`/api/checklists/${id}?incluir_historico=false`)
-      
+      setLoading(true);
+      const response = await api.get(
+        `/api/checklists/${id}?incluir_historico=false`
+      );
+
       if (response.success) {
-        const dados = response.data.checklist
-        setChecklist(dados)
-        setChecklistOriginal(JSON.parse(JSON.stringify(dados))) // Deep copy
+        const dados = response.data.checklist;
+        setChecklist(dados);
+        setChecklistOriginal(JSON.parse(JSON.stringify(dados))); // Deep copy
       } else {
-        setError(response.error || 'Erro ao carregar checklist')
+        setError(response.error || 'Erro ao carregar checklist');
       }
     } catch (err: unknown) {
-      console.error('Erro ao carregar checklist:', err)
-      setError('Erro ao carregar checklist')
+      console.error('Erro ao carregar checklist:', err);
+      setError('Erro ao carregar checklist');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [id])
+  }, [id]);
 
   const carregarVersoes = useCallback(async () => {
     try {
-      const response = await api.get(`/api/checklists/${id}/rollback`)
-      
+      const response = await api.get(`/api/checklists/${id}/rollback`);
+
       if (response.success) {
-        setVersoes(response.data.versoes_disponiveis || [])
+        setVersoes(response.data.versoes_disponiveis || []);
       }
     } catch (err: unknown) {
-      console.error('Erro ao carregar versões:', err)
+      console.error('Erro ao carregar versões:', err);
     }
-  }, [id])
+  }, [id]);
 
   const detectarMudancas = useCallback(() => {
-    if (!checklist || !checklistOriginal) return
+    if (!checklist || !checklistOriginal) return;
 
-    const mudancas: string[] = []
+    const mudancas: string[] = [];
 
     // Verificar mudanças básicas
     if (checklist.nome !== checklistOriginal.nome) {
-      mudancas.push(`Nome: "${checklistOriginal.nome}" → "${checklist.nome}"`)
+      mudancas.push(`Nome: "${checklistOriginal.nome}" → "${checklist.nome}"`);
     }
 
     if (checklist.descricao !== checklistOriginal.descricao) {
-      mudancas.push('Descrição alterada')
+      mudancas.push('Descrição alterada');
     }
 
     if (checklist.setor !== checklistOriginal.setor) {
-      mudancas.push(`Setor: "${checklistOriginal.setor}" → "${checklist.setor}"`)
+      mudancas.push(
+        `Setor: "${checklistOriginal.setor}" → "${checklist.setor}"`
+      );
     }
 
     if (checklist.tipo !== checklistOriginal.tipo) {
-      mudancas.push(`Tipo: "${checklistOriginal.tipo}" → "${checklist.tipo}"`)
+      mudancas.push(`Tipo: "${checklistOriginal.tipo}" → "${checklist.tipo}"`);
     }
 
     if (checklist.tempo_estimado !== checklistOriginal.tempo_estimado) {
-      mudancas.push(`Tempo: ${checklistOriginal.tempo_estimado}min → ${checklist.tempo_estimado}min`)
+      mudancas.push(
+        `Tempo: ${checklistOriginal.tempo_estimado}min → ${checklist.tempo_estimado}min`
+      );
     }
 
     if (checklist.ativo !== checklistOriginal.ativo) {
-      mudancas.push(`Status: ${checklistOriginal.ativo ? 'Ativo' : 'Inativo'} → ${checklist.ativo ? 'Ativo' : 'Inativo'}`)
+      mudancas.push(
+        `Status: ${checklistOriginal.ativo ? 'Ativo' : 'Inativo'} → ${checklist.ativo ? 'Ativo' : 'Inativo'}`
+      );
     }
 
     // Verificar mudanças na estrutura
-    const secoesOriginais = checklistOriginal.estrutura?.secoes || []
-    const secoesAtuais = checklist.estrutura?.secoes || []
+    const secoesOriginais = checklistOriginal.estrutura?.secoes || [];
+    const secoesAtuais = checklist.estrutura?.secoes || [];
 
     if (secoesOriginais.length !== secoesAtuais.length) {
-      mudancas.push(`Seções: ${secoesOriginais.length} → ${secoesAtuais.length}`)
+      mudancas.push(
+        `Seções: ${secoesOriginais.length} → ${secoesAtuais.length}`
+      );
     }
 
     // Verificar mudanças em seções
     secoesAtuais.forEach((secaoAtual, index) => {
-      const secaoOriginal = secoesOriginais[index]
-      
+      const secaoOriginal = secoesOriginais[index];
+
       if (!secaoOriginal) {
-        mudancas.push(`+ Nova seção: "${secaoAtual.nome}"`)
-        return
+        mudancas.push(`+ Nova seção: "${secaoAtual.nome}"`);
+        return;
       }
 
       if (secaoAtual.nome !== secaoOriginal.nome) {
-        mudancas.push(`Seção renomeada: "${secaoOriginal.nome}" → "${secaoAtual.nome}"`)
+        mudancas.push(
+          `Seção renomeada: "${secaoOriginal.nome}" → "${secaoAtual.nome}"`
+        );
       }
 
-      const itensOriginais = secaoOriginal.itens || []
-      const itensAtuais = secaoAtual.itens || []
+      const itensOriginais = secaoOriginal.itens || [];
+      const itensAtuais = secaoAtual.itens || [];
 
       if (itensOriginais.length !== itensAtuais.length) {
-        mudancas.push(`"${secaoAtual.nome}": ${itensOriginais.length} → ${itensAtuais.length} itens`)
+        mudancas.push(
+          `"${secaoAtual.nome}": ${itensOriginais.length} → ${itensAtuais.length} itens`
+        );
       }
-    })
+    });
 
-    setMudancasDetectadas(mudancas)
-  }, [checklist, checklistOriginal])
+    setMudancasDetectadas(mudancas);
+  }, [checklist, checklistOriginal]);
 
   useEffect(() => {
     if (id) {
-      carregarChecklist()
+      carregarChecklist();
     }
-  }, [id, carregarChecklist])
+  }, [id, carregarChecklist]);
 
   useEffect(() => {
     if (checklist && checklistOriginal) {
-      detectarMudancas()
+      detectarMudancas();
     }
-  }, [checklist, checklistOriginal, detectarMudancas])
+  }, [checklist, checklistOriginal, detectarMudancas]);
 
   // =====================================================
   // FUNÇÕES PRINCIPAIS
   // =====================================================
 
   const salvarChecklist = async () => {
-    if (!checklist) return
+    if (!checklist) return;
 
     try {
-      setSaving(true)
-      
+      setSaving(true);
+
       const payload = {
         nome: checklist.nome,
         descricao: checklist.descricao,
@@ -254,68 +283,81 @@ export default function ChecklistEditorPage() {
         tempo_estimado: checklist.tempo_estimado,
         ativo: checklist.ativo,
         estrutura: checklist.estrutura,
-        comentario_edicao: comentarioEdicao || 'Atualização via editor'
-      }
+        comentario_edicao: comentarioEdicao || 'Atualização via editor',
+      };
 
-      const response = await api.put(`/api/checklists/${id}`, payload)
-      
+      const response = await api.put(`/api/checklists/${id}`, payload);
+
       if (response.success) {
-        alert(`Checklist salvo com sucesso! Nova versão: ${response.nova_versao}`)
-        await carregarChecklist()
-        await carregarVersoes()
-        setComentarioEdicao('')
+        alert(
+          `Checklist salvo com sucesso! Nova versão: ${response.nova_versao}`
+        );
+        await carregarChecklist();
+        await carregarVersoes();
+        setComentarioEdicao('');
       } else {
-        alert(response.error || 'Erro ao salvar checklist')
+        alert(response.error || 'Erro ao salvar checklist');
       }
     } catch (err: unknown) {
-      console.error('Erro ao salvar checklist:', err)
-      alert('Erro ao salvar checklist')
+      console.error('Erro ao salvar checklist:', err);
+      alert('Erro ao salvar checklist');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const fazerRollback = async (versaoDestino: number) => {
-    if (!confirm(`Tem certeza que deseja restaurar para a versão ${versaoDestino}?`)) {
-      return
+    if (
+      !confirm(
+        `Tem certeza que deseja restaurar para a versão ${versaoDestino}?`
+      )
+    ) {
+      return;
     }
 
     try {
-      const comentario = prompt('Comentário para o rollback (opcional):') || 'Rollback via interface'
+      const comentario =
+        prompt('Comentário para o rollback (opcional):') ||
+        'Rollback via interface';
 
       const response = await api.post(`/api/checklists/${id}/rollback`, {
         versao_destino: versaoDestino,
-        comentario
-      })
-      
+        comentario,
+      });
+
       if (response.success) {
-        alert(`Rollback executado com sucesso! Nova versão: ${response.rollback_info.nova_versao}`)
-        await carregarChecklist()
-        await carregarVersoes()
+        alert(
+          `Rollback executado com sucesso! Nova versão: ${response.rollback_info.nova_versao}`
+        );
+        await carregarChecklist();
+        await carregarVersoes();
       } else {
-        alert(response.error || 'Erro ao fazer rollback')
+        alert(response.error || 'Erro ao fazer rollback');
       }
     } catch (err: unknown) {
-      console.error('Erro ao fazer rollback:', err)
-      alert('Erro ao fazer rollback')
+      console.error('Erro ao fazer rollback:', err);
+      alert('Erro ao fazer rollback');
     }
-  }
+  };
 
   // =====================================================
   // FUNÇÕES DE EDIÇÃO
   // =====================================================
 
-  const atualizarCampo = (campo: keyof ChecklistData, valor: string | number | boolean) => {
-    if (!checklist) return
-    
+  const atualizarCampo = (
+    campo: keyof ChecklistData,
+    valor: string | number | boolean
+  ) => {
+    if (!checklist) return;
+
     setChecklist(prev => ({
       ...prev!,
-      [campo]: valor
-    }))
-  }
+      [campo]: valor,
+    }));
+  };
 
   const adicionarSecao = () => {
-    if (!checklist) return
+    if (!checklist) return;
 
     const novaSecao: SecaoChecklist = {
       id: `temp_${Date.now()}`,
@@ -323,80 +365,91 @@ export default function ChecklistEditorPage() {
       descricao: '',
       cor: 'bg-blue-500',
       ordem: (checklist.estrutura?.secoes?.length || 0) + 1,
-      itens: []
-    }
+      itens: [],
+    };
 
     setChecklist(prev => ({
       ...prev!,
       estrutura: {
-        secoes: [...(prev!.estrutura?.secoes || []), novaSecao]
-      }
-    }))
-  }
+        secoes: [...(prev!.estrutura?.secoes || []), novaSecao],
+      },
+    }));
+  };
 
-  const atualizarSecao = (secaoIndex: number, updates: Partial<SecaoChecklist>) => {
-    if (!checklist) return
+  const atualizarSecao = (
+    secaoIndex: number,
+    updates: Partial<SecaoChecklist>
+  ) => {
+    if (!checklist) return;
 
     setChecklist(prev => ({
       ...prev!,
       estrutura: {
         secoes: prev!.estrutura.secoes.map((secao, index) =>
           index === secaoIndex ? { ...secao, ...updates } : secao
-        )
-      }
-    }))
-  }
+        ),
+      },
+    }));
+  };
 
   const removerSecao = (secaoIndex: number) => {
-    if (!checklist) return
-    if (!confirm('Tem certeza que deseja remover esta seção?')) return
+    if (!checklist) return;
+    if (!confirm('Tem certeza que deseja remover esta seção?')) return;
 
     setChecklist(prev => ({
       ...prev!,
       estrutura: {
-        secoes: prev!.estrutura.secoes.filter((_, index) => index !== secaoIndex)
-      }
-    }))
-  }
+        secoes: prev!.estrutura.secoes.filter(
+          (_, index) => index !== secaoIndex
+        ),
+      },
+    }));
+  };
 
   const adicionarItem = (secaoIndex: number) => {
-    if (!checklist) return
+    if (!checklist) return;
 
-    const secao = checklist.estrutura.secoes[secaoIndex]
+    const secao = checklist.estrutura.secoes[secaoIndex];
     const novoItem: ItemChecklist = {
       id: `temp_${Date.now()}`,
       titulo: 'Novo item',
       descricao: '',
       tipo: 'sim_nao',
       obrigatorio: false,
-      ordem: (secao.itens?.length || 0) + 1
-    }
+      ordem: (secao.itens?.length || 0) + 1,
+    };
 
     atualizarSecao(secaoIndex, {
-      itens: [...(secao.itens || []), novoItem]
-    })
-  }
+      itens: [...(secao.itens || []), novoItem],
+    });
+  };
 
-  const atualizarItem = (secaoIndex: number, itemIndex: number, updates: Partial<ItemChecklist>) => {
-    if (!checklist) return
+  const atualizarItem = (
+    secaoIndex: number,
+    itemIndex: number,
+    updates: Partial<ItemChecklist>
+  ) => {
+    if (!checklist) return;
 
-    const secao = checklist.estrutura.secoes[secaoIndex]
+    const secao = checklist.estrutura.secoes[secaoIndex];
     const itensAtualizados = secao.itens.map((item, index) =>
       index === itemIndex ? { ...item, ...updates } : item
-    )
+    );
 
-    atualizarSecao(secaoIndex, { itens: itensAtualizados })
-  }
+    atualizarSecao(secaoIndex, { itens: itensAtualizados });
+  };
 
   const removerItem = (secaoIndex: number, itemIndex: number) => {
-    if (!checklist) return
-    if (!confirm('Tem certeza que deseja remover este item?')) return
+    if (!checklist) return;
+    if (!confirm('Tem certeza que deseja remover este item?')) return;
 
-    const secao = checklist.estrutura.secoes[secaoIndex]
-    const itensAtualizados = secao.itens.filter((_, index) => index !== itemIndex)
+    const secao = checklist.estrutura.secoes[secaoIndex];
+    const itensAtualizados = secao.itens.filter(
+      (_, index) => index !== itemIndex
+    );
 
-    atualizarSecao(secaoIndex, { itens: itensAtualizados })
-  }
+    atualizarSecao(secaoIndex, { itens: itensAtualizados });
+  };
 
   // =====================================================
   // UTILITÁRIOS
@@ -411,10 +464,10 @@ export default function ChecklistEditorPage() {
       assinatura: '✍️',
       foto_camera: '📷',
       foto_upload: '🖼️',
-      avaliacao: '⭐'
-    }
-    return icons[tipo] || '📋'
-  }
+      avaliacao: '⭐',
+    };
+    return icons[tipo] || '📋';
+  };
 
   const cores = [
     { value: 'bg-blue-500', label: 'Azul', color: '#3B82F6' },
@@ -424,8 +477,8 @@ export default function ChecklistEditorPage() {
     { value: 'bg-yellow-500', label: 'Amarelo', color: '#F59E0B' },
     { value: 'bg-orange-500', label: 'Laranja', color: '#F97316' },
     { value: 'bg-pink-500', label: 'Rosa', color: '#EC4899' },
-    { value: 'bg-indigo-500', label: 'Índigo', color: '#6366F1' }
-  ]
+    { value: 'bg-indigo-500', label: 'Índigo', color: '#6366F1' },
+  ];
 
   const formatarData = (data: string) => {
     return new Date(data).toLocaleString('pt-BR', {
@@ -433,9 +486,9 @@ export default function ChecklistEditorPage() {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+      minute: '2-digit',
+    });
+  };
 
   // =====================================================
   // RENDER
@@ -451,7 +504,7 @@ export default function ChecklistEditorPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -459,16 +512,19 @@ export default function ChecklistEditorPage() {
       <div className="container mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-600">{error}</p>
-                          <Button onClick={() => router.push('/configuracoes/checklists')} className="mt-2">
-                  Voltar para Checklists
-                </Button>
+          <Button
+            onClick={() => router.push('/configuracoes/checklists')}
+            className="mt-2"
+          >
+            Voltar para Checklists
+          </Button>
         </div>
       </div>
-    )
+    );
   }
 
   if (!checklist) {
-    return null
+    return null;
   }
 
   return (
@@ -477,7 +533,7 @@ export default function ChecklistEditorPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-                            onClick={() => router.push('/configuracoes/checklists')}
+            onClick={() => router.push('/configuracoes/checklists')}
             variant="outline"
             size="sm"
           >
@@ -490,14 +546,18 @@ export default function ChecklistEditorPage() {
             </p>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <Button
             onClick={() => setMobilePreview(!mobilePreview)}
             variant="outline"
             size="sm"
           >
-            {mobilePreview ? <Monitor className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
+            {mobilePreview ? (
+              <Monitor className="w-4 h-4" />
+            ) : (
+              <Smartphone className="w-4 h-4" />
+            )}
           </Button>
           <Button
             onClick={salvarChecklist}
@@ -528,13 +588,13 @@ export default function ChecklistEditorPage() {
                 <li>• ... e mais {mudancasDetectadas.length - 3} alterações</li>
               )}
             </ul>
-            
+
             <div className="mt-3">
               <Label htmlFor="comentario">Comentário da edição:</Label>
               <Input
                 id="comentario"
                 value={comentarioEdicao}
-                onChange={(e) => setComentarioEdicao(e.target.value)}
+                onChange={e => setComentarioEdicao(e.target.value)}
                 placeholder="Descreva as alterações realizadas"
                 className="mt-1"
               />
@@ -565,7 +625,7 @@ export default function ChecklistEditorPage() {
                   <Input
                     id="nome"
                     value={checklist.nome}
-                    onChange={(e) => atualizarCampo('nome', e.target.value)}
+                    onChange={e => atualizarCampo('nome', e.target.value)}
                   />
                 </div>
 
@@ -574,7 +634,7 @@ export default function ChecklistEditorPage() {
                   <Textarea
                     id="descricao"
                     value={checklist.descricao || ''}
-                    onChange={(e) => atualizarCampo('descricao', e.target.value)}
+                    onChange={e => atualizarCampo('descricao', e.target.value)}
                     rows={3}
                   />
                 </div>
@@ -584,16 +644,16 @@ export default function ChecklistEditorPage() {
                   <Input
                     id="setor"
                     value={checklist.setor}
-                    onChange={(e) => atualizarCampo('setor', e.target.value)}
+                    onChange={e => atualizarCampo('setor', e.target.value)}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label htmlFor="tipo">Tipo</Label>
-                    <Select 
-                      value={checklist.tipo} 
-                      onValueChange={(value) => atualizarCampo('tipo', value)}
+                    <Select
+                      value={checklist.tipo}
+                      onValueChange={value => atualizarCampo('tipo', value)}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -618,16 +678,21 @@ export default function ChecklistEditorPage() {
                       min="1"
                       max="480"
                       value={checklist.tempo_estimado}
-                      onChange={(e) => atualizarCampo('tempo_estimado', parseInt(e.target.value) || 30)}
+                      onChange={e =>
+                        atualizarCampo(
+                          'tempo_estimado',
+                          parseInt(e.target.value) || 30
+                        )
+                      }
                     />
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="frequencia">Frequência</Label>
-                  <Select 
-                    value={checklist.frequencia} 
-                    onValueChange={(value) => atualizarCampo('frequencia', value)}
+                  <Select
+                    value={checklist.frequencia}
+                    onValueChange={value => atualizarCampo('frequencia', value)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -639,7 +704,9 @@ export default function ChecklistEditorPage() {
                       <SelectItem value="mensal">Mensal</SelectItem>
                       <SelectItem value="bimestral">Bimestral</SelectItem>
                       <SelectItem value="trimestral">Trimestral</SelectItem>
-                      <SelectItem value="conforme_necessario">Conforme necessário</SelectItem>
+                      <SelectItem value="conforme_necessario">
+                        Conforme necessário
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -648,7 +715,9 @@ export default function ChecklistEditorPage() {
                   <Switch
                     id="ativo"
                     checked={checklist.ativo}
-                    onCheckedChange={(checked) => atualizarCampo('ativo', checked)}
+                    onCheckedChange={checked =>
+                      atualizarCampo('ativo', checked)
+                    }
                   />
                   <Label htmlFor="ativo">Checklist ativo</Label>
                 </div>
@@ -682,11 +751,15 @@ export default function ChecklistEditorPage() {
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <span className="text-gray-600">Total:</span>
-                        <span className="ml-1 font-medium">{checklist.estatisticas.total_execucoes}</span>
+                        <span className="ml-1 font-medium">
+                          {checklist.estatisticas.total_execucoes}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Completos:</span>
-                        <span className="ml-1 font-medium">{checklist.estatisticas.execucoes_completadas}</span>
+                        <span className="ml-1 font-medium">
+                          {checklist.estatisticas.execucoes_completadas}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -707,7 +780,9 @@ export default function ChecklistEditorPage() {
             </Card>
 
             {/* Editor de Conteúdo */}
-            <div className={`lg:col-span-2 ${mobilePreview ? 'max-w-sm mx-auto' : ''}`}>
+            <div
+              className={`lg:col-span-2 ${mobilePreview ? 'max-w-sm mx-auto' : ''}`}
+            >
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -733,43 +808,66 @@ export default function ChecklistEditorPage() {
                   ) : (
                     <div className="space-y-6">
                       {checklist.estrutura.secoes.map((secao, secaoIndex) => (
-                        <Card key={secaoIndex} className="border-l-4" style={{ borderLeftColor: cores.find(c => c.value === secao.cor)?.color }}>
+                        <Card
+                          key={secaoIndex}
+                          className="border-l-4"
+                          style={{
+                            borderLeftColor: cores.find(
+                              c => c.value === secao.cor
+                            )?.color,
+                          }}
+                        >
                           <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <GripVertical className="w-4 h-4 text-gray-400" />
                                 {mobilePreview ? (
-                                  <h3 className="font-semibold text-lg">{secao.nome}</h3>
+                                  <h3 className="font-semibold text-lg">
+                                    {secao.nome}
+                                  </h3>
                                 ) : (
                                   <Input
                                     value={secao.nome}
-                                    onChange={(e) => atualizarSecao(secaoIndex, { nome: e.target.value })}
+                                    onChange={e =>
+                                      atualizarSecao(secaoIndex, {
+                                        nome: e.target.value,
+                                      })
+                                    }
                                     className="font-semibold text-lg border-none px-0 focus:border-gray-300"
                                   />
                                 )}
                               </div>
-                              
+
                               {!mobilePreview && (
                                 <div className="flex items-center gap-2">
-                                  <Select 
-                                    value={secao.cor} 
-                                    onValueChange={(value) => atualizarSecao(secaoIndex, { cor: value })}
+                                  <Select
+                                    value={secao.cor}
+                                    onValueChange={value =>
+                                      atualizarSecao(secaoIndex, { cor: value })
+                                    }
                                   >
                                     <SelectTrigger className="w-24">
-                                      <div 
+                                      <div
                                         className="w-4 h-4 rounded"
-                                        style={{ 
-                                          backgroundColor: cores.find(c => c.value === secao.cor)?.color 
+                                        style={{
+                                          backgroundColor: cores.find(
+                                            c => c.value === secao.cor
+                                          )?.color,
                                         }}
                                       />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      {cores.map((cor) => (
-                                        <SelectItem key={cor.value} value={cor.value}>
+                                      {cores.map(cor => (
+                                        <SelectItem
+                                          key={cor.value}
+                                          value={cor.value}
+                                        >
                                           <div className="flex items-center gap-2">
-                                            <div 
+                                            <div
                                               className="w-4 h-4 rounded"
-                                              style={{ backgroundColor: cor.color }}
+                                              style={{
+                                                backgroundColor: cor.color,
+                                              }}
                                             />
                                             {cor.label}
                                           </div>
@@ -777,7 +875,7 @@ export default function ChecklistEditorPage() {
                                       ))}
                                     </SelectContent>
                                   </Select>
-                                  
+
                                   <Button
                                     onClick={() => removerSecao(secaoIndex)}
                                     size="sm"
@@ -789,15 +887,21 @@ export default function ChecklistEditorPage() {
                                 </div>
                               )}
                             </div>
-                            
+
                             {secao.descricao && (
-                              <p className="text-sm text-gray-600">{secao.descricao}</p>
+                              <p className="text-sm text-gray-600">
+                                {secao.descricao}
+                              </p>
                             )}
-                            
+
                             {!mobilePreview && (
                               <Textarea
                                 value={secao.descricao || ''}
-                                onChange={(e) => atualizarSecao(secaoIndex, { descricao: e.target.value })}
+                                onChange={e =>
+                                  atualizarSecao(secaoIndex, {
+                                    descricao: e.target.value,
+                                  })
+                                }
                                 placeholder="Descrição da seção (opcional)"
                                 rows={2}
                                 className="mt-2"
@@ -815,13 +919,19 @@ export default function ChecklistEditorPage() {
                                 >
                                   <div className="flex items-start justify-between">
                                     <div className="flex items-start gap-2 flex-1">
-                                      <span className="text-lg">{getTipoIcon(item.tipo)}</span>
+                                      <span className="text-lg">
+                                        {getTipoIcon(item.tipo)}
+                                      </span>
                                       <div className="flex-1">
                                         {mobilePreview ? (
                                           <div>
                                             <h4 className="font-medium">
                                               {item.titulo}
-                                              {item.obrigatorio && <span className="text-red-500 ml-1">*</span>}
+                                              {item.obrigatorio && (
+                                                <span className="text-red-500 ml-1">
+                                                  *
+                                                </span>
+                                              )}
                                             </h4>
                                             {item.descricao && (
                                               <p className="text-sm text-gray-600 mt-1">
@@ -833,54 +943,106 @@ export default function ChecklistEditorPage() {
                                           <div className="space-y-2">
                                             <Input
                                               value={item.titulo}
-                                              onChange={(e) => atualizarItem(secaoIndex, itemIndex, { titulo: e.target.value })}
+                                              onChange={e =>
+                                                atualizarItem(
+                                                  secaoIndex,
+                                                  itemIndex,
+                                                  { titulo: e.target.value }
+                                                )
+                                              }
                                               placeholder="Título do item"
                                               className="font-medium"
                                             />
                                             <Input
                                               value={item.descricao || ''}
-                                              onChange={(e) => atualizarItem(secaoIndex, itemIndex, { descricao: e.target.value })}
+                                              onChange={e =>
+                                                atualizarItem(
+                                                  secaoIndex,
+                                                  itemIndex,
+                                                  { descricao: e.target.value }
+                                                )
+                                              }
                                               placeholder="Descrição (opcional)"
                                               className="text-sm"
                                             />
                                             <div className="flex gap-2">
-                                              <Select 
-                                                value={item.tipo} 
-                                                onValueChange={(value: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao') => atualizarItem(secaoIndex, itemIndex, { tipo: value })}
+                                              <Select
+                                                value={item.tipo}
+                                                onValueChange={(
+                                                  value:
+                                                    | 'texto'
+                                                    | 'numero'
+                                                    | 'sim_nao'
+                                                    | 'data'
+                                                    | 'assinatura'
+                                                    | 'foto_camera'
+                                                    | 'foto_upload'
+                                                    | 'avaliacao'
+                                                ) =>
+                                                  atualizarItem(
+                                                    secaoIndex,
+                                                    itemIndex,
+                                                    { tipo: value }
+                                                  )
+                                                }
                                               >
                                                 <SelectTrigger className="flex-1">
                                                   <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                  <SelectItem value="texto">📝 Texto</SelectItem>
-                                                  <SelectItem value="numero">🔢 Número</SelectItem>
-                                                  <SelectItem value="sim_nao">✅ Sim/Não</SelectItem>
-                                                  <SelectItem value="data">📅 Data</SelectItem>
-                                                  <SelectItem value="assinatura">✍️ Assinatura</SelectItem>
-                                                  <SelectItem value="foto_camera">📷 Foto (Câmera)</SelectItem>
-                                                  <SelectItem value="foto_upload">🖼️ Foto (Upload)</SelectItem>
-                                                  <SelectItem value="avaliacao">⭐ Avaliação</SelectItem>
+                                                  <SelectItem value="texto">
+                                                    📝 Texto
+                                                  </SelectItem>
+                                                  <SelectItem value="numero">
+                                                    🔢 Número
+                                                  </SelectItem>
+                                                  <SelectItem value="sim_nao">
+                                                    ✅ Sim/Não
+                                                  </SelectItem>
+                                                  <SelectItem value="data">
+                                                    📅 Data
+                                                  </SelectItem>
+                                                  <SelectItem value="assinatura">
+                                                    ✍️ Assinatura
+                                                  </SelectItem>
+                                                  <SelectItem value="foto_camera">
+                                                    📷 Foto (Câmera)
+                                                  </SelectItem>
+                                                  <SelectItem value="foto_upload">
+                                                    🖼️ Foto (Upload)
+                                                  </SelectItem>
+                                                  <SelectItem value="avaliacao">
+                                                    ⭐ Avaliação
+                                                  </SelectItem>
                                                 </SelectContent>
                                               </Select>
-                                              
+
                                               <div className="flex items-center space-x-2">
                                                 <Switch
                                                   checked={item.obrigatorio}
-                                                  onCheckedChange={(checked) => 
-                                                    atualizarItem(secaoIndex, itemIndex, { obrigatorio: checked })
+                                                  onCheckedChange={checked =>
+                                                    atualizarItem(
+                                                      secaoIndex,
+                                                      itemIndex,
+                                                      { obrigatorio: checked }
+                                                    )
                                                   }
                                                 />
-                                                <Label className="text-sm">Obrigatório</Label>
+                                                <Label className="text-sm">
+                                                  Obrigatório
+                                                </Label>
                                               </div>
                                             </div>
                                           </div>
                                         )}
                                       </div>
                                     </div>
-                                    
+
                                     {!mobilePreview && (
                                       <Button
-                                        onClick={() => removerItem(secaoIndex, itemIndex)}
+                                        onClick={() =>
+                                          removerItem(secaoIndex, itemIndex)
+                                        }
                                         size="sm"
                                         variant="outline"
                                         className="text-red-600 hover:text-red-700 ml-2"
@@ -936,17 +1098,24 @@ export default function ChecklistEditorPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {versoes.map((versao) => (
+                  {versoes.map(versao => (
                     <div
                       key={versao.versao}
                       className={`border rounded-lg p-4 ${
-                        versao.e_versao_atual ? 'bg-blue-50 border-blue-200' : 'bg-white'
+                        versao.e_versao_atual
+                          ? 'bg-blue-50 border-blue-200'
+                          : 'bg-white'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Badge variant={versao.e_versao_atual ? 'default' : 'outline'}>
-                            v{versao.versao} {versao.e_versao_atual && '(Atual)'}
+                          <Badge
+                            variant={
+                              versao.e_versao_atual ? 'default' : 'outline'
+                            }
+                          >
+                            v{versao.versao}{' '}
+                            {versao.e_versao_atual && '(Atual)'}
                           </Badge>
                           <div>
                             <h4 className="font-medium">{versao.nome}</h4>
@@ -965,7 +1134,7 @@ export default function ChecklistEditorPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         {versao.pode_rollback && (
                           <Button
                             onClick={() => fazerRollback(versao.versao)}
@@ -986,17 +1155,27 @@ export default function ChecklistEditorPage() {
 
                       {versao.mudancas.length > 0 && (
                         <div className="mt-3">
-                          <h5 className="text-sm font-medium text-gray-700 mb-1">Alterações:</h5>
+                          <h5 className="text-sm font-medium text-gray-700 mb-1">
+                            Alterações:
+                          </h5>
                           <ul className="text-sm text-gray-600 space-y-1">
-                            {versao.mudancas.slice(0, 3).map((mudanca, index) => (
-                              <li key={index} className="flex items-start gap-1">
-                                <span className="text-gray-400 mt-0.5">•</span>
-                                <span>{mudanca}</span>
-                              </li>
-                            ))}
+                            {versao.mudancas
+                              .slice(0, 3)
+                              .map((mudanca, index) => (
+                                <li
+                                  key={index}
+                                  className="flex items-start gap-1"
+                                >
+                                  <span className="text-gray-400 mt-0.5">
+                                    •
+                                  </span>
+                                  <span>{mudanca}</span>
+                                </li>
+                              ))}
                             {versao.mudancas.length > 3 && (
                               <li className="text-gray-500 italic">
-                                ... e mais {versao.mudancas.length - 3} alterações
+                                ... e mais {versao.mudancas.length - 3}{' '}
+                                alterações
                               </li>
                             )}
                           </ul>
@@ -1011,5 +1190,5 @@ export default function ChecklistEditorPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
-} 
+  );
+}

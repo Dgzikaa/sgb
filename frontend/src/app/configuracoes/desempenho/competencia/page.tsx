@@ -5,23 +5,29 @@ import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 // import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  CalendarDays, 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  DollarSign, 
+import {
+  CalendarDays,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  DollarSign,
   Target,
   RefreshCw,
   BarChart3,
   Award,
   AlertTriangle,
-  Download
+  Download,
 } from 'lucide-react';
 
 interface CompetenciaMensal {
@@ -67,8 +73,23 @@ export default function CompetenciaPage() {
   const [filtroMes, setFiltroMes] = useState<string>('');
 
   const barId = 1; // TODO: Pegar do contexto
-  const anosDisponiveis = Array.from(new Set(competencias.map(c => c.ano))).sort((a, b) => b - a);
-  const mesesDisponiveis = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const anosDisponiveis = Array.from(
+    new Set(competencias.map(c => c.ano))
+  ).sort((a, b) => b - a);
+  const mesesDisponiveis = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
 
   const carregarCompetencias = useCallback(async () => {
     try {
@@ -76,10 +97,12 @@ export default function CompetenciaPage() {
       const params = new URLSearchParams({
         bar_id: barId.toString(),
         ...(filtroAno && { ano: filtroAno }),
-        ...(filtroMes && { mes: filtroMes })
+        ...(filtroMes && { mes: filtroMes }),
       });
 
-      const response = await fetch(`/api/desempenho/competencia-mensal?${params}`);
+      const response = await fetch(
+        `/api/desempenho/competencia-mensal?${params}`
+      );
       const data = await response.json();
 
       if (data.error) {
@@ -89,7 +112,7 @@ export default function CompetenciaPage() {
 
       setCompetencias(data.competencias || []);
     } catch {
-      alert("Erro ao carregar competências");
+      alert('Erro ao carregar competências');
     } finally {
       setLoading(false);
     }
@@ -98,15 +121,15 @@ export default function CompetenciaPage() {
   const recalcularCompetencia = async (ano: number, mes: number) => {
     try {
       setRecalculando(true);
-          const response = await fetch('/api/desempenho/competencia-mensal', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        bar_id: barId,
-        ano,
-        mes
-      })
-    });
+      const response = await fetch('/api/desempenho/competencia-mensal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: barId,
+          ano,
+          mes,
+        }),
+      });
 
       const data = await response.json();
 
@@ -115,10 +138,10 @@ export default function CompetenciaPage() {
         return;
       }
 
-      alert("Competência recalculada com sucesso");
+      alert('Competência recalculada com sucesso');
       carregarCompetencias();
     } catch {
-      alert("Erro ao recalcular competência");
+      alert('Erro ao recalcular competência');
     } finally {
       setRecalculando(false);
     }
@@ -127,16 +150,16 @@ export default function CompetenciaPage() {
   const recalcularTodas = async () => {
     try {
       setRecalculando(true);
-          const response = await fetch('/api/desempenho/competencia-mensal', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        bar_id: barId,
-        ano: new Date().getFullYear(),
-        mes: new Date().getMonth() + 1,
-        recalcular_todos: true
-      })
-    });
+      const response = await fetch('/api/desempenho/competencia-mensal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: barId,
+          ano: new Date().getFullYear(),
+          mes: new Date().getMonth() + 1,
+          recalcular_todos: true,
+        }),
+      });
 
       const data = await response.json();
 
@@ -145,10 +168,10 @@ export default function CompetenciaPage() {
         return;
       }
 
-      alert("Todas as competências foram recalculadas");
+      alert('Todas as competências foram recalculadas');
       carregarCompetencias();
     } catch {
-      alert("Erro ao recalcular todas as competências");
+      alert('Erro ao recalcular todas as competências');
     } finally {
       setRecalculando(false);
     }
@@ -157,7 +180,7 @@ export default function CompetenciaPage() {
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
     }).format(valor);
   };
 
@@ -186,13 +209,18 @@ export default function CompetenciaPage() {
     carregarCompetencias();
   }, [carregarCompetencias]);
 
-  const competenciaAtual = competencias.find(c => 
-    c.ano === new Date().getFullYear() && c.mes === new Date().getMonth() + 1
+  const competenciaAtual = competencias.find(
+    c =>
+      c.ano === new Date().getFullYear() && c.mes === new Date().getMonth() + 1
   );
 
-  const melhorMes = competencias.reduce((best, current) => 
-    !best || current.faturamento_total_mes > best.faturamento_total_mes ? current : best
-  , null as CompetenciaMensal | null);
+  const melhorMes = competencias.reduce(
+    (best, current) =>
+      !best || current.faturamento_total_mes > best.faturamento_total_mes
+        ? current
+        : best,
+    null as CompetenciaMensal | null
+  );
 
   const totalAnual = competencias
     .filter(c => c.ano === new Date().getFullYear())
@@ -214,7 +242,9 @@ export default function CompetenciaPage() {
             variant="outline"
             size="sm"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${recalculando ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${recalculando ? 'animate-spin' : ''}`}
+            />
             Recalcular Todas
           </Button>
           <Button size="sm" variant="outline">
@@ -274,13 +304,21 @@ export default function CompetenciaPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Faturamento Anual</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Faturamento Anual
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatarMoeda(totalAnual)}</div>
+            <div className="text-2xl font-bold">
+              {formatarMoeda(totalAnual)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {competencias.filter(c => c.ano === new Date().getFullYear()).length} meses com dados
+              {
+                competencias.filter(c => c.ano === new Date().getFullYear())
+                  .length
+              }{' '}
+              meses com dados
             </p>
           </CardContent>
         </Card>
@@ -295,7 +333,9 @@ export default function CompetenciaPage() {
               {melhorMes ? melhorMes.nome_mes : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {melhorMes ? formatarMoeda(melhorMes.faturamento_total_mes) : 'Sem dados'}
+              {melhorMes
+                ? formatarMoeda(melhorMes.faturamento_total_mes)
+                : 'Sem dados'}
             </p>
           </CardContent>
         </Card>
@@ -307,7 +347,9 @@ export default function CompetenciaPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {competenciaAtual ? formatarPercentual(competenciaAtual.atingimento_faturamento) : 'N/A'}
+              {competenciaAtual
+                ? formatarPercentual(competenciaAtual.atingimento_faturamento)
+                : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
               Atingimento da meta mensal
@@ -319,7 +361,7 @@ export default function CompetenciaPage() {
       {/* Competências */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Competências Mensais</h2>
-        
+
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
@@ -338,8 +380,11 @@ export default function CompetenciaPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {competencias.map((competencia) => (
-              <Card key={competencia.id} className="hover:shadow-lg transition-shadow">
+            {competencias.map(competencia => (
+              <Card
+                key={competencia.id}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <div>
@@ -350,7 +395,11 @@ export default function CompetenciaPage() {
                         {competencia.total_semanas} semanas
                       </p>
                     </div>
-                    <Badge variant={competencia.status === 'ativo' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        competencia.status === 'ativo' ? 'default' : 'secondary'
+                      }
+                    >
                       {competencia.status}
                     </Badge>
                   </div>
@@ -367,14 +416,20 @@ export default function CompetenciaPage() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Meta</span>
-                      <span>{formatarMoeda(competencia.meta_faturamento_mes)}</span>
+                      <span>
+                        {formatarMoeda(competencia.meta_faturamento_mes)}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Atingimento</span>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${getStatusColor(competencia.atingimento_faturamento)}`}></div>
+                        <div
+                          className={`w-2 h-2 rounded-full ${getStatusColor(competencia.atingimento_faturamento)}`}
+                        ></div>
                         <span className="text-sm font-medium">
-                          {formatarPercentual(competencia.atingimento_faturamento)}
+                          {formatarPercentual(
+                            competencia.atingimento_faturamento
+                          )}
                         </span>
                       </div>
                     </div>
@@ -411,7 +466,9 @@ export default function CompetenciaPage() {
                       <span>Variação</span>
                       <div className="flex items-center gap-1">
                         {getVariacaoIcon(competencia.variacao_semanal)}
-                        <span>{formatarPercentual(competencia.variacao_semanal)}</span>
+                        <span>
+                          {formatarPercentual(competencia.variacao_semanal)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -419,12 +476,16 @@ export default function CompetenciaPage() {
                   {/* Ações */}
                   <div className="flex justify-end">
                     <Button
-                      onClick={() => recalcularCompetencia(competencia.ano, competencia.mes)}
+                      onClick={() =>
+                        recalcularCompetencia(competencia.ano, competencia.mes)
+                      }
                       disabled={recalculando}
                       variant="outline"
                       size="sm"
                     >
-                      <RefreshCw className={`h-3 w-3 mr-1 ${recalculando ? 'animate-spin' : ''}`} />
+                      <RefreshCw
+                        className={`h-3 w-3 mr-1 ${recalculando ? 'animate-spin' : ''}`}
+                      />
                       Recalcular
                     </Button>
                   </div>
@@ -438,12 +499,16 @@ export default function CompetenciaPage() {
           <Card>
             <CardContent className="text-center py-8">
               <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Nenhuma competência encontrada</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Nenhuma competência encontrada
+              </h3>
               <p className="text-muted-foreground mb-4">
                 Não há dados de competência para os filtros selecionados
               </p>
               <Button onClick={recalcularTodas} disabled={recalculando}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${recalculando ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${recalculando ? 'animate-spin' : ''}`}
+                />
                 Calcular Competências
               </Button>
             </CardContent>
@@ -452,4 +517,4 @@ export default function CompetenciaPage() {
       </div>
     </div>
   );
-} 
+}

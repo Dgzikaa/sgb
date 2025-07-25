@@ -1,28 +1,31 @@
-﻿import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
 interface PWAState {
-  isInstalled: boolean
-  isInstallable: boolean
-  isOffline: boolean
-  isOnline: boolean
-  isLoading: boolean
-  installPrompt: BeforeInstallPromptEvent | null
-  notificationPermission: NotificationPermission
-  serviceWorkerRegistration: ServiceWorkerRegistration | null
+  isInstalled: boolean;
+  isInstallable: boolean;
+  isOffline: boolean;
+  isOnline: boolean;
+  isLoading: boolean;
+  installPrompt: BeforeInstallPromptEvent | null;
+  notificationPermission: NotificationPermission;
+  serviceWorkerRegistration: ServiceWorkerRegistration | null;
 }
 
 interface PWAActions {
-  install: () => Promise<boolean>
-  enableNotifications: () => Promise<boolean>
-  showNotification: (title: string, options?: NotificationOptions) => Promise<void>
-  updateServiceWorker: () => Promise<void>
-  clearCache: () => Promise<void>
-  checkForUpdates: () => Promise<boolean>
+  install: () => Promise<boolean>;
+  enableNotifications: () => Promise<boolean>;
+  showNotification: (
+    title: string,
+    options?: NotificationOptions
+  ) => Promise<void>;
+  updateServiceWorker: () => Promise<void>;
+  clearCache: () => Promise<void>;
+  checkForUpdates: () => Promise<boolean>;
 }
 
 export function usePWA(): PWAState & PWAActions {
@@ -30,235 +33,258 @@ export function usePWA(): PWAState & PWAActions {
     isInstalled: false,
     isInstallable: false,
     isOffline: false,
-    isOnline: typeof window !== 'undefined' && navigator ? navigator.onLine : true,
+    isOnline:
+      typeof window !== 'undefined' && navigator ? navigator.onLine : true,
     isLoading: true,
     installPrompt: null,
     notificationPermission: 'default',
-    serviceWorkerRegistration: null
-  })
+    serviceWorkerRegistration: null,
+  });
 
   // Detectar se PWA está instalada
   const detectInstallation = useCallback(() => {
-    if (typeof window === 'undefined') return
-    
-    const isInstalled = 
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as (unknown)).standalone === true ||
-      document.referrer.includes('android-app://')
+    if (typeof window === 'undefined') return;
 
-    setState(prev => ({ ...prev, isInstalled }))
-  }, [])
+    const isInstalled =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone ===
+        true ||
+      document.referrer.includes('android-app://');
+
+    setState(prev => ({ ...prev, isInstalled }));
+  }, []);
 
   // Registrar Service Worker
-  const registerServiceWorker = useCallback(async (): Promise<ServiceWorkerRegistration | null> => {
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return null
-    
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      })
-      
-      setState(prev => ({ 
-        ...prev, 
-        serviceWorkerRegistration: registration 
-      }))
+  const registerServiceWorker =
+    useCallback(async (): Promise<ServiceWorkerRegistration | null> => {
+      if (typeof window === 'undefined' || !('serviceWorker' in navigator))
+        return null;
 
-      // Escutar atualizações do Service Worker
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && typeof window !== 'undefined' && navigator.serviceWorker.controller) {
-              // Aqui você pode mostrar uma notificação para o usuário sobre a atualização
-            }
-          })
-        }
-      })
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/',
+        });
 
-      return registration
-    } catch (error) {
-      console.error('❌ PWA: Erro ao registrar Service Worker:', error)
-      return null
-    }
-  }, [])
+        setState(prev => ({
+          ...prev,
+          serviceWorkerRegistration: registration,
+        }));
+
+        // Escutar atualizações do Service Worker
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (
+                newWorker.state === 'installed' &&
+                typeof window !== 'undefined' &&
+                navigator.serviceWorker.controller
+              ) {
+                // Aqui você pode mostrar uma notificação para o usuário sobre a atualização
+              }
+            });
+          }
+        });
+
+        return registration;
+      } catch (error) {
+        console.error('❌ PWA: Erro ao registrar Service Worker:', error);
+        return null;
+      }
+    }, []);
 
   // Detectar conectividade
   const handleOnline = useCallback(() => {
-    setState(prev => ({ ...prev, isOnline: true, isOffline: false }))
-  }, [])
+    setState(prev => ({ ...prev, isOnline: true, isOffline: false }));
+  }, []);
 
   const handleOffline = useCallback(() => {
-    setState(prev => ({ ...prev, isOnline: false, isOffline: true }))
-  }, [])
+    setState(prev => ({ ...prev, isOnline: false, isOffline: true }));
+  }, []);
 
   // Detectar prompt de instalação
   const handleBeforeInstallPrompt = useCallback((e: Event) => {
-    e.preventDefault()
-    const installEvent = e as BeforeInstallPromptEvent
-    setState(prev => ({ 
-      ...prev, 
+    e.preventDefault();
+    const installEvent = e as BeforeInstallPromptEvent;
+    setState(prev => ({
+      ...prev,
       installPrompt: installEvent,
-      isInstallable: true 
-    }))
-  }, [])
+      isInstallable: true,
+    }));
+  }, []);
 
   // Função para instalar PWA
   const install = useCallback(async (): Promise<boolean> => {
     if (!state.installPrompt) {
-      return false
+      return false;
     }
 
     try {
-      await state.installPrompt.prompt()
-      const choiceResult = await state.installPrompt.userChoice
-      
+      await state.installPrompt.prompt();
+      const choiceResult = await state.installPrompt.userChoice;
+
       if (choiceResult.outcome === 'accepted') {
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           installPrompt: null,
           isInstallable: false,
-          isInstalled: true
-        }))
-        return true
+          isInstalled: true,
+        }));
+        return true;
       } else {
-        return false
+        return false;
       }
     } catch (error) {
-      console.error('❌ PWA: Erro durante instalação:', error)
-      return false
+      console.error('❌ PWA: Erro durante instalação:', error);
+      return false;
     }
-  }, [state.installPrompt])
+  }, [state.installPrompt]);
 
   // Habilitar notificações
   const enableNotifications = useCallback(async (): Promise<boolean> => {
     if (!('Notification' in window)) {
-      return false
+      return false;
     }
 
     try {
-      const permission = await Notification.requestPermission()
-      setState(prev => ({ ...prev, notificationPermission: permission }))
-      
+      const permission = await Notification.requestPermission();
+      setState(prev => ({ ...prev, notificationPermission: permission }));
+
       if (permission === 'granted') {
-        return true
+        return true;
       } else {
-        return false
+        return false;
       }
     } catch (error) {
-      console.error('❌ PWA: Erro ao solicitar permissão de notificação:', error)
-      return false
+      console.error(
+        '❌ PWA: Erro ao solicitar permissão de notificação:',
+        error
+      );
+      return false;
     }
-  }, [])
+  }, []);
 
   // Mostrar notificação
-  const showNotification = useCallback(async (title: string, options?: NotificationOptions) => {
-    if (state.notificationPermission !== 'granted') {
-      return
-    }
+  const showNotification = useCallback(
+    async (title: string, options?: NotificationOptions) => {
+      if (state.notificationPermission !== 'granted') {
+        return;
+      }
 
-    if (state.serviceWorkerRegistration) {
-      // Usar Service Worker para notificações
-      await state.serviceWorkerRegistration.showNotification(title, {
-        icon: '/android-chrome-192x192.png',
-        badge: '/favicon-16x16.png',
-        tag: 'sgb-notification',
-        ...options
-      })
-    } else {
-      // Fallback para notificação direta
-      new Notification(title, {
-        icon: '/android-chrome-192x192.png',
-        ...options
-      })
-    }
-  }, [state.notificationPermission, state.serviceWorkerRegistration])
+      if (state.serviceWorkerRegistration) {
+        // Usar Service Worker para notificações
+        await state.serviceWorkerRegistration.showNotification(title, {
+          icon: '/android-chrome-192x192.png',
+          badge: '/favicon-16x16.png',
+          tag: 'sgb-notification',
+          ...options,
+        });
+      } else {
+        // Fallback para notificação direta
+        new Notification(title, {
+          icon: '/android-chrome-192x192.png',
+          ...options,
+        });
+      }
+    },
+    [state.notificationPermission, state.serviceWorkerRegistration]
+  );
 
   // Atualizar Service Worker
   const updateServiceWorker = useCallback(async () => {
     if (state.serviceWorkerRegistration) {
       try {
-        await state.serviceWorkerRegistration.update()
+        await state.serviceWorkerRegistration.update();
       } catch (error) {
-        console.error('❌ PWA: Erro ao atualizar Service Worker:', error)
+        console.error('❌ PWA: Erro ao atualizar Service Worker:', error);
       }
     }
-  }, [state.serviceWorkerRegistration])
+  }, [state.serviceWorkerRegistration]);
 
   // Limpar cache
   const clearCache = useCallback(async () => {
     if ('caches' in window) {
       try {
-        const cacheNames = await caches.keys()
-        await Promise.all(cacheNames.map(name => caches.delete(name)))
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
       } catch (error) {
-        console.error('❌ PWA: Erro ao limpar cache:', error)
+        console.error('❌ PWA: Erro ao limpar cache:', error);
       }
     }
-  }, [])
+  }, []);
 
   // Verificar atualizações
   const checkForUpdates = useCallback(async (): Promise<boolean> => {
     if (state.serviceWorkerRegistration) {
       try {
-        await state.serviceWorkerRegistration.update()
-        return true
+        await state.serviceWorkerRegistration.update();
+        return true;
       } catch (error) {
-        console.error('❌ PWA: Erro ao verificar atualizações:', error)
-        return false
+        console.error('❌ PWA: Erro ao verificar atualizações:', error);
+        return false;
       }
     }
-    return false
-  }, [state.serviceWorkerRegistration])
+    return false;
+  }, [state.serviceWorkerRegistration]);
 
   // Configurar listeners e inicialização
   useEffect(() => {
     const init = async () => {
-      setState(prev => ({ ...prev, isLoading: true }))
+      setState(prev => ({ ...prev, isLoading: true }));
 
       // Detectar instalação
-      detectInstallation()
+      detectInstallation();
 
       // Registrar Service Worker
-      await registerServiceWorker()
+      await registerServiceWorker();
 
       // Configurar listeners de conectividade
-      window.addEventListener('online', handleOnline)
-      window.addEventListener('offline', handleOffline)
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
 
       // Configurar listener de instalação
-      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
       // Detectar permissão de notificação atual
       if ('Notification' in window) {
-        setState(prev => ({ 
-          ...prev, 
-          notificationPermission: Notification.permission 
-        }))
+        setState(prev => ({
+          ...prev,
+          notificationPermission: Notification.permission,
+        }));
       }
 
-      setState(prev => ({ ...prev, isLoading: false }))
-    }
+      setState(prev => ({ ...prev, isLoading: false }));
+    };
 
-    init()
+    init();
 
     // Cleanup
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    }
-  }, [detectInstallation, registerServiceWorker, handleOnline, handleOffline, handleBeforeInstallPrompt])
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt
+      );
+    };
+  }, [
+    detectInstallation,
+    registerServiceWorker,
+    handleOnline,
+    handleOffline,
+    handleBeforeInstallPrompt,
+  ]);
 
   // Escutar mudanças no display mode
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(display-mode: standalone)')
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
     const handler = (e: MediaQueryListEvent) => {
-      setState(prev => ({ ...prev, isInstalled: e.matches }))
-    }
+      setState(prev => ({ ...prev, isInstalled: e.matches }));
+    };
 
-    mediaQuery.addEventListener('change', handler)
-    return () => mediaQuery.removeEventListener('change', handler)
-  }, [])
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
 
   return {
     ...state,
@@ -267,8 +293,8 @@ export function usePWA(): PWAState & PWAActions {
     showNotification,
     updateServiceWorker,
     clearCache,
-    checkForUpdates
-  }
+    checkForUpdates,
+  };
 }
 
-export default usePWA 
+export default usePWA;

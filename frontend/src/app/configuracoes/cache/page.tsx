@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Database, AlertTriangle, Info } from 'lucide-react'
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Database, AlertTriangle, Info } from 'lucide-react';
 
 export default function CachePage() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -17,7 +17,9 @@ export default function CachePage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Cache Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Cache Management
+              </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Sistema de cache não configurado
               </p>
@@ -28,8 +30,9 @@ export default function CachePage() {
           <Alert>
             <Database className="h-4 w-4" />
             <AlertDescription>
-              O sistema de cache Redis não está configurado. Para ativar o cache e melhorar a performance, 
-              configure as variáveis de ambiente REDIS_URL e instale a dependência ioredis.
+              O sistema de cache Redis não está configurado. Para ativar o cache
+              e melhorar a performance, configure as variáveis de ambiente
+              REDIS_URL e instale a dependência ioredis.
             </AlertDescription>
           </Alert>
 
@@ -39,7 +42,9 @@ export default function CachePage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Status</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Status
+                    </p>
                     <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                       Desabilitado
                     </p>
@@ -55,7 +60,9 @@ export default function CachePage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Performance</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Performance
+                    </p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       Padrão
                     </p>
@@ -71,7 +78,9 @@ export default function CachePage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Configuração</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Configuração
+                    </p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       Necessária
                     </p>
@@ -92,17 +101,23 @@ export default function CachePage() {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">1. Instalar dependência</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    1. Instalar dependência
+                  </span>
                   <Badge variant="outline">npm install ioredis</Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">2. Configurar REDIS_URL</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    2. Configurar REDIS_URL
+                  </span>
                   <Badge variant="outline">Variável de ambiente</Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">3. Reiniciar aplicação</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    3. Reiniciar aplicação
+                  </span>
                   <Badge variant="outline">Necessário</Badge>
                 </div>
               </div>
@@ -111,5 +126,5 @@ export default function CachePage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

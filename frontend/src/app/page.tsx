@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function RootPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     // Redirecionar automaticamente para /login
-    router.replace('/login')
-  }, [router])
+    router.replace('/login');
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -20,5 +20,5 @@ export default function RootPage() {
         <p className="text-gray-600">Redirecionando para login...</p>
       </div>
     </div>
-  )
-} 
+  );
+}

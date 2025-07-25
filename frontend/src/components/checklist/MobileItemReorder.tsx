@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  ChevronUp, 
-  ChevronDown, 
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  ChevronUp,
+  ChevronDown,
   GripVertical,
   Move,
   Check,
   X,
-  RotateCcw
-} from 'lucide-react'
+  RotateCcw,
+} from 'lucide-react';
 
 // =====================================================
 // 📱 REORDENAÇÃO MOBILE-FRIENDLY
@@ -21,21 +21,21 @@ import {
 // ao invés de drag & drop complexo
 
 interface ReorderableItem {
-  id: string
-  titulo: string
-  tipo: string
-  obrigatorio: boolean
-  ordem: number
-  secao?: string
-  placeholder?: string
+  id: string;
+  titulo: string;
+  tipo: string;
+  obrigatorio: boolean;
+  ordem: number;
+  secao?: string;
+  placeholder?: string;
 }
 
 interface MobileItemReorderProps {
-  itens: ReorderableItem[]
-  onReorder: (itens: ReorderableItem[]) => void
-  onCancel?: () => void
-  onSave?: () => void
-  readonly?: boolean
+  itens: ReorderableItem[];
+  onReorder: (itens: ReorderableItem[]) => void;
+  onCancel?: () => void;
+  onSave?: () => void;
+  readonly?: boolean;
 }
 
 export default function MobileItemReorder({
@@ -43,79 +43,88 @@ export default function MobileItemReorder({
   onReorder,
   onCancel,
   onSave,
-  readonly = false
+  readonly = false,
 }: MobileItemReorderProps) {
-  
-  const [isReordering, setIsReordering] = useState(false)
-  const [localItens, setLocalItens] = useState(itens)
-  const [originalItens] = useState(itens)
+  const [isReordering, setIsReordering] = useState(false);
+  const [localItens, setLocalItens] = useState(itens);
+  const [originalItens] = useState(itens);
 
   const startReordering = () => {
-    setIsReordering(true)
-    setLocalItens([...itens])
-  }
+    setIsReordering(true);
+    setLocalItens([...itens]);
+  };
 
   const cancelReordering = () => {
-    setIsReordering(false)
-    setLocalItens([...originalItens])
-    onCancel?.()
-  }
+    setIsReordering(false);
+    setLocalItens([...originalItens]);
+    onCancel?.();
+  };
 
   const saveReordering = () => {
-    setIsReordering(false)
-    onReorder(localItens)
-    onSave?.()
-  }
+    setIsReordering(false);
+    onReorder(localItens);
+    onSave?.();
+  };
 
   const moveItem = (itemId: string, direction: 'up' | 'down') => {
-    const currentIndex = localItens.findIndex(item => item.id === itemId)
-    
+    const currentIndex = localItens.findIndex(item => item.id === itemId);
+
     if (
       (direction === 'up' && currentIndex === 0) ||
       (direction === 'down' && currentIndex === localItens.length - 1)
     ) {
-      return // Não pode mover
+      return; // Não pode mover
     }
 
-    const newItens = [...localItens]
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    
+    const newItens = [...localItens];
+    const targetIndex =
+      direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
     // Trocar posições
-    const temp = newItens[currentIndex]
-    newItens[currentIndex] = newItens[targetIndex]
-    newItens[targetIndex] = temp
-    
+    const temp = newItens[currentIndex];
+    newItens[currentIndex] = newItens[targetIndex];
+    newItens[targetIndex] = temp;
+
     // Atualizar ordens
     newItens.forEach((item, index) => {
-      item.ordem = index + 1
-    })
+      item.ordem = index + 1;
+    });
 
-    setLocalItens(newItens)
-  }
+    setLocalItens(newItens);
+  };
 
   const canMoveUp = (itemId: string) => {
-    const index = localItens.findIndex(item => item.id === itemId)
-    return index > 0
-  }
+    const index = localItens.findIndex(item => item.id === itemId);
+    return index > 0;
+  };
 
   const canMoveDown = (itemId: string) => {
-    const index = localItens.findIndex(item => item.id === itemId)
-    return index < localItens.length - 1
-  }
+    const index = localItens.findIndex(item => item.id === itemId);
+    return index < localItens.length - 1;
+  };
 
   const getItemTypeIcon = (tipo: string) => {
     switch (tipo) {
-      case 'sim_nao': return '✅'
-      case 'texto': return '📝'
-      case 'numero': return '🔢'
-      case 'data': return '📅'
-      case 'foto_camera': return '📷'
-      case 'foto_upload': return '🖼️'
-      case 'avaliacao': return '⭐'
-      case 'assinatura': return '✍️'
-      default: return '📋'
+      case 'sim_nao':
+        return '✅';
+      case 'texto':
+        return '📝';
+      case 'numero':
+        return '🔢';
+      case 'data':
+        return '📅';
+      case 'foto_camera':
+        return '📷';
+      case 'foto_upload':
+        return '🖼️';
+      case 'avaliacao':
+        return '⭐';
+      case 'assinatura':
+        return '✍️';
+      default:
+        return '📋';
     }
-  }
+  };
 
   if (readonly) {
     return (
@@ -124,12 +133,8 @@ export default function MobileItemReorder({
           <Card key={item.id} className="bg-gray-50">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="text-lg text-gray-400">
-                  {index + 1}
-                </div>
-                <div className="text-xl">
-                  {getItemTypeIcon(item.tipo)}
-                </div>
+                <div className="text-lg text-gray-400">{index + 1}</div>
+                <div className="text-xl">{getItemTypeIcon(item.tipo)}</div>
                 <div className="flex-1">
                   <span className="font-medium">{item.titulo}</span>
                   {item.obrigatorio && (
@@ -143,7 +148,7 @@ export default function MobileItemReorder({
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
   return (
@@ -157,7 +162,7 @@ export default function MobileItemReorder({
               {itens.length} {itens.length === 1 ? 'item' : 'itens'}
             </span>
           </div>
-          <Button 
+          <Button
             onClick={startReordering}
             className="bg-blue-600 hover:bg-blue-700 touch-manipulation"
             size="lg"
@@ -168,7 +173,7 @@ export default function MobileItemReorder({
         </div>
       ) : (
         <div className="flex gap-2 p-4 bg-orange-50 rounded-lg">
-          <Button 
+          <Button
             onClick={cancelReordering}
             variant="outline"
             className="flex-1 touch-manipulation"
@@ -177,7 +182,7 @@ export default function MobileItemReorder({
             <X className="w-4 h-4 mr-2" />
             Cancelar
           </Button>
-          <Button 
+          <Button
             onClick={saveReordering}
             className="flex-1 bg-green-600 hover:bg-green-700 touch-manipulation"
             size="lg"
@@ -191,8 +196,8 @@ export default function MobileItemReorder({
       {/* Lista de Itens */}
       <div className="space-y-3">
         {localItens.map((item, index) => (
-          <Card 
-            key={item.id} 
+          <Card
+            key={item.id}
             className={`
               transition-all duration-200
               ${isReordering ? 'ring-2 ring-blue-200 bg-blue-50' : 'bg-white'}
@@ -206,9 +211,7 @@ export default function MobileItemReorder({
                 </div>
 
                 {/* Ícone do Tipo */}
-                <div className="text-2xl">
-                  {getItemTypeIcon(item.tipo)}
-                </div>
+                <div className="text-2xl">{getItemTypeIcon(item.tipo)}</div>
 
                 {/* Informações do Item */}
                 <div className="flex-1 min-w-0">
@@ -273,7 +276,9 @@ export default function MobileItemReorder({
               <ul className="mt-1 space-y-1">
                 <li>• Use os botões ⬆️⬇️ para mover os itens</li>
                 <li>• A numeração atualiza automaticamente</li>
-                <li>• Toque em &quot;Salvar&quot; para confirmar as mudanças</li>
+                <li>
+                  • Toque em &quot;Salvar&quot; para confirmar as mudanças
+                </li>
               </ul>
             </div>
           </div>
@@ -282,7 +287,7 @@ export default function MobileItemReorder({
 
       {/* Botão de Reset (apenas durante reordenação) */}
       {isReordering && (
-        <Button 
+        <Button
           onClick={() => setLocalItens([...originalItens])}
           variant="outline"
           className="w-full touch-manipulation"
@@ -293,7 +298,7 @@ export default function MobileItemReorder({
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -301,37 +306,39 @@ export default function MobileItemReorder({
 // =====================================================
 
 export function useItemReorder(initialItems: ReorderableItem[]) {
-  const [items, setItems] = useState(initialItems)
-  const [hasChanges, setHasChanges] = useState(false)
+  const [items, setItems] = useState(initialItems);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const handleReorder = (newItems: ReorderableItem[]) => {
-    setItems(newItems)
-    setHasChanges(true)
-  }
+    setItems(newItems);
+    setHasChanges(true);
+  };
 
   const resetChanges = () => {
-    setItems(initialItems)
-    setHasChanges(false)
-  }
+    setItems(initialItems);
+    setHasChanges(false);
+  };
 
-  const saveChanges = async (onSave?: (items: ReorderableItem[]) => Promise<void>) => {
+  const saveChanges = async (
+    onSave?: (items: ReorderableItem[]) => Promise<void>
+  ) => {
     try {
       if (onSave) {
-        await onSave(items)
+        await onSave(items);
       }
-      setHasChanges(false)
-      return true
+      setHasChanges(false);
+      return true;
     } catch (error) {
-      console.error('Erro ao salvar reordenação:', error)
-      return false
+      console.error('Erro ao salvar reordenação:', error);
+      return false;
     }
-  }
+  };
 
   return {
     items,
     hasChanges,
     handleReorder,
     resetChanges,
-    saveChanges
-  }
-} 
+    saveChanges,
+  };
+}

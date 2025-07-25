@@ -1,21 +1,21 @@
-import { ReactNode, useCallback, useId } from 'react'
-import { cn } from '@/lib/utils'
-import { useSortableList } from '@/hooks/useDragAndDrop'
-import { DraggableItem } from './DraggableItem'
+import { ReactNode, useCallback, useId } from 'react';
+import { cn } from '@/lib/utils';
+import { useSortableList } from '@/hooks/useDragAndDrop';
+import { DraggableItem } from './DraggableItem';
 
 export interface SortableListProps<T> {
-  items: T[]
-  onReorder: (newItems: T[]) => void
-  renderItem: (item: T, index: number) => ReactNode
-  getId?: (item: T, index: number) => string | number
-  className?: string
-  itemClassName?: string
-  disabled?: boolean
-  orientation?: 'vertical' | 'horizontal'
-  gap?: 'sm' | 'md' | 'lg'
-  showDragHandle?: boolean
-  emptyState?: ReactNode
-  loading?: boolean
+  items: T[];
+  onReorder: (newItems: T[]) => void;
+  renderItem: (item: T, index: number) => ReactNode;
+  getId?: (item: T, index: number) => string | number;
+  className?: string;
+  itemClassName?: string;
+  disabled?: boolean;
+  orientation?: 'vertical' | 'horizontal';
+  gap?: 'sm' | 'md' | 'lg';
+  showDragHandle?: boolean;
+  emptyState?: ReactNode;
+  loading?: boolean;
 }
 
 export function SortableList<T>({
@@ -30,37 +30,41 @@ export function SortableList<T>({
   gap = 'md',
   showDragHandle = true,
   emptyState,
-  loading = false
+  loading = false,
 }: SortableListProps<T>) {
-  const listId = useId()
+  const listId = useId();
 
   const { items, dragHandlers, isDragging } = useSortableList({
     items: originalItems,
     onReorder,
     getId,
-    disabled: disabled || loading
-  })
+    disabled: disabled || loading,
+  });
 
   // Keyboard reordering for accessibility
-  const handleKeyboardReorder = useCallback((index: number, direction: 'up' | 'down') => {
-    const currentIndex = index
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    
-    if (targetIndex < 0 || targetIndex >= items.length) return
-    
-    const newItems = [...originalItems]
-    const [movedItem] = newItems.splice(currentIndex, 1)
-    newItems.splice(targetIndex, 0, movedItem)
-    
-    onReorder(newItems)
-  }, [originalItems, onReorder, items.length])
+  const handleKeyboardReorder = useCallback(
+    (index: number, direction: 'up' | 'down') => {
+      const currentIndex = index;
+      const targetIndex =
+        direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+      if (targetIndex < 0 || targetIndex >= items.length) return;
+
+      const newItems = [...originalItems];
+      const [movedItem] = newItems.splice(currentIndex, 1);
+      newItems.splice(targetIndex, 0, movedItem);
+
+      onReorder(newItems);
+    },
+    [originalItems, onReorder, items.length]
+  );
 
   // Gap classes
   const gapClasses = {
     sm: orientation === 'vertical' ? 'space-y-2' : 'space-x-2',
     md: orientation === 'vertical' ? 'space-y-4' : 'space-x-4',
-    lg: orientation === 'vertical' ? 'space-y-6' : 'space-x-6'
-  }
+    lg: orientation === 'vertical' ? 'space-y-6' : 'space-x-6',
+  };
 
   // Loading state
   if (loading) {
@@ -82,7 +86,7 @@ export function SortableList<T>({
           />
         ))}
       </div>
-    )
+    );
   }
 
   // Empty state
@@ -93,11 +97,13 @@ export function SortableList<T>({
           <div className="text-gray-500 dark:text-gray-400">
             <div className="text-4xl mb-4">📝</div>
             <p className="text-lg font-medium mb-2">Nenhum item encontrado</p>
-            <p className="text-sm">Adicione itens para começar a organizá-los</p>
+            <p className="text-sm">
+              Adicione itens para começar a organizá-los
+            </p>
           </div>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -108,9 +114,9 @@ export function SortableList<T>({
           // Orientation classes
           'flex flex-col': orientation === 'vertical',
           'flex flex-row flex-wrap': orientation === 'horizontal',
-          
+
           // Dragging state
-          'select-none': isDragging
+          'select-none': isDragging,
         },
         gapClasses[gap],
         className
@@ -121,8 +127,8 @@ export function SortableList<T>({
     >
       {/* Instructions for screen readers */}
       <div id={`${listId}-instructions`} className="sr-only">
-        Lista ordenável com {items.length} itens. 
-        Use Ctrl+Setas para reordenar via teclado ou arraste com o mouse.
+        Lista ordenável com {items.length} itens. Use Ctrl+Setas para reordenar
+        via teclado ou arraste com o mouse.
       </div>
 
       {/* Drag overlay for better UX */}
@@ -132,7 +138,7 @@ export function SortableList<T>({
 
       {/* Items */}
       {items.map((item, index) => {
-        const itemKey = getId ? getId(item.originalItem, index) : index
+        const itemKey = getId ? getId(item.originalItem, index) : index;
 
         return (
           <DraggableItem
@@ -143,7 +149,9 @@ export function SortableList<T>({
             isDragOver={item.isDragOver}
             disabled={disabled}
             renderDragHandle={showDragHandle}
-            onKeyboardReorder={(direction) => handleKeyboardReorder(index, direction)}
+            onKeyboardReorder={direction =>
+              handleKeyboardReorder(index, direction)
+            }
             className={cn(
               'sortable-item',
               'card-dark p-4',
@@ -151,20 +159,22 @@ export function SortableList<T>({
                 // Orientation specific classes
                 'w-full': orientation === 'vertical',
                 'flex-shrink-0': orientation === 'horizontal',
-                
+
                 // State classes
                 'shadow-2xl z-50': item.isDragging,
-                'ring-2 ring-blue-400 dark:ring-blue-500': item.isDragOver && !item.isDragging,
-                
+                'ring-2 ring-blue-400 dark:ring-blue-500':
+                  item.isDragOver && !item.isDragging,
+
                 // Interaction states
-                'hover:shadow-md transition-shadow': !disabled && !item.isDragging
+                'hover:shadow-md transition-shadow':
+                  !disabled && !item.isDragging,
               },
               itemClassName
             )}
           >
             {renderItem(item.originalItem, index)}
           </DraggableItem>
-        )
+        );
       })}
 
       {/* Drop zone indicator */}
@@ -178,22 +188,29 @@ export function SortableList<T>({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Variant específico para cards horizontais
-export function SortableCardGrid<T>(props: Omit<SortableListProps<T>, 'orientation'>) {
+export function SortableCardGrid<T>(
+  props: Omit<SortableListProps<T>, 'orientation'>
+) {
   return (
     <SortableList
       {...props}
       orientation="horizontal"
-      className={cn('grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4', props.className)}
+      className={cn(
+        'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+        props.className
+      )}
     />
-  )
+  );
 }
 
 // Variant específico para listas simples
-export function SortableSimpleList<T>(props: Omit<SortableListProps<T>, 'orientation' | 'showDragHandle'>) {
+export function SortableSimpleList<T>(
+  props: Omit<SortableListProps<T>, 'orientation' | 'showDragHandle'>
+) {
   return (
     <SortableList
       {...props}
@@ -202,5 +219,5 @@ export function SortableSimpleList<T>(props: Omit<SortableListProps<T>, 'orienta
       gap="sm"
       className={cn('max-w-2xl', props.className)}
     />
-  )
-} 
+  );
+}

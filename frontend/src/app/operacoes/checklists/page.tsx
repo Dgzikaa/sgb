@@ -1,16 +1,29 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { CheckSquare, Users, FileText, Clock, AlertCircle, CheckCircle } from 'lucide-react'
-import Link from 'next/link'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  CheckSquare,
+  Users,
+  FileText,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function ChecklistsPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <ProtectedRoute requiredModule="operacoes">
@@ -39,8 +52,12 @@ export default function ChecklistsPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ativos</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Ativos
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      12
+                    </p>
                   </div>
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                     <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -53,8 +70,12 @@ export default function ChecklistsPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pendentes</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">3</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Pendentes
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      3
+                    </p>
                   </div>
                   <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                     <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -67,8 +88,12 @@ export default function ChecklistsPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Templates</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">8</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Templates
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      8
+                    </p>
                   </div>
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                     <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -81,8 +106,12 @@ export default function ChecklistsPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Execuções</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">45</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Execuções
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      45
+                    </p>
                   </div>
                   <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                     <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -103,21 +132,31 @@ export default function ChecklistsPage() {
                       <CheckSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Checklist de Abertura</CardTitle>
-                      <CardDescription>Checklist diário de abertura</CardDescription>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Checklist de Abertura
+                      </CardTitle>
+                      <CardDescription>
+                        Checklist diário de abertura
+                      </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                  >
                     Diário
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Checklist para verificação diária de abertura do estabelecimento
+                  Checklist para verificação diária de abertura do
+                  estabelecimento
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Concluído hoje</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Concluído hoje
+                  </span>
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 </div>
                 <Link href="/checklists/abertura">
@@ -137,11 +176,16 @@ export default function ChecklistsPage() {
                       <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Meus Checklists</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Meus Checklists
+                      </CardTitle>
                       <CardDescription>Checklists pessoais</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                  >
                     Pessoal
                   </Badge>
                 </div>
@@ -151,9 +195,14 @@ export default function ChecklistsPage() {
                   Visualize e execute seus checklists pessoais
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Pendentes 2</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Pendentes 2
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: '60%' }}></div>
+                    <div
+                      className="h-full bg-green-500 rounded-full"
+                      style={{ width: '60%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/operacoes/checklists/checklists-funcionario">
@@ -173,11 +222,16 @@ export default function ChecklistsPage() {
                       <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Configurações</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Configurações
+                      </CardTitle>
                       <CardDescription>Gerenciar checklists</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                  >
                     Admin
                   </Badge>
                 </div>
@@ -187,9 +241,14 @@ export default function ChecklistsPage() {
                   Configure templates e gerencie checklists
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Templates 8</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Templates 8
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 rounded-full" style={{ width: '80%' }}></div>
+                    <div
+                      className="h-full bg-purple-500 rounded-full"
+                      style={{ width: '80%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/checklists">
@@ -203,5 +262,5 @@ export default function ChecklistsPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
-} 
+  );
+}

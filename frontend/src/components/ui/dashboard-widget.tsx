@@ -1,60 +1,66 @@
-﻿'use client'
+﻿'use client';
 
-import { useState, useRef, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { 
-  GripVertical, 
-  Settings, 
-  X, 
-  RefreshCw, 
+import { useState, useRef, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  GripVertical,
+  Settings,
+  X,
+  RefreshCw,
   AlertCircle,
   Eye,
   EyeOff,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Tipos para widgets
-export type WidgetSize = 'small' | 'medium' | 'large' | 'full'
-export type WidgetType = 'metric' | 'chart' | 'table' | 'activity' | 'status' | 'custom'
+export type WidgetSize = 'small' | 'medium' | 'large' | 'full';
+export type WidgetType =
+  | 'metric'
+  | 'chart'
+  | 'table'
+  | 'activity'
+  | 'status'
+  | 'custom';
 
 export interface WidgetConfig {
-  id: string
-  title: string
-  type: WidgetType
-  size: WidgetSize
-  position: { x: number; y: number }
-  visible: boolean
-  refreshInterval?: number
-  customConfig?: Record<string, (unknown)>
+  id: string;
+  title: string;
+  type: WidgetType;
+  size: WidgetSize;
+  position: { x: number; y: number };
+  visible: boolean;
+  refreshInterval?: number;
+  customConfig?: Record<string, unknown>;
 }
 
 export interface DashboardWidgetProps {
-  config: WidgetConfig
-  children: React.ReactNode
-  onConfigChange?: (config: WidgetConfig) => void
-  onRemove?: (id: string) => void
-  isDragging?: boolean
-  isEditing?: boolean
-  loading?: boolean
-  error?: string
-  className?: string
+  config: WidgetConfig;
+  children: React.ReactNode;
+  onConfigChange?: (config: WidgetConfig) => void;
+  onRemove?: (id: string) => void;
+  isDragging?: boolean;
+  isEditing?: boolean;
+  loading?: boolean;
+  error?: string;
+  className?: string;
 }
 
 const sizeClasses = {
   small: 'col-span-1 row-span-1',
   medium: 'col-span-2 row-span-1',
   large: 'col-span-2 row-span-2',
-  full: 'col-span-full row-span-1'
-}
+  full: 'col-span-full row-span-1',
+};
 
 const sizeLabels = {
   small: 'Pequeno',
   medium: 'Médio',
   large: 'Grande',
-  full: 'Largura Total'
-}
+  full: 'Largura Total',
+};
 
 export function DashboardWidget({
   config,
@@ -65,57 +71,57 @@ export function DashboardWidget({
   isEditing = false,
   loading = false,
   error,
-  className
+  className,
 }: DashboardWidgetProps) {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
-  const dragRef = useRef<HTMLDivElement>(null)
+  const [isHovered, setIsHovered] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const dragRef = useRef<HTMLDivElement>(null);
 
   // Auto-refresh se configurado
   useEffect(() => {
     if (config.refreshInterval && config.refreshInterval > 0) {
       const interval = setInterval(() => {
-        handleRefresh()
-      }, config.refreshInterval * 1000)
-      
-      return () => clearInterval(interval)
+        handleRefresh();
+      }, config.refreshInterval * 1000);
+
+      return () => clearInterval(interval);
     }
-  }, [config.refreshInterval])
+  }, [config.refreshInterval]);
 
   const handleRefresh = async () => {
-    setIsRefreshing(true)
+    setIsRefreshing(true);
     // Simular refresh - em implementação real, chamar API
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsRefreshing(false)
-  }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsRefreshing(false);
+  };
 
   const handleSizeChange = (newSize: WidgetSize) => {
     if (onConfigChange) {
       onConfigChange({
         ...config,
-        size: newSize
-      })
+        size: newSize,
+      });
     }
-  }
+  };
 
   const handleVisibilityToggle = () => {
     if (onConfigChange) {
       onConfigChange({
         ...config,
-        visible: !config.visible
-      })
+        visible: !config.visible,
+      });
     }
-  }
+  };
 
   const handleRemove = () => {
     if (onRemove) {
-      onRemove(config.id)
+      onRemove(config.id);
     }
-  }
+  };
 
   if (!config.visible && !isEditing) {
-    return null
+    return null;
   }
 
   return (
@@ -137,18 +143,20 @@ export function DashboardWidget({
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div className="flex items-center gap-2">
           {/* Drag handle */}
-          <div className={cn(
-            'cursor-grab active:cursor-grabbing transition-opacity',
-            isHovered || isEditing ? 'opacity-100' : 'opacity-0'
-          )}>
+          <div
+            className={cn(
+              'cursor-grab active:cursor-grabbing transition-opacity',
+              isHovered || isEditing ? 'opacity-100' : 'opacity-0'
+            )}
+          >
             <GripVertical className="h-4 w-4 text-gray-400" />
           </div>
-          
+
           {/* Widget title */}
           <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
             {config.title}
           </CardTitle>
-          
+
           {/* Widget type badge */}
           <Badge variant="secondary" className="text-xs">
             {config.type}
@@ -156,10 +164,12 @@ export function DashboardWidget({
         </div>
 
         {/* Controls */}
-        <div className={cn(
-          'flex items-center gap-1 transition-opacity',
-          isHovered || isEditing ? 'opacity-100' : 'opacity-0'
-        )}>
+        <div
+          className={cn(
+            'flex items-center gap-1 transition-opacity',
+            isHovered || isEditing ? 'opacity-100' : 'opacity-0'
+          )}
+        >
           {/* Visibility toggle */}
           <Button
             variant="ghost"
@@ -182,10 +192,9 @@ export function DashboardWidget({
             disabled={isRefreshing}
             className="h-6 w-6 p-0"
           >
-            <RefreshCw className={cn(
-              'h-3 w-3',
-              isRefreshing && 'animate-spin'
-            )} />
+            <RefreshCw
+              className={cn('h-3 w-3', isRefreshing && 'animate-spin')}
+            />
           </Button>
 
           {/* Settings button */}
@@ -224,7 +233,7 @@ export function DashboardWidget({
                 {Object.entries(sizeLabels).map(([size, label]) => (
                   <Button
                     key={size}
-                    variant={config.size === size ? "default" : "outline"}
+                    variant={config.size === size ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => handleSizeChange(size as WidgetSize)}
                     className="text-xs"
@@ -242,13 +251,13 @@ export function DashboardWidget({
               <input
                 type="number"
                 value={config.refreshInterval || ''}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value) || 0
+                onChange={e => {
+                  const value = parseInt(e.target.value) || 0;
                   if (onConfigChange) {
                     onConfigChange({
                       ...config,
-                      refreshInterval: value
-                    })
+                      refreshInterval: value,
+                    });
                   }
                 }}
                 className="w-full px-3 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -298,7 +307,7 @@ export function DashboardWidget({
         <div className="absolute inset-0 bg-blue-500/20 rounded-lg border-2 border-blue-500 border-dashed" />
       )}
     </Card>
-  )
+  );
 }
 
 // Widget presets
@@ -310,7 +319,7 @@ export const WIDGET_PRESETS = {
     size: 'medium' as WidgetSize,
     position: { x: 0, y: 0 },
     visible: true,
-    refreshInterval: 30
+    refreshInterval: 30,
   },
   checklist_status: {
     id: 'checklist_status',
@@ -319,7 +328,7 @@ export const WIDGET_PRESETS = {
     size: 'small' as WidgetSize,
     position: { x: 0, y: 1 },
     visible: true,
-    refreshInterval: 60
+    refreshInterval: 60,
   },
   producao_ativa: {
     id: 'producao_ativa',
@@ -328,7 +337,7 @@ export const WIDGET_PRESETS = {
     size: 'small' as WidgetSize,
     position: { x: 1, y: 1 },
     visible: true,
-    refreshInterval: 30
+    refreshInterval: 30,
   },
   metricas_integracoes: {
     id: 'metricas_integracoes',
@@ -337,7 +346,7 @@ export const WIDGET_PRESETS = {
     size: 'large' as WidgetSize,
     position: { x: 0, y: 2 },
     visible: true,
-    refreshInterval: 120
+    refreshInterval: 120,
   },
   feed_atividades: {
     id: 'feed_atividades',
@@ -346,7 +355,7 @@ export const WIDGET_PRESETS = {
     size: 'medium' as WidgetSize,
     position: { x: 2, y: 0 },
     visible: true,
-    refreshInterval: 15
+    refreshInterval: 15,
   },
   alertas_sistema: {
     id: 'alertas_sistema',
@@ -355,6 +364,6 @@ export const WIDGET_PRESETS = {
     size: 'full' as WidgetSize,
     position: { x: 0, y: 3 },
     visible: true,
-    refreshInterval: 10
-  }
-} as const 
+    refreshInterval: 10,
+  },
+} as const;

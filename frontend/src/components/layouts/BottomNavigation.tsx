@@ -1,91 +1,93 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { usePermissions } from '@/hooks/usePermissions'
-import { useMenuBadges } from '@/hooks/useMenuBadges'
-import { 
-  Home, 
-  CheckSquare, 
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useMenuBadges } from '@/hooks/useMenuBadges';
+import {
+  Home,
+  CheckSquare,
   ChefHat,
   TrendingUp,
   BarChart3,
   Menu,
   X,
-  Zap
-} from 'lucide-react'
+  Zap,
+} from 'lucide-react';
 
 interface BottomNavItem {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  href: string
-  badge?: number
-  color?: string
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  href: string;
+  badge?: number;
+  color?: string;
 }
 
 interface MobileHamburgerMenuProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 // Menu hambúrguer overlay para funcionalidades avançadas
 function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
-  const pathname = usePathname()
-  const { isRole } = usePermissions()
-  const { badges } = useMenuBadges()
+  const pathname = usePathname();
+  const { isRole } = usePermissions();
+  const { badges } = useMenuBadges();
 
   const isActive = (href: string) => {
-    if (href === '/home') return pathname === '/home'
-    return pathname.startsWith(href)
-  }
+    if (href === '/home') return pathname === '/home';
+    return pathname.startsWith(href);
+  };
 
   const advancedItems = [
-    { 
-      icon: CheckSquare, 
-      label: 'Funcionário Checklists', 
+    {
+      icon: CheckSquare,
+      label: 'Funcionário Checklists',
       href: '/operacoes/checklists/checklists-funcionario',
-      description: 'Meus checklists pessoais'
+      description: 'Meus checklists pessoais',
     },
-    { 
-      icon: ChefHat, 
-      label: 'Terminal Produção', 
+    {
+      icon: ChefHat,
+      label: 'Terminal Produção',
       href: '/producao/terminal',
-      description: 'Terminal de produção'
+      description: 'Terminal de produção',
     },
-    { 
-      icon: BarChart3, 
-      label: 'Relatórios Financeiros', 
+    {
+      icon: BarChart3,
+      label: 'Relatórios Financeiros',
       href: '/relatorios/financeiro-competencia',
-      description: 'Windsor.ai relatórios'
+      description: 'Windsor.ai relatórios',
     },
-  ]
+  ];
 
-  const configItems = isRole('admin') ? [
-    { 
-      icon: CheckSquare, 
-      label: 'Config Checklists', 
-      href: '/configuracoes/checklists',
-      description: 'Configurar checklists'
-    },
-    { 
-      icon: BarChart3, 
-      label: 'Integrações', 
-      href: '/configuracoes/integracoes',
-      description: 'Configurar integrações'
-    },
-  ] : []
+  const configItems = isRole('admin')
+    ? [
+        {
+          icon: CheckSquare,
+          label: 'Config Checklists',
+          href: '/configuracoes/checklists',
+          description: 'Configurar checklists',
+        },
+        {
+          icon: BarChart3,
+          label: 'Integrações',
+          href: '/configuracoes/integracoes',
+          description: 'Configurar integrações',
+        },
+      ]
+    : [];
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <>
       {/* Overlay backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 z-40 md:hidden"
         onClick={onClose}
       />
-      
+
       {/* Menu content */}
       <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white dark:bg-gray-900 z-50 md:hidden transform transition-transform duration-300 ease-in-out overflow-y-auto">
         {/* Header */}
@@ -114,8 +116,8 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
               Funcionalidades
             </h3>
             <div className="space-y-2">
-              {advancedItems.map((item) => {
-                const active = isActive(item.href)
+              {advancedItems.map(item => {
+                const active = isActive(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -135,7 +137,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
                       </div>
                     </div>
                   </Link>
-                )
+                );
               })}
             </div>
           </div>
@@ -147,8 +149,8 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
                 Configurações
               </h3>
               <div className="space-y-2">
-                {configItems.map((item) => {
-                  const active = isActive(item.href)
+                {configItems.map(item => {
+                  const active = isActive(item.href);
                   return (
                     <Link
                       key={item.href}
@@ -168,7 +170,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
                         </div>
                       </div>
                     </Link>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -191,56 +193,56 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 export function BottomNavigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const pathname = usePathname()
-  const { badges } = useMenuBadges()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const { badges } = useMenuBadges();
 
   const isActive = (href: string) => {
-    if (href === '/home') return pathname === '/home'
-    return pathname.startsWith(href)
-  }
+    if (href === '/home') return pathname === '/home';
+    return pathname.startsWith(href);
+  };
 
   // Principais funcionalidades para bottom nav
   const bottomNavItems: BottomNavItem[] = [
-    { 
-      icon: Home, 
-      label: 'Home', 
+    {
+      icon: Home,
+      label: 'Home',
       href: '/home',
       color: 'text-blue-600 dark:text-blue-400',
-      badge: badges.home > 0 ? badges.home : undefined
+      badge: badges.home > 0 ? badges.home : undefined,
     },
-    { 
-      icon: CheckSquare, 
-      label: 'Checklist', 
+    {
+      icon: CheckSquare,
+      label: 'Checklist',
       href: '/checklists/abertura',
       color: 'text-green-600 dark:text-green-400',
-      badge: badges.checklist > 0 ? badges.checklist : undefined
+      badge: badges.checklist > 0 ? badges.checklist : undefined,
     },
-    { 
-      icon: Zap, 
-      label: 'Operações', 
+    {
+      icon: Zap,
+      label: 'Operações',
       href: '/operacoes',
-      color: 'text-orange-600 dark:text-orange-400'
+      color: 'text-orange-600 dark:text-orange-400',
     },
-    { 
-      icon: TrendingUp, 
-      label: 'Marketing', 
+    {
+      icon: TrendingUp,
+      label: 'Marketing',
       href: '/visao-geral/marketing-360',
       color: 'text-pink-600 dark:text-pink-400',
-      badge: badges.marketing > 0 ? badges.marketing : undefined
+      badge: badges.marketing > 0 ? badges.marketing : undefined,
     },
-    { 
-      icon: BarChart3, 
-      label: 'Visão Geral', 
+    {
+      icon: BarChart3,
+      label: 'Visão Geral',
       href: '/visao-geral',
       color: 'text-purple-600 dark:text-purple-400',
-      badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined
-    }
-  ]
+      badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined,
+    },
+  ];
 
   return (
     <>
@@ -248,12 +250,12 @@ export function BottomNavigation() {
       <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden">
         {/* Gradient shadow above */}
         <div className="h-4 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
-        
+
         {/* Navigation bar */}
         <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-2 py-2">
           <div className="flex items-center justify-around">
-            {bottomNavItems.map((item) => {
-              const active = isActive(item.href)
+            {bottomNavItems.map(item => {
+              const active = isActive(item.href);
               return (
                 <Link
                   key={item.href}
@@ -265,12 +267,12 @@ export function BottomNavigation() {
                   }`}
                 >
                   <div className="relative">
-                    <item.icon 
+                    <item.icon
                       className={`w-5 h-5 mb-1 transition-colors ${
-                        active 
-                          ? 'text-blue-600 dark:text-blue-400' 
+                        active
+                          ? 'text-blue-600 dark:text-blue-400'
                           : 'text-gray-500 dark:text-gray-400'
-                      }`} 
+                      }`}
                     />
                     {item.badge && (
                       <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
@@ -278,17 +280,19 @@ export function BottomNavigation() {
                       </span>
                     )}
                   </div>
-                  <span className={`text-xs font-medium transition-colors ${
-                    active 
-                      ? 'text-blue-600 dark:text-blue-400' 
-                      : 'text-gray-500 dark:text-gray-400'
-                  }`}>
+                  <span
+                    className={`text-xs font-medium transition-colors ${
+                      active
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                  >
                     {item.label}
                   </span>
                 </Link>
-              )
+              );
             })}
-            
+
             {/* Menu button */}
             <button
               onClick={() => setIsMenuOpen(true)}
@@ -304,13 +308,13 @@ export function BottomNavigation() {
       </div>
 
       {/* Mobile Hamburger Menu */}
-      <MobileHamburgerMenu 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)} 
+      <MobileHamburgerMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
       />
 
       {/* Bottom padding para compensar fixed bottom nav - apenas no mobile */}
       <div className="h-20 md:hidden"></div>
     </>
-  )
-} 
+  );
+}

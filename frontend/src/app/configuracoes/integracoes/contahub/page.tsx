@@ -1,36 +1,55 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
-import { useBar } from '@/contexts/BarContext'
+import React, { useState, useEffect } from 'react';
 import {
-  Database, Settings, Save, TestTube, RefreshCw, CheckCircle,
-  AlertCircle, ExternalLink, FileText, BarChart3, Calendar,
-  Download, Upload, Zap, Clock, TrendingUp
-} from 'lucide-react'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useBar } from '@/contexts/BarContext';
+import {
+  Database,
+  Settings,
+  Save,
+  TestTube,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  ExternalLink,
+  FileText,
+  BarChart3,
+  Calendar,
+  Download,
+  Upload,
+  Zap,
+  Clock,
+  TrendingUp,
+} from 'lucide-react';
 
 interface ContaHubConfig {
-  api_url: string
-  api_key: string
-  company_id: string
-  sync_accounts: boolean
-  sync_transactions: boolean
-  sync_reports: boolean
-  auto_sync: boolean
-  sync_interval: number
-  last_sync?: string
-  status: 'active' | 'inactive' | 'error'
+  api_url: string;
+  api_key: string;
+  company_id: string;
+  sync_accounts: boolean;
+  sync_transactions: boolean;
+  sync_reports: boolean;
+  auto_sync: boolean;
+  sync_interval: number;
+  last_sync?: string;
+  status: 'active' | 'inactive' | 'error';
 }
 
 export default function ContaHubPage() {
-  const { toast } = useToast()
-  const { selectedBar } = useBar()
+  const { toast } = useToast();
+  const { selectedBar } = useBar();
   const [config, setConfig] = useState<ContaHubConfig>({
     api_url: '',
     api_key: '',
@@ -40,168 +59,176 @@ export default function ContaHubPage() {
     sync_reports: false,
     auto_sync: false,
     sync_interval: 60,
-    status: 'inactive'
-  })
-  const [loading, setLoading] = useState(false)
-  const [testing, setTesting] = useState(false)
-  const [syncing, setSyncing] = useState(false)
+    status: 'inactive',
+  });
+  const [loading, setLoading] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     if (selectedBar?.id) {
-      loadConfig()
+      loadConfig();
     }
-  }, [selectedBar?.id])
+  }, [selectedBar?.id]);
 
   const loadConfig = async () => {
     try {
-      setLoading(true)
-      const response = await fetch('/api/credenciais/contahub', {
+      setLoading(true);
+      const response = await fetch('/api/configuracoes/credenciais/contahub', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bar_id: selectedBar?.id })
-      })
+        body: JSON.stringify({ bar_id: selectedBar?.id }),
+      });
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         if (data.config) {
-          setConfig(data.config)
+          setConfig(data.config);
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar configuração ContaHub:', error)
+      console.error('Erro ao carregar configuração ContaHub:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar a configuração do ContaHub',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const saveConfig = async () => {
     try {
-      setLoading(true)
-      const response = await fetch('/api/credenciais/contahub', {
+      setLoading(true);
+      const response = await fetch('/api/configuracoes/credenciais/contahub', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bar_id: selectedBar?.id,
-          config: config
-        })
-      })
+          config: config,
+        }),
+      });
 
       if (response.ok) {
         toast({
           title: 'Sucesso',
-          description: 'Configuração do ContaHub salva com sucesso'
-        })
-        await loadConfig()
+          description: 'Configuração do ContaHub salva com sucesso',
+        });
+        await loadConfig();
       } else {
-        throw new Error('Erro ao salvar')
+        throw new Error('Erro ao salvar');
       }
     } catch (error) {
-      console.error('Erro ao salvar configuração ContaHub:', error)
+      console.error('Erro ao salvar configuração ContaHub:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar a configuração do ContaHub',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const testConnection = async () => {
     try {
-      setTesting(true)
-      const response = await fetch('/api/integracoes/contahub/test', {
+      setTesting(true);
+      const response = await fetch('/api/configuracoes/integracoes/contahub/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bar_id: selectedBar?.id,
-          config: config
-        })
-      })
+          config: config,
+        }),
+      });
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         toast({
           title: 'Conexão Testada',
-          description: data.success ? 'Conexão com ContaHub estabelecida com sucesso' : data.error
-        })
+          description: data.success
+            ? 'Conexão com ContaHub estabelecida com sucesso'
+            : data.error,
+        });
       } else {
-        throw new Error('Erro no teste')
+        throw new Error('Erro no teste');
       }
     } catch (error) {
-      console.error('Erro ao testar conexão ContaHub:', error)
+      console.error('Erro ao testar conexão ContaHub:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível testar a conexão com o ContaHub',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setTesting(false)
+      setTesting(false);
     }
-  }
+  };
 
   const manualSync = async () => {
     try {
-      setSyncing(true)
-      const response = await fetch('/api/integracoes/contahub/sync', {
+      setSyncing(true);
+      const response = await fetch('/api/configuracoes/integracoes/contahub/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bar_id: selectedBar?.id,
-          config: config
-        })
-      })
+          config: config,
+        }),
+      });
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         toast({
           title: 'Sincronização',
-          description: data.success ? 'Sincronização manual iniciada com sucesso' : data.error
-        })
+          description: data.success
+            ? 'Sincronização manual iniciada com sucesso'
+            : data.error,
+        });
         if (data.success) {
-          setConfig(prev => ({ ...prev, last_sync: new Date().toISOString() }))
+          setConfig(prev => ({ ...prev, last_sync: new Date().toISOString() }));
         }
       } else {
-        throw new Error('Erro na sincronização')
+        throw new Error('Erro na sincronização');
       }
     } catch (error) {
-      console.error('Erro na sincronização ContaHub:', error)
+      console.error('Erro na sincronização ContaHub:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível iniciar a sincronização manual',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setSyncing(false)
+      setSyncing(false);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="badge-status active">Ativo</Badge>
+        return <Badge className="badge-status active">Ativo</Badge>;
       case 'error':
-        return <Badge className="badge-status error">Erro</Badge>
+        return <Badge className="badge-status error">Erro</Badge>;
       default:
-        return <Badge className="badge-status inactive">Inativo</Badge>
+        return <Badge className="badge-status inactive">Inativo</Badge>;
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+        return (
+          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+        );
       case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+        return (
+          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+        );
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-400" />
+        return <AlertCircle className="h-4 w-4 text-gray-400" />;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -211,7 +238,8 @@ export default function ContaHubPage() {
           <div>
             <h1 className="section-title">ContaHub - Sincronização Contábil</h1>
             <p className="section-subtitle">
-              Configure a integração com o ContaHub para sincronização automática de dados contábeis
+              Configure a integração com o ContaHub para sincronização
+              automática de dados contábeis
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -239,39 +267,63 @@ export default function ContaHubPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="api_url" className="text-gray-700 dark:text-gray-300">
+                    <Label
+                      htmlFor="api_url"
+                      className="text-gray-700 dark:text-gray-300"
+                    >
                       URL da API
                     </Label>
                     <Input
                       id="api_url"
                       value={config.api_url}
-                      onChange={(e) => setConfig(prev => ({ ...prev, api_url: e.target.value }))}
+                      onChange={e =>
+                        setConfig(prev => ({
+                          ...prev,
+                          api_url: e.target.value,
+                        }))
+                      }
                       placeholder="https://api.contahub.com.br"
                       className="input-dark"
                     />
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="api_key" className="text-gray-700 dark:text-gray-300">
+                      <Label
+                        htmlFor="api_key"
+                        className="text-gray-700 dark:text-gray-300"
+                      >
                         API Key
                       </Label>
                       <Input
                         id="api_key"
                         type="password"
                         value={config.api_key}
-                        onChange={(e) => setConfig(prev => ({ ...prev, api_key: e.target.value }))}
+                        onChange={e =>
+                          setConfig(prev => ({
+                            ...prev,
+                            api_key: e.target.value,
+                          }))
+                        }
                         placeholder="Digite sua API Key"
                         className="input-dark"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="company_id" className="text-gray-700 dark:text-gray-300">
+                      <Label
+                        htmlFor="company_id"
+                        className="text-gray-700 dark:text-gray-300"
+                      >
                         Company ID
                       </Label>
                       <Input
                         id="company_id"
                         value={config.company_id}
-                        onChange={(e) => setConfig(prev => ({ ...prev, company_id: e.target.value }))}
+                        onChange={e =>
+                          setConfig(prev => ({
+                            ...prev,
+                            company_id: e.target.value,
+                          }))
+                        }
                         placeholder="Digite o Company ID"
                         className="input-dark"
                       />
@@ -300,7 +352,9 @@ export default function ContaHubPage() {
                     <div className="flex items-center gap-3">
                       <Database className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">Contas</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          Contas
+                        </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           Sincronizar plano de contas e saldos
                         </p>
@@ -308,7 +362,9 @@ export default function ContaHubPage() {
                     </div>
                     <Switch
                       checked={config.sync_accounts}
-                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sync_accounts: checked }))}
+                      onCheckedChange={checked =>
+                        setConfig(prev => ({ ...prev, sync_accounts: checked }))
+                      }
                     />
                   </div>
 
@@ -316,7 +372,9 @@ export default function ContaHubPage() {
                     <div className="flex items-center gap-3">
                       <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
                       <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">Transações</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          Transações
+                        </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           Sincronizar lançamentos e movimentações
                         </p>
@@ -324,7 +382,12 @@ export default function ContaHubPage() {
                     </div>
                     <Switch
                       checked={config.sync_transactions}
-                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sync_transactions: checked }))}
+                      onCheckedChange={checked =>
+                        setConfig(prev => ({
+                          ...prev,
+                          sync_transactions: checked,
+                        }))
+                      }
                     />
                   </div>
 
@@ -332,7 +395,9 @@ export default function ContaHubPage() {
                     <div className="flex items-center gap-3">
                       <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">Relatórios</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          Relatórios
+                        </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           Sincronizar relatórios contábeis
                         </p>
@@ -340,7 +405,9 @@ export default function ContaHubPage() {
                     </div>
                     <Switch
                       checked={config.sync_reports}
-                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, sync_reports: checked }))}
+                      onCheckedChange={checked =>
+                        setConfig(prev => ({ ...prev, sync_reports: checked }))
+                      }
                     />
                   </div>
 
@@ -348,7 +415,9 @@ export default function ContaHubPage() {
                     <div className="flex items-center gap-3">
                       <Zap className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                       <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">Sincronização Automática</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          Sincronização Automática
+                        </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           Executar sincronização em intervalos regulares
                         </p>
@@ -356,20 +425,30 @@ export default function ContaHubPage() {
                     </div>
                     <Switch
                       checked={config.auto_sync}
-                      onCheckedChange={(checked) => setConfig(prev => ({ ...prev, auto_sync: checked }))}
+                      onCheckedChange={checked =>
+                        setConfig(prev => ({ ...prev, auto_sync: checked }))
+                      }
                     />
                   </div>
 
                   {config.auto_sync && (
                     <div className="space-y-2">
-                      <Label htmlFor="sync_interval" className="text-gray-700 dark:text-gray-300">
+                      <Label
+                        htmlFor="sync_interval"
+                        className="text-gray-700 dark:text-gray-300"
+                      >
                         Intervalo de Sincronização (minutos)
                       </Label>
                       <Input
                         id="sync_interval"
                         type="number"
                         value={config.sync_interval}
-                        onChange={(e) => setConfig(prev => ({ ...prev, sync_interval: parseInt(e.target.value) || 60 }))}
+                        onChange={e =>
+                          setConfig(prev => ({
+                            ...prev,
+                            sync_interval: parseInt(e.target.value) || 60,
+                          }))
+                        }
                         min="15"
                         max="1440"
                         className="input-dark"
@@ -389,7 +468,9 @@ export default function ContaHubPage() {
             {/* Status e Ações */}
             <Card className="card-modern">
               <CardHeader>
-                <CardTitle className="text-gray-900 dark:text-white">Ações</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">
+                  Ações
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button
@@ -422,7 +503,9 @@ export default function ContaHubPage() {
                 </Button>
 
                 <Button
-                  onClick={() => window.open('https://contahub.com.br', '_blank')}
+                  onClick={() =>
+                    window.open('https://contahub.com.br', '_blank')
+                  }
                   variant="outline"
                   className="w-full"
                 >
@@ -435,18 +518,24 @@ export default function ContaHubPage() {
             {/* Informações */}
             <Card className="card-modern">
               <CardHeader>
-                <CardTitle className="text-gray-900 dark:text-white">Informações</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">
+                  Informações
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Status</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Status
+                    </span>
                     {getStatusBadge(config.status)}
                   </div>
-                  
+
                   {config.last_sync && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Última Sincronização</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Última Sincronização
+                      </span>
                       <span className="text-sm text-gray-900 dark:text-white">
                         {new Date(config.last_sync).toLocaleString('pt-BR')}
                       </span>
@@ -454,15 +543,25 @@ export default function ContaHubPage() {
                   )}
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Sincronização Automática</span>
-                    <Badge className={config.auto_sync ? "badge-status active" : "badge-status inactive"}>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Sincronização Automática
+                    </span>
+                    <Badge
+                      className={
+                        config.auto_sync
+                          ? 'badge-status active'
+                          : 'badge-status inactive'
+                      }
+                    >
                       {config.auto_sync ? 'Ativa' : 'Inativa'}
                     </Badge>
                   </div>
 
                   {config.auto_sync && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Intervalo</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Intervalo
+                      </span>
                       <span className="text-sm text-gray-900 dark:text-white">
                         {config.sync_interval} min
                       </span>
@@ -475,21 +574,29 @@ export default function ContaHubPage() {
             {/* Recursos */}
             <Card className="card-modern">
               <CardHeader>
-                <CardTitle className="text-gray-900 dark:text-white">Recursos</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">
+                  Recursos
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <Database className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Sincronização automática</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Sincronização automática
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <RefreshCw className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Importação de dados</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Importação de dados
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Relatórios integrados</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Relatórios integrados
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -511,9 +618,10 @@ export default function ContaHubPage() {
             <CardContent>
               <div className="space-y-6 text-gray-600 dark:text-gray-400">
                 <p className="text-base leading-relaxed">
-                  O ContaHub é uma plataforma de sincronização contábil que permite integrar dados
-                  de diferentes sistemas contábeis. Para configurar a integração, você precisará das
-                  credenciais de acesso à API do ContaHub.
+                  O ContaHub é uma plataforma de sincronização contábil que
+                  permite integrar dados de diferentes sistemas contábeis. Para
+                  configurar a integração, você precisará das credenciais de
+                  acesso à API do ContaHub.
                 </p>
 
                 <div className="grid md:grid-cols-2 gap-8">
@@ -526,25 +634,34 @@ export default function ContaHubPage() {
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           1
                         </div>
-                        <span className="text-sm">Acesse sua conta no ContaHub e vá para as configurações de API</span>
+                        <span className="text-sm">
+                          Acesse sua conta no ContaHub e vá para as
+                          configurações de API
+                        </span>
                       </div>
                       <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           2
                         </div>
-                        <span className="text-sm">Gere uma nova API Key e anote o Company ID</span>
+                        <span className="text-sm">
+                          Gere uma nova API Key e anote o Company ID
+                        </span>
                       </div>
                       <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           3
                         </div>
-                        <span className="text-sm">Configure as opções de sincronização desejadas</span>
+                        <span className="text-sm">
+                          Configure as opções de sincronização desejadas
+                        </span>
                       </div>
                       <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           4
                         </div>
-                        <span className="text-sm">Teste a conexão e inicie a sincronização</span>
+                        <span className="text-sm">
+                          Teste a conexão e inicie a sincronização
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -556,7 +673,9 @@ export default function ContaHubPage() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <span className="text-sm">Plano de contas e saldos</span>
+                        <span className="text-sm">
+                          Plano de contas e saldos
+                        </span>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -564,7 +683,9 @@ export default function ContaHubPage() {
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <span className="text-sm">Relatórios DRE e Balanço</span>
+                        <span className="text-sm">
+                          Relatórios DRE e Balanço
+                        </span>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -579,5 +700,5 @@ export default function ContaHubPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}
