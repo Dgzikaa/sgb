@@ -16,7 +16,7 @@ const DashboardFiltersSchema = z.object({
 });
 
 // ========================================
-// 📊 API PARA DASHBOARD DE IA
+// 📊 INTERFACES TYPESCRIPT
 // ========================================
 
 interface ProcessedParams {
@@ -27,6 +27,132 @@ interface ProcessedParams {
   incluir_recomendacoes?: string | boolean;
   incluir_predicoes?: string | boolean;
   [key: string]: unknown;
+}
+
+interface KpiData {
+  valor: number;
+  meta: number;
+  variacao: number;
+  performance: string;
+  unidade: string;
+}
+
+interface InsightsResumo {
+  total: number;
+  criticos_pendentes: number;
+  por_status: Record<string, number>;
+  por_impacto: Record<string, number>;
+  criticos_detalhes: Array<{
+    id: string;
+    titulo: string;
+    impacto: string;
+    confianca: number;
+  }>;
+  recentes: Array<{
+    id: string;
+    titulo: string;
+    categoria: string;
+    impacto: string;
+    confianca: number;
+    created_at: string;
+  }>;
+}
+
+interface AnomaliasResumo {
+  total: number;
+  ativas: number;
+  criticas_ativas: number;
+  por_severidade: Record<string, number>;
+  por_status: Record<string, number>;
+  criticas_detalhes: Array<{
+    id: string;
+    titulo: string;
+    severidade: string;
+    tipo_anomalia: string;
+    confianca_deteccao: number;
+  }>;
+  recentes: Array<{
+    id: string;
+    titulo: string;
+    tipo_anomalia: string;
+    severidade: string;
+    data_inicio: string;
+  }>;
+}
+
+interface TendenciaMetrica {
+  metrica: string;
+  dados: Array<{
+    valor: number;
+    data_referencia: string;
+  }>;
+  variacao_periodo: number;
+  tendencia: string;
+}
+
+interface RecomendacoesResumo {
+  total: number;
+  alta_prioridade: number;
+  roi_potencial_total: number;
+  por_status: Record<string, number>;
+  alta_prioridade_detalhes: Array<{
+    id: string;
+    titulo: string;
+    roi_estimado: number;
+    esforco_implementacao: string;
+    prioridade: number;
+  }>;
+  recentes: Array<{
+    id: string;
+    titulo: string;
+    tipo_recomendacao: string;
+    roi_estimado: number;
+    created_at: string;
+  }>;
+}
+
+interface PredicoesResumo {
+  total: number;
+  criticas: number;
+  proximas_semana: number;
+  por_tipo: Record<string, number>;
+  confianca_media: number;
+  criticas_detalhes: Array<{
+    id: string;
+    tipo_predicao: string;
+    valor_predito: number;
+    confianca: number;
+    data_alvo: string;
+    gerar_alerta: boolean;
+    modelo_nome: string;
+  }>;
+  proximas_detalhes: Array<{
+    id: string;
+    tipo_predicao: string;
+    valor_predito: number;
+    confianca: number;
+    data_alvo: string;
+    gerar_alerta: boolean;
+    modelo_nome: string;
+  }>;
+}
+
+interface AgenteStatus {
+  ativo: boolean;
+  ultima_execucao: string | null;
+  proxima_execucao: Date | null;
+  execucoes_recentes: number;
+  sucesso_rate: number;
+  tempo_medio_execucao: number;
+}
+
+interface ResumoExecutivo {
+  score_saude_geral: number;
+  status_geral: string;
+  principais_problemas: string[];
+  oportunidades: string[];
+  periodo_analise: string;
+  ultima_atualizacao: string;
 }
 
 // ========================================
@@ -115,7 +241,7 @@ export async function GET(request: NextRequest) {
 
     const [taxaConclusao, scoreQualidade, tempoMedio, produtividade] = await Promise.all(kpisPromises);
 
-    const kpis = {
+    const kpis: Record<string, KpiData> = {
       taxa_conclusao: {
         valor: taxaConclusao.data?.valor || 0,
         meta: taxaConclusao.data?.meta_valor || 85,
@@ -149,7 +275,7 @@ export async function GET(request: NextRequest) {
     // ========================================
     // 🧠 INSIGHTS RESUMO
     // ========================================
-    let insightsResumo = null;
+    let insightsResumo: InsightsResumo | null = null;
     if (filters.incluir_insights) {
       const [totalInsights, insightsCriticos, insightsRecentes] = await Promise.all([
         supabase
@@ -195,7 +321,7 @@ export async function GET(request: NextRequest) {
     // ========================================
     // 🚨 ANOMALIAS RESUMO
     // ========================================
-    let anomaliasResumo = null;
+    let anomaliasResumo: AnomaliasResumo | null = null;
     if (filters.incluir_anomalias) {
       const [totalAnomalias, anomaliasAtivas, anomaliasRecentes] = await Promise.all([
         supabase
@@ -242,7 +368,7 @@ export async function GET(request: NextRequest) {
     // ========================================
     // 📈 TENDÊNCIAS DE MÉTRICAS
     // ========================================
-    let tendenciasMetricas = null;
+    let tendenciasMetricas: TendenciaMetrica[] | null = null;
     if (filters.incluir_metricas) {
       const metricasChave = [
         'taxa_conclusao_checklists',
@@ -276,13 +402,13 @@ export async function GET(request: NextRequest) {
       });
 
       const tendencias = await Promise.all(tendenciasPromises);
-      tendenciasMetricas = tendencias.filter(t => t !== null);
+      tendenciasMetricas = tendencias.filter(t => t !== null) as TendenciaMetrica[];
     }
 
     // ========================================
     // 💡 RECOMENDAÇÕES RESUMO
     // ========================================
-    let recomendacoesResumo = null;
+    let recomendacoesResumo: RecomendacoesResumo | null = null;
     if (filters.incluir_recomendacoes) {
       const [totalRecomendacoes, recomendacoesAlta, recomendacoesRecentes] = await Promise.all([
         supabase
@@ -327,7 +453,7 @@ export async function GET(request: NextRequest) {
     // ========================================
     // 🔮 PREVISÕES RESUMO
     // ========================================
-    let predicoesResumo = null;
+    let predicoesResumo: PredicoesResumo | null = null;
     if (filters.incluir_predicoes) {
       const { data: predicoes } = await supabase
         .from('ai_predictions')
@@ -384,7 +510,7 @@ export async function GET(request: NextRequest) {
         .limit(10)
     ]);
 
-    const agenteStatus = {
+    const agenteStatus: AgenteStatus = {
       ativo: configAgente.data?.agente_ativo || false,
       ultima_execucao: logsRecentes.data?.[0]?.data_inicio || null,
       proxima_execucao: configAgente.data?.agente_ativo ? 
@@ -400,7 +526,7 @@ export async function GET(request: NextRequest) {
     // ========================================
     // 📊 SCORE GERAL DE SAÚDE
     // ========================================
-    const scoresSaude = [];
+    const scoresSaude: number[] = [];
     
     // Score baseado em KPIs
     Object.values(kpis).forEach(kpi => {
@@ -428,22 +554,22 @@ export async function GET(request: NextRequest) {
     // ========================================
     // 📋 RESUMO EXECUTIVO
     // ========================================
-    const resumoExecutivo = {
+    const resumoExecutivo: ResumoExecutivo = {
       score_saude_geral: scoreSaudeGeral,
       status_geral: scoreSaudeGeral >= 90 ? 'excelente' : 
                     scoreSaudeGeral >= 75 ? 'bom' : 
                     scoreSaudeGeral >= 60 ? 'regular' : 
                     scoreSaudeGeral >= 40 ? 'ruim' : 'critico',
-             principais_problemas: [
-         ...(anomaliasResumo && anomaliasResumo.criticas_ativas > 0 ? [`${anomaliasResumo.criticas_ativas} anomalias críticas ativas`] : []),
-         ...(insightsResumo && insightsResumo.criticos_pendentes > 0 ? [`${insightsResumo.criticos_pendentes} insights críticos pendentes`] : []),
-         ...(!agenteStatus.ativo ? ['Agente IA desativado'] : []),
-         ...(Object.values(kpis).filter(kpi => kpi.performance === 'critico').map(() => `KPI crítico detectado`))
-       ],
-       oportunidades: [
-         ...(recomendacoesResumo && recomendacoesResumo.alta_prioridade > 0 ? [`${recomendacoesResumo.alta_prioridade} recomendações de alta prioridade`] : []),
-         ...(recomendacoesResumo && recomendacoesResumo.roi_potencial_total > 0 ? [`ROI potencial de ${recomendacoesResumo.roi_potencial_total.toFixed(1)}%`] : [])
-       ],
+      principais_problemas: [
+        ...(anomaliasResumo && anomaliasResumo.criticas_ativas > 0 ? [`${anomaliasResumo.criticas_ativas} anomalias críticas ativas`] : []),
+        ...(insightsResumo && insightsResumo.criticos_pendentes > 0 ? [`${insightsResumo.criticos_pendentes} insights críticos pendentes`] : []),
+        ...(!agenteStatus.ativo ? ['Agente IA desativado'] : []),
+        ...(Object.values(kpis).filter(kpi => kpi.performance === 'critico').map(() => `KPI crítico detectado`))
+      ],
+      oportunidades: [
+        ...(recomendacoesResumo && recomendacoesResumo.alta_prioridade > 0 ? [`${recomendacoesResumo.alta_prioridade} recomendações de alta prioridade`] : []),
+        ...(recomendacoesResumo && recomendacoesResumo.roi_potencial_total > 0 ? [`ROI potencial de ${recomendacoesResumo.roi_potencial_total.toFixed(1)}%`] : [])
+      ],
       periodo_analise: `${filters.periodo_dias} dias`,
       ultima_atualizacao: new Date().toISOString()
     };

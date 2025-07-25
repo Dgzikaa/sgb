@@ -2,6 +2,70 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
+// ========================================
+// 📱 INTERFACES TYPESCRIPT
+// ========================================
+
+interface WhatsAppWebhookPayload {
+  object?: string;
+  entry?: WhatsAppEntry[];
+}
+
+interface WhatsAppEntry {
+  changes?: WhatsAppChange[];
+}
+
+interface WhatsAppChange {
+  value?: {
+    metadata?: {
+      phone_number_id?: string;
+    };
+    statuses?: WhatsAppStatus[];
+    messages?: WhatsAppMessage[];
+  };
+}
+
+interface WhatsAppStatus {
+  id: string;
+  status: 'sent' | 'delivered' | 'read' | 'failed';
+  timestamp: string;
+  errors?: Array<{
+    code?: string;
+    message?: string;
+  }>;
+}
+
+interface WhatsAppMessage {
+  id: string;
+  from: string;
+  text?: {
+    body: string;
+  };
+  type: string;
+  timestamp: string;
+}
+
+interface WebhookLog {
+  bar_id: number;
+  webhook_type: string;
+  payload: unknown;
+  processado: boolean;
+  ip_origem: string;
+  user_agent: string | null;
+  signature_verified: boolean;
+  received_at: string;
+}
+
+interface MessageUpdateData {
+  status: string;
+  status_updated_at: string;
+  enviado_em?: string;
+  entregue_em?: string;
+  lido_em?: string;
+  error_code?: string;
+  error_message?: string;
+}
+
 // Configuração do Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -60,9 +124,9 @@ export async function POST(request: NextRequest) {
                      request.headers.get('x-real-ip') || 
                      'unknown';
 
-    let payload: unknown;
+    let payload: WhatsAppWebhookPayload;
     try {
-      payload = JSON.parse(body);
+      payload = JSON.parse(body) as WhatsAppWebhookPayload;
     } catch (error) {
       console.error('Payload JSON inválido:', error);
       return NextResponse.json({ error: 'JSON inválido' }, { status: 400 });
@@ -79,7 +143,7 @@ export async function POST(request: NextRequest) {
     const isSignatureValid = await verifyWebhookSignature(body, signature, barId);
     
     // Log do webhook recebido
-    const webhookLog = {
+    const webhookLog: WebhookLog = {
       bar_id: barId,
       webhook_type: payload.object || 'unknown',
       payload: payload,
@@ -116,7 +180,7 @@ export async function POST(request: NextRequest) {
 /**
  * Identifica o bar_id através do payload do webhook
  */
-async function identifyBarFromWebhook(payload: unknown): Promise<number | null> {
+async function identifyBarFromWebhook(payload: WhatsAppWebhookPayload): Promise<number | null> {
   try {
     // Extrair phone_number_id do webhook
     const phoneNumberId = payload?.entry?.[0]?.changes?.[0]?.value?.metadata?.phone_number_id;
@@ -180,7 +244,7 @@ async function verifyWebhookSignature(body: string, signature: string | null, ba
 /**
  * Processa webhook do WhatsApp Business
  */
-async function processWhatsAppWebhook(payload: unknown, barId: number, webhookLogId?: number): Promise<void> {
+async function processWhatsAppWebhook(payload: WhatsAppWebhookPayload, barId: number, webhookLogId?: number): Promise<void> {
   try {
     const entries = payload.entry || [];
 
@@ -190,14 +254,16 @@ async function processWhatsAppWebhook(payload: unknown, barId: number, webhookLo
       for (const change of changes) {
         const value = change.value;
 
+        if (!value) continue;
+
         // Processar atualizações de status de mensagem
         if (value.statuses) {
-          await processMessageStatuses(value.statuses, barId);
+          await processMessageStatuses(value.statuses as WhatsAppStatus[], barId);
         }
 
         // Processar mensagens recebidas
         if (value.messages) {
-          await processReceivedMessages(value.messages, barId);
+          await processReceivedMessages(value.messages as WhatsAppMessage[], barId);
         }
       }
     }
@@ -218,11 +284,12 @@ async function processWhatsAppWebhook(payload: unknown, barId: number, webhookLo
     
     // Marcar webhook com erro
     if (webhookLogId) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       await supabase
         .from('whatsapp_webhooks')
         .update({
           processado: false,
-          erro_processamento: error.message || String(error)
+          erro_processamento: errorMessage
         })
         .eq('id', webhookLogId);
     }
@@ -232,7 +299,7 @@ async function processWhatsAppWebhook(payload: unknown, barId: number, webhookLo
 /**
  * Processa atualizações de status de mensagens
  */
-async function processMessageStatuses(statuses: unknown[], barId: number): Promise<void> {
+async function processMessageStatuses(statuses: WhatsAppStatus[], barId: number): Promise<void> {
   for (const status of statuses) {
     const messageId = status.id;
     const newStatus = status.status; // sent, delivered, read, failed
@@ -241,7 +308,7 @@ async function processMessageStatuses(statuses: unknown[], barId: number): Promi
     const errorMessage = status.errors?.[0]?.message;
 
     // Atualizar status da mensagem no banco
-    const updateData: unknown = {
+    const updateData: MessageUpdateData = {
       status: newStatus,
       status_updated_at: new Date(parseInt(timestamp) * 1000).toISOString()
     };
@@ -289,7 +356,7 @@ async function processMessageStatuses(statuses: unknown[], barId: number): Promi
 /**
  * Processa mensagens recebidas (respostas dos usuários)
  */
-async function processReceivedMessages(messages: unknown[], barId: number): Promise<void> {
+async function processReceivedMessages(messages: WhatsAppMessage[], barId: number): Promise<void> {
   for (const message of messages) {
     const fromNumber = message.from;
     const messageText = message.text?.body || message.type;
