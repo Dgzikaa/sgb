@@ -8,17 +8,25 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { barId } = await request.json()
+    const body = await request.json()
+    const { barId } = body || {}
 
-    if (!barId) {
-      return NextResponse.json({ error: 'Bar ID é obrigatório' }, { status: 400 })
+    // Se não tiver barId no body, usar variável de ambiente (cron job)
+    const targetBarId = barId || process.env.NIBO_BAR_ID
+
+    if (!targetBarId) {
+      return NextResponse.json({ 
+        error: 'Bar ID é obrigatório (via body ou variável de ambiente NIBO_BAR_ID)' 
+      }, { status: 400 })
     }
+
+    console.log(`🔄 Iniciando sincronização NIBO para bar ${targetBarId}...`)
 
     // Buscar credenciais do NIBO
     const { data: credenciais, error: credError } = await supabase
       .from('credenciais')
       .select('*')
-      .eq('bar_id', barId)
+      .eq('bar_id', targetBarId)
       .eq('servico', 'nibo')
       .single()
 
@@ -35,7 +43,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Sincronização NIBO iniciada com sucesso!',
-      syncId: `sync_${Date.now()}`
+      syncId: `sync_${Date.now()}`,
+      barId: targetBarId
     })
 
   } catch (error) {
