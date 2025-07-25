@@ -43,11 +43,6 @@ const routeMapping: Record<string, { name: string; icon?: React.ComponentType<{ 
   // Financeiro
   '/financeiro': { name: 'Financeiro' },
   '/financeiro/agendamento': { name: 'Agendamento' },
-  '/financeiro/receitas': { name: 'Receitas' },
-  '/financeiro/relatorios': { name: 'Relatórios' },
-  '/financeiro/gastos': { name: 'Gastos' },
-  '/financeiro/fluxo-caixa': { name: 'Fluxo de Caixa' },
-  '/financeiro/calculadora': { name: 'Calculadora' },
   
   // Configurações
   '/configuracoes': { name: 'Configurações' },

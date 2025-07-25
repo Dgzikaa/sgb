@@ -498,7 +498,7 @@ export default function IntegracoesPage() {
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           1
                         </div>
-                        <span className="text-sm">Clique em "Configurar" na integração desejada</span>
+                        <span className="text-sm">Clique em &quot;Configurar&quot; na integração desejada</span>
                       </div>
                       <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">

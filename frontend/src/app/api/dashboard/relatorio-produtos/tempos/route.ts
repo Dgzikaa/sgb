@@ -111,7 +111,8 @@ export async function GET(request: NextRequest) {
     let pagina = 0;
     const tamanhoPagina = 1000;
     
-    while (true) {
+    let hasMoreData = true;
+    while (hasMoreData) {
       const inicio = pagina * tamanhoPagina;
       const fim = inicio + tamanhoPagina - 1;
       
@@ -145,13 +146,19 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Erro ao buscar dados do período' }, { status: 500 });
       }
 
-      if (!dadosPagina || dadosPagina.length === 0) break;
+      if (!dadosPagina || dadosPagina.length === 0) {
+        hasMoreData = false;
+        break;
+      }
       
       dadosPeriodo = [...dadosPeriodo, ...dadosPagina];
       console.log(`📄 Página ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosPeriodo.length})`);
       
-      if (dadosPagina.length < tamanhoPagina) break;
-      pagina++;
+      if (dadosPagina.length < tamanhoPagina) {
+        hasMoreData = false;
+      } else {
+        pagina++;
+      }
     }
 
     console.log(`📊 Total de registros do período: ${dadosPeriodo.length}`);
@@ -168,7 +175,8 @@ export async function GET(request: NextRequest) {
     let dadosDia: TempoItem[] = [];
     pagina = 0;
     
-    while (true) {
+    let hasMoreDataDia = true;
+    while (hasMoreDataDia) {
       const inicio = pagina * tamanhoPagina;
       const fim = inicio + tamanhoPagina - 1;
       
@@ -201,13 +209,19 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Erro ao buscar dados do dia' }, { status: 500 });
       }
 
-      if (!dadosPagina || dadosPagina.length === 0) break;
+      if (!dadosPagina || dadosPagina.length === 0) {
+        hasMoreDataDia = false;
+        break;
+      }
       
       dadosDia = [...dadosDia, ...dadosPagina];
       console.log(`📄 Dia - Página ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosDia.length})`);
       
-      if (dadosPagina.length < tamanhoPagina) break;
-      pagina++;
+      if (dadosPagina.length < tamanhoPagina) {
+        hasMoreDataDia = false;
+      } else {
+        pagina++;
+      }
     }
 
     console.log(`📊 Dados encontrados - Período: ${dadosPeriodo?.length || 0}, Dia específico: ${dadosDia?.length || 0}`);
@@ -328,7 +342,8 @@ export async function GET(request: NextRequest) {
       let dadosUltimos7Dias: TempoItem[] = [];
       let paginaRecente = 0;
       
-      while (true) {
+      let hasMoreDataRecente = true;
+      while (hasMoreDataRecente) {
         const inicio = paginaRecente * tamanhoPagina;
         const fim = inicio + tamanhoPagina - 1;
         
@@ -357,13 +372,19 @@ export async function GET(request: NextRequest) {
           .not('prd_desc', 'is', null)
           .range(inicio, fim);
         
-        if (!dadosPagina || dadosPagina.length === 0) break;
+        if (!dadosPagina || dadosPagina.length === 0) {
+          hasMoreDataRecente = false;
+          break;
+        }
         
         dadosUltimos7Dias = [...dadosUltimos7Dias, ...dadosPagina];
         console.log(`📄 Últimos 7 dias - Página ${paginaRecente + 1}: ${dadosPagina.length} registros (Total: ${dadosUltimos7Dias.length})`);
         
-        if (dadosPagina.length < tamanhoPagina) break;
-        paginaRecente++;
+        if (dadosPagina.length < tamanhoPagina) {
+          hasMoreDataRecente = false;
+        } else {
+          paginaRecente++;
+        }
       }
       
       dadosRecentes = dadosUltimos7Dias;

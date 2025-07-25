@@ -348,7 +348,7 @@ export default function InterWebhookPage() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">Teste a Configuração</p>
-                    <p>Use o botão "Testar Webhook" para verificar se está funcionando</p>
+                    <p>Use o botão &quot;Testar Webhook&quot; para verificar se está funcionando</p>
                   </div>
                 </div>
 

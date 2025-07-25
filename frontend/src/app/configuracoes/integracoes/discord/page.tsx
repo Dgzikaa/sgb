@@ -492,11 +492,11 @@ export default function DiscordPage() {
                     </div>
                     <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                       <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="font-medium">Vá em "Webhooks"</span>
+                      <span className="font-medium">Vá em &quot;Webhooks&quot;</span>
                     </div>
                     <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                       <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="font-medium">Clique em "New Webhook"</span>
+                      <span className="font-medium">Clique em &quot;New Webhook&quot;</span>
                     </div>
                     <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                       <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>

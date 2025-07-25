@@ -179,11 +179,6 @@ export function usePermissions(): PermissionsHook {
       // Financeiro
       'financeiro': 'financeiro',
       'agendamento_pagamentos': 'agendamento_pagamentos',
-      'receitas_financeiro': 'receitas_financeiro',
-      'relatorios_financeiro': 'relatorios_financeiro',
-      'gastos': 'gastos',
-      'fluxo_caixa': 'fluxo_caixa',
-      'calculadora_financeira': 'calculadora_financeira',
       
       // Configurações
       'configuracoes': 'configuracoes',

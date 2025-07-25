@@ -193,36 +193,6 @@ export function ModernSidebar() {
           href: '/financeiro/agendamento',
           description: 'Agendar pagamentos'
         },
-        { 
-          icon: TrendingUp, 
-          label: 'Receitas', 
-          href: '/financeiro/receitas',
-          description: 'Controle de receitas'
-        },
-        { 
-          icon: FileText, 
-          label: 'Relatórios', 
-          href: '/financeiro/relatorios',
-          description: 'Relatórios financeiros'
-        },
-        { 
-          icon: CreditCard, 
-          label: 'Gastos', 
-          href: '/financeiro/gastos',
-          description: 'Controle de gastos'
-        },
-        { 
-          icon: DollarSign, 
-          label: 'Fluxo de Caixa', 
-          href: '/financeiro/fluxo-caixa',
-          description: 'Análise de fluxo'
-        },
-        { 
-          icon: Calculator, 
-          label: 'Calculadora', 
-          href: '/financeiro/calculadora',
-          description: 'Calculadora financeira'
-        },
       ]
     },
 

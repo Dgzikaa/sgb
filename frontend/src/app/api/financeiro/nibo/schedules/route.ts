@@ -415,7 +415,11 @@ async function getCategoriaById(categoriaId: string) {
       return null
     }
 
-      return data
+    return data
+  } catch (error) {
+    console.error('Erro ao buscar categoria:', error)
+    return null
+  }
 }
 
 // Função para enviar notificação para Discord
@@ -517,10 +521,6 @@ async function enviarNotificacaoDiscord(params: {
   } catch (error: any) {
     console.error('❌ Erro ao enviar notificação Discord:', error)
     return false
-  }
-} catch (error) {
-    console.error('Erro ao buscar categoria:', error)
-    return null
   }
 }
 

@@ -358,7 +358,8 @@ export default function ComparativoPage() {
         }
 
         // Buscar dados do ContaHub via pagamentos
-        while (true) {
+        let hasMoreData = true
+        while (hasMoreData) {
           const { data: fatData } = await supabase
             .from('pagamentos')
             .select('liquido, origem')
@@ -368,7 +369,10 @@ export default function ComparativoPage() {
             .neq('pag', 'Conta Assinada')
             .range(offset, offset + CHUNK_SIZE - 1)
 
-          if (!fatData || fatData.length === 0) break
+          if (!fatData || fatData.length === 0) {
+            hasMoreData = false
+            break
+          }
 
           const chunkSympla = fatData
             .filter((item: FaturamentoItem) => item.origem?.toLowerCase().includes('sympla'))
@@ -384,8 +388,11 @@ export default function ComparativoPage() {
           
           console.log(`💻 Chunk processado: ${fatData.length} registros, Sympla: R$ ${chunkSympla.toFixed(2)}, ContaHub: R$ ${chunkContaHub.toFixed(2)}`)
           
-          offset += CHUNK_SIZE
-          if (fatData.length < CHUNK_SIZE) break
+          if (fatData.length < CHUNK_SIZE) {
+            hasMoreData = false
+          } else {
+            offset += CHUNK_SIZE
+          }
         }
       }
 

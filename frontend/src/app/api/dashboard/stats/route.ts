@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
       let pagina = 0
       const tamanhoPagina = 1000
       
-      while (true) {
+      let hasMoreData = true
+      while (hasMoreData) {
         const inicio = pagina * tamanhoPagina
         const fim = inicio + tamanhoPagina - 1
         
@@ -69,11 +70,17 @@ export async function GET(request: NextRequest) {
           throw error
         }
         
-        if (!data || data.length === 0) break
+        if (!data || data.length === 0) {
+          hasMoreData = false
+          break
+        }
         
         todosRegistros = [...todosRegistros, ...data]
-        if (data.length < tamanhoPagina) break
-        pagina++
+        if (data.length < tamanhoPagina) {
+          hasMoreData = false
+        } else {
+          pagina++
+        }
       }
       
       return todosRegistros
@@ -85,7 +92,8 @@ export async function GET(request: NextRequest) {
       let pagina = 0
       const tamanhoPagina = 1000
 
-      while (true) {
+      let hasMoreDataYuzer = true
+      while (hasMoreDataYuzer) {
         const inicio = pagina * tamanhoPagina
         const fim = inicio + tamanhoPagina - 1
         
@@ -105,11 +113,17 @@ export async function GET(request: NextRequest) {
           throw error
         }
         
-        if (!data || data.length === 0) break
+        if (!data || data.length === 0) {
+          hasMoreDataYuzer = false
+          break
+        }
         
         todosRegistros = [...todosRegistros, ...data]
-        if (data.length < tamanhoPagina) break
-        pagina++
+        if (data.length < tamanhoPagina) {
+          hasMoreDataYuzer = false
+        } else {
+          pagina++
+        }
       }
 
       return todosRegistros
