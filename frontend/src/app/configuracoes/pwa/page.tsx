@@ -1,86 +1,97 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import PWAStatus from '@/components/PWAStatus'
-import { PWAInstallBanner } from '@/components/PWAInstallBanner'
-import { usePWA } from '@/hooks/usePWA'
-import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Download, 
-  Smartphone, 
-  Monitor, 
-  Wifi, 
-  WifiOff, 
-  Bell, 
-  Zap, 
+import { useState, useEffect } from 'react';
+import PWAStatus from '@/components/PWAStatus';
+import { PWAInstallBanner } from '@/components/PWAInstallBanner';
+import { usePWA } from '@/hooks/usePWA';
+import { usePageTitle } from '@/contexts/PageTitleContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Download,
+  Smartphone,
+  Monitor,
+  Wifi,
+  WifiOff,
+  Bell,
+  Zap,
   CheckCircle,
   AlertCircle,
   Globe,
   Home,
   RefreshCw,
-  Settings
-} from 'lucide-react'
+  Settings,
+} from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
 export default function PWAPage() {
-  const { setPageTitle } = usePageTitle()
-  const { isInstalled, isInstallable } = usePWA()
-  const [isOnline, setIsOnline] = useState(true)
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [platform, setPlatform] = useState<'desktop' | 'mobile' | 'unknown'>('unknown')
+  const { setPageTitle } = usePageTitle();
+  const { isInstalled, isInstallable } = usePWA();
+  const [isOnline, setIsOnline] = useState(true);
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [platform, setPlatform] = useState<'desktop' | 'mobile' | 'unknown'>(
+    'unknown'
+  );
 
   useEffect(() => {
-    setPageTitle('PWA - Configurações')
-    return () => setPageTitle('')
-  }, [setPageTitle])
+    setPageTitle('PWA - Configurações');
+    return () => setPageTitle('');
+  }, [setPageTitle]);
 
   useEffect(() => {
     // Detectar plataforma
-    const userAgent = navigator.userAgent
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
-    setPlatform(isMobile ? 'mobile' : 'desktop')
+    const userAgent = navigator.userAgent;
+    const isMobile =
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        userAgent
+      );
+    setPlatform(isMobile ? 'mobile' : 'desktop');
 
     // Monitorar status online/offline
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-    
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    setIsOnline(navigator.onLine)
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    setIsOnline(navigator.onLine);
 
     // Capturar evento de instalação
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault()
-      setInstallPrompt(e)
-    }
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    }
-  }, [])
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt
+      );
+    };
+  }, []);
 
   const handleInstallClick = async () => {
     if (installPrompt) {
-      installPrompt.prompt()
-      const { outcome } = await installPrompt.userChoice
-      console.log(`PWA instalação: ${outcome}`)
-      setInstallPrompt(null)
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      console.log(`PWA instalação: ${outcome}`);
+      setInstallPrompt(null);
     } else {
       // Fallback para instruções manuais
-      alert('Para instalar, use o menu do navegador ou clique no ícone de instalação na barra de endereços.')
+      alert(
+        'Para instalar, use o menu do navegador ou clique no ícone de instalação na barra de endereços.'
+      );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -89,12 +100,14 @@ export default function PWAPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Progressive Web App</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Progressive Web App
+              </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Instale o SGB como aplicativo nativo para melhor experiência
               </p>
             </div>
-            
+
             <div className="flex items-center gap-2">
               {isOnline ? (
                 <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
@@ -140,7 +153,7 @@ export default function PWAPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <Home className="w-6 h-6 text-blue-600 mx-auto mb-2" />
@@ -151,7 +164,7 @@ export default function PWAPage() {
                           Ícone adicionado
                         </p>
                       </div>
-                      
+
                       <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                         <Globe className="w-6 h-6 text-purple-600 mx-auto mb-2" />
                         <p className="text-sm font-medium text-purple-900 dark:text-purple-100">
@@ -178,7 +191,7 @@ export default function PWAPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Botão de instalação automática */}
                     {(isInstallable || installPrompt) && (
                       <div className="text-center">
@@ -217,7 +230,9 @@ export default function PWAPage() {
                   {platform === 'mobile' ? (
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                       <Smartphone className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                      <p className="font-medium text-blue-900 dark:text-blue-100">Mobile</p>
+                      <p className="font-medium text-blue-900 dark:text-blue-100">
+                        Mobile
+                      </p>
                       <p className="text-sm text-blue-700 dark:text-blue-300">
                         Ideal para instalação PWA
                       </p>
@@ -225,27 +240,35 @@ export default function PWAPage() {
                   ) : (
                     <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                       <Monitor className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                      <p className="font-medium text-green-900 dark:text-green-100">Desktop</p>
+                      <p className="font-medium text-green-900 dark:text-green-100">
+                        Desktop
+                      </p>
                       <p className="text-sm text-green-700 dark:text-green-300">
                         Suporte completo PWA
                       </p>
                     </div>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">PWA Support</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      PWA Support
+                    </span>
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   </div>
-                  
+
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Service Worker</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Service Worker
+                    </span>
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   </div>
-                  
+
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Cache Offline</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Cache Offline
+                    </span>
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   </div>
                 </div>
@@ -348,5 +371,5 @@ export default function PWAPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

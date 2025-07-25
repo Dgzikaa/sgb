@@ -1,13 +1,16 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao conectar com banco' },
+        { status: 500 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -17,7 +20,10 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '1');
 
     if (!dataEspecifica) {
-      return NextResponse.json({ error: 'Data específica é obrigatória' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Data específica é obrigatória' },
+        { status: 400 }
+      );
     }
 
     // Calcular período para histórico (últimos 30 dias)
@@ -25,18 +31,22 @@ export async function GET(request: NextRequest) {
     const dataInicio = new Date(dataFim);
     dataInicio.setDate(dataFim.getDate() - 30);
 
-    console.log(`📈 Buscando histórico de ${dataInicio.toISOString().split('T')[0]} até ${dataFim.toISOString().split('T')[0]}`);
+    console.log(
+      `📈 Buscando histórico de ${dataInicio.toISOString().split('T')[0]} até ${dataFim.toISOString().split('T')[0]}`
+    );
 
     // Query base
     let query = supabase
       .from('tempo')
-      .select(`
+      .select(
+        `
         t0_lancamento,
         t1_t2,
         prd_desc,
         grp_desc,
         itm_qtd
-      `)
+      `
+      )
       .eq('bar_id', barId)
       .not('prd_desc', 'is', null)
       .not('t1_t2', 'is', null)
@@ -54,7 +64,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar histórico:', error);
-      return NextResponse.json({ error: 'Erro ao buscar histórico' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar histórico' },
+        { status: 500 }
+      );
     }
 
     // Agrupar dados por data
@@ -62,13 +75,13 @@ export async function GET(request: NextRequest) {
 
     dadosHistorico?.forEach((item: unknown) => {
       const data = item.t0_lancamento.split('T')[0];
-      
+
       if (!dadosPorData.has(data)) {
         dadosPorData.set(data, {
           data,
           tempos: [],
           pedidos: 0,
-          produtos_problema: new Set()
+          produtos_problema: new Set(),
         });
       }
 
@@ -84,20 +97,26 @@ export async function GET(request: NextRequest) {
 
     // Calcular estatísticas por dia
     const historico = Array.from(dadosPorData.values()).map((dia: unknown) => {
-      const tempoMedio = dia.tempos.length > 0 
-        ? dia.tempos.reduce((a: number, b: number) => a + b, 0) / dia.tempos.length 
-        : 0;
+      const tempoMedio =
+        dia.tempos.length > 0
+          ? dia.tempos.reduce((a: number, b: number) => a + b, 0) /
+            dia.tempos.length
+          : 0;
 
       return {
         data: new Date(dia.data).toLocaleDateString('pt-BR'),
         tempo_medio: Math.round(tempoMedio),
         total_pedidos: dia.pedidos,
-        produtos_problema: Array.from(dia.produtos_problema)
+        produtos_problema: Array.from(dia.produtos_problema),
       };
     });
 
     // Ordenar por data
-    historico.sort((a, b) => new Date(a.data.split('/').reverse().join('-')).getTime() - new Date(b.data.split('/').reverse().join('-')).getTime());
+    historico.sort(
+      (a, b) =>
+        new Date(a.data.split('/').reverse().join('-')).getTime() -
+        new Date(b.data.split('/').reverse().join('-')).getTime()
+    );
 
     return NextResponse.json({
       success: true,
@@ -106,12 +125,14 @@ export async function GET(request: NextRequest) {
         data_especifica: dataEspecifica,
         periodo_analise: periodoAnalise,
         grupo_filtro: grupoFiltro,
-        total_dias: historico.length
-      }
+        total_dias: historico.length,
+      },
     });
-
   } catch (error) {
     console.error('Erro interno na API de histórico:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
-} 
+}

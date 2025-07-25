@@ -181,7 +181,8 @@
 
 /* Animações */
 @keyframes btn-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -198,12 +199,12 @@
   .btn-modern {
     @apply px-3 py-2 text-sm;
   }
-  
+
   .btn-lg {
     @apply px-4 py-2.5 text-base;
   }
-  
+
   .btn-xl {
     @apply px-6 py-3 text-lg;
   }
-} 
+}

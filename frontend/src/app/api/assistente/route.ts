@@ -1,90 +1,112 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { OpenAI } from 'openai'
-import { getVendasData, getClientesData, getProdutoMaisVendido, getAnaliseCompleta } from '@/lib/database'
+import { NextRequest, NextResponse } from 'next/server';
+import { OpenAI } from 'openai';
+import {
+  getVendasData,
+  getClientesData,
+  getProdutoMaisVendido,
+  getAnaliseCompleta,
+} from '@/lib/database';
 
 // Configurar OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
-})
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json()
+    const { message } = await request.json();
 
     if (!message) {
-      return NextResponse.json({ error: 'Mensagem é obrigatória' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Mensagem é obrigatória' },
+        { status: 400 }
+      );
     }
 
     // 🚀 BUSCAR DADOS REAIS usando as funções já existentes do frontend
-    let contextoDados = ''
-    let vendasData = null
-    let clientesData = null
-    let produtoMaisVendido = null
-    
+    let contextoDados = '';
+    let vendasData = null;
+    let clientesData = null;
+    let produtoMaisVendido = null;
+
     try {
-      console.log('📊 Buscando dados do sistema usando funções existentes...')
-      
+      console.log('📊 Buscando dados do sistema usando funções existentes...');
+
       // Usar as funções já testadas e em produção + análises avançadas
       const dados = await Promise.all([
         getVendasData().catch(err => {
-          console.warn('⚠️ Erro ao buscar vendas:', err.message)
-          return null
+          console.warn('⚠️ Erro ao buscar vendas:', err.message);
+          return null;
         }),
         getClientesData().catch(err => {
-          console.warn('⚠️ Erro ao buscar clientes:', err.message)
-          return null
+          console.warn('⚠️ Erro ao buscar clientes:', err.message);
+          return null;
         }),
         getProdutoMaisVendido().catch(err => {
-          console.warn('⚠️ Erro ao buscar produto mais vendido:', err.message)
-          return null
+          console.warn('⚠️ Erro ao buscar produto mais vendido:', err.message);
+          return null;
         }),
         getAnaliseCompleta('semana').catch(err => {
-          console.warn('⚠️ Erro ao buscar análise completa:', err.message)
-          return null
-        })
-      ])
-      
-      vendasData = dados[0]
-      clientesData = dados[1]
-      produtoMaisVendido = dados[2]
-      const analiseCompleta = dados[3]
+          console.warn('⚠️ Erro ao buscar análise completa:', err.message);
+          return null;
+        }),
+      ]);
+
+      vendasData = dados[0];
+      clientesData = dados[1];
+      produtoMaisVendido = dados[2];
+      const analiseCompleta = dados[3];
 
       console.log('📈 Dados obtidos:', {
         vendas: vendasData ? 'OK' : 'ERRO',
-        clientes: clientesData ? 'OK' : 'ERRO', 
+        clientes: clientesData ? 'OK' : 'ERRO',
         produto: produtoMaisVendido ? 'OK' : 'ERRO',
-        analiseCompleta: analiseCompleta ? 'OK' : 'ERRO'
-      })
+        analiseCompleta: analiseCompleta ? 'OK' : 'ERRO',
+      });
 
       // Montar contexto com dados reais
       contextoDados = `
 📊 DADOS ATUAIS DO BAR ORDINÁRIO (usando sistema de produção):
 
 💰 VENDAS:
-${vendasData ? `
+${
+  vendasData
+    ? `
 - Vendas hoje: R$ ${vendasData.vendas_hoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 - Vendas da semana: R$ ${vendasData.vendas_semana.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 - Total de pedidos hoje: ${vendasData.total_pedidos}
 - Ticket médio: R$ ${vendasData.ticket_medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-` : '- Dados de vendas indisponíveis no momento'}
+`
+    : '- Dados de vendas indisponíveis no momento'
+}
 
 👥 CLIENTES:
-${clientesData ? `
+${
+  clientesData
+    ? `
 - Total de clientes hoje: ${clientesData.total_clientes_hoje}
 - Novos clientes: ${clientesData.novos_clientes}
 - Clientes recorrentes: ${clientesData.clientes_recorrentes}
-` : '- Dados de clientes indisponíveis no momento'}
+`
+    : '- Dados de clientes indisponíveis no momento'
+}
 
 🏆 PRODUTO MAIS VENDIDO:
-${produtoMaisVendido ? `
+${
+  produtoMaisVendido
+    ? `
 - Produto: ${produtoMaisVendido.produto}
 - Categoria: ${produtoMaisVendido.grupo}
 - Quantidade vendida: ${produtoMaisVendido.quantidade}
 - Valor total: R$ ${produtoMaisVendido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-` : '- Dados de produtos indisponíveis no momento'}
+`
+    : '- Dados de produtos indisponíveis no momento'
+}
 
 📊 ANÁLISE AVANÇADA DA SEMANA:
-${analiseCompleta ? `
+${
+  analiseCompleta
+    ? `
 - 🏆 MELHOR DIA: ${analiseCompleta.melhorDiaSemana.dia} (R$ ${analiseCompleta.melhorDiaSemana.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
 - 📈 PERFORMANCE DA SEMANA: ${(analiseCompleta.insights.performanceSemana * 100).toFixed(0)}% acima da média
 - 🎯 CONSISTÊNCIA: ${(analiseCompleta.insights.consistencia * 100).toFixed(0)}% dos dias acima de 80% da média
@@ -95,10 +117,15 @@ ${analiseCompleta ? `
 💰 TOTAL FATURAMENTO DA SEMANA: R$ ${analiseCompleta.dadosSemana.reduce((sum, dia) => sum + dia.faturamento, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 
 DADOS POR DIA DA SEMANA:
-${analiseCompleta.dadosSemana.map(dia => 
-  `  ${dia.dia}: R$ ${dia.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${dia.clientes} pessoas)`
-).join('\n')}
-` : '- Análise avançada indisponível no momento'}
+${analiseCompleta.dadosSemana
+  .map(
+    dia =>
+      `  ${dia.dia}: R$ ${dia.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${dia.clientes} pessoas)`
+  )
+  .join('\n')}
+`
+    : '- Análise avançada indisponível no momento'
+}
 
 🏪 INFORMAÇÕES DO BAR:
 - Nome: Bar Ordinário
@@ -116,10 +143,9 @@ ${analiseCompleta.dadosSemana.map(dia =>
 - Se algum dado estiver indisponível, informe e sugira verificar mais tarde
 - Mantenha tom profissional mas amigável e seja específico com números
 - Dê insights ACTIONABLES baseados nos dados reais
-      `.trim()
-
+      `.trim();
     } catch (error) {
-      console.error('❌ Erro ao buscar dados para contexto:', error)
+      console.error('❌ Erro ao buscar dados para contexto:', error);
       contextoDados = `
 ⚠️ DADOS TEMPORARIAMENTE INDISPONÍVEIS
 
@@ -131,7 +157,7 @@ Posso ainda ajudar com:
 - Planejamento e metas
 
 Por favor, tente novamente em alguns minutos para dados atualizados.
-      `.trim()
+      `.trim();
     }
 
     // Prompt do sistema para o assistente
@@ -156,43 +182,51 @@ CAPACIDADES:
 - Explicação clara de métricas importantes
 
 Sempre mencione a fonte dos dados (sistema SGB) e seja específico nos números quando relevante.
-    `.trim()
+    `.trim();
 
     // Chamar OpenAI com contexto real
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       messages: [
-        { 
-          role: "system", 
-          content: systemPrompt
+        {
+          role: 'system',
+          content: systemPrompt,
         },
-        { 
-          role: "user", 
-          content: message 
-        }
+        {
+          role: 'user',
+          content: message,
+        },
       ],
       max_tokens: 1000,
       temperature: 0.7,
-    })
+    });
 
-    const resposta = completion.choices[0]?.message?.content || 'Desculpe, não consegui processar sua solicitação.'
+    const resposta =
+      completion.choices[0]?.message?.content ||
+      'Desculpe, não consegui processar sua solicitação.';
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: resposta,
       dados_utilizados: {
         vendas_disponivel: vendasData !== null,
         clientes_disponivel: clientesData !== null,
         produto_disponivel: produtoMaisVendido !== null,
-        timestamp: new Date().toISOString()
-      }
-    })
-
+        timestamp: new Date().toISOString(),
+      },
+    });
   } catch (error) {
-    console.error('❌ Erro na API do assistente:', error)
-    
-    return NextResponse.json({ 
-      message: 'Desculpe, ocorreu um erro interno. Tente novamente em alguns instantes.',
-      error: process.env.NODE_ENV === 'development' ? (error as Error).message : 'Erro interno'
-    }, { status: 500 })
+    console.error('❌ Erro na API do assistente:', error);
+
+    return NextResponse.json(
+      {
+        message:
+          'Desculpe, ocorreu um erro interno. Tente novamente em alguns instantes.',
+        error:
+          process.env.NODE_ENV === 'development'
+            ? (error as Error).message
+            : 'Erro interno',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

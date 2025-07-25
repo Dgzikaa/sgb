@@ -20,7 +20,7 @@ const FilterAnomaliesSchema = z.object({
   data_fim: z.string().optional(),
   confianca_minima: z.number().min(0).max(100).optional(),
   order_by: z.string().default('created_at'),
-  order_direction: z.enum(['asc', 'desc']).default('desc')
+  order_direction: z.enum(['asc', 'desc']).default('desc'),
 });
 
 interface ProcessedParams {
@@ -142,28 +142,40 @@ export async function GET(request: NextRequest) {
   try {
     const headersList = await headers();
     const userData = headersList.get('x-user-data');
-    
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao }: UserData = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar anomalias' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para acessar anomalias' },
+        { status: 403 }
+      );
     }
 
     // Parse dos parâmetros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
-    
+
     // Converter tipos
     const processedParams: ProcessedParams = { ...rawParams };
-    if (processedParams.page) processedParams.page = parseInt(processedParams.page as string);
-    if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit as string);
-    if (processedParams.confianca_minima) processedParams.confianca_minima = parseFloat(processedParams.confianca_minima as string);
-    if (processedParams.ainda_ativa) processedParams.ainda_ativa = processedParams.ainda_ativa === 'true';
+    if (processedParams.page)
+      processedParams.page = parseInt(processedParams.page as string);
+    if (processedParams.limit)
+      processedParams.limit = parseInt(processedParams.limit as string);
+    if (processedParams.confianca_minima)
+      processedParams.confianca_minima = parseFloat(
+        processedParams.confianca_minima as string
+      );
+    if (processedParams.ainda_ativa)
+      processedParams.ainda_ativa = processedParams.ainda_ativa === 'true';
 
     const params = FilterAnomaliesSchema.parse(processedParams);
 
@@ -173,7 +185,8 @@ export async function GET(request: NextRequest) {
     // Construir query base
     let query = supabase
       .from('ai_anomalies')
-      .select(`
+      .select(
+        `
         id,
         tipo_anomalia,
         subtipo,
@@ -203,7 +216,8 @@ export async function GET(request: NextRequest) {
         falso_positivo,
         created_at,
         usuarios_bar!ai_anomalies_investigada_por_fkey(nome)
-      `)
+      `
+      )
       .eq('bar_id', bar_id)
       .order(params.order_by, { ascending: params.order_direction === 'asc' });
 
@@ -241,27 +255,36 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar anomalias:', error);
-      return NextResponse.json({ error: 'Erro ao buscar anomalias' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar anomalias' },
+        { status: 500 }
+      );
     }
 
-    const anomaliesData = (anomalies as unknown) as Anomaly[] || [];
+    const anomaliesData = (anomalies as unknown as Anomaly[]) || [];
 
     // Buscar estatísticas gerais
     const { data: stats } = await supabase
       .from('ai_anomalies')
-      .select('severidade, status, tipo_anomalia, ainda_ativa, confianca_deteccao, falso_positivo')
+      .select(
+        'severidade, status, tipo_anomalia, ainda_ativa, confianca_deteccao, falso_positivo'
+      )
       .eq('bar_id', bar_id);
 
-    const estatisticas: AnomalyStats[] = stats?.map((s: Record<string, unknown>) => ({
-      severidade: s.severidade as string,
-      status: s.status as string,
-      tipo_anomalia: s.tipo_anomalia as string,
-      ainda_ativa: s.ainda_ativa as boolean,
-      confianca_deteccao: s.confianca_deteccao as number,
-      falso_positivo: s.falso_positivo as boolean
-    })) || [];
+    const estatisticas: AnomalyStats[] =
+      stats?.map((s: Record<string, unknown>) => ({
+        severidade: s.severidade as string,
+        status: s.status as string,
+        tipo_anomalia: s.tipo_anomalia as string,
+        ainda_ativa: s.ainda_ativa as boolean,
+        confianca_deteccao: s.confianca_deteccao as number,
+        falso_positivo: s.falso_positivo as boolean,
+      })) || [];
 
-    const totalConfianca = estatisticas.reduce((sum, s) => sum + s.confianca_deteccao, 0);
+    const totalConfianca = estatisticas.reduce(
+      (sum, s) => sum + s.confianca_deteccao,
+      0
+    );
     const totalAnomalias = estatisticas.length;
 
     const estatisticasGerais: EstatisticasGerais = {
@@ -281,7 +304,7 @@ export async function GET(request: NextRequest) {
         acc[s.status] = (acc[s.status] || 0) + 1;
         return acc;
       }, {} as StatsAccumulator),
-      confianca_media: totalAnomalias > 0 ? totalConfianca / totalAnomalias : 0
+      confianca_media: totalAnomalias > 0 ? totalConfianca / totalAnomalias : 0,
     };
 
     // Buscar anomalias críticas ativas
@@ -294,7 +317,7 @@ export async function GET(request: NextRequest) {
       .order('data_inicio', { ascending: false })
       .limit(5);
 
-    const criticasData = criticas as AnomalyCritical[] || [];
+    const criticasData = (criticas as AnomalyCritical[]) || [];
 
     // Calcular tendências (últimos 7 vs 7 anteriores)
     const hoje = new Date();
@@ -317,13 +340,14 @@ export async function GET(request: NextRequest) {
     const ultimos7Count = ultimos7?.length || 0;
     const anteriores7Count = anteriores7?.length || 0;
     const variacao = ultimos7Count - anteriores7Count;
-    const percentualVariacao = anteriores7Count > 0 ? (variacao / anteriores7Count) * 100 : 0;
+    const percentualVariacao =
+      anteriores7Count > 0 ? (variacao / anteriores7Count) * 100 : 0;
 
     const tendencia: Tendencia = {
       ultimos_7_dias: ultimos7Count,
       periodo_anterior: anteriores7Count,
       variacao,
-      percentual_variacao: percentualVariacao
+      percentual_variacao: percentualVariacao,
     };
 
     return NextResponse.json({
@@ -337,19 +361,22 @@ export async function GET(request: NextRequest) {
           page: params.page,
           limit: params.limit,
           total: anomaliesData.length,
-          has_more: anomaliesData.length === params.limit
-        }
-      }
+          has_more: anomaliesData.length === params.limit,
+        },
+      },
     });
-
   } catch (error: unknown) {
     console.error('Erro na API de anomalias:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-    
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    }, { status: 500 });
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro desconhecido';
+
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -360,16 +387,22 @@ export async function PUT(request: NextRequest) {
   try {
     const headersList = await headers();
     const userData = headersList.get('x-user-data');
-    
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao }: UserData = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para atualizar anomalias' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para atualizar anomalias' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -382,7 +415,7 @@ export async function PUT(request: NextRequest) {
       const batchData: BatchUpdateData = {
         ...batch_update.updates,
         investigada_por: userData,
-        investigada_em: new Date().toISOString()
+        investigada_em: new Date().toISOString(),
       };
 
       if (batch_update.updates.status === 'resolvida') {
@@ -398,20 +431,22 @@ export async function PUT(request: NextRequest) {
 
       if (batchError) {
         console.error('Erro na atualização em lote:', batchError);
-        return NextResponse.json({ error: 'Erro na atualização em lote' }, { status: 500 });
+        return NextResponse.json(
+          { error: 'Erro na atualização em lote' },
+          { status: 500 }
+        );
       }
 
       return NextResponse.json({
         success: true,
-        message: `${batch_update.ids.length} anomalias atualizadas com sucesso`
+        message: `${batch_update.ids.length} anomalias atualizadas com sucesso`,
       });
-
     } else if (anomalia_id) {
       // Atualização individual
       const updateData: UpdatePayload = {
         ...updates,
         investigada_por: userData,
-        investigada_em: new Date().toISOString()
+        investigada_em: new Date().toISOString(),
       };
 
       if (updates.status === 'resolvida') {
@@ -430,7 +465,10 @@ export async function PUT(request: NextRequest) {
 
       if (updateError) {
         console.error('Erro ao atualizar anomalia:', updateError);
-        return NextResponse.json({ error: 'Erro ao atualizar anomalia' }, { status: 500 });
+        return NextResponse.json(
+          { error: 'Erro ao atualizar anomalia' },
+          { status: 500 }
+        );
       }
 
       const updatedAnomalyData = updatedAnomaly as Anomaly;
@@ -438,21 +476,26 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Anomalia atualizada com sucesso',
-        data: updatedAnomalyData
+        data: updatedAnomalyData,
       });
-
     } else {
-      return NextResponse.json({ error: 'ID da anomalia não fornecido' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'ID da anomalia não fornecido' },
+        { status: 400 }
+      );
     }
-
   } catch (error: unknown) {
     console.error('Erro na API de atualização de anomalias:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-    
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    }, { status: 500 });
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro desconhecido';
+
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -463,23 +506,32 @@ export async function POST(request: NextRequest) {
   try {
     const headersList = await headers();
     const userData = headersList.get('x-user-data');
-    
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao }: UserData = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para criar anomalias' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para criar anomalias' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
     const { anomalia_data } = body;
 
     if (!anomalia_data) {
-      return NextResponse.json({ error: 'Dados da anomalia não fornecidos' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Dados da anomalia não fornecidos' },
+        { status: 400 }
+      );
     }
 
     const supabase = createServiceRoleClient();
@@ -489,7 +541,7 @@ export async function POST(request: NextRequest) {
       ...anomalia_data,
       bar_id,
       criada_por: userData,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     const { data: createdAnomaly, error: createError } = await supabase
@@ -500,7 +552,10 @@ export async function POST(request: NextRequest) {
 
     if (createError) {
       console.error('Erro ao criar anomalia:', createError);
-      return NextResponse.json({ error: 'Erro ao criar anomalia' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao criar anomalia' },
+        { status: 500 }
+      );
     }
 
     const createdAnomalyData = createdAnomaly as Anomaly;
@@ -508,16 +563,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Anomalia criada com sucesso',
-      data: createdAnomalyData
+      data: createdAnomalyData,
     });
-
   } catch (error: unknown) {
     console.error('Erro na API de criação de anomalias:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-    
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    }, { status: 500 });
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro desconhecido';
+
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
-} 
+}

@@ -5,56 +5,72 @@ export interface AuditLogParams {
   // Obrigatórios
   operation: string;
   description: string;
-  
+
   // Contexto do usuário
   barId?: number;
   userId?: string;
   userEmail?: string;
   userRole?: string;
-  
+
   // Informações da requisição
   ipAddress?: string;
   userAgent?: string;
   endpoint?: string;
   method?: string;
-  
+
   // Dados da operação
   tableName?: string;
   recordId?: string;
-  oldValues?: Record<string, (unknown)>;
-  newValues?: Record<string, (unknown)>;
-  
+  oldValues?: Record<string, unknown>;
+  newValues?: Record<string, unknown>;
+
   // Classificação
   severity?: 'info' | 'warning' | 'critical';
-  category?: 'auth' | 'data' | 'admin' | 'financial' | 'security' | 'system' | 'backup';
-  
+  category?:
+    | 'auth'
+    | 'data'
+    | 'admin'
+    | 'financial'
+    | 'security'
+    | 'system'
+    | 'backup';
+
   // Contexto adicional
   sessionId?: string;
   requestId?: string;
-  metadata?: Record<string, (unknown)>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SecurityEventParams {
   // Obrigatórios
   level: 'info' | 'warning' | 'critical';
-  category: 'auth' | 'access' | 'data' | 'injection' | 'rate_limit' | 'api_abuse' | 'backup' | 'system';
+  category:
+    | 'auth'
+    | 'access'
+    | 'data'
+    | 'injection'
+    | 'rate_limit'
+    | 'api_abuse'
+    | 'backup'
+    | 'system';
   eventType: string;
-  
+
   // Contexto
   barId?: number;
   userId?: string;
   ipAddress?: string;
   userAgent?: string;
   endpoint?: string;
-  
+
   // Detalhes
-  details: Record<string, (unknown)>;
+  details: Record<string, unknown>;
   riskScore?: number;
 }
 
 class AuditLogger {
   private static instance: AuditLogger;
-  private discordWebhook = 'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
+  private discordWebhook =
+    'https://discord.com/api/webhooks/1393646423748116602/3zUhIrSKFHmq0zNRLf5AzrkSZNzTj7oYk6f45Tpj2LZWChtmGTKKTHxhfaNZigyLXN4y';
 
   private constructor() {}
 
@@ -69,7 +85,7 @@ class AuditLogger {
   async logAuditEvent(params: AuditLogParams): Promise<void> {
     try {
       const supabase = await getAdminClient();
-      
+
       const auditData = {
         bar_id: params.barId || null,
         operation: params.operation,
@@ -90,15 +106,15 @@ class AuditLogger {
         method: params.method || null,
         severity: params.severity || 'info',
         category: params.category || 'data',
-        metadata: params.metadata || {}
+        metadata: params.metadata || {},
       };
 
       const { error } = await supabase.from('audit_trail').insert(auditData);
-      
+
       if (error) {
         console.error('❌ Erro ao salvar audit log:', error);
       }
-      
+
       // Notificar Discord para eventos críticos
       if (params.severity === 'critical') {
         await this.notifyDiscordAudit(auditData);
@@ -112,7 +128,7 @@ class AuditLogger {
   async logSecurityEvent(params: SecurityEventParams): Promise<void> {
     try {
       const supabase = await getAdminClient();
-      
+
       const eventData = {
         event_id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         bar_id: params.barId || null,
@@ -125,15 +141,17 @@ class AuditLogger {
         endpoint: params.endpoint || null,
         details: params.details,
         risk_score: params.riskScore || 0,
-        resolved: false
+        resolved: false,
       };
 
-      const { error } = await supabase.from('security_events').insert(eventData);
-      
+      const { error } = await supabase
+        .from('security_events')
+        .insert(eventData);
+
       if (error) {
         console.error('❌ Erro ao salvar security event:', error);
       }
-      
+
       // Notificar Discord para eventos críticos
       if (params.level === 'critical') {
         await this.notifyDiscordSecurity(eventData);
@@ -171,8 +189,8 @@ class AuditLogger {
       category: 'auth',
       metadata: {
         login_type: 'password',
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
 
     // Log no security events
@@ -189,9 +207,9 @@ class AuditLogger {
         user_email: params.userEmail,
         user_name: params.userName,
         user_role: params.userRole,
-        login_method: 'password'
+        login_method: 'password',
       },
-      riskScore: 10 // Baixo risco para login normal
+      riskScore: 10, // Baixo risco para login normal
     });
   }
 
@@ -216,8 +234,8 @@ class AuditLogger {
       category: 'auth',
       metadata: {
         failure_reason: params.reason,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
 
     // Log no security events
@@ -231,9 +249,9 @@ class AuditLogger {
       details: {
         email: params.email,
         failure_reason: params.reason,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
-      riskScore: 40 // Risco médio para tentativas falhas
+      riskScore: 40, // Risco médio para tentativas falhas
     });
   }
 
@@ -260,79 +278,84 @@ class AuditLogger {
       severity: 'info',
       category: 'auth',
       metadata: {
-        logout_timestamp: new Date().toISOString()
-      }
+        logout_timestamp: new Date().toISOString(),
+      },
     });
   }
 
   // Métodos auxiliares
-  private calculateChanges(oldValues?: Record<string, (unknown)>, newValues?: Record<string, (unknown)>): Record<string, (unknown)> | null {
+  private calculateChanges(
+    oldValues?: Record<string, unknown>,
+    newValues?: Record<string, unknown>
+  ): Record<string, unknown> | null {
     if (!oldValues || !newValues) return null;
-    
-    const changes: Record<string, (unknown)> = {};
-    
+
+    const changes: Record<string, unknown> = {};
+
     for (const [key, newValue] of Object.entries(newValues)) {
       if (oldValues[key] !== newValue) {
         changes[key] = {
           old: oldValues[key],
-          new: newValue
+          new: newValue,
         };
       }
     }
-    
+
     return Object.keys(changes).length > 0 ? changes : null;
   }
 
   private async notifyDiscordAudit(auditData: unknown): Promise<void> {
     try {
       const message = {
-        embeds: [{
-          title: '🔍 Critical Audit Event',
-          description: auditData.description,
-          color: 0xff9900,
-          fields: [
-            {
-              name: 'User',
-              value: auditData.user_email || 'System',
-              inline: true
+        embeds: [
+          {
+            title: '🔍 Critical Audit Event',
+            description: auditData.description,
+            color: 0xff9900,
+            fields: [
+              {
+                name: 'User',
+                value: auditData.user_email || 'System',
+                inline: true,
+              },
+              {
+                name: 'Operation',
+                value: auditData.operation,
+                inline: true,
+              },
+              {
+                name: 'IP Address',
+                value: auditData.ip_address || 'Unknown',
+                inline: true,
+              },
+              {
+                name: 'Table',
+                value: auditData.table_name || 'N/A',
+                inline: true,
+              },
+              {
+                name: 'Record ID',
+                value: auditData.record_id || 'N/A',
+                inline: true,
+              },
+              {
+                name: 'Endpoint',
+                value: auditData.endpoint || 'N/A',
+                inline: true,
+              },
+            ],
+            timestamp: new Date().toISOString(),
+            footer: {
+              text: '🏢 SGB - Audit System',
             },
-            {
-              name: 'Operation',
-              value: auditData.operation,
-              inline: true
-            },
-            {
-              name: 'IP Address',
-              value: auditData.ip_address || 'Unknown',
-              inline: true
-            },
-            {
-              name: 'Table',
-              value: auditData.table_name || 'N/A',
-              inline: true
-            },
-            {
-              name: 'Record ID',
-              value: auditData.record_id || 'N/A',
-              inline: true
-            },
-            {
-              name: 'Endpoint',
-              value: auditData.endpoint || 'N/A',
-              inline: true
-            }
-          ],
-          timestamp: new Date().toISOString(),
-          footer: {
-            text: '🏢 SGB - Audit System'
-          }
-        }]
+          },
+        ],
       };
 
       await fetch(this.discordWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
+        body: JSON.stringify(message),
       });
     } catch (error) {
       console.error('❌ Erro ao notificar Discord audit:', error);
@@ -342,48 +365,53 @@ class AuditLogger {
   private async notifyDiscordSecurity(eventData: unknown): Promise<void> {
     try {
       const message = {
-        embeds: [{
-          title: '🚨 Critical Security Event',
-          description: `${eventData.event_type} detected`,
-          color: 0xff0000,
-          fields: [
-            {
-              name: 'Event Type',
-              value: eventData.event_type,
-              inline: true
+        embeds: [
+          {
+            title: '🚨 Critical Security Event',
+            description: `${eventData.event_type} detected`,
+            color: 0xff0000,
+            fields: [
+              {
+                name: 'Event Type',
+                value: eventData.event_type,
+                inline: true,
+              },
+              {
+                name: 'Risk Score',
+                value: `${eventData.risk_score}/100`,
+                inline: true,
+              },
+              {
+                name: 'IP Address',
+                value: eventData.ip_address || 'Unknown',
+                inline: true,
+              },
+              {
+                name: 'Endpoint',
+                value: eventData.endpoint || 'N/A',
+                inline: true,
+              },
+              {
+                name: 'Details',
+                value: JSON.stringify(eventData.details, null, 2).substring(
+                  0,
+                  500
+                ),
+                inline: false,
+              },
+            ],
+            timestamp: new Date().toISOString(),
+            footer: {
+              text: '🏢 SGB - Security System',
             },
-            {
-              name: 'Risk Score',
-              value: `${eventData.risk_score}/100`,
-              inline: true
-            },
-            {
-              name: 'IP Address',
-              value: eventData.ip_address || 'Unknown',
-              inline: true
-            },
-            {
-              name: 'Endpoint',
-              value: eventData.endpoint || 'N/A',
-              inline: true
-            },
-            {
-              name: 'Details',
-              value: JSON.stringify(eventData.details, null, 2).substring(0, 500),
-              inline: false
-            }
-          ],
-          timestamp: new Date().toISOString(),
-          footer: {
-            text: '🏢 SGB - Security System'
-          }
-        }]
+          },
+        ],
       };
 
       await fetch(this.discordWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message)
+        body: JSON.stringify(message),
       });
     } catch (error) {
       console.error('❌ Erro ao notificar Discord security:', error);
@@ -395,15 +423,21 @@ class AuditLogger {
 export const auditLogger = AuditLogger.getInstance();
 
 // Helper functions
-export async function logLoginSuccess(params: Parameters<typeof auditLogger.logLoginSuccess>[0]) {
+export async function logLoginSuccess(
+  params: Parameters<typeof auditLogger.logLoginSuccess>[0]
+) {
   return auditLogger.logLoginSuccess(params);
 }
 
-export async function logLoginFailure(params: Parameters<typeof auditLogger.logLoginFailure>[0]) {
+export async function logLoginFailure(
+  params: Parameters<typeof auditLogger.logLoginFailure>[0]
+) {
   return auditLogger.logLoginFailure(params);
 }
 
-export async function logLogout(params: Parameters<typeof auditLogger.logLogout>[0]) {
+export async function logLogout(
+  params: Parameters<typeof auditLogger.logLogout>[0]
+) {
   return auditLogger.logLogout(params);
 }
 
@@ -413,4 +447,4 @@ export async function logAuditEvent(params: AuditLogParams) {
 
 export async function logSecurityEvent(params: SecurityEventParams) {
   return auditLogger.logSecurityEvent(params);
-} 
+}

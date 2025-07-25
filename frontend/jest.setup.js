@@ -1,21 +1,33 @@
-import '@testing-library/jest-dom'
-import 'jest-canvas-mock'
+import '@testing-library/jest-dom';
+import 'jest-canvas-mock';
 
 // Mock do IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
-  observe() { return null }
-  disconnect() { return null }
-  unobserve() { return null }
-}
+  observe() {
+    return null;
+  }
+  disconnect() {
+    return null;
+  }
+  unobserve() {
+    return null;
+  }
+};
 
 // Mock do ResizeObserver
 global.ResizeObserver = class ResizeObserver {
   constructor() {}
-  observe() { return null }
-  disconnect() { return null }
-  unobserve() { return null }
-}
+  observe() {
+    return null;
+  }
+  disconnect() {
+    return null;
+  }
+  unobserve() {
+    return null;
+  }
+};
 
 // Mock do matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -30,7 +42,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
-})
+});
 
 // Mock do localStorage
 const localStorageMock = {
@@ -38,8 +50,8 @@ const localStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-}
-global.localStorage = localStorageMock
+};
+global.localStorage = localStorageMock;
 
 // Mock do sessionStorage
 const sessionStorageMock = {
@@ -47,14 +59,14 @@ const sessionStorageMock = {
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
-}
-global.sessionStorage = sessionStorageMock
+};
+global.sessionStorage = sessionStorageMock;
 
 // Mock do fetch global
-global.fetch = jest.fn()
+global.fetch = jest.fn();
 
 // Mock do window.location
-delete window.location
+delete window.location;
 window.location = {
   assign: jest.fn(),
   reload: jest.fn(),
@@ -68,25 +80,25 @@ window.location = {
   pathname: '/',
   search: '',
   hash: '',
-}
+};
 
 // Mock do console.error para testes limpos
-const originalError = console.error
+const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('Warning: ReactDOM.render is deprecated')
     ) {
-      return
+      return;
     }
-    originalError.call(console, ...args)
-  }
-})
+    originalError.call(console, ...args);
+  };
+});
 
 afterAll(() => {
-  console.error = originalError
-})
+  console.error = originalError;
+});
 
 // Mock do next/navigation
 jest.mock('next/navigation', () => ({
@@ -107,24 +119,24 @@ jest.mock('next/navigation', () => ({
         off: jest.fn(),
         emit: jest.fn(),
       },
-    }
+    };
   },
   usePathname() {
-    return '/'
+    return '/';
   },
   useSearchParams() {
-    return new URLSearchParams()
+    return new URLSearchParams();
   },
-}))
+}));
 
 // Mock do next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props) => {
+  default: props => {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} />
+    return <img {...props} />;
   },
-}))
+}));
 
 // Mock do Supabase
 jest.mock('@supabase/supabase-js', () => ({
@@ -147,23 +159,23 @@ jest.mock('@supabase/supabase-js', () => ({
       then: jest.fn(),
     })),
   })),
-}))
+}));
 
 // Configurar timezone para testes consistentes
-process.env.TZ = 'UTC'
+process.env.TZ = 'UTC';
 
 // Limpar todos os mocks após cada teste
 afterEach(() => {
-  jest.clearAllMocks()
-  localStorageMock.getItem.mockClear()
-  localStorageMock.setItem.mockClear()
-  localStorageMock.removeItem.mockClear()
-  localStorageMock.clear.mockClear()
-  sessionStorageMock.getItem.mockClear()
-  sessionStorageMock.setItem.mockClear()
-  sessionStorageMock.removeItem.mockClear()
-  sessionStorageMock.clear.mockClear()
-})
+  jest.clearAllMocks();
+  localStorageMock.getItem.mockClear();
+  localStorageMock.setItem.mockClear();
+  localStorageMock.removeItem.mockClear();
+  localStorageMock.clear.mockClear();
+  sessionStorageMock.getItem.mockClear();
+  sessionStorageMock.setItem.mockClear();
+  sessionStorageMock.removeItem.mockClear();
+  sessionStorageMock.clear.mockClear();
+});
 
 // Definir timeout global para testes
-jest.setTimeout(10000) 
+jest.setTimeout(10000);

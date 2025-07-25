@@ -1,11 +1,7 @@
 export default function EventosLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  return (
-    <div className="eventos-layout">
-      {children}
-    </div>
-  )
-} 
+  return <div className="eventos-layout">{children}</div>;
+}

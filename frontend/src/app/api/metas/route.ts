@@ -27,44 +27,76 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('❌ Erro ao buscar metas:', error);
-      return NextResponse.json({ error: 'Erro ao buscar metas' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar metas' },
+        { status: 500 }
+      );
     }
 
     // Converter a estrutura de metas existente para o formato esperado
-    const metasConvertidas = converterMetasParaFormatoEsperado(bar?.metas || {});
+    const metasConvertidas = converterMetasParaFormatoEsperado(
+      bar?.metas || {}
+    );
 
     // Filtrar por categoria se especificada
     let metasFiltradas = [...metasConvertidas];
     if (categoria) {
-      metasFiltradas = metasFiltradas.filter((m: any) => m.categoria === categoria);
+      metasFiltradas = metasFiltradas.filter(
+        (m: any) => m.categoria === categoria
+      );
     }
 
     // Filtrar apenas metas ativas se especificado
     if (ativas) {
-      metasFiltradas = metasFiltradas.filter((m: any) => m.meta_ativa !== false);
+      metasFiltradas = metasFiltradas.filter(
+        (m: any) => m.meta_ativa !== false
+      );
     }
 
     // Organizar por categoria
     const metasOrganizadas = {
-      indicadores_estrategicos: metasFiltradas.filter((m: any) => m.categoria === 'indicadores_estrategicos') || [],
-      cockpit_produtos: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_produtos') || [],
-      cockpit_vendas: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_vendas') || [],
-      cockpit_financeiro: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_financeiro') || [],
-      cockpit_marketing: metasFiltradas.filter((m: any) => m.categoria === 'cockpit_marketing') || [],
-      indicadores_qualidade: metasFiltradas.filter((m: any) => m.categoria === 'indicadores_qualidade') || [],
-      indicadores_mensais: metasFiltradas.filter((m: any) => m.categoria === 'indicadores_mensais') || [],
-      metas_diarias: metasFiltradas.filter((m: any) => m.categoria === 'metas_diarias') || [],
+      indicadores_estrategicos:
+        metasFiltradas.filter(
+          (m: any) => m.categoria === 'indicadores_estrategicos'
+        ) || [],
+      cockpit_produtos:
+        metasFiltradas.filter((m: any) => m.categoria === 'cockpit_produtos') ||
+        [],
+      cockpit_vendas:
+        metasFiltradas.filter((m: any) => m.categoria === 'cockpit_vendas') ||
+        [],
+      cockpit_financeiro:
+        metasFiltradas.filter(
+          (m: any) => m.categoria === 'cockpit_financeiro'
+        ) || [],
+      cockpit_marketing:
+        metasFiltradas.filter(
+          (m: any) => m.categoria === 'cockpit_marketing'
+        ) || [],
+      indicadores_qualidade:
+        metasFiltradas.filter(
+          (m: any) => m.categoria === 'indicadores_qualidade'
+        ) || [],
+      indicadores_mensais:
+        metasFiltradas.filter(
+          (m: any) => m.categoria === 'indicadores_mensais'
+        ) || [],
+      metas_diarias:
+        metasFiltradas.filter((m: any) => m.categoria === 'metas_diarias') ||
+        [],
     };
 
     return NextResponse.json({
       success: true,
       data: metasOrganizadas,
-      total: metasFiltradas.length
+      total: metasFiltradas.length,
     });
-
   } catch (error) {
     console.error('❌ Erro na API de metas:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -86,7 +118,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: vendas.quisabdom,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (vendas.couvert_atracoes) {
@@ -99,7 +131,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: vendas.couvert_atracoes,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (vendas.percent_faturamento_ate_19h) {
@@ -112,7 +144,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: vendas.percent_faturamento_ate_19h,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (vendas.venda_balcao !== undefined) {
@@ -125,7 +157,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: vendas.venda_balcao,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
   }
@@ -143,7 +175,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.stockout_comidas,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.stockout_drinks !== undefined) {
@@ -156,7 +188,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.stockout_drinks,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.stockout_bar !== undefined) {
@@ -169,7 +201,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.stockout_bar,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.percent_bebidas !== undefined) {
@@ -182,7 +214,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.percent_bebidas,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.percent_drinks !== undefined) {
@@ -195,7 +227,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.percent_drinks,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.percent_comida !== undefined) {
@@ -208,7 +240,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.percent_comida,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.percent_happyhour !== undefined) {
@@ -221,7 +253,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.percent_happyhour,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.qtde_itens_bar !== undefined) {
@@ -234,7 +266,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.qtde_itens_bar,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.tempo_saida_bar !== undefined) {
@@ -247,7 +279,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.tempo_saida_bar,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.qtde_itens_cozinha !== undefined) {
@@ -260,7 +292,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.qtde_itens_cozinha,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (produtos.tempo_saida_cozinha !== undefined) {
@@ -273,7 +305,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: produtos.tempo_saida_cozinha,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
   }
@@ -291,7 +323,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: qualidade.avaliacoes_5_google_trip,
         meta_mensal: 0,
         valor_atual: qualidade.avaliacoes_5_google_trip,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.media_avaliacoes_google !== undefined) {
@@ -304,7 +336,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.media_avaliacoes_google,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_geral !== undefined) {
@@ -317,7 +349,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_geral,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_ambiente !== undefined) {
@@ -330,7 +362,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_ambiente,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_atendimento !== undefined) {
@@ -343,7 +375,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_atendimento,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_limpeza !== undefined) {
@@ -356,7 +388,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_limpeza,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_musica !== undefined) {
@@ -369,7 +401,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_musica,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_comida !== undefined) {
@@ -382,7 +414,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_comida,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_drink !== undefined) {
@@ -395,7 +427,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_drink,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_preco !== undefined) {
@@ -408,7 +440,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_preco,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_reservas !== undefined) {
@@ -421,7 +453,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_reservas,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (qualidade.nps_felicidade_equipe !== undefined) {
@@ -434,7 +466,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: qualidade.nps_felicidade_equipe,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
   }
@@ -452,7 +484,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: estrategicos.faturamento_total,
         meta_mensal: 0,
         valor_atual: estrategicos.faturamento_total,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.faturamento_couvert !== undefined) {
@@ -465,7 +497,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: estrategicos.faturamento_couvert,
         meta_mensal: 0,
         valor_atual: estrategicos.faturamento_couvert,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.faturamento_bar !== undefined) {
@@ -478,7 +510,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: estrategicos.faturamento_bar,
         meta_mensal: 0,
         valor_atual: estrategicos.faturamento_bar,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.faturamento_cmovel !== undefined) {
@@ -491,7 +523,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: estrategicos.faturamento_cmovel,
         meta_mensal: 0,
         valor_atual: estrategicos.faturamento_cmovel,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.cmv_rs !== undefined) {
@@ -504,7 +536,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: estrategicos.cmv_rs,
         meta_mensal: 0,
         valor_atual: estrategicos.cmv_rs,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.ticket_medio_contahub !== undefined) {
@@ -517,7 +549,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.ticket_medio_contahub,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.tm_entrada !== undefined) {
@@ -530,7 +562,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.tm_entrada,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.tm_bar !== undefined) {
@@ -543,7 +575,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.tm_bar,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.cmv_limpo_percent !== undefined) {
@@ -556,7 +588,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.cmv_limpo_percent,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.cmv_global_real !== undefined) {
@@ -569,7 +601,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.cmv_global_real,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.cmv_teorico !== undefined) {
@@ -582,7 +614,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.cmv_teorico,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.cmo_percent !== undefined) {
@@ -595,7 +627,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.cmo_percent,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.atracao_faturamento !== undefined) {
@@ -608,7 +640,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.atracao_faturamento,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.retencao !== undefined) {
@@ -621,7 +653,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.retencao,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.clientes_atendidos !== undefined) {
@@ -634,7 +666,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.clientes_atendidos,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.clientes_ativos !== undefined) {
@@ -647,7 +679,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.clientes_ativos,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.reservas_totais !== undefined) {
@@ -660,7 +692,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.reservas_totais,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (estrategicos.reservas_presentes !== undefined) {
@@ -673,7 +705,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: estrategicos.reservas_presentes,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
   }
@@ -691,7 +723,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.imposto,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.comissao !== undefined) {
@@ -704,7 +736,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.comissao,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.cmv !== undefined) {
@@ -717,7 +749,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.cmv,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.cmo !== undefined) {
@@ -730,7 +762,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.cmo,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.pro_labore !== undefined) {
@@ -743,7 +775,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.pro_labore,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.ocupacao !== undefined) {
@@ -756,7 +788,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.ocupacao,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.adm_fixo !== undefined) {
@@ -769,7 +801,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.adm_fixo,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.marketing_fixo !== undefined) {
@@ -782,7 +814,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.marketing_fixo,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.escritorio_central !== undefined) {
@@ -795,7 +827,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.escritorio_central,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.adm_mkt_semana !== undefined) {
@@ -808,7 +840,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.adm_mkt_semana,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.rh_estorno_outros_operacao !== undefined) {
@@ -821,7 +853,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.rh_estorno_outros_operacao,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.materiais !== undefined) {
@@ -834,7 +866,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.materiais,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.manutencao !== undefined) {
@@ -847,7 +879,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.manutencao,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.atracoes_eventos !== undefined) {
@@ -860,7 +892,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.atracoes_eventos,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.utensilios !== undefined) {
@@ -873,7 +905,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.utensilios,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.consumacao_sem_socio !== undefined) {
@@ -886,7 +918,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.consumacao_sem_socio,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (financeiro.lucro_rs !== undefined) {
@@ -899,7 +931,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: financeiro.lucro_rs,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
   }
@@ -917,7 +949,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.o_num_posts,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.o_alcance !== undefined) {
@@ -930,7 +962,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.o_alcance,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.o_interacao !== undefined) {
@@ -943,7 +975,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.o_interacao,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.o_compartilhamento !== undefined) {
@@ -956,7 +988,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.o_compartilhamento,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.o_engajamento !== undefined) {
@@ -969,7 +1001,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.o_engajamento,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.o_num_stories !== undefined) {
@@ -982,7 +1014,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.o_num_stories,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.o_visu_stories !== undefined) {
@@ -995,7 +1027,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.o_visu_stories,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_valor_investido !== undefined) {
@@ -1008,7 +1040,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_valor_investido,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_alcance !== undefined) {
@@ -1021,7 +1053,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_alcance,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_frequencia !== undefined) {
@@ -1034,7 +1066,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_frequencia,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_cpm !== undefined) {
@@ -1047,7 +1079,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_cpm,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_cliques !== undefined) {
@@ -1060,7 +1092,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_cliques,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_ctr !== undefined) {
@@ -1073,7 +1105,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_ctr,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_custo_por_clique !== undefined) {
@@ -1086,7 +1118,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_custo_por_clique,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (marketing.m_conversas_iniciadas !== undefined) {
@@ -1099,7 +1131,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: 0,
         valor_atual: marketing.m_conversas_iniciadas,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
   }
@@ -1117,7 +1149,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: mensais.faturamento_total,
         valor_atual: mensais.faturamento_total,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (mensais.faturamento_couvert !== undefined) {
@@ -1130,7 +1162,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: mensais.faturamento_couvert,
         valor_atual: mensais.faturamento_couvert,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (mensais.faturamento_bar !== undefined) {
@@ -1143,7 +1175,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: mensais.faturamento_bar,
         valor_atual: mensais.faturamento_bar,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
     if (mensais.avaliacoes_5_google_trip !== undefined) {
@@ -1156,7 +1188,7 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
         meta_semanal: 0,
         meta_mensal: mensais.avaliacoes_5_google_trip,
         valor_atual: mensais.avaliacoes_5_google_trip,
-        ordem_exibicao: ordemExibicao++
+        ordem_exibicao: ordemExibicao++,
       });
     }
   }
@@ -1171,14 +1203,14 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
       meta_diaria: 5066.67,
       meta_semanal: 0,
       meta_mensal: 0,
-      valor_atual: 5000.00,
-      ticket_entrada: 21.00,
-      ticket_bar: 82.50,
-      meta_pessoas: Math.round(5066.67 / (21.00 + 82.50)), // 49 pessoas
-      custo_artistico: 1500.00,
-      custo_producao: 330.00,
+      valor_atual: 5000.0,
+      ticket_entrada: 21.0,
+      ticket_bar: 82.5,
+      meta_pessoas: Math.round(5066.67 / (21.0 + 82.5)), // 49 pessoas
+      custo_artistico: 1500.0,
+      custo_producao: 330.0,
       percent_art_fat: 36,
-      ordem_exibicao: ordemExibicao++
+      ordem_exibicao: ordemExibicao++,
     },
     {
       id: 'meta_diaria_quarta',
@@ -1188,31 +1220,31 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
       meta_diaria: 38506.67,
       meta_semanal: 0,
       meta_mensal: 0,
-      valor_atual: 38000.00,
-      ticket_entrada: 21.00,
-      ticket_bar: 87.50,
-      meta_pessoas: Math.round(38506.67 / (21.00 + 87.50)), // 355 pessoas
-      custo_artistico: 5776.00,
-      custo_producao: 396.00,
+      valor_atual: 38000.0,
+      ticket_entrada: 21.0,
+      ticket_bar: 87.5,
+      meta_pessoas: Math.round(38506.67 / (21.0 + 87.5)), // 355 pessoas
+      custo_artistico: 5776.0,
+      custo_producao: 396.0,
       percent_art_fat: 16,
-      ordem_exibicao: ordemExibicao++
+      ordem_exibicao: ordemExibicao++,
     },
     {
       id: 'meta_diaria_quinta',
       categoria: 'metas_diarias',
       nome: 'Quinta-feira',
       meta_ativa: true,
-      meta_diaria: 18240.00,
+      meta_diaria: 18240.0,
       meta_semanal: 0,
       meta_mensal: 0,
-      valor_atual: 18000.00,
-      ticket_entrada: 18.00,
-      ticket_bar: 82.50,
-      meta_pessoas: Math.round(18240.00 / (18.00 + 82.50)), // 181 pessoas
-      custo_artistico: 440.00,
-      custo_producao: 680.00,
+      valor_atual: 18000.0,
+      ticket_entrada: 18.0,
+      ticket_bar: 82.5,
+      meta_pessoas: Math.round(18240.0 / (18.0 + 82.5)), // 181 pessoas
+      custo_artistico: 440.0,
+      custo_producao: 680.0,
       percent_art_fat: 6,
-      ordem_exibicao: ordemExibicao++
+      ordem_exibicao: ordemExibicao++,
     },
     {
       id: 'meta_diaria_sexta',
@@ -1222,14 +1254,14 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
       meta_diaria: 62826.67,
       meta_semanal: 0,
       meta_mensal: 0,
-      valor_atual: 62000.00,
-      ticket_entrada: 16.00,
-      ticket_bar: 75.00,
-      meta_pessoas: Math.round(62826.67 / (16.00 + 75.00)), // 690 pessoas
+      valor_atual: 62000.0,
+      ticket_entrada: 16.0,
+      ticket_bar: 75.0,
+      meta_pessoas: Math.round(62826.67 / (16.0 + 75.0)), // 690 pessoas
       custo_artistico: 10565.33,
-      custo_producao: 396.00,
+      custo_producao: 396.0,
       percent_art_fat: 17,
-      ordem_exibicao: ordemExibicao++
+      ordem_exibicao: ordemExibicao++,
     },
     {
       id: 'meta_diaria_sabado',
@@ -1239,14 +1271,14 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
       meta_diaria: 52693.33,
       meta_semanal: 0,
       meta_mensal: 0,
-      valor_atual: 52000.00,
-      ticket_entrada: 21.00,
-      ticket_bar: 75.00,
-      meta_pessoas: Math.round(52693.33 / (21.00 + 75.00)), // 549 pessoas
-      custo_artistico: 5500.00,
-      custo_producao: 1446.00,
+      valor_atual: 52000.0,
+      ticket_entrada: 21.0,
+      ticket_bar: 75.0,
+      meta_pessoas: Math.round(52693.33 / (21.0 + 75.0)), // 549 pessoas
+      custo_artistico: 5500.0,
+      custo_producao: 1446.0,
       percent_art_fat: 13,
-      ordem_exibicao: ordemExibicao++
+      ordem_exibicao: ordemExibicao++,
     },
     {
       id: 'meta_diaria_domingo',
@@ -1256,15 +1288,15 @@ function converterMetasParaFormatoEsperado(metasOriginais: any): any[] {
       meta_diaria: 55733.33,
       meta_semanal: 0,
       meta_mensal: 0,
-      valor_atual: 55000.00,
-      ticket_entrada: 21.00,
-      ticket_bar: 75.00,
-      meta_pessoas: Math.round(55733.33 / (21.00 + 75.00)), // 580 pessoas
-      custo_artistico: 11704.00,
-      custo_producao: 4000.00,
+      valor_atual: 55000.0,
+      ticket_entrada: 21.0,
+      ticket_bar: 75.0,
+      meta_pessoas: Math.round(55733.33 / (21.0 + 75.0)), // 580 pessoas
+      custo_artistico: 11704.0,
+      custo_producao: 4000.0,
       percent_art_fat: 28,
-      ordem_exibicao: ordemExibicao++
-    }
+      ordem_exibicao: ordemExibicao++,
+    },
   ];
 
   return [...metasConvertidas, ...metasDiarias];
@@ -1292,7 +1324,7 @@ export async function POST(request: NextRequest) {
       unidade,
       descricao,
       cor_categoria,
-      icone_categoria
+      icone_categoria,
     } = body;
 
     // Validações
@@ -1314,16 +1346,20 @@ export async function POST(request: NextRequest) {
 
     if (fetchError) {
       console.error('❌ Erro ao buscar metas existentes:', fetchError);
-      return NextResponse.json({ error: 'Erro ao buscar metas existentes' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar metas existentes' },
+        { status: 500 }
+      );
     }
 
     // Garantir que metasExistentes seja sempre um array
     const metasExistentes = Array.isArray(bar?.metas) ? bar.metas : [];
 
     // Buscar próxima ordem
-    const ultimaMeta = metasExistentes.length > 0 
-      ? Math.max(...metasExistentes.map((m: any) => m.ordem_exibicao || 0))
-      : 0;
+    const ultimaMeta =
+      metasExistentes.length > 0
+        ? Math.max(...metasExistentes.map((m: any) => m.ordem_exibicao || 0))
+        : 0;
 
     const novaOrdem = ultimaMeta + 1;
 
@@ -1346,7 +1382,7 @@ export async function POST(request: NextRequest) {
       criado_por: user.user_id,
       atualizado_por: user.user_id,
       criado_em: new Date().toISOString(),
-      atualizado_em: new Date().toISOString()
+      atualizado_em: new Date().toISOString(),
     };
 
     // Adicionar nova meta ao array
@@ -1355,27 +1391,32 @@ export async function POST(request: NextRequest) {
     // Atualizar a coluna metas
     const { error: updateError } = await supabase
       .from('bars')
-      .update({ 
+      .update({
         metas: novasMetas,
-        atualizado_em: new Date().toISOString()
+        atualizado_em: new Date().toISOString(),
       })
       .eq('id', user.bar_id);
 
     if (updateError) {
       console.error('❌ Erro ao criar meta:', updateError);
-      return NextResponse.json({ error: 'Erro ao criar meta' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao criar meta' },
+        { status: 500 }
+      );
     }
 
     console.log(`✅ Meta criada: ${nome_meta}`);
     return NextResponse.json({
       success: true,
       data: novaMeta,
-      message: 'Meta criada com sucesso'
+      message: 'Meta criada com sucesso',
     });
-
   } catch (error) {
     console.error('❌ Erro ao criar meta:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -1409,7 +1450,10 @@ export async function PUT(request: NextRequest) {
 
     if (fetchError) {
       console.error('❌ Erro ao buscar metas existentes:', fetchError);
-      return NextResponse.json({ error: 'Erro ao buscar metas existentes' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar metas existentes' },
+        { status: 500 }
+      );
     }
 
     // Garantir que metasExistentes seja sempre um array
@@ -1426,7 +1470,7 @@ export async function PUT(request: NextRequest) {
           valor_unico: metaAtualizada.valor_unico,
           meta_ativa: metaAtualizada.meta_ativa,
           atualizado_por: user.user_id,
-          atualizado_em: new Date().toISOString()
+          atualizado_em: new Date().toISOString(),
         };
       }
       return metaExistente;
@@ -1435,26 +1479,31 @@ export async function PUT(request: NextRequest) {
     // Atualizar a coluna metas
     const { error: updateError } = await supabase
       .from('bars')
-      .update({ 
+      .update({
         metas: metasAtualizadas,
-        atualizado_em: new Date().toISOString()
+        atualizado_em: new Date().toISOString(),
       })
       .eq('id', user.bar_id);
 
     if (updateError) {
       console.error('❌ Erro ao atualizar metas:', updateError);
-      return NextResponse.json({ error: 'Erro ao atualizar metas' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao atualizar metas' },
+        { status: 500 }
+      );
     }
 
     console.log(`✅ ${metas.length} metas atualizadas`);
     return NextResponse.json({
       success: true,
       data: metasAtualizadas,
-      message: `${metas.length} metas atualizadas com sucesso`
+      message: `${metas.length} metas atualizadas com sucesso`,
     });
-
   } catch (error) {
     console.error('❌ Erro ao atualizar metas:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
-} 
+}

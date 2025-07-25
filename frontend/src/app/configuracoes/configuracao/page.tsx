@@ -1,15 +1,10 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useBar } from '@/contexts/BarContext'
-import { 
-  Users, 
-  Shield, 
-  Target, 
-  Database
-} from 'lucide-react'
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBar } from '@/contexts/BarContext';
+import { Users, Shield, Target, Database } from 'lucide-react';
 
 interface Usuario {
   id: number;
@@ -42,17 +37,19 @@ interface Modulo {
 }
 
 export default function ConfiguracaoPage() {
-  const { selectedBar } = useBar()
-  const [activeTab, setActiveTab] = useState('usuarios')
+  const { selectedBar } = useBar();
+  const [activeTab, setActiveTab] = useState('usuarios');
 
   if (!selectedBar?.id) {
     return (
       <div className="p-6">
         <div className="text-center">
-          <p className="text-red-600 font-medium">⚠️ Selecione um bar primeiro</p>
+          <p className="text-red-600 font-medium">
+            ⚠️ Selecione um bar primeiro
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -63,12 +60,17 @@ export default function ConfiguracaoPage() {
           Configurações do Sistema
         </h1>
         <p className="text-gray-700 font-medium">
-          Gerencie usuários, permissões, metas e importações de dados - {selectedBar.nome}
+          Gerencie usuários, permissões, metas e importações de dados -{' '}
+          {selectedBar.nome}
         </p>
       </div>
 
       {/* Tabs de Configuração */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="usuarios" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
@@ -99,7 +101,9 @@ export default function ConfiguracaoPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <p className="text-gray-600">Funcionalidade em desenvolvimento</p>
+                <p className="text-gray-600">
+                  Funcionalidade em desenvolvimento
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -116,7 +120,9 @@ export default function ConfiguracaoPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <p className="text-gray-600">Funcionalidade em desenvolvimento</p>
+                <p className="text-gray-600">
+                  Funcionalidade em desenvolvimento
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -133,7 +139,9 @@ export default function ConfiguracaoPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <p className="text-gray-600">Funcionalidade em desenvolvimento</p>
+                <p className="text-gray-600">
+                  Funcionalidade em desenvolvimento
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -150,12 +158,14 @@ export default function ConfiguracaoPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <p className="text-gray-600">Funcionalidade em desenvolvimento</p>
+                <p className="text-gray-600">
+                  Funcionalidade em desenvolvimento
+                </p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
-} 
+  );
+}

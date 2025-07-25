@@ -9,23 +9,29 @@ const FilterInsightsSchema = z.object({
   categoria: z.string().optional(),
   impacto: z.enum(['baixo', 'medio', 'alto', 'critico']).optional(),
   urgencia: z.enum(['baixa', 'media', 'alta', 'critica']).optional(),
-  status: z.enum(['novo', 'lido', 'em_acao', 'resolvido', 'ignorado']).optional(),
+  status: z
+    .enum(['novo', 'lido', 'em_acao', 'resolvido', 'ignorado'])
+    .optional(),
   data_inicio: z.string().optional(),
   data_fim: z.string().optional(),
   confianca_minima: z.number().min(0).max(100).optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),
-  order_by: z.enum(['created_at', 'confianca', 'impacto', 'urgencia']).default('created_at'),
-  order_direction: z.enum(['asc', 'desc']).default('desc')
+  order_by: z
+    .enum(['created_at', 'confianca', 'impacto', 'urgencia'])
+    .default('created_at'),
+  order_direction: z.enum(['asc', 'desc']).default('desc'),
 });
 
 // Schema para atualização de insight
 const UpdateInsightSchema = z.object({
-  status: z.enum(['novo', 'lido', 'em_acao', 'resolvido', 'ignorado']).optional(),
+  status: z
+    .enum(['novo', 'lido', 'em_acao', 'resolvido', 'ignorado'])
+    .optional(),
   acao_tomada: z.string().optional(),
   usuario_avaliacao: z.number().min(1).max(5).optional(),
   usuario_feedback: z.string().optional(),
-  util: z.boolean().optional()
+  util: z.boolean().optional(),
 });
 
 // ========================================
@@ -33,29 +39,40 @@ const UpdateInsightSchema = z.object({
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
-    
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar insights' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para acessar insights' },
+        { status: 403 }
+      );
     }
 
     // Parsear parâmetros de consulta
     const { searchParams } = new URL(request.url);
     const rawParams = Object.fromEntries(searchParams.entries());
-    
+
     // Converter tipos numéricos
     const processedParams: Record<string, string | number> = { ...rawParams };
-    if (processedParams.page) processedParams.page = parseInt(processedParams.page as string);
-    if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit as string);
-    if (processedParams.confianca_minima) processedParams.confianca_minima = parseFloat(processedParams.confianca_minima as string);
+    if (processedParams.page)
+      processedParams.page = parseInt(processedParams.page as string);
+    if (processedParams.limit)
+      processedParams.limit = parseInt(processedParams.limit as string);
+    if (processedParams.confianca_minima)
+      processedParams.confianca_minima = parseFloat(
+        processedParams.confianca_minima as string
+      );
 
     const validatedParams = FilterInsightsSchema.parse(processedParams);
 
@@ -98,22 +115,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Aplicar ordenação
-    // query = query.order(validatedParams.order_by, { 
-    //   ascending: validatedParams.order_direction === 'asc' 
+    // query = query.order(validatedParams.order_by, {
+    //   ascending: validatedParams.order_direction === 'asc'
     // });
 
     // Aplicar paginação
     // const offset = (validatedParams.page - 1) * validatedParams.limit;
     // query = query.range(offset, offset + validatedParams.limit - 1);
 
-    const { data: insights, error, count } = await supabase
+    const {
+      data: insights,
+      error,
+      count,
+    } = await supabase
       .from('ai_insights')
       .select('*', { count: 'exact' })
       .eq('bar_id', bar_id);
 
     if (error) {
       console.error('Erro ao buscar insights:', error);
-      return NextResponse.json({ error: 'Erro ao buscar insights' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar insights' },
+        { status: 500 }
+      );
     }
 
     // Calcular estatísticas
@@ -124,14 +148,14 @@ export async function GET(request: NextRequest) {
         lido: insights?.filter(i => i.status === 'lido').length || 0,
         em_acao: insights?.filter(i => i.status === 'em_acao').length || 0,
         resolvido: insights?.filter(i => i.status === 'resolvido').length || 0,
-        ignorado: insights?.filter(i => i.status === 'ignorado').length || 0
+        ignorado: insights?.filter(i => i.status === 'ignorado').length || 0,
       },
       por_impacto: {
         critico: insights?.filter(i => i.impacto === 'critico').length || 0,
         alto: insights?.filter(i => i.impacto === 'alto').length || 0,
         medio: insights?.filter(i => i.impacto === 'medio').length || 0,
-        baixo: insights?.filter(i => i.impacto === 'baixo').length || 0
-      }
+        baixo: insights?.filter(i => i.impacto === 'baixo').length || 0,
+      },
     };
 
     return NextResponse.json({
@@ -141,21 +165,26 @@ export async function GET(request: NextRequest) {
         page: validatedParams.page,
         limit: validatedParams.limit,
         total: count || 0,
-        totalPages: Math.ceil((count || 0) / validatedParams.limit)
+        totalPages: Math.ceil((count || 0) / validatedParams.limit),
       },
-      stats
+      stats,
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ 
-        error: 'Parâmetros inválidos',
-        details: error.issues 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Parâmetros inválidos',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
-    
+
     console.error('Erro na API de insights:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -164,25 +193,34 @@ export async function GET(request: NextRequest) {
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
-    
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para atualizar insights' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para atualizar insights' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
     const { id, ...updateData } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'ID do insight é obrigatório' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'ID do insight é obrigatório' },
+        { status: 400 }
+      );
     }
 
     const validatedData = UpdateInsightSchema.parse(updateData);
@@ -197,7 +235,10 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (fetchError || !existing) {
-      return NextResponse.json({ error: 'Insight não encontrado' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Insight não encontrado' },
+        { status: 404 }
+      );
     }
 
     // Preparar dados para atualização
@@ -215,33 +256,43 @@ export async function PUT(request: NextRequest) {
       .update(updatePayload)
       .eq('id', id)
       .eq('bar_id', bar_id)
-      .select(`
+      .select(
+        `
         *,
         usuarios_bar!ai_insights_lido_por_fkey(nome)
-      `)
+      `
+      )
       .single();
 
     if (error) {
       console.error('Erro ao atualizar insight:', error);
-      return NextResponse.json({ error: 'Erro ao atualizar insight' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao atualizar insight' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
       success: true,
       data: insight,
-      message: 'Insight atualizado com sucesso'
+      message: 'Insight atualizado com sucesso',
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Dados inválidos',
-        details: error.issues
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Dados inválidos',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
     console.error('Erro na API de insights:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -250,27 +301,36 @@ export async function PUT(request: NextRequest) {
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
-    
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para atualizar insights' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para atualizar insights' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
     const { action, ids } = body;
 
     if (!action || !Array.isArray(ids) || ids.length === 0) {
-      return NextResponse.json({ 
-        error: 'Ação e lista de IDs são obrigatórios' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Ação e lista de IDs são obrigatórios',
+        },
+        { status: 400 }
+      );
     }
 
     let updateData: unknown = {};
@@ -281,21 +341,21 @@ export async function POST(request: NextRequest) {
         updateData = {
           status: 'lido',
           lido_por: usuario_id,
-          lido_em: new Date().toISOString()
+          lido_em: new Date().toISOString(),
         };
         successMessage = 'Insights marcados como lidos';
         break;
-      
+
       case 'mark_resolved':
         updateData = { status: 'resolvido' };
         successMessage = 'Insights marcados como resolvidos';
         break;
-      
+
       case 'mark_ignored':
         updateData = { status: 'ignorado' };
         successMessage = 'Insights marcados como ignorados';
         break;
-      
+
       default:
         return NextResponse.json({ error: 'Ação inválida' }, { status: 400 });
     }
@@ -311,18 +371,23 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao atualizar insights:', error);
-      return NextResponse.json({ error: 'Erro ao atualizar insights' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao atualizar insights' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
       success: true,
       data: data,
       message: successMessage,
-      updated_count: data?.length || 0
+      updated_count: data?.length || 0,
     });
-
   } catch (error) {
     console.error('Erro na API de insights:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
-} 
+}

@@ -1,8 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
-
-
 // Dados históricos de fevereiro a junho 2025
 const eventosHistoricos = `
 01/02	SÁBADO		Soft Família - 100 pessoas
@@ -164,30 +162,34 @@ const eventosHistoricos = `
 function extrairGenero(texto: string): string {
   const generos = {
     '(DJ)': 'dj_set',
-    '(Samba)': 'samba', 
+    '(Samba)': 'samba',
     '(Pagode)': 'pagode',
     '(Jazz)': 'jazz',
     '(Carnaval)': 'carnaval',
     '(Especial)': 'evento_especial',
-    '(Sertanejo)': 'sertanejo'
+    '(Sertanejo)': 'sertanejo',
   };
-  
+
   for (const [pattern, genero] of Object.entries(generos)) {
     if (texto.includes(pattern)) {
       return genero;
     }
   }
-  
+
   // Detectar por palavras-chave se não tiver parênteses
   const textoLower = texto.toLowerCase();
-  if (textoLower.includes('dj') || textoLower.includes('music')) return 'dj_set';
+  if (textoLower.includes('dj') || textoLower.includes('music'))
+    return 'dj_set';
   if (textoLower.includes('samba')) return 'samba';
   if (textoLower.includes('pagode')) return 'pagode';
   if (textoLower.includes('jazz')) return 'jazz';
-  if (textoLower.includes('sertanejo') || textoLower.includes('viola')) return 'sertanejo';
-  if (textoLower.includes('carnaval') || textoLower.includes('bloco')) return 'carnaval';
-  if (textoLower.includes('especial') || textoLower.includes('homenagem')) return 'evento_especial';
-  
+  if (textoLower.includes('sertanejo') || textoLower.includes('viola'))
+    return 'sertanejo';
+  if (textoLower.includes('carnaval') || textoLower.includes('bloco'))
+    return 'carnaval';
+  if (textoLower.includes('especial') || textoLower.includes('homenagem'))
+    return 'evento_especial';
+
   return 'outros';
 }
 
@@ -208,61 +210,75 @@ function extrairArtista(texto: string): string {
     .replace(/\s*-\s*FERIADO.*/, '') // Remove "FERIADO"
     .replace(/\s*\|\s*.*/, '') // Remove parte após pipe |
     .trim();
-  
+
   // Se sobrou alguma coisa útil, retorna, senão vazio
-  if (artistaTexto && artistaTexto.length > 3 && !artistaTexto.includes('TBC') && !artistaTexto.includes('TBD')) {
+  if (
+    artistaTexto &&
+    artistaTexto.length > 3 &&
+    !artistaTexto.includes('TBC') &&
+    !artistaTexto.includes('TBD')
+  ) {
     return artistaTexto;
   }
-  
+
   return '';
 }
 
-function parseEventos(dados: string, barId: number, ano: number = 2025): unknown[] {
-  const linhas = dados.trim().split('\n').filter(linha => linha.trim());
+function parseEventos(
+  dados: string,
+  barId: number,
+  ano: number = 2025
+): unknown[] {
+  const linhas = dados
+    .trim()
+    .split('\n')
+    .filter(linha => linha.trim());
   const eventos: unknown[] = [];
-  
+
   for (const linha of linhas) {
     const partes = linha.split('\t').map((p: unknown) => p.trim());
     if (partes.length < 3) continue;
-    
+
     const [dataStr, diaSemana, eventoStr] = partes;
-    
+
     // Pular dias fechados
     if (eventoStr.includes('FECHADO') || eventoStr.includes('FOLGA')) {
       continue;
     }
-    
+
     // Construir data completa com validação
     const [dia, mes] = dataStr.split('/').map(Number);
-    
+
     // Validar se a data é válida antes de criar
     const diasNoMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     // Ajustar para ano bissexto
     if (ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0)) {
       diasNoMes[1] = 29;
     }
-    
+
     if (dia > diasNoMes[mes - 1]) {
-      console.warn(`⚠️  Data inválida ignorada: ${dia}/${mes}/${ano} (mês ${mes} só tem ${diasNoMes[mes - 1]} dias)`);
+      console.warn(
+        `⚠️  Data inválida ignorada: ${dia}/${mes}/${ano} (mês ${mes} só tem ${diasNoMes[mes - 1]} dias)`
+      );
       continue;
     }
-    
+
     const dataEvento = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
-    
+
     // VERSÃO ULTRA SIMPLES: Só aplicar as transformações básicas
     let nomeEvento = eventoStr.trim();
-    
+
     // DEBUG: Log ALL events being processed
     console.log(`🔍 Processing ${dataStr}: "${eventoStr}"`);
-    
+
     // DEBUG: Force specific test for first few events
     if (dataStr === '01/06' || dataStr === '02/06' || dataStr === '03/06') {
       console.log(`🚨 IMPORTANT EVENT ${dataStr}: "${eventoStr}"`);
     }
-    
+
     // Step 1: Remove parentheses at the end
     nomeEvento = nomeEvento.replace(/\s*\([^)]+\)\s*$/, '');
-    
+
     // Step 2: Handle specific prefixes
     if (nomeEvento.startsWith('Evento - ')) {
       nomeEvento = nomeEvento.substring('Evento - '.length);
@@ -275,21 +291,21 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): unknown
         nomeEvento = nomeEvento.substring(start, end);
       }
     }
-    
+
     // Step 3: Split on common delimiters
     if (nomeEvento.includes(': ')) {
       nomeEvento = nomeEvento.split(':')[0];
     } else if (nomeEvento.includes(' - ')) {
       nomeEvento = nomeEvento.split(' - ')[0];
     }
-    
+
     nomeEvento = nomeEvento.trim();
-    
+
     // Fallback if empty
     if (!nomeEvento) {
       nomeEvento = `Evento ${dataStr}`;
     }
-    
+
     // DEBUG: Log final result for first few events
     if (dataStr === '01/06' || dataStr === '02/06' || dataStr === '03/06') {
       console.log(`🚨 FINAL RESULT ${dataStr}: "${nomeEvento}"`);
@@ -297,11 +313,11 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): unknown
     const genero = extrairGenero(eventoStr);
     const capacidade = extrairCapacidade(eventoStr);
     const artista = extrairArtista(eventoStr);
-    
+
     // Definir horários padrão baseados no tipo de evento
     let horarioInicio = '20:00';
     let horarioFim = '02:00';
-    
+
     if (diaSemana === 'DOMINGO') {
       horarioInicio = '18:00';
       horarioFim = '00:00';
@@ -309,7 +325,7 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): unknown
       horarioInicio = '19:00';
       horarioFim = '01:00';
     }
-    
+
     eventos.push({
       bar_id: barId,
       data_evento: dataEvento,
@@ -319,9 +335,15 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): unknown
       categoria: genero === 'dj_set' ? 'eletronica' : 'brasileira',
       genero_musical: genero,
       sub_genero: null,
-      nome_artista: artista && !artista.toLowerCase().includes('dj') ? artista : null,
-      nome_banda: artista && !artista.toLowerCase().includes('dj') ? artista : null,
-      tipo_artista: artista ? (artista.toLowerCase().includes('dj') ? 'dj' : 'banda_local') : null,
+      nome_artista:
+        artista && !artista.toLowerCase().includes('dj') ? artista : null,
+      nome_banda:
+        artista && !artista.toLowerCase().includes('dj') ? artista : null,
+      tipo_artista: artista
+        ? artista.toLowerCase().includes('dj')
+          ? 'dj'
+          : 'banda_local'
+        : null,
       origem: 'local',
       popularidade: eventoStr.includes('ESPECIAL') ? 'conhecido' : 'local',
       couvert_artistico: null,
@@ -333,21 +355,37 @@ function parseEventos(dados: string, barId: number, ano: number = 2025): unknown
       plataforma_venda: eventoStr.includes('Sympla') ? 'sympla' : null,
       tags: {
         dia_semana: diaSemana.toLowerCase(),
-        evento_recorrente: ['Quarta de Bamba', 'Pagode Vira-lata', 'R&Baile', 'Uma mesa e um pagode'].some(recorrente => 
-          nomeEvento.includes(recorrente)
-        ),
-        evento_especial: eventoStr.includes('ESPECIAL') || eventoStr.includes('CARNAVAL') || eventoStr.includes('Festival'),
+        evento_recorrente: [
+          'Quarta de Bamba',
+          'Pagode Vira-lata',
+          'R&Baile',
+          'Uma mesa e um pagode',
+        ].some(recorrente => nomeEvento.includes(recorrente)),
+        evento_especial:
+          eventoStr.includes('ESPECIAL') ||
+          eventoStr.includes('CARNAVAL') ||
+          eventoStr.includes('Festival'),
         divulgacao_necessaria: eventoStr.includes('Divulgar'),
-        confirmacao_pendente: eventoStr.includes('Precisa confirmar') || eventoStr.includes('TBC') || eventoStr.includes('TBD')
+        confirmacao_pendente:
+          eventoStr.includes('Precisa confirmar') ||
+          eventoStr.includes('TBC') ||
+          eventoStr.includes('TBD'),
       },
       horario_inicio: horarioInicio,
       horario_fim: horarioFim,
       status: 'confirmado',
-      divulgacao_ativa: !eventoStr.includes('Precisa confirmar') && !eventoStr.includes('TBC') && !eventoStr.includes('TBD'),
-      observacoes: eventoStr.includes('Divulgar') || eventoStr.includes('Precisa confirmar') ? eventoStr : null
+      divulgacao_ativa:
+        !eventoStr.includes('Precisa confirmar') &&
+        !eventoStr.includes('TBC') &&
+        !eventoStr.includes('TBD'),
+      observacoes:
+        eventoStr.includes('Divulgar') ||
+        eventoStr.includes('Precisa confirmar')
+          ? eventoStr
+          : null,
     });
   }
-  
+
   return eventos;
 }
 
@@ -356,62 +394,86 @@ export async function POST(request: NextRequest) {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao conectar com banco' },
+        { status: 500 }
+      );
     }
     console.log('🔄 Iniciando importação de eventos...');
-    
+
     let body;
     try {
       body = await request.json();
     } catch (parseError) {
       console.error('❌ Erro ao fazer parse do JSON:', parseError);
-      return NextResponse.json({
-        success: false,
-        error: 'Body da requisição não é um JSON válido'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Body da requisição não é um JSON válido',
+        },
+        { status: 400 }
+      );
     }
-    
-    const { bar_id, bar_name, ano = 2025, confirmar_substituicao = false } = body;
-    
-    console.log('📥 Dados recebidos no endpoint:', { bar_id, bar_name, ano, confirmar_substituicao });
-    
+
+    const {
+      bar_id,
+      bar_name,
+      ano = 2025,
+      confirmar_substituicao = false,
+    } = body;
+
+    console.log('📥 Dados recebidos no endpoint:', {
+      bar_id,
+      bar_name,
+      ano,
+      confirmar_substituicao,
+    });
+
     if (!bar_id && !bar_name) {
       console.error('❌ bar_id ou bar_name não fornecido');
-      return NextResponse.json({
-        success: false,
-        error: 'bar_id ou bar_name é obrigatório'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'bar_id ou bar_name é obrigatório',
+        },
+        { status: 400 }
+      );
     }
-    
+
     // Verificar se o bar existe
     console.log('🔍 Verificando se bar existe...');
-    let query = supabase
-      .from('bar')
-      .select('id, nome');
-    
+    let query = supabase.from('bar').select('id, nome');
+
     if (bar_id) {
       query = query.eq('id', bar_id);
     } else if (bar_name) {
       query = query.ilike('nome', `%${bar_name}%`);
     }
-    
+
     const { data: barData, error: barError } = await query.single();
-    
+
     if (barError || !barData) {
       console.error('❌ Bar não encontrado:', barError);
       const identifier = bar_id ? `ID ${bar_id}` : `nome "${bar_name}"`;
-      return NextResponse.json({
-        success: false,
-        error: `Bar com ${identifier} não encontrado`
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Bar com ${identifier} não encontrado`,
+        },
+        { status: 404 }
+      );
     }
-    
+
     console.log(`✅ Bar encontrado: ${barData.nome} (ID: ${barData.id})`);
-    
+
     // Parse dos eventos usando o ID do bar encontrado
     const barIdFinal = barData.id;
-    const eventosParaImportar = parseEventos(eventosHistoricos, barIdFinal, ano);
-    
+    const eventosParaImportar = parseEventos(
+      eventosHistoricos,
+      barIdFinal,
+      ano
+    );
+
     if (!confirmar_substituicao) {
       // Primeiro, verificar se já existem eventos no período
       const { data: eventosExistentes } = await supabase
@@ -420,14 +482,14 @@ export async function POST(request: NextRequest) {
         .eq('bar_id', barIdFinal)
         .gte('data_evento', `${ano}-02-01`)
         .lte('data_evento', `${ano}-06-30`);
-      
+
       if (eventosExistentes && eventosExistentes.length > 0) {
         return NextResponse.json({
           success: false,
           error: 'Já existem eventos no período. Confirme a substituição.',
           eventos_existentes: eventosExistentes.length,
           eventos_para_importar: eventosParaImportar.length,
-          requer_confirmacao: true
+          requer_confirmacao: true,
         });
       }
     } else {
@@ -439,61 +501,99 @@ export async function POST(request: NextRequest) {
         .gte('data_evento', `${ano}-02-01`)
         .lte('data_evento', `${ano}-06-30`);
     }
-    
+
     // Inserir novos eventos
-    console.log(`📤 Inserindo ${eventosParaImportar.length} eventos para bar_id: ${barIdFinal}`);
-    console.log('📋 Primeiro evento:', JSON.stringify(eventosParaImportar[0], null, 2));
-    
+    console.log(
+      `📤 Inserindo ${eventosParaImportar.length} eventos para bar_id: ${barIdFinal}`
+    );
+    console.log(
+      '📋 Primeiro evento:',
+      JSON.stringify(eventosParaImportar[0], null, 2)
+    );
+
     // Inserir em lotes para evitar timeouts
     const BATCH_SIZE = 50;
     let totalInseridos = 0;
-    
+
     for (let i = 0; i < eventosParaImportar.length; i += BATCH_SIZE) {
       const lote = eventosParaImportar.slice(i, i + BATCH_SIZE);
-      console.log(`📦 Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}: ${lote.length} eventos`);
-      
+      console.log(
+        `📦 Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}: ${lote.length} eventos`
+      );
+
       const { data, error } = await supabase
         .from('eventos')
         .insert(lote)
         .select();
-      
+
       if (error) {
-        console.error(`❌ Erro ao inserir lote ${Math.floor(i / BATCH_SIZE) + 1}:`, error);
-        console.error('Evento que causou erro:', JSON.stringify(lote[0], null, 2));
-        return NextResponse.json({
-          success: false,
-          error: `Erro no lote ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`,
-          details: error,
-          eventos_inseridos_antes_do_erro: totalInseridos
-        }, { status: 500 });
+        console.error(
+          `❌ Erro ao inserir lote ${Math.floor(i / BATCH_SIZE) + 1}:`,
+          error
+        );
+        console.error(
+          'Evento que causou erro:',
+          JSON.stringify(lote[0], null, 2)
+        );
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Erro no lote ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`,
+            details: error,
+            eventos_inseridos_antes_do_erro: totalInseridos,
+          },
+          { status: 500 }
+        );
       }
-      
+
       totalInseridos += data?.length || 0;
-      console.log(`✅ Lote inserido com sucesso! Total até agora: ${totalInseridos}`);
+      console.log(
+        `✅ Lote inserido com sucesso! Total até agora: ${totalInseridos}`
+      );
     }
-    
+
     console.log(`✅ ${totalInseridos} eventos inseridos com sucesso!`);
-    
+
     return NextResponse.json({
       success: true,
       message: `${eventosParaImportar.length} eventos importados com sucesso!`,
       eventos_importados: totalInseridos,
       resumo: {
-        fevereiro: eventosParaImportar.filter((e: unknown) => e.data_evento.includes('-02-')).length,
-        marco: eventosParaImportar.filter((e: unknown) => e.data_evento.includes('-03-')).length,
-        abril: eventosParaImportar.filter((e: unknown) => e.data_evento.includes('-04-')).length,
-        maio: eventosParaImportar.filter((e: unknown) => e.data_evento.includes('-05-')).length,
-        junho: eventosParaImportar.filter((e: unknown) => e.data_evento.includes('-06-')).length
+        fevereiro: eventosParaImportar.filter((e: unknown) =>
+          e.data_evento.includes('-02-')
+        ).length,
+        marco: eventosParaImportar.filter((e: unknown) =>
+          e.data_evento.includes('-03-')
+        ).length,
+        abril: eventosParaImportar.filter((e: unknown) =>
+          e.data_evento.includes('-04-')
+        ).length,
+        maio: eventosParaImportar.filter((e: unknown) =>
+          e.data_evento.includes('-05-')
+        ).length,
+        junho: eventosParaImportar.filter((e: unknown) =>
+          e.data_evento.includes('-06-')
+        ).length,
       },
-      generos_detectados: [...new Set(eventosParaImportar.map((e: unknown) => e.genero_musical))],
-      artistas_detectados: [...new Set(eventosParaImportar.map((e: unknown) => e.nome_artista).filter(Boolean))]
+      generos_detectados: [
+        ...new Set(eventosParaImportar.map((e: unknown) => e.genero_musical)),
+      ],
+      artistas_detectados: [
+        ...new Set(
+          eventosParaImportar
+            .map((e: unknown) => e.nome_artista)
+            .filter(Boolean)
+        ),
+      ],
     });
-    
   } catch (error) {
     console.error('Erro interno:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Erro interno do servidor'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Erro interno do servidor',
+      },
+      { status: 500 }
+    );
   }
 }

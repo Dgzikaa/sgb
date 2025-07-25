@@ -1,40 +1,51 @@
-﻿'use client'
+﻿'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { useNotifications, getColorByType, getColorByPriority, formatarTempo } from '@/hooks/useNotifications'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Switch } from '@/components/ui/switch'
-import { 
-  Bell, 
-  CheckCircle, 
-  XCircle, 
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  useNotifications,
+  getColorByType,
+  getColorByPriority,
+  formatarTempo,
+} from '@/hooks/useNotifications';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import {
+  Bell,
+  CheckCircle,
+  XCircle,
   Info,
   Clock,
   User,
   Trash2,
-  RefreshCw
-} from 'lucide-react'
+  RefreshCw,
+} from 'lucide-react';
 
 // =====================================================
 // NOTIFICATION CENTER COMPONENT
 // =====================================================
 
 export function NotificationCenter() {
-  const router = useRouter()
-  const [isOpen, setIsOpen] = useState(false)
-  const [filtroTab, setFiltroTab] = useState<'todas' | 'nao_lidas' | 'importantes'>('todas')
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const [filtroTab, setFiltroTab] = useState<
+    'todas' | 'nao_lidas' | 'importantes'
+  >('todas');
   const [configuracoes, setConfiguracoes] = useState({
     autoRefresh: true,
     showBadge: true,
     playSound: false,
-    refreshInterval: 30000 // 30 segundos
-  })
+    refreshInterval: 30000, // 30 segundos
+  });
 
   // =====================================================
   // HOOKS E REFS
@@ -48,11 +59,11 @@ export function NotificationCenter() {
     marcarComoLida,
     marcarTodasComoLidas,
     excluirNotificacao,
-    recarregar
-  } = useNotifications()
+    recarregar,
+  } = useNotifications();
 
-  const hasInitializedRef = useRef(false)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const hasInitializedRef = useRef(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // =====================================================
   // CARREGAMENTO INICIAL (APENAS UMA VEZ)
@@ -61,37 +72,40 @@ export function NotificationCenter() {
   useEffect(() => {
     if (!hasInitializedRef.current) {
       // Carregar notificações iniciais
-      carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
-      
-      hasInitializedRef.current = true
+      carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 });
+
+      hasInitializedRef.current = true;
     }
 
     // Cleanup ao desmontar
     return () => {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current)
+        clearInterval(intervalRef.current);
       }
-    }
-  }, []) // DEPENDÊNCIAS VAZIAS - executar apenas uma vez
+    };
+  }, [carregarNotificacoes]); // Adicionar dependência
 
   // =====================================================
   // CONTROLE DE POLLING VIA CONFIGURAÇÕES
   // =====================================================
 
-
-
   useEffect(() => {
     if (configuracoes.autoRefresh) {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current)
+        clearInterval(intervalRef.current);
       }
       intervalRef.current = setInterval(() => {
         if (!loading) {
-          carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
+          carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 });
         }
-      }, configuracoes.refreshInterval)
+      }, configuracoes.refreshInterval);
     }
-  }, [carregarNotificacoes])
+  }, [
+    carregarNotificacoes,
+    configuracoes.autoRefresh,
+    configuracoes.refreshInterval,
+    loading,
+  ]);
 
   // =====================================================
   // FILTRAR NOTIFICAÇÕES
@@ -99,16 +113,16 @@ export function NotificationCenter() {
 
   const notificacoesFiltradas = notificacoes.filter(notificacao => {
     // Verificar se a notificação tem dados válidos
-    if (!notificacao || !notificacao.id) return false
-    
+    if (!notificacao || !notificacao.id) return false;
+
     if (filtroTab === 'nao_lidas') {
-      return ['pendente', 'enviada'].includes(notificacao.status || '')
+      return ['pendente', 'enviada'].includes(notificacao.status || '');
     }
     if (filtroTab === 'importantes') {
-      return ['alta', 'critica'].includes(notificacao.prioridade || '')
+      return ['alta', 'critica'].includes(notificacao.prioridade || '');
     }
-    return true // todas
-  })
+    return true; // todas
+  });
 
   // =====================================================
   // HANDLERS
@@ -117,73 +131,73 @@ export function NotificationCenter() {
   const handleMarcarComoLida = async (notificacaoId: string) => {
     try {
       if (!notificacaoId) {
-        console.error('❌ ID da notificação não fornecido')
-        return
+        console.error('❌ ID da notificação não fornecido');
+        return;
       }
-      
-      await marcarComoLida(notificacaoId)
+
+      await marcarComoLida(notificacaoId);
     } catch (error) {
-      console.error('❌ Erro ao marcar notificação como lida:', error)
+      console.error('❌ Erro ao marcar notificação como lida:', error);
     }
-  }
+  };
 
   const handleMarcarTodasComoLidas = async () => {
     try {
-      await marcarTodasComoLidas()
+      await marcarTodasComoLidas();
     } catch (error) {
-      console.error('❌ Erro ao marcar todas como lidas:', error)
+      console.error('❌ Erro ao marcar todas como lidas:', error);
     }
-  }
+  };
 
   const handleExcluirNotificacao = async (notificacaoId: string) => {
     try {
       if (!notificacaoId) {
-        console.error('❌ ID da notificação não fornecido')
-        return
+        console.error('❌ ID da notificação não fornecido');
+        return;
       }
-      
-      await excluirNotificacao(notificacaoId)
+
+      await excluirNotificacao(notificacaoId);
     } catch (error) {
-      console.error('❌ Erro ao excluir notificação:', error)
+      console.error('❌ Erro ao excluir notificação:', error);
     }
-  }
+  };
 
   const handleAcaoNotificacao = (acao: unknown) => {
     try {
       if (!acao) {
-        console.error('❌ Ação não fornecida')
-        return
+        console.error('❌ Ação não fornecida');
+        return;
       }
-      
+
       if (acao.action === 'redirect' && acao.url) {
-        router.push(acao.url)
-        setIsOpen(false)
+        router.push(acao.url);
+        setIsOpen(false);
       } else if (acao.action === 'download' && acao.url) {
-        window.open(acao.url, '_blank')
+        window.open(acao.url, '_blank');
       }
     } catch (error) {
-      console.error('❌ Erro ao executar ação da notificação:', error)
+      console.error('❌ Erro ao executar ação da notificação:', error);
     }
-  }
+  };
 
   const handleRefreshManual = () => {
-    carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 })
-  }
+    carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 });
+  };
 
   const handleToggleAutoRefresh = (enabled: boolean) => {
-    setConfiguracoes(prev => ({ ...prev, autoRefresh: enabled }))
-  }
+    setConfiguracoes(prev => ({ ...prev, autoRefresh: enabled }));
+  };
 
   const handleChangeInterval = (interval: number) => {
-    setConfiguracoes(prev => ({ ...prev, refreshInterval: interval }))
-  }
+    setConfiguracoes(prev => ({ ...prev, refreshInterval: interval }));
+  };
 
   // =====================================================
   // CONTADORES
   // =====================================================
 
-  const totalNaoLidas = estatisticas?.nao_lidas || 0
-  const totalImportantes = estatisticas?.alta_prioridade || 0
+  const totalNaoLidas = estatisticas?.nao_lidas || 0;
+  const totalImportantes = estatisticas?.alta_prioridade || 0;
 
   // =====================================================
   // RENDER
@@ -195,8 +209,8 @@ export function NotificationCenter() {
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {configuracoes.showBadge && totalNaoLidas > 0 && (
-            <Badge 
-              variant="destructive" 
+            <Badge
+              variant="destructive"
               className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
             >
               {totalNaoLidas > 99 ? '99+' : totalNaoLidas}
@@ -213,7 +227,7 @@ export function NotificationCenter() {
                 <Bell className="h-5 w-5" />
                 Notificações
               </CardTitle>
-              
+
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -227,7 +241,7 @@ export function NotificationCenter() {
                     <Clock className="h-4 w-4" />
                   )}
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -248,7 +262,10 @@ export function NotificationCenter() {
 
           <CardContent className="p-0">
             {/* Tabs de Filtro */}
-            <Tabs value={filtroTab} onValueChange={(value: unknown) => setFiltroTab(value)}>
+            <Tabs
+              value={filtroTab}
+              onValueChange={(value: unknown) => setFiltroTab(value)}
+            >
               <TabsList className="tabs-list-dark w-full rounded-none">
                 <TabsTrigger value="todas" className="tabs-trigger-dark">
                   Todas ({notificacoes.length})
@@ -267,53 +284,68 @@ export function NotificationCenter() {
                   {loading && notificacoes.length === 0 ? (
                     <div className="flex items-center justify-center py-8">
                       <RefreshCw className="h-6 w-6 animate-spin text-gray-400" />
-                      <span className="ml-2 text-sm text-gray-500">Carregando...</span>
+                      <span className="ml-2 text-sm text-gray-500">
+                        Carregando...
+                      </span>
                     </div>
                   ) : notificacoesFiltradas.length === 0 ? (
                     <div className="text-center py-8">
                       <Info className="h-12 w-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
                       <p className="text-gray-500 dark:text-gray-400">
-                        {filtroTab === 'todas' ? 'Nenhuma notificação' : 
-                         filtroTab === 'nao_lidas' ? 'Todas as notificações foram lidas' :
-                         'Nenhuma notificação importante'}
+                        {filtroTab === 'todas'
+                          ? 'Nenhuma notificação'
+                          : filtroTab === 'nao_lidas'
+                            ? 'Todas as notificações foram lidas'
+                            : 'Nenhuma notificação importante'}
                       </p>
                     </div>
                   ) : (
-                    notificacoesFiltradas.map((notificacao) => (
-                      <Card key={notificacao.id} className="card-dark p-3 space-y-2">
+                    notificacoesFiltradas.map(notificacao => (
+                      <Card
+                        key={notificacao.id}
+                        className="card-dark p-3 space-y-2"
+                      >
                         {/* Header da Notificação */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2">
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className={`${getColorByType(notificacao.tipo || 'info')} text-xs`}
                             >
                               {(notificacao.tipo || 'INFO').toUpperCase()}
                             </Badge>
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className={`${getColorByPriority(notificacao.prioridade || 'media')} text-xs`}
                             >
-                              {(notificacao.prioridade || 'MEDIA').toUpperCase()}
+                              {(
+                                notificacao.prioridade || 'MEDIA'
+                              ).toUpperCase()}
                             </Badge>
                           </div>
 
                           <div className="flex items-center gap-1">
-                            {['pendente', 'enviada'].includes(notificacao.status || '') && (
+                            {['pendente', 'enviada'].includes(
+                              notificacao.status || ''
+                            ) && (
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleMarcarComoLida(notificacao.id)}
+                                onClick={() =>
+                                  handleMarcarComoLida(notificacao.id)
+                                }
                                 className="h-6 w-6 p-0"
                               >
                                 <CheckCircle className="h-3 w-3" />
                               </Button>
                             )}
-                            
+
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleExcluirNotificacao(notificacao.id)}
+                              onClick={() =>
+                                handleExcluirNotificacao(notificacao.id)
+                              }
                               className="h-6 w-6 p-0"
                             >
                               <Trash2 className="h-3 w-3" />
@@ -330,28 +362,36 @@ export function NotificationCenter() {
                             {notificacao.mensagem || 'Sem mensagem'}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-500">
-                            {notificacao.criada_em ? formatarTempo(notificacao.criada_em) : 'Sem data'}
+                            {notificacao.criada_em
+                              ? formatarTempo(notificacao.criada_em)
+                              : 'Sem data'}
                           </p>
                         </div>
 
                         {/* Ações da Notificação */}
-                        {notificacao.acoes && Array.isArray(notificacao.acoes) && notificacao.acoes.length > 0 && (
-                          <div className="flex flex-wrap gap-1 pt-2">
-                            {notificacao.acoes.map((acao, index) => (
-                              <Button
-                                key={index}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAcaoNotificacao(acao)}
-                                className="h-6 text-xs"
-                              >
-                                {acao.action === 'redirect' && <User className="h-3 w-3 mr-1" />}
-                                {acao.action === 'download' && <Info className="h-3 w-3 mr-1" />}
-                                {acao.label || 'Ação'}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
+                        {notificacao.acoes &&
+                          Array.isArray(notificacao.acoes) &&
+                          notificacao.acoes.length > 0 && (
+                            <div className="flex flex-wrap gap-1 pt-2">
+                              {notificacao.acoes.map((acao, index) => (
+                                <Button
+                                  key={index}
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleAcaoNotificacao(acao)}
+                                  className="h-6 text-xs"
+                                >
+                                  {acao.action === 'redirect' && (
+                                    <User className="h-3 w-3 mr-1" />
+                                  )}
+                                  {acao.action === 'download' && (
+                                    <Info className="h-3 w-3 mr-1" />
+                                  )}
+                                  {acao.label || 'Ação'}
+                                </Button>
+                              ))}
+                            </div>
+                          )}
                       </Card>
                     ))
                   )}
@@ -372,7 +412,7 @@ export function NotificationCenter() {
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Marcar todas como lidas
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -393,7 +433,7 @@ export function NotificationCenter() {
                     onCheckedChange={handleToggleAutoRefresh}
                   />
                 </div>
-                
+
                 {configuracoes.autoRefresh && (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 dark:text-gray-500">
@@ -401,7 +441,9 @@ export function NotificationCenter() {
                     </span>
                     <select
                       value={configuracoes.refreshInterval}
-                      onChange={(e) => handleChangeInterval(parseInt(e.target.value))}
+                      onChange={e =>
+                        handleChangeInterval(parseInt(e.target.value))
+                      }
                       className="input-dark text-xs h-6 px-2 py-0"
                     >
                       <option value={15000}>15s</option>
@@ -417,7 +459,5 @@ export function NotificationCenter() {
         </Card>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
-
- 

@@ -1,18 +1,21 @@
-'use client'
+'use client';
 
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { obterCorCategoria, obterIconeCategoria } from '@/lib/checklist-scoring'
-import { 
-  CheckCircle, 
-  AlertTriangle, 
-  XCircle, 
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  obterCorCategoria,
+  obterIconeCategoria,
+} from '@/lib/checklist-scoring';
+import {
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
   Clock,
   TrendingUp,
   TrendingDown,
-  BarChart3
-} from 'lucide-react'
+  BarChart3,
+} from 'lucide-react';
 
 // =====================================================
 // 🏆 COMPONENTE DE EXIBIÇÃO DE SCORE
@@ -23,66 +26,63 @@ import {
 
 interface ScoreDisplayProps {
   scoreResult: {
-    score_total: number
-    categoria: 'excelente' | 'bom' | 'atencao' | 'critico'
-    total_itens: number
-    total_respondidos: number
-    itens_ok: number
-    itens_problema: number
+    score_total: number;
+    categoria: 'excelente' | 'bom' | 'atencao' | 'critico';
+    total_itens: number;
+    total_respondidos: number;
+    itens_ok: number;
+    itens_problema: number;
     problemas_identificados: Array<{
-      titulo: string
-      secao: string
-      tipo_problema: string
-      descricao: string
-      impacto: 'alto' | 'medio' | 'baixo'
-      requer_acao: boolean
-    }>
+      titulo: string;
+      secao: string;
+      tipo_problema: string;
+      descricao: string;
+      impacto: 'alto' | 'medio' | 'baixo';
+      requer_acao: boolean;
+    }>;
     detalhes_por_secao: Array<{
-      secao_nome: string
-      score_secao: number
-      total_itens: number
-      itens_respondidos: number
-      problemas: number
-      categoria: string
-    }>
-    recomendacoes: string[]
-  }
-  variant?: 'compact' | 'detailed' | 'card'
-  showProblems?: boolean
-  showRecommendations?: boolean
+      secao_nome: string;
+      score_secao: number;
+      total_itens: number;
+      itens_respondidos: number;
+      problemas: number;
+      categoria: string;
+    }>;
+    recomendacoes: string[];
+  };
+  variant?: 'compact' | 'detailed' | 'card';
+  showProblems?: boolean;
+  showRecommendations?: boolean;
 }
 
-export default function ScoreDisplay({ 
-  scoreResult, 
+export default function ScoreDisplay({
+  scoreResult,
   variant = 'compact',
   showProblems = true,
-  showRecommendations = true
+  showRecommendations = true,
 }: ScoreDisplayProps) {
-  
   if (!scoreResult) {
-    return (
-      <div className="text-gray-500 text-sm">
-        Score não disponível
-      </div>
-    )
+    return <div className="text-gray-500 text-sm">Score não disponível</div>;
   }
 
-  const { 
-    score_total, 
-    categoria, 
-    total_itens, 
-    total_respondidos, 
+  const {
+    score_total,
+    categoria,
+    total_itens,
+    total_respondidos,
     itens_problema,
     problemas_identificados,
     detalhes_por_secao,
-    recomendacoes
-  } = scoreResult
+    recomendacoes,
+  } = scoreResult;
 
   // Versão compacta para listas
   if (variant === 'compact') {
     return (
       <div className="flex items-center gap-2">
-        <div className={`px-2 py-1 rounded-md text-xs font-medium ${obterCorCategoria(categoria)}`}>
+        <div
+          className={`px-2 py-1 rounded-md text-xs font-medium ${obterCorCategoria(categoria)}`}
+        >
           <span className="mr-1">{obterIconeCategoria(categoria)}</span>
           {score_total}/100
         </div>
@@ -92,7 +92,7 @@ export default function ScoreDisplay({
           </Badge>
         )}
       </div>
-    )
+    );
   }
 
   // Versão em card para páginas de detalhes
@@ -112,8 +112,12 @@ export default function ScoreDisplay({
                 </p>
               </div>
               <div className="text-right">
-                <div className={`inline-flex items-center px-4 py-2 rounded-lg text-lg font-bold ${obterCorCategoria(categoria)}`}>
-                  <span className="mr-2 text-xl">{obterIconeCategoria(categoria)}</span>
+                <div
+                  className={`inline-flex items-center px-4 py-2 rounded-lg text-lg font-bold ${obterCorCategoria(categoria)}`}
+                >
+                  <span className="mr-2 text-xl">
+                    {obterIconeCategoria(categoria)}
+                  </span>
                   {score_total}/100
                 </div>
                 <p className="text-sm text-gray-600 mt-1 capitalize">
@@ -133,7 +137,7 @@ export default function ScoreDisplay({
                 </div>
                 <div className="text-sm text-green-700">Itens OK</div>
               </div>
-              
+
               {itens_problema > 0 && (
                 <div className="text-center p-3 bg-red-50 rounded-lg">
                   <div className="flex items-center justify-center mb-1">
@@ -145,7 +149,7 @@ export default function ScoreDisplay({
                   <div className="text-sm text-red-700">Problemas</div>
                 </div>
               )}
-              
+
               <div className="text-center p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-center mb-1">
                   <Clock className="w-5 h-5 text-gray-600" />
@@ -165,35 +169,46 @@ export default function ScoreDisplay({
                   Problemas Identificados ({problemas_identificados.length})
                 </h4>
                 <div className="space-y-2">
-                  {problemas_identificados.slice(0, 3).map((problema, index) => (
-                    <Alert key={index} className={`border-l-4 ${
-                      problema.impacto === 'alto' ? 'border-red-500 bg-red-50' :
-                      problema.impacto === 'medio' ? 'border-yellow-500 bg-yellow-50' :
-                      'border-blue-500 bg-blue-50'
-                    }`}>
-                      <AlertDescription className="text-sm">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {problema.titulo}
+                  {problemas_identificados
+                    .slice(0, 3)
+                    .map((problema, index) => (
+                      <Alert
+                        key={index}
+                        className={`border-l-4 ${
+                          problema.impacto === 'alto'
+                            ? 'border-red-500 bg-red-50'
+                            : problema.impacto === 'medio'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-blue-500 bg-blue-50'
+                        }`}
+                      >
+                        <AlertDescription className="text-sm">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {problema.titulo}
+                              </div>
+                              <div className="text-gray-600 mt-1">
+                                {problema.descricao}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Seção: {problema.secao}
+                              </div>
                             </div>
-                            <div className="text-gray-600 mt-1">
-                              {problema.descricao}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              Seção: {problema.secao}
-                            </div>
+                            <Badge
+                              variant={
+                                problema.impacto === 'alto'
+                                  ? 'destructive'
+                                  : 'secondary'
+                              }
+                              className="text-xs"
+                            >
+                              {problema.impacto}
+                            </Badge>
                           </div>
-                          <Badge 
-                            variant={problema.impacto === 'alto' ? 'destructive' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {problema.impacto}
-                          </Badge>
-                        </div>
-                      </AlertDescription>
-                    </Alert>
-                  ))}
+                        </AlertDescription>
+                      </Alert>
+                    ))}
                   {problemas_identificados.length > 3 && (
                     <div className="text-sm text-gray-500 text-center">
                       + {problemas_identificados.length - 3} outros problemas
@@ -212,7 +227,7 @@ export default function ScoreDisplay({
                 </h4>
                 <div className="space-y-1">
                   {recomendacoes.map((recomendacao, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="text-sm text-gray-700 bg-blue-50 p-2 rounded border-l-2 border-blue-500"
                     >
@@ -231,7 +246,7 @@ export default function ScoreDisplay({
                 </h4>
                 <div className="space-y-2">
                   {detalhes_por_secao.map((secao, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                     >
@@ -241,11 +256,14 @@ export default function ScoreDisplay({
                         </div>
                         <div className="text-sm text-gray-600">
                           {secao.itens_respondidos}/{secao.total_itens} itens
-                          {secao.problemas > 0 && ` • ${secao.problemas} problema(s)`}
+                          {secao.problemas > 0 &&
+                            ` • ${secao.problemas} problema(s)`}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`px-2 py-1 rounded text-xs font-medium ${obterCorCategoria(secao.categoria)}`}>
+                        <div
+                          className={`px-2 py-1 rounded text-xs font-medium ${obterCorCategoria(secao.categoria)}`}
+                        >
                           {secao.score_secao}/100
                         </div>
                         {secao.score_secao >= 90 ? (
@@ -262,7 +280,7 @@ export default function ScoreDisplay({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   // Versão detalhada padrão
@@ -275,11 +293,13 @@ export default function ScoreDisplay({
           <div className="text-2xl font-bold text-gray-900">
             {score_total}/100
           </div>
-          <div className={`text-sm font-medium capitalize ${obterCorCategoria(categoria).split(' ')[0]}`}>
+          <div
+            className={`text-sm font-medium capitalize ${obterCorCategoria(categoria).split(' ')[0]}`}
+          >
             {obterIconeCategoria(categoria)} {categoria}
           </div>
         </div>
-        
+
         <div className="text-right">
           <div className="text-sm text-gray-600">
             {total_respondidos}/{total_itens} itens
@@ -316,5 +336,5 @@ export default function ScoreDisplay({
         </Alert>
       )}
     </div>
-  )
-} 
+  );
+}

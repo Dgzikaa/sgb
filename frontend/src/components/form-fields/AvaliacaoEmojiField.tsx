@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
+import { useState } from 'react';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 // =====================================================
 // 🎭 CAMPO DE AVALIAÇÃO COM EMOJIS/CARINHAS
@@ -11,16 +11,16 @@ import { Badge } from '@/components/ui/badge'
 // "O campo de avaliação eu gosto de poder usar as carinhas"
 
 interface AvaliacaoEmojiFieldProps {
-  label: string
-  value?: number
-  onChange: (value: number) => void
-  obrigatorio?: boolean
-  disabled?: boolean
-  descricao?: string
-  variant?: 'emojis' | 'estrelas' | 'faces' | 'qualidade'
-  size?: 'sm' | 'md' | 'lg'
-  showLabel?: boolean
-  showDescription?: boolean
+  label: string;
+  value?: number;
+  onChange: (value: number) => void;
+  obrigatorio?: boolean;
+  disabled?: boolean;
+  descricao?: string;
+  variant?: 'emojis' | 'estrelas' | 'faces' | 'qualidade';
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+  showDescription?: boolean;
 }
 
 // Configurações dos diferentes tipos de avaliação
@@ -31,17 +31,27 @@ const avaliacaoConfigs = {
       { valor: 2, emoji: '😕', label: 'Ruim', cor: 'text-orange-500' },
       { valor: 3, emoji: '😐', label: 'Regular', cor: 'text-yellow-500' },
       { valor: 4, emoji: '😊', label: 'Bom', cor: 'text-blue-500' },
-      { valor: 5, emoji: '😍', label: 'Excelente', cor: 'text-green-500' }
-    ]
+      { valor: 5, emoji: '😍', label: 'Excelente', cor: 'text-green-500' },
+    ],
   },
   faces: {
     opcoes: [
       { valor: 1, emoji: '☹️', label: 'Insatisfeito', cor: 'text-red-500' },
-      { valor: 2, emoji: '😞', label: 'Pouco satisfeito', cor: 'text-orange-500' },
+      {
+        valor: 2,
+        emoji: '😞',
+        label: 'Pouco satisfeito',
+        cor: 'text-orange-500',
+      },
       { valor: 3, emoji: '😐', label: 'Neutro', cor: 'text-yellow-500' },
       { valor: 4, emoji: '🙂', label: 'Satisfeito', cor: 'text-blue-500' },
-      { valor: 5, emoji: '😁', label: 'Muito satisfeito', cor: 'text-green-500' }
-    ]
+      {
+        valor: 5,
+        emoji: '😁',
+        label: 'Muito satisfeito',
+        cor: 'text-green-500',
+      },
+    ],
   },
   qualidade: {
     opcoes: [
@@ -49,19 +59,34 @@ const avaliacaoConfigs = {
       { valor: 2, emoji: '👎', label: 'Ruim', cor: 'text-orange-500' },
       { valor: 3, emoji: '👌', label: 'Aceitável', cor: 'text-yellow-500' },
       { valor: 4, emoji: '👍', label: 'Bom', cor: 'text-blue-500' },
-      { valor: 5, emoji: '🏆', label: 'Perfeito', cor: 'text-green-500' }
-    ]
+      { valor: 5, emoji: '🏆', label: 'Perfeito', cor: 'text-green-500' },
+    ],
   },
   estrelas: {
     opcoes: [
       { valor: 1, emoji: '⭐', label: '1 estrela', cor: 'text-yellow-500' },
       { valor: 2, emoji: '⭐⭐', label: '2 estrelas', cor: 'text-yellow-500' },
-      { valor: 3, emoji: '⭐⭐⭐', label: '3 estrelas', cor: 'text-yellow-500' },
-      { valor: 4, emoji: '⭐⭐⭐⭐', label: '4 estrelas', cor: 'text-yellow-500' },
-      { valor: 5, emoji: '⭐⭐⭐⭐⭐', label: '5 estrelas', cor: 'text-yellow-500' }
-    ]
-  }
-}
+      {
+        valor: 3,
+        emoji: '⭐⭐⭐',
+        label: '3 estrelas',
+        cor: 'text-yellow-500',
+      },
+      {
+        valor: 4,
+        emoji: '⭐⭐⭐⭐',
+        label: '4 estrelas',
+        cor: 'text-yellow-500',
+      },
+      {
+        valor: 5,
+        emoji: '⭐⭐⭐⭐⭐',
+        label: '5 estrelas',
+        cor: 'text-yellow-500',
+      },
+    ],
+  },
+};
 
 export default function AvaliacaoEmojiField({
   label,
@@ -73,31 +98,30 @@ export default function AvaliacaoEmojiField({
   variant = 'emojis',
   size = 'md',
   showLabel = true,
-  showDescription = true
+  showDescription = true,
 }: AvaliacaoEmojiFieldProps) {
-  
-  const [hoveredValue, setHoveredValue] = useState<number | null>(null)
-  const config = avaliacaoConfigs[variant]
-  
+  const [hoveredValue, setHoveredValue] = useState<number | null>(null);
+  const config = avaliacaoConfigs[variant];
+
   const sizeClasses = {
     sm: 'text-2xl p-2',
     md: 'text-3xl p-3',
-    lg: 'text-4xl p-4'
-  }
+    lg: 'text-4xl p-4',
+  };
 
-  const getSizeClass = () => sizeClasses[size]
+  const getSizeClass = () => sizeClasses[size];
 
   const handleSelect = (valor: number) => {
-    if (disabled) return
-    onChange(valor)
-  }
+    if (disabled) return;
+    onChange(valor);
+  };
 
   const getOpcaoAtual = () => {
-    const valorAtual = hoveredValue ?? value
-    return config.opcoes.find(opcao => opcao.valor === valorAtual)
-  }
+    const valorAtual = hoveredValue ?? value;
+    return config.opcoes.find(opcao => opcao.valor === valorAtual);
+  };
 
-  const opcaoAtual = getOpcaoAtual()
+  const opcaoAtual = getOpcaoAtual();
 
   return (
     <div className="space-y-3">
@@ -124,11 +148,11 @@ export default function AvaliacaoEmojiField({
       {/* Avaliação com Emojis */}
       <div className="space-y-4">
         <div className="flex items-center justify-center gap-2 p-4 bg-gray-50 rounded-lg">
-          {config.opcoes.map((opcao) => {
-            const isSelected = value === opcao.valor
-            const isHovered = hoveredValue === opcao.valor
-            const isActive = isSelected || isHovered
-            
+          {config.opcoes.map(opcao => {
+            const isSelected = value === opcao.valor;
+            const isHovered = hoveredValue === opcao.valor;
+            const isActive = isSelected || isHovered;
+
             return (
               <button
                 key={opcao.valor}
@@ -151,14 +175,16 @@ export default function AvaliacaoEmojiField({
                   {opcao.emoji}
                 </span>
               </button>
-            )
+            );
           })}
         </div>
 
         {/* Feedback Visual */}
         <div className="text-center min-h-[2rem] flex items-center justify-center">
           {opcaoAtual && (
-            <div className={`text-lg font-medium transition-all duration-300 ${opcaoAtual.cor}`}>
+            <div
+              className={`text-lg font-medium transition-all duration-300 ${opcaoAtual.cor}`}
+            >
               {opcaoAtual.emoji} {opcaoAtual.label}
             </div>
           )}
@@ -177,27 +203,35 @@ export default function AvaliacaoEmojiField({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // =====================================================
 // 🎨 VARIANTES PRÉ-CONFIGURADAS
 // =====================================================
 
-export function AvaliacaoSatisfacao(props: Omit<AvaliacaoEmojiFieldProps, 'variant'>) {
-  return <AvaliacaoEmojiField {...props} variant="faces" />
+export function AvaliacaoSatisfacao(
+  props: Omit<AvaliacaoEmojiFieldProps, 'variant'>
+) {
+  return <AvaliacaoEmojiField {...props} variant="faces" />;
 }
 
-export function AvaliacaoQualidade(props: Omit<AvaliacaoEmojiFieldProps, 'variant'>) {
-  return <AvaliacaoEmojiField {...props} variant="qualidade" />
+export function AvaliacaoQualidade(
+  props: Omit<AvaliacaoEmojiFieldProps, 'variant'>
+) {
+  return <AvaliacaoEmojiField {...props} variant="qualidade" />;
 }
 
-export function AvaliacaoEstrelas(props: Omit<AvaliacaoEmojiFieldProps, 'variant'>) {
-  return <AvaliacaoEmojiField {...props} variant="estrelas" />
+export function AvaliacaoEstrelas(
+  props: Omit<AvaliacaoEmojiFieldProps, 'variant'>
+) {
+  return <AvaliacaoEmojiField {...props} variant="estrelas" />;
 }
 
-export function AvaliacaoEmojis(props: Omit<AvaliacaoEmojiFieldProps, 'variant'>) {
-  return <AvaliacaoEmojiField {...props} variant="emojis" />
+export function AvaliacaoEmojis(
+  props: Omit<AvaliacaoEmojiFieldProps, 'variant'>
+) {
+  return <AvaliacaoEmojiField {...props} variant="emojis" />;
 }
 
 // =====================================================
@@ -205,32 +239,32 @@ export function AvaliacaoEmojis(props: Omit<AvaliacaoEmojiFieldProps, 'variant'>
 // =====================================================
 
 export function useAvaliacaoEmoji(valorInicial?: number) {
-  const [valor, setValor] = useState<number | undefined>(valorInicial)
-  
-  const reset = () => setValor(undefined)
-  
+  const [valor, setValor] = useState<number | undefined>(valorInicial);
+
+  const reset = () => setValor(undefined);
+
   const isValid = (obrigatorio: boolean = false) => {
-    return obrigatorio ? valor !== undefined && valor >= 1 && valor <= 5 : true
-  }
-  
+    return obrigatorio ? valor !== undefined && valor >= 1 && valor <= 5 : true;
+  };
+
   const getLabel = (variant: keyof typeof avaliacaoConfigs = 'emojis') => {
-    if (!valor) return ''
-    const config = avaliacaoConfigs[variant]
-    return config.opcoes.find(opcao => opcao.valor === valor)?.label || ''
-  }
-  
+    if (!valor) return '';
+    const config = avaliacaoConfigs[variant];
+    return config.opcoes.find(opcao => opcao.valor === valor)?.label || '';
+  };
+
   const getEmoji = (variant: keyof typeof avaliacaoConfigs = 'emojis') => {
-    if (!valor) return ''
-    const config = avaliacaoConfigs[variant]
-    return config.opcoes.find(opcao => opcao.valor === valor)?.emoji || ''
-  }
-  
+    if (!valor) return '';
+    const config = avaliacaoConfigs[variant];
+    return config.opcoes.find(opcao => opcao.valor === valor)?.emoji || '';
+  };
+
   return {
     valor,
     setValor,
     reset,
     isValid,
     getLabel,
-    getEmoji
-  }
-} 
+    getEmoji,
+  };
+}

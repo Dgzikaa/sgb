@@ -91,15 +91,18 @@ export async function GET(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         auth: {
-          persistSession: false
-        }
+          persistSession: false,
+        },
       }
-    )
-    
+    );
+
     // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
     // Compilar todos os dados do usuário de diferentes tabelas
@@ -108,7 +111,7 @@ export async function GET(request: NextRequest) {
         requestedAt: new Date(),
         userId: user.id,
         email: user.email || '',
-        purpose: 'LGPD Art. 15 - Direito de Acesso aos Dados'
+        purpose: 'LGPD Art. 15 - Direito de Acesso aos Dados',
       },
       personalData: {},
       systemData: {
@@ -116,31 +119,31 @@ export async function GET(request: NextRequest) {
         preferences: {
           theme: 'Obtido do localStorage',
           language: 'pt-BR',
-          notifications: 'Configurações de notificação'
-        }
+          notifications: 'Configurações de notificação',
+        },
       },
       activityData: {
         recentLogins: [],
         auditTrail: [],
-        lastActivity: new Date()
+        lastActivity: new Date(),
       },
       consentData: {
         currentConsents: {},
         lastUpdated: undefined,
         version: '1.0',
-        bannerShown: false
+        bannerShown: false,
       },
       businessData: {
         associatedBars: [],
         recentChecklists: [],
-        roles: 'Extraído dos bars'
+        roles: 'Extraído dos bars',
       },
       technicalData: {
         ipAddresses: 'Histórico obtido dos logs',
         userAgents: 'Histórico obtido dos logs',
         cookies: 'Baseado nos consentimentos',
-        sessions: 'Dados de sessão ativa'
-      }
+        sessions: 'Dados de sessão ativa',
+      },
     };
 
     // 1. Dados pessoais básicos (tabela profiles)
@@ -159,7 +162,7 @@ export async function GET(request: NextRequest) {
         avatar: profile.avatar_url,
         createdAt: profile.created_at,
         updatedAt: profile.updated_at,
-        metadata: profile.metadata
+        metadata: profile.metadata,
       };
     }
 
@@ -201,7 +204,7 @@ export async function GET(request: NextRequest) {
         currentConsents: lgpdSettings.consents || {},
         lastUpdated: lgpdSettings.last_updated,
         version: lgpdSettings.version || '1.0',
-        bannerShown: lgpdSettings.bannerShown || false
+        bannerShown: lgpdSettings.bannerShown || false,
       };
     }
 
@@ -221,43 +224,40 @@ export async function GET(request: NextRequest) {
     userData.businessData.recentChecklists = checklists || [];
 
     // Log da solicitação de acesso
-    await supabase
-      .from('lgpd_audit_log')
-      .insert({
-        user_id: user.id,
-        action: 'data_access_requested',
-        details: {
-          requestedAt: new Date(),
-          ipAddress: getClientIP(request)
-        },
-        ip_address: getClientIP(request),
-        user_agent: request.headers.get('user-agent') || 'unknown',
-        timestamp: new Date()
-      });
+    await supabase.from('lgpd_audit_log').insert({
+      user_id: user.id,
+      action: 'data_access_requested',
+      details: {
+        requestedAt: new Date(),
+        ipAddress: getClientIP(request),
+      },
+      ip_address: getClientIP(request),
+      user_agent: request.headers.get('user-agent') || 'unknown',
+      timestamp: new Date(),
+    });
 
     return NextResponse.json(userData);
-
   } catch (error: unknown) {
     const apiError = error as ApiError;
     console.error('Erro ao acessar dados do usuário:', apiError);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' }, 
+      { error: 'Erro interno do servidor' },
       { status: 500 }
     );
   }
 }
 
 function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  const realIP = request.headers.get('x-real-ip')
-  
+  const forwarded = request.headers.get('x-forwarded-for');
+  const realIP = request.headers.get('x-real-ip');
+
   if (forwarded) {
-    return forwarded.split(',')[0].trim()
+    return forwarded.split(',')[0].trim();
   }
-  
+
   if (realIP) {
-    return realIP
+    return realIP;
   }
-  
-  return 'unknown'
-} 
+
+  return 'unknown';
+}

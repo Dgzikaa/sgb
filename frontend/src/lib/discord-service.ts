@@ -40,40 +40,47 @@ export interface DiscordField {
 }
 
 interface DiscordNotificationData {
-  title: string
-  description: string
-  color?: number
+  title: string;
+  description: string;
+  color?: number;
   fields?: {
-    name: string
-    value: string
-    inline?: boolean
-  }[]
+    name: string;
+    value: string;
+    inline?: boolean;
+  }[];
   footer?: {
-    text: string
-  }
-  bar_id: string
-  webhook_type?: 'sistema' | 'windsor' | 'nibo' | 'checklists' | 'contahub' | 'vendas' | 'reservas'
+    text: string;
+  };
+  bar_id: string;
+  webhook_type?:
+    | 'sistema'
+    | 'windsor'
+    | 'nibo'
+    | 'checklists'
+    | 'contahub'
+    | 'vendas'
+    | 'reservas';
 }
 
 interface AIAnomaly {
-  tipo_anomalia: string
-  subtipo: string
-  severidade: string
-  titulo: string
-  descricao: string
-  objeto_id?: number
-  objeto_tipo?: string
-  objeto_nome?: string
-  valor_esperado: number
-  valor_observado: number
-  desvio_percentual: number
-  confianca_deteccao: number
-  possivel_causa: string
-  impacto_estimado: string
-  acoes_sugeridas: string[]
-  metricas_anomalia: Record<string, unknown>
-  periodo_deteccao: string
-  status: string
+  tipo_anomalia: string;
+  subtipo: string;
+  severidade: string;
+  titulo: string;
+  descricao: string;
+  objeto_id?: number;
+  objeto_tipo?: string;
+  objeto_nome?: string;
+  valor_esperado: number;
+  valor_observado: number;
+  desvio_percentual: number;
+  confianca_deteccao: number;
+  possivel_causa: string;
+  impacto_estimado: string;
+  acoes_sugeridas: string[];
+  metricas_anomalia: Record<string, unknown>;
+  periodo_deteccao: string;
+  status: string;
 }
 
 // ========================================
@@ -87,20 +94,20 @@ export class DiscordService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
-      })
+        body: JSON.stringify(data),
+      });
 
-      const result = await response.json()
-      
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error(result.error || 'Erro ao enviar notificação')
+        throw new Error(result.error || 'Erro ao enviar notificação');
       }
 
-      console.log('✅ Notificação Discord enviada:', result)
-      return result
+      console.log('✅ Notificação Discord enviada:', result);
+      return result;
     } catch (error) {
-      console.error('❌ Erro ao enviar notificação Discord:', error)
-      throw error
+      console.error('❌ Erro ao enviar notificação Discord:', error);
+      throw error;
     }
   }
 
@@ -116,22 +123,24 @@ export class DiscordService {
           {
             name: '⚡ Status',
             value: 'Conexão funcionando corretamente',
-            inline: true
+            inline: true,
           },
           {
             name: '🕐 Horário',
-            value: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
-            inline: true
-          }
+            value: new Date().toLocaleString('pt-BR', {
+              timeZone: 'America/Sao_Paulo',
+            }),
+            inline: true,
+          },
         ],
-        color: 0x00ff00 // Verde para sucesso
-      }
+        color: 0x00ff00, // Verde para sucesso
+      };
 
-      await this.sendNotification(testData)
-      return true
+      await this.sendNotification(testData);
+      return true;
     } catch (error) {
-      console.error('❌ Erro ao testar conexão Discord:', error)
-      return false
+      console.error('❌ Erro ao testar conexão Discord:', error);
+      return false;
     }
   }
 
@@ -142,52 +151,55 @@ export class DiscordService {
         bar_id: anomalia.bar_id || 'unknown',
         webhook_type: 'sistema' as const,
         title: `🚨 ${anomalia.titulo || 'Anomalia Detectada'}`,
-        description: anomalia.descricao || 'Anomalia crítica detectada pelo sistema de IA',
+        description:
+          anomalia.descricao || 'Anomalia crítica detectada pelo sistema de IA',
         fields: [
           {
             name: '📊 Tipo',
             value: anomalia.tipo_anomalia || 'N/A',
-            inline: true
+            inline: true,
           },
           {
             name: '⚠️ Severidade',
             value: anomalia.severidade || 'N/A',
-            inline: true
+            inline: true,
           },
           {
             name: '📈 Valor Esperado',
             value: anomalia.valor_esperado?.toString() || 'N/A',
-            inline: true
+            inline: true,
           },
           {
             name: '📉 Valor Observado',
             value: anomalia.valor_observado?.toString() || 'N/A',
-            inline: true
+            inline: true,
           },
           {
             name: '📊 Desvio',
             value: `${anomalia.desvio_percentual || 0}%`,
-            inline: true
+            inline: true,
           },
           {
             name: '🎯 Confiança',
             value: `${anomalia.confianca_deteccao || 0}%`,
-            inline: true
-          }
+            inline: true,
+          },
         ],
-        color: anomalia.severidade === 'critica' ? 0xff0000 : 0xff6600 // Vermelho para crítica, laranja para outras
-      }
+        color: anomalia.severidade === 'critica' ? 0xff0000 : 0xff6600, // Vermelho para crítica, laranja para outras
+      };
 
-      await this.sendNotification(data)
-      return true
+      await this.sendNotification(data);
+      return true;
     } catch (error) {
-      console.error('❌ Erro ao enviar alerta de anomalia:', error)
-      return false
+      console.error('❌ Erro ao enviar alerta de anomalia:', error);
+      return false;
     }
   }
 
   // Método para enviar relatório matinal
-  static async enviarRelatorioMatinal(dashboardData: unknown): Promise<boolean> {
+  static async enviarRelatorioMatinal(
+    dashboardData: unknown
+  ): Promise<boolean> {
     try {
       const data = {
         bar_id: dashboardData.bar_id || 'unknown',
@@ -198,105 +210,137 @@ export class DiscordService {
           {
             name: '📊 Métricas Calculadas',
             value: dashboardData.metricas_count?.toString() || '0',
-            inline: true
+            inline: true,
           },
           {
             name: '🚨 Anomalias Detectadas',
             value: dashboardData.anomalias_count?.toString() || '0',
-            inline: true
+            inline: true,
           },
           {
             name: '💡 Insights Gerados',
             value: dashboardData.insights_count?.toString() || '0',
-            inline: true
+            inline: true,
           },
           {
             name: '📈 Score Geral',
             value: dashboardData.score_geral?.toString() || 'N/A',
-            inline: true
+            inline: true,
           },
           {
             name: '⏰ Horário de Geração',
-            value: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
-            inline: true
-          }
+            value: new Date().toLocaleString('pt-BR', {
+              timeZone: 'America/Sao_Paulo',
+            }),
+            inline: true,
+          },
         ],
-        color: 0x00aa55 // Verde para relatório matinal
-      }
+        color: 0x00aa55, // Verde para relatório matinal
+      };
 
-      await this.sendNotification(data)
-      return true
+      await this.sendNotification(data);
+      return true;
     } catch (error) {
-      console.error('❌ Erro ao enviar relatório matinal:', error)
-      return false
+      console.error('❌ Erro ao enviar relatório matinal:', error);
+      return false;
     }
   }
 
   // Métodos de conveniência para tipos específicos de webhook
-  static async sendSystemNotification(barId: string, title: string, description: string, fields?: unknown[]) {
+  static async sendSystemNotification(
+    barId: string,
+    title: string,
+    description: string,
+    fields?: unknown[]
+  ) {
     return this.sendNotification({
       bar_id: barId,
       webhook_type: 'sistema',
       title,
       description,
       fields,
-      color: 0xff0000 // Vermelho para sistema/segurança
-    })
+      color: 0xff0000, // Vermelho para sistema/segurança
+    });
   }
 
-  static async sendWindsorNotification(barId: string, title: string, description: string, fields?: unknown[]) {
+  static async sendWindsorNotification(
+    barId: string,
+    title: string,
+    description: string,
+    fields?: unknown[]
+  ) {
     return this.sendNotification({
       bar_id: barId,
       webhook_type: 'windsor',
       title,
       description,
       fields,
-      color: 0x8b5cf6 // Roxo para Windsor.ai
-    })
+      color: 0x8b5cf6, // Roxo para Windsor.ai
+    });
   }
 
-  static async sendChecklistNotification(barId: string, title: string, description: string, fields?: unknown[]) {
+  static async sendChecklistNotification(
+    barId: string,
+    title: string,
+    description: string,
+    fields?: unknown[]
+  ) {
     return this.sendNotification({
       bar_id: barId,
       webhook_type: 'checklists',
       title,
       description,
       fields,
-      color: 0x00cc66 // Verde para checklists
-    })
+      color: 0x00cc66, // Verde para checklists
+    });
   }
 
-  static async sendSalesNotification(barId: string, title: string, description: string, fields?: unknown[]) {
+  static async sendSalesNotification(
+    barId: string,
+    title: string,
+    description: string,
+    fields?: unknown[]
+  ) {
     return this.sendNotification({
       bar_id: barId,
       webhook_type: 'vendas',
       title,
       description,
       fields,
-      color: 0x00ff00 // Verde para vendas
-    })
+      color: 0x00ff00, // Verde para vendas
+    });
   }
 
-  static async sendReservationNotification(barId: string, title: string, description: string, fields?: unknown[]) {
+  static async sendReservationNotification(
+    barId: string,
+    title: string,
+    description: string,
+    fields?: unknown[]
+  ) {
     return this.sendNotification({
       bar_id: barId,
       webhook_type: 'reservas',
       title,
       description,
       fields,
-      color: 0x6600cc // Roxo para reservas
-    })
+      color: 0x6600cc, // Roxo para reservas
+    });
   }
 
-  static async sendNiboNotification(barId: string, title: string, description: string, fields?: unknown[]) {
+  static async sendNiboNotification(
+    barId: string,
+    title: string,
+    description: string,
+    fields?: unknown[]
+  ) {
     return this.sendNotification({
       bar_id: barId,
       webhook_type: 'nibo',
       title,
       description,
       fields,
-      color: 0xf97316 // Laranja para NIBO
-    })
+      color: 0xf97316, // Laranja para NIBO
+    });
   }
 
   // Método para enviar embed diretamente (compatibilidade com bot)
@@ -308,14 +352,14 @@ export class DiscordService {
         title: embed.title || 'Mensagem do Bot',
         description: embed.description || '',
         fields: embed.fields || [],
-        color: embed.color || 0x5865F2
-      }
+        color: embed.color || 0x5865f2,
+      };
 
-      await this.sendNotification(data)
-      return true
+      await this.sendNotification(data);
+      return true;
     } catch (error) {
-      console.error('❌ Erro ao enviar embed Discord:', error)
-      return false
+      console.error('❌ Erro ao enviar embed Discord:', error);
+      return false;
     }
   }
 
@@ -327,14 +371,14 @@ export class DiscordService {
         webhook_type: 'sistema' as const,
         title: '🤖 SGB Bot',
         description: message,
-        color: 0x5865F2
-      }
+        color: 0x5865f2,
+      };
 
-      await this.sendNotification(data)
-      return true
+      await this.sendNotification(data);
+      return true;
     } catch (error) {
-      console.error('❌ Erro ao enviar mensagem Discord:', error)
-      return false
+      console.error('❌ Erro ao enviar mensagem Discord:', error);
+      return false;
     }
   }
 }
@@ -360,7 +404,7 @@ export function isHorarioRelatorioMatinal(): boolean {
   const agora = new Date();
   const hora = agora.getHours();
   const minuto = agora.getMinutes();
-  
+
   // 8h da manhã (entre 8:00 e 8:05 para dar margem)
   return hora === 8 && minuto <= 5;
 }
@@ -371,15 +415,15 @@ export function isHorarioRelatorioMatinal(): boolean {
 export function calcularProximoRelatorioMatinal(): Date {
   const agora = new Date();
   const proximoRelatorio = new Date();
-  
+
   // Configurar para 8h da manhã
   proximoRelatorio.setHours(8, 0, 0, 0);
-  
+
   // Se já passou das 8h hoje, agendar para amanhã
   if (agora.getHours() >= 8) {
     proximoRelatorio.setDate(proximoRelatorio.getDate() + 1);
   }
-  
+
   return proximoRelatorio;
 }
 
@@ -390,4 +434,4 @@ export function minutosAteProximoRelatorio(): number {
   const agora = new Date();
   const proximo = calcularProximoRelatorioMatinal();
   return Math.ceil((proximo.getTime() - agora.getTime()) / (1000 * 60));
-} 
+}

@@ -22,14 +22,14 @@ interface BarConfig {
   google_places_key?: string;
   openai_enabled?: boolean;
   openai_key?: string;
-  
+
   // Sistemas de Gestão
   contahub_enabled?: boolean;
   contahub_login?: string;
   contahub_password?: string;
   contahub_url?: string;
   contahub_empresa_id?: string;
-  
+
   // Status de Teste
   last_test_status?: 'success' | 'failed';
   last_test_time?: string;
@@ -113,55 +113,61 @@ interface AnalyticsPeriodo {
 export default function AdminPage() {
   const [currentTab, setCurrentTab] = useState('overview');
   const [loading, setLoading] = useState(false);
-  const [monitoringResult, setMonitoringResult] = useState<MonitoringResult | null>(null);
+  const [monitoringResult, setMonitoringResult] =
+    useState<MonitoringResult | null>(null);
   const [bars, setBars] = useState<Bar[]>([]);
-  const [newBar, setNewBar] = useState({ nome: '', endereco: '', telefone: '' });
+  const [newBar, setNewBar] = useState({
+    nome: '',
+    endereco: '',
+    telefone: '',
+  });
   const [message, setMessage] = useState('');
   const [selectedBarId, setSelectedBarId] = useState<number | null>(null);
   const [testingConnection, setTestingConnection] = useState(false);
   const [migrating, setMigrating] = useState(false);
-  
+
   // Estados para Planejamento Comercial
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [editingEvent, setEditingEvent] = useState<Evento | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
-  
+
   // Estados para configurações de APIs por bar - com tipagem correta
   const [barConfigs, setBarConfigs] = useState<Record<number, BarConfig>>({});
-  
+
   // Estados para configurações gerais do sistema
   const [configs, setConfigs] = useState({
     // ContaHub
     contahub_username: '',
     contahub_password: '',
     contahub_url: '',
-    
+
     // Discord
     discord_webhook: '',
     discord_bot_token: '',
     discord_channel_alerts: '',
-    
+
     // Email
     email_provider: 'sendgrid',
     email_api_key: '',
     email_from: '',
-    
+
     // Segurança
     admin_password: '',
     jwt_secret: '',
-    
+
     // Features
     monitoring_enabled: true,
     debug_enabled: false,
     auto_sync_enabled: true,
-    notifications_enabled: true
+    notifications_enabled: true,
   });
 
   // Estados para verificação de receitas
   const [verificandoReceitas, setVerificandoReceitas] = useState(false);
-  const [resultadoVerificacao, setResultadoVerificacao] = useState<unknown>(null);
+  const [resultadoVerificacao, setResultadoVerificacao] =
+    useState<unknown>(null);
 
   const loadBars = useCallback(async () => {
     setLoading(true);
@@ -169,19 +175,19 @@ export default function AdminPage() {
       console.log('🔍 Carregando bares do banco de dados...');
       const response = await fetch('/api/bars');
       console.log('📡 Response status:', response.status);
-      
+
       const result = await response.json();
       console.log('📊 Resultado da API:', result);
-      
+
       if (result.success) {
         setBars(result.data);
-        
+
         // Selecionar automaticamente o Bar Ordinário (ID 1) por padrão
         const barOrdinario = result.data.find((bar: Bar) => bar.id === 1);
         if (barOrdinario && !selectedBarId) {
           setSelectedBarId(1);
         }
-        
+
         setMessage(`✅ ${result.data.length} bares carregados com sucesso!`);
         console.log(`✅ ${result.data.length} bares carregados:`, result.data);
       } else {
@@ -236,17 +242,17 @@ export default function AdminPage() {
       setEventos([]);
       return;
     }
-    
+
     try {
       const params = new URLSearchParams({
         mes: currentMonth.toString(),
         ano: currentYear.toString(),
-        bar_id: selectedBarId.toString()
+        bar_id: selectedBarId.toString(),
       });
 
       const response = await fetch(`/api/eventos?${params}`);
       const result = await response.json();
-      
+
       if (result.success) {
         setEventos(result.data);
       } else {
@@ -265,11 +271,11 @@ export default function AdminPage() {
       const response = await fetch('/api/eventos', {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(evento)
+        body: JSON.stringify(evento),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setMessage('Evento salvo com sucesso!');
         setShowEventModal(false);
@@ -289,15 +295,15 @@ export default function AdminPage() {
 
   const deleteEvento = async (id: number) => {
     if (!confirm('Tem certeza que deseja deletar este evento?')) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/eventos?id=${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setMessage('Evento deletado com sucesso!');
         loadEventos();
@@ -315,58 +321,61 @@ export default function AdminPage() {
 
   const importarEventosHistoricos = async () => {
     // Encontrar o bar ordinário pelo nome
-    const barOrdinario = bars.find(bar => 
-      bar.nome.toLowerCase().includes('ordinário') || 
-      bar.nome.toLowerCase().includes('ordinario')
+    const barOrdinario = bars.find(
+      bar =>
+        bar.nome.toLowerCase().includes('ordinário') ||
+        bar.nome.toLowerCase().includes('ordinario')
     );
-    
+
     if (!barOrdinario) {
       setMessage('❌ Bar Ordinário não encontrado na lista de bares');
       return;
     }
-    
+
     const confirmacao = confirm(
       `🚀 Deseja importar os dados históricos de Fevereiro a Junho 2025 para o ${barOrdinario.nome}?\n\n` +
-      '📊 Isso incluirá:\n' +
-      '• ~150 eventos de diferentes gêneros\n' +
-      '• Informações de artistas e capacidade\n' +
-      '• Eventos recorrentes (Quarta de Bamba, Pagode Vira-lata, etc.)\n' +
-      '• Eventos especiais (Carnaval, Homenagens, Festival Junino)\n\n' +
-      '⚠️ Se já existirem eventos no período, eles serão substituídos.'
+        '📊 Isso incluirá:\n' +
+        '• ~150 eventos de diferentes gêneros\n' +
+        '• Informações de artistas e capacidade\n' +
+        '• Eventos recorrentes (Quarta de Bamba, Pagode Vira-lata, etc.)\n' +
+        '• Eventos especiais (Carnaval, Homenagens, Festival Junino)\n\n' +
+        '⚠️ Se já existirem eventos no período, eles serão substituídos.'
     );
-    
+
     if (!confirmacao) return;
-    
+
     setLoading(true);
     try {
-      console.log(`📊 Importando eventos para bar: ${barOrdinario.nome} (ID: ${barOrdinario.id})`);
-      
+      console.log(
+        `📊 Importando eventos para bar: ${barOrdinario.nome} (ID: ${barOrdinario.id})`
+      );
+
       // Primeira tentativa - verificar se existem eventos
-              const response1 = await fetch('/api/eventos/import', {
+      const response1 = await fetch('/api/eventos/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bar_id: barOrdinario.id,
           ano: 2025,
-          confirmar_substituicao: false
-        })
+          confirmar_substituicao: false,
+        }),
       });
-      
+
       const result1 = await response1.json();
-      
+
       if (result1.requer_confirmacao) {
         const confirmarSubstituicao = confirm(
           `⚠️ Atenção: Já existem ${result1.eventos_existentes} eventos no período!\n\n` +
-          `📥 Eventos para importar: ${result1.eventos_para_importar}\n` +
-          `🗑️ Eventos existentes: ${result1.eventos_existentes}\n\n` +
-          'Deseja SUBSTITUIR os eventos existentes pelos dados históricos?'
+            `📥 Eventos para importar: ${result1.eventos_para_importar}\n` +
+            `🗑️ Eventos existentes: ${result1.eventos_existentes}\n\n` +
+            'Deseja SUBSTITUIR os eventos existentes pelos dados históricos?'
         );
-        
+
         if (!confirmarSubstituicao) {
           setLoading(false);
           return;
         }
-        
+
         // Segunda tentativa - confirmar substituição
         const response2 = await fetch('/api/eventos/import', {
           method: 'POST',
@@ -374,22 +383,22 @@ export default function AdminPage() {
           body: JSON.stringify({
             bar_id: barOrdinario.id,
             ano: 2025,
-            confirmar_substituicao: true
-          })
+            confirmar_substituicao: true,
+          }),
         });
-        
+
         const result2 = await response2.json();
-        
+
         if (result2.success) {
           setMessage(
             `🎉 ${result2.eventos_importados} eventos importados com sucesso!\n\n` +
-            `📅 Resumo por mês:\n` +
-            `• Fevereiro: ${result2.resumo.fevereiro} eventos\n` +
-            `• Março: ${result2.resumo.marco} eventos\n` +
-            `• Abril: ${result2.resumo.abril} eventos\n` +
-            `• Maio: ${result2.resumo.maio} eventos\n` +
-            `• Junho: ${result2.resumo.junho} eventos\n\n` +
-            `🎵 Gêneros: ${result2.generos_detectados.join(', ')}`
+              `📅 Resumo por mês:\n` +
+              `• Fevereiro: ${result2.resumo.fevereiro} eventos\n` +
+              `• Março: ${result2.resumo.marco} eventos\n` +
+              `• Abril: ${result2.resumo.abril} eventos\n` +
+              `• Maio: ${result2.resumo.maio} eventos\n` +
+              `• Junho: ${result2.resumo.junho} eventos\n\n` +
+              `🎵 Gêneros: ${result2.generos_detectados.join(', ')}`
           );
           loadEventos();
         } else {
@@ -398,13 +407,13 @@ export default function AdminPage() {
       } else if (result1.success) {
         setMessage(
           `🎉 ${result1.eventos_importados} eventos importados com sucesso!\n\n` +
-          `📅 Resumo por mês:\n` +
-          `• Fevereiro: ${result1.resumo.fevereiro} eventos\n` +
-          `• Março: ${result1.resumo.marco} eventos\n` +
-          `• Abril: ${result1.resumo.abril} eventos\n` +
-          `• Maio: ${result1.resumo.maio} eventos\n` +
-          `• Junho: ${result1.resumo.junho} eventos\n\n` +
-          `🎵 Gêneros: ${result1.generos_detectados.join(', ')}`
+            `📅 Resumo por mês:\n` +
+            `• Fevereiro: ${result1.resumo.fevereiro} eventos\n` +
+            `• Março: ${result1.resumo.marco} eventos\n` +
+            `• Abril: ${result1.resumo.abril} eventos\n` +
+            `• Maio: ${result1.resumo.maio} eventos\n` +
+            `• Junho: ${result1.resumo.junho} eventos\n\n` +
+            `🎵 Gêneros: ${result1.generos_detectados.join(', ')}`
         );
         loadEventos();
       } else {
@@ -422,30 +431,32 @@ export default function AdminPage() {
   const migrateExistingConfigs = async (barId: number) => {
     setMigrating(true);
     try {
-              const response = await fetch('/api/configuracoes/migrate-apis', {
+      const response = await fetch('/api/configuracoes/migrate-apis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          targetBarId: barId
-        })
+          targetBarId: barId,
+        }),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         const { migratedConfigs, migrationLog, summary } = result.data;
-        
+
         // Atualizar estado local com as configurações migradas
         setBarConfigs({
           ...barConfigs,
           [barId]: {
             ...barConfigs[barId],
-            ...migratedConfigs
-          }
+            ...migratedConfigs,
+          },
         });
-        
-        setMessage(`✅ Migração concluída! ${summary.successful}/${summary.total} APIs migradas com sucesso`);
-        
+
+        setMessage(
+          `✅ Migração concluída! ${summary.successful}/${summary.total} APIs migradas com sucesso`
+        );
+
         // Log detalhado
         console.log('📋 Migração detalhada:', migrationLog);
       } else {
@@ -464,17 +475,22 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const currentBarConfig = barConfigs[barId] || {};
-      
+
       // Salvar no localStorage (depois pode integrar com API)
-      const savedBarConfigs = JSON.parse(localStorage.getItem('sgb-bar-configs') || '{}');
+      const savedBarConfigs = JSON.parse(
+        localStorage.getItem('sgb-bar-configs') || '{}'
+      );
       savedBarConfigs[barId] = currentBarConfig;
       localStorage.setItem('sgb-bar-configs', JSON.stringify(savedBarConfigs));
-      
+
       const barName = bars.find(b => b.id === barId)?.nome || 'Bar';
       setMessage(`✅ Configurações do ${barName} salvas com sucesso!`);
       setTimeout(() => setMessage(''), 3000);
-      
-      console.log(`💾 Configurações salvas para bar ${barId}:`, currentBarConfig);
+
+      console.log(
+        `💾 Configurações salvas para bar ${barId}:`,
+        currentBarConfig
+      );
     } catch (error) {
       console.error('Erro ao salvar configurações do bar:', error);
       setMessage('Erro ao salvar configurações do bar');
@@ -486,10 +502,10 @@ export default function AdminPage() {
   const runApiMonitoring = async () => {
     setLoading(true);
     try {
-              const response = await fetch('/api/configuracoes/monitor-apis', {
+      const response = await fetch('/api/configuracoes/monitor-apis', {
         method: 'POST',
       });
-      
+
       const result = await response.json();
       setMonitoringResult(result);
       setMessage('Monitoramento executado com sucesso!');
@@ -511,7 +527,7 @@ export default function AdminPage() {
       username: barConfigs[barId]?.contahub_login,
       password: barConfigs[barId]?.contahub_password,
       base_url: barConfigs[barId]?.contahub_url,
-      empresa_id: barConfigs[barId]?.contahub_empresa_id
+      empresa_id: barConfigs[barId]?.contahub_empresa_id,
     };
 
     if (!credentials.username || !credentials.password) {
@@ -521,21 +537,26 @@ export default function AdminPage() {
 
     setTestingConnection(true);
     try {
-              const response = await fetch('/api/configuracoes/bar-systems?action=test-connection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          barId,
-          credentials,
-          systemType: 'contahub'
-        })
-      });
-      
+      const response = await fetch(
+        '/api/configuracoes/bar-systems?action=test-connection',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            barId,
+            credentials,
+            systemType: 'contahub',
+          }),
+        }
+      );
+
       const result = await response.json();
-      
+
       if (result.success && result.data.success) {
-        setMessage(`✅ Conexão bem-sucedida! Tempo de resposta: ${result.data.responseTime}ms`);
-        
+        setMessage(
+          `✅ Conexão bem-sucedida! Tempo de resposta: ${result.data.responseTime}ms`
+        );
+
         // Atualizar configuração com sucesso
         setBarConfigs({
           ...barConfigs,
@@ -543,13 +564,14 @@ export default function AdminPage() {
             ...barConfigs[barId],
             last_test_status: 'success',
             last_test_time: new Date().toISOString(),
-            last_error: null
-          }
+            last_error: null,
+          },
         });
       } else {
-        const errorMsg = result.data?.message || result.error || 'Erro desconhecido';
+        const errorMsg =
+          result.data?.message || result.error || 'Erro desconhecido';
         setMessage(`❌ Falha na conexão: ${errorMsg}`);
-        
+
         // Atualizar configuração com erro
         setBarConfigs({
           ...barConfigs,
@@ -557,15 +579,15 @@ export default function AdminPage() {
             ...barConfigs[barId],
             last_test_status: 'failed',
             last_test_time: new Date().toISOString(),
-            last_error: errorMsg
-          }
+            last_error: errorMsg,
+          },
         });
       }
     } catch (error) {
       console.error('Erro ao testar conexão:', error);
       const errorMsg = 'Erro de comunicação com o servidor';
       setMessage(`❌ ${errorMsg}`);
-      
+
       // Atualizar configuração com erro
       setBarConfigs({
         ...barConfigs,
@@ -573,8 +595,8 @@ export default function AdminPage() {
           ...barConfigs[barId],
           last_test_status: 'failed',
           last_test_time: new Date().toISOString(),
-          last_error: errorMsg
-        }
+          last_error: errorMsg,
+        },
       });
     } finally {
       setTestingConnection(false);
@@ -590,14 +612,14 @@ export default function AdminPage() {
 
     setLoading(true);
     try {
-              const response = await fetch('/api/bars', {
+      const response = await fetch('/api/bars', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBar)
+        body: JSON.stringify(newBar),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setBars([...bars, result.data]);
         setNewBar({ nome: '', endereco: '', telefone: '' });
@@ -615,14 +637,14 @@ export default function AdminPage() {
 
   const deleteBar = async (id: number) => {
     if (!confirm('Tem certeza que deseja excluir este bar?')) return;
-    
+
     try {
-              const response = await fetch(`/api/bars?id=${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/bars?id=${id}`, {
+        method: 'DELETE',
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setBars(bars.filter(bar => bar.id !== id));
         setMessage('Bar removido com sucesso!');
@@ -641,9 +663,9 @@ export default function AdminPage() {
       offline: 'status-badge status-offline',
       pending: 'status-badge status-pending',
       ativo: 'status-badge status-online',
-      inativo: 'status-badge status-offline'
+      inativo: 'status-badge status-offline',
     };
-    
+
     return (
       <span className={statusClasses[status as keyof typeof statusClasses]}>
         {status}
@@ -659,20 +681,24 @@ export default function AdminPage() {
 
     setVerificandoReceitas(true);
     try {
-      console.log(`🔍 Verificando receitas problemáticas para bar ${selectedBarId}...`);
-      
-              const response = await fetch(`/api/receitas/verificar-sem-nome?bar_id=${selectedBarId}`);
+      console.log(
+        `🔍 Verificando receitas problemáticas para bar ${selectedBarId}...`
+      );
+
+      const response = await fetch(
+        `/api/receitas/verificar-sem-nome?bar_id=${selectedBarId}`
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         setResultadoVerificacao(result.data);
-        
+
         const { estatisticas } = result.data;
         let mensagem = `✅ Verificação concluída!\n\n`;
         mensagem += `📊 ESTATÍSTICAS:\n`;
         mensagem += `• Total de receitas: ${estatisticas.total_receitas}\n`;
         mensagem += `• Total de problemas: ${estatisticas.total_problemas}\n\n`;
-        
+
         if (estatisticas.total_problemas > 0) {
           mensagem += `❌ PROBLEMAS ENCONTRADOS:\n`;
           if (estatisticas.codigo_sem_nome > 0) {
@@ -688,13 +714,16 @@ export default function AdminPage() {
         } else {
           mensagem += `✅ Nenhum problema encontrado! Todas as receitas estão OK.`;
         }
-        
+
         setMessage(mensagem);
-        
+
         // Log detalhado no console
         if (result.data.problemas.length > 0) {
           console.log(`⚠️ PROBLEMAS ENCONTRADOS:`, result.data.problemas);
-          console.log(`📋 RECEITAS COM PROBLEMAS:`, result.data.receitas_com_problemas);
+          console.log(
+            `📋 RECEITAS COM PROBLEMAS:`,
+            result.data.receitas_com_problemas
+          );
         }
       } else {
         setMessage(`❌ Erro na verificação: ${result.error}`);
@@ -711,22 +740,26 @@ export default function AdminPage() {
   const adicionarCamposProducao = async () => {
     setLoading(true);
     try {
-      console.log('🔧 Executando migration para campos de aderência à receita...');
-      
-              const response = await fetch('/api/producoes/adicionar-campos', {
+      console.log(
+        '🔧 Executando migration para campos de aderência à receita...'
+      );
+
+      const response = await fetch('/api/producoes/adicionar-campos', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
-        setMessage(`✅ Migration executada com sucesso!\n\n` +
-                  `📊 Detalhes:\n` +
-                  `• Campo na tabela produções: ${result.detalhes.campo_producoes}\n` +
-                  `• Atualização tabela insumos: ${result.detalhes.tabela_insumos}\n` +
-                  `• Criação de índices: ${result.detalhes.indices}\n\n` +
-                  `🎯 Agora o sistema pode calcular o percentual de aderência à receita!`);
+        setMessage(
+          `✅ Migration executada com sucesso!\n\n` +
+            `📊 Detalhes:\n` +
+            `• Campo na tabela produções: ${result.detalhes.campo_producoes}\n` +
+            `• Atualização tabela insumos: ${result.detalhes.tabela_insumos}\n` +
+            `• Criação de índices: ${result.detalhes.indices}\n\n` +
+            `🎯 Agora o sistema pode calcular o percentual de aderência à receita!`
+        );
       } else {
         setMessage(`❌ Erro na migration: ${result.error}`);
       }
@@ -760,13 +793,22 @@ export default function AdminPage() {
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {/* Seletor de Bar Global */}
           <div className="form-group" style={{ margin: 0, minWidth: '200px' }}>
-            <label htmlFor="global-bar-selector" style={{ fontSize: '0.8rem', marginBottom: '4px', color: '#64748b' }}>
+            <label
+              htmlFor="global-bar-selector"
+              style={{
+                fontSize: '0.8rem',
+                marginBottom: '4px',
+                color: '#64748b',
+              }}
+            >
               Selecionar Bar:
             </label>
             <select
               id="global-bar-selector"
               value={selectedBarId || ''}
-              onChange={(e) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
+              onChange={e =>
+                setSelectedBarId(e.target.value ? Number(e.target.value) : null)
+              }
               className="form-input"
               style={{ padding: '8px 12px', fontSize: '0.9rem' }}
             >
@@ -778,8 +820,8 @@ export default function AdminPage() {
               ))}
             </select>
           </div>
-          <button 
-            onClick={saveConfigs} 
+          <button
+            onClick={saveConfigs}
             disabled={loading}
             className="btn btn-primary"
           >
@@ -789,7 +831,9 @@ export default function AdminPage() {
       </div>
 
       {message && (
-        <div className={`message ${message.includes('sucesso') ? 'success' : 'error'}`}>
+        <div
+          className={`message ${message.includes('sucesso') ? 'success' : 'error'}`}
+        >
           {message}
         </div>
       )}
@@ -798,20 +842,39 @@ export default function AdminPage() {
       {selectedBarId && (
         <div className="card" style={{ marginBottom: '24px' }}>
           <div className="card-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <div>
                 <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.2rem' }}>
                   🏪 {bars.find(b => b.id === selectedBarId)?.nome}
                 </h3>
-                <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
-                  📍 {bars.find(b => b.id === selectedBarId)?.endereco} | 
-                  📞 {bars.find(b => b.id === selectedBarId)?.telefone}
+                <p
+                  style={{
+                    margin: '4px 0 0 0',
+                    color: '#64748b',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  📍 {bars.find(b => b.id === selectedBarId)?.endereco} | 📞{' '}
+                  {bars.find(b => b.id === selectedBarId)?.telefone}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                {getStatusBadge(bars.find(b => b.id === selectedBarId)?.status || 'inativo')}
+              <div
+                style={{ display: 'flex', gap: '12px', alignItems: 'center' }}
+              >
+                {getStatusBadge(
+                  bars.find(b => b.id === selectedBarId)?.status || 'inativo'
+                )}
                 <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                  Criado em {new Date(bars.find(b => b.id === selectedBarId)?.created_at || '').toLocaleDateString('pt-BR')}
+                  Criado em{' '}
+                  {new Date(
+                    bars.find(b => b.id === selectedBarId)?.created_at || ''
+                  ).toLocaleDateString('pt-BR')}
                 </span>
               </div>
             </div>
@@ -821,55 +884,55 @@ export default function AdminPage() {
 
       <div className="tabs">
         <div className="tab-nav">
-          <button 
+          <button
             className={`tab-button ${currentTab === 'overview' ? 'active' : ''}`}
             onClick={() => setCurrentTab('overview')}
           >
             📊 Visão Geral
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'apis' ? 'active' : ''}`}
             onClick={() => setCurrentTab('apis')}
           >
             📡 APIs
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'bars' ? 'active' : ''}`}
             onClick={() => setCurrentTab('bars')}
           >
             🍺 Bares
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'services' ? 'active' : ''}`}
             onClick={() => setCurrentTab('services')}
           >
             ⚙️ Serviços
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'sistemas' ? 'active' : ''}`}
             onClick={() => setCurrentTab('sistemas')}
           >
             🖥️ Sistemas
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'security' ? 'active' : ''}`}
             onClick={() => setCurrentTab('security')}
           >
             🔒 Segurança
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'monitoring' ? 'active' : ''}`}
             onClick={() => setCurrentTab('monitoring')}
           >
             📈 Monitoramento
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'planejamento' ? 'active' : ''}`}
             onClick={() => setCurrentTab('planejamento')}
           >
             🎵 Planejamento
           </button>
-          <button 
+          <button
             className={`tab-button ${currentTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setCurrentTab('analytics')}
           >
@@ -881,8 +944,12 @@ export default function AdminPage() {
         {currentTab === 'overview' && (
           <div className="tab-content">
             {selectedBarId && (
-              <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                📊 Visualizando dados específicos de: <strong>{bars.find(b => b.id === selectedBarId)?.nome}</strong>
+              <div
+                className="alert alert-info"
+                style={{ marginBottom: '20px' }}
+              >
+                📊 Visualizando dados específicos de:{' '}
+                <strong>{bars.find(b => b.id === selectedBarId)?.nome}</strong>
               </div>
             )}
             <div className="grid grid-3">
@@ -906,7 +973,9 @@ export default function AdminPage() {
                   <div className="stat-row">
                     <span>Bares Ativos:</span>
                     <span className="stat-value text-blue">
-                      {selectedBarId ? '1 (selecionado)' : bars.filter((b: Bar) => b.status === 'ativo').length}
+                      {selectedBarId
+                        ? '1 (selecionado)'
+                        : bars.filter((b: Bar) => b.status === 'ativo').length}
                     </span>
                   </div>
                   {selectedBarId && (
@@ -914,18 +983,24 @@ export default function AdminPage() {
                       <div className="stat-row">
                         <span>APIs Configuradas:</span>
                         <span className="stat-value text-green">
-                          {Object.values(barConfigs[selectedBarId] || {}).filter((v: unknown) => 
-                            typeof v === 'boolean' && v === true
-                          ).length}
+                          {
+                            Object.values(
+                              barConfigs[selectedBarId] || {}
+                            ).filter(
+                              (v: unknown) =>
+                                typeof v === 'boolean' && v === true
+                            ).length
+                          }
                         </span>
                       </div>
                       <div className="stat-row">
                         <span>Sistema Integrado:</span>
                         <span className="stat-value">
-                          {barConfigs[selectedBarId]?.contahub_login ? 
-                            <span className="text-green">✅ ContaHub</span> : 
+                          {barConfigs[selectedBarId]?.contahub_login ? (
+                            <span className="text-green">✅ ContaHub</span>
+                          ) : (
                             <span className="text-red">❌ Nenhum</span>
-                          }
+                          )}
                         </span>
                       </div>
                     </>
@@ -938,17 +1013,20 @@ export default function AdminPage() {
                   <h3>🔍 Monitoramento</h3>
                 </div>
                 <div className="card-content">
-                  <button 
-                    onClick={runApiMonitoring} 
+                  <button
+                    onClick={runApiMonitoring}
                     disabled={loading}
                     className="btn btn-primary btn-full"
                   >
                     {loading ? '🔄 Verificando...' : '▶️ Verificar APIs'}
                   </button>
-                  
+
                   {monitoringResult && (
                     <div className="last-check">
-                      Última verificação: {new Date(monitoringResult.timestamp).toLocaleString('pt-BR')}
+                      Última verificação:{' '}
+                      {new Date(monitoringResult.timestamp).toLocaleString(
+                        'pt-BR'
+                      )}
                     </div>
                   )}
                 </div>
@@ -968,15 +1046,21 @@ export default function AdminPage() {
                   <button className="btn btn-outline btn-full">
                     🔑 Gerar Nova API Key
                   </button>
-                  <button 
+                  <button
                     onClick={verificarReceitasProblematicas}
                     disabled={verificandoReceitas || !selectedBarId}
                     className="btn btn-outline btn-full"
-                    title={!selectedBarId ? 'Selecione um bar primeiro' : 'Verificar receitas com insumos problemáticos'}
+                    title={
+                      !selectedBarId
+                        ? 'Selecione um bar primeiro'
+                        : 'Verificar receitas com insumos problemáticos'
+                    }
                   >
-                    {verificandoReceitas ? '🔍 Verificando...' : '🧪 Verificar Receitas'}
+                    {verificandoReceitas
+                      ? '🔍 Verificando...'
+                      : '🧪 Verificar Receitas'}
                   </button>
-                  <button 
+                  <button
                     onClick={adicionarCamposProducao}
                     disabled={loading}
                     className="btn btn-outline btn-full"
@@ -1003,14 +1087,10 @@ export default function AdminPage() {
                           {getStatusBadge(api.status)}
                         </div>
                         {api.responseTime && (
-                          <div className="api-time">
-                            {api.responseTime}ms
-                          </div>
+                          <div className="api-time">{api.responseTime}ms</div>
                         )}
                         {api.error && (
-                          <div className="api-error">
-                            {api.error}
-                          </div>
+                          <div className="api-error">{api.error}</div>
                         )}
                       </div>
                     ))}
@@ -1026,18 +1106,23 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🔌 APIs Conectadas{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>
+                  🔌 APIs Conectadas
+                  {selectedBarId
+                    ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}`
+                    : ''}
+                </h3>
                 <p>
-                  {selectedBarId 
+                  {selectedBarId
                     ? `Configure as APIs específicas para ${bars.find(b => b.id === selectedBarId)?.nome}`
-                    : 'Selecione um bar no cabeçalho para ver suas APIs específicas'
-                  }
+                    : 'Selecione um bar no cabeçalho para ver suas APIs específicas'}
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-info">
-                    👆 Selecione um bar no seletor do cabeçalho para configurar suas APIs específicas
+                    👆 Selecione um bar no seletor do cabeçalho para configurar
+                    suas APIs específicas
                   </div>
                 )}
 
@@ -1046,14 +1131,22 @@ export default function AdminPage() {
                   <div className="form-section">
                     <div style={{ marginBottom: '20px' }}>
                       <h4>📋 Status das APIs Configuradas</h4>
-                      <div className="grid grid-2" style={{ marginBottom: '20px' }}>
+                      <div
+                        className="grid grid-2"
+                        style={{ marginBottom: '20px' }}
+                      >
                         <div className="api-status-card">
                           <div className="api-header">
                             <span className="api-name">Sympla</span>
-                            {barConfigs[selectedBarId]?.sympla_enabled ? 
-                              <span className="status-badge status-online">✅ Ativa</span> : 
-                              <span className="status-badge status-offline">❌ Inativa</span>
-                            }
+                            {barConfigs[selectedBarId]?.sympla_enabled ? (
+                              <span className="status-badge status-online">
+                                ✅ Ativa
+                              </span>
+                            ) : (
+                              <span className="status-badge status-offline">
+                                ❌ Inativa
+                              </span>
+                            )}
                           </div>
                           {barConfigs[selectedBarId]?.sympla_token && (
                             <div className="api-time">Token configurado</div>
@@ -1062,10 +1155,15 @@ export default function AdminPage() {
                         <div className="api-status-card">
                           <div className="api-header">
                             <span className="api-name">Yuzer</span>
-                            {barConfigs[selectedBarId]?.yuzer_enabled ? 
-                              <span className="status-badge status-online">✅ Ativa</span> : 
-                              <span className="status-badge status-offline">❌ Inativa</span>
-                            }
+                            {barConfigs[selectedBarId]?.yuzer_enabled ? (
+                              <span className="status-badge status-online">
+                                ✅ Ativa
+                              </span>
+                            ) : (
+                              <span className="status-badge status-offline">
+                                ❌ Inativa
+                              </span>
+                            )}
                           </div>
                           {barConfigs[selectedBarId]?.yuzer_token && (
                             <div className="api-time">Token configurado</div>
@@ -1074,10 +1172,16 @@ export default function AdminPage() {
                         <div className="api-status-card">
                           <div className="api-header">
                             <span className="api-name">Google Places</span>
-                            {barConfigs[selectedBarId]?.google_places_enabled ? 
-                              <span className="status-badge status-online">✅ Ativa</span> : 
-                              <span className="status-badge status-offline">❌ Inativa</span>
-                            }
+                            {barConfigs[selectedBarId]
+                              ?.google_places_enabled ? (
+                              <span className="status-badge status-online">
+                                ✅ Ativa
+                              </span>
+                            ) : (
+                              <span className="status-badge status-offline">
+                                ❌ Inativa
+                              </span>
+                            )}
                           </div>
                           {barConfigs[selectedBarId]?.google_places_key && (
                             <div className="api-time">Chave configurada</div>
@@ -1086,10 +1190,15 @@ export default function AdminPage() {
                         <div className="api-status-card">
                           <div className="api-header">
                             <span className="api-name">OpenAI</span>
-                            {barConfigs[selectedBarId]?.openai_enabled ? 
-                              <span className="status-badge status-online">✅ Ativa</span> : 
-                              <span className="status-badge status-offline">❌ Inativa</span>
-                            }
+                            {barConfigs[selectedBarId]?.openai_enabled ? (
+                              <span className="status-badge status-online">
+                                ✅ Ativa
+                              </span>
+                            ) : (
+                              <span className="status-badge status-offline">
+                                ❌ Inativa
+                              </span>
+                            )}
                           </div>
                           {barConfigs[selectedBarId]?.openai_key && (
                             <div className="api-time">Chave configurada</div>
@@ -1097,45 +1206,56 @@ export default function AdminPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <h4>⚙️ Configurar APIs</h4>
-                    
+
                     <div className="grid grid-2">
                       <div>
                         <h5>🏭 APIs de Produção</h5>
-                        
+
                         <div className="api-config-item">
                           <div className="form-group">
                             <label>
                               <input
                                 type="checkbox"
-                                checked={barConfigs[selectedBarId]?.sympla_enabled || false}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    sympla_enabled: e.target.checked
-                                  }
-                                })}
+                                checked={
+                                  barConfigs[selectedBarId]?.sympla_enabled ||
+                                  false
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      sympla_enabled: e.target.checked,
+                                    },
+                                  })
+                                }
                               />
-                              <span style={{ marginLeft: '8px' }}>Habilitar Sympla</span>
+                              <span style={{ marginLeft: '8px' }}>
+                                Habilitar Sympla
+                              </span>
                             </label>
                           </div>
-                          
+
                           {barConfigs[selectedBarId]?.sympla_enabled && (
                             <div className="form-group">
                               <label htmlFor="sympla_token">Token Sympla</label>
                               <input
                                 id="sympla_token"
                                 type="password"
-                                value={barConfigs[selectedBarId]?.sympla_token || ''}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    sympla_token: e.target.value
-                                  }
-                                })}
+                                value={
+                                  barConfigs[selectedBarId]?.sympla_token || ''
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      sympla_token: e.target.value,
+                                    },
+                                  })
+                                }
                                 className="form-input"
                                 placeholder="Token de acesso da Sympla"
                               />
@@ -1148,33 +1268,44 @@ export default function AdminPage() {
                             <label>
                               <input
                                 type="checkbox"
-                                checked={barConfigs[selectedBarId]?.yuzer_enabled || false}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    yuzer_enabled: e.target.checked
-                                  }
-                                })}
+                                checked={
+                                  barConfigs[selectedBarId]?.yuzer_enabled ||
+                                  false
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      yuzer_enabled: e.target.checked,
+                                    },
+                                  })
+                                }
                               />
-                              <span style={{ marginLeft: '8px' }}>Habilitar Yuzer</span>
+                              <span style={{ marginLeft: '8px' }}>
+                                Habilitar Yuzer
+                              </span>
                             </label>
                           </div>
-                          
+
                           {barConfigs[selectedBarId]?.yuzer_enabled && (
                             <div className="form-group">
                               <label htmlFor="yuzer_token">Token Yuzer</label>
                               <input
                                 id="yuzer_token"
                                 type="password"
-                                value={barConfigs[selectedBarId]?.yuzer_token || ''}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    yuzer_token: e.target.value
-                                  }
-                                })}
+                                value={
+                                  barConfigs[selectedBarId]?.yuzer_token || ''
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      yuzer_token: e.target.value,
+                                    },
+                                  })
+                                }
                                 className="form-input"
                                 placeholder="Token de acesso da Yuzer"
                               />
@@ -1187,33 +1318,47 @@ export default function AdminPage() {
                             <label>
                               <input
                                 type="checkbox"
-                                checked={barConfigs[selectedBarId]?.google_places_enabled || false}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    google_places_enabled: e.target.checked
-                                  }
-                                })}
+                                checked={
+                                  barConfigs[selectedBarId]
+                                    ?.google_places_enabled || false
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      google_places_enabled: e.target.checked,
+                                    },
+                                  })
+                                }
                               />
-                              <span style={{ marginLeft: '8px' }}>Habilitar Google Places</span>
+                              <span style={{ marginLeft: '8px' }}>
+                                Habilitar Google Places
+                              </span>
                             </label>
                           </div>
-                          
+
                           {barConfigs[selectedBarId]?.google_places_enabled && (
                             <div className="form-group">
-                              <label htmlFor="google_places_key">Google Places API Key</label>
+                              <label htmlFor="google_places_key">
+                                Google Places API Key
+                              </label>
                               <input
                                 id="google_places_key"
                                 type="password"
-                                value={barConfigs[selectedBarId]?.google_places_key || ''}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    google_places_key: e.target.value
-                                  }
-                                })}
+                                value={
+                                  barConfigs[selectedBarId]
+                                    ?.google_places_key || ''
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      google_places_key: e.target.value,
+                                    },
+                                  })
+                                }
                                 className="form-input"
                                 placeholder="Chave da API Google Places"
                               />
@@ -1226,33 +1371,44 @@ export default function AdminPage() {
                             <label>
                               <input
                                 type="checkbox"
-                                checked={barConfigs[selectedBarId]?.openai_enabled || false}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    openai_enabled: e.target.checked
-                                  }
-                                })}
+                                checked={
+                                  barConfigs[selectedBarId]?.openai_enabled ||
+                                  false
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      openai_enabled: e.target.checked,
+                                    },
+                                  })
+                                }
                               />
-                              <span style={{ marginLeft: '8px' }}>Habilitar OpenAI</span>
+                              <span style={{ marginLeft: '8px' }}>
+                                Habilitar OpenAI
+                              </span>
                             </label>
                           </div>
-                          
+
                           {barConfigs[selectedBarId]?.openai_enabled && (
                             <div className="form-group">
                               <label htmlFor="openai_key">OpenAI API Key</label>
                               <input
                                 id="openai_key"
                                 type="password"
-                                value={barConfigs[selectedBarId]?.openai_key || ''}
-                                onChange={(e) => setBarConfigs({
-                                  ...barConfigs,
-                                  [selectedBarId]: {
-                                    ...barConfigs[selectedBarId],
-                                    openai_key: e.target.value
-                                  }
-                                })}
+                                value={
+                                  barConfigs[selectedBarId]?.openai_key || ''
+                                }
+                                onChange={e =>
+                                  setBarConfigs({
+                                    ...barConfigs,
+                                    [selectedBarId]: {
+                                      ...barConfigs[selectedBarId],
+                                      openai_key: e.target.value,
+                                    },
+                                  })
+                                }
                                 className="form-input"
                                 placeholder="Chave da API OpenAI"
                               />
@@ -1263,31 +1419,47 @@ export default function AdminPage() {
 
                       <div>
                         <h5>⏳ APIs Futuras</h5>
-                        
-                                        <div className="alert alert-info">
-                  ⚠️ Essas APIs serão integradas em breve. Configure antecipadamente.
-                </div>
-                
-                {/* Botão de Migração */}
-                <div className="form-group">
-                  <button 
-                    onClick={() => migrateExistingConfigs(selectedBarId)}
-                    disabled={loading || migrating}
-                    className="btn btn-outline"
-                    style={{ marginBottom: '10px' }}
-                  >
-                    {migrating ? '🔄 Migrando...' : '📥 Migrar APIs Existentes'}
-                  </button>
-                  <p style={{ fontSize: '12px', color: '#666', margin: '5px 0 0 0' }}>
-                    💡 Importa as configurações de APIs já funcionando no sistema (Sympla, Yuzer, Google Places, OpenAI)
-                  </p>
-                </div>
-                        
+
+                        <div className="alert alert-info">
+                          ⚠️ Essas APIs serão integradas em breve. Configure
+                          antecipadamente.
+                        </div>
+
+                        {/* Botão de Migração */}
+                        <div className="form-group">
+                          <button
+                            onClick={() =>
+                              migrateExistingConfigs(selectedBarId)
+                            }
+                            disabled={loading || migrating}
+                            className="btn btn-outline"
+                            style={{ marginBottom: '10px' }}
+                          >
+                            {migrating
+                              ? '🔄 Migrando...'
+                              : '📥 Migrar APIs Existentes'}
+                          </button>
+                          <p
+                            style={{
+                              fontSize: '12px',
+                              color: '#666',
+                              margin: '5px 0 0 0',
+                            }}
+                          >
+                            💡 Importa as configurações de APIs já funcionando
+                            no sistema (Sympla, Yuzer, Google Places, OpenAI)
+                          </p>
+                        </div>
+
                         <div className="api-config-item">
                           <div className="form-group">
                             <label>
                               <input type="checkbox" disabled />
-                              <span style={{ marginLeft: '8px', color: '#9ca3af' }}>Conta Azul (Em breve)</span>
+                              <span
+                                style={{ marginLeft: '8px', color: '#9ca3af' }}
+                              >
+                                Conta Azul (Em breve)
+                              </span>
                             </label>
                           </div>
                         </div>
@@ -1296,7 +1468,11 @@ export default function AdminPage() {
                           <div className="form-group">
                             <label>
                               <input type="checkbox" disabled />
-                              <span style={{ marginLeft: '8px', color: '#9ca3af' }}>GetIN (Em breve)</span>
+                              <span
+                                style={{ marginLeft: '8px', color: '#9ca3af' }}
+                              >
+                                GetIN (Em breve)
+                              </span>
                             </label>
                           </div>
                         </div>
@@ -1305,7 +1481,11 @@ export default function AdminPage() {
                           <div className="form-group">
                             <label>
                               <input type="checkbox" disabled />
-                              <span style={{ marginLeft: '8px', color: '#9ca3af' }}>Google My Business (Em breve)</span>
+                              <span
+                                style={{ marginLeft: '8px', color: '#9ca3af' }}
+                              >
+                                Google My Business (Em breve)
+                              </span>
                             </label>
                           </div>
                         </div>
@@ -1313,7 +1493,7 @@ export default function AdminPage() {
                     </div>
 
                     <div className="form-section">
-                      <button 
+                      <button
                         onClick={() => saveBarConfigs(selectedBarId)}
                         disabled={loading}
                         className="btn btn-primary"
@@ -1326,7 +1506,8 @@ export default function AdminPage() {
 
                 {!selectedBarId && (
                   <div className="alert alert-info">
-                    👆 Selecione um bar acima para configurar suas APIs específicas
+                    👆 Selecione um bar acima para configurar suas APIs
+                    específicas
                   </div>
                 )}
               </div>
@@ -1339,12 +1520,16 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🍺 Gerenciar Bares{selectedBarId ? ` - Foco: ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>
+                  🍺 Gerenciar Bares
+                  {selectedBarId
+                    ? ` - Foco: ${bars.find(b => b.id === selectedBarId)?.nome}`
+                    : ''}
+                </h3>
                 <p>
-                  {selectedBarId 
+                  {selectedBarId
                     ? `Visualizando detalhes e configurações de ${bars.find(b => b.id === selectedBarId)?.nome}`
-                    : 'Adicione, edite ou remova bares do sistema'
-                  }
+                    : 'Adicione, edite ou remova bares do sistema'}
                 </p>
               </div>
               <div className="card-content">
@@ -1357,7 +1542,9 @@ export default function AdminPage() {
                       <input
                         id="bar_nome"
                         value={newBar.nome}
-                        onChange={(e) => setNewBar({...newBar, nome: e.target.value})}
+                        onChange={e =>
+                          setNewBar({ ...newBar, nome: e.target.value })
+                        }
                         placeholder="Ex: Bar do João"
                         className="form-input"
                       />
@@ -1367,7 +1554,9 @@ export default function AdminPage() {
                       <input
                         id="bar_endereco"
                         value={newBar.endereco}
-                        onChange={(e) => setNewBar({...newBar, endereco: e.target.value})}
+                        onChange={e =>
+                          setNewBar({ ...newBar, endereco: e.target.value })
+                        }
                         placeholder="Rua A, 123 - Centro"
                         className="form-input"
                       />
@@ -1377,23 +1566,36 @@ export default function AdminPage() {
                       <input
                         id="bar_telefone"
                         value={newBar.telefone}
-                        onChange={(e) => setNewBar({...newBar, telefone: e.target.value})}
+                        onChange={e =>
+                          setNewBar({ ...newBar, telefone: e.target.value })
+                        }
                         placeholder="(11) 99999-9999"
                         className="form-input"
                       />
                     </div>
                   </div>
-                  <button onClick={addBar} disabled={loading} className="btn btn-primary">
+                  <button
+                    onClick={addBar}
+                    disabled={loading}
+                    className="btn btn-primary"
+                  >
                     ➕ Adicionar Bar
                   </button>
                 </div>
 
                 {/* Lista de Bares */}
                 <div className="form-section">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '16px',
+                    }}
+                  >
                     <h4>Bares Cadastrados</h4>
-                    <button 
-                      onClick={loadBars} 
+                    <button
+                      onClick={loadBars}
                       disabled={loading}
                       className="btn btn-outline btn-small"
                     >
@@ -1401,7 +1603,7 @@ export default function AdminPage() {
                     </button>
                   </div>
                   <div className="bars-list">
-                    {bars.map((bar) => (
+                    {bars.map(bar => (
                       <div key={bar.id} className="bar-item">
                         <div className="bar-info">
                           <h5>{bar.nome}</h5>
@@ -1413,7 +1615,7 @@ export default function AdminPage() {
                           <button className="btn btn-small btn-outline">
                             ✏️ Editar
                           </button>
-                          <button 
+                          <button
                             className="btn btn-small btn-outline btn-danger"
                             onClick={() => deleteBar(bar.id)}
                           >
@@ -1447,7 +1649,12 @@ export default function AdminPage() {
                       <input
                         id="contahub_username"
                         value={configs.contahub_username}
-                        onChange={(e) => setConfigs({...configs, contahub_username: e.target.value})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            contahub_username: e.target.value,
+                          })
+                        }
                         className="form-input"
                       />
                     </div>
@@ -1457,7 +1664,12 @@ export default function AdminPage() {
                         id="contahub_password"
                         type="password"
                         value={configs.contahub_password}
-                        onChange={(e) => setConfigs({...configs, contahub_password: e.target.value})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            contahub_password: e.target.value,
+                          })
+                        }
                         className="form-input"
                       />
                     </div>
@@ -1466,7 +1678,12 @@ export default function AdminPage() {
                       <input
                         id="contahub_url"
                         value={configs.contahub_url}
-                        onChange={(e) => setConfigs({...configs, contahub_url: e.target.value})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            contahub_url: e.target.value,
+                          })
+                        }
                         placeholder="https://api.contahub.com.br"
                         className="form-input"
                       />
@@ -1482,7 +1699,12 @@ export default function AdminPage() {
                         id="discord_webhook"
                         type="password"
                         value={configs.discord_webhook}
-                        onChange={(e) => setConfigs({...configs, discord_webhook: e.target.value})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            discord_webhook: e.target.value,
+                          })
+                        }
                         className="form-input"
                       />
                     </div>
@@ -1492,16 +1714,28 @@ export default function AdminPage() {
                         id="discord_bot_token"
                         type="password"
                         value={configs.discord_bot_token}
-                        onChange={(e) => setConfigs({...configs, discord_bot_token: e.target.value})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            discord_bot_token: e.target.value,
+                          })
+                        }
                         className="form-input"
                       />
                     </div>
                     <div className="form-group">
-                      <label htmlFor="discord_channel_alerts">Canal de Alertas</label>
+                      <label htmlFor="discord_channel_alerts">
+                        Canal de Alertas
+                      </label>
                       <input
                         id="discord_channel_alerts"
                         value={configs.discord_channel_alerts}
-                        onChange={(e) => setConfigs({...configs, discord_channel_alerts: e.target.value})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            discord_channel_alerts: e.target.value,
+                          })
+                        }
                         className="form-input"
                       />
                     </div>
@@ -1517,12 +1751,16 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🖥️ Sistemas de Bar{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>
+                  🖥️ Sistemas de Bar
+                  {selectedBarId
+                    ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}`
+                    : ''}
+                </h3>
                 <p>
-                  {selectedBarId 
+                  {selectedBarId
                     ? `Configure sistemas de gestão para ${bars.find(b => b.id === selectedBarId)?.nome} (ContaHub, etc.)`
-                    : 'Configure e gerencie sistemas de gestão para cada bar (ContaHub, etc.)'
-                  }
+                    : 'Configure e gerencie sistemas de gestão para cada bar (ContaHub, etc.)'}
                 </p>
               </div>
               <div className="card-content">
@@ -1533,10 +1771,14 @@ export default function AdminPage() {
                       <div className="bar-info">
                         <h5>ContaHub</h5>
                         <p>Sistema de gestão para bares e restaurantes</p>
-                        <p><strong>Campos obrigatórios:</strong> Login e Senha</p>
+                        <p>
+                          <strong>Campos obrigatórios:</strong> Login e Senha
+                        </p>
                       </div>
                       <div className="bar-actions">
-                        <span className="status-badge status-online">Ativo</span>
+                        <span className="status-badge status-online">
+                          Ativo
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1544,14 +1786,20 @@ export default function AdminPage() {
 
                 <div className="form-section">
                   <h4>⚙️ Configurar Sistema por Bar</h4>
-                  
+
                   {/* Seletor de Bar */}
                   <div className="form-group">
-                    <label htmlFor="sistema-bar-selector">Selecione o bar:</label>
+                    <label htmlFor="sistema-bar-selector">
+                      Selecione o bar:
+                    </label>
                     <select
                       id="sistema-bar-selector"
                       value={selectedBarId || ''}
-                      onChange={(e) => setSelectedBarId(e.target.value ? Number(e.target.value) : null)}
+                      onChange={e =>
+                        setSelectedBarId(
+                          e.target.value ? Number(e.target.value) : null
+                        )
+                      }
                       className="form-input"
                     >
                       <option value="">-- Selecione um bar --</option>
@@ -1566,20 +1814,28 @@ export default function AdminPage() {
                   {/* Configurações quando um bar é selecionado */}
                   {selectedBarId && (
                     <div className="api-config-item">
-                      <h5>🖥️ ContaHub - {bars.find(b => b.id === selectedBarId)?.nome}</h5>
-                      
+                      <h5>
+                        🖥️ ContaHub -{' '}
+                        {bars.find(b => b.id === selectedBarId)?.nome}
+                      </h5>
+
                       <div className="form-group">
                         <label>
                           <input
                             type="checkbox"
-                            checked={barConfigs[selectedBarId]?.contahub_enabled || false}
-                            onChange={(e) => setBarConfigs({
-                              ...barConfigs,
-                              [selectedBarId]: {
-                                ...barConfigs[selectedBarId],
-                                contahub_enabled: e.target.checked
-                              }
-                            })}
+                            checked={
+                              barConfigs[selectedBarId]?.contahub_enabled ||
+                              false
+                            }
+                            onChange={e =>
+                              setBarConfigs({
+                                ...barConfigs,
+                                [selectedBarId]: {
+                                  ...barConfigs[selectedBarId],
+                                  contahub_enabled: e.target.checked,
+                                },
+                              })
+                            }
                           />
                           Habilitar ContaHub para este bar
                         </label>
@@ -1588,71 +1844,102 @@ export default function AdminPage() {
                       {barConfigs[selectedBarId]?.contahub_enabled && (
                         <div className="grid grid-2">
                           <div className="form-group">
-                            <label htmlFor={`contahub_login_${selectedBarId}`}>Login ContaHub</label>
+                            <label htmlFor={`contahub_login_${selectedBarId}`}>
+                              Login ContaHub
+                            </label>
                             <input
                               id={`contahub_login_${selectedBarId}`}
                               type="text"
-                              value={barConfigs[selectedBarId]?.contahub_login || ''}
-                              onChange={(e) => setBarConfigs({
-                                ...barConfigs,
-                                [selectedBarId]: {
-                                  ...barConfigs[selectedBarId],
-                                  contahub_login: e.target.value
-                                }
-                              })}
+                              value={
+                                barConfigs[selectedBarId]?.contahub_login || ''
+                              }
+                              onChange={e =>
+                                setBarConfigs({
+                                  ...barConfigs,
+                                  [selectedBarId]: {
+                                    ...barConfigs[selectedBarId],
+                                    contahub_login: e.target.value,
+                                  },
+                                })
+                              }
                               placeholder="usuario@contahub.com"
                               className="form-input"
                             />
                           </div>
 
                           <div className="form-group">
-                            <label htmlFor={`contahub_password_${selectedBarId}`}>Senha ContaHub</label>
+                            <label
+                              htmlFor={`contahub_password_${selectedBarId}`}
+                            >
+                              Senha ContaHub
+                            </label>
                             <input
                               id={`contahub_password_${selectedBarId}`}
                               type="password"
-                              value={barConfigs[selectedBarId]?.contahub_password || ''}
-                              onChange={(e) => setBarConfigs({
-                                ...barConfigs,
-                                [selectedBarId]: {
-                                  ...barConfigs[selectedBarId],
-                                  contahub_password: e.target.value
-                                }
-                              })}
+                              value={
+                                barConfigs[selectedBarId]?.contahub_password ||
+                                ''
+                              }
+                              onChange={e =>
+                                setBarConfigs({
+                                  ...barConfigs,
+                                  [selectedBarId]: {
+                                    ...barConfigs[selectedBarId],
+                                    contahub_password: e.target.value,
+                                  },
+                                })
+                              }
                               placeholder="••••••••"
                               className="form-input"
                             />
                           </div>
 
                           <div className="form-group">
-                            <label htmlFor={`contahub_url_${selectedBarId}`}>URL Base (opcional)</label>
+                            <label htmlFor={`contahub_url_${selectedBarId}`}>
+                              URL Base (opcional)
+                            </label>
                             <input
                               id={`contahub_url_${selectedBarId}`}
                               type="url"
-                              value={barConfigs[selectedBarId]?.contahub_url || 'https://api.contahub.com.br'}
-                              onChange={(e) => setBarConfigs({
-                                ...barConfigs,
-                                [selectedBarId]: {
-                                  ...barConfigs[selectedBarId],
-                                  contahub_url: e.target.value
-                                }
-                              })}
+                              value={
+                                barConfigs[selectedBarId]?.contahub_url ||
+                                'https://api.contahub.com.br'
+                              }
+                              onChange={e =>
+                                setBarConfigs({
+                                  ...barConfigs,
+                                  [selectedBarId]: {
+                                    ...barConfigs[selectedBarId],
+                                    contahub_url: e.target.value,
+                                  },
+                                })
+                              }
                               className="form-input"
                             />
                           </div>
 
                           <div className="form-group">
-                            <label htmlFor={`contahub_empresa_id_${selectedBarId}`}>ID da Empresa (opcional)</label>
+                            <label
+                              htmlFor={`contahub_empresa_id_${selectedBarId}`}
+                            >
+                              ID da Empresa (opcional)
+                            </label>
                             <input
                               id={`contahub_empresa_id_${selectedBarId}`}
                               type="text"
-                              value={barConfigs[selectedBarId]?.contahub_empresa_id || ''}
-                              onChange={(e) => setBarConfigs({
-                                ...barConfigs,
-                                [selectedBarId]: {
-                                  ...barConfigs[selectedBarId],
-                                  contahub_empresa_id: e.target.value
-                                }
-                              })}
+                              value={
+                                barConfigs[selectedBarId]
+                                  ?.contahub_empresa_id || ''
+                              }
+                              onChange={e =>
+                                setBarConfigs({
+                                  ...barConfigs,
+                                  [selectedBarId]: {
+                                    ...barConfigs[selectedBarId],
+                                    contahub_empresa_id: e.target.value,
+                                  },
+                                })
+                              }
                               placeholder="ID único da empresa no ContaHub (opcional)"
                               className="form-input"
                             />
@@ -1661,21 +1948,25 @@ export default function AdminPage() {
                       )}
 
                       <div className="form-group">
-                        <button 
+                        <button
                           onClick={() => saveBarConfigs(selectedBarId)}
                           disabled={loading}
                           className="btn btn-primary"
                         >
-                          {loading ? '💾 Salvando...' : '💾 Salvar Configurações'}
+                          {loading
+                            ? '💾 Salvando...'
+                            : '💾 Salvar Configurações'}
                         </button>
-                        
+
                         {barConfigs[selectedBarId]?.contahub_enabled && (
-                          <button 
+                          <button
                             onClick={() => testSystemConnection(selectedBarId)}
                             disabled={loading || testingConnection}
                             className="btn btn-outline"
                           >
-                            {testingConnection ? '🔄 Testando...' : '🔍 Testar Conexão'}
+                            {testingConnection
+                              ? '🔄 Testando...'
+                              : '🔍 Testar Conexão'}
                           </button>
                         )}
                       </div>
@@ -1687,22 +1978,34 @@ export default function AdminPage() {
                           <div className="form-group">
                             <div className="stat-row">
                               <span>Status:</span>
-                              <span className={`status-badge ${
-                                barConfigs[selectedBarId]?.last_test_status === 'success' 
-                                  ? 'status-online' 
-                                  : 'status-offline'
-                              }`}>
-                                {barConfigs[selectedBarId]?.last_test_status === 'success' ? '✅ Online' : '❌ Offline'}
+                              <span
+                                className={`status-badge ${
+                                  barConfigs[selectedBarId]
+                                    ?.last_test_status === 'success'
+                                    ? 'status-online'
+                                    : 'status-offline'
+                                }`}
+                              >
+                                {barConfigs[selectedBarId]?.last_test_status ===
+                                'success'
+                                  ? '✅ Online'
+                                  : '❌ Offline'}
                               </span>
                             </div>
                             <div className="stat-row">
                               <span>Último teste:</span>
-                              <span>{new Date(barConfigs[selectedBarId]?.last_test_time).toLocaleString('pt-BR')}</span>
+                              <span>
+                                {new Date(
+                                  barConfigs[selectedBarId]?.last_test_time
+                                ).toLocaleString('pt-BR')}
+                              </span>
                             </div>
                             {barConfigs[selectedBarId]?.last_error && (
                               <div className="stat-row">
                                 <span>Erro:</span>
-                                <span className="text-red">{barConfigs[selectedBarId]?.last_error}</span>
+                                <span className="text-red">
+                                  {barConfigs[selectedBarId]?.last_error}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -1710,10 +2013,11 @@ export default function AdminPage() {
                       )}
                     </div>
                   )}
-                  
+
                   {!selectedBarId && (
                     <div className="alert alert-info">
-                      👆 Selecione um bar acima para configurar seus sistemas de gestão
+                      👆 Selecione um bar acima para configurar seus sistemas de
+                      gestão
                     </div>
                   )}
                 </div>
@@ -1737,25 +2041,30 @@ export default function AdminPage() {
                     id="admin_password"
                     type="password"
                     value={configs.admin_password}
-                    onChange={(e) => setConfigs({...configs, admin_password: e.target.value})}
+                    onChange={e =>
+                      setConfigs({ ...configs, admin_password: e.target.value })
+                    }
                     className="form-input"
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="jwt_secret">JWT Secret</label>
                   <input
                     id="jwt_secret"
                     type="password"
                     value={configs.jwt_secret}
-                    onChange={(e) => setConfigs({...configs, jwt_secret: e.target.value})}
+                    onChange={e =>
+                      setConfigs({ ...configs, jwt_secret: e.target.value })
+                    }
                     className="form-input"
                   />
                 </div>
-                
+
                 <div className="alert alert-warning">
-                  🛡️ Essas configurações são críticas para a segurança do sistema. 
-                  Altere apenas se necessário e mantenha em local seguro.
+                  🛡️ Essas configurações são críticas para a segurança do
+                  sistema. Altere apenas se necessário e mantenha em local
+                  seguro.
                 </div>
               </div>
             </div>
@@ -1768,7 +2077,9 @@ export default function AdminPage() {
             <div className="card">
               <div className="card-header">
                 <h3>📈 Configurações de Monitoramento</h3>
-                <p>Configure alertas, notificações e recursos de monitoramento</p>
+                <p>
+                  Configure alertas, notificações e recursos de monitoramento
+                </p>
               </div>
               <div className="card-content">
                 <div className="form-section">
@@ -1777,40 +2088,60 @@ export default function AdminPage() {
                       <input
                         type="checkbox"
                         checked={configs.monitoring_enabled}
-                        onChange={(e) => setConfigs({...configs, monitoring_enabled: e.target.checked})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            monitoring_enabled: e.target.checked,
+                          })
+                        }
                       />
                       <span>Habilitar Monitoramento de APIs</span>
                     </label>
-                    
+
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
                         checked={configs.notifications_enabled}
-                        onChange={(e) => setConfigs({...configs, notifications_enabled: e.target.checked})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            notifications_enabled: e.target.checked,
+                          })
+                        }
                       />
                       <span>Habilitar Notificações</span>
                     </label>
-                    
+
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
                         checked={configs.auto_sync_enabled}
-                        onChange={(e) => setConfigs({...configs, auto_sync_enabled: e.target.checked})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            auto_sync_enabled: e.target.checked,
+                          })
+                        }
                       />
                       <span>Sincronização Automática</span>
                     </label>
-                    
+
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
                         checked={configs.debug_enabled}
-                        onChange={(e) => setConfigs({...configs, debug_enabled: e.target.checked})}
+                        onChange={e =>
+                          setConfigs({
+                            ...configs,
+                            debug_enabled: e.target.checked,
+                          })
+                        }
                       />
                       <span>Modo Debug (Desenvolvimento)</span>
                     </label>
                   </div>
                 </div>
-                
+
                 <div className="form-section">
                   <h4>📧 Email de Notificações</h4>
                   <div className="form-group">
@@ -1819,7 +2150,12 @@ export default function AdminPage() {
                       id="email_api_key"
                       type="password"
                       value={configs.email_api_key}
-                      onChange={(e) => setConfigs({...configs, email_api_key: e.target.value})}
+                      onChange={e =>
+                        setConfigs({
+                          ...configs,
+                          email_api_key: e.target.value,
+                        })
+                      }
                       className="form-input"
                     />
                   </div>
@@ -1828,7 +2164,9 @@ export default function AdminPage() {
                     <input
                       id="email_from"
                       value={configs.email_from}
-                      onChange={(e) => setConfigs({...configs, email_from: e.target.value})}
+                      onChange={e =>
+                        setConfigs({ ...configs, email_from: e.target.value })
+                      }
                       placeholder="noreply@seubar.com.br"
                       className="form-input"
                     />
@@ -1844,21 +2182,29 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>🎵 Planejamento Comercial{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>
+                  🎵 Planejamento Comercial
+                  {selectedBarId
+                    ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}`
+                    : ''}
+                </h3>
                 <p>
-                  {selectedBarId 
+                  {selectedBarId
                     ? `Gerencie as atrações e eventos de ${bars.find(b => b.id === selectedBarId)?.nome} para todos os dias do mês`
-                    : 'Gerencie as atrações e eventos de todos os bares para todos os dias do mês'
-                  }
+                    : 'Gerencie as atrações e eventos de todos os bares para todos os dias do mês'}
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
-                  <div className="alert alert-info" style={{ marginBottom: '20px' }}>
-                    ℹ️ Selecione um bar no cabeçalho para focar no planejamento específico, ou continue vendo todos os eventos
+                  <div
+                    className="alert alert-info"
+                    style={{ marginBottom: '20px' }}
+                  >
+                    ℹ️ Selecione um bar no cabeçalho para focar no planejamento
+                    específico, ou continue vendo todos os eventos
                   </div>
                 )}
-                
+
                 {/* Controles do Calendário */}
                 <div className="form-section">
                   <div className="grid grid-2">
@@ -1867,23 +2213,25 @@ export default function AdminPage() {
                       <select
                         id="month-selector"
                         value={currentMonth}
-                        onChange={(e) => setCurrentMonth(Number(e.target.value))}
+                        onChange={e => setCurrentMonth(Number(e.target.value))}
                         className="form-input"
                       >
                         {Array.from({ length: 12 }, (_, i) => (
                           <option key={i + 1} value={i + 1}>
-                            {new Date(0, i).toLocaleString('pt-BR', { month: 'long' })}
+                            {new Date(0, i).toLocaleString('pt-BR', {
+                              month: 'long',
+                            })}
                           </option>
                         ))}
                       </select>
                     </div>
-                    
+
                     <div className="form-group">
                       <label htmlFor="year-selector">Ano:</label>
                       <select
                         id="year-selector"
                         value={currentYear}
-                        onChange={(e) => setCurrentYear(Number(e.target.value))}
+                        onChange={e => setCurrentYear(Number(e.target.value))}
                         className="form-input"
                       >
                         {Array.from({ length: 5 }, (_, i) => {
@@ -1897,9 +2245,11 @@ export default function AdminPage() {
                       </select>
                     </div>
                   </div>
-                  
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                    <button 
+
+                  <div
+                    style={{ display: 'flex', gap: '12px', marginTop: '16px' }}
+                  >
+                    <button
                       onClick={() => {
                         setEditingEvent({
                           bar_id: selectedBarId || bars[0]?.id,
@@ -1915,7 +2265,7 @@ export default function AdminPage() {
                           valor_cover: 0,
                           valor_show: 0,
                           capacidade_estimada: 0,
-                          generos: []
+                          generos: [],
                         });
                         setShowEventModal(true);
                       }}
@@ -1923,16 +2273,16 @@ export default function AdminPage() {
                     >
                       ➕ Adicionar Evento
                     </button>
-                    
-                    <button 
+
+                    <button
                       onClick={loadEventos}
                       disabled={loading}
                       className="btn btn-outline"
                     >
                       {loading ? '🔄 Carregando...' : '🔄 Recarregar'}
                     </button>
-                    
-                    <button 
+
+                    <button
                       onClick={importarEventosHistoricos}
                       disabled={loading}
                       className="btn btn-outline"
@@ -1945,8 +2295,14 @@ export default function AdminPage() {
 
                 {/* Calendário do Mês */}
                 <div className="form-section">
-                  <h4>📅 Eventos de {new Date(currentYear, currentMonth - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h4>
-                  
+                  <h4>
+                    📅 Eventos de{' '}
+                    {new Date(currentYear, currentMonth - 1).toLocaleString(
+                      'pt-BR',
+                      { month: 'long', year: 'numeric' }
+                    )}
+                  </h4>
+
                   <div className="calendar-grid">
                     {/* Cabeçalho dos dias da semana */}
                     <div className="calendar-header">
@@ -1958,50 +2314,66 @@ export default function AdminPage() {
                       <div className="calendar-day-header">Sex</div>
                       <div className="calendar-day-header">Sáb</div>
                     </div>
-                    
+
                     {/* Dias do mês */}
                     <div className="calendar-body">
                       {(() => {
-                        const firstDay = new Date(currentYear, currentMonth - 1, 1);
+                        const firstDay = new Date(
+                          currentYear,
+                          currentMonth - 1,
+                          1
+                        );
                         const lastDay = new Date(currentYear, currentMonth, 0);
                         const startDate = new Date(firstDay);
-                        startDate.setDate(startDate.getDate() - firstDay.getDay());
-                        
+                        startDate.setDate(
+                          startDate.getDate() - firstDay.getDay()
+                        );
+
                         const days = [];
                         for (let i = 0; i < 42; i++) {
                           const date = new Date(startDate);
                           date.setDate(startDate.getDate() + i);
-                          
+
                           // Fix timezone issue - compare dates directly as strings
                           const dateString = date.toISOString().split('T')[0];
-                          const dayEvents = eventos.filter((e: Evento) => 
-                            e.data_evento === dateString
+                          const dayEvents = eventos.filter(
+                            (e: Evento) => e.data_evento === dateString
                           );
-                          
-                          const isCurrentMonth = date.getMonth() === currentMonth - 1;
-                          const isToday = date.toDateString() === new Date().toDateString();
-                          
+
+                          const isCurrentMonth =
+                            date.getMonth() === currentMonth - 1;
+                          const isToday =
+                            date.toDateString() === new Date().toDateString();
+
                           days.push(
                             <div
                               key={date.toISOString()}
                               className={`calendar-day ${!isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`}
                             >
-                              <div className="calendar-day-number">{date.getDate()}</div>
+                              <div className="calendar-day-number">
+                                {date.getDate()}
+                              </div>
                               <div className="calendar-day-events">
-                                {dayEvents.slice(0, 2).map((evento: Evento, idx: unknown) => (
-                                  <div
-                                    key={evento.id}
-                                    className="calendar-event"
-                                    onClick={() => {
-                                      setEditingEvent(evento);
-                                      setShowEventModal(true);
-                                    }}
-                                    title={`${evento.nome} - ${evento.descricao || 'Sem descrição'}`}
-                                  >
-                                    <span className="event-name">{evento.nome}</span>
-                                    <span className="event-genre">{evento.genero_musical}</span>
-                                  </div>
-                                ))}
+                                {dayEvents
+                                  .slice(0, 2)
+                                  .map((evento: Evento, idx: unknown) => (
+                                    <div
+                                      key={evento.id}
+                                      className="calendar-event"
+                                      onClick={() => {
+                                        setEditingEvent(evento);
+                                        setShowEventModal(true);
+                                      }}
+                                      title={`${evento.nome} - ${evento.descricao || 'Sem descrição'}`}
+                                    >
+                                      <span className="event-name">
+                                        {evento.nome}
+                                      </span>
+                                      <span className="event-genre">
+                                        {evento.genero_musical}
+                                      </span>
+                                    </div>
+                                  ))}
                                 {dayEvents.length > 2 && (
                                   <div className="calendar-event-more">
                                     +{dayEvents.length - 2} mais
@@ -2013,7 +2385,9 @@ export default function AdminPage() {
                                     onClick={() => {
                                       setEditingEvent({
                                         bar_id: selectedBarId || bars[0]?.id,
-                                        data_evento: date.toISOString().split('T')[0],
+                                        data_evento: date
+                                          .toISOString()
+                                          .split('T')[0],
                                         nome: '',
                                         descricao: '',
                                         tipo_evento: 'musica_ao_vivo',
@@ -2025,7 +2399,7 @@ export default function AdminPage() {
                                         valor_cover: 0,
                                         valor_show: 0,
                                         capacidade_estimada: 0,
-                                        generos: []
+                                        generos: [],
                                       });
                                       setShowEventModal(true);
                                     }}
@@ -2061,14 +2435,20 @@ export default function AdminPage() {
                       <tbody>
                         {eventos.map(evento => (
                           <tr key={evento.id}>
-                            <td>{new Date(evento.data_evento).toLocaleDateString('pt-BR')}</td>
+                            <td>
+                              {new Date(evento.data_evento).toLocaleDateString(
+                                'pt-BR'
+                              )}
+                            </td>
                             <td>
                               <strong>{evento.nome}</strong>
                               {evento.descricao && <br />}
                               <small>{evento.descricao}</small>
                             </td>
                             <td>
-                              <span className="genre-badge">{evento.genero_musical}</span>
+                              <span className="genre-badge">
+                                {evento.genero_musical}
+                              </span>
                             </td>
                             <td>{evento.artistas_bandas}</td>
                             <td>
@@ -2097,7 +2477,10 @@ export default function AdminPage() {
                         ))}
                         {eventos.length === 0 && (
                           <tr>
-                            <td colSpan={6} style={{ textAlign: 'center', padding: '32px' }}>
+                            <td
+                              colSpan={6}
+                              style={{ textAlign: 'center', padding: '32px' }}
+                            >
                               📅 Nenhum evento encontrado para este período
                             </td>
                           </tr>
@@ -2113,28 +2496,35 @@ export default function AdminPage() {
 
         {/* Modal de Evento */}
         {showEventModal && editingEvent && (
-          <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-overlay"
+            onClick={() => setShowEventModal(false)}
+          >
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>{editingEvent.id ? '✏️ Editar Evento' : '➕ Novo Evento'}</h3>
-                <button 
+                <h3>
+                  {editingEvent.id ? '✏️ Editar Evento' : '➕ Novo Evento'}
+                </h3>
+                <button
                   onClick={() => setShowEventModal(false)}
                   className="modal-close"
                 >
                   ✕
                 </button>
               </div>
-              
+
               <div className="modal-body">
                 <div className="grid grid-2">
                   <div className="form-group">
                     <label>Bar:</label>
                     <select
                       value={editingEvent.bar_id || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        bar_id: Number(e.target.value)
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          bar_id: Number(e.target.value),
+                        })
+                      }
                       className="form-input"
                     >
                       {bars.map(bar => (
@@ -2144,58 +2534,66 @@ export default function AdminPage() {
                       ))}
                     </select>
                   </div>
-                  
+
                   <div className="form-group">
                     <label>Data:</label>
                     <input
                       type="date"
                       value={editingEvent.data_evento}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        data_evento: e.target.value
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          data_evento: e.target.value,
+                        })
+                      }
                       className="form-input"
                     />
                   </div>
                 </div>
-                
+
                 <div className="form-group">
                   <label>Nome do Evento:</label>
                   <input
                     type="text"
                     value={editingEvent.nome}
-                    onChange={(e) => setEditingEvent({
-                      ...editingEvent,
-                      nome: e.target.value
-                    })}
+                    onChange={e =>
+                      setEditingEvent({
+                        ...editingEvent,
+                        nome: e.target.value,
+                      })
+                    }
                     placeholder="Ex: Noite do Pagode"
                     className="form-input"
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label>Descrição:</label>
                   <textarea
                     value={editingEvent.descricao || ''}
-                    onChange={(e) => setEditingEvent({
-                      ...editingEvent,
-                      descricao: e.target.value
-                    })}
+                    onChange={e =>
+                      setEditingEvent({
+                        ...editingEvent,
+                        descricao: e.target.value,
+                      })
+                    }
                     placeholder="Descrição do evento..."
                     className="form-input"
                     rows={3}
                   />
                 </div>
-                
+
                 <div className="grid grid-2">
                   <div className="form-group">
                     <label>Gênero Musical:</label>
                     <select
                       value={editingEvent.genero_musical || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        genero_musical: e.target.value
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          genero_musical: e.target.value,
+                        })
+                      }
                       className="form-input"
                     >
                       <option value="">Selecione...</option>
@@ -2213,50 +2611,56 @@ export default function AdminPage() {
                       <option value="outro">Outro</option>
                     </select>
                   </div>
-                  
+
                   <div className="form-group">
                     <label>Artista/Banda:</label>
                     <input
                       type="text"
                       value={editingEvent?.artistas_bandas || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent!,
-                        artistas_bandas: e.target.value
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent!,
+                          artistas_bandas: e.target.value,
+                        })
+                      }
                       placeholder="Nome do artista ou banda"
                       className="form-input"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-2">
                   <div className="form-group">
                     <label>Horário Início:</label>
                     <input
                       type="time"
                       value={editingEvent.horario_inicio || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        horario_inicio: e.target.value
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          horario_inicio: e.target.value,
+                        })
+                      }
                       className="form-input"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label>Horário Fim:</label>
                     <input
                       type="time"
                       value={editingEvent.horario_fim || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        horario_fim: e.target.value
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          horario_fim: e.target.value,
+                        })
+                      }
                       className="form-input"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-3">
                   <div className="form-group">
                     <label>Valor Cover:</label>
@@ -2264,46 +2668,58 @@ export default function AdminPage() {
                       type="number"
                       step="0.01"
                       value={editingEvent.valor_cover || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        valor_cover: e.target.value ? parseFloat(e.target.value) : null
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          valor_cover: e.target.value
+                            ? parseFloat(e.target.value)
+                            : null,
+                        })
+                      }
                       placeholder="0.00"
                       className="form-input"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label>Valor Show:</label>
                     <input
                       type="number"
                       step="0.01"
                       value={editingEvent.valor_show || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        valor_show: e.target.value ? parseFloat(e.target.value) : null
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          valor_show: e.target.value
+                            ? parseFloat(e.target.value)
+                            : null,
+                        })
+                      }
                       placeholder="0.00"
                       className="form-input"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label>Capacidade:</label>
                     <input
                       type="number"
                       value={editingEvent.capacidade_estimada || ''}
-                      onChange={(e) => setEditingEvent({
-                        ...editingEvent,
-                        capacidade_estimada: e.target.value ? parseInt(e.target.value) : null
-                      })}
+                      onChange={e =>
+                        setEditingEvent({
+                          ...editingEvent,
+                          capacidade_estimada: e.target.value
+                            ? parseInt(e.target.value)
+                            : null,
+                        })
+                      }
                       placeholder="Ex: 200"
                       className="form-input"
                     />
                   </div>
                 </div>
               </div>
-              
+
               <div className="modal-footer">
                 <button
                   onClick={() => setShowEventModal(false)}
@@ -2328,24 +2744,27 @@ export default function AdminPage() {
           <div className="tab-content">
             <div className="card">
               <div className="card-header">
-                <h3>📈 Analytics de Performance{selectedBarId ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}` : ''}</h3>
+                <h3>
+                  📈 Analytics de Performance
+                  {selectedBarId
+                    ? ` - ${bars.find(b => b.id === selectedBarId)?.nome}`
+                    : ''}
+                </h3>
                 <p>
-                  {selectedBarId 
+                  {selectedBarId
                     ? `Análise de performance dos artistas e eventos de ${bars.find(b => b.id === selectedBarId)?.nome} por dados reais de faturamento`
-                    : 'Análise de performance dos artistas e eventos por dados reais de faturamento'
-                  }
+                    : 'Análise de performance dos artistas e eventos por dados reais de faturamento'}
                 </p>
               </div>
               <div className="card-content">
                 {!selectedBarId && (
                   <div className="alert alert-warning">
-                    📊 Selecione um bar no cabeçalho para visualizar suas análises de performance
+                    📊 Selecione um bar no cabeçalho para visualizar suas
+                    análises de performance
                   </div>
                 )}
 
-                {selectedBarId && (
-                  <AnalyticsContent barId={selectedBarId} />
-                )}
+                {selectedBarId && <AnalyticsContent barId={selectedBarId} />}
               </div>
             </div>
           </div>
@@ -2364,9 +2783,11 @@ function AnalyticsContent({ barId }: { barId: number }) {
   const carregarAnalytics = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/eventos/analytics?bar_id=${barId}&tipo=${tipoAnalise}`);
+      const response = await fetch(
+        `/api/eventos/analytics?bar_id=${barId}&tipo=${tipoAnalise}`
+      );
       const result = await response.json();
-      
+
       if (result.success) {
         setDadosAnalytics(result.data);
       } else {
@@ -2385,7 +2806,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
     if (barId) {
       carregarAnalytics();
     }
-  }, [carregarAnalytics])
+  }, [carregarAnalytics, barId]);
 
   return (
     <div className="analytics-content">
@@ -2394,7 +2815,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
         <label>Tipo de Análise:</label>
         <select
           value={tipoAnalise}
-          onChange={(e) => setTipoAnalise(e.target.value)}
+          onChange={e => setTipoAnalise(e.target.value)}
           className="form-input"
         >
           <option value="artistas">📊 Por Artista/Banda</option>
@@ -2431,7 +2852,9 @@ function AnalyticsContent({ barId }: { barId: number }) {
                         <strong>{item.nome}</strong>
                         <div className="genres">
                           {item.generos.slice(0, 2).map((genero: string) => (
-                            <span key={genero} className="genre-tag">{genero}</span>
+                            <span key={genero} className="genre-tag">
+                              {genero}
+                            </span>
                           ))}
                         </div>
                       </td>
@@ -2440,7 +2863,13 @@ function AnalyticsContent({ barId }: { barId: number }) {
                       <td>R$ {item.faturamento_total.toFixed(2)}</td>
                       <td>R$ {item.ticket_medio_geral.toFixed(2)}</td>
                       <td>{Math.round(item.publico_medio)}</td>
-                      <td>{item.ultimo_evento?.data_evento ? new Date(item.ultimo_evento.data_evento).toLocaleDateString('pt-BR') : 'N/A'}</td>
+                      <td>
+                        {item.ultimo_evento?.data_evento
+                          ? new Date(
+                              item.ultimo_evento.data_evento
+                            ).toLocaleDateString('pt-BR')
+                          : 'N/A'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -2464,25 +2893,36 @@ function AnalyticsContent({ barId }: { barId: number }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(dadosAnalytics as unknown as AnalyticsGenero[]).map((item: AnalyticsGenero, index: number) => (
-                    <tr key={index}>
-                      <td><strong>{item.genero}</strong></td>
-                      <td>{item.total_eventos}</td>
-                      <td>{item.total_artistas}</td>
-                      <td>{item.publico_total.toLocaleString('pt-BR')}</td>
-                      <td>R$ {item.faturamento_total.toFixed(2)}</td>
-                      <td>R$ {item.ticket_medio_geral.toFixed(2)}</td>
-                      <td>
-                        {item.melhor_evento ? (
-                          <div>
-                            <strong>{item.melhor_evento.nome}</strong>
-                            <br />
-                            <small>R$ {item.melhor_evento.faturamento_liquido.toFixed(2)}</small>
-                          </div>
-                        ) : 'N/A'}
-                      </td>
-                    </tr>
-                  ))}
+                  {(dadosAnalytics as unknown as AnalyticsGenero[]).map(
+                    (item: AnalyticsGenero, index: number) => (
+                      <tr key={index}>
+                        <td>
+                          <strong>{item.genero}</strong>
+                        </td>
+                        <td>{item.total_eventos}</td>
+                        <td>{item.total_artistas}</td>
+                        <td>{item.publico_total.toLocaleString('pt-BR')}</td>
+                        <td>R$ {item.faturamento_total.toFixed(2)}</td>
+                        <td>R$ {item.ticket_medio_geral.toFixed(2)}</td>
+                        <td>
+                          {item.melhor_evento ? (
+                            <div>
+                              <strong>{item.melhor_evento.nome}</strong>
+                              <br />
+                              <small>
+                                R${' '}
+                                {item.melhor_evento.faturamento_liquido.toFixed(
+                                  2
+                                )}
+                              </small>
+                            </div>
+                          ) : (
+                            'N/A'
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -2504,23 +2944,29 @@ function AnalyticsContent({ barId }: { barId: number }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(dadosAnalytics as unknown as AnalyticsPeriodo[]).map((item: AnalyticsPeriodo, index: number) => (
-                    <tr key={index}>
-                      <td><strong>{item.periodo_label}</strong></td>
-                      <td>{item.total_eventos}</td>
-                      <td>{item.publico_total.toLocaleString('pt-BR')}</td>
-                      <td>R$ {item.faturamento_total.toFixed(2)}</td>
-                      <td>R$ {item.ticket_medio_geral.toFixed(2)}</td>
-                      <td>{Math.round(item.publico_medio)}</td>
-                      <td>
-                        <div className="genres">
-                          {item.generos.slice(0, 3).map((genero: string) => (
-                            <span key={genero} className="genre-tag">{genero}</span>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {(dadosAnalytics as unknown as AnalyticsPeriodo[]).map(
+                    (item: AnalyticsPeriodo, index: number) => (
+                      <tr key={index}>
+                        <td>
+                          <strong>{item.periodo_label}</strong>
+                        </td>
+                        <td>{item.total_eventos}</td>
+                        <td>{item.publico_total.toLocaleString('pt-BR')}</td>
+                        <td>R$ {item.faturamento_total.toFixed(2)}</td>
+                        <td>R$ {item.ticket_medio_geral.toFixed(2)}</td>
+                        <td>{Math.round(item.publico_medio)}</td>
+                        <td>
+                          <div className="genres">
+                            {item.generos.slice(0, 3).map((genero: string) => (
+                              <span key={genero} className="genre-tag">
+                                {genero}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -2529,9 +2975,12 @@ function AnalyticsContent({ barId }: { barId: number }) {
       ) : (
         <div className="no-data">
           <div>📊 Nenhum dado de performance encontrado</div>
-          <p>Os eventos precisam ter dados de público e faturamento sincronizados para aparecer nas análises.</p>
+          <p>
+            Os eventos precisam ter dados de público e faturamento sincronizados
+            para aparecer nas análises.
+          </p>
         </div>
       )}
     </div>
   );
-} 
+}

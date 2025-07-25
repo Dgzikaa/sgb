@@ -1,12 +1,18 @@
-﻿'use client'
+﻿'use client';
 
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { useRouter } from 'next/navigation'
-import { useBar } from '@/contexts/BarContext'
-import { useUser } from '@/contexts/UserContext'
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
+import { useBar } from '@/contexts/BarContext';
+import { useUser } from '@/contexts/UserContext';
 import {
   Building2,
   CreditCard,
@@ -23,295 +29,296 @@ import {
   Users,
   BarChart3,
   Clock,
-  Smartphone
-} from 'lucide-react'
+  Smartphone,
+  DollarSign,
+  Building,
+  Phone,
+} from 'lucide-react';
 
 interface Integration {
-  id: string
-  name: string
-  description: string
-  icon: React.ReactNode
-  status: 'active' | 'inactive' | 'error' | 'not-configured' | 'pending'
-  route: string
-  externalUrl?: string
-  features: string[]
-  category: string
-  hasCredentials?: boolean
-  hasWebhook?: boolean
-  webhookCount?: number
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  status: 'active' | 'inactive' | 'error' | 'not-configured' | 'pending';
+  route: string;
+  externalUrl?: string;
+  features: string[];
+  category: string;
+  hasCredentials?: boolean;
+  hasWebhook?: boolean;
+  webhookCount?: number;
 }
 
 export default function IntegracoesPage() {
-  const router = useRouter()
-  const { selectedBar, isLoading: barLoading, availableBars } = useBar()
-  const { user, loading: userLoading, isInitialized: userInitialized } = useUser()
-  const [integrations, setIntegrations] = useState<Integration[]>([])
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const { selectedBar, isLoading: barLoading, availableBars } = useBar();
+  const {
+    user,
+    loading: userLoading,
+    isInitialized: userInitialized,
+  } = useUser();
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  console.log('🏪 BarContext:', { 
-    selectedBar, 
-    barLoading, 
-    availableBarsCount: availableBars?.length 
-  })
-  
-  console.log('👤 UserContext:', { 
-    user, 
-    userLoading, 
-    userInitialized 
-  })
+  console.log('🏪 BarContext:', {
+    selectedBar,
+    barLoading,
+    availableBarsCount: availableBars?.length,
+  });
 
-  useEffect(() => {
-    console.log('🔄 useEffect executado:', { 
-      selectedBarId: selectedBar?.id, 
-      selectedBarName: selectedBar?.nome,
-      userId: user?.id,
-      userName: user?.nome,
-      userEmail: user?.email,
-      userRole: user?.role,
-      barLoading,
-      userLoading,
-      userInitialized
-    })
-    
-    // Aguardar que os contextos sejam inicializados
-    if (barLoading || userLoading || !userInitialized) {
-      console.log('⏳ Aguardando inicialização dos contextos...')
-      return
-    }
-    
-    if (selectedBar?.id && user) {
-      console.log('✅ Condições atendidas, chamando loadIntegrationsStatus...')
-      loadIntegrationsStatus()
-    } else {
-      console.log('❌ Condições não atendidas:', {
-        hasSelectedBar: !!selectedBar?.id,
-        selectedBarValue: selectedBar,
-        hasUser: !!user,
-        userValue: user
-      })
-    }
-  }, [selectedBar?.id, user, barLoading, userLoading, userInitialized])
+  console.log('👤 UserContext:', {
+    user,
+    userLoading,
+    userInitialized,
+  });
 
-  const loadIntegrationsStatus = async () => {
-    try {
-      console.log('🔄 Iniciando carregamento de integrações...')
-      console.log('👤 Usuário:', user?.nome)
-      console.log('🏪 Bar selecionado:', selectedBar?.id)
-      
-      setLoading(true)
-      
-      // Sempre definir as integrações padrão primeiro
-      setDefaultIntegrations()
-      
-      console.log('📡 Fazendo requisição para /api/integracoes/status...')
-      const response = await fetch('/api/integracoes/status', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
-        },
-        body: JSON.stringify({ bar_id: selectedBar?.id })
-      })
-
-      console.log('📊 Status da resposta:', response.status, response.statusText)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('✅ Dados recebidos:', data)
-        updateIntegrationsWithStatus(data.integrations)
-      } else {
-        const errorText = await response.text()
-        console.error('❌ Erro na resposta:', response.status, errorText)
-      }
-    } catch (error) {
-      console.error('❌ Erro ao carregar status das integrações:', error)
-      // As integrações padrão já foram definidas acima
-    } finally {
-      console.log('🏁 Finalizando carregamento...')
-      setLoading(false)
-    }
-  }
-
-  const setDefaultIntegrations = () => {
+  const setDefaultIntegrations = useCallback(() => {
     const defaultIntegrations: Integration[] = [
       {
-        id: 'inter',
-        name: 'Banco Inter',
-        description: 'Integração com o Banco Inter para receber notificações de pagamentos PIX e boletos',
-        icon: <Building2 className="h-6 w-6" />,
+        id: 'contahub',
+        name: 'ContaHub',
+        description: 'Sistema de gestão financeira e contábil',
+        icon: <DollarSign className="h-6 w-6" />,
         status: 'not-configured',
-        route: '/configuracoes/integracoes/inter-webhook',
-        externalUrl: 'https://cdpj.partners.bancointer.com.br/',
+        route: '/configuracoes/integracoes/contahub',
+        features: [
+          'Sincronização automática',
+          'Relatórios financeiros',
+          'Gestão de vendas',
+        ],
         category: 'financeiro',
-        features: [
-          'Webhook para PIX recebidos',
-          'Webhook para PIX enviados',
-          'Webhook para boletos vencidos',
-          'Webhook para boletos pagos',
-          'Autenticação automática'
-        ]
-      },
-      {
-        id: 'discord',
-        name: 'Discord',
-        description: 'Configuração de webhooks do Discord para notificações automáticas',
-        icon: <MessageSquare className="h-6 w-6" />,
-        status: 'not-configured',
-        route: '/configuracoes/integracoes/discord',
-        externalUrl: 'https://discord.com/developers/applications',
-        category: 'notificacoes',
-        features: [
-          'Webhooks para PIX recebidos',
-          'Webhooks para boletos',
-          'Notificações de checklists',
-          'Alertas do sistema',
-          'Relatórios automáticos'
-        ]
       },
       {
         id: 'nibo',
         name: 'NIBO',
-        description: 'Integração com o NIBO para gestão contábil',
-        icon: <CreditCard className="h-6 w-6" />,
+        description: 'Sistema de gestão empresarial',
+        icon: <Building className="h-6 w-6" />,
         status: 'not-configured',
         route: '/configuracoes/integracoes/nibo',
-        category: 'contabil',
         features: [
-          'API de dados contábeis',
-          'Sincronização de lançamentos',
-          'Relatórios contábeis'
-        ]
+          'Gestão completa',
+          'Relatórios avançados',
+          'Integração contábil',
+        ],
+        category: 'financeiro',
       },
       {
-        id: 'contahub',
-        name: 'ContaHub',
-        description: 'Integração com o ContaHub para sincronização de dados contábeis',
-        icon: <Database className="h-6 w-6" />,
+        id: 'discord',
+        name: 'Discord',
+        description: 'Notificações e alertas em tempo real',
+        icon: <MessageSquare className="h-6 w-6" />,
         status: 'not-configured',
-        route: '/configuracoes/integracoes/contahub',
-        category: 'contabil',
+        route: '/configuracoes/integracoes/discord',
         features: [
-          'Sincronização automática',
-          'Importação de dados',
-          'Relatórios integrados'
-        ]
+          'Notificações automáticas',
+          'Canais personalizados',
+          'Alertas críticos',
+        ],
+        category: 'comunicacao',
       },
       {
         id: 'whatsapp',
-        name: 'WhatsApp',
-        description: 'Integração com WhatsApp via Evolution API',
-        icon: <Smartphone className="h-6 w-6" />,
+        name: 'WhatsApp Business',
+        description: 'Integração com WhatsApp para comunicação',
+        icon: <Phone className="h-6 w-6" />,
         status: 'not-configured',
         route: '/configuracoes/integracoes/whatsapp',
-        category: 'comunicacao',
         features: [
-          'Envio de mensagens',
-          'Recebimento de mensagens',
-          'Automação de respostas',
-          'Integração com checklists'
-        ]
+          'Mensagens automáticas',
+          'Respostas rápidas',
+          'Gestão de contatos',
+        ],
+        category: 'comunicacao',
       },
       {
-        id: 'windsor',
-        name: 'Windsor.AI',
-        description: 'Plataforma de analytics e inteligência artificial',
-        icon: <BarChart3 className="h-6 w-6" />,
-        status: 'pending',
-        route: '/configuracoes/integracoes/windsor',
-        category: 'analytics',
+        id: 'inter-webhook',
+        name: 'Inter Banking',
+        description: 'Webhooks para transações bancárias',
+        icon: <CreditCard className="h-6 w-6" />,
+        status: 'not-configured',
+        route: '/configuracoes/integracoes/inter-webhook',
         features: [
-          'Analytics avançado',
-          'Inteligência artificial',
-          'Relatórios preditivos',
-          'Automação de insights'
-        ]
-      }
-    ]
-    setIntegrations(defaultIntegrations)
-  }
+          'Notificações de pagamento',
+          'Reconciliação automática',
+          'Gestão de recebimentos',
+        ],
+        category: 'financeiro',
+      },
+      {
+        id: 'webhooks',
+        name: 'Webhooks Gerais',
+        description: 'Configuração de webhooks personalizados',
+        icon: <Webhook className="h-6 w-6" />,
+        status: 'not-configured',
+        route: '/configuracoes/webhooks',
+        features: [
+          'Webhooks customizados',
+          'Eventos personalizados',
+          'Integração externa',
+        ],
+        category: 'desenvolvimento',
+      },
+    ];
+    setIntegrations(defaultIntegrations);
+  }, []);
 
-  const updateIntegrationsWithStatus = (statusData: any) => {
-    setIntegrations(prevIntegrations => 
-      prevIntegrations.map(integration => {
-        const status = statusData[integration.id]
+  const updateIntegrationsWithStatus = useCallback((statusData: any) => {
+    setIntegrations(prev =>
+      prev.map(integration => {
+        const status = statusData[integration.id];
         if (status) {
           return {
             ...integration,
-            status: status.status,
-            hasCredentials: status.hasCredentials,
-            hasWebhook: status.hasWebhook,
-            webhookCount: status.activeWebhooks || 0
-          }
+            status: status.status || 'not-configured',
+            hasCredentials: status.hasCredentials || false,
+            hasWebhook: status.hasWebhook || false,
+            webhookCount: status.webhookCount || 0,
+          };
         }
-        return integration
+        return integration;
       })
-    )
-  }
+    );
+  }, []);
+
+  const loadIntegrationsStatus = useCallback(async () => {
+    try {
+      console.log('🔄 Iniciando carregamento de integrações...');
+      console.log('👤 Usuário:', user?.nome);
+      console.log('🏪 Bar selecionado:', selectedBar?.id);
+      setLoading(true);
+      setDefaultIntegrations();
+      console.log('📡 Fazendo requisição para /api/integracoes/status...');
+      const response = await fetch('/api/integracoes/status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': encodeURIComponent(JSON.stringify(user)),
+        },
+        body: JSON.stringify({ bar_id: selectedBar?.id }),
+      });
+      console.log(
+        '📊 Status da resposta:',
+        response.status,
+        response.statusText
+      );
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Dados recebidos:', data);
+        updateIntegrationsWithStatus(data.integrations);
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Erro na resposta:', response.status, errorText);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar status das integrações:', error);
+    } finally {
+      console.log('🏁 Finalizando carregamento...');
+      setLoading(false);
+    }
+  }, [
+    user,
+    selectedBar?.id,
+    setDefaultIntegrations,
+    updateIntegrationsWithStatus,
+  ]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="badge-status active">Ativo</Badge>
+        return <Badge className="badge-status active">Ativo</Badge>;
       case 'inactive':
-        return <Badge className="badge-status inactive">Inativo</Badge>
+        return <Badge className="badge-status inactive">Inativo</Badge>;
       case 'error':
-        return <Badge className="badge-status error">Erro</Badge>
+        return <Badge className="badge-status error">Erro</Badge>;
       case 'not-configured':
-        return <Badge className="badge-status warning">Não Configurado</Badge>
+        return <Badge className="badge-status warning">Não Configurado</Badge>;
       case 'pending':
-        return <Badge className="badge-status pending">Em Construção</Badge>
+        return <Badge className="badge-status pending">Em Construção</Badge>;
       default:
-        return <Badge className="badge-status inactive">Desconhecido</Badge>
+        return <Badge className="badge-status inactive">Desconhecido</Badge>;
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'active':
-        return <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+        return (
+          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+        );
       case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+        return (
+          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+        );
       case 'pending':
-        return <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        return <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
       default:
-        return <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+        return (
+          <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+        );
     }
-  }
+  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'financeiro': return 'from-green-500 to-green-600'
-      case 'contabil': return 'from-blue-500 to-blue-600'
-      case 'notificacoes': return 'from-purple-500 to-purple-600'
-      case 'comunicacao': return 'from-teal-500 to-teal-600'
-      case 'analytics': return 'from-orange-500 to-orange-600'
-      default: return 'from-gray-500 to-gray-600'
+      case 'financeiro':
+        return 'from-green-500 to-green-600';
+      case 'contabil':
+        return 'from-blue-500 to-blue-600';
+      case 'notificacoes':
+        return 'from-purple-500 to-purple-600';
+      case 'comunicacao':
+        return 'from-teal-500 to-teal-600';
+      case 'analytics':
+        return 'from-orange-500 to-orange-600';
+      default:
+        return 'from-gray-500 to-gray-600';
     }
-  }
+  };
 
   const getCategoryName = (category: string) => {
     switch (category) {
-      case 'financeiro': return 'Financeiro'
-      case 'contabil': return 'Contábil'
-      case 'notificacoes': return 'Notificações'
-      case 'comunicacao': return 'Comunicação'
-      case 'analytics': return 'Analytics'
-      default: return 'Geral'
+      case 'financeiro':
+        return 'Financeiro';
+      case 'contabil':
+        return 'Contábil';
+      case 'notificacoes':
+        return 'Notificações';
+      case 'comunicacao':
+        return 'Comunicação';
+      case 'analytics':
+        return 'Analytics';
+      default:
+        return 'Geral';
     }
-  }
+  };
 
-    if (loading) {
+  useEffect(() => {
+    if (selectedBar?.id && userInitialized && !barLoading && !userLoading) {
+      loadIntegrationsStatus();
+    }
+  }, [
+    selectedBar?.id,
+    userInitialized,
+    barLoading,
+    userLoading,
+    loadIntegrationsStatus,
+  ]);
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container-modern py-6">
           <div className="section-header">
             <div>
               <h1 className="section-title">Integrações</h1>
-              <p className="section-subtitle">Carregando status das integrações...</p>
+              <p className="section-subtitle">
+                Carregando status das integrações...
+              </p>
             </div>
           </div>
           <div className="grid-integrations">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="card-integration animate-pulse">
                 <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
               </div>
@@ -319,7 +326,7 @@ export default function IntegracoesPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -338,19 +345,25 @@ export default function IntegracoesPage() {
               {integrations.filter(i => i.status === 'active').length} Ativas
             </Badge>
             <Badge className="badge-status warning">
-              {integrations.filter(i => i.status === 'not-configured').length} Pendentes
+              {integrations.filter(i => i.status === 'not-configured').length}{' '}
+              Pendentes
             </Badge>
           </div>
         </div>
 
         {/* Grid de Integrações */}
         <div className="grid-integrations">
-          {integrations.map((integration) => (
-            <Card key={integration.id} className="card-integration group hover:shadow-xl transition-all duration-300">
+          {integrations.map(integration => (
+            <Card
+              key={integration.id}
+              className="card-integration group hover:shadow-xl transition-all duration-300"
+            >
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className={`icon-integration bg-gradient-to-br ${getCategoryColor(integration.category)} shadow-lg`}>
+                    <div
+                      className={`icon-integration bg-gradient-to-br ${getCategoryColor(integration.category)} shadow-lg`}
+                    >
                       {integration.icon}
                     </div>
                     <div className="flex-1">
@@ -388,12 +401,15 @@ export default function IntegracoesPage() {
                         <span className="text-sm font-medium">Webhook</span>
                       </div>
                     )}
-                    {integration.webhookCount && integration.webhookCount > 0 && (
-                      <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                        <Bell className="h-4 w-4" />
-                        <span className="text-sm font-medium">{integration.webhookCount} webhooks</span>
-                      </div>
-                    )}
+                    {integration.webhookCount &&
+                      integration.webhookCount > 0 && (
+                        <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                          <Bell className="h-4 w-4" />
+                          <span className="text-sm font-medium">
+                            {integration.webhookCount} webhooks
+                          </span>
+                        </div>
+                      )}
                   </div>
                 </div>
 
@@ -421,14 +437,18 @@ export default function IntegracoesPage() {
                     disabled={integration.status === 'pending'}
                   >
                     <Settings className="h-4 w-4 mr-2" />
-                    {integration.status === 'pending' ? 'Em Breve' : 'Configurar'}
+                    {integration.status === 'pending'
+                      ? 'Em Breve'
+                      : 'Configurar'}
                   </Button>
 
                   {integration.externalUrl && (
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => window.open(integration.externalUrl, '_blank')}
+                      onClick={() =>
+                        window.open(integration.externalUrl, '_blank')
+                      }
                       className="action-icon hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                       title="Abrir site externo"
                     >
@@ -439,7 +459,7 @@ export default function IntegracoesPage() {
               </CardContent>
             </Card>
           ))}
-                </div>
+        </div>
 
         {/* Seção de Informações */}
         <div className="mt-12">
@@ -455,9 +475,10 @@ export default function IntegracoesPage() {
             <CardContent>
               <div className="space-y-6 text-gray-600 dark:text-gray-400">
                 <p className="text-base leading-relaxed">
-                  As integrações permitem conectar o SGB com serviços externos para automatizar
-                  processos e sincronizar dados. Cada integração pode ter diferentes níveis de
-                  configuração e funcionalidades.
+                  As integrações permitem conectar o SGB com serviços externos
+                  para automatizar processos e sincronizar dados. Cada
+                  integração pode ter diferentes níveis de configuração e
+                  funcionalidades.
                 </p>
 
                 <div className="grid md:grid-cols-2 gap-8">
@@ -468,10 +489,14 @@ export default function IntegracoesPage() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                         <Badge className="badge-status active">Ativo</Badge>
-                        <span className="text-sm">Funcionando corretamente</span>
+                        <span className="text-sm">
+                          Funcionando corretamente
+                        </span>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                        <Badge className="badge-status warning">Não Configurado</Badge>
+                        <Badge className="badge-status warning">
+                          Não Configurado
+                        </Badge>
                         <span className="text-sm">Precisa de configuração</span>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -483,8 +508,12 @@ export default function IntegracoesPage() {
                         <span className="text-sm">Problema na integração</span>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <Badge className="badge-status pending">Em Construção</Badge>
-                        <span className="text-sm">Funcionalidade em desenvolvimento</span>
+                        <Badge className="badge-status pending">
+                          Em Construção
+                        </Badge>
+                        <span className="text-sm">
+                          Funcionalidade em desenvolvimento
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -498,25 +527,34 @@ export default function IntegracoesPage() {
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           1
                         </div>
-                        <span className="text-sm">Clique em &quot;Configurar&quot; na integração desejada</span>
+                        <span className="text-sm">
+                          Clique em &quot;Configurar&quot; na integração
+                          desejada
+                        </span>
                       </div>
                       <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           2
                         </div>
-                        <span className="text-sm">Siga as instruções específicas de cada serviço</span>
+                        <span className="text-sm">
+                          Siga as instruções específicas de cada serviço
+                        </span>
                       </div>
                       <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           3
                         </div>
-                        <span className="text-sm">Teste a integração para verificar se está funcionando</span>
+                        <span className="text-sm">
+                          Teste a integração para verificar se está funcionando
+                        </span>
                       </div>
                       <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <div className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           4
                         </div>
-                        <span className="text-sm">Monitore o status regularmente</span>
+                        <span className="text-sm">
+                          Monitore o status regularmente
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -527,5 +565,5 @@ export default function IntegracoesPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

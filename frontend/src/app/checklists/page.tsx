@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function ChecklistsPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     // Redirecionar automaticamente para checklist de abertura
-    router.replace('/checklists/abertura')
-  }, [router])
+    router.replace('/checklists/abertura');
+  }, [router]);
 
   // Loading enquanto redireciona
   return (
@@ -24,5 +24,5 @@ export default function ChecklistsPage() {
         </p>
       </div>
     </div>
-  )
-} 
+  );
+}

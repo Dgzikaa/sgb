@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, authErrorResponse } from '@/middleware/auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { getAdminClient } from '@/lib/supabase-admin';
+import { authenticateUser, authErrorResponse } from '@/middleware/auth';
 
 // =====================================================
 // 🗑️ API PARA EXCLUIR AGENDAMENTO ESPECÍFICO
@@ -12,18 +12,21 @@ export async function DELETE(
 ) {
   try {
     // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
+    const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('Usuário não autenticado');
     }
 
-    const { id: scheduleId } = await params
+    const { id: scheduleId } = await params;
 
     if (!scheduleId) {
-      return NextResponse.json({ error: 'ID do agendamento não fornecido' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'ID do agendamento não fornecido' },
+        { status: 400 }
+      );
     }
 
-    const supabase = await getAdminClient()
+    const supabase = await getAdminClient();
 
     // Verificar se o agendamento existe e pertence ao bar do usuário
     const { data: schedule, error: scheduleError } = await supabase
@@ -31,10 +34,13 @@ export async function DELETE(
       .select('*')
       .eq('id', scheduleId)
       .eq('bar_id', user.bar_id)
-      .single()
+      .single();
 
     if (scheduleError || !schedule) {
-      return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Agendamento não encontrado' },
+        { status: 404 }
+      );
     }
 
     // Deletar o agendamento
@@ -42,24 +48,29 @@ export async function DELETE(
       .from('checklist_schedules')
       .delete()
       .eq('id', scheduleId)
-      .eq('bar_id', user.bar_id)
+      .eq('bar_id', user.bar_id);
 
     if (deleteError) {
-      console.error('Erro ao excluir agendamento:', deleteError)
-      return NextResponse.json({ 
-        error: 'Erro ao excluir agendamento' 
-      }, { status: 500 })
+      console.error('Erro ao excluir agendamento:', deleteError);
+      return NextResponse.json(
+        {
+          error: 'Erro ao excluir agendamento',
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: `Agendamento "${schedule.titulo}" excluído com sucesso`
-    })
-
+      message: `Agendamento "${schedule.titulo}" excluído com sucesso`,
+    });
   } catch (error) {
-    console.error('Erro ao excluir agendamento:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor' 
-    }, { status: 500 })
+    console.error('Erro ao excluir agendamento:', error);
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

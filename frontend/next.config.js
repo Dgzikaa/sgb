@@ -36,10 +36,10 @@ const nextConfig = {
         fs: false,
         net: false,
         tls: false,
-      }
+      };
     }
-    
-    return config
+
+    return config;
   },
   // Configurações de PWA
   async headers() {
@@ -61,7 +61,7 @@ const nextConfig = {
           },
         ],
       },
-    ]
+    ];
   },
   // Configurações de compilação
   compiler: {
@@ -71,6 +71,6 @@ const nextConfig = {
   // Configurações de performance
   poweredByHeader: false,
   compress: true,
-}
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig;

@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Executar verificação de qualidade antes do commit
+echo "🔍 Executando verificação de qualidade..."
+
+# Executar ESLint
+npx eslint . --ext .ts,.tsx --max-warnings 0
+
+# Verificar TypeScript
+npx tsc --noEmit
+
+# Verificar Prettier
+npx prettier --check .
+
+echo "✅ Verificação concluída!" 

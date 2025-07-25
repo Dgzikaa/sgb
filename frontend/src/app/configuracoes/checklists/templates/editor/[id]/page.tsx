@@ -1,29 +1,35 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { usePageTitle } from '@/contexts/PageTitleContext'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
-import { 
-  Save, 
-  ArrowLeft, 
-  Plus, 
-  Trash2, 
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { usePageTitle } from '@/contexts/PageTitleContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import {
+  Save,
+  ArrowLeft,
+  Plus,
+  Trash2,
   GripVertical,
   Eye,
   Smartphone,
   Monitor,
   Settings,
-  Tag
-} from 'lucide-react'
-import { api } from '@/lib/api-client'
+  Tag,
+} from 'lucide-react';
+import { api } from '@/lib/api-client';
 
 // =====================================================
 // INTERFACES E TIPOS
@@ -31,58 +37,66 @@ import { api } from '@/lib/api-client'
 
 interface TemplateTag {
   template_tags: {
-    nome: string
-  }
+    nome: string;
+  };
 }
 
 interface OpcoesItem {
-  [key: string]: string | number | boolean
+  [key: string]: string | number | boolean;
 }
 
 interface CondicionalItem {
-  dependeDe: string
-  valor: string | number | boolean
+  dependeDe: string;
+  valor: string | number | boolean;
 }
 
 interface ValidacaoItem {
-  [key: string]: string | number | boolean
+  [key: string]: string | number | boolean;
 }
 
 interface ItemChecklist {
-  id: string
-  titulo: string
-  descricao?: string
-  tipo: 'texto' | 'numero' | 'sim_nao' | 'data' | 'assinatura' | 'foto_camera' | 'foto_upload' | 'avaliacao'
-  obrigatorio: boolean
-  ordem: number
-  opcoes?: OpcoesItem
-  condicional?: CondicionalItem
-  validacao?: ValidacaoItem
+  id: string;
+  titulo: string;
+  descricao?: string;
+  tipo:
+    | 'texto'
+    | 'numero'
+    | 'sim_nao'
+    | 'data'
+    | 'assinatura'
+    | 'foto_camera'
+    | 'foto_upload'
+    | 'avaliacao';
+  obrigatorio: boolean;
+  ordem: number;
+  opcoes?: OpcoesItem;
+  condicional?: CondicionalItem;
+  validacao?: ValidacaoItem;
 }
 
 interface SecaoChecklist {
-  id: string
-  nome: string
-  descricao?: string
-  cor: string
-  ordem: number
-  itens: ItemChecklist[]
+  id: string;
+  nome: string;
+  descricao?: string;
+  cor: string;
+  ordem: number;
+  itens: ItemChecklist[];
 }
 
 interface TemplateData {
-  id?: string
-  nome: string
-  descricao?: string
-  categoria: string
-  setor: string
-  tipo: string
-  frequencia: string
-  tempo_estimado: number
-  publico: boolean
-  tags: string[]
+  id?: string;
+  nome: string;
+  descricao?: string;
+  categoria: string;
+  setor: string;
+  tipo: string;
+  frequencia: string;
+  tempo_estimado: number;
+  publico: boolean;
+  tags: string[];
   estrutura: {
-    secoes: SecaoChecklist[]
-  }
+    secoes: SecaoChecklist[];
+  };
 }
 
 // =====================================================
@@ -90,11 +104,11 @@ interface TemplateData {
 // =====================================================
 
 export default function TemplateEditorPage() {
-  const router = useRouter()
-  const params = useParams()
-  const { id } = params
-  const isNew = id === 'novo'
-  const { setPageTitle } = usePageTitle()
+  const router = useRouter();
+  const params = useParams();
+  const { id } = params;
+  const isNew = id === 'novo';
+  const { setPageTitle } = usePageTitle();
 
   const [template, setTemplate] = useState<TemplateData>({
     nome: '',
@@ -107,32 +121,32 @@ export default function TemplateEditorPage() {
     publico: false,
     tags: [],
     estrutura: {
-      secoes: []
-    }
-  })
+      secoes: [],
+    },
+  });
 
-  const [loading, setLoading] = useState(!isNew)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [mobilePreview, setMobilePreview] = useState(false)
-  const [newTag, setNewTag] = useState('')
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mobilePreview, setMobilePreview] = useState(false);
+  const [newTag, setNewTag] = useState('');
 
   // =====================================================
   // EFEITOS
   // =====================================================
 
   useEffect(() => {
-    setPageTitle('📝 Editor de Template')
-    return () => setPageTitle('')
-  }, [setPageTitle])
+    setPageTitle('📝 Editor de Template');
+    return () => setPageTitle('');
+  }, [setPageTitle]);
 
   const carregarTemplate = useCallback(async () => {
     try {
-      setLoading(true)
-      const response = await api.get(`/api/templates/${id}`)
-      
+      setLoading(true);
+      const response = await api.get(`/api/templates/${id}`);
+
       if (response.success) {
-        const templateData = response.data
+        const templateData = response.data;
         setTemplate({
           id: templateData.id,
           nome: templateData.nome,
@@ -143,25 +157,28 @@ export default function TemplateEditorPage() {
           frequencia: templateData.frequencia,
           tempo_estimado: templateData.tempo_estimado,
           publico: templateData.publico,
-          tags: templateData.template_tags?.map((t: TemplateTag) => t.template_tags.nome) || [],
-          estrutura: templateData.estrutura || { secoes: [] }
-        })
+          tags:
+            templateData.template_tags?.map(
+              (t: TemplateTag) => t.template_tags.nome
+            ) || [],
+          estrutura: templateData.estrutura || { secoes: [] },
+        });
       } else {
-        setError(response.error || 'Erro ao carregar template')
+        setError(response.error || 'Erro ao carregar template');
       }
     } catch (err: unknown) {
-      console.error('Erro ao carregar template:', err)
-      setError('Erro ao carregar template')
+      console.error('Erro ao carregar template:', err);
+      setError('Erro ao carregar template');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
     if (!isNew) {
-      carregarTemplate()
+      carregarTemplate();
     }
-  }, [carregarTemplate, isNew])
+  }, [carregarTemplate, isNew]);
 
   // =====================================================
   // FUNÇÕES PRINCIPAIS
@@ -169,22 +186,22 @@ export default function TemplateEditorPage() {
 
   const salvarTemplate = async () => {
     try {
-      setSaving(true)
-      
+      setSaving(true);
+
       // Validações básicas
       if (!template.nome.trim()) {
-        alert('Nome do template é obrigatório')
-        return
+        alert('Nome do template é obrigatório');
+        return;
       }
-      
+
       if (!template.setor.trim()) {
-        alert('Setor é obrigatório')
-        return
+        alert('Setor é obrigatório');
+        return;
       }
 
       if (template.estrutura.secoes.length === 0) {
-        alert('Adicione pelo menos uma seção ao template')
-        return
+        alert('Adicione pelo menos uma seção ao template');
+        return;
       }
 
       const payload = {
@@ -194,33 +211,37 @@ export default function TemplateEditorPage() {
             ...secao,
             itens: secao.itens.map(item => ({
               ...item,
-              id: undefined // Remove IDs temporários
+              id: undefined, // Remove IDs temporários
             })),
-            id: undefined
-          }))
-        }
+            id: undefined,
+          })),
+        },
+      };
+
+      let response;
+      if (isNew) {
+        response = await api.post('/api/templates', payload);
+      } else {
+        response = await api.put(`/api/templates/${id}`, payload);
       }
 
-      let response
-      if (isNew) {
-        response = await api.post('/api/templates', payload)
-      } else {
-        response = await api.put(`/api/templates/${id}`, payload)
-      }
-      
       if (response.success) {
-        alert(isNew ? 'Template criado com sucesso!' : 'Template atualizado com sucesso!')
-        router.push('/configuracoes/templates')
+        alert(
+          isNew
+            ? 'Template criado com sucesso!'
+            : 'Template atualizado com sucesso!'
+        );
+        router.push('/configuracoes/templates');
       } else {
-        alert(response.error || 'Erro ao salvar template')
+        alert(response.error || 'Erro ao salvar template');
       }
     } catch (err: unknown) {
-      console.error('Erro ao salvar template:', err)
-      alert('Erro ao salvar template')
+      console.error('Erro ao salvar template:', err);
+      alert('Erro ao salvar template');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   // =====================================================
   // FUNÇÕES DE SEÇÕES
@@ -233,46 +254,49 @@ export default function TemplateEditorPage() {
       descricao: '',
       cor: 'bg-blue-500',
       ordem: template.estrutura.secoes.length + 1,
-      itens: []
-    }
+      itens: [],
+    };
 
     setTemplate(prev => ({
       ...prev,
       estrutura: {
-        secoes: [...prev.estrutura.secoes, novaSecao]
-      }
-    }))
-  }
+        secoes: [...prev.estrutura.secoes, novaSecao],
+      },
+    }));
+  };
 
-  const atualizarSecao = (secaoId: string, updates: Partial<SecaoChecklist>) => {
+  const atualizarSecao = (
+    secaoId: string,
+    updates: Partial<SecaoChecklist>
+  ) => {
     setTemplate(prev => ({
       ...prev,
       estrutura: {
         secoes: prev.estrutura.secoes.map(secao =>
           secao.id === secaoId ? { ...secao, ...updates } : secao
-        )
-      }
-    }))
-  }
+        ),
+      },
+    }));
+  };
 
   const removerSecao = (secaoId: string) => {
-    if (!confirm('Tem certeza que deseja remover esta seção?')) return
+    if (!confirm('Tem certeza que deseja remover esta seção?')) return;
 
     setTemplate(prev => ({
       ...prev,
       estrutura: {
-        secoes: prev.estrutura.secoes.filter(secao => secao.id !== secaoId)
-      }
-    }))
-  }
+        secoes: prev.estrutura.secoes.filter(secao => secao.id !== secaoId),
+      },
+    }));
+  };
 
   // =====================================================
   // FUNÇÕES DE ITENS
   // =====================================================
 
   const adicionarItem = (secaoId: string) => {
-    const secao = template.estrutura.secoes.find(s => s.id === secaoId)
-    if (!secao) return
+    const secao = template.estrutura.secoes.find(s => s.id === secaoId);
+    if (!secao) return;
 
     const novoItem: ItemChecklist = {
       id: `item_${Date.now()}`,
@@ -282,57 +306,61 @@ export default function TemplateEditorPage() {
       obrigatorio: false,
       ordem: secao.itens.length + 1,
       opcoes: {},
-      validacao: {}
-    }
+      validacao: {},
+    };
 
     atualizarSecao(secaoId, {
-      itens: [...secao.itens, novoItem]
-    })
-  }
+      itens: [...secao.itens, novoItem],
+    });
+  };
 
-  const atualizarItem = (secaoId: string, itemId: string, updates: Partial<ItemChecklist>) => {
-    const secao = template.estrutura.secoes.find(s => s.id === secaoId)
-    if (!secao) return
+  const atualizarItem = (
+    secaoId: string,
+    itemId: string,
+    updates: Partial<ItemChecklist>
+  ) => {
+    const secao = template.estrutura.secoes.find(s => s.id === secaoId);
+    if (!secao) return;
 
     atualizarSecao(secaoId, {
       itens: secao.itens.map(item =>
         item.id === itemId ? { ...item, ...updates } : item
-      )
-    })
-  }
+      ),
+    });
+  };
 
   const removerItem = (secaoId: string, itemId: string) => {
-    if (!confirm('Tem certeza que deseja remover este item?')) return
+    if (!confirm('Tem certeza que deseja remover este item?')) return;
 
-    const secao = template.estrutura.secoes.find(s => s.id === secaoId)
-    if (!secao) return
+    const secao = template.estrutura.secoes.find(s => s.id === secaoId);
+    if (!secao) return;
 
     atualizarSecao(secaoId, {
-      itens: secao.itens.filter(item => item.id !== itemId)
-    })
-  }
+      itens: secao.itens.filter(item => item.id !== itemId),
+    });
+  };
 
   // =====================================================
   // FUNÇÕES DE TAGS
   // =====================================================
 
   const adicionarTag = () => {
-    if (!newTag.trim()) return
-    if (template.tags.includes(newTag.trim())) return
+    if (!newTag.trim()) return;
+    if (template.tags.includes(newTag.trim())) return;
 
     setTemplate(prev => ({
       ...prev,
-      tags: [...prev.tags, newTag.trim()]
-    }))
-    setNewTag('')
-  }
+      tags: [...prev.tags, newTag.trim()],
+    }));
+    setNewTag('');
+  };
 
   const removerTag = (tag: string) => {
     setTemplate(prev => ({
       ...prev,
-      tags: prev.tags.filter(t => t !== tag)
-    }))
-  }
+      tags: prev.tags.filter(t => t !== tag),
+    }));
+  };
 
   // =====================================================
   // UTILITÁRIOS
@@ -347,10 +375,10 @@ export default function TemplateEditorPage() {
       assinatura: '✍️',
       foto_camera: '📷',
       foto_upload: '🖼️',
-      avaliacao: '⭐'
-    }
-    return icons[tipo] || '📋'
-  }
+      avaliacao: '⭐',
+    };
+    return icons[tipo] || '📋';
+  };
 
   const getTipoLabel = (tipo: string) => {
     const labels: Record<string, string> = {
@@ -361,10 +389,10 @@ export default function TemplateEditorPage() {
       assinatura: 'Assinatura',
       foto_camera: 'Foto (Câmera)',
       foto_upload: 'Foto (Upload)',
-      avaliacao: 'Avaliação'
-    }
-    return labels[tipo] || tipo
-  }
+      avaliacao: 'Avaliação',
+    };
+    return labels[tipo] || tipo;
+  };
 
   const cores = [
     { value: 'bg-blue-500', label: 'Azul', color: '#3B82F6' },
@@ -374,8 +402,8 @@ export default function TemplateEditorPage() {
     { value: 'bg-yellow-500', label: 'Amarelo', color: '#F59E0B' },
     { value: 'bg-orange-500', label: 'Laranja', color: '#F97316' },
     { value: 'bg-pink-500', label: 'Rosa', color: '#EC4899' },
-    { value: 'bg-indigo-500', label: 'Índigo', color: '#6366F1' }
-  ]
+    { value: 'bg-indigo-500', label: 'Índigo', color: '#6366F1' },
+  ];
 
   // =====================================================
   // RENDER
@@ -391,7 +419,7 @@ export default function TemplateEditorPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -399,12 +427,15 @@ export default function TemplateEditorPage() {
       <div className="container mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-600">{error}</p>
-                          <Button onClick={() => router.push('/configuracoes/templates')} className="mt-2">
-                  Voltar para Templates
-                </Button>
+          <Button
+            onClick={() => router.push('/configuracoes/templates')}
+            className="mt-2"
+          >
+            Voltar para Templates
+          </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -413,7 +444,7 @@ export default function TemplateEditorPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-                            onClick={() => router.push('/configuracoes/templates')}
+            onClick={() => router.push('/configuracoes/templates')}
             variant="outline"
             size="sm"
           >
@@ -426,14 +457,18 @@ export default function TemplateEditorPage() {
             </p>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <Button
             onClick={() => setMobilePreview(!mobilePreview)}
             variant="outline"
             size="sm"
           >
-            {mobilePreview ? <Monitor className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
+            {mobilePreview ? (
+              <Monitor className="w-4 h-4" />
+            ) : (
+              <Smartphone className="w-4 h-4" />
+            )}
           </Button>
           <Button
             onClick={salvarTemplate}
@@ -463,7 +498,9 @@ export default function TemplateEditorPage() {
                 <Input
                   id="nome"
                   value={template.nome}
-                  onChange={(e) => setTemplate(prev => ({ ...prev, nome: e.target.value }))}
+                  onChange={e =>
+                    setTemplate(prev => ({ ...prev, nome: e.target.value }))
+                  }
                   placeholder="Ex: Abertura de Cozinha"
                 />
               </div>
@@ -473,7 +510,12 @@ export default function TemplateEditorPage() {
                 <Textarea
                   id="descricao"
                   value={template.descricao}
-                  onChange={(e) => setTemplate(prev => ({ ...prev, descricao: e.target.value }))}
+                  onChange={e =>
+                    setTemplate(prev => ({
+                      ...prev,
+                      descricao: e.target.value,
+                    }))
+                  }
                   placeholder="Descreva o propósito deste checklist"
                   rows={3}
                 />
@@ -484,7 +526,9 @@ export default function TemplateEditorPage() {
                 <Input
                   id="setor"
                   value={template.setor}
-                  onChange={(e) => setTemplate(prev => ({ ...prev, setor: e.target.value }))}
+                  onChange={e =>
+                    setTemplate(prev => ({ ...prev, setor: e.target.value }))
+                  }
                   placeholder="Ex: Cozinha, Banheiro, Salão"
                 />
               </div>
@@ -492,9 +536,11 @@ export default function TemplateEditorPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label htmlFor="categoria">Categoria</Label>
-                  <Select 
-                    value={template.categoria} 
-                    onValueChange={(value) => setTemplate(prev => ({ ...prev, categoria: value }))}
+                  <Select
+                    value={template.categoria}
+                    onValueChange={value =>
+                      setTemplate(prev => ({ ...prev, categoria: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -514,9 +560,11 @@ export default function TemplateEditorPage() {
 
                 <div>
                   <Label htmlFor="tipo">Tipo</Label>
-                  <Select 
-                    value={template.tipo} 
-                    onValueChange={(value) => setTemplate(prev => ({ ...prev, tipo: value }))}
+                  <Select
+                    value={template.tipo}
+                    onValueChange={value =>
+                      setTemplate(prev => ({ ...prev, tipo: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -537,9 +585,11 @@ export default function TemplateEditorPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label htmlFor="frequencia">Frequência</Label>
-                  <Select 
-                    value={template.frequencia} 
-                    onValueChange={(value) => setTemplate(prev => ({ ...prev, frequencia: value }))}
+                  <Select
+                    value={template.frequencia}
+                    onValueChange={value =>
+                      setTemplate(prev => ({ ...prev, frequencia: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -551,7 +601,9 @@ export default function TemplateEditorPage() {
                       <SelectItem value="mensal">Mensal</SelectItem>
                       <SelectItem value="bimestral">Bimestral</SelectItem>
                       <SelectItem value="trimestral">Trimestral</SelectItem>
-                      <SelectItem value="conforme_necessario">Conforme necessário</SelectItem>
+                      <SelectItem value="conforme_necessario">
+                        Conforme necessário
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -564,10 +616,12 @@ export default function TemplateEditorPage() {
                     min="1"
                     max="480"
                     value={template.tempo_estimado}
-                    onChange={(e) => setTemplate(prev => ({ 
-                      ...prev, 
-                      tempo_estimado: parseInt(e.target.value) || 30 
-                    }))}
+                    onChange={e =>
+                      setTemplate(prev => ({
+                        ...prev,
+                        tempo_estimado: parseInt(e.target.value) || 30,
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -576,10 +630,12 @@ export default function TemplateEditorPage() {
                 <Switch
                   id="publico"
                   checked={template.publico}
-                  onCheckedChange={(checked) => setTemplate(prev => ({ 
-                    ...prev, 
-                    publico: checked 
-                  }))}
+                  onCheckedChange={checked =>
+                    setTemplate(prev => ({
+                      ...prev,
+                      publico: checked,
+                    }))
+                  }
                 />
                 <Label htmlFor="publico">Template público</Label>
               </div>
@@ -591,16 +647,16 @@ export default function TemplateEditorPage() {
                 <Tag className="w-4 h-4" />
                 Tags
               </Label>
-              
+
               <div className="flex gap-2 mt-2">
                 <Input
                   value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
+                  onChange={e => setNewTag(e.target.value)}
                   placeholder="Adicionar tag"
-                  onKeyPress={(e) => {
+                  onKeyPress={e => {
                     if (e.key === 'Enter') {
-                      e.preventDefault()
-                      adicionarTag()
+                      e.preventDefault();
+                      adicionarTag();
                     }
                   }}
                 />
@@ -612,9 +668,9 @@ export default function TemplateEditorPage() {
               {template.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {template.tags.map((tag, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
+                    <Badge
+                      key={index}
+                      variant="outline"
                       className="cursor-pointer hover:bg-red-50"
                       onClick={() => removerTag(tag)}
                     >
@@ -640,7 +696,9 @@ export default function TemplateEditorPage() {
         </Card>
 
         {/* Editor de Conteúdo */}
-        <div className={`lg:col-span-2 ${mobilePreview ? 'max-w-sm mx-auto' : ''}`}>
+        <div
+          className={`lg:col-span-2 ${mobilePreview ? 'max-w-sm mx-auto' : ''}`}
+        >
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -665,42 +723,62 @@ export default function TemplateEditorPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {template.estrutura.secoes.map((secao) => (
-                    <Card key={secao.id} className="border-l-4" style={{ borderLeftColor: cores.find(c => c.value === secao.cor)?.color }}>
+                  {template.estrutura.secoes.map(secao => (
+                    <Card
+                      key={secao.id}
+                      className="border-l-4"
+                      style={{
+                        borderLeftColor: cores.find(c => c.value === secao.cor)
+                          ?.color,
+                      }}
+                    >
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <GripVertical className="w-4 h-4 text-gray-400" />
                             {mobilePreview ? (
-                              <h3 className="font-semibold text-lg">{secao.nome}</h3>
+                              <h3 className="font-semibold text-lg">
+                                {secao.nome}
+                              </h3>
                             ) : (
                               <Input
                                 value={secao.nome}
-                                onChange={(e) => atualizarSecao(secao.id, { nome: e.target.value })}
+                                onChange={e =>
+                                  atualizarSecao(secao.id, {
+                                    nome: e.target.value,
+                                  })
+                                }
                                 className="font-semibold text-lg border-none px-0 focus:border-gray-300"
                               />
                             )}
                           </div>
-                          
+
                           {!mobilePreview && (
                             <div className="flex items-center gap-2">
-                              <Select 
-                                value={secao.cor} 
-                                onValueChange={(value) => atualizarSecao(secao.id, { cor: value })}
+                              <Select
+                                value={secao.cor}
+                                onValueChange={value =>
+                                  atualizarSecao(secao.id, { cor: value })
+                                }
                               >
                                 <SelectTrigger className="w-24">
-                                  <div 
+                                  <div
                                     className="w-4 h-4 rounded"
-                                    style={{ 
-                                      backgroundColor: cores.find(c => c.value === secao.cor)?.color 
+                                    style={{
+                                      backgroundColor: cores.find(
+                                        c => c.value === secao.cor
+                                      )?.color,
                                     }}
                                   />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {cores.map((cor) => (
-                                    <SelectItem key={cor.value} value={cor.value}>
+                                  {cores.map(cor => (
+                                    <SelectItem
+                                      key={cor.value}
+                                      value={cor.value}
+                                    >
                                       <div className="flex items-center gap-2">
-                                        <div 
+                                        <div
                                           className="w-4 h-4 rounded"
                                           style={{ backgroundColor: cor.color }}
                                         />
@@ -710,7 +788,7 @@ export default function TemplateEditorPage() {
                                   ))}
                                 </SelectContent>
                               </Select>
-                              
+
                               <Button
                                 onClick={() => removerSecao(secao.id)}
                                 size="sm"
@@ -722,15 +800,21 @@ export default function TemplateEditorPage() {
                             </div>
                           )}
                         </div>
-                        
+
                         {secao.descricao && (
-                          <p className="text-sm text-gray-600">{secao.descricao}</p>
+                          <p className="text-sm text-gray-600">
+                            {secao.descricao}
+                          </p>
                         )}
-                        
+
                         {!mobilePreview && (
                           <Textarea
                             value={secao.descricao || ''}
-                            onChange={(e) => atualizarSecao(secao.id, { descricao: e.target.value })}
+                            onChange={e =>
+                              atualizarSecao(secao.id, {
+                                descricao: e.target.value,
+                              })
+                            }
                             placeholder="Descrição da seção (opcional)"
                             rows={2}
                             className="mt-2"
@@ -741,20 +825,26 @@ export default function TemplateEditorPage() {
                       <CardContent>
                         {/* Itens da Seção */}
                         <div className="space-y-3">
-                          {secao.itens.map((item) => (
+                          {secao.itens.map(item => (
                             <div
                               key={item.id}
                               className="border rounded-lg p-3 bg-gray-50"
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-2 flex-1">
-                                  <span className="text-lg">{getTipoIcon(item.tipo)}</span>
+                                  <span className="text-lg">
+                                    {getTipoIcon(item.tipo)}
+                                  </span>
                                   <div className="flex-1">
                                     {mobilePreview ? (
                                       <div>
                                         <h4 className="font-medium">
                                           {item.titulo}
-                                          {item.obrigatorio && <span className="text-red-500 ml-1">*</span>}
+                                          {item.obrigatorio && (
+                                            <span className="text-red-500 ml-1">
+                                              *
+                                            </span>
+                                          )}
                                         </h4>
                                         {item.descricao && (
                                           <p className="text-sm text-gray-600 mt-1">
@@ -766,54 +856,90 @@ export default function TemplateEditorPage() {
                                       <div className="space-y-2">
                                         <Input
                                           value={item.titulo}
-                                          onChange={(e) => atualizarItem(secao.id, item.id, { titulo: e.target.value })}
+                                          onChange={e =>
+                                            atualizarItem(secao.id, item.id, {
+                                              titulo: e.target.value,
+                                            })
+                                          }
                                           placeholder="Título do item"
                                           className="font-medium"
                                         />
                                         <Input
                                           value={item.descricao || ''}
-                                          onChange={(e) => atualizarItem(secao.id, item.id, { descricao: e.target.value })}
+                                          onChange={e =>
+                                            atualizarItem(secao.id, item.id, {
+                                              descricao: e.target.value,
+                                            })
+                                          }
                                           placeholder="Descrição (opcional)"
                                           className="text-sm"
                                         />
                                         <div className="flex gap-2">
-                                          <Select 
-                                            value={item.tipo} 
-                                            onValueChange={(value: string) => atualizarItem(secao.id, item.id, { tipo: value })}
+                                          <Select
+                                            value={item.tipo}
+                                            onValueChange={(value: string) =>
+                                              atualizarItem(secao.id, item.id, {
+                                                tipo: value,
+                                              })
+                                            }
                                           >
                                             <SelectTrigger className="flex-1">
                                               <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                              <SelectItem value="texto">📝 Texto</SelectItem>
-                                              <SelectItem value="numero">🔢 Número</SelectItem>
-                                              <SelectItem value="sim_nao">✅ Sim/Não</SelectItem>
-                                              <SelectItem value="data">📅 Data</SelectItem>
-                                              <SelectItem value="assinatura">✍️ Assinatura</SelectItem>
-                                              <SelectItem value="foto_camera">📷 Foto (Câmera)</SelectItem>
-                                              <SelectItem value="foto_upload">🖼️ Foto (Upload)</SelectItem>
-                                              <SelectItem value="avaliacao">⭐ Avaliação</SelectItem>
+                                              <SelectItem value="texto">
+                                                📝 Texto
+                                              </SelectItem>
+                                              <SelectItem value="numero">
+                                                🔢 Número
+                                              </SelectItem>
+                                              <SelectItem value="sim_nao">
+                                                ✅ Sim/Não
+                                              </SelectItem>
+                                              <SelectItem value="data">
+                                                📅 Data
+                                              </SelectItem>
+                                              <SelectItem value="assinatura">
+                                                ✍️ Assinatura
+                                              </SelectItem>
+                                              <SelectItem value="foto_camera">
+                                                📷 Foto (Câmera)
+                                              </SelectItem>
+                                              <SelectItem value="foto_upload">
+                                                🖼️ Foto (Upload)
+                                              </SelectItem>
+                                              <SelectItem value="avaliacao">
+                                                ⭐ Avaliação
+                                              </SelectItem>
                                             </SelectContent>
                                           </Select>
-                                          
+
                                           <div className="flex items-center space-x-2">
                                             <Switch
                                               checked={item.obrigatorio}
-                                              onCheckedChange={(checked) => 
-                                                atualizarItem(secao.id, item.id, { obrigatorio: checked })
+                                              onCheckedChange={checked =>
+                                                atualizarItem(
+                                                  secao.id,
+                                                  item.id,
+                                                  { obrigatorio: checked }
+                                                )
                                               }
                                             />
-                                            <Label className="text-sm">Obrigatório</Label>
+                                            <Label className="text-sm">
+                                              Obrigatório
+                                            </Label>
                                           </div>
                                         </div>
                                       </div>
                                     )}
                                   </div>
                                 </div>
-                                
+
                                 {!mobilePreview && (
                                   <Button
-                                    onClick={() => removerItem(secao.id, item.id)}
+                                    onClick={() =>
+                                      removerItem(secao.id, item.id)
+                                    }
                                     size="sm"
                                     variant="outline"
                                     className="text-red-600 hover:text-red-700 ml-2"
@@ -847,5 +973,5 @@ export default function TemplateEditorPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

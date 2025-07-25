@@ -31,7 +31,8 @@ export async function GET() {
     // Buscar checklists com suas seções e itens
     const { data: checklists, error: checklistsError } = await supabase
       .from('checklists')
-      .select(`
+      .select(
+        `
         id,
         nome,
         descricao,
@@ -55,68 +56,84 @@ export async function GET() {
             tipo
           )
         )
-      `)
+      `
+      )
       .eq('bar_id', 3) // Ordinário Bar
-      .order('criado_em', { ascending: false })
+      .order('criado_em', { ascending: false });
 
     if (checklistsError) {
-      console.error('❌ Erro ao buscar checklists:', checklistsError)
-      return NextResponse.json({ error: 'Erro ao buscar checklists' }, { status: 500 })
+      console.error('❌ Erro ao buscar checklists:', checklistsError);
+      return NextResponse.json(
+        { error: 'Erro ao buscar checklists' },
+        { status: 500 }
+      );
     }
 
     // Transformar dados para o formato esperado pela interface
-    const checklistsFormatados = checklists?.map(checklist => {
-      // Contar total de itens
-      const totalItens = checklist.checklist_secoes?.reduce((total: number, secao: ChecklistSecao) => {
-        return total + (secao.checklist_itens?.length || 0)
-      }, 0) || 0
+    const checklistsFormatados =
+      checklists?.map(checklist => {
+        // Contar total de itens
+        const totalItens =
+          checklist.checklist_secoes?.reduce(
+            (total: number, secao: ChecklistSecao) => {
+              return total + (secao.checklist_itens?.length || 0);
+            },
+            0
+          ) || 0;
 
-      return {
-        id: checklist.id,
-        nome: checklist.nome,
-        setor: checklist.setor,
-        descricao: checklist.descricao || '',
-        tipo: checklist.tipo,
-        frequencia: checklist.frequencia,
-        tempo_estimado: checklist.tempo_estimado || 30,
-        itens_total: totalItens,
-        responsavel_padrao: checklist.responsavel_padrao || 'Não definido',
-        ativo: checklist.status === 'ativo',
-        ultima_edicao: new Date(checklist.atualizado_em).toISOString().split('T')[0],
-        criado_por: 'Sistema', // TODO: Buscar nome real do usuário
-        usado_recentemente: false // TODO: Implementar lógica de uso recente
-      }
-    }) || []
+        return {
+          id: checklist.id,
+          nome: checklist.nome,
+          setor: checklist.setor,
+          descricao: checklist.descricao || '',
+          tipo: checklist.tipo,
+          frequencia: checklist.frequencia,
+          tempo_estimado: checklist.tempo_estimado || 30,
+          itens_total: totalItens,
+          responsavel_padrao: checklist.responsavel_padrao || 'Não definido',
+          ativo: checklist.status === 'ativo',
+          ultima_edicao: new Date(checklist.atualizado_em)
+            .toISOString()
+            .split('T')[0],
+          criado_por: 'Sistema', // TODO: Buscar nome real do usuário
+          usado_recentemente: false, // TODO: Implementar lógica de uso recente
+        };
+      }) || [];
 
-    console.log(`✅ Checklists carregados: ${checklistsFormatados.length}`)
+    console.log(`✅ Checklists carregados: ${checklistsFormatados.length}`);
 
-    return NextResponse.json(checklistsFormatados)
-
+    return NextResponse.json(checklistsFormatados);
   } catch (error) {
-    console.error('💥 Erro na API de checklists:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    console.error('💥 Erro na API de checklists:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    
-    console.log('📦 Dados recebidos:', body)
+    const body = await req.json();
+
+    console.log('📦 Dados recebidos:', body);
 
     // Validação básica
     if (!body.nome || !body.setor || !body.tipo) {
-      return NextResponse.json({ 
-        error: 'Campos obrigatórios: nome, setor e tipo' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'Campos obrigatórios: nome, setor e tipo',
+        },
+        { status: 400 }
+      );
     }
 
     // Buscar usuário admin
     const { data: adminUser } = await supabase
-              .from('usuarios_bar')
+      .from('usuarios_bar')
       .select('id')
       .eq('email', 'admin@ordinario.com')
-      .single()
+      .single();
 
     const checklistData = {
       nome: body.nome,
@@ -128,33 +145,38 @@ export async function POST(req: NextRequest) {
       responsavel_padrao: body.responsavel_padrao || '',
       bar_id: 3, // Ordinário Bar
       criado_por: adminUser?.id || null,
-      status: 'ativo'
-    }
+      status: 'ativo',
+    };
 
-    console.log('💾 Dados para inserção:', checklistData)
+    console.log('💾 Dados para inserção:', checklistData);
 
     const { data: novoChecklist, error } = await supabase
       .from('checklists')
       .insert([checklistData])
       .select()
-      .single()
+      .single();
 
     if (error) {
-      console.error('❌ Erro ao criar checklist:', error)
-      return NextResponse.json({ 
-        error: 'Erro ao criar checklist',
-        details: error.message 
-      }, { status: 500 })
+      console.error('❌ Erro ao criar checklist:', error);
+      return NextResponse.json(
+        {
+          error: 'Erro ao criar checklist',
+          details: error.message,
+        },
+        { status: 500 }
+      );
     }
 
-    console.log('✅ Checklist criado:', novoChecklist.nome)
-    return NextResponse.json(novoChecklist)
-
+    console.log('✅ Checklist criado:', novoChecklist.nome);
+    return NextResponse.json(novoChecklist);
   } catch (error) {
-    console.error('💥 Erro ao criar checklist:', error)
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 })
+    console.error('💥 Erro ao criar checklist:', error);
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : 'Erro desconhecido',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

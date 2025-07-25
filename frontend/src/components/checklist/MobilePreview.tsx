@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
-import { 
-  Smartphone, 
-  Tablet, 
-  Monitor, 
-  Maximize2, 
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import {
+  Smartphone,
+  Tablet,
+  Monitor,
+  Maximize2,
   Minimize2,
   Eye,
-  EyeOff
-} from 'lucide-react'
+  EyeOff,
+} from 'lucide-react';
 
 // =====================================================
 // 📱 PREVIEW MOBILE PARA CHECKLIST
@@ -21,21 +21,21 @@ import {
 // Mostra como o checklist ficará no celular durante a criação
 
 interface PreviewItem {
-  id: string
-  titulo: string
-  tipo: string
-  obrigatorio: boolean
-  opcoes?: string[]
-  placeholder?: string
-  secao?: string
+  id: string;
+  titulo: string;
+  tipo: string;
+  obrigatorio: boolean;
+  opcoes?: string[];
+  placeholder?: string;
+  secao?: string;
 }
 
 interface MobilePreviewProps {
-  titulo: string
-  descricao?: string
-  itens: PreviewItem[]
-  showPreview: boolean
-  onTogglePreview: (show: boolean) => void
+  titulo: string;
+  descricao?: string;
+  itens: PreviewItem[];
+  showPreview: boolean;
+  onTogglePreview: (show: boolean) => void;
 }
 
 export default function MobilePreview({
@@ -43,12 +43,13 @@ export default function MobilePreview({
   descricao,
   itens,
   showPreview,
-  onTogglePreview
+  onTogglePreview,
 }: MobilePreviewProps) {
-  
-  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('mobile')
-  const [zoom, setZoom] = useState(1)
-  const [darkMode, setDarkMode] = useState(false)
+  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>(
+    'mobile'
+  );
+  const [zoom, setZoom] = useState(1);
+  const [darkMode, setDarkMode] = useState(false);
 
   const getDeviceStyles = () => {
     switch (deviceType) {
@@ -56,99 +57,95 @@ export default function MobilePreview({
         return {
           width: '375px',
           height: '667px',
-          aspectRatio: '375/667'
-        }
+          aspectRatio: '375/667',
+        };
       case 'tablet':
         return {
           width: '768px',
           height: '1024px',
-          aspectRatio: '768/1024'
-        }
+          aspectRatio: '768/1024',
+        };
       case 'desktop':
         return {
           width: '1200px',
           height: '800px',
-          aspectRatio: '1200/800'
-        }
+          aspectRatio: '1200/800',
+        };
     }
-  }
+  };
 
   const renderItemField = (item: PreviewItem) => {
-    const baseClass = "w-full p-3 border rounded-lg"
-    const fieldClass = darkMode ? `${baseClass} bg-gray-800 border-gray-600 text-white` : `${baseClass} bg-white border-gray-300`
+    const baseClass = 'w-full p-3 border rounded-lg';
+    const fieldClass = darkMode
+      ? `${baseClass} bg-gray-800 border-gray-600 text-white`
+      : `${baseClass} bg-white border-gray-300`;
 
     switch (item.tipo) {
       case 'sim_nao':
         return (
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1 touch-manipulation h-12"
               disabled
             >
               ✅ Sim
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1 touch-manipulation h-12"
               disabled
             >
               ❌ Não
             </Button>
           </div>
-        )
-      
+        );
+
       case 'texto':
         return (
           <input
             type="text"
-            placeholder={item.placeholder || "Digite aqui..."}
+            placeholder={item.placeholder || 'Digite aqui...'}
             className={fieldClass}
             disabled
           />
-        )
-      
+        );
+
       case 'numero':
         return (
           <input
             type="number"
-            placeholder={item.placeholder || "0"}
+            placeholder={item.placeholder || '0'}
             className={fieldClass}
             disabled
           />
-        )
-      
+        );
+
       case 'data':
-        return (
-          <input
-            type="date"
-            className={fieldClass}
-            disabled
-          />
-        )
-      
+        return <input type="date" className={fieldClass} disabled />;
+
       case 'foto_camera':
         return (
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full h-24 touch-manipulation"
             disabled
           >
             📷 Tirar Foto
           </Button>
-        )
-      
+        );
+
       case 'foto_upload':
         return (
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full h-24 touch-manipulation"
             disabled
           >
             🖼️ Enviar Imagem
           </Button>
-        )
-      
+        );
+
       case 'avaliacao':
         return (
           <div className="flex justify-center gap-2">
@@ -162,15 +159,15 @@ export default function MobilePreview({
               </button>
             ))}
           </div>
-        )
-      
+        );
+
       case 'assinatura':
         return (
           <div className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center">
             <span className="text-gray-500">✍️ Área de Assinatura</span>
           </div>
-        )
-      
+        );
+
       default:
         return (
           <input
@@ -179,18 +176,21 @@ export default function MobilePreview({
             className={fieldClass}
             disabled
           />
-        )
+        );
     }
-  }
+  };
 
-  const groupedItems = itens.reduce((acc, item) => {
-    const secao = item.secao || 'Geral'
-    if (!acc[secao]) {
-      acc[secao] = []
-    }
-    acc[secao].push(item)
-    return acc
-  }, {} as Record<string, PreviewItem[]>)
+  const groupedItems = itens.reduce(
+    (acc, item) => {
+      const secao = item.secao || 'Geral';
+      if (!acc[secao]) {
+        acc[secao] = [];
+      }
+      acc[secao].push(item);
+      return acc;
+    },
+    {} as Record<string, PreviewItem[]>
+  );
 
   if (!showPreview) {
     return (
@@ -204,7 +204,7 @@ export default function MobilePreview({
           Preview Mobile
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -216,7 +216,7 @@ export default function MobilePreview({
             <Smartphone className="w-5 h-5 text-blue-600" />
             <span className="font-semibold">Preview Mobile</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* Controles de Dispositivo */}
             <div className="flex bg-gray-100 rounded-lg p-1">
@@ -267,10 +267,7 @@ export default function MobilePreview({
             {/* Dark Mode */}
             <div className="flex items-center gap-2">
               <span className="text-sm">Dark</span>
-              <Switch
-                checked={darkMode}
-                onCheckedChange={setDarkMode}
-              />
+              <Switch checked={darkMode} onCheckedChange={setDarkMode} />
             </div>
 
             {/* Fechar */}
@@ -286,27 +283,33 @@ export default function MobilePreview({
 
         {/* Preview Content */}
         <div className="p-4 overflow-auto max-h-[80vh]">
-          <div 
+          <div
             className="mx-auto border-2 border-gray-300 rounded-lg overflow-hidden shadow-lg"
             style={{
               ...getDeviceStyles(),
               transform: `scale(${zoom})`,
-              transformOrigin: 'top center'
+              transformOrigin: 'top center',
             }}
           >
             {/* Simulação da Tela */}
-            <div 
+            <div
               className={`h-full overflow-auto ${
                 darkMode ? 'bg-gray-900' : 'bg-gray-50'
               }`}
             >
               {/* Header do App */}
-              <div className={`p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-b`}>
-                <h1 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              <div
+                className={`p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'} border-b`}
+              >
+                <h1
+                  className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}
+                >
                   {titulo || 'Checklist'}
                 </h1>
                 {descricao && (
-                  <p className={`text-sm mt-1 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  <p
+                    className={`text-sm mt-1 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}
+                  >
                     {descricao}
                   </p>
                 )}
@@ -317,22 +320,33 @@ export default function MobilePreview({
                 {Object.entries(groupedItems).map(([secao, items]) => (
                   <div key={secao}>
                     {/* Título da Seção */}
-                    <h2 className={`text-base font-semibold mb-3 ${
-                      darkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
+                    <h2
+                      className={`text-base font-semibold mb-3 ${
+                        darkMode ? 'text-white' : 'text-gray-900'
+                      }`}
+                    >
                       {secao}
                     </h2>
 
                     {/* Itens da Seção */}
                     <div className="space-y-3">
-                      {items.map((item) => (
-                        <Card key={item.id} className={darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white'}>
+                      {items.map(item => (
+                        <Card
+                          key={item.id}
+                          className={
+                            darkMode
+                              ? 'bg-gray-800 border-gray-700'
+                              : 'bg-white'
+                          }
+                        >
                           <CardContent className="p-3">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1">
-                                <h3 className={`text-sm font-medium ${
-                                  darkMode ? 'text-white' : 'text-gray-900'
-                                }`}>
+                                <h3
+                                  className={`text-sm font-medium ${
+                                    darkMode ? 'text-white' : 'text-gray-900'
+                                  }`}
+                                >
                                   {item.titulo}
                                 </h3>
                                 <div className="flex items-center gap-1 mt-1">
@@ -347,7 +361,7 @@ export default function MobilePreview({
                                 </div>
                               </div>
                             </div>
-                            
+
                             {renderItemField(item)}
                           </CardContent>
                         </Card>
@@ -358,7 +372,7 @@ export default function MobilePreview({
 
                 {/* Botão de Envio */}
                 <div className="pt-4">
-                  <Button 
+                  <Button
                     className="w-full bg-blue-600 hover:bg-blue-700 touch-manipulation"
                     size="lg"
                     disabled
@@ -374,12 +388,13 @@ export default function MobilePreview({
         {/* Footer com Informações */}
         <div className="p-4 border-t bg-gray-50 text-center">
           <p className="text-sm text-gray-600">
-            📱 Preview: {deviceType} • {itens.length} itens • Zoom: {Math.round(zoom * 100)}%
+            📱 Preview: {deviceType} • {itens.length} itens • Zoom:{' '}
+            {Math.round(zoom * 100)}%
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // =====================================================
@@ -387,28 +402,28 @@ export default function MobilePreview({
 // =====================================================
 
 export function useMobilePreview() {
-  const [showPreview, setShowPreview] = useState(false)
+  const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState<{
-    titulo: string
-    descricao?: string
-    itens: PreviewItem[]
+    titulo: string;
+    descricao?: string;
+    itens: PreviewItem[];
   }>({
     titulo: '',
-    itens: []
-  })
+    itens: [],
+  });
 
   const updatePreview = (data: Partial<typeof previewData>) => {
-    setPreviewData(prev => ({ ...prev, ...data }))
-  }
+    setPreviewData(prev => ({ ...prev, ...data }));
+  };
 
   const togglePreview = (show?: boolean) => {
-    setShowPreview(show ?? !showPreview)
-  }
+    setShowPreview(show ?? !showPreview);
+  };
 
   return {
     showPreview,
     previewData,
     updatePreview,
-    togglePreview
-  }
-} 
+    togglePreview,
+  };
+}

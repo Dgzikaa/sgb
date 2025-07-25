@@ -1,32 +1,38 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Settings, 
-  CheckSquare, 
-  Target, 
-  Database, 
-  Shield, 
-  MessageSquare, 
-  Zap, 
-  Clock, 
-  FileText, 
-  BarChart3, 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Settings,
+  CheckSquare,
+  Target,
+  Database,
+  Shield,
+  MessageSquare,
+  Zap,
+  Clock,
+  FileText,
+  BarChart3,
   Smartphone,
   Users,
   Bell,
   Key,
-  CreditCard
-} from 'lucide-react'
-import Link from 'next/link'
+  CreditCard,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function ConfiguracoesPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <ProtectedRoute requiredModule="configuracoes">
@@ -55,8 +61,12 @@ export default function ConfiguracoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Configurações</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">10</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Configurações
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      10
+                    </p>
                   </div>
                   <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
                     <Settings className="w-6 h-6 text-gray-600 dark:text-gray-400" />
@@ -69,8 +79,12 @@ export default function ConfiguracoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Integrações</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">5</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Integrações
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      5
+                    </p>
                   </div>
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                     <Database className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -83,8 +97,12 @@ export default function ConfiguracoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Usuários</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Usuários
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      12
+                    </p>
                   </div>
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                     <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -97,8 +115,12 @@ export default function ConfiguracoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Alertas</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">3</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Alertas
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      3
+                    </p>
                   </div>
                   <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                     <Bell className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -119,11 +141,16 @@ export default function ConfiguracoesPage() {
                       <CheckSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Checklists</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Checklists
+                      </CardTitle>
                       <CardDescription>Configurar checklists</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                  >
                     Ativo
                   </Badge>
                 </div>
@@ -133,9 +160,14 @@ export default function ConfiguracoesPage() {
                   Configure templates e gerencie checklists
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Templates 8</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Templates 8
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: '80%' }}></div>
+                    <div
+                      className="h-full bg-green-500 rounded-full"
+                      style={{ width: '80%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/checklists">
@@ -155,11 +187,16 @@ export default function ConfiguracoesPage() {
                       <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Metas</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Metas
+                      </CardTitle>
                       <CardDescription>Configurar metas</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                  >
                     Ativo
                   </Badge>
                 </div>
@@ -169,9 +206,14 @@ export default function ConfiguracoesPage() {
                   Defina e gerencie metas do estabelecimento
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Metas ativas 5</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Metas ativas 5
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: '60%' }}></div>
+                    <div
+                      className="h-full bg-blue-500 rounded-full"
+                      style={{ width: '60%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/metas">
@@ -191,11 +233,16 @@ export default function ConfiguracoesPage() {
                       <Database className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Integrações</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Integrações
+                      </CardTitle>
                       <CardDescription>APIs e integrações</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                  >
                     Popular
                   </Badge>
                 </div>
@@ -205,9 +252,14 @@ export default function ConfiguracoesPage() {
                   Configure integrações com APIs externas
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">APIs conectadas 3</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    APIs conectadas 3
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 rounded-full" style={{ width: '40%' }}></div>
+                    <div
+                      className="h-full bg-purple-500 rounded-full"
+                      style={{ width: '40%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/integracoes">
@@ -227,11 +279,18 @@ export default function ConfiguracoesPage() {
                       <Shield className="w-6 h-6 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Segurança</CardTitle>
-                      <CardDescription>Configurações de segurança</CardDescription>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Segurança
+                      </CardTitle>
+                      <CardDescription>
+                        Configurações de segurança
+                      </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+                  >
                     Crítico
                   </Badge>
                 </div>
@@ -241,9 +300,14 @@ export default function ConfiguracoesPage() {
                   Configure segurança e permissões do sistema
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Alertas 3</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Alertas 3
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-500 rounded-full" style={{ width: '30%' }}></div>
+                    <div
+                      className="h-full bg-red-500 rounded-full"
+                      style={{ width: '30%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/seguranca">
@@ -263,11 +327,16 @@ export default function ConfiguracoesPage() {
                       <MessageSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">WhatsApp</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        WhatsApp
+                      </CardTitle>
                       <CardDescription>Configurar WhatsApp</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                  >
                     Conectado
                   </Badge>
                 </div>
@@ -277,9 +346,14 @@ export default function ConfiguracoesPage() {
                   Configure integração com WhatsApp
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Webhooks 2</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Webhooks 2
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: '70%' }}></div>
+                    <div
+                      className="h-full bg-green-500 rounded-full"
+                      style={{ width: '70%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/whatsapp">
@@ -299,28 +373,45 @@ export default function ConfiguracoesPage() {
                       <CreditCard className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Inter Webhook</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Inter Webhook
+                      </CardTitle>
                       <CardDescription>Notificações PIX</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300"
+                  >
                     PIX
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Configure webhook para receber notificações de pagamentos PIX do Banco Inter
+                  Configure webhook para receber notificações de pagamentos PIX
+                  do Banco Inter
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Webhook PIX</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Webhook PIX
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-orange-500 rounded-full" style={{ width: '0%' }}></div>
+                    <div
+                      className="h-full bg-orange-500 rounded-full"
+                      style={{ width: '0%' }}
+                    ></div>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Link href="/configuracoes/inter-certificados" className="flex-1">
-                    <Button variant="outline" className="w-full btn-outline-dark">
+                  <Link
+                    href="/configuracoes/inter-certificados"
+                    className="flex-1"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full btn-outline-dark"
+                    >
                       Certificados
                     </Button>
                   </Link>
@@ -342,11 +433,18 @@ export default function ConfiguracoesPage() {
                       <Zap className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">ContaHub Auto</CardTitle>
-                      <CardDescription>Sincronização automática</CardDescription>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        ContaHub Auto
+                      </CardTitle>
+                      <CardDescription>
+                        Sincronização automática
+                      </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                  >
                     Auto
                   </Badge>
                 </div>
@@ -356,7 +454,9 @@ export default function ConfiguracoesPage() {
                   Configure sincronização automática com ContaHub
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Sync ativo</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Sync ativo
+                  </span>
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 </div>
                 <Link href="/configuracoes/contahub-automatico">
@@ -376,11 +476,16 @@ export default function ConfiguracoesPage() {
                       <Clock className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Meta Config</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Meta Config
+                      </CardTitle>
                       <CardDescription>Configuração Meta</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300"
+                  >
                     Beta
                   </Badge>
                 </div>
@@ -390,9 +495,14 @@ export default function ConfiguracoesPage() {
                   Configure integração com Meta/Facebook
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Campanhas 0</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Campanhas 0
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-cyan-500 rounded-full" style={{ width: '0%' }}></div>
+                    <div
+                      className="h-full bg-cyan-500 rounded-full"
+                      style={{ width: '0%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/meta-config">
@@ -412,11 +522,16 @@ export default function ConfiguracoesPage() {
                       <FileText className="w-6 h-6 text-pink-600 dark:text-pink-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Templates</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Templates
+                      </CardTitle>
                       <CardDescription>Gerenciar templates</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300"
+                  >
                     Docs
                   </Badge>
                 </div>
@@ -426,9 +541,14 @@ export default function ConfiguracoesPage() {
                   Gerencie templates de relatórios e documentos
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Templates 15</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Templates 15
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-pink-500 rounded-full" style={{ width: '90%' }}></div>
+                    <div
+                      className="h-full bg-pink-500 rounded-full"
+                      style={{ width: '90%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/templates">
@@ -448,11 +568,16 @@ export default function ConfiguracoesPage() {
                       <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Analytics</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Analytics
+                      </CardTitle>
                       <CardDescription>Configurar analytics</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                  >
                     Dados
                   </Badge>
                 </div>
@@ -462,9 +587,14 @@ export default function ConfiguracoesPage() {
                   Configure analytics e métricas do sistema
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Métricas 24</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Métricas 24
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: '75%' }}></div>
+                    <div
+                      className="h-full bg-blue-500 rounded-full"
+                      style={{ width: '75%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/configuracoes/analytics">
@@ -484,11 +614,16 @@ export default function ConfiguracoesPage() {
                       <Smartphone className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">PWA</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        PWA
+                      </CardTitle>
                       <CardDescription>Progressive Web App</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300"
+                  >
                     Mobile
                   </Badge>
                 </div>
@@ -498,7 +633,9 @@ export default function ConfiguracoesPage() {
                   Configure Progressive Web App
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Instalado</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Instalado
+                  </span>
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 </div>
                 <Link href="/configuracoes/pwa">
@@ -512,5 +649,5 @@ export default function ConfiguracoesPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
-} 
+  );
+}

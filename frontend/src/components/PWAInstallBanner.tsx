@@ -1,130 +1,130 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { usePWA } from '@/hooks/usePWA'
-import { 
-  Download, 
-  X, 
-  Smartphone, 
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { usePWA } from '@/hooks/usePWA';
+import {
+  Download,
+  X,
+  Smartphone,
   Monitor,
   Zap,
   Wifi,
-  Bell
-} from 'lucide-react'
+  Bell,
+} from 'lucide-react';
 
 interface PWAInstallBannerProps {
-  className?: string
-  variant?: 'floating' | 'inline' | 'modal'
-  autoShow?: boolean
-  showDelay?: number
+  className?: string;
+  variant?: 'floating' | 'inline' | 'modal';
+  autoShow?: boolean;
+  showDelay?: number;
 }
 
-export function PWAInstallBanner({ 
+export function PWAInstallBanner({
   className = '',
   variant = 'floating',
   autoShow = true,
-  showDelay = 3000
+  showDelay = 3000,
 }: PWAInstallBannerProps) {
-  const { 
-    isInstallable, 
-    isInstalled, 
+  const {
+    isInstallable,
+    isInstalled,
     isLoading,
     install,
     enableNotifications,
-    notificationPermission
-  } = usePWA()
-  
-  const [isVisible, setIsVisible] = useState(false)
-  const [isDismissed, setIsDismissed] = useState(false)
-  const [isInstalling, setIsInstalling] = useState(false)
+    notificationPermission,
+  } = usePWA();
+
+  const [isVisible, setIsVisible] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
 
   // Controlar visibilidade do banner
   useEffect(() => {
     if (!autoShow || isInstalled || isDismissed || !isInstallable) {
-      return
+      return;
     }
 
     // Verificar se o usuário já dismissou antes
-    const dismissed = localStorage.getItem('pwa-banner-dismissed')
+    const dismissed = localStorage.getItem('pwa-banner-dismissed');
     if (dismissed) {
-      const dismissedTime = parseInt(dismissed)
-      const now = Date.now()
+      const dismissedTime = parseInt(dismissed);
+      const now = Date.now();
       // Mostrar novamente após 7 dias
       if (now - dismissedTime < 7 * 24 * 60 * 60 * 1000) {
-        setIsDismissed(true)
-        return
+        setIsDismissed(true);
+        return;
       }
     }
 
     const timer = setTimeout(() => {
-      setIsVisible(true)
-    }, showDelay)
+      setIsVisible(true);
+    }, showDelay);
 
-    return () => clearTimeout(timer)
-  }, [autoShow, isInstalled, isDismissed, isInstallable, showDelay])
+    return () => clearTimeout(timer);
+  }, [autoShow, isInstalled, isDismissed, isInstallable, showDelay]);
 
   const handleInstall = async () => {
-    setIsInstalling(true)
-    
+    setIsInstalling(true);
+
     try {
-      const success = await install()
+      const success = await install();
       if (success) {
-        setIsVisible(false)
-        setIsDismissed(true)
+        setIsVisible(false);
+        setIsDismissed(true);
       }
     } catch (error) {
-      console.error('Erro na instalação:', error)
+      console.error('Erro na instalação:', error);
     } finally {
-      setIsInstalling(false)
+      setIsInstalling(false);
     }
-  }
+  };
 
   const handleDismiss = () => {
-    setIsVisible(false)
-    setIsDismissed(true)
-    
+    setIsVisible(false);
+    setIsDismissed(true);
+
     // Salvar no localStorage
-    localStorage.setItem('pwa-banner-dismissed', Date.now().toString())
-  }
+    localStorage.setItem('pwa-banner-dismissed', Date.now().toString());
+  };
 
   const handleEnableNotifications = async () => {
-    await enableNotifications()
-  }
+    await enableNotifications();
+  };
 
   // Não mostrar se não for necessário
   if (isLoading || isInstalled || !isInstallable || isDismissed || !isVisible) {
-    return null
+    return null;
   }
 
   const features = [
     {
       icon: Zap,
-      text: 'Acesso instantâneo'
+      text: 'Acesso instantâneo',
     },
     {
       icon: Wifi,
-      text: 'Funciona offline'
+      text: 'Funciona offline',
     },
     {
       icon: Bell,
-      text: 'Notificações push'
-    }
-  ]
+      text: 'Notificações push',
+    },
+  ];
 
   const getVariantStyles = () => {
     switch (variant) {
       case 'floating':
-        return `fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md ${className}`
+        return `fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md ${className}`;
       case 'modal':
-        return `fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 ${className}`
+        return `fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 ${className}`;
       case 'inline':
       default:
-        return `w-full ${className}`
+        return `w-full ${className}`;
     }
-  }
+  };
 
   const CardWrapper = ({ children }: { children: React.ReactNode }) => {
     if (variant === 'modal') {
@@ -132,15 +132,15 @@ export function PWAInstallBanner({
         <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-xl">
           {children}
         </Card>
-      )
+      );
     }
 
     return (
       <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg">
         {children}
       </Card>
-    )
-  }
+    );
+  };
 
   return (
     <div className={getVariantStyles()}>
@@ -159,7 +159,7 @@ export function PWAInstallBanner({
                 <Badge className="badge-primary text-xs">PWA</Badge>
               </div>
             </div>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -172,13 +172,17 @@ export function PWAInstallBanner({
 
           {/* Descrição */}
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Adicione o SGB à sua tela inicial para acesso rápido e experiência nativa.
+            Adicione o SGB à sua tela inicial para acesso rápido e experiência
+            nativa.
           </p>
 
           {/* Features */}
           <div className="grid grid-cols-3 gap-2 mb-4">
             {features.map((feature, index) => (
-              <div key={index} className="flex flex-col items-center text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div
+                key={index}
+                className="flex flex-col items-center text-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+              >
                 <feature.icon className="w-4 h-4 text-blue-500 mb-1" />
                 <span className="text-xs text-gray-600 dark:text-gray-400">
                   {feature.text}
@@ -195,7 +199,9 @@ export function PWAInstallBanner({
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
               size="sm"
             >
-              <Download className={`w-4 h-4 mr-2 ${isInstalling ? 'animate-bounce' : ''}`} />
+              <Download
+                className={`w-4 h-4 mr-2 ${isInstalling ? 'animate-bounce' : ''}`}
+              />
               {isInstalling ? 'Instalando...' : 'Instalar App'}
             </Button>
 
@@ -224,32 +230,25 @@ export function PWAInstallBanner({
 
       {/* Backdrop para modal */}
       {variant === 'modal' && (
-        <div 
-          className="absolute inset-0 -z-10" 
-          onClick={handleDismiss}
-        />
+        <div className="absolute inset-0 -z-10" onClick={handleDismiss} />
       )}
     </div>
-  )
+  );
 }
 
 // Hook para usar o banner programaticamente
 export function usePWAInstallBanner() {
-  const [isVisible, setIsVisible] = useState(false)
-  
-  const showBanner = () => setIsVisible(true)
-  const hideBanner = () => setIsVisible(false)
-  
+  const [isVisible, setIsVisible] = useState(false);
+
+  const showBanner = () => setIsVisible(true);
+  const hideBanner = () => setIsVisible(false);
+
   return {
     isVisible,
     showBanner,
     hideBanner,
     PWABanner: ({ ...props }) => (
-      <PWAInstallBanner
-        {...props}
-        variant="modal"
-        autoShow={false}
-      />
-    )
-  }
-} 
+      <PWAInstallBanner {...props} variant="modal" autoShow={false} />
+    ),
+  };
+}

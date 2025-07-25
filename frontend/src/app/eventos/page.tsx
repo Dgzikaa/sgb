@@ -1,18 +1,29 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
-import { useBar } from '@/contexts/BarContext'
-import { usePageTitle } from '@/contexts/PageTitleContext'
-import { 
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { useBar } from '@/contexts/BarContext';
+import { usePageTitle } from '@/contexts/PageTitleContext';
+import {
   Calendar,
   Plus,
   Edit3,
@@ -25,33 +36,43 @@ import {
   ChevronRight,
   Filter,
   Search,
-  Eye
-} from 'lucide-react'
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+  Eye,
+} from 'lucide-react';
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  isToday,
+} from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface Evento {
-  id: number
-  nome: string
-  data: string
-  hora: string
-  local: string
-  descricao?: string
-  status: string
-  categoria: string
-  capacidade: number
-  ingressos_vendidos: number
-  preco: number
-  organizador: string
-  created_at: string
-  updated_at: string
+  id: number;
+  nome: string;
+  data: string;
+  hora: string;
+  local: string;
+  descricao?: string;
+  status: string;
+  categoria: string;
+  capacidade: number;
+  ingressos_vendidos: number;
+  preco: number;
+  organizador: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface CategoriaEvento {
-  id: string
-  nome: string
-  cor: string
-  icon: string
+  id: string;
+  nome: string;
+  cor: string;
+  icon: string;
 }
 
 const categoriasPadrao: CategoriaEvento[] = [
@@ -62,171 +83,185 @@ const categoriasPadrao: CategoriaEvento[] = [
   { id: 'gastronomia', nome: 'Gastronomia', cor: 'bg-yellow-500', icon: '🍽️' },
   { id: 'networking', nome: 'Networking', cor: 'bg-blue-500', icon: '🤝' },
   { id: 'promocao', nome: 'Promoção', cor: 'bg-red-500', icon: '🏷️' },
-  { id: 'especial', nome: 'Data Especial', cor: 'bg-indigo-500', icon: '🌟' }
-]
+  { id: 'especial', nome: 'Data Especial', cor: 'bg-indigo-500', icon: '🌟' },
+];
 
 export default function EventosPage() {
-  const { toast } = useToast()
-  const { selectedBar } = useBar()
-  const { setPageTitle } = usePageTitle()
-  
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [eventos, setEventos] = useState<Evento[]>([])
-  const [showEventModal, setShowEventModal] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [editingEvent, setEditingEvent] = useState<Evento | null>(null)
-  const [filtroCategoria, setFiltroCategoria] = useState<string>('all')
-  const [filtroStatus, setFiltroStatus] = useState<string>('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar')
+  const { toast } = useToast();
+  const { selectedBar } = useBar();
+  const { setPageTitle } = usePageTitle();
+
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [eventos, setEventos] = useState<Evento[]>([]);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [editingEvent, setEditingEvent] = useState<Evento | null>(null);
+  const [filtroCategoria, setFiltroCategoria] = useState<string>('all');
+  const [filtroStatus, setFiltroStatus] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
 
   useEffect(() => {
-    setPageTitle('Eventos & Planejamento')
-    return () => setPageTitle('')
-  }, [setPageTitle])
+    setPageTitle('Eventos & Planejamento');
+    return () => setPageTitle('');
+  }, [setPageTitle]);
 
   const loadEventos = useCallback(async () => {
-    if (!selectedBar) return
-    
+    if (!selectedBar) return;
+
     try {
-      setLoading(true)
-      const response = await fetch(`/api/eventos?bar_id=${selectedBar.id}&ano=${currentDate.getFullYear()}&mes=${currentDate.getMonth() + 1}`)
-      const data = await response.json()
-      
+      setLoading(true);
+      const response = await fetch(
+        `/api/eventos?bar_id=${selectedBar.id}&ano=${currentDate.getFullYear()}&mes=${currentDate.getMonth() + 1}`
+      );
+      const data = await response.json();
+
       if (data.success) {
-        setEventos(data.data || [])
+        setEventos(data.data || []);
       } else {
-        console.error('Erro ao carregar eventos:', data.error)
+        console.error('Erro ao carregar eventos:', data.error);
         toast({
           title: '❌ Erro',
           description: 'Falha ao carregar eventos',
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error('Erro ao carregar eventos:', error)
+      console.error('Erro ao carregar eventos:', error);
       toast({
         title: '❌ Erro',
         description: 'Falha ao carregar eventos',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [selectedBar?.id, currentDate, toast]);
+  }, [selectedBar, currentDate, toast]);
 
   useEffect(() => {
     if (selectedBar) {
-      loadEventos()
+      loadEventos();
     }
-  }, [loadEventos])
+  }, [loadEventos, selectedBar]);
 
   const saveEvento = async (evento: Partial<Evento>) => {
-    if (!selectedBar) return
-    
+    if (!selectedBar) return;
+
     try {
-      setLoading(true)
-      
+      setLoading(true);
+
       const eventoData = {
         ...evento,
-        bar_id: selectedBar.id
-      }
-      
+        bar_id: selectedBar.id,
+      };
+
       const response = await fetch('/api/eventos', {
         method: editingEvent ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingEvent ? { id: editingEvent.id, ...eventoData } : [eventoData])
-      })
-      
-      const result = await response.json()
-      
+        body: JSON.stringify(
+          editingEvent ? { id: editingEvent.id, ...eventoData } : [eventoData]
+        ),
+      });
+
+      const result = await response.json();
+
       if (result.success) {
         toast({
           title: '✅ Sucesso',
-          description: editingEvent ? 'Evento atualizado!' : 'Evento criado!'
-        })
-        setShowEventModal(false)
-        setEditingEvent(null)
-        loadEventos()
+          description: editingEvent ? 'Evento atualizado!' : 'Evento criado!',
+        });
+        setShowEventModal(false);
+        setEditingEvent(null);
+        loadEventos();
       } else {
-        throw new Error(result.error)
+        throw new Error(result.error);
       }
     } catch (error) {
-      console.error('Erro ao salvar evento:', error)
+      console.error('Erro ao salvar evento:', error);
       toast({
         title: '❌ Erro',
         description: 'Falha ao salvar evento',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const deleteEvento = async (id: number) => {
-    if (!confirm('Tem certeza que deseja deletar este evento?')) return
-    
+    if (!confirm('Tem certeza que deseja deletar este evento?')) return;
+
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await fetch(`/api/eventos?id=${id}`, {
-        method: 'DELETE'
-      })
-      
-      const result = await response.json()
-      
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
       if (result.success) {
         toast({
           title: '✅ Sucesso',
-          description: 'Evento deletado!'
-        })
-        loadEventos()
+          description: 'Evento deletado!',
+        });
+        loadEventos();
       } else {
-        throw new Error(result.error)
+        throw new Error(result.error);
       }
     } catch (error) {
-      console.error('Erro ao deletar evento:', error)
+      console.error('Erro ao deletar evento:', error);
       toast({
         title: '❌ Erro',
         description: 'Falha ao deletar evento',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getCategoria = (categoriaId: string) => {
-    return categoriasPadrao.find(cat => cat.id === categoriaId) || categoriasPadrao[0]
-  }
+    return (
+      categoriasPadrao.find(cat => cat.id === categoriaId) ||
+      categoriasPadrao[0]
+    );
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmado':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
       case 'planejado':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
       case 'cancelado':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
       case 'concluido':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
     }
-  }
+  };
 
   const filteredEventos = eventos.filter(evento => {
-    const matchesCategoria = filtroCategoria === 'all' || evento.categoria === filtroCategoria
-    const matchesStatus = filtroStatus === 'all' || evento.status === filtroStatus
-    const matchesSearch = searchTerm === '' || 
+    const matchesCategoria =
+      filtroCategoria === 'all' || evento.categoria === filtroCategoria;
+    const matchesStatus =
+      filtroStatus === 'all' || evento.status === filtroStatus;
+    const matchesSearch =
+      searchTerm === '' ||
       evento.nome_evento.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      evento.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    return matchesCategoria && matchesStatus && matchesSearch
-  })
+      evento.descricao?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesCategoria && matchesStatus && matchesSearch;
+  });
 
   const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(direction === 'prev' ? subMonths(currentDate, 1) : addMonths(currentDate, 1))
-  }
+    setCurrentDate(
+      direction === 'prev'
+        ? subMonths(currentDate, 1)
+        : addMonths(currentDate, 1)
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -239,13 +274,15 @@ export default function EventosPage() {
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Eventos & Planejamento</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Eventos & Planejamento
+                </h1>
                 <p className="text-gray-600 dark:text-gray-400">
                   Gerencie e planeje os eventos do seu bar
                 </p>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                 <Button
@@ -267,18 +304,18 @@ export default function EventosPage() {
                   Lista
                 </Button>
               </div>
-              
-              <Button 
+
+              <Button
                 className="bg-purple-600 hover:bg-purple-700 text-white"
                 onClick={() => {
-                  setEditingEvent(null)
-                  setShowEventModal(true)
+                  setEditingEvent(null);
+                  setShowEventModal(true);
                 }}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Evento
               </Button>
-              
+
               <Dialog open={showEventModal} onOpenChange={setShowEventModal}>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
@@ -286,18 +323,18 @@ export default function EventosPage() {
                       {editingEvent ? 'Editar Evento' : 'Novo Evento'}
                     </DialogTitle>
                   </DialogHeader>
-                  <EventForm 
+                  <EventForm
                     evento={editingEvent}
                     onSave={saveEvento}
                     onCancel={() => {
-                      setShowEventModal(false)
-                      setEditingEvent(null)
+                      setShowEventModal(false);
+                      setEditingEvent(null);
                     }}
                     categorias={categoriasPadrao}
                     loading={loading}
                   />
-                                  </DialogContent>
-                </Dialog>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
@@ -306,21 +343,28 @@ export default function EventosPage() {
             <CardContent className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                  <Label className="text-sm text-gray-600 dark:text-gray-400">Buscar eventos</Label>
+                  <Label className="text-sm text-gray-600 dark:text-gray-400">
+                    Buscar eventos
+                  </Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
                       placeholder="Nome, descrição..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={e => setSearchTerm(e.target.value)}
                       className="pl-10"
                     />
                   </div>
                 </div>
-                
+
                 <div>
-                  <Label className="text-sm text-gray-600 dark:text-gray-400">Categoria</Label>
-                  <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
+                  <Label className="text-sm text-gray-600 dark:text-gray-400">
+                    Categoria
+                  </Label>
+                  <Select
+                    value={filtroCategoria}
+                    onValueChange={setFiltroCategoria}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -334,9 +378,11 @@ export default function EventosPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
-                  <Label className="text-sm text-gray-600 dark:text-gray-400">Status</Label>
+                  <Label className="text-sm text-gray-600 dark:text-gray-400">
+                    Status
+                  </Label>
                   <Select value={filtroStatus} onValueChange={setFiltroStatus}>
                     <SelectTrigger>
                       <SelectValue />
@@ -350,15 +396,15 @@ export default function EventosPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="flex items-end">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => {
-                      setFiltroCategoria('all')
-                      setFiltroStatus('all')
-                      setSearchTerm('')
+                      setFiltroCategoria('all');
+                      setFiltroStatus('all');
+                      setSearchTerm('');
                     }}
                   >
                     <Filter className="w-4 h-4 mr-2" />
@@ -406,9 +452,9 @@ export default function EventosPage() {
                 <CalendarView
                   currentDate={currentDate}
                   eventos={filteredEventos}
-                  onEditEvent={(evento) => {
-                    setEditingEvent(evento)
-                    setShowEventModal(true)
+                  onEditEvent={evento => {
+                    setEditingEvent(evento);
+                    setShowEventModal(true);
                   }}
                   onDeleteEvent={deleteEvento}
                   categorias={categoriasPadrao}
@@ -423,9 +469,9 @@ export default function EventosPage() {
               <CardContent>
                 <EventList
                   eventos={filteredEventos}
-                  onEditEvent={(evento) => {
-                    setEditingEvent(evento)
-                    setShowEventModal(true)
+                  onEditEvent={evento => {
+                    setEditingEvent(evento);
+                    setShowEventModal(true);
                   }}
                   onDeleteEvent={deleteEvento}
                   categorias={categoriasPadrao}
@@ -444,10 +490,12 @@ export default function EventosPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {eventos.length}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total do Mês</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Total do Mês
+                </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -456,10 +504,12 @@ export default function EventosPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {eventos.filter(e => e.status === 'confirmado').length}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Confirmados</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Confirmados
+                </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -468,10 +518,12 @@ export default function EventosPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {eventos.filter(e => e.status === 'planejado').length}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Planejados</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Planejados
+                </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="p-4 text-center">
                 <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -480,29 +532,31 @@ export default function EventosPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {new Set(eventos.map(e => e.categoria)).size}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Categorias</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Categorias
+                </p>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Componente do formulário de evento
-function EventForm({ 
-  evento, 
-  onSave, 
-  onCancel, 
-  categorias, 
-  loading 
+function EventForm({
+  evento,
+  onSave,
+  onCancel,
+  categorias,
+  loading,
 }: {
-  evento: Evento | null
-  onSave: (evento: Partial<Evento>) => void
-  onCancel: () => void
-  categorias: CategoriaEvento[]
-  loading: boolean
+  evento: Evento | null;
+  onSave: (evento: Partial<Evento>) => void;
+  onCancel: () => void;
+  categorias: CategoriaEvento[];
+  loading: boolean;
 }) {
   const [formData, setFormData] = useState<Partial<Evento>>({
     nome_evento: '',
@@ -514,8 +568,8 @@ function EventForm({
     local: '',
     capacidade_maxima: undefined,
     preco: undefined,
-    status: 'planejado'
-  })
+    status: 'planejado',
+  });
 
   useEffect(() => {
     if (evento) {
@@ -523,15 +577,15 @@ function EventForm({
         ...evento,
         data_evento: evento.data_evento.split('T')[0],
         hora_inicio: evento.hora_inicio || '',
-        hora_fim: evento.hora_fim || ''
-      })
+        hora_fim: evento.hora_fim || '',
+      });
     }
-  }, [evento])
+  }, [evento]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave(formData)
-  }
+    e.preventDefault();
+    onSave(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -541,7 +595,9 @@ function EventForm({
           <Input
             id="nome_evento"
             value={formData.nome_evento}
-            onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, nome_evento: e.target.value })
+            }
             placeholder="Ex: Show de Rock, Happy Hour..."
             required
           />
@@ -552,7 +608,9 @@ function EventForm({
           <Textarea
             id="descricao"
             value={formData.descricao}
-            onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, descricao: e.target.value })
+            }
             placeholder="Descreva o evento..."
             rows={3}
           />
@@ -564,14 +622,21 @@ function EventForm({
             id="data_evento"
             type="date"
             value={formData.data_evento}
-            onChange={(e) => setFormData({ ...formData, data_evento: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, data_evento: e.target.value })
+            }
             required
           />
         </div>
 
         <div>
           <Label htmlFor="categoria">Categoria *</Label>
-          <Select value={formData.categoria} onValueChange={(value) => setFormData({ ...formData, categoria: value })}>
+          <Select
+            value={formData.categoria}
+            onValueChange={value =>
+              setFormData({ ...formData, categoria: value })
+            }
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -591,7 +656,9 @@ function EventForm({
             id="hora_inicio"
             type="time"
             value={formData.hora_inicio}
-            onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, hora_inicio: e.target.value })
+            }
           />
         </div>
 
@@ -601,13 +668,20 @@ function EventForm({
             id="hora_fim"
             type="time"
             value={formData.hora_fim}
-            onChange={(e) => setFormData({ ...formData, hora_fim: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, hora_fim: e.target.value })
+            }
           />
         </div>
 
         <div>
           <Label htmlFor="status">Status *</Label>
-          <Select value={formData.status} onValueChange={(value: string) => setFormData({ ...formData, status: value })}>
+          <Select
+            value={formData.status}
+            onValueChange={(value: string) =>
+              setFormData({ ...formData, status: value })
+            }
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -625,14 +699,18 @@ function EventForm({
           <Input
             id="local"
             value={formData.local}
-            onChange={(e) => setFormData({ ...formData, local: e.target.value })}
+            onChange={e => setFormData({ ...formData, local: e.target.value })}
             placeholder="Ex: Salão Principal..."
           />
         </div>
       </div>
 
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-700">
+        <Button
+          type="submit"
+          disabled={loading}
+          className="bg-purple-600 hover:bg-purple-700"
+        >
           {loading ? 'Salvando...' : 'Salvar Evento'}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
@@ -640,51 +718,54 @@ function EventForm({
         </Button>
       </div>
     </form>
-  )
+  );
 }
 
 // Componente do calendário
-function CalendarView({ 
-  currentDate, 
-  eventos, 
-  onEditEvent, 
-  onDeleteEvent, 
-  categorias 
+function CalendarView({
+  currentDate,
+  eventos,
+  onEditEvent,
+  onDeleteEvent,
+  categorias,
 }: {
-  currentDate: Date
-  eventos: Evento[]
-  onEditEvent: (evento: Evento) => void
-  onDeleteEvent: (id: number) => void
-  categorias: CategoriaEvento[]
+  currentDate: Date;
+  eventos: Evento[];
+  onEditEvent: (evento: Evento) => void;
+  onDeleteEvent: (id: number) => void;
+  categorias: CategoriaEvento[];
 }) {
   const days = eachDayOfInterval({
     start: startOfMonth(currentDate),
-    end: endOfMonth(currentDate)
-  })
+    end: endOfMonth(currentDate),
+  });
 
   const getEventosForDay = (day: Date) => {
-    return eventos.filter(evento => isSameDay(new Date(evento.data), day))
-  }
+    return eventos.filter(evento => isSameDay(new Date(evento.data), day));
+  };
 
   const getCategoria = (categoriaId: string) => {
-    return categorias.find(cat => cat.id === categoriaId) || categorias[0]
-  }
+    return categorias.find(cat => cat.id === categoriaId) || categorias[0];
+  };
 
   return (
     <div className="grid grid-cols-7 gap-1">
       {/* Cabeçalho dos dias da semana */}
       {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-        <div key={day} className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+        <div
+          key={day}
+          className="p-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400"
+        >
           {day}
         </div>
       ))}
-      
+
       {/* Dias do mês */}
       {days.map(day => {
-        const dayEvents = getEventosForDay(day)
-        const isCurrentMonth = isSameMonth(day, currentDate)
-        const isCurrentDay = isToday(day)
-        
+        const dayEvents = getEventosForDay(day);
+        const isCurrentMonth = isSameMonth(day, currentDate);
+        const isCurrentDay = isToday(day);
+
         return (
           <div
             key={day.toISOString()}
@@ -694,17 +775,19 @@ function CalendarView({
               ${isCurrentDay ? 'ring-2 ring-purple-500' : ''}
             `}
           >
-            <div className={`
+            <div
+              className={`
               text-sm font-medium mb-1
               ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}
               ${isCurrentDay ? 'text-purple-600 dark:text-purple-400' : ''}
-            `}>
+            `}
+            >
               {format(day, 'd')}
             </div>
-            
+
             <div className="space-y-1">
               {dayEvents.slice(0, 2).map(evento => {
-                const categoria = getCategoria(evento.categoria)
+                const categoria = getCategoria(evento.categoria);
                 return (
                   <div
                     key={evento.id}
@@ -720,9 +803,9 @@ function CalendarView({
                       <span className="truncate">{evento.nome_evento}</span>
                     </div>
                   </div>
-                )
+                );
               })}
-              
+
               {dayEvents.length > 2 && (
                 <div className="text-xs text-gray-500 dark:text-gray-400 px-2">
                   +{dayEvents.length - 2}
@@ -730,56 +813,58 @@ function CalendarView({
               )}
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 // Componente da lista de eventos
-function EventList({ 
-  eventos, 
-  onEditEvent, 
-  onDeleteEvent, 
-  categorias 
+function EventList({
+  eventos,
+  onEditEvent,
+  onDeleteEvent,
+  categorias,
 }: {
-  eventos: Evento[]
-  onEditEvent: (evento: Evento) => void
-  onDeleteEvent: (id: number) => void
-  categorias: CategoriaEvento[]
+  eventos: Evento[];
+  onEditEvent: (evento: Evento) => void;
+  onDeleteEvent: (id: number) => void;
+  categorias: CategoriaEvento[];
 }) {
   const getCategoria = (categoriaId: string) => {
-    return categorias.find(cat => cat.id === categoriaId) || categorias[0]
-  }
+    return categorias.find(cat => cat.id === categoriaId) || categorias[0];
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmado':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
       case 'planejado':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
       case 'cancelado':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
       case 'concluido':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
     }
-  }
+  };
 
   if (eventos.length === 0) {
     return (
       <div className="text-center py-8">
         <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">Nenhum evento encontrado</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Nenhum evento encontrado
+        </p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-3">
       {eventos.map(evento => {
-        const categoria = getCategoria(evento.categoria)
+        const categoria = getCategoria(evento.categoria);
         return (
           <div
             key={evento.id}
@@ -796,13 +881,15 @@ function EventList({
                     {evento.status}
                   </Badge>
                 </div>
-                
+
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
-                    {format(new Date(evento.data), 'dd/MM/yyyy', { locale: ptBR })}
+                    {format(new Date(evento.data), 'dd/MM/yyyy', {
+                      locale: ptBR,
+                    })}
                   </div>
-                  
+
                   {evento.hora_inicio && (
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
@@ -810,7 +897,7 @@ function EventList({
                       {evento.hora_fim && ` - ${evento.hora_fim}`}
                     </div>
                   )}
-                  
+
                   {evento.local && (
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
@@ -818,14 +905,14 @@ function EventList({
                     </div>
                   )}
                 </div>
-                
+
                 {evento.descricao && (
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                     {evento.descricao}
                   </p>
                 )}
               </div>
-              
+
               <div className="flex gap-2 ml-4">
                 <Button
                   variant="outline"
@@ -845,8 +932,8 @@ function EventList({
               </div>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
-} 
+  );
+}

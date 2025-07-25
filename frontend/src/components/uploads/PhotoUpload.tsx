@@ -1,19 +1,20 @@
-﻿'use client'
+﻿'use client';
 
-import React, { useState, useRef } from 'react'
-import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react'
-import { useFileUpload, UploadOptions } from '@/hooks/useFileUpload'
+import React, { useState, useRef } from 'react';
+import Image from 'next/image';
+import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { useFileUpload, UploadOptions } from '@/hooks/useFileUpload';
 
 interface PhotoUploadProps {
-  onUploadComplete?: (result: unknown) => void
-  onError?: (error: string) => void
-  folder?: 'checklist_photos' | 'signatures' | 'profile_photos'
-  compress?: boolean
-  maxWidth?: number
-  quality?: number
-  showPreview?: boolean
-  multiple?: boolean
-  className?: string
+  onUploadComplete?: (result: unknown) => void;
+  onError?: (error: string) => void;
+  folder?: 'checklist_photos' | 'signatures' | 'profile_photos';
+  compress?: boolean;
+  maxWidth?: number;
+  quality?: number;
+  showPreview?: boolean;
+  multiple?: boolean;
+  className?: string;
 }
 
 export default function PhotoUpload({
@@ -25,36 +26,40 @@ export default function PhotoUpload({
   quality = 0.8,
   showPreview = true,
   multiple = false,
-  className = ''
+  className = '',
 }: PhotoUploadProps) {
-  const [previews, setPreviews] = useState<string[]>([])
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const cameraInputRef = useRef<HTMLInputElement>(null)
-  
-  const { uploadFile, uploads } = useFileUpload()
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const { uploadFile, uploads } = useFileUpload();
 
   // Função para capturar foto da câmera
-  const handleCameraCapture = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
+  const handleCameraCapture = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    await processFiles(Array.from(files))
-  }
+    await processFiles(Array.from(files));
+  };
 
   // Função para upload de arquivo
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    await processFiles(Array.from(files))
-  }
+    await processFiles(Array.from(files));
+  };
 
   // Processar arquivos selecionados
   const processFiles = async (files: File[]) => {
-    if (isUploading) return
+    if (isUploading) return;
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     try {
       const uploadOptions: UploadOptions = {
@@ -62,58 +67,61 @@ export default function PhotoUpload({
         compress,
         maxWidth,
         quality,
-        maxSizeMB: 10
-      }
+        maxSizeMB: 10,
+      };
 
       // Criar previews
       if (showPreview) {
-        const newPreviews = files.map(file => URL.createObjectURL(file))
-        setPreviews(prev => multiple ? [...prev, ...newPreviews] : newPreviews)
+        const newPreviews = files.map(file => URL.createObjectURL(file));
+        setPreviews(prev =>
+          multiple ? [...prev, ...newPreviews] : newPreviews
+        );
       }
 
       // Fazer uploads
       for (const file of files) {
         try {
-          const result = await uploadFile(file, uploadOptions)
-          
+          const result = await uploadFile(file, uploadOptions);
+
           if (onUploadComplete) {
-            onUploadComplete(result)
+            onUploadComplete(result);
           }
-          
-          console.log('✅ Upload concluído:', result.filename)
-          
+
+          console.log('✅ Upload concluído:', result.filename);
         } catch (error: unknown) {
-          console.error('❌ Erro no upload:', error)
-          
+          console.error('❌ Erro no upload:', error);
+
           if (onError) {
-            onError(error.message)
+            onError(error.message);
           }
         }
       }
-
     } catch (error: unknown) {
-      console.error('❌ Erro no processamento:', error)
-      
+      console.error('❌ Erro no processamento:', error);
+
       if (onError) {
-        onError(error.message)
+        onError(error.message);
       }
     } finally {
-      setIsUploading(false)
-      
+      setIsUploading(false);
+
       // Limpar inputs
-      if (fileInputRef.current) fileInputRef.current.value = ''
-      if (cameraInputRef.current) cameraInputRef.current.value = ''
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
     }
-  }
+  };
 
   // Remover preview
   const removePreview = (index: number) => {
-    setPreviews(prev => prev.filter((_, i) => i !== index))
-  }
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Verificar se há uploads em progresso
-  const uploadsInProgress = Object.values(uploads).some(upload => upload.loading)
-  const uploadProgress = Object.values(uploads).find(upload => upload.loading)?.progress || 0
+  const uploadsInProgress = Object.values(uploads).some(
+    upload => upload.loading
+  );
+  const uploadProgress =
+    Object.values(uploads).find(upload => upload.loading)?.progress || 0;
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -150,7 +158,7 @@ export default function PhotoUpload({
             <span>{Math.round(uploadProgress)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-blue-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
@@ -161,13 +169,17 @@ export default function PhotoUpload({
       {/* Preview das fotos */}
       {showPreview && previews.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Fotos selecionadas:</h4>
+          <h4 className="text-sm font-medium text-gray-700">
+            Fotos selecionadas:
+          </h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {previews.map((preview, index) => (
               <div key={index} className="relative group">
-                <img
+                <Image
                   src={preview}
                   alt={`Preview ${index + 1}`}
+                  width={96}
+                  height={96}
                   className="w-full h-24 object-cover rounded-lg border"
                 />
                 <button
@@ -188,7 +200,10 @@ export default function PhotoUpload({
         <p>📸 Formatos aceitos: JPEG, PNG, WebP</p>
         <p>📏 Tamanho máximo: 10MB por foto</p>
         {compress && (
-          <p>🗜️ Compressão automática ativada (máx. {maxWidth}px, qualidade {Math.round(quality * 100)}%)</p>
+          <p>
+            🗜️ Compressão automática ativada (máx. {maxWidth}px, qualidade{' '}
+            {Math.round(quality * 100)}%)
+          </p>
         )}
       </div>
 
@@ -202,7 +217,7 @@ export default function PhotoUpload({
         onChange={handleCameraCapture}
         className="hidden"
       />
-      
+
       <input
         ref={fileInputRef}
         type="file"
@@ -212,5 +227,5 @@ export default function PhotoUpload({
         className="hidden"
       />
     </div>
-  )
-} 
+  );
+}

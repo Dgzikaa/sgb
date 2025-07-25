@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const message = body.content.trim();
     const username = body.author?.username || 'Usuário Desconhecido';
-    
+
     // Bar ID do Ordinário Bar
     const BAR_ID = 3; // Ordinário Bar
 
@@ -37,16 +37,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success,
-      message: success ? 'Comando processado com sucesso' : 'Erro ao processar comando'
+      message: success
+        ? 'Comando processado com sucesso'
+        : 'Erro ao processar comando',
     });
-
   } catch (error) {
     console.error('❌ Erro no webhook Discord:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -56,24 +60,30 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const testCommand = url.searchParams.get('test') || 'dashboard executivo';
-  
+
   try {
     console.log(`🧪 Teste do Discord Bot: "${testCommand}"`);
-    
-    const success = await processDiscordCommand(testCommand, 'Sistema de Teste', 3);
-    
+
+    const success = await processDiscordCommand(
+      testCommand,
+      'Sistema de Teste',
+      3
+    );
+
     return NextResponse.json({
       success,
       message: `Teste executado: "${testCommand}"`,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('❌ Erro no teste:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

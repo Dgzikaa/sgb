@@ -14,38 +14,54 @@ export async function POST(request: NextRequest) {
       }
 
       // Configurar novo interval
-      syncInterval = setInterval(async () => {
-        console.log('🔄 Executando sincronização automática...');
-        
-        try {
-          // Chamar endpoint de sincronização
-          const response = await fetch('http://localhost:3000/api/sync/getin-reservas', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
+      syncInterval = setInterval(
+        async () => {
+          console.log('🔄 Executando sincronização automática...');
+
+          try {
+            // Chamar endpoint de sincronização
+            const response = await fetch(
+              'http://localhost:3000/api/sync/getin-reservas',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+
+            const result = await response.json();
+
+            if (result.success) {
+              console.log(
+                '✅ Sincronização automática concluída:',
+                result.data
+              );
+            } else {
+              console.error(
+                '❌ Erro na sincronização automática:',
+                result.error
+              );
             }
-          });
-
-          const result = await response.json();
-          
-          if (result.success) {
-            console.log('✅ Sincronização automática concluída:', result.data);
-          } else {
-            console.error('❌ Erro na sincronização automática:', result.error);
+          } catch (error) {
+            console.error(
+              '❌ Erro ao executar sincronização automática:',
+              error
+            );
           }
-        } catch (error) {
-          console.error('❌ Erro ao executar sincronização automática:', error);
-        }
-      }, intervalMinutes * 60 * 1000); // Converter minutos para milliseconds
+        },
+        intervalMinutes * 60 * 1000
+      ); // Converter minutos para milliseconds
 
-      console.log(`🚀 Sincronização automática iniciada a cada ${intervalMinutes} minutos`);
+      console.log(
+        `🚀 Sincronização automática iniciada a cada ${intervalMinutes} minutos`
+      );
 
       return NextResponse.json({
         success: true,
         message: `Sincronização automática iniciada a cada ${intervalMinutes} minutos`,
-        intervalMinutes
+        intervalMinutes,
       });
-
     } else if (action === 'stop') {
       if (syncInterval) {
         clearInterval(syncInterval);
@@ -54,36 +70,41 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: 'Sincronização automática parada'
+          message: 'Sincronização automática parada',
         });
       } else {
         return NextResponse.json({
           success: false,
-          message: 'Nenhuma sincronização automática estava rodando'
+          message: 'Nenhuma sincronização automática estava rodando',
         });
       }
-
     } else if (action === 'status') {
       return NextResponse.json({
         success: true,
         status: syncInterval ? 'running' : 'stopped',
-        message: syncInterval ? 'Sincronização automática ativa' : 'Sincronização automática parada'
+        message: syncInterval
+          ? 'Sincronização automática ativa'
+          : 'Sincronização automática parada',
       });
-
     } else {
-      return NextResponse.json({
-        success: false,
-        error: 'Ação inválida. Use: start, stop ou status'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Ação inválida. Use: start, stop ou status',
+        },
+        { status: 400 }
+      );
     }
-
   } catch (error) {
     console.error('❌ Erro no cron setup:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: 'Erro interno: ' + (error as Error).message
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Erro interno: ' + (error as Error).message,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -91,6 +112,8 @@ export async function GET() {
   return NextResponse.json({
     success: true,
     status: syncInterval ? 'running' : 'stopped',
-    message: syncInterval ? 'Sincronização automática ativa' : 'Sincronização automática parada'
+    message: syncInterval
+      ? 'Sincronização automática ativa'
+      : 'Sincronização automática parada',
   });
-} 
+}

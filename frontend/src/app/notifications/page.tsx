@@ -1,16 +1,22 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { useToast } from '@/hooks/use-toast'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { 
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import {
   Bell,
   BellRing,
   Search,
@@ -29,33 +35,33 @@ import {
   Clock,
   Users,
   Activity,
-  Zap
-} from 'lucide-react'
-import { useNotifications } from '@/hooks/useNotifications'
-import { formatDistanceToNow } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+  Zap,
+} from 'lucide-react';
+import { useNotifications } from '@/hooks/useNotifications';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface FiltrosNotificacao {
-  status?: 'pendente' | 'enviada' | 'lida' | 'descartada'
-  modulo?: string
-  tipo?: string
-  prioridade?: string
-  apenas_nao_lidas?: boolean
+  status?: 'pendente' | 'enviada' | 'lida' | 'descartada';
+  modulo?: string;
+  tipo?: string;
+  prioridade?: string;
+  apenas_nao_lidas?: boolean;
 }
 
 interface Notificacao {
-  id: string
-  titulo: string
-  mensagem: string
-  tipo: string
-  lida: boolean
-  criada_em: string
-  dados?: Record<string, unknown>
+  id: string;
+  titulo: string;
+  mensagem: string;
+  tipo: string;
+  lida: boolean;
+  criada_em: string;
+  dados?: Record<string, unknown>;
 }
 
 export default function NotificationsPage() {
-  const router = useRouter()
-  const { toast } = useToast()
+  const router = useRouter();
+  const { toast } = useToast();
   const {
     notificacoes,
     loading,
@@ -66,171 +72,195 @@ export default function NotificationsPage() {
     marcarTodasComoLidas,
     excluirNotificacao,
     recarregar,
-    limparErro
-  } = useNotifications()
+    limparErro,
+  } = useNotifications();
 
   // Estados
-  const [filtros, setFiltros] = useState<FiltrosNotificacao>({})
-  const [busca, setBusca] = useState('')
-  const [selecionadas, setSelecionadas] = useState<string[]>([])
-  const [autoRefresh, setAutoRefresh] = useState(false)
+  const [filtros, setFiltros] = useState<FiltrosNotificacao>({});
+  const [busca, setBusca] = useState('');
+  const [selecionadas, setSelecionadas] = useState<string[]>([]);
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   useEffect(() => {
-    carregarNotificacoes(filtros)
-  }, [carregarNotificacoes])
+    carregarNotificacoes(filtros);
+  }, [carregarNotificacoes, filtros]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval: NodeJS.Timeout;
     if (autoRefresh) {
       interval = setInterval(() => {
-        recarregar()
-      }, 30000) // Auto-refresh a cada 30 segundos
+        recarregar();
+      }, 30000); // Auto-refresh a cada 30 segundos
     }
     return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [autoRefresh, recarregar])
+      if (interval) clearInterval(interval);
+    };
+  }, [autoRefresh, recarregar]);
 
   // Handlers
   const handleMarcarComoLida = async (id: string) => {
     try {
-      await marcarComoLida(id)
-      await carregarNotificacoes()
+      await marcarComoLida(id);
+      await carregarNotificacoes();
     } catch (error: unknown) {
-      console.error('Erro ao marcar como lida:', error)
+      console.error('Erro ao marcar como lida:', error);
     }
-  }
+  };
 
   const handleMarcarTodasComoLidas = async () => {
-    const sucesso = await marcarTodasComoLidas()
+    const sucesso = await marcarTodasComoLidas();
     if (sucesso) {
-      setSelecionadas([])
+      setSelecionadas([]);
     }
-  }
+  };
 
   const handleExcluirNotificacao = async (id: string) => {
-    const sucesso = await excluirNotificacao(id)
+    const sucesso = await excluirNotificacao(id);
     if (sucesso) {
-      setSelecionadas(prev => prev.filter(item => item !== id))
+      setSelecionadas(prev => prev.filter(item => item !== id));
     }
-  }
+  };
 
   const handleExcluirSelecionadas = async () => {
     for (const id of selecionadas) {
-      await excluirNotificacao(id)
+      await excluirNotificacao(id);
     }
-    setSelecionadas([])
-  }
+    setSelecionadas([]);
+  };
 
   const handleBusca = (termo: string) => {
-    setBusca(termo)
-    carregarNotificacoes({ ...filtros })
-  }
+    setBusca(termo);
+    carregarNotificacoes({ ...filtros });
+  };
 
   const handleFiltros = (novosFiltros: FiltrosNotificacao) => {
-    setFiltros(novosFiltros)
-    carregarNotificacoes(novosFiltros)
-  }
+    setFiltros(novosFiltros);
+    carregarNotificacoes(novosFiltros);
+  };
 
   const handleRefresh = () => {
-    recarregar()
-  }
+    recarregar();
+  };
 
   const handleSelecionarTodos = () => {
     if (selecionadas.length === notificacoes.length) {
-      setSelecionadas([])
+      setSelecionadas([]);
     } else {
-      setSelecionadas(notificacoes.map(n => n.id))
+      setSelecionadas(notificacoes.map(n => n.id));
     }
-  }
+  };
 
   const limparFiltros = () => {
-    setFiltros({})
-    setBusca('')
-  }
+    setFiltros({});
+    setBusca('');
+  };
 
   const getTipoIcon = (tipo: string) => {
     switch (tipo) {
-      case 'erro': return <X className="w-4 h-4" />
-      case 'alerta': return <AlertTriangle className="w-4 h-4" />
-      case 'sucesso': return <CheckCircle className="w-4 h-4" />
-      case 'info': 
-      default: return <Info className="w-4 h-4" />
+      case 'erro':
+        return <X className="w-4 h-4" />;
+      case 'alerta':
+        return <AlertTriangle className="w-4 h-4" />;
+      case 'sucesso':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'info':
+      default:
+        return <Info className="w-4 h-4" />;
     }
-  }
+  };
 
   const getTipoColor = (tipo: string) => {
     switch (tipo) {
-      case 'erro': return 'from-red-500 to-red-600'
-      case 'alerta': return 'from-yellow-500 to-yellow-600'
-      case 'sucesso': return 'from-green-500 to-green-600'
+      case 'erro':
+        return 'from-red-500 to-red-600';
+      case 'alerta':
+        return 'from-yellow-500 to-yellow-600';
+      case 'sucesso':
+        return 'from-green-500 to-green-600';
       case 'info':
-      default: return 'from-blue-500 to-blue-600'
+      default:
+        return 'from-blue-500 to-blue-600';
     }
-  }
+  };
 
   const getPrioridadeColor = (prioridade: string) => {
     switch (prioridade) {
-      case 'critica': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-      case 'alta': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100'
-      case 'media': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
-      case 'baixa': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
+      case 'critica':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100';
+      case 'alta':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100';
+      case 'media':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100';
+      case 'baixa':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100';
     }
-  }
+  };
 
   const getModuloColor = (modulo: string) => {
     switch (modulo) {
-      case 'checklists': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
-      case 'metas': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-      case 'relatorios': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100'
-      case 'dashboard': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100'
-      case 'sistema': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
+      case 'checklists':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100';
+      case 'metas':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100';
+      case 'relatorios':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100';
+      case 'dashboard':
+        return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-100';
+      case 'sistema':
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100';
     }
-  }
+  };
 
   const notificacoesFiltradas = notificacoes.filter(notificacao => {
-    if (busca && !notificacao.titulo.toLowerCase().includes(busca.toLowerCase()) && 
-        !notificacao.mensagem.toLowerCase().includes(busca.toLowerCase())) {
-      return false
+    if (
+      busca &&
+      !notificacao.titulo.toLowerCase().includes(busca.toLowerCase()) &&
+      !notificacao.mensagem.toLowerCase().includes(busca.toLowerCase())
+    ) {
+      return false;
     }
-    return true
-  })
+    return true;
+  });
 
   if (loading && notificacoes.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando notificações...</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Carregando notificações...
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   const handleNotificacaoClick = (notificacao: Record<string, unknown>) => {
     // Marcar como lida
-    marcarComoLida(notificacao.id as string)
-    
+    marcarComoLida(notificacao.id as string);
+
     // Navegar para a página correspondente
-    const tipo = notificacao.tipo as string
-    const dados = notificacao.dados as Record<string, unknown>
-    
+    const tipo = notificacao.tipo as string;
+    const dados = notificacao.dados as Record<string, unknown>;
+
     switch (tipo) {
       case 'checklist':
-        router.push(`/funcionario/checklists/${dados.checklist_id}`)
-        break
+        router.push(`/funcionario/checklists/${dados.checklist_id}`);
+        break;
       case 'relatorio':
-        router.push(`/relatorios/${dados.relatorio_id}`)
-        break
+        router.push(`/relatorios/${dados.relatorio_id}`);
+        break;
       case 'sistema':
-        router.push('/configuracoes')
-        break
+        router.push('/configuracoes');
+        break;
       default:
-        router.push('/notifications')
+        router.push('/notifications');
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -245,16 +275,22 @@ export default function NotificationsPage() {
                     <Bell className="w-8 h-8" />
                   </div>
                   <div>
-                    <h1 className="text-3xl font-bold">Central de Notificações</h1>
-                    <p className="text-blue-100 mt-1">Gerencie todas as suas notificações e alertas</p>
+                    <h1 className="text-3xl font-bold">
+                      Central de Notificações
+                    </h1>
+                    <p className="text-blue-100 mt-1">
+                      Gerencie todas as suas notificações e alertas
+                    </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <div className="text-sm text-blue-200">Não Lidas</div>
-                  <div className="text-2xl font-bold">{estatisticas?.nao_lidas || 0}</div>
+                  <div className="text-2xl font-bold">
+                    {estatisticas?.nao_lidas || 0}
+                  </div>
                 </div>
                 <div className="p-3 bg-white/10 rounded-xl">
                   <BellRing className="w-8 h-8" />
@@ -270,9 +306,15 @@ export default function NotificationsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total da Semana</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{estatisticas?.total_semana || 0}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Últimos 7 dias</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Total da Semana
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {estatisticas?.total_semana || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                    Últimos 7 dias
+                  </p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                   <Activity className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -285,9 +327,15 @@ export default function NotificationsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Não Lidas</p>
-                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">{estatisticas?.nao_lidas || 0}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Requer atenção</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Não Lidas
+                  </p>
+                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">
+                    {estatisticas?.nao_lidas || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                    Requer atenção
+                  </p>
                 </div>
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
                   <BellRing className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -300,9 +348,15 @@ export default function NotificationsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Alta Prioridade</p>
-                  <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{estatisticas?.alta_prioridade || 0}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Urgente</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Alta Prioridade
+                  </p>
+                  <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                    {estatisticas?.alta_prioridade || 0}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                    Urgente
+                  </p>
                 </div>
                 <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
                   <Zap className="w-8 h-8 text-orange-600 dark:text-orange-400" />
@@ -315,7 +369,9 @@ export default function NotificationsPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Notificações Browser</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Notificações Browser
+                  </p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white">
                     Ativas
                   </p>
@@ -348,7 +404,9 @@ export default function NotificationsPage() {
                     checked={autoRefresh}
                     onCheckedChange={setAutoRefresh}
                   />
-                  <Label htmlFor="auto-refresh" className="text-sm">Auto-refresh</Label>
+                  <Label htmlFor="auto-refresh" className="text-sm">
+                    Auto-refresh
+                  </Label>
                 </div>
                 <Button
                   onClick={recarregar}
@@ -356,7 +414,9 @@ export default function NotificationsPage() {
                   size="sm"
                   disabled={loading}
                 >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+                  />
                   Atualizar
                 </Button>
               </div>
@@ -369,12 +429,20 @@ export default function NotificationsPage() {
                 <Input
                   placeholder="Buscar notificações..."
                   value={busca}
-                  onChange={(e) => handleBusca(e.target.value)}
+                  onChange={e => handleBusca(e.target.value)}
                   className="pl-10 bg-white dark:bg-gray-700"
                 />
               </div>
 
-              <Select value={filtros.status || ''} onValueChange={(value) => handleFiltros({ ...filtros, status: value as NotificationStatus || undefined })}>
+              <Select
+                value={filtros.status || ''}
+                onValueChange={value =>
+                  handleFiltros({
+                    ...filtros,
+                    status: (value as NotificationStatus) || undefined,
+                  })
+                }
+              >
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -386,7 +454,12 @@ export default function NotificationsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={filtros.modulo || ''} onValueChange={(value) => handleFiltros({ ...filtros, modulo: value || undefined })}>
+              <Select
+                value={filtros.modulo || ''}
+                onValueChange={value =>
+                  handleFiltros({ ...filtros, modulo: value || undefined })
+                }
+              >
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Módulo" />
                 </SelectTrigger>
@@ -400,7 +473,12 @@ export default function NotificationsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={filtros.prioridade || ''} onValueChange={(value) => handleFiltros({ ...filtros, prioridade: value || undefined })}>
+              <Select
+                value={filtros.prioridade || ''}
+                onValueChange={value =>
+                  handleFiltros({ ...filtros, prioridade: value || undefined })
+                }
+              >
                 <SelectTrigger className="bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Prioridade" />
                 </SelectTrigger>
@@ -420,16 +498,22 @@ export default function NotificationsPage() {
             </div>
 
             <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3"></div>
+
               <div className="flex items-center gap-3">
-                
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Button onClick={handleMarcarTodasComoLidas} variant="outline" size="sm">
+                <Button
+                  onClick={handleMarcarTodasComoLidas}
+                  variant="outline"
+                  size="sm"
+                >
                   <CheckCheck className="w-4 h-4 mr-2" />
                   Marcar Todas como Lidas
                 </Button>
-                <Button onClick={handleExcluirSelecionadas} variant="outline" size="sm">
+                <Button
+                  onClick={handleExcluirSelecionadas}
+                  variant="outline"
+                  size="sm"
+                >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Excluir Selecionadas
                 </Button>
@@ -445,7 +529,9 @@ export default function NotificationsPage() {
               <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                 <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Erro ao Carregar</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Erro ao Carregar
+              </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
               <Button onClick={recarregar} variant="outline">
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -459,12 +545,13 @@ export default function NotificationsPage() {
               <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                 <Bell className="w-8 h-8 text-gray-600 dark:text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nenhuma Notificação</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Nenhuma Notificação
+              </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {busca || Object.keys(filtros).length > 0 
+                {busca || Object.keys(filtros).length > 0
                   ? 'Não há notificações que correspondem aos filtros aplicados'
-                  : 'Você está em dia! Não há notificações no momento'
-                }
+                  : 'Você está em dia! Não há notificações no momento'}
               </p>
               {(busca || Object.keys(filtros).length > 0) && (
                 <Button onClick={limparFiltros} variant="outline">
@@ -475,17 +562,24 @@ export default function NotificationsPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {notificacoesFiltradas.map((notificacao) => (
-              <Card key={notificacao.id} className={`bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group ${
-                notificacao.status === 'pendente' ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''
-              }`}>
+            {notificacoesFiltradas.map(notificacao => (
+              <Card
+                key={notificacao.id}
+                className={`bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group ${
+                  notificacao.status === 'pendente'
+                    ? 'ring-2 ring-blue-200 dark:ring-blue-800'
+                    : ''
+                }`}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className={`p-2 rounded-lg bg-gradient-to-r ${getTipoColor(notificacao.tipo)} text-white flex-shrink-0`}>
+                      <div
+                        className={`p-2 rounded-lg bg-gradient-to-r ${getTipoColor(notificacao.tipo)} text-white flex-shrink-0`}
+                      >
                         {getTipoIcon(notificacao.tipo)}
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
@@ -502,7 +596,11 @@ export default function NotificationsPage() {
                           <Badge className={getModuloColor(notificacao.modulo)}>
                             {notificacao.modulo}
                           </Badge>
-                          <Badge className={getPrioridadeColor(notificacao.prioridade)}>
+                          <Badge
+                            className={getPrioridadeColor(
+                              notificacao.prioridade
+                            )}
+                          >
                             {notificacao.prioridade}
                           </Badge>
                           {notificacao.categoria && (
@@ -521,12 +619,14 @@ export default function NotificationsPage() {
                           <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <div className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {formatDistanceToNow(new Date(notificacao.criada_em), { 
-                                addSuffix: true, 
-                                locale: ptBR 
-                              })}
+                              {formatDistanceToNow(
+                                new Date(notificacao.criada_em),
+                                {
+                                  addSuffix: true,
+                                  locale: ptBR,
+                                }
+                              )}
                             </div>
-                            
                           </div>
 
                           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -537,7 +637,7 @@ export default function NotificationsPage() {
                                 variant="outline"
                                 onClick={() => {
                                   if (acao.action === 'redirect' && acao.url) {
-                                    router.push(acao.url)
+                                    router.push(acao.url);
                                   }
                                 }}
                               >
@@ -545,21 +645,27 @@ export default function NotificationsPage() {
                                 {acao.label}
                               </Button>
                             ))}
-                            
+
                             {notificacao.status === 'pendente' && (
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => handleMarcarComoLida(notificacao.id as string)}
+                                onClick={() =>
+                                  handleMarcarComoLida(notificacao.id as string)
+                                }
                               >
                                 <Check className="w-4 h-4" />
                               </Button>
                             )}
-                            
+
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleExcluirNotificacao(notificacao.id as string)}
+                              onClick={() =>
+                                handleExcluirNotificacao(
+                                  notificacao.id as string
+                                )
+                              }
                             >
                               <Trash2 className="w-4 h-4 text-red-500" />
                             </Button>
@@ -575,5 +681,5 @@ export default function NotificationsPage() {
         )}
       </div>
     </div>
-  )
-} 
+  );
+}

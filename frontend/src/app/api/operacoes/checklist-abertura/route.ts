@@ -1,41 +1,49 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supabase-admin'
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { getAdminClient } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const bar_id = searchParams.get('bar_id')
-    const data = searchParams.get('data')
+    const { searchParams } = new URL(request.url);
+    const bar_id = searchParams.get('bar_id');
+    const data = searchParams.get('data');
 
     if (!bar_id) {
-      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
     }
 
-    const supabase = await getAdminClient()
+    const supabase = await getAdminClient();
 
     if (data) {
       // Buscar checklist específico de uma data
       const { data: checklist, error } = await supabase
         .from('checklist_abertura')
-        .select(`
+        .select(
+          `
           *,
           checklist_abertura_itens (*)
-        `)
+        `
+        )
         .eq('bar_id', bar_id)
         .eq('data', data)
-        .single()
+        .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao buscar checklist:', error)
-        return NextResponse.json({ error: 'Erro ao buscar checklist' }, { status: 500 })
+        console.error('Erro ao buscar checklist:', error);
+        return NextResponse.json(
+          { error: 'Erro ao buscar checklist' },
+          { status: 500 }
+        );
       }
 
       return NextResponse.json({
         checklist: checklist?.checklist_abertura_itens || [],
         hora_inicio: checklist?.hora_inicio,
         hora_conclusao: checklist?.hora_conclusao,
-        responsavel_geral: checklist?.responsavel_geral
-      })
+        responsavel_geral: checklist?.responsavel_geral,
+      });
     } else {
       // Buscar todos os checklists do bar
       const { data: checklists, error } = await supabase
@@ -43,79 +51,99 @@ export async function GET(request: NextRequest) {
         .select('*')
         .eq('bar_id', bar_id)
         .order('data', { ascending: false })
-        .limit(30)
+        .limit(30);
 
       if (error) {
-        console.error('Erro ao buscar checklists:', error)
-        return NextResponse.json({ error: 'Erro ao buscar checklists' }, { status: 500 })
+        console.error('Erro ao buscar checklists:', error);
+        return NextResponse.json(
+          { error: 'Erro ao buscar checklists' },
+          { status: 500 }
+        );
       }
 
-      return NextResponse.json({ checklists: checklists || [] })
+      return NextResponse.json({ checklists: checklists || [] });
     }
   } catch (error) {
-    console.error('Erro na API de checklist:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    console.error('Erro na API de checklist:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { 
-      bar_id, 
-      data, 
-      hora_inicio, 
-      hora_conclusao, 
-      itens, 
-      responsavel_geral, 
-      observacoes_gerais 
-    } = body
+    const body = await request.json();
+    const {
+      bar_id,
+      data,
+      hora_inicio,
+      hora_conclusao,
+      itens,
+      responsavel_geral,
+      observacoes_gerais,
+    } = body;
 
     if (!bar_id || !data || !itens) {
-      return NextResponse.json({ 
-        error: 'bar_id, data e itens são obrigatórios' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'bar_id, data e itens são obrigatórios',
+        },
+        { status: 400 }
+      );
     }
 
-    const supabase = await getAdminClient()
+    const supabase = await getAdminClient();
 
     // Calcular estatísticas
-    const total_itens = itens.length
-    const itens_concluidos = itens.filter((item: unknown) => item.status === 'concluido').length
-    const itens_problemas = itens.filter((item: unknown) => item.status === 'problema').length
-    const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
+    const total_itens = itens.length;
+    const itens_concluidos = itens.filter(
+      (item: unknown) => item.status === 'concluido'
+    ).length;
+    const itens_problemas = itens.filter(
+      (item: unknown) => item.status === 'problema'
+    ).length;
+    const percentual_conclusao =
+      total_itens > 0 ? (itens_concluidos / total_itens) * 100 : 0;
 
     // Criar ou atualizar checklist principal
     const { data: checklistData, error: checklistError } = await supabase
       .from('checklist_abertura')
-      .upsert({
-        bar_id,
-        data,
-        hora_inicio,
-        hora_conclusao,
-        responsavel_geral,
-        observacoes_gerais,
-        total_itens,
-        itens_concluidos,
-        itens_problemas,
-        percentual_conclusao,
-        status: percentual_conclusao === 100 ? 'completo' : 'parcial'
-      }, {
-        onConflict: 'bar_id, data'
-      })
+      .upsert(
+        {
+          bar_id,
+          data,
+          hora_inicio,
+          hora_conclusao,
+          responsavel_geral,
+          observacoes_gerais,
+          total_itens,
+          itens_concluidos,
+          itens_problemas,
+          percentual_conclusao,
+          status: percentual_conclusao === 100 ? 'completo' : 'parcial',
+        },
+        {
+          onConflict: 'bar_id, data',
+        }
+      )
       .select()
-      .single()
+      .single();
 
     if (checklistError) {
-      console.error('Erro ao salvar checklist:', checklistError)
-      return NextResponse.json({ error: 'Erro ao salvar checklist' }, { status: 500 })
+      console.error('Erro ao salvar checklist:', checklistError);
+      return NextResponse.json(
+        { error: 'Erro ao salvar checklist' },
+        { status: 500 }
+      );
     }
 
     // Remover itens antigos se existirem
     await supabase
       .from('checklist_abertura_itens')
       .delete()
-      .eq('checklist_id', checklistData.id)
+      .eq('checklist_id', checklistData.id);
 
     // Inserir novos itens
     const itensParaInserir = itens.map((item: unknown) => ({
@@ -131,16 +159,19 @@ export async function POST(request: NextRequest) {
       observacoes: item.observacoes,
       horario_inicio: item.horario_inicio,
       horario_conclusao: item.horario_conclusao,
-      verificado_por: item.verificado_por
-    }))
+      verificado_por: item.verificado_por,
+    }));
 
     const { error: itensError } = await supabase
       .from('checklist_abertura_itens')
-      .insert(itensParaInserir)
+      .insert(itensParaInserir);
 
     if (itensError) {
-      console.error('Erro ao salvar itens:', itensError)
-      return NextResponse.json({ error: 'Erro ao salvar itens do checklist' }, { status: 500 })
+      console.error('Erro ao salvar itens:', itensError);
+      return NextResponse.json(
+        { error: 'Erro ao salvar itens do checklist' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -151,29 +182,35 @@ export async function POST(request: NextRequest) {
         total_itens,
         itens_concluidos,
         itens_problemas,
-        percentual_conclusao
-      }
-    })
+        percentual_conclusao,
+      },
+    });
   } catch (error) {
-    console.error('Erro ao processar checklist:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    console.error('Erro ao processar checklist:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { checklist_id, item_id, status, observacoes } = body
+    const body = await request.json();
+    const { checklist_id, item_id, status, observacoes } = body;
 
     if (!checklist_id || !item_id || !status) {
-      return NextResponse.json({ 
-        error: 'checklist_id, item_id e status são obrigatórios' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'checklist_id, item_id e status são obrigatórios',
+        },
+        { status: 400 }
+      );
     }
 
-    const supabase = await getAdminClient()
+    const supabase = await getAdminClient();
 
-    const agora = new Date().toISOString()
+    const agora = new Date().toISOString();
 
     // Atualizar item específico
     const { error } = await supabase
@@ -183,27 +220,35 @@ export async function PUT(request: NextRequest) {
         observacoes,
         horario_inicio: status === 'fazendo' ? agora : undefined,
         horario_conclusao: status === 'concluido' ? agora : undefined,
-        verificado_por: status === 'concluido' ? 'Usuario Logado' : undefined // TODO: pegar do contexto
+        verificado_por: status === 'concluido' ? 'Usuario Logado' : undefined, // TODO: pegar do contexto
       })
       .eq('checklist_id', checklist_id)
-      .eq('item_id', item_id)
+      .eq('item_id', item_id);
 
     if (error) {
-      console.error('Erro ao atualizar item:', error)
-      return NextResponse.json({ error: 'Erro ao atualizar item' }, { status: 500 })
+      console.error('Erro ao atualizar item:', error);
+      return NextResponse.json(
+        { error: 'Erro ao atualizar item' },
+        { status: 500 }
+      );
     }
 
     // Recalcular estatísticas do checklist
     const { data: itens, error: itensError } = await supabase
       .from('checklist_abertura_itens')
       .select('status')
-      .eq('checklist_id', checklist_id)
+      .eq('checklist_id', checklist_id);
 
     if (!itensError && itens) {
-      const total_itens = itens.length
-      const itens_concluidos = itens.filter((item: unknown) => item.status === 'concluido').length
-      const itens_problemas = itens.filter((item: unknown) => item.status === 'problema').length
-      const percentual_conclusao = total_itens > 0 ? (itens_concluidos / total_itens * 100) : 0
+      const total_itens = itens.length;
+      const itens_concluidos = itens.filter(
+        (item: unknown) => item.status === 'concluido'
+      ).length;
+      const itens_problemas = itens.filter(
+        (item: unknown) => item.status === 'problema'
+      ).length;
+      const percentual_conclusao =
+        total_itens > 0 ? (itens_concluidos / total_itens) * 100 : 0;
 
       await supabase
         .from('checklist_abertura')
@@ -212,17 +257,20 @@ export async function PUT(request: NextRequest) {
           itens_concluidos,
           itens_problemas,
           percentual_conclusao,
-          status: percentual_conclusao === 100 ? 'completo' : 'parcial'
+          status: percentual_conclusao === 100 ? 'completo' : 'parcial',
         })
-        .eq('id', checklist_id)
+        .eq('id', checklist_id);
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Item atualizado com sucesso'
-    })
+      message: 'Item atualizado com sucesso',
+    });
   } catch (error) {
-    console.error('Erro ao atualizar item:', error)
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    console.error('Erro ao atualizar item:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
-} 
+}

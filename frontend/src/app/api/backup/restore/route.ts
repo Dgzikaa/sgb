@@ -12,31 +12,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🔄 Iniciando restore do backup ${backupId}${barId ? ` para bar ${barId}` : ''}...`);
+    console.log(
+      `🔄 Iniciando restore do backup ${backupId}${barId ? ` para bar ${barId}` : ''}...`
+    );
 
     // Restaurar backup
-    const success = await backupSystem.restoreBackup(backupId, barId ? parseInt(barId) : undefined);
+    const success = await backupSystem.restoreBackup(
+      backupId,
+      barId ? parseInt(barId) : undefined
+    );
 
     if (success) {
       return NextResponse.json({
         success: true,
-        message: 'Backup restaurado com sucesso'
+        message: 'Backup restaurado com sucesso',
       });
     } else {
-      return NextResponse.json({
-        success: false,
-        error: 'Falha ao restaurar backup'
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Falha ao restaurar backup',
+        },
+        { status: 500 }
+      );
     }
-
   } catch (error) {
     console.error('❌ Erro ao restaurar backup:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Erro interno do servidor',
-        message: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
       },
       { status: 500 }
     );
   }
-} 
+}

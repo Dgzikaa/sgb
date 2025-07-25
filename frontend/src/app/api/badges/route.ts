@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       return authErrorResponse('Usuário não autenticado');
     }
 
-    const body = await request.json() as BadgeRequest;
+    const body = (await request.json()) as BadgeRequest;
     const { bar_id, user_id } = body;
 
     if (!bar_id || !user_id) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await getAdminClient();
-    
+
     // 🎯 BUSCAR TODOS OS DADOS EM UMA SÓ CONSULTA
     const badges: Badges = {
       home: 0,
@@ -78,43 +78,46 @@ export async function POST(request: NextRequest) {
           .select('id')
           .eq('bar_id', bar_id)
           .is('concluido_em', null),
-        
+
         // 2. PRODUÇÕES PENDENTES
         supabase
           .from('producoes')
           .select('id')
           .eq('bar_id', bar_id)
           .in('status', ['pendente', 'em_andamento']),
-        
+
         // 3. NOTIFICAÇÕES NÃO LIDAS
         supabase
           .from('notificacoes')
           .select('id')
           .eq('bar_id', bar_id)
           .eq('lida', false),
-        
+
         // 4. ALERTAS DO SISTEMA
         supabase
           .from('sistema_alertas')
           .select('id')
           .eq('bar_id', bar_id)
           .is('resolvido_em', null),
-        
+
         // 5. MARKETING - Posts recentes
         supabase
           .from('instagram_posts')
           .select('id')
           .eq('bar_id', bar_id)
-          .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-        
+          .gte(
+            'created_at',
+            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+          ),
+
         // 6. CONFIGURAÇÕES - Para admins apenas
-        user.role === 'admin' ? 
-          supabase
-            .from('integracoes_config')
-            .select('id')
-            .eq('bar_id', bar_id)
-            .eq('ativo', false) : 
-          Promise.resolve({ data: null, error: null })
+        user.role === 'admin'
+          ? supabase
+              .from('integracoes_config')
+              .select('id')
+              .eq('bar_id', bar_id)
+              .eq('ativo', false)
+          : Promise.resolve({ data: null, error: null }),
       ];
 
       const results = await Promise.allSettled(queries);
@@ -152,7 +155,6 @@ export async function POST(request: NextRequest) {
 
       // 9. FINANCEIRO - Por enquanto 0, pode ser implementado depois
       badges.financeiro = 0;
-
     } catch (queryError: unknown) {
       const apiError = queryError as ApiError;
       console.error('Erro nas queries de badges:', apiError);
@@ -160,40 +162,42 @@ export async function POST(request: NextRequest) {
     }
 
     const summary: BadgeSummary = {
-      total_issues: Object.values(badges).reduce((sum: number, count: number) => sum + count, 0),
+      total_issues: Object.values(badges).reduce(
+        (sum: number, count: number) => sum + count,
+        0
+      ),
       critical_issues: badges.visaoGeral,
-      pending_tasks: badges.checklist + badges.producao
+      pending_tasks: badges.checklist + badges.producao,
     };
 
     return NextResponse.json({
       success: true,
       badges,
-      summary
+      summary,
     });
-
   } catch (error: unknown) {
     const apiError = error as ApiError;
     console.error('Erro na API badges consolidada:', apiError);
-    
+
     // Retornar badges zerados em caso de erro
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       badges: {
-        checklist: 0, 
-        producao: 0, 
+        checklist: 0,
+        producao: 0,
         marketing: 0,
-        configuracoes: 0, 
-        notifications: 0, 
-        home: 0, 
+        configuracoes: 0,
+        notifications: 0,
+        home: 0,
         visaoGeral: 0,
         relatorios: 0,
-        financeiro: 0
+        financeiro: 0,
       },
       summary: {
         total_issues: 0,
         critical_issues: 0,
-        pending_tasks: 0
-      }
+        pending_tasks: 0,
+      },
     });
   }
 }
@@ -204,4 +208,4 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   return POST(request);
-} 
+}

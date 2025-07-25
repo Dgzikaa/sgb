@@ -77,30 +77,35 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('barId');
 
     if (!barId) {
-      return NextResponse.json({ error: 'Bar ID é obrigatório' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Bar ID é obrigatório' },
+        { status: 400 }
+      );
     }
 
     // Buscar dados financeiros (resumo executivo)
     const resumoExecutivo = await buscarResumoExecutivo(barId);
-    
+
     // Buscar dados de operações críticas
     const operacoesCriticas = await buscarOperacoesCriticas(barId);
-    
+
     // Buscar métricas chave
     const metricasChave = await buscarMetricasChave(barId);
 
     const dashboardData: DashboardData = {
       resumoExecutivo,
       operacoesCriticas,
-      metricasChave
+      metricasChave,
     };
 
     return NextResponse.json(dashboardData);
-
   } catch (error: unknown) {
     const apiError = error as ApiError;
     console.error('Erro na API dashboard-unificado:', apiError);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -108,8 +113,10 @@ async function buscarResumoExecutivo(barId: string) {
   try {
     // Buscar dados financeiros do NIBO
     const hoje = new Date().toISOString().split('T')[0];
-    const ontem = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
+    const ontem = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
+
     // Dados de hoje - Receitas (Receivable)
     const { data: receitasHoje } = await supabase
       .from('nibo_agendamentos')
@@ -151,17 +158,39 @@ async function buscarResumoExecutivo(barId: string) {
       .lt('data_pagamento', ontem + 'T23:59:59');
 
     // Calcular totais
-    const receitas = receitasHoje?.reduce((acc: number, curr: NiboAgendamento) => acc + Number(curr.valor), 0) || 0;
-    const despesas = despesasHoje?.reduce((acc: number, curr: NiboAgendamento) => acc + Number(curr.valor), 0) || 0;
-    const receitasOntemTotal = receitasOntem?.reduce((acc: number, curr: NiboAgendamento) => acc + Number(curr.valor), 0) || 0;
-    const despesasOntemTotal = despesasOntem?.reduce((acc: number, curr: NiboAgendamento) => acc + Number(curr.valor), 0) || 0;
+    const receitas =
+      receitasHoje?.reduce(
+        (acc: number, curr: NiboAgendamento) => acc + Number(curr.valor),
+        0
+      ) || 0;
+    const despesas =
+      despesasHoje?.reduce(
+        (acc: number, curr: NiboAgendamento) => acc + Number(curr.valor),
+        0
+      ) || 0;
+    const receitasOntemTotal =
+      receitasOntem?.reduce(
+        (acc: number, curr: NiboAgendamento) => acc + Number(curr.valor),
+        0
+      ) || 0;
+    const despesasOntemTotal =
+      despesasOntem?.reduce(
+        (acc: number, curr: NiboAgendamento) => acc + Number(curr.valor),
+        0
+      ) || 0;
 
     // Calcular margem
     const margem = receitas > 0 ? ((receitas - despesas) / receitas) * 100 : 0;
 
     // Calcular tendências
-    const tendenciaReceitas = receitasOntemTotal > 0 ? ((receitas - receitasOntemTotal) / receitasOntemTotal) * 100 : 0;
-    const tendenciaDespesas = despesasOntemTotal > 0 ? ((despesas - despesasOntemTotal) / despesasOntemTotal) * 100 : 0;
+    const tendenciaReceitas =
+      receitasOntemTotal > 0
+        ? ((receitas - receitasOntemTotal) / receitasOntemTotal) * 100
+        : 0;
+    const tendenciaDespesas =
+      despesasOntemTotal > 0
+        ? ((despesas - despesasOntemTotal) / despesasOntemTotal) * 100
+        : 0;
 
     // Buscar total de agendamentos
     const { count: totalAgendamentos } = await supabase
@@ -179,7 +208,12 @@ async function buscarResumoExecutivo(barId: string) {
       .lt('criado_em', hoje)
       .or('deletado.is.null,deletado.eq.false');
 
-    const tendenciaAgendamentos = (agendamentosOntem || 0) > 0 ? (((totalAgendamentos || 0) - (agendamentosOntem || 0)) / (agendamentosOntem || 0)) * 100 : 0;
+    const tendenciaAgendamentos =
+      (agendamentosOntem || 0) > 0
+        ? (((totalAgendamentos || 0) - (agendamentosOntem || 0)) /
+            (agendamentosOntem || 0)) *
+          100
+        : 0;
 
     return {
       receitas: Number(receitas.toFixed(2)),
@@ -189,8 +223,8 @@ async function buscarResumoExecutivo(barId: string) {
       tendencia: {
         receitas: Number(tendenciaReceitas.toFixed(1)),
         despesas: Number(tendenciaDespesas.toFixed(1)),
-        agendamentos: Number(tendenciaAgendamentos.toFixed(1))
-      }
+        agendamentos: Number(tendenciaAgendamentos.toFixed(1)),
+      },
     };
   } catch (error: unknown) {
     const apiError = error as ApiError;
@@ -200,7 +234,7 @@ async function buscarResumoExecutivo(barId: string) {
       despesas: 0,
       margem: 0,
       totalAgendamentos: 0,
-      tendencia: { receitas: 0, despesas: 0, agendamentos: 0 }
+      tendencia: { receitas: 0, despesas: 0, agendamentos: 0 },
     };
   }
 }
@@ -209,7 +243,7 @@ async function buscarOperacoesCriticas(barId: string) {
   try {
     // Buscar dados de checklists
     const hoje = new Date().toISOString().split('T')[0];
-    
+
     const { data: checklists } = await supabase
       .from('checklist_abertura')
       .select('status')
@@ -218,19 +252,25 @@ async function buscarOperacoesCriticas(barId: string) {
 
     const checklistStats = {
       total: checklists?.length || 0,
-      concluidos: checklists?.filter((c: ChecklistAbertura) => c.status === 'completed').length || 0,
-      pendentes: checklists?.filter((c: ChecklistAbertura) => c.status === 'pending').length || 0,
-      problemas: checklists?.filter((c: ChecklistAbertura) => c.status === 'problem').length || 0
+      concluidos:
+        checklists?.filter((c: ChecklistAbertura) => c.status === 'completed')
+          .length || 0,
+      pendentes:
+        checklists?.filter((c: ChecklistAbertura) => c.status === 'pending')
+          .length || 0,
+      problemas:
+        checklists?.filter((c: ChecklistAbertura) => c.status === 'problem')
+          .length || 0,
     };
 
     // Criar alertas baseados nos dados
     const alertas = [];
-    
+
     if (checklistStats.problemas > 0) {
       alertas.push({
         tipo: 'critico' as const,
         mensagem: `${checklistStats.problemas} checklist(s) com problemas`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -238,7 +278,7 @@ async function buscarOperacoesCriticas(barId: string) {
       alertas.push({
         tipo: 'importante' as const,
         mensagem: `${checklistStats.pendentes} checklist(s) pendentes`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -254,20 +294,20 @@ async function buscarOperacoesCriticas(barId: string) {
       alertas.push({
         tipo: 'critico' as const,
         mensagem: `${agendamentosVencidos.length} agendamento(s) vencido(s)`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
     return {
       checklist: checklistStats,
-      alertas
+      alertas,
     };
   } catch (error: unknown) {
     const apiError = error as ApiError;
     console.error('Erro ao buscar operações críticas:', apiError);
     return {
       checklist: { total: 0, concluidos: 0, pendentes: 0, problemas: 0 },
-      alertas: []
+      alertas: [],
     };
   }
 }
@@ -296,7 +336,10 @@ async function buscarMetricasChave(barId: string) {
       .from('discord_messages')
       .select('id')
       .eq('bar_id', barId)
-      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+      .gte(
+        'created_at',
+        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      );
 
     return {
       nibo: {
@@ -304,12 +347,12 @@ async function buscarMetricasChave(barId: string) {
         ultima_sync: new Date().toISOString(),
         registros: registrosNibo || 0,
         categorias: categoriasNibo || 0,
-        stakeholders: stakeholdersNibo || 0
+        stakeholders: stakeholdersNibo || 0,
       },
       discord: {
         status: 'ativo' as const,
-        mensagens: mensagensDiscord?.length || 0
-      }
+        mensagens: mensagensDiscord?.length || 0,
+      },
     };
   } catch (error: unknown) {
     const apiError = error as ApiError;
@@ -320,12 +363,12 @@ async function buscarMetricasChave(barId: string) {
         ultima_sync: new Date().toISOString(),
         registros: 0,
         categorias: 0,
-        stakeholders: 0
+        stakeholders: 0,
       },
       discord: {
         status: 'erro' as const,
-        mensagens: 0
-      }
+        mensagens: 0,
+      },
     };
   }
 }

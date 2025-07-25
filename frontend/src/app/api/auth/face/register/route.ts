@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,30 +7,30 @@ const supabase = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   }
-)
+);
 
 export async function POST(request: NextRequest) {
-  console.log('🔐 API de registro facial iniciada')
-  
-  try {
-    const { descriptor, confidence, userEmail, barId } = await request.json()
+  console.log('🔐 API de registro facial iniciada');
 
-    console.log('📊 Dados recebidos:', { 
-      userEmail, 
-      barId, 
+  try {
+    const { descriptor, confidence, userEmail, barId } = await request.json();
+
+    console.log('📊 Dados recebidos:', {
+      userEmail,
+      barId,
       confidence,
-      descriptorLength: descriptor?.length 
-    })
+      descriptorLength: descriptor?.length,
+    });
 
     // Validar dados obrigatórios
     if (!descriptor || !userEmail || !barId) {
       return NextResponse.json(
         { success: false, error: 'Dados obrigatórios não fornecidos' },
         { status: 400 }
-      )
+      );
     }
 
     // Validar descriptor
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Descritor facial inválido' },
         { status: 400 }
-      )
+      );
     }
 
     // Validar confidence
@@ -46,10 +46,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Confiança inválida' },
         { status: 400 }
-      )
+      );
     }
 
-    console.log('✅ Validações passaram')
+    console.log('✅ Validações passaram');
 
     // Buscar usuário pelo email
     const { data: usuarios, error: userError } = await supabase
@@ -57,25 +57,25 @@ export async function POST(request: NextRequest) {
       .select('user_id, id, nome')
       .eq('email', userEmail)
       .eq('bar_id', barId)
-      .eq('ativo', true)
+      .eq('ativo', true);
 
     if (userError) {
-      console.error('❌ Erro ao buscar usuário:', userError)
+      console.error('❌ Erro ao buscar usuário:', userError);
       return NextResponse.json(
         { success: false, error: 'Erro interno do servidor' },
         { status: 500 }
-      )
+      );
     }
 
     if (!usuarios || usuarios.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Usuário não encontrado ou inativo' },
         { status: 404 }
-      )
+      );
     }
 
-    const usuario = usuarios[0]
-    console.log('👤 Usuário encontrado:', usuario.nome)
+    const usuario = usuarios[0];
+    console.log('👤 Usuário encontrado:', usuario.nome);
 
     // Verificar se já existe face registrada para este usuário/bar
     const { data: existingFace, error: faceCheckError } = await supabase
@@ -83,43 +83,43 @@ export async function POST(request: NextRequest) {
       .select('id')
       .eq('user_id', usuario.user_id)
       .eq('bar_id', barId)
-      .eq('active', true)
+      .eq('active', true);
 
     if (faceCheckError) {
-      console.error('❌ Erro ao verificar face existente:', faceCheckError)
+      console.error('❌ Erro ao verificar face existente:', faceCheckError);
       return NextResponse.json(
         { success: false, error: 'Erro interno do servidor' },
         { status: 500 }
-      )
+      );
     }
 
     if (existingFace && existingFace.length > 0) {
       // Atualizar face existente
-      console.log('🔄 Atualizando face existente')
-      
+      console.log('🔄 Atualizando face existente');
+
       const { error: updateError } = await supabase
         .from('face_descriptors')
         .update({
           descriptor: descriptor,
           confidence_threshold: Math.max(0.6, confidence - 0.1), // Threshold ligeiramente menor que a confiança
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('user_id', usuario.user_id)
-        .eq('bar_id', barId)
+        .eq('bar_id', barId);
 
       if (updateError) {
-        console.error('❌ Erro ao atualizar face:', updateError)
+        console.error('❌ Erro ao atualizar face:', updateError);
         return NextResponse.json(
           { success: false, error: 'Erro ao atualizar registro facial' },
           { status: 500 }
-        )
+        );
       }
 
-      console.log('✅ Face atualizada com sucesso')
+      console.log('✅ Face atualizada com sucesso');
     } else {
       // Criar nova face
-      console.log('➕ Criando nova face')
-      
+      console.log('➕ Criando nova face');
+
       const { error: insertError } = await supabase
         .from('face_descriptors')
         .insert({
@@ -127,38 +127,39 @@ export async function POST(request: NextRequest) {
           bar_id: barId,
           descriptor: descriptor,
           confidence_threshold: Math.max(0.6, confidence - 0.1), // Threshold ligeiramente menor que a confiança
-          active: true
-        })
+          active: true,
+        });
 
       if (insertError) {
-        console.error('❌ Erro ao inserir face:', insertError)
+        console.error('❌ Erro ao inserir face:', insertError);
         return NextResponse.json(
           { success: false, error: 'Erro ao registrar face' },
           { status: 500 }
-        )
+        );
       }
 
-      console.log('✅ Face registrada com sucesso')
+      console.log('✅ Face registrada com sucesso');
     }
 
     // Log de auditoria
-    console.log(`🎉 REGISTRO FACIAL CONCLUÍDO: ${usuario.nome} (${userEmail}) - Bar ${barId}`)
+    console.log(
+      `🎉 REGISTRO FACIAL CONCLUÍDO: ${usuario.nome} (${userEmail}) - Bar ${barId}`
+    );
 
     return NextResponse.json({
       success: true,
       message: 'Face registrada com sucesso',
       user: {
         nome: usuario.nome,
-        email: userEmail
-      }
-    })
-
+        email: userEmail,
+      },
+    });
   } catch (error: unknown) {
-    console.error('🔥 Erro fatal na API de registro facial:', error)
-    
+    console.error('🔥 Erro fatal na API de registro facial:', error);
+
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
-    )
+    );
   }
-} 
+}

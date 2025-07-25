@@ -1,75 +1,72 @@
-'use client'
+'use client';
 
-import { useState, useRef } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Upload, 
-  X, 
-  Check, 
-  AlertTriangle 
-} from 'lucide-react'
+import { useState, useRef } from 'react';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Upload, X, Check, AlertTriangle } from 'lucide-react';
 
 interface ProfilePhotoUploadProps {
-  currentPhoto?: string
-  onPhotoChange: (photoData: string) => void
-  disabled?: boolean
+  currentPhoto?: string;
+  onPhotoChange: (photoData: string) => void;
+  disabled?: boolean;
 }
 
-export default function ProfilePhotoUpload({ 
-  currentPhoto, 
-  onPhotoChange, 
-  disabled = false 
+export default function ProfilePhotoUpload({
+  currentPhoto,
+  onPhotoChange,
+  disabled = false,
 }: ProfilePhotoUploadProps) {
-  const [previewUrl, setPreviewUrl] = useState<string>(currentPhoto || '')
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [previewUrl, setPreviewUrl] = useState<string>(currentPhoto || '');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const file = event.target.files?.[0];
+    if (!file) return;
 
     // Validações
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem válida')
-      return
+      alert('Por favor, selecione uma imagem válida');
+      return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      alert('A imagem deve ter menos que 5MB')
-      return
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB
+      alert('A imagem deve ter menos que 5MB');
+      return;
     }
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     // Converter para base64 para preview e armazenamento
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const result = e.target?.result as string
-      setPreviewUrl(result)
-      onPhotoChange(result)
-      setIsUploading(false)
-    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const result = e.target?.result as string;
+      setPreviewUrl(result);
+      onPhotoChange(result);
+      setIsUploading(false);
+    };
     reader.onerror = () => {
-      alert('Erro ao processar a imagem')
-      setIsUploading(false)
-    }
-    reader.readAsDataURL(file)
-  }
+      alert('Erro ao processar a imagem');
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleRemovePhoto = () => {
-    setPreviewUrl('')
-    onPhotoChange('')
+    setPreviewUrl('');
+    onPhotoChange('');
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = '';
     }
-  }
+  };
 
   const openFileDialog = () => {
     if (!disabled) {
-      fileInputRef.current?.click()
+      fileInputRef.current?.click();
     }
-  }
+  };
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -77,9 +74,11 @@ export default function ProfilePhotoUpload({
       <div className="relative">
         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-200 shadow-lg bg-slate-100">
           {previewUrl ? (
-            <img
+            <Image
               src={previewUrl}
               alt="Foto de perfil"
+              width={128}
+              height={128}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -152,5 +151,5 @@ export default function ProfilePhotoUpload({
         <p>Formatos aceitos: JPG, PNG, GIF</p>
       </div>
     </div>
-  )
-} 
+  );
+}

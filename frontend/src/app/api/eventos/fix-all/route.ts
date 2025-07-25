@@ -1,10 +1,14 @@
-﻿import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 // Event name mappings to fix encoding issues
 const eventMappings = [
   // February 2025
-  { originalPattern: /Sertanejada com ARNO SANTANA \*OPEN BAR\*/i, name: 'Sertanejada com ARNO SANTANA OPEN BAR', date: '2025-02-01' }
+  {
+    originalPattern: /Sertanejada com ARNO SANTANA \*OPEN BAR\*/i,
+    name: 'Sertanejada com ARNO SANTANA OPEN BAR',
+    date: '2025-02-01',
+  },
 ];
 
 export async function POST() {
@@ -12,11 +16,14 @@ export async function POST() {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao conectar com banco' },
+        { status: 500 }
+      );
     }
 
     console.log('?? Starting complete event name fix...');
-    
+
     let totalFixed = 0;
     const errors = [];
 
@@ -45,15 +52,17 @@ export async function POST() {
       success: true,
       totalFixed,
       errors: errors.length > 0 ? errors : null,
-      message: `Fixed ${totalFixed} event names successfully`
+      message: `Fixed ${totalFixed} event names successfully`,
     });
-
   } catch (error: unknown) {
     console.error('? Error in fix-all endpoint:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({
-      success: false,
-      error: errorMessage
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }

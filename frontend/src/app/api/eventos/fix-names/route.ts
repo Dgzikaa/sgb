@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 // Historical event data mapping
@@ -161,10 +161,10 @@ const eventosHistoricos = `
 
 function parseEventName(eventoStr: string): string {
   let nomeEvento = eventoStr.trim();
-  
+
   // Step 1: Remove parentheses at the end
   nomeEvento = nomeEvento.replace(/\s*\([^)]+\)\s*$/, '');
-  
+
   // Step 2: Handle specific prefixes
   if (nomeEvento.startsWith('Evento - ')) {
     nomeEvento = nomeEvento.substring('Evento - '.length);
@@ -177,14 +177,14 @@ function parseEventName(eventoStr: string): string {
       nomeEvento = nomeEvento.substring(start, end);
     }
   }
-  
+
   // Step 3: Split on common delimiters
   if (nomeEvento.includes(': ')) {
     nomeEvento = nomeEvento.split(':')[0];
   } else if (nomeEvento.includes(' - ')) {
     nomeEvento = nomeEvento.split(' - ')[0];
   }
-  
+
   return nomeEvento.trim();
 }
 
@@ -193,80 +193,95 @@ export async function POST(request: NextRequest) {
     // Inicializar cliente Supabase
     const supabase = await getSupabaseClient();
     if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao conectar com banco' },
+        { status: 500 }
+      );
     }
 
     const { bar_id = 1, ano = 2025 } = await request.json();
-    
+
     console.log('🔧 Starting event name fix...');
-    
+
     // Parse historical data to create date-to-name mapping
-    const linhas = eventosHistoricos.trim().split('\n').filter(linha => linha.trim());
+    const linhas = eventosHistoricos
+      .trim()
+      .split('\n')
+      .filter(linha => linha.trim());
     const dateNameMap: Record<string, string> = {};
-    
+
     for (const linha of linhas) {
       const partes = linha.split('\t').map((p: unknown) => p.trim());
       if (partes.length < 3) continue;
-      
+
       const [dataStr, , eventoStr] = partes;
-      
+
       // Skip closed days
       if (eventoStr.includes('FECHADO') || eventoStr.includes('FOLGA')) {
         continue;
       }
-      
+
       const [dia, mes] = dataStr.split('/').map(Number);
       const dataCompleta = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
-      
+
       const nomeEvento = parseEventName(eventoStr);
       if (nomeEvento) {
         dateNameMap[dataCompleta] = nomeEvento;
       }
     }
-    
+
     console.log(`📋 Parsed ${Object.keys(dateNameMap).length} event names`);
-    
+
     // Get all events from the bar in the date range
-  
+
     const { data: eventos, error: fetchError } = await supabase
       .from('eventos')
       .select('id, data_evento, nome_evento')
       .eq('bar_id', bar_id)
       .gte('data_evento', `${ano}-02-01`)
       .lte('data_evento', `${ano}-06-30`);
-    
+
     if (fetchError) {
       console.error('Error fetching events:', fetchError);
-      return NextResponse.json({ success: false, error: fetchError.message }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: fetchError.message },
+        { status: 500 }
+      );
     }
-    
+
     console.log(`📥 Found ${eventos?.length || 0} events to update`);
-    
+
     let updatedCount = 0;
     const updates = [];
-    
+
     // Update events with correct names
     for (const evento of eventos || []) {
       const correctName = dateNameMap[evento.data_evento];
-      console.log(`🔍 Event ${evento.data_evento}: current="${evento.nome_evento}", should be="${correctName}"`);
-      
+      console.log(
+        `🔍 Event ${evento.data_evento}: current="${evento.nome_evento}", should be="${correctName}"`
+      );
+
       if (correctName && correctName !== evento.nome_evento) {
-        console.log(`📝 Will update ${evento.data_evento}: "${evento.nome_evento}" → "${correctName}"`);
+        console.log(
+          `📝 Will update ${evento.data_evento}: "${evento.nome_evento}" → "${correctName}"`
+        );
         updates.push({
           id: evento.id,
           data_evento: evento.data_evento,
           old_name: evento.nome_evento,
-          new_name: correctName
+          new_name: correctName,
         });
       } else if (correctName) {
-        console.log(`✅ Event ${evento.data_evento} already has correct name: "${correctName}"`);
+        console.log(
+          `✅ Event ${evento.data_evento} already has correct name: "${correctName}"`
+        );
       } else {
         console.log(`⚠️  No mapping found for ${evento.data_evento}`);
       }
     }
-    
+
     console.log(`🔄 Will update ${updates.length} events`);
-    
+
     // FORCE UPDATE ALL: Update all events with correct names from mapping
     for (const [date, correctName] of Object.entries(dateNameMap)) {
       const { error: updateError } = await supabase
@@ -274,7 +289,7 @@ export async function POST(request: NextRequest) {
         .update({ nome_evento: correctName })
         .eq('bar_id', bar_id)
         .eq('data_evento', date);
-      
+
       if (updateError) {
         console.error(`Error updating event ${date}:`, updateError);
       } else {
@@ -282,35 +297,39 @@ export async function POST(request: NextRequest) {
         updatedCount++;
       }
     }
-    
+
     // Apply regular updates if (unknown)
     for (const update of updates) {
       const { error: updateError } = await supabase
         .from('eventos')
         .update({ nome_evento: update.new_name })
         .eq('id', update.id);
-      
+
       if (updateError) {
         console.error(`Error updating event ${update.id}:`, updateError);
       } else {
-        console.log(`✅ Updated ${update.data_evento}: "${update.old_name}" → "${update.new_name}"`);
+        console.log(
+          `✅ Updated ${update.data_evento}: "${update.old_name}" → "${update.new_name}"`
+        );
         updatedCount++;
       }
     }
-    
+
     return NextResponse.json({
       success: true,
       message: `Successfully updated ${updatedCount} event names`,
       updated_count: updatedCount,
       total_events: eventos?.length || 0,
-      sample_updates: updates.slice(0, 5)
+      sample_updates: updates.slice(0, 5),
     });
-    
   } catch (error) {
     console.error('Error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Internal server error',
+      },
+      { status: 500 }
+    );
   }
 }

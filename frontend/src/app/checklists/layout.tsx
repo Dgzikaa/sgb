@@ -1,13 +1,9 @@
-import { DarkSidebarLayout } from '@/components/layouts'
+import { DarkSidebarLayout } from '@/components/layouts';
 
 export default function ChecklistsLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  return (
-    <DarkSidebarLayout>
-      {children}
-    </DarkSidebarLayout>
-  )
-} 
+  return <DarkSidebarLayout>{children}</DarkSidebarLayout>;
+}

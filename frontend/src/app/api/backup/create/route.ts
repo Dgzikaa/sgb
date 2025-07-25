@@ -20,17 +20,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Backup criado com sucesso',
-      backup: result
+      backup: result,
     });
-
   } catch (error) {
     console.error('❌ Erro ao criar backup:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Erro interno do servidor',
-        message: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
       },
       { status: 500 }
     );
   }
-} 
+}

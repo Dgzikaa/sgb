@@ -12,16 +12,22 @@ const supabase = createClient(
 // Schema de validação para filtros
 const FilterMetricsSchema = z.object({
   nome_metrica: z.string().optional(),
-  categoria: z.enum(['produtividade', 'qualidade', 'eficiencia', 'engagement']).optional(),
-  performance: z.enum(['excelente', 'bom', 'regular', 'ruim', 'critico']).optional(),
+  categoria: z
+    .enum(['produtividade', 'qualidade', 'eficiencia', 'engagement'])
+    .optional(),
+  performance: z
+    .enum(['excelente', 'bom', 'regular', 'ruim', 'critico'])
+    .optional(),
   tendencia: z.enum(['crescente', 'estavel', 'decrescente']).optional(),
   data_inicio: z.string().optional(),
   data_fim: z.string().optional(),
   ativa: z.boolean().optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),
-  order_by: z.enum(['data_referencia', 'valor', 'variacao_percentual']).default('data_referencia'),
-  order_direction: z.enum(['asc', 'desc']).default('desc')
+  order_by: z
+    .enum(['data_referencia', 'valor', 'variacao_percentual'])
+    .default('data_referencia'),
+  order_direction: z.enum(['asc', 'desc']).default('desc'),
 });
 
 // ========================================
@@ -29,36 +35,46 @@ const FilterMetricsSchema = z.object({
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
-    
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     // Verificar permissões
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar métricas' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para acessar métricas' },
+        { status: 403 }
+      );
     }
 
     // Parse dos parâmetros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
-    
+
     // Converter tipos
     const processedParams: Record<string, unknown> = { ...rawParams };
-    if (processedParams.page) processedParams.page = parseInt(processedParams.page as string);
-    if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit as string);
-    if (processedParams.ativa) processedParams.ativa = processedParams.ativa === 'true';
+    if (processedParams.page)
+      processedParams.page = parseInt(processedParams.page as string);
+    if (processedParams.limit)
+      processedParams.limit = parseInt(processedParams.limit as string);
+    if (processedParams.ativa)
+      processedParams.ativa = processedParams.ativa === 'true';
 
     const params = FilterMetricsSchema.parse(processedParams);
 
     // Construir query base
     let query = supabase
       .from('ai_metrics')
-      .select(`
+      .select(
+        `
         id,
         nome_metrica,
         categoria,
@@ -81,7 +97,8 @@ export async function GET(request: NextRequest) {
         comparativo_historico,
         created_at,
         proximo_calculo
-      `)
+      `
+      )
       .eq('bar_id', bar_id)
       .order(params.order_by, { ascending: params.order_direction === 'asc' });
 
@@ -116,35 +133,46 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar métricas:', error);
-      return NextResponse.json({ error: 'Erro ao buscar métricas' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar métricas' },
+        { status: 500 }
+      );
     }
 
     // Buscar estatísticas gerais
     const { data: stats } = await supabase
       .from('ai_metrics')
-      .select('nome_metrica, categoria, performance, tendencia, alerta_ativado, valor')
+      .select(
+        'nome_metrica, categoria, performance, tendencia, alerta_ativado, valor'
+      )
       .eq('bar_id', bar_id)
       .eq('ativa', true);
 
     const estatisticas = {
       total_metricas: stats?.length || 0,
       alertas_ativos: stats?.filter(s => s.alerta_ativado).length || 0,
-      por_categoria: stats?.reduce((acc, s) => {
-        acc[s.categoria] = (acc[s.categoria] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>) || {},
+      por_categoria:
+        stats?.reduce(
+          (acc, s) => {
+            acc[s.categoria] = (acc[s.categoria] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>
+        ) || {},
       por_performance: {
-        excelente: stats?.filter(s => s.performance === 'excelente').length || 0,
+        excelente:
+          stats?.filter(s => s.performance === 'excelente').length || 0,
         bom: stats?.filter(s => s.performance === 'bom').length || 0,
         regular: stats?.filter(s => s.performance === 'regular').length || 0,
         ruim: stats?.filter(s => s.performance === 'ruim').length || 0,
-        critico: stats?.filter(s => s.performance === 'critico').length || 0
+        critico: stats?.filter(s => s.performance === 'critico').length || 0,
       },
       por_tendencia: {
         crescente: stats?.filter(s => s.tendencia === 'crescente').length || 0,
         estavel: stats?.filter(s => s.tendencia === 'estavel').length || 0,
-        decrescente: stats?.filter(s => s.tendencia === 'decrescente').length || 0
-      }
+        decrescente:
+          stats?.filter(s => s.tendencia === 'decrescente').length || 0,
+      },
     };
 
     // Buscar métricas com alertas críticos
@@ -159,17 +187,19 @@ export async function GET(request: NextRequest) {
 
     // Calcular KPIs principais (métricas mais recentes)
     const kpiMap = {
-      'taxa_conclusao_checklists': 'Taxa de Conclusão',
-      'tempo_medio_execucao': 'Tempo Médio',
-      'score_medio_qualidade': 'Score de Qualidade',
-      'whatsapp_engagement': 'Engagement WhatsApp',
-      'produtividade_funcionarios': 'Produtividade'
+      taxa_conclusao_checklists: 'Taxa de Conclusão',
+      tempo_medio_execucao: 'Tempo Médio',
+      score_medio_qualidade: 'Score de Qualidade',
+      whatsapp_engagement: 'Engagement WhatsApp',
+      produtividade_funcionarios: 'Produtividade',
     };
 
-    const kpisPromises = Object.keys(kpiMap).map(async (metrica) => {
+    const kpisPromises = Object.keys(kpiMap).map(async metrica => {
       const { data } = await supabase
         .from('ai_metrics')
-        .select('nome_metrica, valor, meta_valor, variacao_percentual, performance, tendencia')
+        .select(
+          'nome_metrica, valor, meta_valor, variacao_percentual, performance, tendencia'
+        )
         .eq('bar_id', bar_id)
         .eq('nome_metrica', metrica)
         .eq('ativa', true)
@@ -177,14 +207,16 @@ export async function GET(request: NextRequest) {
         .limit(1)
         .single();
 
-      return data ? {
-        nome: kpiMap[metrica as keyof typeof kpiMap],
-        valor: data.valor,
-        meta: data.meta_valor,
-        variacao: data.variacao_percentual,
-        performance: data.performance,
-        tendencia: data.tendencia
-      } : null;
+      return data
+        ? {
+            nome: kpiMap[metrica as keyof typeof kpiMap],
+            valor: data.valor,
+            meta: data.meta_valor,
+            variacao: data.variacao_percentual,
+            performance: data.performance,
+            tendencia: data.tendencia,
+          }
+        : null;
     });
 
     const kpis = (await Promise.all(kpisPromises)).filter(kpi => kpi !== null);
@@ -199,20 +231,25 @@ export async function GET(request: NextRequest) {
         page: params.page,
         limit: params.limit,
         total: metrics?.length || 0,
-        hasNext: metrics?.length === params.limit
-      }
+        hasNext: metrics?.length === params.limit,
+      },
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Parâmetros inválidos',
-        details: error.issues
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Parâmetros inválidos',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
     console.error('Erro na API de métricas:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -221,24 +258,33 @@ export async function GET(request: NextRequest) {
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
-    
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     if (!['funcionario', 'financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar tendências' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para acessar tendências' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
     const { metrica, periodo_dias = 30, granularidade = 'daily' } = body;
 
     if (!metrica) {
-      return NextResponse.json({ error: 'Nome da métrica é obrigatório' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Nome da métrica é obrigatório' },
+        { status: 400 }
+      );
     }
 
     const dataInicio = new Date();
@@ -247,7 +293,8 @@ export async function POST(request: NextRequest) {
     // Buscar dados históricos
     const { data: historico, error } = await supabase
       .from('ai_metrics')
-      .select(`
+      .select(
+        `
         valor,
         valor_anterior,
         variacao_percentual,
@@ -255,7 +302,8 @@ export async function POST(request: NextRequest) {
         performance,
         data_referencia,
         detalhamento
-      `)
+      `
+      )
       .eq('bar_id', bar_id)
       .eq('nome_metrica', metrica)
       .gte('data_referencia', dataInicio.toISOString().split('T')[0])
@@ -263,7 +311,10 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar tendências:', error);
-      return NextResponse.json({ error: 'Erro ao buscar tendências' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar tendências' },
+        { status: 500 }
+      );
     }
 
     // Calcular estatísticas da série
@@ -280,8 +331,8 @@ export async function POST(request: NextRequest) {
           desvio_padrao: null,
           tendencia_geral: 'estavel',
           atingiu_meta: 0,
-          variacao_total: null
-        }
+          variacao_total: null,
+        },
       });
     }
 
@@ -291,9 +342,10 @@ export async function POST(request: NextRequest) {
     const valorMaximo = Math.max(...valores);
     const valorMinimo = Math.min(...valores);
     const media = valores.reduce((a, b) => a + b, 0) / valores.length;
-    
+
     // Calcular desvio padrão
-    const variance = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
+    const variance =
+      valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / valores.length;
     const desvioPadrao = Math.sqrt(variance);
 
     // Determinar tendência geral
@@ -303,38 +355,46 @@ export async function POST(request: NextRequest) {
     else if (variacaoTotal < -5) tendenciaGeral = 'decrescente';
 
     // Calcular quantas vezes atingiu a meta
-    const atingiuMeta = historico.filter(h => h.meta_valor && h.valor >= h.meta_valor).length;
+    const atingiuMeta = historico.filter(
+      h => h.meta_valor && h.valor >= h.meta_valor
+    ).length;
 
     // Preparar dados para gráfico (agrupamento se necessário)
     let dadosGrafico = historico;
-    
+
     if (granularidade === 'weekly' && historico.length > 7) {
       // Agrupar por semana
       const semanas: unknown = {};
       historico.forEach(h => {
         const data = new Date(h.data_referencia);
-        const inicioSemana = new Date(data.setDate(data.getDate() - data.getDay()));
+        const inicioSemana = new Date(
+          data.setDate(data.getDate() - data.getDay())
+        );
         const chave = inicioSemana.toISOString().split('T')[0];
-        
+
         if (!semanas[chave]) {
           semanas[chave] = {
             valores: [],
             data_referencia: chave,
-            meta_valor: h.meta_valor
+            meta_valor: h.meta_valor,
           };
         }
         semanas[chave].valores.push(h.valor);
       });
 
-      dadosGrafico = Object.values(semanas).map((s: Record<string, unknown>) => ({
-        ...s,
-        valor: (s.valores as number[]).reduce((a: number, b: number) => a + b, 0) / (s.valores as number[]).length,
-        valor_anterior: 0,
-        variacao_percentual: 0,
-        meta_valor: s.meta_valor,
-        performance: 'bom',
-        detalhamento: ''
-      })) as typeof historico;
+      dadosGrafico = Object.values(semanas).map(
+        (s: Record<string, unknown>) => ({
+          ...s,
+          valor:
+            (s.valores as number[]).reduce((a: number, b: number) => a + b, 0) /
+            (s.valores as number[]).length,
+          valor_anterior: 0,
+          variacao_percentual: 0,
+          meta_valor: s.meta_valor,
+          performance: 'bom',
+          detalhamento: '',
+        })
+      ) as typeof historico;
     }
 
     return NextResponse.json({
@@ -350,15 +410,20 @@ export async function POST(request: NextRequest) {
         tendencia_geral: tendenciaGeral,
         atingiu_meta: atingiuMeta,
         variacao_total: parseFloat(variacaoTotal.toFixed(2)),
-        performance_distribuicao: historico.reduce((acc, h) => {
-          acc[h.performance] = (acc[h.performance] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>)
-      }
+        performance_distribuicao: historico.reduce(
+          (acc, h) => {
+            acc[h.performance] = (acc[h.performance] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
+      },
     });
-
   } catch (error) {
     console.error('Erro na API de tendências:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
-} 
+}

@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { usePermissions } from '@/hooks/usePermissions'
-import { useMenuBadges } from '@/hooks/useMenuBadges'
-import { 
-  Home, 
-  CheckSquare, 
-  Settings, 
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useMenuBadges } from '@/hooks/useMenuBadges';
+import {
+  Home,
+  CheckSquare,
+  Settings,
   BarChart3,
   Calendar,
   Users,
@@ -30,308 +30,267 @@ import {
   Smartphone,
   DollarSign,
   MessageSquare,
-  CreditCard
-} from 'lucide-react'
+  CreditCard,
+} from 'lucide-react';
 
 interface SubMenuItem {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  href: string
-  badge?: number
-  description?: string
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  href: string;
+  badge?: number;
+  description?: string;
 }
 
 interface SidebarItem {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  href?: string
-  badge?: number
-  color?: string
-  subItems?: SubMenuItem[]
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  href?: string;
+  badge?: number;
+  color?: string;
+  subItems?: SubMenuItem[];
 }
 
-
-
 export function ModernSidebar() {
-  const [isHovered, setIsHovered] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<string[]>([])
-  const [manuallyToggledItems, setManuallyToggledItems] = useState<string[]>([])
-  const pathname = usePathname()
-  const { isRole } = usePermissions()
-  const { badges } = useMenuBadges()
-  
+  const [isHovered, setIsHovered] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [manuallyToggledItems, setManuallyToggledItems] = useState<string[]>(
+    []
+  );
+  const pathname = usePathname();
+  const { isRole } = usePermissions();
+  const { badges } = useMenuBadges();
+
   // Função para obter itens da sidebar com badges dinâmicos
   const getSidebarItems = (): SidebarItem[] => [
-    { 
-      icon: Home, 
-      label: 'Home', 
-      href: '/home', 
+    {
+      icon: Home,
+      label: 'Home',
+      href: '/home',
       color: 'text-blue-600 dark:text-blue-400',
-      badge: badges.home > 0 ? badges.home : undefined
+      badge: badges.home > 0 ? badges.home : undefined,
     },
 
-    { 
-      icon: Zap, 
-      label: 'Operações', 
-      href: '/operacoes', 
+    {
+      icon: Zap,
+      label: 'Operações',
+      href: '/operacoes',
       color: 'text-orange-600 dark:text-orange-400',
       subItems: [
-        { 
-          icon: CheckSquare, 
-          label: 'Gestão de Checklists', 
-          href: '/operacoes/checklists', 
-          description: 'Gestão de checklists'
+        {
+          icon: CheckSquare,
+          label: 'Gestão de Checklists',
+          href: '/operacoes/checklists',
+          description: 'Gestão de checklists',
         },
-        { 
-          icon: Users, 
-          label: 'Meus Checklists', 
-          href: '/operacoes/checklists/checklists-funcionario', 
-          description: 'Meus checklists pessoais'
+        {
+          icon: Users,
+          label: 'Meus Checklists',
+          href: '/operacoes/checklists/checklists-funcionario',
+          description: 'Meus checklists pessoais',
         },
-        { 
-          icon: FileText, 
-          label: 'Receitas', 
-          href: '/operacoes/receitas', 
-          description: 'Gestão de receitas operacionais'
+        {
+          icon: FileText,
+          label: 'Receitas',
+          href: '/operacoes/receitas',
+          description: 'Gestão de receitas operacionais',
         },
-        { 
-          icon: Zap, 
-          label: 'Terminal de Produção', 
-          href: '/operacoes/terminal', 
-          description: 'Terminal de produção em tempo real'
+        {
+          icon: Zap,
+          label: 'Terminal de Produção',
+          href: '/operacoes/terminal',
+          description: 'Terminal de produção em tempo real',
         },
-      ]
+      ],
     },
 
-    { 
-      icon: BarChart3, 
-      label: 'Relatórios', 
+    {
+      icon: BarChart3,
+      label: 'Relatórios',
       href: '/relatorios',
       color: 'text-blue-600 dark:text-blue-400',
       subItems: [
-        { 
-          icon: BarChart3, 
-          label: 'Visão Geral', 
+        {
+          icon: BarChart3,
+          label: 'Visão Geral',
           href: '/relatorios/visao-geral',
-          description: 'Dashboard principal'
+          description: 'Dashboard principal',
         },
-        { 
-          icon: Clock, 
-          label: 'Gestão de Tempo', 
-          href: '/relatorios/tempo',
-          description: 'Análise de tempo'
-        },
-        { 
-          icon: RefreshCw, 
-          label: 'Recorrência', 
-          href: '/relatorios/recorrencia',
-          description: 'Análise de padrões'
-        },
-        { 
-          icon: FileText, 
-          label: 'Analítico', 
-          href: '/relatorios/analitico',
-          description: 'Relatórios detalhados'
-        },
-        { 
-          icon: TrendingUp, 
-          label: 'ContaHub', 
-          href: '/relatorios/contahub-teste',
-          description: 'Relatórios ContaHub'
-        },
-        { 
-          icon: Calculator, 
-          label: 'Windsor.ai', 
-          href: '/relatorios/windsor-analytics',
-          description: 'Analytics Windsor.ai'
-        },
-      ]
+      ],
     },
 
-    { 
-      icon: TrendingUp, 
-      label: 'Marketing', 
+    {
+      icon: TrendingUp,
+      label: 'Marketing',
       href: '/marketing',
       color: 'text-pink-600 dark:text-pink-400',
       subItems: [
-        { 
-          icon: TrendingUp, 
-          label: 'Marketing 360', 
-          href: '/marketing/marketing-360',
-          description: 'Estratégia completa'
+        {
+          icon: Calculator,
+          label: 'Windsor.ai',
+          href: '/relatorios/windsor-analytics',
+          description: 'Analytics Windsor.ai',
         },
-        { 
-          icon: Target, 
-          label: 'Campanhas', 
-          href: '/marketing/campanhas',
-          description: 'Gestão de campanhas'
-        },
-        { 
-          icon: MessageSquare, 
-          label: 'WhatsApp', 
-          href: '/marketing/whatsapp',
-          description: 'Marketing via WhatsApp'
-        },
-        { 
-          icon: BarChart3, 
-          label: 'Analytics', 
-          href: '/marketing/analytics',
-          description: 'Métricas de marketing'
-        },
-      ]
+      ],
     },
 
-    { 
-      icon: DollarSign, 
-      label: 'Financeiro', 
+    {
+      icon: DollarSign,
+      label: 'Financeiro',
       href: '/financeiro',
       color: 'text-green-600 dark:text-green-400',
       subItems: [
-        { 
-          icon: Calendar, 
-          label: 'Agendamento', 
+        {
+          icon: Calendar,
+          label: 'Agendamento',
           href: '/financeiro/agendamento',
-          description: 'Agendar pagamentos'
+          description: 'Agendar pagamentos',
         },
-      ]
+      ],
     },
 
-    { 
-      icon: Settings, 
-      label: 'Configurações', 
+    {
+      icon: Settings,
+      label: 'Configurações',
       href: '/configuracoes',
       color: 'text-gray-600 dark:text-gray-400',
       badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
       subItems: [
-        { 
-          icon: CheckSquare, 
-          label: 'Checklists', 
+        {
+          icon: CheckSquare,
+          label: 'Checklists',
           href: '/configuracoes/checklists',
-          description: 'Configurar checklists'
+          description: 'Configurar checklists',
         },
-        { 
-          icon: Target, 
-          label: 'Metas', 
+        {
+          icon: Target,
+          label: 'Metas',
           href: '/configuracoes/metas',
-          description: 'Configurar metas'
+          description: 'Configurar metas',
         },
-        { 
-          icon: Database, 
-          label: 'Integrações', 
+        {
+          icon: Database,
+          label: 'Integrações',
           href: '/configuracoes/integracoes',
-          description: 'APIs e integrações'
+          description: 'APIs e integrações',
         },
-        { 
-          icon: Shield, 
-          label: 'Segurança', 
+        {
+          icon: Shield,
+          label: 'Segurança',
           href: '/configuracoes/seguranca',
-          description: 'Configurações de segurança'
+          description: 'Configurações de segurança',
         },
-        { 
-          icon: MessageSquare, 
-          label: 'WhatsApp', 
+        {
+          icon: MessageSquare,
+          label: 'WhatsApp',
           href: '/configuracoes/whatsapp',
-          description: 'Configurar WhatsApp'
+          description: 'Configurar WhatsApp',
         },
-        { 
-          icon: Zap, 
-          label: 'ContaHub Auto', 
+        {
+          icon: Zap,
+          label: 'ContaHub Auto',
           href: '/configuracoes/contahub-automatico',
-          description: 'Sincronização automática'
+          description: 'Sincronização automática',
         },
-        { 
-          icon: Clock, 
-          label: 'Meta Config', 
+        {
+          icon: Clock,
+          label: 'Meta Config',
           href: '/configuracoes/meta-config',
-          description: 'Configuração Meta'
+          description: 'Configuração Meta',
         },
-        { 
-          icon: FileText, 
-          label: 'Templates', 
+        {
+          icon: FileText,
+          label: 'Templates',
           href: '/configuracoes/templates',
-          description: 'Gerenciar templates'
+          description: 'Gerenciar templates',
         },
-        { 
-          icon: BarChart3, 
-          label: 'Analytics', 
+        {
+          icon: BarChart3,
+          label: 'Analytics',
           href: '/configuracoes/analytics',
-          description: 'Configurar analytics'
+          description: 'Configurar analytics',
         },
-        { 
-          icon: Smartphone, 
-          label: 'PWA', 
+        {
+          icon: Smartphone,
+          label: 'PWA',
           href: '/configuracoes/pwa',
-          description: 'Progressive Web App'
+          description: 'Progressive Web App',
         },
-      ]
+      ],
     },
-  ]
+  ];
 
   // Obter itens da sidebar com badges
-  const sidebarItems = getSidebarItems()
-  
+  const sidebarItems = getSidebarItems();
+
   // Usar diretamente os itens da sidebar (já inclui configurações)
-  const allSidebarItems = sidebarItems
+  const allSidebarItems = sidebarItems;
 
   const isActive = (href: string) => {
-    if (href === '/home') return pathname === '/home'
-    return pathname.startsWith(href)
-  }
+    if (href === '/home') return pathname === '/home';
+    return pathname.startsWith(href);
+  };
 
   const hasActiveSubItem = (subItems?: SubMenuItem[]) => {
-    if (!subItems) return false
-    return subItems.some(subItem => pathname.startsWith(subItem.href))
-  }
+    if (!subItems) return false;
+    return subItems.some(subItem => pathname.startsWith(subItem.href));
+  };
 
   const toggleExpanded = (label: string) => {
     setExpandedItems(prev => {
-      const newState = prev.includes(label) 
+      const newState = prev.includes(label)
         ? prev.filter(item => item !== label)
-        : [...prev, label]
-      return newState
-    })
-    
+        : [...prev, label];
+      return newState;
+    });
+
     // Marcar como manualmente manipulado
-    setManuallyToggledItems(prev => 
+    setManuallyToggledItems(prev =>
       prev.includes(label) ? prev : [...prev, label]
-    )
-  }
+    );
+  };
 
   const isExpanded = (label: string) => {
     // Se o item foi manipulado manualmente, respeita apenas o estado manual
     if (manuallyToggledItems.includes(label)) {
-      const result = expandedItems.includes(label)
-      return result
+      const result = expandedItems.includes(label);
+      return result;
     }
-    
+
     // Se não foi manipulado manualmente, pode usar expansão automática por hover
-    if (isHovered && hasActiveSubItem(allSidebarItems.find(item => item.label === label)?.subItems)) {
-      return true
+    if (
+      isHovered &&
+      hasActiveSubItem(
+        allSidebarItems.find(item => item.label === label)?.subItems
+      )
+    ) {
+      return true;
     }
-    
-    return false
-  }
+
+    return false;
+  };
 
   return (
-    <div 
+    <div
       className={`hidden md:block fixed left-0 top-0 bottom-0 z-40 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-out ${
         isHovered ? 'w-64' : 'w-16'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
-        setIsHovered(false)
+        setIsHovered(false);
         // Reset manual toggles after leaving hover for better UX
         setTimeout(() => {
-          setManuallyToggledItems([])
-        }, 3000)
+          setManuallyToggledItems([]);
+        }, 3000);
       }}
     >
       {/* Header spacer com design integrado */}
       <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
         <div className="flex items-center h-full px-4">
-          <div className={`flex items-center transition-all duration-300 ${
-            isHovered ? 'justify-start' : 'justify-center'
-          }`}>
+          <div
+            className={`flex items-center transition-all duration-300 ${
+              isHovered ? 'justify-start' : 'justify-center'
+            }`}
+          >
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-sm">S</span>
             </div>
@@ -349,11 +308,13 @@ export function ModernSidebar() {
         <nav className="flex-1 px-2 overflow-y-auto custom-scrollbar">
           <div className="space-y-1">
             {/* Command Palette Search Button removido da sidebar */}
-            
-            {allSidebarItems.map((item) => {
-              const isItemActive = item.href ? isActive(item.href) : hasActiveSubItem(item.subItems)
-              const itemExpanded = isExpanded(item.label)
-              
+
+            {allSidebarItems.map(item => {
+              const isItemActive = item.href
+                ? isActive(item.href)
+                : hasActiveSubItem(item.subItems);
+              const itemExpanded = isExpanded(item.label);
+
               return (
                 <div key={item.label}>
                   {/* Main item */}
@@ -366,34 +327,37 @@ export function ModernSidebar() {
                   >
                     {/* Link wrapper for items with direct href - clicar no nome/ícone navega */}
                     {item.href ? (
-                      <Link href={item.href} className="flex items-center flex-1">
-                        <ItemContent 
-                          item={item} 
-                          isItemActive={isItemActive} 
-                          isHovered={isHovered} 
+                      <Link
+                        href={item.href}
+                        className="flex items-center flex-1"
+                      >
+                        <ItemContent
+                          item={item}
+                          isItemActive={isItemActive}
+                          isHovered={isHovered}
                           hasSubItems={!!item.subItems}
                           isExpanded={itemExpanded}
                           showExpandIcon={false}
                         />
                       </Link>
                     ) : (
-                      <ItemContent 
-                        item={item} 
-                        isItemActive={isItemActive} 
-                        isHovered={isHovered} 
+                      <ItemContent
+                        item={item}
+                        isItemActive={isItemActive}
+                        isHovered={isHovered}
                         hasSubItems={!!item.subItems}
                         isExpanded={itemExpanded}
                         showExpandIcon={false}
                       />
                     )}
-                    
+
                     {/* Botão separado para expandir/colapsar - clicar na setinha expande */}
                     {item.subItems && isHovered && (
                       <button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          toggleExpanded(item.label)
+                        onClick={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleExpanded(item.label);
                         }}
                         className="ml-2 p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                       >
@@ -404,7 +368,7 @@ export function ModernSidebar() {
                         )}
                       </button>
                     )}
-                    
+
                     {/* Tooltip for collapsed state */}
                     {!isHovered && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
@@ -417,9 +381,9 @@ export function ModernSidebar() {
                   {/* Sub-items */}
                   {item.subItems && isHovered && itemExpanded && (
                     <div className="ml-6 mt-1 space-y-1 animate-slide-in-from-top">
-                      {item.subItems.map((subItem) => {
-                        const isSubActive = isActive(subItem.href)
-                        
+                      {item.subItems.map(subItem => {
+                        const isSubActive = isActive(subItem.href);
+
                         return (
                           <Link
                             key={subItem.href}
@@ -440,21 +404,23 @@ export function ModernSidebar() {
                               </span>
                             )}
                           </Link>
-                        )
+                        );
                       })}
                     </div>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         </nav>
 
         {/* Bottom section */}
         <div className="px-2 pt-4 border-t border-gray-100 dark:border-gray-800">
-          <div className={`flex items-center transition-all duration-300 ${
-            isHovered ? 'justify-between px-3' : 'justify-center'
-          }`}>
+          <div
+            className={`flex items-center transition-all duration-300 ${
+              isHovered ? 'justify-between px-3' : 'justify-center'
+            }`}
+          >
             <div className="flex items-center">
               <div className="w-2 h-2 rounded-full bg-green-500 shadow-sm"></div>
               {isHovered && (
@@ -472,41 +438,43 @@ export function ModernSidebar() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Componente auxiliar para renderizar o conteúdo do item
-function ItemContent({ 
-  item, 
-  isItemActive, 
-  isHovered, 
-  hasSubItems = false, 
+function ItemContent({
+  item,
+  isItemActive,
+  isHovered,
+  hasSubItems = false,
   isExpanded = false,
-  showExpandIcon = true
+  showExpandIcon = true,
 }: {
-  item: SidebarItem
-  isItemActive: boolean
-  isHovered: boolean
-  hasSubItems?: boolean
-  isExpanded?: boolean
-  showExpandIcon?: boolean
+  item: SidebarItem;
+  isItemActive: boolean;
+  isHovered: boolean;
+  hasSubItems?: boolean;
+  isExpanded?: boolean;
+  showExpandIcon?: boolean;
 }) {
   return (
     <>
       {/* Icon */}
-      <item.icon 
+      <item.icon
         className={`w-5 h-5 flex-shrink-0 transition-colors ${
-          isItemActive ? 'text-blue-600 dark:text-blue-400' : item.color || 'text-gray-500 dark:text-gray-400'
-        }`} 
+          isItemActive
+            ? 'text-blue-600 dark:text-blue-400'
+            : item.color || 'text-gray-500 dark:text-gray-400'
+        }`}
       />
-      
+
       {/* Label */}
       {isHovered && (
         <span className="ml-3 font-medium animate-slide-in-from-left duration-200 flex-1">
           {item.label}
         </span>
       )}
-      
+
       {/* Badge */}
       {item.badge && isHovered && (
         <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-slide-in-from-right duration-200 shadow-sm">
@@ -525,5 +493,5 @@ function ItemContent({
         </div>
       )}
     </>
-  )
-} 
+  );
+}

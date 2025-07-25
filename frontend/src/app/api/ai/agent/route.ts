@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
-import { aiAgentManager, startAIAgent, stopAIAgent } from '@/lib/ai-agent-service';
+import {
+  aiAgentManager,
+  startAIAgent,
+  stopAIAgent,
+} from '@/lib/ai-agent-service';
 
 // Configuração do Supabase
 const supabase = createClient(
@@ -14,8 +18,14 @@ const supabase = createClient(
 const AgentConfigSchema = z.object({
   agente_ativo: z.boolean().optional(),
   frequencia_analise_minutos: z.number().int().min(5).max(1440).optional(), // 5min a 24h
-  horario_analise_inicio: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
-  horario_analise_fim: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
+  horario_analise_inicio: z
+    .string()
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .optional(),
+  horario_analise_fim: z
+    .string()
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .optional(),
   gerar_insights: z.boolean().optional(),
   detectar_anomalias: z.boolean().optional(),
   gerar_predicoes: z.boolean().optional(),
@@ -32,18 +42,20 @@ const AgentConfigSchema = z.object({
   notificar_insights: z.boolean().optional(),
   notificar_anomalias: z.boolean().optional(),
   notificar_predicoes_criticas: z.boolean().optional(),
-  canais_notificacao: z.object({
-    browser: z.boolean(),
-    whatsapp: z.boolean(),
-    email: z.boolean().optional(),
-    sms: z.boolean().optional()
-  }).optional(),
+  canais_notificacao: z
+    .object({
+      browser: z.boolean(),
+      whatsapp: z.boolean(),
+      email: z.boolean().optional(),
+      sms: z.boolean().optional(),
+    })
+    .optional(),
   retreinar_modelos_automaticamente: z.boolean().optional(),
   frequencia_retreino_dias: z.number().int().min(7).max(180).optional(),
   accuracy_minima_producao: z.number().min(0).max(100).optional(),
   timeout_processamento_minutos: z.number().int().min(5).max(120).optional(),
   max_memoria_mb: z.number().int().min(512).max(8192).optional(),
-  log_debug: z.boolean().optional()
+  log_debug: z.boolean().optional(),
 });
 
 // ========================================
@@ -51,18 +63,26 @@ const AgentConfigSchema = z.object({
 // ========================================
 export async function GET() {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
-    
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     // Apenas admins podem ver configurações do agente
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas administradores podem acessar configurações do agente' }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: 'Apenas administradores podem acessar configurações do agente',
+        },
+        { status: 403 }
+      );
     }
 
     // Buscar configuração atual
@@ -72,19 +92,26 @@ export async function GET() {
       .eq('bar_id', bar_id)
       .single();
 
-    if (configError && configError.code !== 'PGRST116') { // PGRST116 = not found
+    if (configError && configError.code !== 'PGRST116') {
+      // PGRST116 = not found
       console.error('Erro ao buscar configuração do agente:', configError);
-      return NextResponse.json({ error: 'Erro ao buscar configuração' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar configuração' },
+        { status: 500 }
+      );
     }
 
     // Status do agente no manager
     const agentsStatus = aiAgentManager.getAgentsStatus();
-    const agentRunning = agentsStatus.some(a => a.barId === bar_id && a.running);
+    const agentRunning = agentsStatus.some(
+      a => a.barId === bar_id && a.running
+    );
 
     // Buscar logs recentes
     const { data: logs } = await supabase
       .from('ai_agent_logs')
-      .select(`
+      .select(
+        `
         id,
         tipo_processamento,
         nome_processo,
@@ -98,7 +125,8 @@ export async function GET() {
         total_recomendacoes_criadas,
         erro_detalhes,
         executado_por
-      `)
+      `
+      )
       .eq('bar_id', bar_id)
       .order('data_inicio', { ascending: false })
       .limit(10);
@@ -108,17 +136,28 @@ export async function GET() {
       .from('ai_agent_logs')
       .select('status, duracao_segundos, data_inicio')
       .eq('bar_id', bar_id)
-      .gte('data_inicio', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+      .gte(
+        'data_inicio',
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      );
 
     const estatisticas = {
       execucoes_ultima_semana: execStats?.length || 0,
-      execucoes_sucesso: execStats?.filter(e => e.status === 'concluido').length || 0,
+      execucoes_sucesso:
+        execStats?.filter(e => e.status === 'concluido').length || 0,
       execucoes_erro: execStats?.filter(e => e.status === 'erro').length || 0,
-      tempo_medio_execucao: execStats?.length ? 
-        execStats.filter(e => e.duracao_segundos).reduce((acc, e) => acc + e.duracao_segundos, 0) / execStats.filter(e => e.duracao_segundos).length : 0,
+      tempo_medio_execucao: execStats?.length
+        ? execStats
+            .filter(e => e.duracao_segundos)
+            .reduce((acc, e) => acc + e.duracao_segundos, 0) /
+          execStats.filter(e => e.duracao_segundos).length
+        : 0,
       ultima_execucao: logs?.[0]?.data_inicio || null,
-      uptime_percentual: execStats?.length ? 
-        ((execStats.filter(e => e.status === 'concluido').length / execStats.length) * 100) : 0
+      uptime_percentual: execStats?.length
+        ? (execStats.filter(e => e.status === 'concluido').length /
+            execStats.length) *
+          100
+        : 0,
     };
 
     // Próxima execução estimada
@@ -127,7 +166,9 @@ export async function GET() {
       const ultimaExec = logs?.find(l => l.status === 'concluido');
       if (ultimaExec) {
         const ultima = new Date(ultimaExec.data_inicio);
-        proximaExecucao = new Date(ultima.getTime() + config.frequencia_analise_minutos * 60 * 1000);
+        proximaExecucao = new Date(
+          ultima.getTime() + config.frequencia_analise_minutos * 60 * 1000
+        );
       }
     }
 
@@ -139,16 +180,20 @@ export async function GET() {
           agente_rodando: agentRunning,
           agente_configurado: !!config,
           proxima_execucao: proximaExecucao,
-          dentro_horario_funcionamento: config ? isWithinWorkingHours(config) : false
+          dentro_horario_funcionamento: config
+            ? isWithinWorkingHours(config)
+            : false,
         },
         logs_recentes: logs || [],
-        estatisticas
-      }
+        estatisticas,
+      },
     });
-
   } catch (error) {
     console.error('Erro na API do agente:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -157,17 +202,23 @@ export async function GET() {
 // ========================================
 export async function PUT(request: NextRequest) {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
-    
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas administradores podem configurar o agente' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Apenas administradores podem configurar o agente' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -192,7 +243,10 @@ export async function PUT(request: NextRequest) {
 
       if (error) {
         console.error('Erro ao atualizar configuração:', error);
-        return NextResponse.json({ error: 'Erro ao atualizar configuração' }, { status: 500 });
+        return NextResponse.json(
+          { error: 'Erro ao atualizar configuração' },
+          { status: 500 }
+        );
       }
       result = data;
     } else {
@@ -205,7 +259,10 @@ export async function PUT(request: NextRequest) {
 
       if (error) {
         console.error('Erro ao criar configuração:', error);
-        return NextResponse.json({ error: 'Erro ao criar configuração' }, { status: 500 });
+        return NextResponse.json(
+          { error: 'Erro ao criar configuração' },
+          { status: 500 }
+        );
       }
       result = data;
     }
@@ -222,19 +279,24 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result,
-      message: 'Configuração atualizada com sucesso'
+      message: 'Configuração atualizada com sucesso',
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Dados inválidos',
-        details: error.issues
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Dados inválidos',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
     console.error('Erro na API do agente:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -243,24 +305,33 @@ export async function PUT(request: NextRequest) {
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    const headersList = await headers()
-    const userData = headersList.get('x-user-data')
+    const headersList = await headers();
+    const userData = headersList.get('x-user-data');
 
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     if (permissao !== 'admin') {
-      return NextResponse.json({ error: 'Apenas administradores podem controlar o agente' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Apenas administradores podem controlar o agente' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
     const { action } = body;
 
     if (!action) {
-      return NextResponse.json({ error: 'Ação é obrigatória' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Ação é obrigatória' },
+        { status: 400 }
+      );
     }
 
     let message = '';
@@ -269,7 +340,9 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'start': {
         success = await startAIAgent(bar_id);
-        message = success ? 'Agente iniciado com sucesso' : 'Erro ao iniciar agente';
+        message = success
+          ? 'Agente iniciado com sucesso'
+          : 'Erro ao iniciar agente';
         break;
       }
 
@@ -284,29 +357,34 @@ export async function POST(request: NextRequest) {
         stopAIAgent(bar_id);
         await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar 1s
         success = await startAIAgent(bar_id);
-        message = success ? 'Agente reiniciado com sucesso' : 'Erro ao reiniciar agente';
+        message = success
+          ? 'Agente reiniciado com sucesso'
+          : 'Erro ao reiniciar agente';
         break;
       }
 
       case 'run_analysis': {
         // Forçar execução manual de análise
         const agentsStatus = aiAgentManager.getAgentsStatus();
-        const agentRunning = agentsStatus.some(a => a.barId === bar_id && a.running);
-        
+        const agentRunning = agentsStatus.some(
+          a => a.barId === bar_id && a.running
+        );
+
         if (!agentRunning) {
-          return NextResponse.json({ error: 'Agente não está rodando' }, { status: 400 });
+          return NextResponse.json(
+            { error: 'Agente não está rodando' },
+            { status: 400 }
+          );
         }
 
         // Registrar execução manual
-        await supabase
-          .from('ai_agent_logs')
-          .insert({
-            bar_id,
-            tipo_processamento: 'analise_manual',
-            nome_processo: 'Análise Manual Solicitada',
-            status: 'iniciado',
-            executado_por: 'usuario_manual'
-          });
+        await supabase.from('ai_agent_logs').insert({
+          bar_id,
+          tipo_processamento: 'analise_manual',
+          nome_processo: 'Análise Manual Solicitada',
+          status: 'iniciado',
+          executado_por: 'usuario_manual',
+        });
 
         success = true;
         message = 'Análise manual iniciada';
@@ -319,11 +397,17 @@ export async function POST(request: NextRequest) {
           .from('ai_agent_logs')
           .delete()
           .eq('bar_id', bar_id)
-          .lt('data_inicio', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+          .lt(
+            'data_inicio',
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+          );
 
         if (clearError) {
           console.error('Erro ao limpar logs:', clearError);
-          return NextResponse.json({ error: 'Erro ao limpar logs' }, { status: 500 });
+          return NextResponse.json(
+            { error: 'Erro ao limpar logs' },
+            { status: 500 }
+          );
         }
 
         success = true;
@@ -346,7 +430,7 @@ export async function POST(request: NextRequest) {
           sensibilidade_anomalias: 2.0,
           notificar_insights: true,
           notificar_anomalias: true,
-          notificar_predicoes_criticas: true
+          notificar_predicoes_criticas: true,
         };
 
         const { error: resetError } = await supabase
@@ -356,7 +440,10 @@ export async function POST(request: NextRequest) {
 
         if (resetError) {
           console.error('Erro ao resetar configuração:', resetError);
-          return NextResponse.json({ error: 'Erro ao resetar configuração' }, { status: 500 });
+          return NextResponse.json(
+            { error: 'Erro ao resetar configuração' },
+            { status: 500 }
+          );
         }
 
         // Parar agente se estiver rodando
@@ -376,13 +463,15 @@ export async function POST(request: NextRequest) {
       message,
       data: {
         action_executed: action,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     console.error('Erro na API do agente:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -391,8 +480,8 @@ export async function POST(request: NextRequest) {
 // ========================================
 
 interface AgentConfig {
-  horario_analise_inicio: string
-  horario_analise_fim: string
+  horario_analise_inicio: string;
+  horario_analise_fim: string;
 }
 
 /**
@@ -401,7 +490,9 @@ interface AgentConfig {
 function isWithinWorkingHours(config: AgentConfig): boolean {
   const now = new Date();
   const currentTime = now.toTimeString().slice(0, 5);
-  
-  return currentTime >= config.horario_analise_inicio && 
-         currentTime <= config.horario_analise_fim;
-} 
+
+  return (
+    currentTime >= config.horario_analise_inicio &&
+    currentTime <= config.horario_analise_fim
+  );
+}

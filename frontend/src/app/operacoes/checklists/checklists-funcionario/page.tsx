@@ -1,12 +1,25 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { CheckSquare, Users, FileText, Clock, Calendar, AlertTriangle } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  CheckSquare,
+  Users,
+  FileText,
+  Clock,
+  Calendar,
+  AlertTriangle,
+} from 'lucide-react';
 
 export default function ChecklistsFuncionarioPage() {
   return (
@@ -46,5 +59,5 @@ export default function ChecklistsFuncionarioPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
-} 
+  );
+}

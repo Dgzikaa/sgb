@@ -7,10 +7,10 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[]
+  | Json[];
 
 // Cole o conteúdo do tipo Database gerado pelo MCP aqui:
 // (Conteúdo omitido para exemplo, mas deve ser colado integralmente)
 
 // Exemplo:
-export type Database = Record<string, unknown> 
+export type Database = Record<string, unknown>;

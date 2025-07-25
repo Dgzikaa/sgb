@@ -1,6 +1,11 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
-import { authenticateUser, checkPermission, authErrorResponse, permissionErrorResponse } from '@/middleware/auth';
+import {
+  authenticateUser,
+  checkPermission,
+  authErrorResponse,
+  permissionErrorResponse,
+} from '@/middleware/auth';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -53,48 +58,94 @@ interface TemplatePredefinido {
 const TemplateCreateSchema = z.object({
   nome: z.string().min(1).max(255),
   descricao: z.string().optional(),
-  categoria: z.enum(['limpeza', 'seguranca', 'qualidade', 'manutencao', 'abertura', 'fechamento', 'auditoria', 'geral']),
+  categoria: z.enum([
+    'limpeza',
+    'seguranca',
+    'qualidade',
+    'manutencao',
+    'abertura',
+    'fechamento',
+    'auditoria',
+    'geral',
+  ]),
   setor: z.string().min(1),
-  tipo: z.enum(['abertura', 'fechamento', 'manutencao', 'qualidade', 'seguranca', 'limpeza', 'auditoria']),
-  frequencia: z.enum(['diaria', 'semanal', 'quinzenal', 'mensal', 'bimestral', 'trimestral', 'conforme_necessario']),
+  tipo: z.enum([
+    'abertura',
+    'fechamento',
+    'manutencao',
+    'qualidade',
+    'seguranca',
+    'limpeza',
+    'auditoria',
+  ]),
+  frequencia: z.enum([
+    'diaria',
+    'semanal',
+    'quinzenal',
+    'mensal',
+    'bimestral',
+    'trimestral',
+    'conforme_necessario',
+  ]),
   tempo_estimado: z.number().min(1).max(480).default(30),
   publico: z.boolean().default(false), // Se é público para todos os bares
   predefinido: z.boolean().default(false), // Se é template do sistema
   tags: z.array(z.string()).optional(),
   estrutura: z.object({
-    secoes: z.array(z.object({
-      nome: z.string(),
-      descricao: z.string().optional(),
-      cor: z.string().default('bg-blue-500'),
-      ordem: z.number(),
-      itens: z.array(z.object({
-        titulo: z.string(),
+    secoes: z.array(
+      z.object({
+        nome: z.string(),
         descricao: z.string().optional(),
-        tipo: z.enum(['texto', 'numero', 'sim_nao', 'data', 'assinatura', 'foto_camera', 'foto_upload', 'avaliacao']),
-        obrigatorio: z.boolean().default(false),
+        cor: z.string().default('bg-blue-500'),
         ordem: z.number(),
-        opcoes: z.object({}).optional(),
-        condicional: z.object({
-          dependeDe: z.string(),
-          valor: z.unknown()
-        }).optional(),
-        validacao: z.object({}).optional()
-      }))
-    }))
-  })
-})
+        itens: z.array(
+          z.object({
+            titulo: z.string(),
+            descricao: z.string().optional(),
+            tipo: z.enum([
+              'texto',
+              'numero',
+              'sim_nao',
+              'data',
+              'assinatura',
+              'foto_camera',
+              'foto_upload',
+              'avaliacao',
+            ]),
+            obrigatorio: z.boolean().default(false),
+            ordem: z.number(),
+            opcoes: z.object({}).optional(),
+            condicional: z
+              .object({
+                dependeDe: z.string(),
+                valor: z.unknown(),
+              })
+              .optional(),
+            validacao: z.object({}).optional(),
+          })
+        ),
+      })
+    ),
+  }),
+});
 
 const TemplateQuerySchema = z.object({
   categoria: z.string().optional(),
   setor: z.string().optional(),
   tipo: z.string().optional(),
-  publico: z.string().transform((val: string) => val === 'true').optional(),
-  predefinido: z.string().transform((val: string) => val === 'true').optional(),
+  publico: z
+    .string()
+    .transform((val: string) => val === 'true')
+    .optional(),
+  predefinido: z
+    .string()
+    .transform((val: string) => val === 'true')
+    .optional(),
   busca: z.string().optional(),
   tags: z.string().optional(),
   page: z.string().transform(Number).default('1'),
-  limit: z.string().transform(Number).default('20')
-})
+  limit: z.string().transform(Number).default('20'),
+});
 
 // =====================================================
 // TEMPLATES PREDEFINIDOS DO SISTEMA
@@ -120,24 +171,25 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
           itens: [
             {
               titulo: 'Bancadas limpas e sanitizadas',
-              descricao: 'Verificar se todas as bancadas estão limpas e sanitizadas',
+              descricao:
+                'Verificar se todas as bancadas estão limpas e sanitizadas',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 1
+              ordem: 1,
             },
             {
               titulo: 'Pias e torneiras limpas',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 2
+              ordem: 2,
             },
             {
               titulo: 'Lixeiras vazias e com sacos novos',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 3
-            }
-          ]
+              ordem: 3,
+            },
+          ],
         },
         {
           nome: 'Equipamentos',
@@ -149,7 +201,7 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
               titulo: 'Fogão funcionando corretamente',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 1
+              ordem: 1,
             },
             {
               titulo: 'Geladeira - temperatura adequada',
@@ -157,7 +209,7 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
               tipo: 'numero',
               obrigatorio: true,
               ordem: 2,
-              opcoes: { min: -5, max: 10, unidade: '°C' }
+              opcoes: { min: -5, max: 10, unidade: '°C' },
             },
             {
               titulo: 'Freezer - temperatura adequada',
@@ -165,12 +217,12 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
               tipo: 'numero',
               obrigatorio: true,
               ordem: 3,
-              opcoes: { min: -30, max: -15, unidade: '°C' }
-            }
-          ]
-        }
-      ]
-    }
+              opcoes: { min: -30, max: -15, unidade: '°C' },
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     nome: 'Limpeza de Banheiros',
@@ -192,27 +244,27 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
               titulo: 'Vasos sanitários limpos e desinfetados',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 1
+              ordem: 1,
             },
             {
               titulo: 'Pias e torneiras limpas',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 2
+              ordem: 2,
             },
             {
               titulo: 'Espelhos limpos',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 3
+              ordem: 3,
             },
             {
               titulo: 'Chão lavado e seco',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 4
-            }
-          ]
+              ordem: 4,
+            },
+          ],
         },
         {
           nome: 'Suprimentos',
@@ -223,24 +275,24 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
               titulo: 'Papel higiênico disponível',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 1
+              ordem: 1,
             },
             {
               titulo: 'Sabonete/sabão disponível',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 2
+              ordem: 2,
             },
             {
               titulo: 'Papel toalha disponível',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 3
-            }
-          ]
-        }
-      ]
-    }
+              ordem: 3,
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     nome: 'Checklist de Segurança - Básico',
@@ -262,15 +314,15 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
               titulo: 'Extintores no local e dentro da validade',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 1
+              ordem: 1,
             },
             {
               titulo: 'Saídas de emergência desobstruídas',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 2
-            }
-          ]
+              ordem: 2,
+            },
+          ],
         },
         {
           nome: 'Segurança Geral',
@@ -281,13 +333,13 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
               titulo: 'Instalações elétricas em bom estado',
               tipo: 'sim_nao',
               obrigatorio: true,
-              ordem: 1
-            }
-          ]
-        }
-      ]
-    }
-  }
+              ordem: 1,
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 // =====================================================
@@ -296,73 +348,80 @@ const TEMPLATES_PREDEFINIDOS: TemplatePredefinido[] = [
 export async function GET(request: NextRequest) {
   try {
     // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
+    const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('Usuário não autenticado');
     }
 
-    const { searchParams } = new URL(request.url)
-    const query = TemplateQuerySchema.parse(Object.fromEntries(searchParams))
-    
-    const supabase = await getAdminClient()
-    
+    const { searchParams } = new URL(request.url);
+    const query = TemplateQuerySchema.parse(Object.fromEntries(searchParams));
+
+    const supabase = await getAdminClient();
+
     // Construir query base
     let dbQuery = supabase
       .from('checklist_templates')
-      .select(`
+      .select(
+        `
         *,
         criado_por:usuarios_bar!criado_por (nome, email),
         template_tags (
           template_tags (nome, cor)
         )
-      `)
+      `
+      )
       .order('predefinido', { ascending: false }) // Templates do sistema primeiro
-      .order('criado_em', { ascending: false })
+      .order('criado_em', { ascending: false });
 
     // Filtrar por templates públicos OU do próprio bar
-            dbQuery = dbQuery.or(`publico.eq.true,bar_id.eq.${user.bar_id.toString()}`)
+    dbQuery = dbQuery.or(`publico.eq.true,bar_id.eq.${user.bar_id.toString()}`);
 
     // Aplicar filtros
     if (query.categoria) {
-      dbQuery = dbQuery.eq('categoria', query.categoria)
+      dbQuery = dbQuery.eq('categoria', query.categoria);
     }
-    
+
     if (query.setor) {
-      dbQuery = dbQuery.eq('setor', query.setor)
+      dbQuery = dbQuery.eq('setor', query.setor);
     }
-    
+
     if (query.tipo) {
-      dbQuery = dbQuery.eq('tipo', query.tipo)
+      dbQuery = dbQuery.eq('tipo', query.tipo);
     }
-    
+
     if (query.publico !== undefined) {
-      dbQuery = dbQuery.eq('publico', query.publico)
+      dbQuery = dbQuery.eq('publico', query.publico);
     }
-    
+
     if (query.predefinido !== undefined) {
-      dbQuery = dbQuery.eq('predefinido', query.predefinido)
+      dbQuery = dbQuery.eq('predefinido', query.predefinido);
     }
-    
+
     if (query.busca) {
-      dbQuery = dbQuery.or(`nome.ilike.%${query.busca}%,descricao.ilike.%${query.busca}%`)
+      dbQuery = dbQuery.or(
+        `nome.ilike.%${query.busca}%,descricao.ilike.%${query.busca}%`
+      );
     }
 
     // Paginação
-    const offset = (query.page - 1) * query.limit
-    dbQuery = dbQuery.range(offset, offset + query.limit - 1)
+    const offset = (query.page - 1) * query.limit;
+    dbQuery = dbQuery.range(offset, offset + query.limit - 1);
 
-    const { data: templates, error, count } = await dbQuery
+    const { data: templates, error, count } = await dbQuery;
 
     if (error) {
-      console.error('Erro ao buscar templates:', error)
-      return NextResponse.json({ error: 'Erro ao buscar templates' }, { status: 500 })
+      console.error('Erro ao buscar templates:', error);
+      return NextResponse.json(
+        { error: 'Erro ao buscar templates' },
+        { status: 500 }
+      );
     }
 
     // Buscar estatísticas
     const { data: stats } = await supabase
       .from('checklist_templates')
       .select('categoria, publico, predefinido')
-              .or(`publico.eq.true,bar_id.eq.${user.bar_id.toString()}`)
+      .or(`publico.eq.true,bar_id.eq.${user.bar_id.toString()}`);
 
     interface TemplateStats {
       categoria: string;
@@ -372,12 +431,17 @@ export async function GET(request: NextRequest) {
 
     const estatisticas = {
       total: stats?.length || 0,
-      por_categoria: stats?.reduce((acc: Record<string, number>, item: TemplateStats) => {
-        acc[item.categoria] = (acc[item.categoria] || 0) + 1;
-        return acc;
-      }, {}),
-      publicos: stats?.filter((item: TemplateStats) => item.publico).length || 0,
-      predefinidos: stats?.filter((item: TemplateStats) => item.predefinido).length || 0
+      por_categoria: stats?.reduce(
+        (acc: Record<string, number>, item: TemplateStats) => {
+          acc[item.categoria] = (acc[item.categoria] || 0) + 1;
+          return acc;
+        },
+        {}
+      ),
+      publicos:
+        stats?.filter((item: TemplateStats) => item.publico).length || 0,
+      predefinidos:
+        stats?.filter((item: TemplateStats) => item.predefinido).length || 0,
     };
 
     return NextResponse.json({
@@ -387,18 +451,20 @@ export async function GET(request: NextRequest) {
         page: query.page,
         limit: query.limit,
         total: count,
-        pages: Math.ceil((count || 0) / query.limit)
+        pages: Math.ceil((count || 0) / query.limit),
       },
-      estatisticas
-    })
-
+      estatisticas,
+    });
   } catch (error: unknown) {
     const apiError = error as Error;
     console.error('Erro na API de templates GET:', apiError);
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: apiError.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: apiError.message,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -408,25 +474,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
+    const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('Usuário não autenticado');
     }
 
     // 🔒 PERMISSÕES - Verificar se pode criar templates
     if (!checkPermission(user, { module: 'checklists', action: 'write' })) {
-      return permissionErrorResponse('Sem permissão para criar templates')
+      return permissionErrorResponse('Sem permissão para criar templates');
     }
 
-    const body = await request.json()
-    const supabase = await getAdminClient()
+    const body = await request.json();
+    const supabase = await getAdminClient();
 
     // Verificar se é uma solicitação para instalar templates predefinidos
     if (body.action === 'install_predefined') {
-      console.log('📦 Instalando templates predefinidos...')
-      
-      const templatesParaInstalar = []
-      
+      console.log('📦 Instalando templates predefinidos...');
+
+      const templatesParaInstalar = [];
+
       for (const template of TEMPLATES_PREDEFINIDOS) {
         // Verificar se já existe
         const { data: existente } = await supabase
@@ -434,7 +500,7 @@ export async function POST(request: NextRequest) {
           .select('id')
           .eq('nome', template.nome)
           .eq('predefinido', true)
-          .single()
+          .single();
 
         if (!existente) {
           templatesParaInstalar.push({
@@ -442,8 +508,8 @@ export async function POST(request: NextRequest) {
             publico: true,
             predefinido: true,
             bar_id: null, // Templates do sistema não pertencem a nenhum bar específico
-            criado_por: user.user_id
-          })
+            criado_por: user.user_id,
+          });
         }
       }
 
@@ -451,44 +517,52 @@ export async function POST(request: NextRequest) {
         const { data: novosTemplates, error: insertError } = await supabase
           .from('checklist_templates')
           .insert(templatesParaInstalar)
-          .select()
+          .select();
 
         if (insertError) {
-          console.error('Erro ao instalar templates:', insertError)
-          return NextResponse.json({ error: 'Erro ao instalar templates' }, { status: 500 })
+          console.error('Erro ao instalar templates:', insertError);
+          return NextResponse.json(
+            { error: 'Erro ao instalar templates' },
+            { status: 500 }
+          );
         }
 
-        console.log(`✅ ${novosTemplates.length} templates predefinidos instalados`)
+        console.log(
+          `✅ ${novosTemplates.length} templates predefinidos instalados`
+        );
 
         return NextResponse.json({
           success: true,
           message: `${novosTemplates.length} templates predefinidos instalados com sucesso`,
-          data: novosTemplates
-        })
+          data: novosTemplates,
+        });
       } else {
         return NextResponse.json({
           success: true,
           message: 'Todos os templates predefinidos já estão instalados',
-          data: []
-        })
+          data: [],
+        });
       }
     }
 
     // Criar template personalizado
-    const data = TemplateCreateSchema.parse(body)
-    
+    const data = TemplateCreateSchema.parse(body);
+
     // Verificar se já existe template com mesmo nome
     const { data: existente } = await supabase
       .from('checklist_templates')
       .select('id')
       .eq('nome', data.nome)
       .eq('bar_id', data.publico ? null : user.bar_id)
-      .single()
+      .single();
 
     if (existente) {
-      return NextResponse.json({ 
-        error: 'Já existe um template com este nome' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'Já existe um template com este nome',
+        },
+        { status: 400 }
+      );
     }
 
     // Criar template
@@ -506,14 +580,17 @@ export async function POST(request: NextRequest) {
         predefinido: false,
         estrutura: data.estrutura,
         bar_id: data.publico ? null : user.bar_id,
-        criado_por: user.user_id
+        criado_por: user.user_id,
       })
       .select()
-      .single()
+      .single();
 
     if (templateError) {
-      console.error('Erro ao criar template:', templateError)
-      return NextResponse.json({ error: 'Erro ao criar template' }, { status: 500 })
+      console.error('Erro ao criar template:', templateError);
+      return NextResponse.json(
+        { error: 'Erro ao criar template' },
+        { status: 500 }
+      );
     }
 
     // Adicionar tags se fornecidas
@@ -524,52 +601,58 @@ export async function POST(request: NextRequest) {
           .from('template_tags')
           .select('id')
           .eq('nome', tagNome)
-          .single()
+          .single();
 
         if (!tag) {
           const { data: novaTag } = await supabase
             .from('template_tags')
             .insert({ nome: tagNome })
             .select()
-            .single()
-          tag = novaTag
+            .single();
+          tag = novaTag;
         }
 
         if (tag) {
           // Associar tag ao template
-          await supabase
-            .from('checklist_tags')
-            .insert({
-              template_id: template.id,
-              tag_id: tag.id
-            })
+          await supabase.from('checklist_tags').insert({
+            template_id: template.id,
+            tag_id: tag.id,
+          });
         }
       }
     }
 
-    console.log('✅ Template criado:', template.nome)
+    console.log('✅ Template criado:', template.nome);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Template criado com sucesso',
-      data: template
-    }, { status: 201 })
-
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Template criado com sucesso',
+        data: template,
+      },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     const apiError = error as Error;
     console.error('Erro na API de templates POST:', apiError);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ 
-        error: 'Dados inválidos',
-        details: error.issues 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Dados inválidos',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
-    
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: apiError.message 
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: apiError.message,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -579,48 +662,61 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // 🔐 AUTENTICAÇÃO
-    const user = await authenticateUser(request)
+    const user = await authenticateUser(request);
     if (!user) {
-      return authErrorResponse('Usuário não autenticado')
+      return authErrorResponse('Usuário não autenticado');
     }
 
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-    
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
     if (!id) {
-      return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
+      return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 });
     }
 
-    const supabase = await getAdminClient()
-    
+    const supabase = await getAdminClient();
+
     // Verificar se template existe e se pode ser excluído
     const { data: template } = await supabase
       .from('checklist_templates')
       .select('id, nome, predefinido, publico, bar_id, criado_por')
       .eq('id', id)
-      .single()
+      .single();
 
     if (!template) {
-      return NextResponse.json({ error: 'Template não encontrado' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Template não encontrado' },
+        { status: 404 }
+      );
     }
 
     // Não permitir deletar templates predefinidos do sistema
     if (template.predefinido) {
-      return NextResponse.json({ 
-        error: 'Templates predefinidos do sistema não podem ser removidos' 
-      }, { status: 403 })
+      return NextResponse.json(
+        {
+          error: 'Templates predefinidos do sistema não podem ser removidos',
+        },
+        { status: 403 }
+      );
     }
 
     // Verificar permissões
     if (template.publico) {
       // Template público só pode ser deletado por admin
       if (!checkPermission(user, { module: 'checklists', action: 'admin' })) {
-        return permissionErrorResponse('Apenas administradores podem deletar templates públicos')
+        return permissionErrorResponse(
+          'Apenas administradores podem deletar templates públicos'
+        );
       }
     } else {
       // Template privado só pode ser deletado pelo criador ou admin do bar
-      if (template.criado_por !== user.user_id && template.bar_id !== user.bar_id) {
-        return permissionErrorResponse('Sem permissão para deletar este template')
+      if (
+        template.criado_por !== user.user_id &&
+        template.bar_id !== user.bar_id
+      ) {
+        return permissionErrorResponse(
+          'Sem permissão para deletar este template'
+        );
       }
     }
 
@@ -629,38 +725,47 @@ export async function DELETE(request: NextRequest) {
       .from('checklists')
       .select('id')
       .eq('template_origem', id)
-      .limit(1)
+      .limit(1);
 
     if (checklists && checklists.length > 0) {
-      return NextResponse.json({ 
-        error: 'Template não pode ser removido pois está sendo usado por checklists existentes' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error:
+            'Template não pode ser removido pois está sendo usado por checklists existentes',
+        },
+        { status: 400 }
+      );
     }
 
     // Deletar template (cascade remove tags automaticamente)
     const { error: deleteError } = await supabase
       .from('checklist_templates')
       .delete()
-      .eq('id', id)
+      .eq('id', id);
 
     if (deleteError) {
-      console.error('Erro ao deletar template:', deleteError)
-      return NextResponse.json({ error: 'Erro ao deletar template' }, { status: 500 })
+      console.error('Erro ao deletar template:', deleteError);
+      return NextResponse.json(
+        { error: 'Erro ao deletar template' },
+        { status: 500 }
+      );
     }
 
-    console.log('✅ Template deletado:', template.nome)
+    console.log('✅ Template deletado:', template.nome);
 
     return NextResponse.json({
       success: true,
-      message: 'Template deletado com sucesso'
-    })
-
+      message: 'Template deletado com sucesso',
+    });
   } catch (error: unknown) {
     const apiError = error as Error;
     console.error('Erro na API de templates DELETE:', apiError);
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: apiError.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: apiError.message,
+      },
+      { status: 500 }
+    );
   }
-} 
+}

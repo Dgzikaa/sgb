@@ -23,10 +23,10 @@ export async function GET() {
     try {
       // Usar cliente Supabase para executar SQL
       const supabase = await getAdminClient();
-      const { data, error } = await supabase.rpc('execute_sql', { 
-        sql_query: supabaseQuery 
+      const { data, error } = await supabase.rpc('execute_sql', {
+        sql_query: supabaseQuery,
       });
-      
+
       if (!error && data) {
         supabaseResult = data;
       }
@@ -41,36 +41,40 @@ export async function GET() {
         agora: frontendTime.toISOString(),
         formatado: frontendFormatted,
         timestamp_brasil: frontendISO,
-        timezone: 'America/Sao_Paulo (Frontend)'
+        timezone: 'America/Sao_Paulo (Frontend)',
       },
-      supabase: supabaseResult ? {
-        timezone_config: supabaseResult[0]?.timezone_config,
-        utc_time: supabaseResult[0]?.utc_time,
-        brasil_time: supabaseResult[0]?.brasil_time,
-        agora_brasil_func: supabaseResult[0]?.agora_brasil_func,
-        formatado_brasil: supabaseResult[0]?.formatado_brasil
-      } : {
-        error: 'Não foi possível conectar ao Supabase'
-      },
+      supabase: supabaseResult
+        ? {
+            timezone_config: supabaseResult[0]?.timezone_config,
+            utc_time: supabaseResult[0]?.utc_time,
+            brasil_time: supabaseResult[0]?.brasil_time,
+            agora_brasil_func: supabaseResult[0]?.agora_brasil_func,
+            formatado_brasil: supabaseResult[0]?.formatado_brasil,
+          }
+        : {
+            error: 'Não foi possível conectar ao Supabase',
+          },
       comparison: {
         frontend_vs_utc: `Frontend está ${Math.round((frontendTime.getTime() - new Date().getTime()) / 1000 / 60 / 60)} horas de diferença do UTC`,
         ambiente: process.env.NODE_ENV,
-        vercel_timezone: process.env.TZ || 'Não configurado'
+        vercel_timezone: process.env.TZ || 'Não configurado',
       },
       debug: {
         env_tz: process.env.TZ,
         node_env: process.env.NODE_ENV,
         vercel_region: process.env.VERCEL_REGION,
-        user_agent: 'API Test'
-      }
+        user_agent: 'API Test',
+      },
     });
-
   } catch (error) {
     console.error('Erro no teste de timezone:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido',
-      timestamp: new Date().toISOString()
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 }
+    );
   }
-} 
+}

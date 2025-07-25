@@ -86,23 +86,33 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         auth: {
-          persistSession: false
-        }
+          persistSession: false,
+        },
       }
-    )
-    
+    );
+
     // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const scheduleData: ScheduleData = await req.json()
+    const scheduleData: ScheduleData = await req.json();
 
-    if (!scheduleData.checklistId || !scheduleData.frequencia || !scheduleData.horario) {
-      return NextResponse.json({ 
-        error: 'Dados obrigatórios não fornecidos' 
-      }, { status: 400 })
+    if (
+      !scheduleData.checklistId ||
+      !scheduleData.frequencia ||
+      !scheduleData.horario
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Dados obrigatórios não fornecidos',
+        },
+        { status: 400 }
+      );
     }
 
     // Verificar se o checklist existe e pertence ao usuário
@@ -111,12 +121,15 @@ export async function POST(req: NextRequest) {
       .select('id, titulo, user_id')
       .eq('id', scheduleData.checklistId)
       .eq('user_id', user.id)
-      .single()
+      .single();
 
     if (checklistError || !checklist) {
-      return NextResponse.json({ 
-        error: 'Checklist não encontrado' 
-      }, { status: 404 })
+      return NextResponse.json(
+        {
+          error: 'Checklist não encontrado',
+        },
+        { status: 404 }
+      );
     }
 
     // Preparar dados para inserção
@@ -133,38 +146,44 @@ export async function POST(req: NextRequest) {
       observacoes: scheduleData.observacoes || null,
       user_id: user.id,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
+      updated_at: new Date().toISOString(),
+    };
 
     // Inserir agendamento
     const { data: insertedSchedule, error: insertError } = await supabase
       .from('checklist_schedules')
       .insert(scheduleToInsert)
       .select()
-      .single()
+      .single();
 
     if (insertError) {
-      console.error('Erro ao inserir agendamento:', insertError)
-      return NextResponse.json({ 
-        error: 'Erro ao criar agendamento' 
-      }, { status: 500 })
+      console.error('Erro ao inserir agendamento:', insertError);
+      return NextResponse.json(
+        {
+          error: 'Erro ao criar agendamento',
+        },
+        { status: 500 }
+      );
     }
 
-    const insertedScheduleData = insertedSchedule as Schedule
+    const insertedScheduleData = insertedSchedule as Schedule;
 
     return NextResponse.json({
       success: true,
       message: 'Agendamento criado com sucesso',
-      schedule: insertedScheduleData
-    })
-
+      schedule: insertedScheduleData,
+    });
   } catch (error: unknown) {
-    console.error('Erro ao criar agendamento:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    }, { status: 500 })
+    console.error('Erro ao criar agendamento:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro desconhecido';
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -175,56 +194,67 @@ export async function GET(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         auth: {
-          persistSession: false
-        }
+          persistSession: false,
+        },
       }
-    )
-    
+    );
+
     // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url)
-    const checklistId = searchParams.get('checklistId')
+    const { searchParams } = new URL(req.url);
+    const checklistId = searchParams.get('checklistId');
 
     let query = supabase
       .from('checklist_schedules')
-      .select(`
+      .select(
+        `
         *,
         checklist:checklists(id, titulo, categoria)
-      `)
+      `
+      )
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
 
     if (checklistId) {
-      query = query.eq('checklist_id', checklistId)
+      query = query.eq('checklist_id', checklistId);
     }
 
-    const { data: schedules, error: schedulesError } = await query
+    const { data: schedules, error: schedulesError } = await query;
 
     if (schedulesError) {
-      console.error('Erro ao buscar agendamentos:', schedulesError)
-      return NextResponse.json({ 
-        error: 'Erro ao buscar agendamentos' 
-      }, { status: 500 })
+      console.error('Erro ao buscar agendamentos:', schedulesError);
+      return NextResponse.json(
+        {
+          error: 'Erro ao buscar agendamentos',
+        },
+        { status: 500 }
+      );
     }
 
-    const schedulesData = schedules as Schedule[] || []
+    const schedulesData = (schedules as Schedule[]) || [];
 
     return NextResponse.json({
       success: true,
-      schedules: schedulesData
-    })
-
+      schedules: schedulesData,
+    });
   } catch (error: unknown) {
-    console.error('Erro ao buscar agendamentos:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    }, { status: 500 })
+    console.error('Erro ao buscar agendamentos:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro desconhecido';
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -235,23 +265,29 @@ export async function PUT(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         auth: {
-          persistSession: false
-        }
+          persistSession: false,
+        },
       }
-    )
-    
+    );
+
     // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const scheduleData: ScheduleUpdateData = await req.json()
+    const scheduleData: ScheduleUpdateData = await req.json();
 
     if (!scheduleData.id) {
-      return NextResponse.json({ 
-        error: 'ID do agendamento não fornecido' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'ID do agendamento não fornecido',
+        },
+        { status: 400 }
+      );
     }
 
     // Verificar se o agendamento existe e pertence ao usuário
@@ -260,28 +296,39 @@ export async function PUT(req: NextRequest) {
       .select('id, user_id')
       .eq('id', scheduleData.id)
       .eq('user_id', user.id)
-      .single()
+      .single();
 
     if (scheduleError || !existingSchedule) {
-      return NextResponse.json({ 
-        error: 'Agendamento não encontrado' 
-      }, { status: 404 })
+      return NextResponse.json(
+        {
+          error: 'Agendamento não encontrado',
+        },
+        { status: 404 }
+      );
     }
 
     // Preparar dados para atualização
     const updateData: Partial<ScheduleToInsert> = {
-      updated_at: new Date().toISOString()
-    }
+      updated_at: new Date().toISOString(),
+    };
 
-    if (scheduleData.titulo !== undefined) updateData.titulo = scheduleData.titulo
-    if (scheduleData.frequencia !== undefined) updateData.frequencia = scheduleData.frequencia
-    if (scheduleData.horario !== undefined) updateData.horario = scheduleData.horario
-    if (scheduleData.diasSemana !== undefined) updateData.dias_semana = scheduleData.diasSemana
-    if (scheduleData.diaMes !== undefined) updateData.dia_mes = scheduleData.diaMes
-    if (scheduleData.ativo !== undefined) updateData.ativo = scheduleData.ativo
-    if (scheduleData.notificacoes !== undefined) updateData.notificacoes = scheduleData.notificacoes
-    if (scheduleData.responsaveis !== undefined) updateData.responsaveis = scheduleData.responsaveis
-    if (scheduleData.observacoes !== undefined) updateData.observacoes = scheduleData.observacoes
+    if (scheduleData.titulo !== undefined)
+      updateData.titulo = scheduleData.titulo;
+    if (scheduleData.frequencia !== undefined)
+      updateData.frequencia = scheduleData.frequencia;
+    if (scheduleData.horario !== undefined)
+      updateData.horario = scheduleData.horario;
+    if (scheduleData.diasSemana !== undefined)
+      updateData.dias_semana = scheduleData.diasSemana;
+    if (scheduleData.diaMes !== undefined)
+      updateData.dia_mes = scheduleData.diaMes;
+    if (scheduleData.ativo !== undefined) updateData.ativo = scheduleData.ativo;
+    if (scheduleData.notificacoes !== undefined)
+      updateData.notificacoes = scheduleData.notificacoes;
+    if (scheduleData.responsaveis !== undefined)
+      updateData.responsaveis = scheduleData.responsaveis;
+    if (scheduleData.observacoes !== undefined)
+      updateData.observacoes = scheduleData.observacoes;
 
     // Atualizar agendamento
     const { data: updatedSchedule, error: updateError } = await supabase
@@ -289,30 +336,36 @@ export async function PUT(req: NextRequest) {
       .update(updateData)
       .eq('id', scheduleData.id)
       .select()
-      .single()
+      .single();
 
     if (updateError) {
-      console.error('Erro ao atualizar agendamento:', updateError)
-      return NextResponse.json({ 
-        error: 'Erro ao atualizar agendamento' 
-      }, { status: 500 })
+      console.error('Erro ao atualizar agendamento:', updateError);
+      return NextResponse.json(
+        {
+          error: 'Erro ao atualizar agendamento',
+        },
+        { status: 500 }
+      );
     }
 
-    const updatedScheduleData = updatedSchedule as Schedule
+    const updatedScheduleData = updatedSchedule as Schedule;
 
     return NextResponse.json({
       success: true,
       message: 'Agendamento atualizado com sucesso',
-      schedule: updatedScheduleData
-    })
-
+      schedule: updatedScheduleData,
+    });
   } catch (error: unknown) {
-    console.error('Erro ao atualizar agendamento:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    }, { status: 500 })
+    console.error('Erro ao atualizar agendamento:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro desconhecido';
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -323,24 +376,30 @@ export async function DELETE(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         auth: {
-          persistSession: false
-        }
+          persistSession: false,
+        },
       }
-    )
-    
+    );
+
     // Verificar autenticação
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url)
-    const scheduleId = searchParams.get('id')
+    const { searchParams } = new URL(req.url);
+    const scheduleId = searchParams.get('id');
 
     if (!scheduleId) {
-      return NextResponse.json({ 
-        error: 'ID do agendamento não fornecido' 
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'ID do agendamento não fornecido',
+        },
+        { status: 400 }
+      );
     }
 
     // Verificar se o agendamento existe e pertence ao usuário
@@ -349,38 +408,47 @@ export async function DELETE(req: NextRequest) {
       .select('id, user_id')
       .eq('id', scheduleId)
       .eq('user_id', user.id)
-      .single()
+      .single();
 
     if (scheduleError || !existingSchedule) {
-      return NextResponse.json({ 
-        error: 'Agendamento não encontrado' 
-      }, { status: 404 })
+      return NextResponse.json(
+        {
+          error: 'Agendamento não encontrado',
+        },
+        { status: 404 }
+      );
     }
 
     // Deletar agendamento
     const { error: deleteError } = await supabase
       .from('checklist_schedules')
       .delete()
-      .eq('id', scheduleId)
+      .eq('id', scheduleId);
 
     if (deleteError) {
-      console.error('Erro ao deletar agendamento:', deleteError)
-      return NextResponse.json({ 
-        error: 'Erro ao deletar agendamento' 
-      }, { status: 500 })
+      console.error('Erro ao deletar agendamento:', deleteError);
+      return NextResponse.json(
+        {
+          error: 'Erro ao deletar agendamento',
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Agendamento deletado com sucesso'
-    })
-
+      message: 'Agendamento deletado com sucesso',
+    });
   } catch (error: unknown) {
-    console.error('Erro ao deletar agendamento:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
-    return NextResponse.json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    }, { status: 500 })
+    console.error('Erro ao deletar agendamento:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro desconhecido';
+    return NextResponse.json(
+      {
+        error: 'Erro interno do servidor',
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
-} 
+}

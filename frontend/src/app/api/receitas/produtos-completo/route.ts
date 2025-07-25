@@ -1,5 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseClient } from '@/lib/supabase'
+﻿import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/lib/supabase';
 
 // Criar tabelas de produtos e receitas
 const criarTabelas = async (supabase: unknown) => {
@@ -36,62 +36,69 @@ const criarTabelas = async (supabase: unknown) => {
       CREATE INDEX IF NOT EXISTS idx_produtos_ativo ON produtos(ativo);
       CREATE INDEX IF NOT EXISTS idx_receitas_produto ON receitas(produto_codigo);
       CREATE INDEX IF NOT EXISTS idx_receitas_insumo ON receitas(insumo_codigo);
-    `
-  })
-  
+    `,
+  });
+
   if (error) {
-    console.error('❌ Erro ao criar tabelas produtos/receitas:', error)
-    throw error
+    console.error('❌ Erro ao criar tabelas produtos/receitas:', error);
+    throw error;
   }
-  
-  console.log('✅ Tabelas produtos/receitas criadas/verificadas')
-}
+
+  console.log('✅ Tabelas produtos/receitas criadas/verificadas');
+};
 
 // GET - Listar produtos com receitas
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const ativo = searchParams.get('ativo') !== 'false'
-    const busca = searchParams.get('busca') || ''
-    const comReceitas = searchParams.get('com_receitas') === 'true'
+    const { searchParams } = new URL(request.url);
+    const ativo = searchParams.get('ativo') !== 'false';
+    const busca = searchParams.get('busca') || '';
+    const comReceitas = searchParams.get('com_receitas') === 'true';
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getSupabaseClient();
     if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Erro ao conectar com banco' },
+        { status: 500 }
+      );
     }
 
     // Verificar/criar tabelas
-    await criarTabelas(supabase)
+    await criarTabelas(supabase);
 
     let query = supabase
       .from('produtos')
       .select('*')
       .eq('ativo', ativo)
-      .order('nome', { ascending: true })
+      .order('nome', { ascending: true });
 
     if (busca) {
-      query = query.or(`nome.ilike.%${busca}%,codigo.ilike.%${busca}%`)
+      query = query.or(`nome.ilike.%${busca}%,codigo.ilike.%${busca}%`);
     }
 
-    const { data: produtos, error } = await query
+    const { data: produtos, error } = await query;
 
     if (error) {
-      console.error('❌ Erro ao buscar produtos:', error)
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Erro ao buscar produtos' 
-      }, { status: 500 })
+      console.error('❌ Erro ao buscar produtos:', error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Erro ao buscar produtos',
+        },
+        { status: 500 }
+      );
     }
 
     // Se solicitado, incluir receitas de cada produto
-    const produtosComReceitas = produtos || []
-    
+    const produtosComReceitas = produtos || [];
+
     if (comReceitas && produtos && produtos.length > 0) {
       for (const produto of produtos) {
         // Buscar receitas do produto com dados dos insumos
         const { data: receitas } = await supabase
           .from('receitas')
-          .select(`
+          .select(
+            `
             quantidade_receita,
             insumos (
               codigo,
@@ -100,49 +107,54 @@ export async function GET(request: NextRequest) {
               unidade,
               peso_volume_unidade
             )
-          `)
-          .eq('produto_codigo', produto.codigo)
+          `
+          )
+          .eq('produto_codigo', produto.codigo);
 
         // Calcular custo total da receita
-        let custoTotalReceita = 0
-        const insumosReceita = receitas?.map((receita: unknown) => {
-          const custoInsumo = receita.quantidade_receita * receita.insumos.custo_unitario
-          custoTotalReceita += custoInsumo
-          
-          return {
-            insumo_codigo: receita.insumos.codigo,
-            insumo_nome: receita.insumos.nome,
-            quantidade_receita: receita.quantidade_receita,
-            custo_unitario: receita.insumos.custo_unitario,
-            custo_total: custoInsumo,
-            unidade: receita.insumos.unidade
-          }
-        }) || []
+        let custoTotalReceita = 0;
+        const insumosReceita =
+          receitas?.map((receita: unknown) => {
+            const custoInsumo =
+              receita.quantidade_receita * receita.insumos.custo_unitario;
+            custoTotalReceita += custoInsumo;
 
-        produto.insumos = insumosReceita
-        produto.custo_total_receita = custoTotalReceita
+            return {
+              insumo_codigo: receita.insumos.codigo,
+              insumo_nome: receita.insumos.nome,
+              quantidade_receita: receita.quantidade_receita,
+              custo_unitario: receita.insumos.custo_unitario,
+              custo_total: custoInsumo,
+              unidade: receita.insumos.unidade,
+            };
+          }) || [];
+
+        produto.insumos = insumosReceita;
+        produto.custo_total_receita = custoTotalReceita;
       }
     }
 
     return NextResponse.json({
       success: true,
       data: produtosComReceitas,
-      total: produtosComReceitas.length
-    })
-
+      total: produtosComReceitas.length,
+    });
   } catch (error) {
-    console.error('❌ Erro interno:', error)
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Erro interno do servidor' 
-    }, { status: 500 })
+    console.error('❌ Erro interno:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Erro interno do servidor',
+      },
+      { status: 500 }
+    );
   }
 }
 
 // POST - Cadastrar produto com receita
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const {
       codigo,
       nome,
@@ -150,130 +162,164 @@ export async function POST(request: NextRequest) {
       quantidade_base = 1,
       unidade_final = 'unid',
       observacoes = '',
-      receita = [] // Array de {insumo_codigo, quantidade_receita}
-    } = body
+      receita = [], // Array de {insumo_codigo, quantidade_receita}
+    } = body;
 
-    console.log(`🍽️ Cadastrando produto:`, { codigo, nome, receita: receita.length })
+    console.log(`🍽️ Cadastrando produto:`, {
+      codigo,
+      nome,
+      receita: receita.length,
+    });
 
     // Validações
     if (!codigo || !nome) {
-      return NextResponse.json({
-        success: false,
-        error: 'Campos obrigatórios: codigo, nome'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Campos obrigatórios: codigo, nome',
+        },
+        { status: 400 }
+      );
     }
 
     if (!Array.isArray(receita) || receita.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'Receita deve ter pelo menos um insumo'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Receita deve ter pelo menos um insumo',
+        },
+        { status: 400 }
+      );
     }
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getSupabaseClient();
     if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Erro ao conectar com banco' },
+        { status: 500 }
+      );
     }
 
     // Verificar/criar tabelas
-    await criarTabelas(supabase)
+    await criarTabelas(supabase);
 
     // Verificar se código já existe
     const { data: existente } = await supabase
       .from('produtos')
       .select('codigo')
       .eq('codigo', codigo)
-      .single()
+      .single();
 
     if (existente) {
-      return NextResponse.json({
-        success: false,
-        error: `Código ${codigo} já existe`
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Código ${codigo} já existe`,
+        },
+        { status: 400 }
+      );
     }
 
     // Verificar se todos os insumos existem
-    const insumoCodigos = receita.map((r: unknown) => r.insumo_codigo)
+    const insumoCodigos = receita.map((r: unknown) => r.insumo_codigo);
     const { data: insumosExistentes } = await supabase
       .from('insumos')
       .select('codigo')
       .in('codigo', insumoCodigos)
-      .eq('ativo', true)
+      .eq('ativo', true);
 
-    const codigosExistentes = insumosExistentes?.map((i: unknown) => i.codigo) || []
-    const insumosInvalidos = insumoCodigos.filter((codigo: string) => !codigosExistentes.includes(codigo))
+    const codigosExistentes =
+      insumosExistentes?.map((i: unknown) => i.codigo) || [];
+    const insumosInvalidos = insumoCodigos.filter(
+      (codigo: string) => !codigosExistentes.includes(codigo)
+    );
 
     if (insumosInvalidos.length > 0) {
-      return NextResponse.json({
-        success: false,
-        error: `Insumos não encontrados: ${insumosInvalidos.join(', ')}`
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Insumos não encontrados: ${insumosInvalidos.join(', ')}`,
+        },
+        { status: 400 }
+      );
     }
 
     // Inserir produto
     const { data: produto, error: erroProduto } = await supabase
       .from('produtos')
-      .insert([{
-        codigo,
-        nome,
-        rendimento_percentual: parseFloat(rendimento_percentual),
-        quantidade_base: parseFloat(quantidade_base),
-        unidade_final,
-        observacoes
-      }])
-      .select()
+      .insert([
+        {
+          codigo,
+          nome,
+          rendimento_percentual: parseFloat(rendimento_percentual),
+          quantidade_base: parseFloat(quantidade_base),
+          unidade_final,
+          observacoes,
+        },
+      ])
+      .select();
 
     if (erroProduto) {
-      console.error('❌ Erro ao cadastrar produto:', erroProduto)
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Erro ao cadastrar produto' 
-      }, { status: 500 })
+      console.error('❌ Erro ao cadastrar produto:', erroProduto);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Erro ao cadastrar produto',
+        },
+        { status: 500 }
+      );
     }
 
     // Inserir receitas
     const receitasParaInserir = receita.map((r: unknown) => ({
       produto_codigo: codigo,
       insumo_codigo: r.insumo_codigo,
-      quantidade_receita: parseFloat(r.quantidade_receita)
-    }))
+      quantidade_receita: parseFloat(r.quantidade_receita),
+    }));
 
     const { error: erroReceitas } = await supabase
       .from('receitas')
-      .insert(receitasParaInserir)
+      .insert(receitasParaInserir);
 
     if (erroReceitas) {
       // Se falhou nas receitas, remover produto
-      await supabase.from('produtos').delete().eq('codigo', codigo)
-      
-      console.error('❌ Erro ao cadastrar receitas:', erroReceitas)
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Erro ao cadastrar receitas do produto' 
-      }, { status: 500 })
+      await supabase.from('produtos').delete().eq('codigo', codigo);
+
+      console.error('❌ Erro ao cadastrar receitas:', erroReceitas);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Erro ao cadastrar receitas do produto',
+        },
+        { status: 500 }
+      );
     }
 
-    console.log(`✅ Produto cadastrado: ${codigo} com ${receita.length} insumos`)
+    console.log(
+      `✅ Produto cadastrado: ${codigo} com ${receita.length} insumos`
+    );
 
     return NextResponse.json({
       success: true,
       data: produto[0],
-      message: 'Produto e receita cadastrados com sucesso!'
-    })
-
+      message: 'Produto e receita cadastrados com sucesso!',
+    });
   } catch (error) {
-    console.error('❌ Erro interno:', error)
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Erro interno do servidor' 
-    }, { status: 500 })
+    console.error('❌ Erro interno:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Erro interno do servidor',
+      },
+      { status: 500 }
+    );
   }
 }
 
 // PUT - Atualizar produto e receita
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await request.json();
     const {
       codigo,
       nome,
@@ -282,19 +328,25 @@ export async function PUT(request: NextRequest) {
       unidade_final,
       observacoes,
       ativo,
-      receita = []
-    } = body
+      receita = [],
+    } = body;
 
     if (!codigo) {
-      return NextResponse.json({
-        success: false,
-        error: 'Código é obrigatório para atualização'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Código é obrigatório para atualização',
+        },
+        { status: 400 }
+      );
     }
 
-    const supabase = await getSupabaseClient()
+    const supabase = await getSupabaseClient();
     if (!supabase) {
-      return NextResponse.json({ error: 'Erro ao conectar com banco' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Erro ao conectar com banco' },
+        { status: 500 }
+      );
     }
 
     // Atualizar produto
@@ -307,58 +359,63 @@ export async function PUT(request: NextRequest) {
         unidade_final,
         observacoes,
         ativo,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('codigo', codigo)
-      .select()
+      .select();
 
     if (erroProduto) {
-      console.error('❌ Erro ao atualizar produto:', erroProduto)
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Erro ao atualizar produto' 
-      }, { status: 500 })
+      console.error('❌ Erro ao atualizar produto:', erroProduto);
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Erro ao atualizar produto',
+        },
+        { status: 500 }
+      );
     }
 
     // Se receita foi fornecida, atualizar
     if (receita.length > 0) {
       // Remover receitas antigas
-      await supabase
-        .from('receitas')
-        .delete()
-        .eq('produto_codigo', codigo)
+      await supabase.from('receitas').delete().eq('produto_codigo', codigo);
 
       // Inserir novas receitas
       const receitasParaInserir = receita.map((r: unknown) => ({
         produto_codigo: codigo,
         insumo_codigo: r.insumo_codigo,
-        quantidade_receita: parseFloat(r.quantidade_receita)
-      }))
+        quantidade_receita: parseFloat(r.quantidade_receita),
+      }));
 
       const { error: erroReceitas } = await supabase
         .from('receitas')
-        .insert(receitasParaInserir)
+        .insert(receitasParaInserir);
 
       if (erroReceitas) {
-        console.error('❌ Erro ao atualizar receitas:', erroReceitas)
-        return NextResponse.json({ 
-          success: false, 
-          error: 'Erro ao atualizar receitas' 
-        }, { status: 500 })
+        console.error('❌ Erro ao atualizar receitas:', erroReceitas);
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Erro ao atualizar receitas',
+          },
+          { status: 500 }
+        );
       }
     }
 
     return NextResponse.json({
       success: true,
       data: produto[0],
-      message: 'Produto atualizado com sucesso!'
-    })
-
+      message: 'Produto atualizado com sucesso!',
+    });
   } catch (error) {
-    console.error('❌ Erro interno:', error)
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Erro interno do servidor' 
-    }, { status: 500 })
+    console.error('❌ Erro interno:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Erro interno do servidor',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

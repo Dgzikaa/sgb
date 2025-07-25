@@ -1,12 +1,16 @@
-'use client'
+'use client';
 
 interface AssistantButtonProps {
-  onClick: () => void
-  hasNewMessages?: boolean
-  isOpen?: boolean
+  onClick: () => void;
+  hasNewMessages?: boolean;
+  isOpen?: boolean;
 }
 
-export default function AssistantButton({ onClick, hasNewMessages = false, isOpen = false }: AssistantButtonProps) {
+export default function AssistantButton({
+  onClick,
+  hasNewMessages = false,
+  isOpen = false,
+}: AssistantButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -25,19 +29,23 @@ export default function AssistantButton({ onClick, hasNewMessages = false, isOpe
       title="SGB Assistant"
     >
       {/* Ícone principal */}
-      <div className={`
+      <div
+        className={`
         transition-all duration-300
         ${isOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}
-      `}>
+      `}
+      >
         🤖
       </div>
-      
+
       {/* Ícone quando aberto */}
-      <div className={`
+      <div
+        className={`
         absolute inset-0 flex items-center justify-center
         transition-all duration-300
         ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
-      `}>
+      `}
+      >
         ✖️
       </div>
 
@@ -55,9 +63,9 @@ export default function AssistantButton({ onClick, hasNewMessages = false, isOpe
 
       {/* Hover effect ring */}
       <div className="absolute inset-0 rounded-2xl border-2 border-white/0 group-hover:border-white/30 transition-all duration-300"></div>
-      
+
       {/* Gradient overlay on hover */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/10 group-hover:to-transparent transition-all duration-300"></div>
     </button>
-  )
-} 
+  );
+}

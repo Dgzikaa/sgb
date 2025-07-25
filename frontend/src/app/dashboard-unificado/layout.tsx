@@ -1,13 +1,9 @@
-import { DarkSidebarLayout } from '@/components/layouts/DarkSidebarLayout'
+import { DarkSidebarLayout } from '@/components/layouts/DarkSidebarLayout';
 
 export default function DashboardUnificadoLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  return (
-    <DarkSidebarLayout>
-      {children}
-    </DarkSidebarLayout>
-  )
-} 
+  return <DarkSidebarLayout>{children}</DarkSidebarLayout>;
+}

@@ -1,40 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 // Cliente Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+);
 
 interface InterPixCallback {
-  chave: string
-  codigoSolicitacao: string
-  dataHoraMovimento: string
-  dataHoraSolicitacao: string
-  descricaoPagamento: string
-  endToEnd: string
-  instituicaoDestinatario: string
+  chave: string;
+  codigoSolicitacao: string;
+  dataHoraMovimento: string;
+  dataHoraSolicitacao: string;
+  descricaoPagamento: string;
+  endToEnd: string;
+  instituicaoDestinatario: string;
   recebedor: {
-    cpfCnpj: string
-    nome: string
-  }
-  status: 'PROCESSADO' | 'REJEITADO' | 'PENDENTE'
-  tipoMovimentacao: 'PAGAMENTO'
-  valor: string
+    cpfCnpj: string;
+    nome: string;
+  };
+  status: 'PROCESSADO' | 'REJEITADO' | 'PENDENTE';
+  tipoMovimentacao: 'PAGAMENTO';
+  valor: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body: InterPixCallback = await request.json()
-    
+    const body: InterPixCallback = await request.json();
+
     console.log('📨 Callback PIX recebido do Inter:', {
       codigoSolicitacao: body.codigoSolicitacao,
       status: body.status,
       valor: body.valor,
       endToEnd: body.endToEnd,
-      dataHoraMovimento: body.dataHoraMovimento
-    })
+      dataHoraMovimento: body.dataHoraMovimento,
+    });
 
     // Salvar callback no banco de dados
     const { data: callbackData, error: callbackError } = await supabase
@@ -52,58 +52,57 @@ export async function POST(request: NextRequest) {
         data_hora_solicitacao: body.dataHoraSolicitacao,
         instituicao_destinatario: body.instituicaoDestinatario,
         tipo_movimentacao: body.tipoMovimentacao,
-        payload_completo: body
-      })
+        payload_completo: body,
+      });
 
     if (callbackError) {
-      console.error('❌ Erro ao salvar callback:', callbackError)
+      console.error('❌ Erro ao salvar callback:', callbackError);
       // Não falhar o callback, apenas logar o erro
     } else {
-      console.log('✅ Callback salvo no banco:', callbackData)
+      console.log('✅ Callback salvo no banco:', callbackData);
     }
 
     // Atualizar status na tabela pix_enviados
-    console.log('🔄 Atualizando status do PIX:', body.codigoSolicitacao)
-    
+    console.log('🔄 Atualizando status do PIX:', body.codigoSolicitacao);
+
     const { data: updateData, error: updateError } = await supabase
       .from('pix_enviados')
-      .update({ 
+      .update({
         status: body.status,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('txid', body.codigoSolicitacao)
-      .select()
+      .select();
 
     if (updateError) {
-      console.error('❌ Erro ao atualizar status do PIX:', updateError)
+      console.error('❌ Erro ao atualizar status do PIX:', updateError);
     } else {
-      console.log('✅ Status do PIX atualizado:', updateData)
+      console.log('✅ Status do PIX atualizado:', updateData);
     }
 
     // Enviar notificação para Discord
     try {
-      await enviarNotificacaoDiscord(body)
-      console.log('✅ Notificação Discord enviada')
+      await enviarNotificacaoDiscord(body);
+      console.log('✅ Notificação Discord enviada');
     } catch (discordError) {
-      console.error('⚠️ Erro ao enviar notificação Discord:', discordError)
+      console.error('⚠️ Erro ao enviar notificação Discord:', discordError);
       // Não falhar o callback se o Discord der erro
     }
 
     // Retornar 200 para confirmar recebimento
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Callback processado com sucesso',
-      codigoSolicitacao: body.codigoSolicitacao
-    })
-
+      codigoSolicitacao: body.codigoSolicitacao,
+    });
   } catch (error: any) {
-    console.error('❌ Erro ao processar callback PIX:', error)
-    
+    console.error('❌ Erro ao processar callback PIX:', error);
+
     // Sempre retornar 200 para não fazer o Inter reenviar
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message 
-    })
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+    });
   }
 }
 
@@ -116,28 +115,28 @@ async function enviarNotificacaoDiscord(callback: InterPixCallback) {
       .select('configuracoes')
       .eq('sistema', 'banco_inter')
       .eq('ativo', true)
-      .single()
+      .single();
 
     if (error || !credenciaisDiscord?.configuracoes?.webhook_url) {
-      console.log('⚠️ Webhook do Discord não encontrado')
-      return false
+      console.log('⚠️ Webhook do Discord não encontrado');
+      return false;
     }
 
-    const webhookUrl = credenciaisDiscord.configuracoes.webhook_url
-    
+    const webhookUrl = credenciaisDiscord.configuracoes.webhook_url;
+
     // Definir cor baseada no status
-    let color = 0xffa500 // Laranja (padrão)
-    let statusEmoji = "⏳"
-    let statusText = "Processando"
-    
+    let color = 0xffa500; // Laranja (padrão)
+    let statusEmoji = '⏳';
+    let statusText = 'Processando';
+
     if (callback.status === 'PROCESSADO') {
-      color = 0x00ff00 // Verde
-      statusEmoji = "✅"
-      statusText = "Processado"
+      color = 0x00ff00; // Verde
+      statusEmoji = '✅';
+      statusText = 'Processado';
     } else if (callback.status === 'REJEITADO') {
-      color = 0xff0000 // Vermelho
-      statusEmoji = "❌"
-      statusText = "Rejeitado"
+      color = 0xff0000; // Vermelho
+      statusEmoji = '❌';
+      statusText = 'Rejeitado';
     }
 
     const embed = {
@@ -145,79 +144,81 @@ async function enviarNotificacaoDiscord(callback: InterPixCallback) {
       color: color,
       fields: [
         {
-          name: "Valor",
+          name: 'Valor',
           value: `R$ ${parseFloat(callback.valor).toFixed(2)}`,
-          inline: true
+          inline: true,
         },
         {
-          name: "Status",
+          name: 'Status',
           value: `${statusEmoji} ${statusText}`,
-          inline: true
+          inline: true,
         },
         {
-          name: "Recebedor",
+          name: 'Recebedor',
           value: callback.recebedor.nome,
-          inline: true
+          inline: true,
         },
         {
-          name: "Chave PIX",
+          name: 'Chave PIX',
           value: callback.chave,
-          inline: true
+          inline: true,
         },
         {
-          name: "End-to-End",
+          name: 'End-to-End',
           value: callback.endToEnd,
-          inline: true
+          inline: true,
         },
         {
-          name: "Código Solicitação",
+          name: 'Código Solicitação',
           value: callback.codigoSolicitacao,
-          inline: true
+          inline: true,
         },
         {
-          name: "Descrição",
+          name: 'Descrição',
           value: callback.descricaoPagamento,
-          inline: false
+          inline: false,
         },
         {
-          name: "Data/Hora Movimento",
+          name: 'Data/Hora Movimento',
           value: new Date(callback.dataHoraMovimento).toLocaleString('pt-BR'),
-          inline: true
-        }
+          inline: true,
+        },
       ],
       timestamp: new Date().toISOString(),
       footer: {
-        text: "SGB - Callback Inter"
-      }
-    }
+        text: 'SGB - Callback Inter',
+      },
+    };
 
     const payload = {
-      embeds: [embed]
-    }
+      embeds: [embed],
+    };
 
-    console.log('📤 Enviando notificação Discord...')
-    console.log('🔗 Webhook URL:', webhookUrl)
+    console.log('📤 Enviando notificação Discord...');
+    console.log('🔗 Webhook URL:', webhookUrl);
 
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload)
-    })
+      body: JSON.stringify(payload),
+    });
 
-    console.log('📡 Status da resposta Discord:', response.status)
+    console.log('📡 Status da resposta Discord:', response.status);
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ Erro no Discord:', errorText)
-      throw new Error(`Discord webhook error: ${response.status} - ${errorText}`)
+      const errorText = await response.text();
+      console.error('❌ Erro no Discord:', errorText);
+      throw new Error(
+        `Discord webhook error: ${response.status} - ${errorText}`
+      );
     }
 
-    console.log('✅ Notificação enviada para Discord')
-    return true
+    console.log('✅ Notificação enviada para Discord');
+    return true;
   } catch (error) {
-    console.error('❌ Erro ao enviar notificação Discord:', error)
-    throw error
+    console.error('❌ Erro ao enviar notificação Discord:', error);
+    throw error;
   }
-} 
+}

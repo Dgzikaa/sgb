@@ -1,16 +1,19 @@
-import type { Metadata, Viewport } from 'next'
-import './globals.css'
+import type { Metadata, Viewport } from 'next';
+import './globals.css';
 
-import { ToastProvider, GlobalToastListener } from '@/components/ui/toast'
-import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper'
-import { PWAInstallBanner } from '@/components/PWAInstallBanner'
-import { ConfirmDialogProvider, GlobalConfirmListener } from '@/components/ui/confirm-dialog'
-import { BarProvider } from '@/contexts/BarContext'
-import { UserProvider } from '@/contexts/UserContext'
-import AuthSync from '@/components/AuthSync'
-import { ThemeProvider } from '@/contexts/ThemeContext'
-import { LGPDProvider } from '@/hooks/useLGPD'
-import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext'
+import { ToastProvider, GlobalToastListener } from '@/components/ui/toast';
+import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper';
+import { PWAInstallBanner } from '@/components/PWAInstallBanner';
+import {
+  ConfirmDialogProvider,
+  GlobalConfirmListener,
+} from '@/components/ui/confirm-dialog';
+import { BarProvider } from '@/contexts/BarContext';
+import { UserProvider } from '@/contexts/UserContext';
+import AuthSync from '@/components/AuthSync';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { LGPDProvider } from '@/hooks/useLGPD';
+import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
 
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'SGB Dashboard'
+    title: 'SGB Dashboard',
   },
   icons: {
     icon: [
@@ -52,7 +55,7 @@ export const metadata: Metadata = {
     },
     shortcut: '/favicon.ico',
   },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: '#6366f1',
@@ -60,12 +63,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
@@ -104,5 +107,5 @@ export default function RootLayout({
         </LGPDProvider>
       </body>
     </html>
-  )
+  );
 }

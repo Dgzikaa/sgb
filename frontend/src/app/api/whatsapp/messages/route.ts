@@ -19,7 +19,7 @@ const SendMessageSchema = z.object({
   modulo: z.string().optional(),
   checklist_id: z.number().optional(),
   checklist_execucao_id: z.number().optional(),
-  prioridade: z.enum(['baixa', 'normal', 'alta']).default('normal')
+  prioridade: z.enum(['baixa', 'normal', 'alta']).default('normal'),
 });
 
 // Schema para filtros de listagem
@@ -31,7 +31,7 @@ const FilterSchema = z.object({
   destinatario: z.string().optional(),
   template_name: z.string().optional(),
   page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(100).default(20)
+  limit: z.number().int().min(1).max(100).default(20),
 });
 
 // ========================================
@@ -39,35 +39,44 @@ const FilterSchema = z.object({
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    const headersList = await headers()
+    const headersList = await headers();
     const userData = headersList.get('x-user-data');
-    
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao } = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para acessar mensagens' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para acessar mensagens' },
+        { status: 403 }
+      );
     }
 
     // Parse dos parâmetros de query
     const url = new URL(request.url);
     const rawParams = Object.fromEntries(url.searchParams.entries());
-    
+
     // Converter tipos numéricos
     const processedParams: unknown = { ...rawParams };
-    if (processedParams.page) processedParams.page = parseInt(processedParams.page);
-    if (processedParams.limit) processedParams.limit = parseInt(processedParams.limit);
+    if (processedParams.page)
+      processedParams.page = parseInt(processedParams.page);
+    if (processedParams.limit)
+      processedParams.limit = parseInt(processedParams.limit);
 
     const params = FilterSchema.parse(processedParams);
 
     // Construir query base
     let query = supabase
       .from('whatsapp_mensagens')
-      .select(`
+      .select(
+        `
         id,
         whatsapp_message_id,
         tipo_mensagem,
@@ -88,7 +97,8 @@ export async function GET(request: NextRequest) {
           nome_contato,
           usuarios_bar!inner(nome, cargo)
         )
-      `)
+      `
+      )
       .eq('bar_id', bar_id)
       .order('created_at', { ascending: false });
 
@@ -109,7 +119,10 @@ export async function GET(request: NextRequest) {
       query = query.lte('created_at', params.data_fim);
     }
     if (params.destinatario) {
-      query = query.ilike('whatsapp_contatos.numero_whatsapp', `%${params.destinatario}%`);
+      query = query.ilike(
+        'whatsapp_contatos.numero_whatsapp',
+        `%${params.destinatario}%`
+      );
     }
 
     // Paginação
@@ -120,7 +133,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar mensagens:', error);
-      return NextResponse.json({ error: 'Erro ao buscar mensagens' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao buscar mensagens' },
+        { status: 500 }
+      );
     }
 
     // Buscar estatísticas
@@ -135,7 +151,7 @@ export async function GET(request: NextRequest) {
       sent: stats?.filter(m => m.status === 'sent').length || 0,
       delivered: stats?.filter(m => m.status === 'delivered').length || 0,
       read: stats?.filter(m => m.status === 'read').length || 0,
-      failed: stats?.filter(m => m.status === 'failed').length || 0
+      failed: stats?.filter(m => m.status === 'failed').length || 0,
     };
 
     return NextResponse.json({
@@ -146,20 +162,25 @@ export async function GET(request: NextRequest) {
         page: params.page,
         limit: params.limit,
         total: mensagens?.length || 0,
-        hasNext: mensagens?.length === params.limit
-      }
+        hasNext: mensagens?.length === params.limit,
+      },
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Parâmetros inválidos',
-        details: error.issues
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Parâmetros inválidos',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
     console.error('Erro na API de mensagens:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -168,18 +189,24 @@ export async function GET(request: NextRequest) {
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    const headersList = await headers()
+    const headersList = await headers();
     const userData = headersList.get('x-user-data');
-    
+
     if (!userData) {
-      return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Usuário não autenticado' },
+        { status: 401 }
+      );
     }
 
     const { bar_id, permissao, usuario_id } = JSON.parse(userData);
 
     // Verificar permissões
     if (!['financeiro', 'admin'].includes(permissao)) {
-      return NextResponse.json({ error: 'Sem permissão para enviar mensagens' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Sem permissão para enviar mensagens' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -194,32 +221,48 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (configError || !config) {
-      return NextResponse.json({ 
-        error: 'WhatsApp não configurado ou inativo' 
-      }, { status: 409 });
+      return NextResponse.json(
+        {
+          error: 'WhatsApp não configurado ou inativo',
+        },
+        { status: 409 }
+      );
     }
 
     // Buscar ou criar contato
-    const contato = await getOrCreateContact(bar_id, validatedData.destinatario, usuario_id);
-    
+    const contato = await getOrCreateContact(
+      bar_id,
+      validatedData.destinatario,
+      usuario_id
+    );
+
     if (!contato) {
-      return NextResponse.json({ 
-        error: 'Não foi possível identificar o contato' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Não foi possível identificar o contato',
+        },
+        { status: 400 }
+      );
     }
 
     // Verificar se contato aceita notificações
     if (!contato.aceita_notificacoes) {
-      return NextResponse.json({ 
-        error: 'Contato não aceita notificações WhatsApp' 
-      }, { status: 409 });
+      return NextResponse.json(
+        {
+          error: 'Contato não aceita notificações WhatsApp',
+        },
+        { status: 409 }
+      );
     }
 
     // Verificar horário permitido
     if (!isWithinAllowedHours(contato)) {
-      return NextResponse.json({ 
-        error: 'Fora do horário permitido para envio' 
-      }, { status: 409 });
+      return NextResponse.json(
+        {
+          error: 'Fora do horário permitido para envio',
+        },
+        { status: 409 }
+      );
     }
 
     // Preparar dados da mensagem
@@ -233,7 +276,7 @@ export async function POST(request: NextRequest) {
       modulo: validatedData.modulo || 'manual',
       checklist_id: validatedData.checklist_id,
       checklist_execucao_id: validatedData.checklist_execucao_id,
-      status: 'pending'
+      status: 'pending',
     };
 
     // Salvar mensagem no banco
@@ -245,7 +288,10 @@ export async function POST(request: NextRequest) {
 
     if (saveError) {
       console.error('Erro ao salvar mensagem:', saveError);
-      return NextResponse.json({ error: 'Erro ao salvar mensagem' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Erro ao salvar mensagem' },
+        { status: 500 }
+      );
     }
 
     // Enviar mensagem via WhatsApp API
@@ -258,7 +304,7 @@ export async function POST(request: NextRequest) {
       tentativas: 1,
       enviado_em: sendResult.success ? new Date().toISOString() : null,
       error_code: sendResult.errorCode,
-      error_message: sendResult.errorMessage
+      error_message: sendResult.errorMessage,
     };
 
     await supabase
@@ -272,28 +318,38 @@ export async function POST(request: NextRequest) {
         .from('whatsapp_contatos')
         .update({
           total_mensagens_enviadas: contato.total_mensagens_enviadas + 1,
-          ultima_interacao: new Date().toISOString()
+          ultima_interacao: new Date().toISOString(),
         })
         .eq('id', contato.id);
     }
 
-    return NextResponse.json({
-      success: sendResult.success,
-      data: { ...mensagem, ...updateData },
-      message: sendResult.success ? 'Mensagem enviada com sucesso' : 'Falha no envio',
-      details: sendResult.errorMessage
-    }, { status: sendResult.success ? 201 : 400 });
-
+    return NextResponse.json(
+      {
+        success: sendResult.success,
+        data: { ...mensagem, ...updateData },
+        message: sendResult.success
+          ? 'Mensagem enviada com sucesso'
+          : 'Falha no envio',
+        details: sendResult.errorMessage,
+      },
+      { status: sendResult.success ? 201 : 400 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Dados inválidos',
-        details: error.issues
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Dados inválidos',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
     console.error('Erro na API de mensagens:', error);
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
   }
 }
 
@@ -304,7 +360,11 @@ export async function POST(request: NextRequest) {
 /**
  * Busca ou cria contato WhatsApp
  */
-async function getOrCreateContact(barId: number, numeroWhatsapp: string, usuarioId?: number) {
+async function getOrCreateContact(
+  barId: number,
+  numeroWhatsapp: string,
+  usuarioId?: number
+) {
   // Primeiro, tentar buscar contato existente
   const { data: contato } = await supabase
     .from('whatsapp_contatos')
@@ -334,7 +394,7 @@ async function getOrCreateContact(barId: number, numeroWhatsapp: string, usuario
           usuario_id: usuarioId,
           numero_whatsapp: numeroWhatsapp,
           nome_contato: usuario.nome,
-          verificado: false
+          verificado: false,
         })
         .select()
         .single();
@@ -360,13 +420,19 @@ function isWithinAllowedHours(contato: unknown): boolean {
   }
 
   // Verificar horário
-  return currentTime >= contato.horario_inicio && currentTime <= contato.horario_fim;
+  return (
+    currentTime >= contato.horario_inicio && currentTime <= contato.horario_fim
+  );
 }
 
 /**
  * Envia mensagem via WhatsApp Business API
  */
-async function sendWhatsAppMessage(config: unknown, contato: unknown, mensagem: unknown): Promise<{
+async function sendWhatsAppMessage(
+  config: unknown,
+  contato: unknown,
+  mensagem: unknown
+): Promise<{
   success: boolean;
   messageId?: string;
   errorCode?: string;
@@ -374,10 +440,10 @@ async function sendWhatsAppMessage(config: unknown, contato: unknown, mensagem: 
 }> {
   try {
     const url = `https://graph.facebook.com/${config.api_version}/${config.phone_number_id}/messages`;
-    
+
     const payload: unknown = {
       messaging_product: 'whatsapp',
-      to: contato.numero_whatsapp
+      to: contato.numero_whatsapp,
     };
 
     if (mensagem.tipo_mensagem === 'template') {
@@ -385,17 +451,20 @@ async function sendWhatsAppMessage(config: unknown, contato: unknown, mensagem: 
       payload.template = {
         name: mensagem.template_name,
         language: { code: config.idioma },
-        components: []
+        components: [],
       };
 
       // Adicionar parâmetros se existirem
-      if (mensagem.template_parameters && mensagem.template_parameters.length > 0) {
+      if (
+        mensagem.template_parameters &&
+        mensagem.template_parameters.length > 0
+      ) {
         payload.template.components.push({
           type: 'body',
           parameters: mensagem.template_parameters.map((param: string) => ({
             type: 'text',
-            text: param
-          }))
+            text: param,
+          })),
         });
       }
     } else {
@@ -406,10 +475,10 @@ async function sendWhatsAppMessage(config: unknown, contato: unknown, mensagem: 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${config.access_token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${config.access_token}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const result = await response.json();
@@ -417,22 +486,21 @@ async function sendWhatsAppMessage(config: unknown, contato: unknown, mensagem: 
     if (response.ok) {
       return {
         success: true,
-        messageId: result.messages[0].id
+        messageId: result.messages[0].id,
       };
     } else {
       return {
         success: false,
         errorCode: result.error?.code?.toString(),
-        errorMessage: result.error?.message || 'Erro desconhecido'
+        errorMessage: result.error?.message || 'Erro desconhecido',
       };
     }
-
   } catch (error) {
     console.error('Erro ao enviar mensagem WhatsApp:', error);
     return {
       success: false,
       errorCode: 'NETWORK_ERROR',
-      errorMessage: 'Erro de conexão com WhatsApp API'
+      errorMessage: 'Erro de conexão com WhatsApp API',
     };
   }
-} 
+}

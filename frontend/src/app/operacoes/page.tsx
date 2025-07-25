@@ -1,27 +1,33 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  CheckSquare, 
-  FileText, 
-  Clock, 
-  Package, 
-  Target, 
-  RefreshCw, 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  CheckSquare,
+  FileText,
+  Clock,
+  Package,
+  Target,
+  RefreshCw,
   Zap,
   Users,
   TrendingUp,
-  BarChart3
-} from 'lucide-react'
-import Link from 'next/link'
+  BarChart3,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function OperacoesPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <ProtectedRoute requiredModule="operacoes">
@@ -50,8 +56,12 @@ export default function OperacoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Checklists</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">3/5</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Checklists
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      3/5
+                    </p>
                   </div>
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                     <CheckSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -64,8 +74,12 @@ export default function OperacoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Receitas</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">24</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Receitas
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      24
+                    </p>
                   </div>
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                     <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -78,8 +92,12 @@ export default function OperacoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Insumos</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">89</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Insumos
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      89
+                    </p>
                   </div>
                   <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                     <Package className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -92,8 +110,12 @@ export default function OperacoesPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Terminal</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">Ativo</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Terminal
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Ativo
+                    </p>
                   </div>
                   <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
                     <Zap className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
@@ -114,11 +136,16 @@ export default function OperacoesPage() {
                       <CheckSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Gestão de Checklists</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Gestão de Checklists
+                      </CardTitle>
                       <CardDescription>Controle de checklists</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                  >
                     Essencial
                   </Badge>
                 </div>
@@ -128,9 +155,14 @@ export default function OperacoesPage() {
                   Gerencie todos os checklists operacionais do sistema
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Concluídos hoje 3/5</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Concluídos hoje 3/5
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: '60%' }}></div>
+                    <div
+                      className="h-full bg-green-500 rounded-full"
+                      style={{ width: '60%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/operacoes/checklists">
@@ -150,11 +182,16 @@ export default function OperacoesPage() {
                       <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Meus Checklists</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Meus Checklists
+                      </CardTitle>
                       <CardDescription>Checklists pessoais</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                  >
                     Pessoal
                   </Badge>
                 </div>
@@ -164,9 +201,14 @@ export default function OperacoesPage() {
                   Visualize e execute seus checklists pessoais
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Pendentes 2</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Pendentes 2
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: '40%' }}></div>
+                    <div
+                      className="h-full bg-blue-500 rounded-full"
+                      style={{ width: '40%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/operacoes/checklists/checklists-funcionario">
@@ -186,11 +228,16 @@ export default function OperacoesPage() {
                       <FileText className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Receitas e Insumos</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Receitas e Insumos
+                      </CardTitle>
                       <CardDescription>Gestão completa</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                  >
                     Popular
                   </Badge>
                 </div>
@@ -200,9 +247,14 @@ export default function OperacoesPage() {
                   Gerencie receitas, ingredientes e produtos do cardápio
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Receitas 24 | Insumos 89</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Receitas 24 | Insumos 89
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 rounded-full" style={{ width: '80%' }}></div>
+                    <div
+                      className="h-full bg-purple-500 rounded-full"
+                      style={{ width: '80%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/operacoes/receitas">
@@ -222,11 +274,16 @@ export default function OperacoesPage() {
                       <Zap className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Terminal de Produção</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Terminal de Produção
+                      </CardTitle>
                       <CardDescription>Produção em tempo real</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                  >
                     Tempo Real
                   </Badge>
                 </div>
@@ -236,7 +293,9 @@ export default function OperacoesPage() {
                   Terminal de produção em tempo real para controle operacional
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Ativo agora</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Ativo agora
+                  </span>
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 </div>
                 <Link href="/operacoes/terminal">
@@ -250,5 +309,5 @@ export default function OperacoesPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
-} 
+  );
+}

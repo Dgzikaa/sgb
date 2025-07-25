@@ -12,7 +12,7 @@ export interface ContaHubStatus {
   };
 }
 
-export interface ContaHubResponse<T = (unknown)> {
+export interface ContaHubResponse<T = unknown> {
   success: boolean;
   data?: T;
   message: string;
@@ -26,56 +26,65 @@ export interface ContaHubResponse<T = (unknown)> {
 export function verificarStatusContaHub(): ContaHubStatus {
   const email = process.env.CONTAHUB_EMAIL;
   const senha = process.env.CONTAHUB_PASSWORD;
-  
+
   const emailConfigurado = !!email;
   const senhaConfigurada = !!senha;
   const disponivel = emailConfigurado && senhaConfigurada;
-  
+
   return {
     disponivel,
-    motivo: !disponivel ? 'Credenciais do ContaHub temporariamente indisponíveis' : undefined,
+    motivo: !disponivel
+      ? 'Credenciais do ContaHub temporariamente indisponíveis'
+      : undefined,
     detalhes: {
       email_configurado: emailConfigurado,
-      senha_configurada: senhaConfigurada
-    }
+      senha_configurada: senhaConfigurada,
+    },
   };
 }
 
 /**
  * Cria uma resposta padrão para quando ContaHub está em manutenção
  */
-export function criarRespostaManutencao<T = (unknown)>(acao: string): ContaHubResponse<T> {
+export function criarRespostaManutencao<T = unknown>(
+  acao: string
+): ContaHubResponse<T> {
   const status = verificarStatusContaHub();
-  
+
   return {
     success: false,
     message: `${acao} temporariamente indisponível - ContaHub em manutenção`,
     manutencao: true,
-    status
+    status,
   };
 }
 
 /**
  * Cria uma resposta de sucesso para ContaHub
  */
-export function criarRespostaSucesso<T>(data: T, message: string): ContaHubResponse<T> {
+export function criarRespostaSucesso<T>(
+  data: T,
+  message: string
+): ContaHubResponse<T> {
   return {
     success: true,
     data,
     message,
-    manutencao: false
+    manutencao: false,
   };
 }
 
 /**
  * Verifica se deve executar operação ContaHub ou retornar modo manutenção
  */
-export function verificarDisponibilidadeContaHub(acao: string): ContaHubResponse | null {
+export function verificarDisponibilidadeContaHub(
+  acao: string
+): ContaHubResponse | null {
   const status = verificarStatusContaHub();
-  
+
   if (!status.disponivel) {
     return criarRespostaManutencao(acao);
   }
-  
+
   return null; // ContaHub disponível, pode prosseguir
-} 
+}

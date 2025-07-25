@@ -16,10 +16,13 @@ export async function POST(request: NextRequest) {
     const { bar_id } = body;
 
     if (!bar_id) {
-      return NextResponse.json({
-        success: false,
-        error: 'bar_id é obrigatório'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'bar_id é obrigatório',
+        },
+        { status: 400 }
+      );
     }
 
     // Verificar se agente já está rodando
@@ -28,7 +31,7 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'Agente IA já está ativo',
         bar_id,
-        status: 'running'
+        status: 'running',
       });
     }
 
@@ -37,10 +40,14 @@ export async function POST(request: NextRequest) {
     const initialized = await agent.initialize();
 
     if (!initialized) {
-      return NextResponse.json({
-        success: false,
-        error: 'Falha ao inicializar agente - verifique configuração na tabela ai_agent_config'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Falha ao inicializar agente - verifique configuração na tabela ai_agent_config',
+        },
+        { status: 400 }
+      );
     }
 
     // Iniciar agente
@@ -60,17 +67,19 @@ export async function POST(request: NextRequest) {
         'Geração de insights estratégicos',
         'Relatório matinal às 8h no Discord',
         'Notificações de eventos críticos',
-        'Recomendações baseadas em IA'
+        'Recomendações baseadas em IA',
       ],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Erro ao iniciar agente IA:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -97,28 +106,30 @@ export async function GET(request: NextRequest) {
           detectar_anomalias: true,
           fazer_predicoes: true,
           gerar_recomendacoes: true,
-          notificacoes_automaticas: true
-        }
+          notificacoes_automaticas: true,
+        },
       },
       instrucoes: [
         '📡 Para iniciar: POST /api/ai/agent/start com {"bar_id": 3}',
         '🛑 Para parar: POST /api/ai/agent/stop com {"bar_id": 3}',
         '📊 Para status: GET /api/ai/agent/start?bar_id=3',
-        '🎮 Discord Bot: Pergunte qualquer coisa no canal Discord'
-      ]
+        '🎮 Discord Bot: Pergunte qualquer coisa no canal Discord',
+      ],
     };
 
     return NextResponse.json({
       success: true,
       ...status,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -131,18 +142,24 @@ export async function DELETE(request: NextRequest) {
     const { bar_id } = body;
 
     if (!bar_id) {
-      return NextResponse.json({
-        success: false,
-        error: 'bar_id é obrigatório'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'bar_id é obrigatório',
+        },
+        { status: 400 }
+      );
     }
 
     const agent = agentesAtivos.get(bar_id);
     if (!agent) {
-      return NextResponse.json({
-        success: false,
-        error: 'Agente não está rodando'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Agente não está rodando',
+        },
+        { status: 400 }
+      );
     }
 
     // Parar agente
@@ -156,14 +173,16 @@ export async function DELETE(request: NextRequest) {
       message: 'Agente IA parado com sucesso',
       bar_id,
       status: 'stopped',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Erro ao parar agente IA:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+      },
+      { status: 500 }
+    );
   }
-} 
+}

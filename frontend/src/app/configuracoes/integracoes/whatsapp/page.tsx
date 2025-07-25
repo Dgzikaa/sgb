@@ -1,18 +1,24 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
-import { useToast } from '@/hooks/use-toast'
-import { useBar } from '@/contexts/BarContext'
-import { 
-  Smartphone, 
-  Settings, 
-  TestTube, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
+import { useBar } from '@/contexts/BarContext';
+import {
+  Smartphone,
+  Settings,
+  TestTube,
   Save,
   Copy,
   ExternalLink,
@@ -20,22 +26,22 @@ import {
   AlertCircle,
   MessageSquare,
   Zap,
-  Bell
-} from 'lucide-react'
+  Bell,
+} from 'lucide-react';
 
 interface WhatsAppConfig {
-  enabled: boolean
-  evolution_api_url: string
-  api_key: string
-  instance_name: string
-  webhook_url: string
-  auto_reply: boolean
-  notifications_enabled: boolean
+  enabled: boolean;
+  evolution_api_url: string;
+  api_key: string;
+  instance_name: string;
+  webhook_url: string;
+  auto_reply: boolean;
+  notifications_enabled: boolean;
 }
 
 export default function WhatsAppPage() {
-  const { toast } = useToast()
-  const { selectedBar } = useBar()
+  const { toast } = useToast();
+  const { selectedBar } = useBar();
   const [config, setConfig] = useState<WhatsAppConfig>({
     enabled: false,
     evolution_api_url: '',
@@ -43,146 +49,145 @@ export default function WhatsAppPage() {
     instance_name: '',
     webhook_url: '',
     auto_reply: false,
-    notifications_enabled: true
-  })
-  const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [testing, setTesting] = useState(false)
+    notifications_enabled: true,
+  });
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
 
-  useEffect(() => {
-    if (selectedBar?.id) {
-      loadConfig()
-    }
-  }, [selectedBar?.id])
-
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await fetch('/api/configuracoes/whatsapp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           bar_id: selectedBar?.id,
-          action: 'get'
-        })
-      })
-
+          action: 'get',
+        }),
+      });
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         if (data.config) {
-          setConfig(data.config)
+          setConfig(data.config);
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar configuração WhatsApp:', error)
+      console.error('Erro ao carregar configuração WhatsApp:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [selectedBar?.id]);
+
+  useEffect(() => {
+    if (selectedBar?.id) {
+      loadConfig();
+    }
+  }, [selectedBar?.id, loadConfig]);
 
   const saveConfig = async () => {
-    if (!selectedBar?.id) return
+    if (!selectedBar?.id) return;
 
     try {
-      setSaving(true)
-      
+      setSaving(true);
+
       const response = await fetch('/api/configuracoes/whatsapp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bar_id: selectedBar.id,
           action: 'save',
-          config
-        })
-      })
+          config,
+        }),
+      });
 
       if (response.ok) {
         toast({
           title: '✅ Configuração salva!',
           description: 'Configuração do WhatsApp salva com sucesso.',
-        })
+        });
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: '❌ Erro ao salvar',
           description: error.error || 'Erro desconhecido',
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: '❌ Erro ao salvar',
         description: 'Erro de conexão ou servidor',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const testConnection = async () => {
     if (!config.evolution_api_url || !config.api_key) {
       toast({
         title: '❌ Configuração incompleta',
         description: 'Configure a URL da API e a chave antes de testar.',
-        variant: 'destructive'
-      })
-      return
+        variant: 'destructive',
+      });
+      return;
     }
 
     try {
-      setTesting(true)
-      
+      setTesting(true);
+
       const response = await fetch('/api/whatsapp/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           evolution_api_url: config.evolution_api_url,
           api_key: config.api_key,
-          bar_id: selectedBar?.id
-        })
-      })
+          bar_id: selectedBar?.id,
+        }),
+      });
 
       if (response.ok) {
         toast({
           title: '✅ Conexão testada!',
           description: 'Conexão com Evolution API estabelecida com sucesso.',
-        })
+        });
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: '❌ Erro na conexão',
           description: error.error || 'Erro desconhecido',
-          variant: 'destructive'
-        })
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
         title: '❌ Erro no teste',
         description: 'Erro de conexão ou servidor',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setTesting(false)
+      setTesting(false);
     }
-  }
+  };
 
   const copyWebhookUrl = async () => {
-    const webhookUrl = `${window.location.origin}/api/whatsapp/webhook`
+    const webhookUrl = `${window.location.origin}/api/whatsapp/webhook`;
     try {
-      await navigator.clipboard.writeText(webhookUrl)
+      await navigator.clipboard.writeText(webhookUrl);
       toast({
         title: '✅ URL copiada!',
         description: 'Webhook URL copiada para a área de transferência.',
-      })
+      });
     } catch (error) {
       toast({
         title: '❌ Erro ao copiar',
         description: 'Não foi possível copiar a URL.',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   if (!selectedBar) {
     return (
@@ -197,7 +202,7 @@ export default function WhatsAppPage() {
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -212,7 +217,9 @@ export default function WhatsAppPage() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Badge className={`badge-status ${config.enabled ? 'active' : 'inactive'}`}>
+            <Badge
+              className={`badge-status ${config.enabled ? 'active' : 'inactive'}`}
+            >
               {config.enabled ? 'Ativo' : 'Inativo'}
             </Badge>
           </div>
@@ -226,24 +233,30 @@ export default function WhatsAppPage() {
                 <Smartphone className="h-6 w-6" />
               </div>
               <div>
-                <CardTitle className="text-xl">Configuração Evolution API</CardTitle>
+                <CardTitle className="text-xl">
+                  Configuração Evolution API
+                </CardTitle>
                 <CardDescription>
                   Configure a conexão com a Evolution API para WhatsApp
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {/* Status da Integração */}
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center gap-3">
                 <Switch
                   checked={config.enabled}
-                  onCheckedChange={(checked) => setConfig(prev => ({ ...prev, enabled: checked }))}
+                  onCheckedChange={checked =>
+                    setConfig(prev => ({ ...prev, enabled: checked }))
+                  }
                 />
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">Ativar Integração</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    Ativar Integração
+                  </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Habilita a integração com WhatsApp
                   </p>
@@ -258,7 +271,12 @@ export default function WhatsAppPage() {
                 <Input
                   id="evolution_api_url"
                   value={config.evolution_api_url}
-                  onChange={(e) => setConfig(prev => ({ ...prev, evolution_api_url: e.target.value }))}
+                  onChange={e =>
+                    setConfig(prev => ({
+                      ...prev,
+                      evolution_api_url: e.target.value,
+                    }))
+                  }
                   placeholder="https://sua-evolution-api.com"
                   className="mt-1"
                 />
@@ -273,7 +291,9 @@ export default function WhatsAppPage() {
                   id="api_key"
                   type="password"
                   value={config.api_key}
-                  onChange={(e) => setConfig(prev => ({ ...prev, api_key: e.target.value }))}
+                  onChange={e =>
+                    setConfig(prev => ({ ...prev, api_key: e.target.value }))
+                  }
                   placeholder="Sua chave da API"
                   className="mt-1"
                 />
@@ -287,7 +307,12 @@ export default function WhatsAppPage() {
                 <Input
                   id="instance_name"
                   value={config.instance_name}
-                  onChange={(e) => setConfig(prev => ({ ...prev, instance_name: e.target.value }))}
+                  onChange={e =>
+                    setConfig(prev => ({
+                      ...prev,
+                      instance_name: e.target.value,
+                    }))
+                  }
                   placeholder="sgb-whatsapp"
                   className="mt-1"
                 />
@@ -301,7 +326,9 @@ export default function WhatsAppPage() {
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">Webhook URL</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    Webhook URL
+                  </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Configure esta URL no painel da Evolution API
                   </p>
@@ -326,10 +353,14 @@ export default function WhatsAppPage() {
                 <div className="flex items-center gap-3">
                   <Switch
                     checked={config.auto_reply}
-                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, auto_reply: checked }))}
+                    onCheckedChange={checked =>
+                      setConfig(prev => ({ ...prev, auto_reply: checked }))
+                    }
                   />
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Resposta Automática</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-white">
+                      Resposta Automática
+                    </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Ativa respostas automáticas para mensagens
                     </p>
@@ -341,10 +372,17 @@ export default function WhatsAppPage() {
                 <div className="flex items-center gap-3">
                   <Switch
                     checked={config.notifications_enabled}
-                    onCheckedChange={(checked) => setConfig(prev => ({ ...prev, notifications_enabled: checked }))}
+                    onCheckedChange={checked =>
+                      setConfig(prev => ({
+                        ...prev,
+                        notifications_enabled: checked,
+                      }))
+                    }
                   />
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">Notificações</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-white">
+                      Notificações
+                    </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Recebe notificações de mensagens no sistema
                     </p>
@@ -357,7 +395,9 @@ export default function WhatsAppPage() {
             <div className="actions-group">
               <Button
                 onClick={testConnection}
-                disabled={testing || !config.evolution_api_url || !config.api_key}
+                disabled={
+                  testing || !config.evolution_api_url || !config.api_key
+                }
                 className="action-secondary"
               >
                 {testing ? (
@@ -408,7 +448,9 @@ export default function WhatsAppPage() {
             <div className="space-y-4 text-gray-600 dark:text-gray-400">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">1. Evolution API:</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                    1. Evolution API:
+                  </h4>
                   <ol className="space-y-2 text-sm">
                     <li>• Instale a Evolution API em seu servidor</li>
                     <li>• Configure uma instância WhatsApp</li>
@@ -416,9 +458,11 @@ export default function WhatsAppPage() {
                     <li>• Configure o webhook URL no painel</li>
                   </ol>
                 </div>
-                
+
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">2. SGB:</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                    2. SGB:
+                  </h4>
                   <ol className="space-y-2 text-sm">
                     <li>• Cole a URL da Evolution API</li>
                     <li>• Insira a chave da API</li>
@@ -432,5 +476,5 @@ export default function WhatsAppPage() {
         </Card>
       </div>
     </div>
-  )
-} 
+  );
+}

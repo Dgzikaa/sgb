@@ -1,54 +1,57 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { useCommandPalette } from '@/hooks/useCommandPalette'
-import { Search } from 'lucide-react'
+import { Button } from '@/components/ui/button';
+import { useCommandPalette } from '@/hooks/useCommandPalette';
+import { Search } from 'lucide-react';
 
 interface CommandPaletteTriggerProps {
-  variant?: 'default' | 'outline' | 'ghost' | 'sidebar'
-  size?: 'sm' | 'md' | 'lg'
-  showShortcut?: boolean
-  className?: string
+  variant?: 'default' | 'outline' | 'ghost' | 'sidebar';
+  size?: 'sm' | 'md' | 'lg';
+  showShortcut?: boolean;
+  className?: string;
 }
 
-export function CommandPaletteTrigger({ 
-  variant = 'outline', 
+export function CommandPaletteTrigger({
+  variant = 'outline',
   size = 'md',
   showShortcut = true,
-  className = ''
+  className = '',
 }: CommandPaletteTriggerProps) {
-  const { openPalette } = useCommandPalette()
+  const { openPalette } = useCommandPalette();
 
   const getButtonProps = () => {
     switch (variant) {
       case 'sidebar':
         return {
           variant: 'ghost' as const,
-          className: `w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${className}`
-        }
+          className: `w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${className}`,
+        };
       case 'ghost':
         return {
           variant: 'ghost' as const,
-          className: `text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${className}`
-        }
+          className: `text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${className}`,
+        };
       default:
         return {
           variant,
-          className
-        }
+          className,
+        };
     }
-  }
+  };
 
   const getSizeProps = () => {
     switch (size) {
-      case 'sm': return { size: 'sm' as const }
-      case 'lg': return { size: 'lg' as const }
-      default: return {}
+      case 'sm':
+        return { size: 'sm' as const };
+      case 'lg':
+        return { size: 'lg' as const };
+      default:
+        return {};
     }
-  }
+  };
 
-  const buttonProps = getButtonProps()
-  const sizeProps = getSizeProps()
+  const buttonProps = getButtonProps();
+  const sizeProps = getSizeProps();
 
   return (
     <Button
@@ -83,22 +86,22 @@ export function CommandPaletteTrigger({
         </>
       )}
     </Button>
-  )
+  );
 }
 
 // Versão compacta apenas com ícone - otimizada para mobile
-export function CommandPaletteIconTrigger({ 
+export function CommandPaletteIconTrigger({
   className = '',
-  title = "Buscar"
-}: { 
-  className?: string
-  title?: string 
+  title = 'Buscar',
+}: {
+  className?: string;
+  title?: string;
 }) {
-  const { openPalette } = useCommandPalette()
+  const { openPalette } = useCommandPalette();
 
   const handleClick = () => {
-    openPalette()
-  }
+    openPalette();
+  };
 
   return (
     <Button
@@ -110,25 +113,25 @@ export function CommandPaletteIconTrigger({
     >
       <Search className="w-5 h-5" />
     </Button>
-  )
+  );
 }
 
 // Placeholder de busca que abre o Command Palette
-export function CommandPaletteSearchPlaceholder({ 
-  placeholder = "Buscar... (Cmd+K)",
-  className = ""
+export function CommandPaletteSearchPlaceholder({
+  placeholder = 'Buscar... (Cmd+K)',
+  className = '',
 }: {
-  placeholder?: string
-  className?: string
+  placeholder?: string;
+  className?: string;
 }) {
-  const { openPalette } = useCommandPalette()
+  const { openPalette } = useCommandPalette();
 
   const handleClick = () => {
-    openPalette()
-  }
+    openPalette();
+  };
 
   return (
-    <div 
+    <div
       onClick={handleClick}
       className={`
         flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 dark:bg-gray-800 
@@ -147,5 +150,5 @@ export function CommandPaletteSearchPlaceholder({
         </kbd>
       </div>
     </div>
-  )
+  );
 }

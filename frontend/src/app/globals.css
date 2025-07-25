@@ -303,7 +303,7 @@
 }
 
 .feature-item::before {
-  content: "✓";
+  content: '✓';
   @apply text-green-500 font-bold;
 }
 
@@ -329,11 +329,11 @@
   .grid-integrations {
     @apply grid-cols-1;
   }
-  
+
   .card-integration {
     @apply p-4;
   }
-  
+
   .actions-group {
     @apply flex-col;
   }
@@ -355,7 +355,7 @@
 .card-modern-advanced.group::before {
   @apply absolute inset-0 bg-gradient-to-r from-orange-500/5 to-red-500/5;
   @apply opacity-0 transition-opacity duration-500;
-  content: "";
+  content: '';
 }
 
 .card-modern-advanced.group:hover::before {
@@ -446,4 +446,4 @@
 
 .error-text-modern {
   @apply text-gray-600 dark:text-gray-300 text-lg;
-} 
+}

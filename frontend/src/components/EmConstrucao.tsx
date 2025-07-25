@@ -1,34 +1,36 @@
-'use client'
+'use client';
 
-import { Construction, ArrowLeft, Clock, CheckCircle2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Construction, ArrowLeft, Clock, CheckCircle2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface EmConstrucaoProps {
-  titulo: string
-  descricao?: string
-  prioridade?: 'alta' | 'media' | 'baixa'
-  previsao?: string
+  titulo: string;
+  descricao?: string;
+  prioridade?: 'alta' | 'media' | 'baixa';
+  previsao?: string;
 }
 
-export default function EmConstrucao({ 
-  titulo, 
-  descricao = "Esta página está sendo desenvolvida e estará disponível em breve.",
+export default function EmConstrucao({
+  titulo,
+  descricao = 'Esta página está sendo desenvolvida e estará disponível em breve.',
   prioridade = 'media',
-  previsao 
+  previsao,
 }: EmConstrucaoProps) {
-  const router = useRouter()
+  const router = useRouter();
 
   const corPrioridade = {
     alta: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800',
-    media: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800', 
-    baixa: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800'
-  }
+    media:
+      'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800',
+    baixa:
+      'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800',
+  };
 
   const textoPrioridade = {
     alta: 'Alta Prioridade',
     media: 'Prioridade Média',
-    baixa: 'Baixa Prioridade'
-  }
+    baixa: 'Baixa Prioridade',
+  };
 
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center p-4">
@@ -52,7 +54,9 @@ export default function EmConstrucao({
 
         {/* Badge de Prioridade */}
         <div className="flex justify-center mb-6">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border transition-colors duration-300 ${corPrioridade[prioridade]}`}>
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border transition-colors duration-300 ${corPrioridade[prioridade]}`}
+          >
             <CheckCircle2 className="w-4 h-4 mr-2" />
             {textoPrioridade[prioridade]}
           </span>
@@ -63,9 +67,7 @@ export default function EmConstrucao({
           <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6 transition-colors duration-300">
             <div className="flex items-center justify-center text-blue-800 dark:text-blue-200">
               <Clock className="w-4 h-4 mr-2" />
-              <span className="text-sm font-medium">
-                Previsão: {previsao}
-              </span>
+              <span className="text-sm font-medium">Previsão: {previsao}</span>
             </div>
           </div>
         )}
@@ -87,5 +89,5 @@ export default function EmConstrucao({
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

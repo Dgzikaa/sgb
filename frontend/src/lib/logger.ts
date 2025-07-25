@@ -20,10 +20,10 @@ export const logger = {
     if (isDevelopment) {
       console.info(message, ...args);
     }
-  }
+  },
 };
 
 // Para substituir console.log em produção
 export const devLog = isDevelopment ? console.log : () => {};
 export const devError = isDevelopment ? console.error : () => {};
-export const devWarn = isDevelopment ? console.warn : () => {}; 
+export const devWarn = isDevelopment ? console.warn : () => {};

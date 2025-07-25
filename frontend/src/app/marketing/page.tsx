@@ -1,26 +1,32 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { 
-  TrendingUp, 
-  BarChart3, 
-  Target, 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  TrendingUp,
+  BarChart3,
+  Target,
   MessageSquare,
   Users,
   Eye,
   Heart,
   Share2,
-  Zap
-} from 'lucide-react'
-import Link from 'next/link'
+  Zap,
+} from 'lucide-react';
+import Link from 'next/link';
 
 export default function MarketingPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <ProtectedRoute requiredModule="marketing">
@@ -49,8 +55,12 @@ export default function MarketingPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Campanhas</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">8</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Campanhas
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      8
+                    </p>
                   </div>
                   <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
                     <Target className="w-6 h-6 text-pink-600 dark:text-pink-400" />
@@ -63,8 +73,12 @@ export default function MarketingPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Alcance</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">2.4K</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Alcance
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      2.4K
+                    </p>
                   </div>
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                     <Eye className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -77,8 +91,12 @@ export default function MarketingPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Engajamento</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">12.5%</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Engajamento
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      12.5%
+                    </p>
                   </div>
                   <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                     <Heart className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -91,8 +109,12 @@ export default function MarketingPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Conversões</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">156</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Conversões
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      156
+                    </p>
                   </div>
                   <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                     <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -113,11 +135,16 @@ export default function MarketingPage() {
                       <TrendingUp className="w-6 h-6 text-pink-600 dark:text-pink-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Marketing 360</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Marketing 360
+                      </CardTitle>
                       <CardDescription>Estratégia completa</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300"
+                  >
                     Premium
                   </Badge>
                 </div>
@@ -127,9 +154,14 @@ export default function MarketingPage() {
                   Estratégia de marketing completa e integrada
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Campanhas ativas 3</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Campanhas ativas 3
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-pink-500 rounded-full" style={{ width: '75%' }}></div>
+                    <div
+                      className="h-full bg-pink-500 rounded-full"
+                      style={{ width: '75%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/marketing/marketing-360">
@@ -149,11 +181,16 @@ export default function MarketingPage() {
                       <Target className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Campanhas</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Campanhas
+                      </CardTitle>
                       <CardDescription>Gestão de campanhas</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+                  >
                     Ativo
                   </Badge>
                 </div>
@@ -163,9 +200,14 @@ export default function MarketingPage() {
                   Crie e gerencie campanhas promocionais
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Campanhas 8</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Campanhas 8
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-500 rounded-full" style={{ width: '60%' }}></div>
+                    <div
+                      className="h-full bg-purple-500 rounded-full"
+                      style={{ width: '60%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/marketing/campanhas">
@@ -185,11 +227,16 @@ export default function MarketingPage() {
                       <MessageSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">WhatsApp</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        WhatsApp
+                      </CardTitle>
                       <CardDescription>Marketing via WhatsApp</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                  >
                     Conectado
                   </Badge>
                 </div>
@@ -199,9 +246,14 @@ export default function MarketingPage() {
                   Campanhas e comunicação via WhatsApp
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Mensagens 1.2K</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Mensagens 1.2K
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: '85%' }}></div>
+                    <div
+                      className="h-full bg-green-500 rounded-full"
+                      style={{ width: '85%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/marketing/whatsapp">
@@ -221,11 +273,16 @@ export default function MarketingPage() {
                       <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Analytics</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Analytics
+                      </CardTitle>
                       <CardDescription>Métricas de marketing</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                  >
                     Insights
                   </Badge>
                 </div>
@@ -235,9 +292,14 @@ export default function MarketingPage() {
                   Análise de performance das campanhas
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">ROI médio 3.2x</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    ROI médio 3.2x
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: '90%' }}></div>
+                    <div
+                      className="h-full bg-blue-500 rounded-full"
+                      style={{ width: '90%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/marketing/analytics">
@@ -257,11 +319,16 @@ export default function MarketingPage() {
                       <Share2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Redes Sociais</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Redes Sociais
+                      </CardTitle>
                       <CardDescription>Gestão de redes</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                  >
                     Social
                   </Badge>
                 </div>
@@ -271,9 +338,14 @@ export default function MarketingPage() {
                   Gerencie presença nas redes sociais
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Plataformas 4</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Plataformas 4
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full" style={{ width: '70%' }}></div>
+                    <div
+                      className="h-full bg-indigo-500 rounded-full"
+                      style={{ width: '70%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/marketing/redes-sociais">
@@ -293,11 +365,16 @@ export default function MarketingPage() {
                       <Zap className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">Automação</CardTitle>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        Automação
+                      </CardTitle>
                       <CardDescription>Marketing automatizado</CardDescription>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">
+                  <Badge
+                    variant="secondary"
+                    className="bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300"
+                  >
                     Auto
                   </Badge>
                 </div>
@@ -307,9 +384,14 @@ export default function MarketingPage() {
                   Configure automações de marketing
                 </p>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-500">Fluxos ativos 5</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Fluxos ativos 5
+                  </span>
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-cyan-500 rounded-full" style={{ width: '55%' }}></div>
+                    <div
+                      className="h-full bg-cyan-500 rounded-full"
+                      style={{ width: '55%' }}
+                    ></div>
                   </div>
                 </div>
                 <Link href="/marketing/automacao">
@@ -323,5 +405,5 @@ export default function MarketingPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
-} 
+  );
+}

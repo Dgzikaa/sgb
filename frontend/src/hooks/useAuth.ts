@@ -1,106 +1,105 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { getSupabaseClient } from '@/lib/supabase'
+import { useState, useEffect } from 'react';
+import { getSupabaseClient } from '@/lib/supabase';
 
 interface UserInfo {
-  id: number
-  nome: string
-  email: string
-  role: string
-  avatar?: string
-  bar_id?: number
-  modulos_permitidos?: string[] | Record<string, unknown>
-  ativo?: boolean
-  availableBars?: any[]
-  credenciais_apis?: any[]
+  id: number;
+  nome: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  bar_id?: number;
+  modulos_permitidos?: string[] | Record<string, unknown>;
+  ativo?: boolean;
+  availableBars?: any[];
+  credenciais_apis?: any[];
 }
 
 export function useAuth() {
-  const [user, setUser] = useState<UserInfo | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true
+    let mounted = true;
 
     async function loadUserInfo() {
       try {
         // Primeiro verificar localStorage
-        const storedUser = localStorage.getItem('sgb_user')
+        const storedUser = localStorage.getItem('sgb_user');
         if (storedUser) {
           try {
-            const userData = JSON.parse(storedUser)
+            const userData = JSON.parse(storedUser);
             if (userData && userData.nome && userData.email) {
-              setUser(userData)
+              setUser(userData);
               if (mounted) {
-                setLoading(false)
+                setLoading(false);
               }
-              return
+              return;
             } else {
-              localStorage.removeItem('sgb_user')
+              localStorage.removeItem('sgb_user');
             }
           } catch (parseError) {
-            localStorage.removeItem('sgb_user')
+            localStorage.removeItem('sgb_user');
           }
         }
-        
-        // Se chegou até aqui, não há dados válidos no localStorage
-        throw new Error('Usuário não logado - faça login novamente')
 
+        // Se chegou até aqui, não há dados válidos no localStorage
+        throw new Error('Usuário não logado - faça login novamente');
       } catch (err) {
-        console.error('❌ Erro ao carregar informações do usuário:', err)
-        setError(err instanceof Error ? err.message : 'Erro desconhecido')
+        console.error('❌ Erro ao carregar informações do usuário:', err);
+        setError(err instanceof Error ? err.message : 'Erro desconhecido');
       } finally {
         if (mounted) {
-          setLoading(false)
+          setLoading(false);
         }
       }
     }
 
-    loadUserInfo()
+    loadUserInfo();
 
     return () => {
-      mounted = false
-    }
-  }, [])
+      mounted = false;
+    };
+  }, []);
 
   const hasPermission = (permission: string) => {
-    if (!user || !user.modulos_permitidos) return false
-    
+    if (!user || !user.modulos_permitidos) return false;
+
     // Se modulos_permitidos é um array
     if (Array.isArray(user.modulos_permitidos)) {
-      return user.modulos_permitidos.includes(permission)
+      return user.modulos_permitidos.includes(permission);
     }
-    
+
     // Se modulos_permitidos é um objeto
     if (typeof user.modulos_permitidos === 'object') {
-      return user.modulos_permitidos[permission] === true
+      return user.modulos_permitidos[permission] === true;
     }
-    
-    return false
-  }
+
+    return false;
+  };
 
   const hasAnyPermission = (permissions: string[]) => {
-    return permissions.some(permission => hasPermission(permission))
-  }
+    return permissions.some(permission => hasPermission(permission));
+  };
 
   const isRole = (role: string) => {
-    return user?.role?.toLowerCase() === role.toLowerCase()
-  }
+    return user?.role?.toLowerCase() === role.toLowerCase();
+  };
 
   const roleDisplayName = (role: string) => {
     switch (role.toLowerCase()) {
       case 'admin':
-        return 'Administrador'
+        return 'Administrador';
       case 'financeiro':
-        return 'Financeiro'
+        return 'Financeiro';
       case 'funcionario':
-        return 'Funcionário'
+        return 'Funcionário';
       default:
-        return role
+        return role;
     }
-  }
+  };
 
   return {
     user,
@@ -109,6 +108,6 @@ export function useAuth() {
     hasPermission,
     hasAnyPermission,
     isRole,
-    roleDisplayName: user ? roleDisplayName(user.role) : null
-  }
-} 
+    roleDisplayName: user ? roleDisplayName(user.role) : null,
+  };
+}

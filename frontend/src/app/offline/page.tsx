@@ -1,98 +1,98 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { safeNavigator, isClient } from '@/lib/client-utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { 
-  WifiOff, 
-  RefreshCw, 
-  CheckSquare, 
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { safeNavigator, isClient } from '@/lib/client-utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  WifiOff,
+  RefreshCw,
+  CheckSquare,
   Database,
   Smartphone,
   Signal,
   Home,
-  Eye
-} from 'lucide-react'
+  Eye,
+} from 'lucide-react';
 
 export default function OfflinePage() {
-  const [isOnline, setIsOnline] = useState(true)
-  const [retryCount, setRetryCount] = useState(0)
-  const [lastUpdate, setLastUpdate] = useState<string>('')
+  const [isOnline, setIsOnline] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState<string>('');
 
   useEffect(() => {
-    if (!isClient) return
+    if (!isClient) return;
 
     // Detectar mudanças de conectividade
     const handleOnline = () => {
-      setIsOnline(true)
-      window.location.reload()
-    }
-    
-    const handleOffline = () => {
-      setIsOnline(false)
-    }
+      setIsOnline(true);
+      window.location.reload();
+    };
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     // Verificar estado inicial
-    setIsOnline(safeNavigator.isOnline())
-    
+    setIsOnline(safeNavigator.isOnline());
+
     // Simular última atualização
-    setLastUpdate(new Date().toLocaleString('pt-BR'))
+    setLastUpdate(new Date().toLocaleString('pt-BR'));
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const handleRetry = () => {
-    setRetryCount(prev => prev + 1)
-    
+    setRetryCount(prev => prev + 1);
+
     // Tentar recarregar a página
     if (safeNavigator.isOnline()) {
-      window.location.href = '/'
+      window.location.href = '/';
     } else {
       // Feedback visual de tentativa
       setTimeout(() => {
-        setRetryCount(prev => prev - 1)
-      }, 2000)
+        setRetryCount(prev => prev - 1);
+      }, 2000);
     }
-  }
+  };
 
   const handleGoHome = () => {
-    window.location.href = '/'
-  }
+    window.location.href = '/';
+  };
 
   const offlineFeatures = [
     {
       title: 'Visualizar Dados em Cache',
       description: 'Consulte informações salvas localmente',
       icon: Eye,
-      available: true
+      available: true,
     },
     {
       title: 'Checklists Offline',
       description: 'Continue trabalhando com checklists salvos',
       icon: CheckSquare,
-      available: true
+      available: true,
     },
     {
       title: 'Cache Local',
       description: 'Dados importantes ficam disponíveis',
       icon: Database,
-      available: true
+      available: true,
     },
     {
       title: 'Interface Completa',
       description: 'Navegação e visualizações funcionam',
       icon: Smartphone,
-      available: true
-    }
-  ]
+      available: true,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
@@ -104,22 +104,23 @@ export default function OfflinePage() {
               <WifiOff className="w-10 h-10 text-gray-500 dark:text-gray-400" />
             </div>
           </div>
-          
+
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Você está offline
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              Sem conexão com a internet. Algumas funcionalidades ainda estão disponíveis.
+              Sem conexão com a internet. Algumas funcionalidades ainda estão
+              disponíveis.
             </p>
           </div>
 
           {/* Status da conexão */}
           <div className="flex justify-center">
-            <Badge 
+            <Badge
               className={`px-4 py-2 text-sm font-medium ${
-                isOnline 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                isOnline
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                   : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
               }`}
             >
@@ -133,16 +134,18 @@ export default function OfflinePage() {
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
+              <Button
                 onClick={handleRetry}
                 disabled={retryCount > 0}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${retryCount > 0 ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${retryCount > 0 ? 'animate-spin' : ''}`}
+                />
                 {retryCount > 0 ? 'Tentando...' : 'Tentar Novamente'}
               </Button>
-              
-              <Button 
+
+              <Button
                 onClick={handleGoHome}
                 variant="outline"
                 className="flex-1 border-gray-300 dark:border-gray-600"
@@ -151,7 +154,7 @@ export default function OfflinePage() {
                 Ir para Home
               </Button>
             </div>
-            
+
             {retryCount > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 text-center">
                 Tentativa {retryCount} - Verificando conexão...
@@ -171,7 +174,10 @@ export default function OfflinePage() {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {offlineFeatures.map((feature, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                >
                   <div className="flex-shrink-0">
                     <feature.icon className="w-5 h-5 text-green-600 dark:text-green-400" />
                   </div>
@@ -198,22 +204,32 @@ export default function OfflinePage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Status da PWA:</span>
+              <span className="text-gray-600 dark:text-gray-400">
+                Status da PWA:
+              </span>
               <Badge className="badge-success">Ativa</Badge>
             </div>
-            
+
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Cache Local:</span>
+              <span className="text-gray-600 dark:text-gray-400">
+                Cache Local:
+              </span>
               <Badge className="badge-primary">Disponível</Badge>
             </div>
-            
+
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Última Sincronização:</span>
-              <span className="text-gray-900 dark:text-white text-xs">{lastUpdate}</span>
+              <span className="text-gray-600 dark:text-gray-400">
+                Última Sincronização:
+              </span>
+              <span className="text-gray-900 dark:text-white text-xs">
+                {lastUpdate}
+              </span>
             </div>
-            
+
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Modo Offline:</span>
+              <span className="text-gray-600 dark:text-gray-400">
+                Modo Offline:
+              </span>
               <Badge className="badge-warning">Ativo</Badge>
             </div>
           </CardContent>
@@ -241,5 +257,5 @@ export default function OfflinePage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}
