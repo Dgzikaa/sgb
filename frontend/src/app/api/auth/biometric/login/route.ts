@@ -1,6 +1,29 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Interfaces TypeScript
+interface BiometricCredential {
+  id: string;
+  lastUsed?: string;
+  [key: string]: unknown;
+}
+
+interface UsuarioBar {
+  id: string;
+  email: string;
+  nome: string;
+  bar_id: number;
+  biometric_credentials: BiometricCredential[] | null;
+  ativo: boolean;
+}
+
+interface UserResponse {
+  id: string;
+  email: string;
+  nome: string;
+  barId: number;
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -34,17 +57,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Encontrar usuário com a credencial específica
-    let usuarioEncontrado = null
-    let credentialData = null
+    let usuarioEncontrado: UsuarioBar | null = null
+    let credentialData: BiometricCredential | null = null
 
-    for (const usuario of usuarios) {
+    for (const usuario of usuarios as UsuarioBar[]) {
       if (!usuario.biometric_credentials) continue
       
       const credentials = Array.isArray(usuario.biometric_credentials) 
         ? usuario.biometric_credentials 
         : []
       
-      const foundCredential = credentials.find((cred: any) => cred.id === credentialId)
+      const foundCredential = credentials.find((cred: BiometricCredential) => cred.id === credentialId)
       if (foundCredential) {
         usuarioEncontrado = usuario
         credentialData = foundCredential
@@ -75,11 +98,11 @@ export async function POST(request: NextRequest) {
     console.log('✅ Autenticação biométrica bem-sucedida para:', usuarioEncontrado.email)
 
     // Atualizar last_used da credencial
-    const updatedCredentials = usuarioEncontrado.biometric_credentials.map((cred: any) => 
+    const updatedCredentials = usuarioEncontrado.biometric_credentials?.map((cred: BiometricCredential) => 
       cred.id === credentialId 
         ? { ...cred, lastUsed: new Date().toISOString() }
         : cred
-    )
+    ) || []
 
     // Atualizar no banco
     await supabase
@@ -90,15 +113,17 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', usuarioEncontrado.id)
 
+    const userResponse: UserResponse = {
+      id: usuarioEncontrado.id,
+      email: usuarioEncontrado.email,
+      nome: usuarioEncontrado.nome,
+      barId: usuarioEncontrado.bar_id
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Login realizado com sucesso',
-      user: {
-        id: usuarioEncontrado.id,
-        email: usuarioEncontrado.email,
-        nome: usuarioEncontrado.nome,
-        barId: usuarioEncontrado.bar_id
-      }
+      user: userResponse
     })
 
   } catch (error) {

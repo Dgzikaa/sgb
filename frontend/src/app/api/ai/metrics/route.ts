@@ -9,6 +9,84 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Interfaces TypeScript
+interface AiMetric {
+  id: string;
+  nome_metrica: string;
+  categoria: string;
+  tipo_calculo: string;
+  valor: number;
+  valor_anterior: number;
+  variacao_absoluta: number;
+  variacao_percentual: number;
+  meta_valor: number;
+  benchmark_interno: number;
+  benchmark_mercado: number;
+  performance: string;
+  tendencia: string;
+  alerta_ativado: boolean;
+  data_referencia: string;
+  periodo_inicio: string;
+  periodo_fim: string;
+  detalhamento: string;
+  fatores_influencia: string;
+  comparativo_historico: string;
+  created_at: string;
+  proximo_calculo: string;
+  ativa: boolean;
+}
+
+interface MetricStat {
+  nome_metrica: string;
+  categoria: string;
+  performance: string;
+  tendencia: string;
+  alerta_ativado: boolean;
+  valor: number;
+}
+
+interface MetricAlert {
+  nome_metrica: string;
+  valor: number;
+  meta_valor: number;
+  performance: string;
+}
+
+interface KpiData {
+  nome: string;
+  valor: number;
+  meta: number;
+  variacao: number;
+  performance: string;
+  tendencia: string;
+}
+
+interface MetricHistory {
+  valor: number;
+  valor_anterior: number;
+  variacao_percentual: number;
+  meta_valor: number;
+  performance: string;
+  data_referencia: string;
+  detalhamento: string;
+}
+
+interface WeeklyData {
+  valores: number[];
+  data_referencia: string;
+  meta_valor: number;
+}
+
+interface WeeklyAggregated {
+  valor: number;
+  valor_anterior: number;
+  variacao_percentual: number;
+  meta_valor: number;
+  performance: string;
+  detalhamento: string;
+  data_referencia: string;
+}
+
 // Schema de validação para filtros
 const FilterMetricsSchema = z.object({
   nome_metrica: z.string().optional(),
@@ -191,10 +269,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: metrics,
+      data: metrics as AiMetric[],
       estatisticas,
-      kpis_principais: kpis,
-      alertas_criticos: alertas || [],
+      kpis_principais: kpis as KpiData[],
+      alertas_criticos: alertas as MetricAlert[] || [],
       pagination: {
         page: params.page,
         limit: params.limit,
@@ -306,11 +384,11 @@ export async function POST(request: NextRequest) {
     const atingiuMeta = historico.filter(h => h.meta_valor && h.valor >= h.meta_valor).length;
 
     // Preparar dados para gráfico (agrupamento se necessário)
-    let dadosGrafico = historico;
+    let dadosGrafico = historico as MetricHistory[];
     
     if (granularidade === 'weekly' && historico.length > 7) {
       // Agrupar por semana
-      const semanas: unknown = {};
+      const semanas: Record<string, WeeklyData> = {};
       historico.forEach(h => {
         const data = new Date(h.data_referencia);
         const inicioSemana = new Date(data.setDate(data.getDate() - data.getDay()));
@@ -326,15 +404,15 @@ export async function POST(request: NextRequest) {
         semanas[chave].valores.push(h.valor);
       });
 
-      dadosGrafico = Object.values(semanas).map((s: Record<string, unknown>) => ({
-        ...s,
-        valor: (s.valores as number[]).reduce((a: number, b: number) => a + b, 0) / (s.valores as number[]).length,
+      dadosGrafico = Object.values(semanas).map((s: WeeklyData): WeeklyAggregated => ({
+        valor: s.valores.reduce((a: number, b: number) => a + b, 0) / s.valores.length,
         valor_anterior: 0,
         variacao_percentual: 0,
         meta_valor: s.meta_valor,
         performance: 'bom',
-        detalhamento: ''
-      })) as typeof historico;
+        detalhamento: '',
+        data_referencia: s.data_referencia
+      }));
     }
 
     return NextResponse.json({

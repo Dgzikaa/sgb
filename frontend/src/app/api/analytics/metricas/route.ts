@@ -1,6 +1,33 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 
+// Interfaces TypeScript
+interface SistemaMetrica {
+  id: string;
+  bar_id: number;
+  tipo_metrica: string;
+  categoria: string;
+  nome_metrica: string;
+  valor: number;
+  valor_anterior: number | null;
+  variacao_percentual: number | null;
+  unidade: string;
+  metadados: Record<string, unknown>;
+  periodo_inicio: string;
+  periodo_fim: string;
+  coletado_em: string;
+  bars?: {
+    nome: string;
+  };
+}
+
+interface MetricasResumo {
+  total_metricas: number;
+  metricas_por_tipo: Record<string, number>;
+  ultima_coleta: string | null;
+  periodo_consultado: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -37,14 +64,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Calcular estatísticas resumidas
-    const resumo = {
+    const resumo: MetricasResumo = {
       total_metricas: metricas?.length || 0,
       metricas_por_tipo: {} as Record<string, number>,
       ultima_coleta: metricas?.[0]?.coletado_em || null,
       periodo_consultado: `${periodo} dias`
     }
 
-    metricas?.forEach((metrica: any) => {
+    metricas?.forEach((metrica: SistemaMetrica) => {
       resumo.metricas_por_tipo[metrica.tipo_metrica] = 
         (resumo.metricas_por_tipo[metrica.tipo_metrica] || 0) + 1
     })
@@ -52,7 +79,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        metricas,
+        metricas: metricas as SistemaMetrica[],
         resumo
       }
     })
@@ -94,7 +121,7 @@ export async function POST(request: NextRequest) {
     const supabase = await getAdminClient()
 
     // Calcular variação percentual se valor_anterior fornecido
-    let variacao_percentual = null
+    let variacao_percentual: number | null = null
     if (valor_anterior && valor_anterior > 0) {
       variacao_percentual = ((valor - valor_anterior) / valor_anterior) * 100
     }
@@ -125,7 +152,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: metrica,
+      data: metrica as SistemaMetrica,
       message: 'Métrica registrada com sucesso'
     })
 

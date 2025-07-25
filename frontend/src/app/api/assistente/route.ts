@@ -2,6 +2,47 @@ import { NextRequest, NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import { getVendasData, getClientesData, getProdutoMaisVendido, getAnaliseCompleta } from '@/lib/database'
 
+// Interfaces TypeScript
+interface VendasData {
+  vendas_hoje: number;
+  vendas_semana: number;
+  total_pedidos: number;
+  ticket_medio: number;
+}
+
+interface ClientesData {
+  total_clientes_hoje: number;
+  novos_clientes: number;
+  clientes_recorrentes: number;
+}
+
+interface ProdutoMaisVendido {
+  produto: string;
+  grupo: string;
+  quantidade: number;
+  valor_total: number;
+}
+
+interface AnaliseCompleta {
+  melhorDiaSemana: {
+    dia: string;
+    faturamento: number;
+  };
+  insights: {
+    performanceSemana: number;
+    consistencia: number;
+  };
+  medias: {
+    faturamento: number;
+    clientes: number;
+  };
+  dadosSemana: Array<{
+    dia: string;
+    faturamento: number;
+    clientes: number;
+  }>;
+}
+
 // Configurar OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
@@ -17,9 +58,9 @@ export async function POST(request: NextRequest) {
 
     // 🚀 BUSCAR DADOS REAIS usando as funções já existentes do frontend
     let contextoDados = ''
-    let vendasData = null
-    let clientesData = null
-    let produtoMaisVendido = null
+    let vendasData: VendasData | null = null
+    let clientesData: ClientesData | null = null
+    let produtoMaisVendido: ProdutoMaisVendido | null = null
     
     try {
       console.log('📊 Buscando dados do sistema usando funções existentes...')
@@ -44,10 +85,10 @@ export async function POST(request: NextRequest) {
         })
       ])
       
-      vendasData = dados[0]
-      clientesData = dados[1]
-      produtoMaisVendido = dados[2]
-      const analiseCompleta = dados[3]
+      vendasData = dados[0] as VendasData | null
+      clientesData = dados[1] as ClientesData | null
+      produtoMaisVendido = dados[2] as ProdutoMaisVendido | null
+      const analiseCompleta = dados[3] as AnaliseCompleta | null
 
       console.log('📈 Dados obtidos:', {
         vendas: vendasData ? 'OK' : 'ERRO',
@@ -144,7 +185,7 @@ PAPEL:
 Você é um consultor especialista em gestão de bares que tem acesso aos dados reais do estabelecimento. 
 Suas respostas devem ser:
 - Baseadas nos dados reais fornecidos acima
-- Práticas e actionáveis para gestores de bar
+- Práticas e actionables para gestores de bar
 - Profissionais mas com tom amigável
 - Focadas em insights que ajudem na tomada de decisão
 
