@@ -47,6 +47,87 @@ const AgentConfigSchema = z.object({
 });
 
 // ========================================
+// 🤖 INTERFACES TYPESCRIPT
+// ========================================
+
+interface AgentConfig {
+  id?: string;
+  bar_id: string;
+  agente_ativo?: boolean;
+  frequencia_analise_minutos?: number;
+  horario_analise_inicio?: string;
+  horario_analise_fim?: string;
+  gerar_insights?: boolean;
+  detectar_anomalias?: boolean;
+  gerar_predicoes?: boolean;
+  gerar_recomendacoes?: boolean;
+  confianca_minima_insights?: number;
+  dias_historico_insights?: number;
+  max_insights_por_execucao?: number;
+  sensibilidade_anomalias?: number;
+  window_anomalias_horas?: number;
+  horizonte_predicao_dias?: number;
+  confianca_minima_predicoes?: number;
+  roi_minimo_recomendacoes?: number;
+  max_recomendacoes_ativas?: number;
+  notificar_insights?: boolean;
+  notificar_anomalias?: boolean;
+  notificar_predicoes_criticas?: boolean;
+  canais_notificacao?: {
+    browser: boolean;
+    whatsapp: boolean;
+    email?: boolean;
+    sms?: boolean;
+  };
+  retreinar_modelos_automaticamente?: boolean;
+  frequencia_retreino_dias?: number;
+  accuracy_minima_producao?: number;
+  timeout_processamento_minutos?: number;
+  max_memoria_mb?: number;
+  log_debug?: boolean;
+}
+
+interface AgentLog {
+  id: string;
+  bar_id?: string; // Opcional porque pode não estar na query
+  tipo_processamento: string;
+  nome_processo: string;
+  status: string;
+  data_inicio: string;
+  data_fim?: string;
+  duracao_segundos?: number;
+  total_insights_gerados?: number;
+  total_anomalias_detectadas?: number;
+  total_predicoes_feitas?: number;
+  total_recomendacoes_criadas?: number;
+  erro_detalhes?: string;
+  executado_por?: string;
+}
+
+interface AgentStatus {
+  agente_rodando: boolean;
+  agente_configurado: boolean;
+  proxima_execucao: Date | null;
+  dentro_horario_funcionamento: boolean;
+}
+
+interface AgentStatistics {
+  execucoes_ultima_semana: number;
+  execucoes_sucesso: number;
+  execucoes_erro: number;
+  tempo_medio_execucao: number;
+  ultima_execucao: string | null;
+  uptime_percentual: number;
+}
+
+interface AgentResponse {
+  configuracao: AgentConfig | null;
+  status: AgentStatus;
+  logs_recentes: AgentLog[];
+  estatisticas: AgentStatistics;
+}
+
+// ========================================
 // 🤖 GET /api/ai/agent (Status e configuração)
 // ========================================
 export async function GET() {
@@ -110,40 +191,44 @@ export async function GET() {
       .eq('bar_id', bar_id)
       .gte('data_inicio', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
-    const estatisticas = {
+    const estatisticas: AgentStatistics = {
       execucoes_ultima_semana: execStats?.length || 0,
       execucoes_sucesso: execStats?.filter(e => e.status === 'concluido').length || 0,
       execucoes_erro: execStats?.filter(e => e.status === 'erro').length || 0,
       tempo_medio_execucao: execStats?.length ? 
-        execStats.filter(e => e.duracao_segundos).reduce((acc, e) => acc + e.duracao_segundos, 0) / execStats.filter(e => e.duracao_segundos).length : 0,
+        execStats.filter(e => e.duracao_segundos).reduce((acc, e) => acc + (e.duracao_segundos || 0), 0) / execStats.filter(e => e.duracao_segundos).length : 0,
       ultima_execucao: logs?.[0]?.data_inicio || null,
       uptime_percentual: execStats?.length ? 
         ((execStats.filter(e => e.status === 'concluido').length / execStats.length) * 100) : 0
     };
 
     // Próxima execução estimada
-    let proximaExecucao = null;
+    let proximaExecucao: Date | null = null;
     if (config && config.agente_ativo && agentRunning) {
       const ultimaExec = logs?.find(l => l.status === 'concluido');
       if (ultimaExec) {
         const ultima = new Date(ultimaExec.data_inicio);
-        proximaExecucao = new Date(ultima.getTime() + config.frequencia_analise_minutos * 60 * 1000);
+        proximaExecucao = new Date(ultima.getTime() + (config.frequencia_analise_minutos || 60) * 60 * 1000);
       }
     }
 
+    const status: AgentStatus = {
+      agente_rodando: agentRunning,
+      agente_configurado: !!config,
+      proxima_execucao: proximaExecucao,
+      dentro_horario_funcionamento: config ? isWithinWorkingHours(config) : false
+    };
+
+    const response: AgentResponse = {
+      configuracao: config,
+      status,
+      logs_recentes: logs || [],
+      estatisticas
+    };
+
     return NextResponse.json({
       success: true,
-      data: {
-        configuracao: config,
-        status: {
-          agente_rodando: agentRunning,
-          agente_configurado: !!config,
-          proxima_execucao: proximaExecucao,
-          dentro_horario_funcionamento: config ? isWithinWorkingHours(config) : false
-        },
-        logs_recentes: logs || [],
-        estatisticas
-      }
+      data: response
     });
 
   } catch (error) {
@@ -180,7 +265,7 @@ export async function PUT(request: NextRequest) {
       .eq('bar_id', bar_id)
       .single();
 
-    let result;
+    let result: AgentConfig;
     if (existing) {
       // Atualizar configuração existente
       const { data, error } = await supabase
@@ -390,15 +475,14 @@ export async function POST(request: NextRequest) {
 // 🛠️ FUNÇÕES AUXILIARES
 // ========================================
 
-interface AgentConfig {
-  horario_analise_inicio: string
-  horario_analise_fim: string
-}
-
 /**
  * Verifica se está dentro do horário de funcionamento
  */
 function isWithinWorkingHours(config: AgentConfig): boolean {
+  if (!config.horario_analise_inicio || !config.horario_analise_fim) {
+    return true; // Se não há horário definido, sempre permitir
+  }
+
   const now = new Date();
   const currentTime = now.toTimeString().slice(0, 5);
   
