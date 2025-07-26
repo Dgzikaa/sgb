@@ -7,7 +7,7 @@ interface IndicadorDesempenho {
   id: string
   categoria: 'guardrail' | 'ovt' | 'qualidade' | 'produtos' | 'vendas' | 'marketing'
   nome: string
-  descricao: string
+  descricao?: string
   unidade: string
   meta?: number
   dados: {
@@ -65,127 +65,205 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const { searchParams } = new URL(request.url)
+    const tipo = searchParams.get('tipo') // 'semanal' ou 'mensal'
+    
     const supabase = await getAdminClient()
     
-    // Buscar todos os dados da tabela_desempenho
-    const { data: dadosDesempenho, error } = await supabase
-      .from('tabela_desempenho')
-      .select('*')
-      .eq('ativo', true)
-      .order('ordem_exibicao')
-      .order('tipo_periodo')
-      .order('periodo')
+    if (tipo === 'mensal') {
+      // Buscar apenas dados mensais
+      const { data: dadosMensais, error: errorMensais } = await supabase
+        .from('tabela_desempenho_mensal')
+        .select('*')
+        .eq('ativo', true)
+        .order('ordem_exibicao')
+        .order('mes')
 
-    if (error) {
-      console.error('Erro ao buscar dados de desempenho:', error)
-      return NextResponse.json(
-        { error: 'Erro ao buscar dados de desempenho' },
-        { status: 500 }
-      )
-    }
-
-    if (!dadosDesempenho || dadosDesempenho.length === 0) {
-      return NextResponse.json(
-        { error: 'Nenhum dado de desempenho encontrado' },
-        { status: 404 }
-      )
-    }
-
-    // Agrupar dados por indicador
-    const indicadoresMap = new Map<string, any>()
-    
-    dadosDesempenho.forEach(registro => {
-      const key = registro.indicador_id
-      
-      if (!indicadoresMap.has(key)) {
-        indicadoresMap.set(key, {
-          id: registro.indicador_id,
-          categoria: registro.categoria,
-          nome: registro.nome,
-          descricao: registro.descricao,
-          unidade: registro.unidade,
-          meta: registro.meta,
-          dados: {
-            semanais: [],
-            mensais: []
-          }
-        })
+      if (errorMensais) {
+        console.error('Erro ao buscar dados mensais:', errorMensais)
+        return NextResponse.json(
+          { error: 'Erro ao buscar dados mensais' },
+          { status: 500 }
+        )
       }
+
+      // Agrupar dados mensais por indicador
+      const indicadoresMap = new Map<string, any>()
       
-      const indicador = indicadoresMap.get(key)
+      // Primeiro, criar todos os indicadores únicos
+      dadosMensais?.forEach(registro => {
+        const key = registro.indicador_id
+        if (!indicadoresMap.has(key)) {
+          indicadoresMap.set(key, {
+            id: registro.indicador_id,
+            categoria: registro.categoria,
+            nome: registro.nome,
+            descricao: registro.descricao || '',
+            unidade: registro.unidade,
+            meta: registro.meta,
+            dados: {
+              semanais: [],
+              mensais: []
+            }
+          })
+        }
+      })
       
-      if (registro.tipo_periodo === 'semanal') {
+      // Depois, adicionar os dados mensais
+      dadosMensais?.forEach(registro => {
+        const indicador = indicadoresMap.get(registro.indicador_id)
+        if (indicador) {
+          indicador.dados.mensais.push({
+            mes: registro.mes,
+            valor: parseFloat(registro.valor),
+            meta: parseFloat(registro.meta),
+            status: registro.status,
+            tendencia: registro.tendencia
+          })
+        }
+      })
+
+      // Converter para array e ordenar dados
+      const indicadores: IndicadorDesempenho[] = Array.from(indicadoresMap.values()).map(indicador => ({
+        ...indicador,
+        dados: {
+          semanais: [],
+          mensais: indicador.dados.mensais.sort((a: DadoMensal, b: DadoMensal) => 
+            extrairNumeroMes(b.mes) - extrairNumeroMes(a.mes)
+          )
+        }
+      }))
+
+      // Calcular resumo
+      const totalIndicadores = indicadores.length
+      let acimaMeta = 0
+      let abaixoMeta = 0
+      let dentroMeta = 0
+
+      indicadores.forEach(indicador => {
+        const dadoMaisRecente = indicador.dados.mensais[0]
+        if (dadoMaisRecente) {
+          switch (dadoMaisRecente.status) {
+            case 'acima':
+              acimaMeta++
+              break
+            case 'abaixo':
+              abaixoMeta++
+              break
+            case 'dentro':
+              dentroMeta++
+              break
+          }
+        }
+      })
+
+      const resposta: RespostaDesempenho = {
+        indicadores,
+        resumo: {
+          totalIndicadores,
+          acimaMeta,
+          abaixoMeta,
+          dentroMeta
+        }
+      }
+
+      return NextResponse.json(resposta)
+
+    } else {
+      // Buscar apenas dados semanais (padrão)
+      const { data: dadosSemanais, error: errorSemanais } = await supabase
+        .from('tabela_desempenho')
+        .select('*')
+        .eq('ativo', true)
+        .eq('tipo_periodo', 'semanal')
+        .order('ordem_exibicao')
+        .order('periodo')
+
+      if (errorSemanais) {
+        console.error('Erro ao buscar dados semanais:', errorSemanais)
+        return NextResponse.json(
+          { error: 'Erro ao buscar dados semanais' },
+          { status: 500 }
+        )
+      }
+
+      // Agrupar dados semanais por indicador
+      const indicadoresMap = new Map<string, any>()
+      
+      dadosSemanais?.forEach(registro => {
+        const key = registro.indicador_id
+        
+        if (!indicadoresMap.has(key)) {
+          indicadoresMap.set(key, {
+            id: registro.indicador_id,
+            categoria: registro.categoria,
+            nome: registro.nome,
+            descricao: registro.descricao,
+            unidade: registro.unidade,
+            meta: registro.meta,
+            dados: {
+              semanais: [],
+              mensais: []
+            }
+          })
+        }
+        
+        const indicador = indicadoresMap.get(key)
         indicador.dados.semanais.push({
           semana: registro.periodo,
           valor: parseFloat(registro.valor),
-          meta: parseFloat(registro.meta), // Garantir que é número
+          meta: parseFloat(registro.meta),
           status: registro.status,
           tendencia: registro.tendencia
         })
-      } else if (registro.tipo_periodo === 'mensal') {
-        indicador.dados.mensais.push({
-          mes: registro.periodo,
-          valor: parseFloat(registro.valor),
-          meta: parseFloat(registro.meta), // Garantir que é número
-          status: registro.status,
-          tendencia: registro.tendencia
-        })
-      }
-    })
+      })
 
-    // Converter para array e ordenar dados
-    const indicadores: IndicadorDesempenho[] = Array.from(indicadoresMap.values()).map(indicador => ({
-      ...indicador,
-      dados: {
-        // Ordenar semanais por número da semana (decrescente - da mais recente para mais antiga)
-        semanais: indicador.dados.semanais.sort((a: DadoSemanal, b: DadoSemanal) => 
-          extrairNumeroSemana(b.semana) - extrairNumeroSemana(a.semana)
-        ),
-        // Ordenar mensais por mês (decrescente - do mais recente para mais antigo)
-        mensais: indicador.dados.mensais.sort((a: DadoMensal, b: DadoMensal) => 
-          extrairNumeroMes(b.mes) - extrairNumeroMes(a.mes)
-        )
-      }
-    }))
+      // Converter para array e ordenar dados
+      const indicadores: IndicadorDesempenho[] = Array.from(indicadoresMap.values()).map(indicador => ({
+        ...indicador,
+        dados: {
+          semanais: indicador.dados.semanais.sort((a: DadoSemanal, b: DadoSemanal) => 
+            extrairNumeroSemana(b.semana) - extrairNumeroSemana(a.semana)
+          ),
+          mensais: []
+        }
+      }))
 
-    // Calcular resumo
-    const totalIndicadores = indicadores.length
-    let acimaMeta = 0
-    let abaixoMeta = 0
-    let dentroMeta = 0
+      // Calcular resumo
+      const totalIndicadores = indicadores.length
+      let acimaMeta = 0
+      let abaixoMeta = 0
+      let dentroMeta = 0
 
-    indicadores.forEach(indicador => {
-      // Pegar o dado mais recente (semanal ou mensal) para calcular o resumo
-      const dadoMaisRecente = indicador.dados.semanais.length > 0 
-        ? indicador.dados.semanais[0] 
-        : indicador.dados.mensais[0]
-      
-      if (dadoMaisRecente) {
-        switch (dadoMaisRecente.status) {
-          case 'acima':
-            acimaMeta++
-            break
-          case 'abaixo':
-            abaixoMeta++
-            break
-          case 'dentro':
-            dentroMeta++
-            break
+      indicadores.forEach(indicador => {
+        const dadoMaisRecente = indicador.dados.semanais[0]
+        if (dadoMaisRecente) {
+          switch (dadoMaisRecente.status) {
+            case 'acima':
+              acimaMeta++
+              break
+            case 'abaixo':
+              abaixoMeta++
+              break
+            case 'dentro':
+              dentroMeta++
+              break
+          }
+        }
+      })
+
+      const resposta: RespostaDesempenho = {
+        indicadores,
+        resumo: {
+          totalIndicadores,
+          acimaMeta,
+          abaixoMeta,
+          dentroMeta
         }
       }
-    })
 
-    const resposta: RespostaDesempenho = {
-      indicadores,
-      resumo: {
-        totalIndicadores,
-        acimaMeta,
-        abaixoMeta,
-        dentroMeta
-      }
+      return NextResponse.json(resposta)
     }
-
-    return NextResponse.json(resposta)
     
   } catch (error) {
     console.error('Erro interno do servidor:', error)

@@ -41,7 +41,7 @@ interface IndicadorDesempenho {
   id: string
   categoria: 'guardrail' | 'ovt' | 'qualidade' | 'produtos' | 'vendas' | 'marketing'
   nome: string
-  descricao: string
+  descricao?: string
   unidade: string
   meta?: number
   dados: {
@@ -118,7 +118,7 @@ const gruposIndicadores = {
 export default function DesempenhoPage() {
   const [dados, setDados] = useState<RespostaDesempenho | null>(null)
   const [loading, setLoading] = useState(true)
-  const [secoesExpandidas, setSecoesExpandidas] = useState<{[key: string]: boolean}>({
+  const [secoesExpandidas, setSecoesExpandidas] = useState<Record<string, boolean>>({
     'indicadores-estrategicos': true,
     'guardrail': true,
     'ovt': true,
@@ -127,27 +127,28 @@ export default function DesempenhoPage() {
     'cockpit-vendas': true,
     'cockpit-marketing': true
   })
-  
-  // Refs para os containers de scroll
-  const scrollContainerRefs = useRef<{[key: string]: HTMLDivElement | null}>({})
+  const [viewMode, setViewMode] = useState<'semanal' | 'mensal'>('semanal')
+  const scrollContainerRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        const response = await fetch('/api/gestao/desempenho')
-        if (response.ok) {
-          const data = await response.json()
-          setDados(data)
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
     carregarDados()
-  }, [])
+  }, [viewMode])
 
+  const carregarDados = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/gestao/desempenho?tipo=${viewMode}`)
+      if (!response.ok) {
+        throw new Error('Erro ao carregar dados')
+      }
+      const data = await response.json()
+      setDados(data)
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
 
   const toggleSecao = (secaoId: string) => {
@@ -157,7 +158,7 @@ export default function DesempenhoPage() {
     }))
   }
 
-  const getStatusIcon = (status: string, tendencia: string) => {
+  const getStatusIcon = (status: string) => {
     if (status === 'acima') {
       return <TrendingUp className="w-4 h-4 text-green-500" />
     } else if (status === 'abaixo') {
@@ -165,22 +166,6 @@ export default function DesempenhoPage() {
     } else {
       return <Minus className="w-4 h-4 text-gray-500" />
     }
-  }
-
-  const getStatusBadge = (status: string) => {
-    const config = {
-      acima: { color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300', text: 'Acima' },
-      abaixo: { color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300', text: 'Abaixo' },
-      dentro: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300', text: 'Dentro' }
-    }
-    
-    const configStatus = config[status as keyof typeof config] || config.abaixo
-    
-    return (
-      <Badge className={`text-xs px-2 py-1 ${configStatus.color}`}>
-        {configStatus.text}
-      </Badge>
-    )
   }
 
   const formatarValor = (valor: number, unidade: string) => {
@@ -198,89 +183,141 @@ export default function DesempenhoPage() {
     }
   }
 
-  const renderizarTabela = (indicadores: IndicadorDesempenho[], viewMode: 'semanal' | 'mensal', grupoId: string) => (
-    <div 
-      ref={(el) => {
-        scrollContainerRefs.current[`${grupoId}-${viewMode}`] = el
-      }}
-      className="w-full overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm"
-      style={{
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#6b7280 #374151'
-      }}
-    >
-      <style jsx>{`
-        div::-webkit-scrollbar {
-          height: 12px;
-        }
-        div::-webkit-scrollbar-track {
-          background: #374151;
-          border-radius: 6px;
-        }
-        div::-webkit-scrollbar-thumb {
-          background: #6b7280;
-          border-radius: 6px;
-        }
-        div::-webkit-scrollbar-thumb:hover {
-          background: #9ca3af;
-        }
-      `}</style>
-      <div className="min-w-[2000px]">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-700">
-              <th className="sticky left-0 z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[250px]">
-                Indicador
-              </th>
-              <th className="sticky left-[250px] z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[100px]">
-                Meta
-              </th>
-              {dados?.indicadores[0]?.dados[viewMode === 'semanal' ? 'semanais' : 'mensais'].map((item, index) => (
-                <th key={index} className={`px-2 py-3 text-center text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 ${
-                  viewMode === 'mensal' ? 'min-w-[90px]' : 'min-w-[120px]'
-                }`}>
-                  {viewMode === 'semanal' ? item.semana : item.mes}
+  const renderizarTabela = (indicadores: IndicadorDesempenho[], viewMode: 'semanal' | 'mensal', grupoId: string) => {
+    // Gerar cabeçalhos dos meses/semanas baseado nos dados disponíveis
+    const getCabecalhos = () => {
+      if (viewMode === 'semanal') {
+        // Para semanais, pegar todas as semanas únicas dos indicadores
+        const semanas = new Set<string>()
+        indicadores.forEach(ind => {
+          ind.dados.semanais.forEach(sem => semanas.add(sem.semana))
+        })
+        return Array.from(semanas).sort((a, b) => {
+          const numA = parseInt(a.match(/Semana (\d+)/)?.[1] || '0')
+          const numB = parseInt(b.match(/Semana (\d+)/)?.[1] || '0')
+          return numB - numA // Ordem decrescente (mais recente primeiro)
+        })
+      } else {
+        // Para mensais, usar os meses padrão em ordem
+        return ['Julho', 'Junho', 'Maio', 'Abril', 'Março', 'Fevereiro']
+      }
+    }
+
+    const cabecalhos = getCabecalhos()
+
+    // Filtrar indicadores que têm dados para o viewMode atual
+    const indicadoresComDados = indicadores.filter(ind => {
+      if (viewMode === 'semanal') {
+        return ind.dados.semanais.length > 0
+      } else {
+        return ind.dados.mensais.length > 0
+      }
+    })
+
+    if (indicadoresComDados.length === 0) {
+      return (
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          Nenhum dado disponível para {viewMode === 'semanal' ? 'semanas' : 'meses'}.
+        </div>
+      )
+    }
+
+    return (
+      <div 
+        ref={(el) => {
+          scrollContainerRefs.current[`${grupoId}-${viewMode}`] = el
+        }}
+        className="w-full overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm"
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#6b7280 #374151'
+        }}
+      >
+        <style jsx>{`
+          div::-webkit-scrollbar {
+            height: 12px;
+          }
+          div::-webkit-scrollbar-track {
+            background: #374151;
+            border-radius: 6px;
+          }
+          div::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 6px;
+          }
+          div::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+          }
+        `}</style>
+        <div className="min-w-[2000px]">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-700">
+                <th className="sticky left-0 z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[250px]">
+                  Indicador
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {indicadores.map((indicador) => (
-              <tr key={indicador.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white text-sm">{indicador.nome}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{indicador.unidade}</div>
-                  </div>
-                </td>
-                <td className="sticky left-[250px] z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {viewMode === 'semanal' 
-                      ? (indicador.dados.semanais[0]?.meta ? formatarValor(indicador.dados.semanais[0].meta, indicador.unidade) : '-')
-                      : (indicador.dados.mensais[0]?.meta ? formatarValor(indicador.dados.mensais[0].meta, indicador.unidade) : '-')
-                    }
-                  </div>
-                </td>
-                {indicador.dados[viewMode === 'semanal' ? 'semanais' : 'mensais'].map((item, index) => (
-                  <td key={index} className={`text-center ${viewMode === 'mensal' ? 'px-2 py-3' : 'px-4 py-4'}`}>
-                    <div className={`flex flex-col items-center ${viewMode === 'mensal' ? 'gap-1' : 'gap-2'}`}>
-                      <div className={`font-semibold text-gray-900 dark:text-white ${viewMode === 'mensal' ? 'text-xs' : 'text-sm'}`}>
-                        {formatarValor(item.valor, indicador.unidade)}
-                      </div>
-                      <div className={`flex items-center ${viewMode === 'mensal' ? 'gap-0.5' : 'gap-1'}`}>
-                        {getStatusIcon(item.status, item.tendencia)}
-                        {viewMode === 'semanal' && getStatusBadge(item.status)}
-                      </div>
-                    </div>
-                  </td>
+                <th className="sticky left-[250px] z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[100px]">
+                  Meta
+                </th>
+                {cabecalhos.map((cabecalho, index) => (
+                  <th key={index} className={`px-2 py-3 text-center text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 ${
+                    viewMode === 'mensal' ? 'min-w-[90px]' : 'min-w-[120px]'
+                  }`}>
+                    {cabecalho}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {indicadoresComDados.map((indicador) => (
+                <tr key={indicador.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white text-sm">{indicador.nome}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{indicador.unidade}</div>
+                    </div>
+                  </td>
+                  <td className="sticky left-[250px] z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      {viewMode === 'semanal' 
+                        ? (indicador.dados.semanais[0]?.meta ? formatarValor(indicador.dados.semanais[0].meta, indicador.unidade) : '-')
+                        : (indicador.dados.mensais[0]?.meta ? formatarValor(indicador.dados.mensais[0].meta, indicador.unidade) : '-')
+                      }
+                    </div>
+                  </td>
+                  {cabecalhos.map((periodo) => {
+                    let dadosPeriodo
+                    if (viewMode === 'semanal') {
+                      dadosPeriodo = indicador.dados.semanais.find(sem => sem.semana === periodo)
+                    } else {
+                      dadosPeriodo = indicador.dados.mensais.find(mes => mes.mes === periodo)
+                    }
+
+                    return (
+                      <td key={periodo} className="px-4 py-4 text-center">
+                        {dadosPeriodo ? (
+                          <div className="flex flex-col items-center space-y-1">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {formatarValor(dadosPeriodo.valor, indicador.unidade)}
+                            </span>
+                            <div className="flex items-center justify-center">
+                              {getStatusIcon(dadosPeriodo.status)}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 dark:text-gray-600">-</span>
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const renderizarGrupo = (grupoId: string, grupo: any) => {
     const indicadores = dados?.indicadores.filter(ind => 
@@ -350,7 +387,7 @@ export default function DesempenhoPage() {
                     </div>
                     
                     {secoesExpandidas[subId] && (
-                      <Tabs defaultValue="semanal" className="w-full">
+                      <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'semanal' | 'mensal')} className="w-full">
                         <TabsList className="grid w-full grid-cols-2 mb-4">
                           <TabsTrigger value="semanal" className="text-sm font-medium">
                             Visão Semanal
@@ -374,7 +411,7 @@ export default function DesempenhoPage() {
               })
             ) : (
               // Renderizar grupo simples
-              <Tabs defaultValue="semanal" className="w-full">
+              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'semanal' | 'mensal')} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-4">
                   <TabsTrigger value="semanal" className="text-sm font-medium">
                     Visão Semanal
