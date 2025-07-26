@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { DateTime } from 'luxon';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,6 +25,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Horário atual no fuso de São Paulo
+    const agoraBrasil = DateTime.now().setZone('America/Sao_Paulo');
+    console.log(`🕐 Horário em São Paulo: ${agoraBrasil.toFormat('HH:mm:ss')}`);
     console.log(`🔄 Iniciando sincronização NIBO para bar ${targetBarId}...`);
 
     // Buscar credenciais do NIBO

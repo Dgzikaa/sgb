@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/credenciais/nibo-sync",
+      "path": "/api/configuracoes/credenciais/nibo-sync",
       "schedule": "0 7 * * *"
     }
   ],
@@ -12,13 +12,12 @@
     "src/app/api/meta/collect/route.ts": {
       "maxDuration": 180
     },
-    "src/app/api/credenciais/nibo-sync/route.ts": {
+    "src/app/api/configuracoes/credenciais/nibo-sync/route.ts": {
       "maxDuration": 300
     }
   },
   "env": {
     "CRON_SECRET": "@cron_secret",
-    "TZ": "America/Sao_Paulo",
     "NIBO_BAR_ID": "@nibo_bar_id",
     "NIBO_API_TOKEN": "@nibo_api_token",
     "NIBO_ORGANIZATION_ID": "@nibo_organization_id",
