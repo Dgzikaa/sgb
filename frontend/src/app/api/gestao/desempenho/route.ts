@@ -515,6 +515,438 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         }))
       }
     },
+    {
+      id: 'nps-ambiente',
+      categoria: 'qualidade',
+      nome: 'NPS Ambiente',
+      descricao: 'Net Promoter Score do ambiente',
+      unidade: 'pontos',
+      meta: 75,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 70 + (i * 2) + Math.random() * 10,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 72 + (i * 1) + Math.random() * 6,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-atendimento',
+      categoria: 'qualidade',
+      nome: 'NPS Atendimento',
+      descricao: 'Net Promoter Score do atendimento',
+      unidade: 'pontos',
+      meta: 80,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 75 + (i * 2) + Math.random() * 10,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 77 + (i * 1) + Math.random() * 6,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-limpeza',
+      categoria: 'qualidade',
+      nome: 'NPS Limpeza',
+      descricao: 'Net Promoter Score da limpeza',
+      unidade: 'pontos',
+      meta: 85,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 80 + (i * 2) + Math.random() * 10,
+          meta: 85,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 82 + (i * 1) + Math.random() * 6,
+          meta: 85,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-musica',
+      categoria: 'qualidade',
+      nome: 'NPS Música',
+      descricao: 'Net Promoter Score da música',
+      unidade: 'pontos',
+      meta: 70,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 65 + (i * 2) + Math.random() * 10,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 67 + (i * 1) + Math.random() * 6,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-comida',
+      categoria: 'qualidade',
+      nome: 'NPS Comida',
+      descricao: 'Net Promoter Score da comida',
+      unidade: 'pontos',
+      meta: 75,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 70 + (i * 2) + Math.random() * 10,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 72 + (i * 1) + Math.random() * 6,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-drink',
+      categoria: 'qualidade',
+      nome: 'NPS Drink',
+      descricao: 'Net Promoter Score dos drinks',
+      unidade: 'pontos',
+      meta: 80,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 75 + (i * 2) + Math.random() * 10,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 77 + (i * 1) + Math.random() * 6,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-preco',
+      categoria: 'qualidade',
+      nome: 'NPS Preço',
+      descricao: 'Net Promoter Score do preço',
+      unidade: 'pontos',
+      meta: 65,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 60 + (i * 2) + Math.random() * 10,
+          meta: 65,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 62 + (i * 1) + Math.random() * 6,
+          meta: 65,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-reservas',
+      categoria: 'qualidade',
+      nome: 'NPS Reservas',
+      descricao: 'Net Promoter Score das reservas',
+      unidade: 'pontos',
+      meta: 70,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 65 + (i * 2) + Math.random() * 10,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 67 + (i * 1) + Math.random() * 6,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-felicidade-equipe',
+      categoria: 'qualidade',
+      nome: 'NPS Felicidade Equipe',
+      descricao: 'Net Promoter Score da felicidade da equipe',
+      unidade: 'pontos',
+      meta: 75,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 70 + (i * 2) + Math.random() * 10,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 72 + (i * 1) + Math.random() * 6,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-ambiente',
+      categoria: 'qualidade',
+      nome: 'NPS Ambiente',
+      descricao: 'Net Promoter Score do ambiente',
+      unidade: 'pontos',
+      meta: 75,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 70 + (i * 2) + Math.random() * 10,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 72 + (i * 1) + Math.random() * 6,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-atendimento',
+      categoria: 'qualidade',
+      nome: 'NPS Atendimento',
+      descricao: 'Net Promoter Score do atendimento',
+      unidade: 'pontos',
+      meta: 80,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 75 + (i * 2) + Math.random() * 10,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 77 + (i * 1) + Math.random() * 6,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-limpeza',
+      categoria: 'qualidade',
+      nome: 'NPS Limpeza',
+      descricao: 'Net Promoter Score da limpeza',
+      unidade: 'pontos',
+      meta: 85,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 80 + (i * 2) + Math.random() * 10,
+          meta: 85,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 82 + (i * 1) + Math.random() * 6,
+          meta: 85,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-musica',
+      categoria: 'qualidade',
+      nome: 'NPS Música',
+      descricao: 'Net Promoter Score da música',
+      unidade: 'pontos',
+      meta: 70,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 65 + (i * 2) + Math.random() * 10,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 67 + (i * 1) + Math.random() * 6,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-comida',
+      categoria: 'qualidade',
+      nome: 'NPS Comida',
+      descricao: 'Net Promoter Score da comida',
+      unidade: 'pontos',
+      meta: 75,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 70 + (i * 2) + Math.random() * 10,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 72 + (i * 1) + Math.random() * 6,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-drink',
+      categoria: 'qualidade',
+      nome: 'NPS Drink',
+      descricao: 'Net Promoter Score dos drinks',
+      unidade: 'pontos',
+      meta: 80,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 75 + (i * 2) + Math.random() * 10,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 77 + (i * 1) + Math.random() * 6,
+          meta: 80,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-preco',
+      categoria: 'qualidade',
+      nome: 'NPS Preço',
+      descricao: 'Net Promoter Score do preço',
+      unidade: 'pontos',
+      meta: 65,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 60 + (i * 2) + Math.random() * 10,
+          meta: 65,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 62 + (i * 1) + Math.random() * 6,
+          meta: 65,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-reservas',
+      categoria: 'qualidade',
+      nome: 'NPS Reservas',
+      descricao: 'Net Promoter Score das reservas',
+      unidade: 'pontos',
+      meta: 70,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 65 + (i * 2) + Math.random() * 10,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 67 + (i * 1) + Math.random() * 6,
+          meta: 70,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'nps-felicidade-equipe',
+      categoria: 'qualidade',
+      nome: 'NPS Felicidade Equipe',
+      descricao: 'Net Promoter Score da felicidade da equipe',
+      unidade: 'pontos',
+      meta: 75,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 70 + (i * 2) + Math.random() * 10,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 72 + (i * 1) + Math.random() * 6,
+          meta: 75,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
 
     // PRODUTOS - Cockpit Produtos
     {

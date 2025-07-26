@@ -70,12 +70,48 @@ export default function Marketing360Page() {
   const [googleData, setGoogleData] = useState<GoogleReviewData[]>([]);
   const [ageData, setAgeData] = useState<AgeData[]>([]);
 
-  // Mock data - substituir por chamadas reais à API
+  // Carregar dados das APIs
   useEffect(() => {
-    // Simular carregamento de dados
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar dados das campanhas
+        const campaignsResponse = await fetch('/api/marketing/campanhas');
+        const campaignsResult = await campaignsResponse.json();
+        if (campaignsResult.success) {
+          setCampaignsData(campaignsResult.data);
+        }
+
+        // Buscar dados do Instagram
+        const instagramResponse = await fetch('/api/marketing/instagram');
+        const instagramResult = await instagramResponse.json();
+        if (instagramResult.success) {
+          setInstagramData(instagramResult.data);
+        }
+
+        // Buscar dados do Google
+        const googleResponse = await fetch('/api/marketing/google');
+        const googleResult = await googleResponse.json();
+        if (googleResult.success) {
+          setGoogleData(googleResult.data);
+        }
+
+        // Buscar dados de idade
+        const ageResponse = await fetch('/api/marketing/idade');
+        const ageResult = await ageResponse.json();
+        if (ageResult.success) {
+          setAgeData(ageResult.data);
+        }
+
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Funções para calcular insights
@@ -154,6 +190,17 @@ export default function Marketing360Page() {
 
     return insights;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Carregando dados de marketing...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
