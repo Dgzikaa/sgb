@@ -186,25 +186,24 @@ export default function VisaoGeralPage() {
 
   return (
     <ProtectedRoute requiredModule="relatorios">
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-6">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Eye className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Visão Geral
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Acesse relatórios detalhados, análises comparativas e insights
-                  estratégicos
-                </p>
-              </div>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+              <Eye className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Visão Geral
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Acesse relatórios detalhados, análises comparativas e insights
+                estratégicos
+              </p>
             </div>
           </div>
+        </div>
 
           {/* Métricas Rápidas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -362,7 +361,6 @@ export default function VisaoGeralPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
     </ProtectedRoute>
   );
 }

@@ -28,7 +28,7 @@ export default function InterCertificadosPage() {
   const checkCertificates = async () => {
     setCertStatus('checking');
     try {
-      const response = await fetch('/api/inter-webhook', {
+      const response = await fetch('/api/configuracoes/webhooks/inter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -62,7 +62,7 @@ export default function InterCertificadosPage() {
     formData.append('type', type);
 
     try {
-      const response = await fetch('/api/upload-certificado', {
+      const response = await fetch('/api/configuracoes/uploads', {
         method: 'POST',
         body: formData,
       });

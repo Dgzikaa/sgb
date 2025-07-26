@@ -263,7 +263,7 @@ export default function ReceitasPage() {
     try {
       console.log('🔄 Carregando receitas do banco...');
       const response = await fetch(
-        `/api/receitas/todas?bar_id=${selectedBar.id}`
+        `/api/operacoes/receitas?bar_id=${selectedBar.id}`
       );
 
       if (!response.ok) {
@@ -507,7 +507,7 @@ export default function ReceitasPage() {
     try {
       setIsLoading(true);
 
-      const response = await fetch('/api/receitas/insumos', {
+      const response = await fetch('/api/operacoes/receitas/insumos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -592,7 +592,7 @@ export default function ReceitasPage() {
         bar_id: selectedBar?.id,
       });
 
-      const response = await fetch('/api/receitas/editar', {
+      const response = await fetch('/api/operacoes/receitas/editar', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -752,7 +752,7 @@ export default function ReceitasPage() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('/api/receitas/criar', {
+      const response = await fetch('/api/operacoes/receitas/criar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

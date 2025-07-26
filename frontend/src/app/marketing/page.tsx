@@ -30,24 +30,23 @@ export default function MarketingPage() {
 
   return (
     <ProtectedRoute requiredModule="marketing">
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-6">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-xl">
-                <TrendingUp className="w-8 h-8 text-pink-600 dark:text-pink-400" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Marketing e Promoções
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Gerencie campanhas e estratégias de marketing
-                </p>
-              </div>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-xl">
+              <TrendingUp className="w-8 h-8 text-pink-600 dark:text-pink-400" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Marketing e Promoções
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Gerencie campanhas e estratégias de marketing
+              </p>
             </div>
           </div>
+        </div>
 
           {/* Métricas Rápidas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -403,7 +402,6 @@ export default function MarketingPage() {
             </Card>
           </div>
         </div>
-      </div>
     </ProtectedRoute>
   );
 }

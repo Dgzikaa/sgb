@@ -422,7 +422,7 @@ export function useLGPDImplementation() {
 // Utilitários
 async function getClientIP(): Promise<string> {
   try {
-    const response = await fetch('/api/utils/client-ip');
+    const response = await fetch('/api/configuracoes/utils/client-ip');
     const data = await response.json();
     return data.ip || 'unknown';
   } catch {

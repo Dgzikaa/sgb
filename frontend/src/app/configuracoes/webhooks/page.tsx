@@ -171,7 +171,7 @@ export default function WebhooksPage() {
       });
 
       // Agora testar a autenticação com as credenciais
-      const response = await fetch('/api/inter-auth', {
+      const response = await fetch('/api/configuracoes/webhooks/inter-auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -77,7 +77,7 @@ export default function InterWebhookPage() {
 
     try {
       setTesting(true);
-      const response = await fetch('/api/webhook-inter-banking', {
+      const response = await fetch('/api/configuracoes/webhooks/inter-banking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -159,7 +159,7 @@ export default function TabelaDesempenhoPage() {
     try {
       console.log('🔄 Iniciando sincronização com Google Sheets...');
 
-      const response = await fetch('/api/desempenho/sync-sheets-service', {
+              const response = await fetch('/api/configuracoes/desempenho/sync-sheets-service', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -244,7 +244,7 @@ export default function TabelaDesempenhoPage() {
     }
 
     try {
-      const response = await fetch('/api/desempenho/clear-all', {
+              const response = await fetch('/api/configuracoes/desempenho/clear-all', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

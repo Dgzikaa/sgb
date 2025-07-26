@@ -121,7 +121,7 @@ export default function CompetenciaPage() {
   const recalcularCompetencia = async (ano: number, mes: number) => {
     try {
       setRecalculando(true);
-      const response = await fetch('/api/desempenho/competencia-mensal', {
+      const response = await fetch('/api/configuracoes/desempenho/competencia-mensal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -150,7 +150,7 @@ export default function CompetenciaPage() {
   const recalcularTodas = async () => {
     try {
       setRecalculando(true);
-      const response = await fetch('/api/desempenho/competencia-mensal', {
+      const response = await fetch('/api/configuracoes/desempenho/competencia-mensal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -268,7 +268,7 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const method = evento.id ? 'PUT' : 'POST';
-      const response = await fetch('/api/eventos', {
+              const response = await fetch('/api/gestao/eventos', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(evento),
@@ -351,7 +351,7 @@ export default function AdminPage() {
       );
 
       // Primeira tentativa - verificar se existem eventos
-      const response1 = await fetch('/api/eventos/import', {
+              const response1 = await fetch('/api/gestao/eventos/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -377,7 +377,7 @@ export default function AdminPage() {
         }
 
         // Segunda tentativa - confirmar substituição
-        const response2 = await fetch('/api/eventos/import', {
+        const response2 = await fetch('/api/gestao/eventos/import', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -744,7 +744,7 @@ export default function AdminPage() {
         '🔧 Executando migration para campos de aderência à receita...'
       );
 
-      const response = await fetch('/api/producoes/adicionar-campos', {
+              const response = await fetch('/api/operacoes/producoes/adicionar-campos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
