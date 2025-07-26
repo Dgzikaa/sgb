@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Este seria o projeto do Supabase conectado via MCP
+const SUPABASE_PROJECT_ID = "uqtgsvujwcbymjmvkjhy";
+
 export async function POST(request: NextRequest) {
   try {
     const { query } = await request.json();
     
-    // Em produção, integrar com MCP Supabase
-    // Por enquanto, vou simular uma resposta estruturada
-    
     if (query.includes('eventos')) {
-      // Simular dados reais baseados no que inserimos via MCP
-      const mockEventos = [
+      // Em produção real, isso faria uma chamada MCP
+      // Por enquanto, vou simular o retorno baseado nos dados reais que inserimos
+      
+      // Simular alguns dados reais que inserimos
+      const eventosReais = [
         {
           id: 1,
           bar_id: 3,
@@ -27,7 +30,7 @@ export async function POST(request: NextRequest) {
           capacidade_maxima: null
         },
         {
-          id: 2,
+          id: 8,
           bar_id: 3,
           nome: 'Quarta de Bamba',
           data_evento: '2025-02-12',
@@ -43,7 +46,39 @@ export async function POST(request: NextRequest) {
           capacidade_maxima: null
         },
         {
-          id: 3,
+          id: 11,
+          bar_id: 3,
+          nome: 'DJs - Hugo drop + convidados (DJ)',
+          data_evento: '2025-02-15',
+          artista: 'DJ Hugo Drop',
+          genero: 'DJ',
+          dia_semana: 'SÁBADO',
+          semana: 7,
+          observacoes: '',
+          tipo_evento: 'DJs - Hugo drop + convidados (DJ)',
+          status: 'confirmado',
+          hora_inicio: null,
+          hora_fim: null,
+          capacidade_maxima: null
+        },
+        {
+          id: 12,
+          bar_id: 3,
+          nome: 'Pagode do Ordi',
+          data_evento: '2025-02-16',
+          artista: '12 por 8',
+          genero: 'Pagode',
+          dia_semana: 'DOMINGO',
+          semana: 7,
+          observacoes: '',
+          tipo_evento: 'Pagode do Ordi',
+          status: 'confirmado',
+          hora_inicio: null,
+          hora_fim: null,
+          capacidade_maxima: null
+        },
+        {
+          id: 62,
           bar_id: 3,
           nome: 'Pagode Vira-Lata',
           data_evento: '2025-08-01',
@@ -57,10 +92,42 @@ export async function POST(request: NextRequest) {
           hora_inicio: null,
           hora_fim: null,
           capacidade_maxima: null
+        },
+        {
+          id: 65,
+          bar_id: 3,
+          nome: 'STZ',
+          data_evento: '2025-08-03',
+          artista: 'Legado do samba',
+          genero: 'Samba',
+          dia_semana: 'DOMINGO',
+          semana: 31,
+          observacoes: 'Label própria',
+          tipo_evento: 'STZ',
+          status: 'confirmado',
+          hora_inicio: null,
+          hora_fim: null,
+          capacidade_maxima: null
+        },
+        {
+          id: 70,
+          bar_id: 3,
+          nome: 'Quintal do Pagode',
+          data_evento: '2025-08-07',
+          artista: 'Stephanie',
+          genero: 'Pagode',
+          dia_semana: 'QUINTA',
+          semana: 32,
+          observacoes: '',
+          tipo_evento: 'Quintal do Pagode',
+          status: 'confirmado',
+          hora_inicio: null,
+          hora_fim: null,
+          capacidade_maxima: null
         }
       ];
       
-      return NextResponse.json(mockEventos);
+      return NextResponse.json(eventosReais);
     }
     
     return NextResponse.json([]);

@@ -50,182 +50,182 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "Faturamento Total",
     "descricao": "Faturamento Total - guardrail",
-    "unidade": "unidade",
-    "meta": null,
+    "unidade": "R$",
+    "meta": 930000,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 54,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 54,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 45,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 73,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 95,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 99,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 44,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 38,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 71,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 14,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
-          "meta": null,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 87,
-          "meta": null,
+          "valor": 0,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -233,44 +233,44 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 99,
-          "meta": null,
-          "status": "dentro",
+          "valor": 525761.14,
+          "meta": 930000,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 968716.05,
+          "meta": 930000,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 19,
-          "meta": null,
-          "status": "dentro",
+          "valor": 940171.17,
+          "meta": 930000,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": null,
+          "valor": 758225.94,
+          "meta": 930000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 36,
-          "meta": null,
-          "status": "dentro",
+          "valor": 1004578.16,
+          "meta": 930000,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 941632.44,
+          "meta": 930000,
+          "status": "acima",
           "tendencia": "estavel"
         }
       ]
@@ -281,182 +281,182 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "Faturamento Couvert",
     "descricao": "Faturamento Couvert - guardrail",
-    "unidade": "unidade",
-    "meta": null,
+    "unidade": "R$",
+    "meta": 160000,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 32,
-          "meta": null,
+          "valor": 0,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
-          "meta": null,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 29,
-          "meta": null,
+          "valor": 0,
+          "meta": 160000,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -464,44 +464,44 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 66,
-          "meta": null,
-          "status": "dentro",
+          "valor": 85625,
+          "meta": 160000,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 173291.32,
+          "meta": 160000,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 86,
-          "meta": null,
-          "status": "dentro",
+          "valor": 175931.53,
+          "meta": 160000,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 127429.95,
+          "meta": 160000,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 173723.5,
+          "meta": 160000,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 162737,
+          "meta": 160000,
+          "status": "acima",
           "tendencia": "estavel"
         }
       ]
@@ -512,7 +512,238 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "Faturamento Bar",
     "descricao": "Faturamento Bar - guardrail",
-    "unidade": "unidade",
+    "unidade": "R$",
+    "meta": 690000,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 440136.14,
+          "meta": 690000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 795424.73,
+          "meta": 690000,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 764239.64,
+          "meta": 690000,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 630795.99,
+          "meta": 690000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 830854.66,
+          "meta": 690000,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 778895.44,
+          "meta": 690000,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "faturamento-cmovel",
+    "categoria": "guardrail",
+    "nome": "Faturamento CMvível",
+    "descricao": "Faturamento CMvível - guardrail",
+    "unidade": "R$",
     "meta": null,
     "dados": {
       "semanais": [
@@ -532,7 +763,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 07",
-          "valor": 54,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -546,7 +777,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 09",
-          "valor": 54,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -574,7 +805,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 13",
-          "valor": 45,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -588,7 +819,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 15",
-          "valor": 73,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -602,7 +833,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 17",
-          "valor": 95,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -616,7 +847,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 99,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -630,7 +861,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 21",
-          "valor": 44,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -644,7 +875,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 23",
-          "valor": 38,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -658,7 +889,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 25",
-          "valor": 39,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -672,7 +903,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 27",
-          "valor": 14,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -686,7 +917,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 29",
-          "valor": 58,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -695,42 +926,42 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 33,
+          "valor": 440136.14,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 795424.73,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 33,
+          "valor": 764239.64,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 630795.99,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 36,
+          "valor": 830854.66,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
+          "valor": 778895.44,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -756,7 +987,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 06",
-          "valor": 96,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -770,7 +1001,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 08",
-          "valor": 16,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -784,7 +1015,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 10",
-          "valor": 72,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -798,7 +1029,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 12",
-          "valor": 28,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -812,7 +1043,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 14",
-          "valor": 99,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -826,7 +1057,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 16",
-          "valor": 64,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -840,7 +1071,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 17,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -854,7 +1085,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 20",
-          "valor": 53,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -868,7 +1099,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 22",
-          "valor": 59,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -882,7 +1113,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 24",
-          "valor": 60,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -896,7 +1127,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 26",
-          "valor": 46,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -910,7 +1141,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 28",
-          "valor": 1,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -926,42 +1157,42 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 0,
+          "valor": -18185.56,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 98,
+          "valor": 46350.1,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": -151.76,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 32,
+          "valor": -46382.35,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
+          "valor": 37210.84,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 60,
+          "valor": 16517.9,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -974,182 +1205,182 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "Ticket Médio ContaHub",
     "descricao": "Ticket Médio ContaHub - guardrail",
-    "unidade": "unidade",
-    "meta": null,
+    "unidade": "R$",
+    "meta": 93,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 11,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 70,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 31,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 67,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 8,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 77,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 48,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 32,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 48,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 45,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 58,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
-          "meta": null,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 92,
-          "meta": null,
+          "valor": 0,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -1157,44 +1388,44 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 21,
-          "meta": null,
-          "status": "dentro",
+          "valor": 93.03,
+          "meta": 93,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
-          "meta": null,
+          "valor": 87.5,
+          "meta": 93,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 36,
-          "meta": null,
-          "status": "dentro",
+          "valor": 91.32,
+          "meta": 93,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 97.88,
+          "meta": 93,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 88,
-          "meta": null,
-          "status": "dentro",
+          "valor": 101.66,
+          "meta": 93,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 101.95,
+          "meta": 93,
+          "status": "acima",
           "tendencia": "estavel"
         }
       ]
@@ -1205,182 +1436,182 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "TM Entrada",
     "descricao": "TM Entrada - guardrail",
-    "unidade": "unidade",
-    "meta": null,
+    "unidade": "R$",
+    "meta": 15.5,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
-          "valor": 50,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 68,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 41,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 96,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 75,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 73,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 34,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 72,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 85,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 56,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
-          "meta": null,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 1,
-          "meta": null,
+          "valor": 0,
+          "meta": 15.5,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -1388,44 +1619,44 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 92,
-          "meta": null,
-          "status": "dentro",
+          "valor": 14.9,
+          "meta": 15.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 16.55,
+          "meta": 15.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 68,
-          "meta": null,
-          "status": "dentro",
+          "valor": 17.32,
+          "meta": 15.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 16.99,
+          "meta": 15.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 68,
-          "meta": null,
-          "status": "dentro",
+          "valor": 20.73,
+          "meta": 15.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 20.82,
+          "meta": 15.5,
+          "status": "acima",
           "tendencia": "estavel"
         }
       ]
@@ -1436,182 +1667,182 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "TM Bar",
     "descricao": "TM Bar - guardrail",
-    "unidade": "unidade",
-    "meta": null,
+    "unidade": "R$",
+    "meta": 77.5,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
-          "valor": 50,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 11,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 2,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 31,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 26,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 12,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 2,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 75,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 98,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 75,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 59,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 2,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
-          "meta": null,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 91,
-          "meta": null,
+          "valor": 0,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -1619,44 +1850,44 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 29,
-          "meta": null,
-          "status": "dentro",
+          "valor": 78.13,
+          "meta": 77.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
-          "meta": null,
+          "valor": 70.95,
+          "meta": 77.5,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 68,
-          "meta": null,
-          "status": "dentro",
+          "valor": 74,
+          "meta": 77.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 80.89,
+          "meta": 77.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 20,
-          "meta": null,
-          "status": "dentro",
+          "valor": 80.93,
+          "meta": 77.5,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 81.14,
+          "meta": 77.5,
+          "status": "acima",
           "tendencia": "estavel"
         }
       ]
@@ -1667,7 +1898,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "CMV Limpo %",
     "descricao": "CMV Limpo % - guardrail",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": 31,
     "dados": {
       "semanais": [
@@ -1675,217 +1906,217 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 6,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 7,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 2,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 5,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 1,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 9,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 7,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 9,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 4,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 6,
+          "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
           "meta": 31,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 2,
+          "valor": -4.1,
           "meta": 31,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 5.8,
           "meta": 31,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 9,
+          "valor": 0,
           "meta": 31,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": -7.4,
           "meta": 31,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 7,
+          "valor": 4.5,
           "meta": 31,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
+          "valor": 2.1,
           "meta": 31,
           "status": "abaixo",
           "tendencia": "estavel"
@@ -1898,7 +2129,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "CMV Global Real",
     "descricao": "CMV Global Real - guardrail",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": 27,
     "dados": {
       "semanais": [
@@ -1906,217 +2137,217 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 1,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 5,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 3,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 6,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 5,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 2,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 6,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 9,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 1,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 8,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 7,
+          "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
           "meta": 27,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 7,
+          "valor": -3.5,
           "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 4.8,
           "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 3,
+          "valor": 0,
           "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": -6.1,
           "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 9,
+          "valor": 3.7,
           "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
+          "valor": 1.8,
           "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
@@ -2129,226 +2360,226 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "guardrail",
     "nome": "CMV Teórico",
     "descricao": "CMV Teórico - guardrail",
-    "unidade": "unidade",
-    "meta": 29,
+    "unidade": "%",
+    "meta": 27,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 4,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 1,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 1,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 1,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 4,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 1,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 4,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 7,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 1,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 8,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "meta": 27,
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 2,
-          "meta": 29,
+          "valor": 0,
+          "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 28,
+          "meta": 27,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 2,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 30.8,
+          "meta": 27,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 28.8,
+          "meta": 27,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 8,
-          "meta": 29,
-          "status": "abaixo",
+          "valor": 29.1,
+          "meta": 27,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
           "valor": 0,
-          "meta": 29,
+          "meta": 27,
           "status": "abaixo",
           "tendencia": "estavel"
         }
@@ -2356,10 +2587,934 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     }
   },
   {
-    "id": "retencao",
+    "id": "cmo-percent",
+    "categoria": "guardrail",
+    "nome": "CMO%",
+    "descricao": "CMO% - guardrail",
+    "unidade": "%",
+    "meta": 23,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 23,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 23,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 23,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 23,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 23,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 23,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 23,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "atracao-faturamento",
+    "categoria": "guardrail",
+    "nome": "Atração/Faturamento",
+    "descricao": "Atração/Faturamento - guardrail",
+    "unidade": "%",
+    "meta": 17,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 17,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 1.1,
+          "meta": 17,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 1.3,
+          "meta": 17,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 1.7,
+          "meta": 17,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 1.9,
+          "meta": 17,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 1.6,
+          "meta": 17,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 17,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "clientes-atendidos",
     "categoria": "ovt",
-    "nome": "Retenção",
-    "descricao": "Retenção - ovt",
+    "nome": "Clientes Atendidos",
+    "descricao": "Clientes Atendidos - ovt",
+    "unidade": "unidade",
+    "meta": 10000,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 5747,
+          "meta": 10000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 9794,
+          "meta": 10000,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 10025,
+          "meta": 10000,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 7789,
+          "meta": 10000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 10135,
+          "meta": 10000,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 8663,
+          "meta": 10000,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "reservas-totais",
+    "categoria": "ovt",
+    "nome": "Reservas Totais",
+    "descricao": "Reservas Totais - ovt",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 1586,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 2692,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 3486,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 3524,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 2712,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "reservas-presentes",
+    "categoria": "ovt",
+    "nome": "Reservas Presentes",
+    "descricao": "Reservas Presentes - ovt",
     "unidade": "unidade",
     "meta": null,
     "dados": {
@@ -2564,947 +3719,23 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "clientes-atendidos",
-    "categoria": "ovt",
-    "nome": "Clientes Atendidos",
-    "descricao": "Clientes Atendidos - ovt",
-    "unidade": "unidade",
-    "meta": 2645,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 133,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 849,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 1624,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 1997,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 1177,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 597,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 1579,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 2012,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 1490,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 2540,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 1914,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 2788,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 1960,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 2401,
-          "meta": 2645,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 1794,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 1459,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 1668,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 2036,
-          "meta": 2645,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 2489,
-          "meta": 2645,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 2200,
-          "meta": 2645,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 2294,
-          "meta": 2645,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 2245,
-          "meta": 2645,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 2718,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 2949,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 3077,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 5747,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 9794,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 10025,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 7789,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 10135,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 8663,
-          "meta": 2645,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "clientes-ativos",
-    "categoria": "ovt",
-    "nome": "Clientes Ativos",
-    "descricao": "Clientes Ativos - ovt",
-    "unidade": "unidade",
-    "meta": 3000,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 3000,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "reservas-totais",
-    "categoria": "ovt",
-    "nome": "Reservas Totais",
-    "descricao": "Reservas Totais - ovt",
-    "unidade": "unidade",
-    "meta": 800,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 788,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 580,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 638,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 521,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 571,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 644,
-          "meta": 800,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 760,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 870,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 806,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 771,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 837,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 1044,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 808,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 978,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 839,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 946,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 800,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 1586,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 2692,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 3486,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 3524,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 2712,
-          "meta": 800,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "reservas-presentes",
-    "categoria": "ovt",
-    "nome": "Reservas Presentes",
-    "descricao": "Reservas Presentes - ovt",
-    "unidade": "unidade",
-    "meta": 650,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 608,
-          "meta": 650,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 578,
-          "meta": 650,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 650,
-          "meta": 650,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 622,
-          "meta": 650,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 801,
-          "meta": 650,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 703,
-          "meta": 650,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 747,
-          "meta": 650,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 650,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
           "valor": 2738,
-          "meta": 650,
-          "status": "acima",
+          "meta": null,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
           "valor": 2478,
-          "meta": 650,
-          "status": "acima",
+          "meta": null,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
           "valor": 2236,
-          "meta": 650,
-          "status": "acima",
+          "meta": null,
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ]
@@ -3515,183 +3746,183 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "qualidade",
     "nome": "Avaliações 5 Google/Trip",
     "descricao": "Avaliações 5 Google/Trip - qualidade",
-    "unidade": "estrelas",
-    "meta": 75,
+    "unidade": "unidade",
+    "meta": 300,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
           "valor": 0,
-          "meta": 75,
-          "status": "abaixo",
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
-          "valor": 43,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 74,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 35,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 60,
-          "meta": 75,
+          "valor": 0,
+          "meta": 300,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 10,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 172,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
-          "valor": 163,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 53,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 23,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 19,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 29,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 73,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
-          "valor": 152,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 87,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 58,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 109,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 129,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 127,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 58,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 96,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 55,
-          "meta": 75,
-          "status": "abaixo",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 87,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 70,
-          "meta": 75,
+          "valor": 0,
+          "meta": 300,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 226,
-          "meta": 75,
-          "status": "acima",
+          "valor": 0,
+          "meta": 300,
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
@@ -3699,42 +3930,42 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         {
           "mes": "Fevereiro",
           "valor": 193,
-          "meta": 75,
-          "status": "acima",
+          "meta": 300,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
           "valor": 417,
-          "meta": 75,
+          "meta": 300,
           "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
           "valor": 142,
-          "meta": 75,
-          "status": "acima",
+          "meta": 300,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
           "valor": 528,
-          "meta": 75,
+          "meta": 300,
           "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
           "valor": 369,
-          "meta": 75,
+          "meta": 300,
           "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
           "valor": 0,
-          "meta": 75,
+          "meta": 300,
           "status": "abaixo",
           "tendencia": "estavel"
         }
@@ -3747,181 +3978,181 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "nome": "Média Avaliações Google",
     "descricao": "Média Avaliações Google - qualidade",
     "unidade": "estrelas",
-    "meta": null,
+    "meta": 4.8,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
-          "valor": 8,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 92,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
-          "valor": 29,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 97,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 23,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
-          "valor": 92,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 92,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 95,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 63,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 82,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 77,
-          "meta": null,
+          "valor": 0,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
-          "meta": null,
+          "meta": 4.8,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -3929,1891 +4160,43 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 4.83,
+          "meta": 4.8,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 87,
-          "meta": null,
-          "status": "dentro",
+          "valor": 4.9,
+          "meta": 4.8,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 4.81,
+          "meta": 4.8,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 69,
-          "meta": null,
-          "status": "dentro",
+          "valor": 4.91,
+          "meta": 4.8,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 94,
-          "meta": null,
-          "status": "dentro",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-geral",
-    "categoria": "qualidade",
-    "nome": "NPS Geral",
-    "descricao": "NPS Geral - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 87,
-          "meta": 70,
+          "valor": 4.91,
+          "meta": 4.8,
           "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 90,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 91,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
           "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-ambiente",
-    "categoria": "qualidade",
-    "nome": "NPS Ambiente",
-    "descricao": "NPS Ambiente - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 88,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 86,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 88,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 86,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-atendimento",
-    "categoria": "qualidade",
-    "nome": "NPS Atendimento",
-    "descricao": "NPS Atendimento - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 94,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 85,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 88,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 80,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-limpeza",
-    "categoria": "qualidade",
-    "nome": "NPS Limpeza",
-    "descricao": "NPS Limpeza - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 68,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 78,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 81,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 82,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-musica",
-    "categoria": "qualidade",
-    "nome": "NPS Música",
-    "descricao": "NPS Música - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 94,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 85,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 93,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 86,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-comida",
-    "categoria": "qualidade",
-    "nome": "NPS Comida",
-    "descricao": "NPS Comida - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 68,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 71,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 86,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 75,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-drink",
-    "categoria": "qualidade",
-    "nome": "NPS Drink",
-    "descricao": "NPS Drink - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 72,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 79,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 85,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 77,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "nps-preco",
-    "categoria": "qualidade",
-    "nome": "NPS Preço",
-    "descricao": "NPS Preço - qualidade",
-    "unidade": "estrelas",
-    "meta": 70,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 79,
-          "meta": 70,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 44,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 65,
-          "meta": 70,
-          "status": "dentro",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 51,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 0,
-          "meta": 70,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 70,
+          "meta": 4.8,
           "status": "abaixo",
           "tendencia": "estavel"
         }
@@ -5833,124 +4216,124 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
-          "valor": 5,
+          "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 92,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 29,
+          "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
-          "valor": 97,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 23,
+          "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 92,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
-          "valor": 92,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 95,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 63,
+          "valor": 0,
           "meta": 70,
           "status": "dentro",
           "tendencia": "estavel"
@@ -5959,49 +4342,49 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 23",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 82,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
           "meta": 70,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
@@ -6015,37 +4398,37 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "mes": "Março",
-          "valor": 75,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 83,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 100,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 100,
+          "valor": 80,
           "meta": 70,
           "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 78,
+          "valor": 0,
           "meta": 70,
-          "status": "acima",
+          "status": "abaixo",
           "tendencia": "estavel"
         }
       ]
@@ -6064,210 +4447,210 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 944,
+          "valor": 0,
           "meta": 60,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 7833,
+          "valor": 0,
           "meta": 60,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 86,
+          "valor": 0,
           "meta": 60,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 3,
+          "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 2,
+          "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 12,
+          "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 76,
+          "valor": 0,
           "meta": 60,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
           "meta": 60,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 87,
+          "valor": 0,
           "meta": 60,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 70,
+          "valor": 0,
           "meta": 60,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 81,
+          "valor": 0,
           "meta": 60,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 72,
-          "meta": 60,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 79,
-          "meta": 60,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 84,
-          "meta": 60,
-          "status": "acima",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
           "valor": 0,
           "meta": 60,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
+          "mes": "Março",
+          "valor": 2582,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 68,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 78,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
           "mes": "Junho",
-          "valor": 60,
+          "valor": 76,
           "meta": 60,
           "status": "acima",
           "tendencia": "estavel"
@@ -6287,7 +4670,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "produtos",
     "nome": "StockOut Comidas",
     "descricao": "StockOut Comidas - produtos",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": 3,
     "dados": {
       "semanais": [
@@ -6295,175 +4678,175 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 6,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 2,
+          "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 7,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 3,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 8,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 6,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
@@ -6477,21 +4860,21 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 4.4,
           "meta": 3,
-          "status": "abaixo",
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": 0.9,
           "meta": 3,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 0.2,
           "meta": 3,
           "status": "abaixo",
           "tendencia": "estavel"
@@ -6518,7 +4901,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "produtos",
     "nome": "StockOut Drinks",
     "descricao": "StockOut Drinks - produtos",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": 3,
     "dados": {
       "semanais": [
@@ -6526,175 +4909,175 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 2,
+          "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 2,
+          "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
-          "valor": 2,
+          "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 7,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 7,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
-          "valor": 5,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 1,
+          "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 6,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 4,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 7,
+          "valor": 0,
           "meta": 3,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
           "meta": 3,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
@@ -6708,23 +5091,23 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 1.4,
           "meta": 3,
           "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": 3.5,
           "meta": 3,
-          "status": "abaixo",
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 7,
+          "valor": 0.2,
           "meta": 3,
-          "status": "acima",
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
@@ -6749,7 +5132,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "produtos",
     "nome": "Stockout Bar",
     "descricao": "Stockout Bar - produtos",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": 1,
     "dados": {
       "semanais": [
@@ -6757,175 +5140,175 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 3,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 3,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
-          "valor": 6,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 4,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 9,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
-          "valor": 2,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 9,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 1,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 2,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 6,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 6,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
           "meta": 1,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
@@ -6939,21 +5322,21 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "mes": "Março",
-          "valor": 5,
+          "valor": 4.5,
           "meta": 1,
           "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": 7.8,
           "meta": 1,
-          "status": "abaixo",
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 3,
+          "valor": 3.4,
           "meta": 1,
           "status": "acima",
           "tendencia": "estavel"
@@ -6967,9 +5350,9 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "mes": "Julho",
-          "valor": 3,
+          "valor": 0,
           "meta": 1,
-          "status": "acima",
+          "status": "abaixo",
           "tendencia": "estavel"
         }
       ]
@@ -6980,7 +5363,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "produtos",
     "nome": "% BEBIDAS",
     "descricao": "% BEBIDAS - produtos",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": null,
     "dados": {
       "semanais": [
@@ -6993,7 +5376,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 06",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7007,7 +5390,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 08",
-          "valor": 6,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7021,7 +5404,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 10",
-          "valor": 8,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7035,7 +5418,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 12",
-          "valor": 7,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7049,7 +5432,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 14",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7063,7 +5446,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 16",
-          "valor": 6,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7077,7 +5460,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 6,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7105,7 +5488,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 22",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7133,7 +5516,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 26",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7147,7 +5530,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 28",
-          "valor": 1,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7163,42 +5546,42 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 0,
+          "valor": 45.6,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 3,
+          "valor": 46.9,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": 50,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 5,
+          "valor": 50,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
+          "valor": 53,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
+          "valor": 57,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7211,7 +5594,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "produtos",
     "nome": "% DRINKS",
     "descricao": "% DRINKS - produtos",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": null,
     "dados": {
       "semanais": [
@@ -7224,7 +5607,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 06",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7238,7 +5621,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 08",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7252,7 +5635,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 10",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7266,7 +5649,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 12",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7280,7 +5663,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 14",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7294,7 +5677,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 16",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7308,7 +5691,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7322,7 +5705,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 20",
-          "valor": 8,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7336,7 +5719,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 22",
-          "valor": 1,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7350,7 +5733,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 24",
-          "valor": 7,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7364,7 +5747,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 26",
-          "valor": 6,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7394,42 +5777,42 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 0,
+          "valor": 30.9,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 3,
+          "valor": 30.3,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": 28,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 4,
+          "valor": 29,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
+          "valor": 28,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 3,
+          "valor": 26,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7442,7 +5825,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "produtos",
     "nome": "% COMIDA",
     "descricao": "% COMIDA - produtos",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": null,
     "dados": {
       "semanais": [
@@ -7455,7 +5838,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 06",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7469,7 +5852,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 08",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7483,7 +5866,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 10",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7497,7 +5880,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 12",
-          "valor": 1,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7525,7 +5908,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 16",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7539,7 +5922,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7553,7 +5936,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 20",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7581,7 +5964,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 24",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7595,7 +5978,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 26",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7609,7 +5992,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 28",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7625,42 +6008,42 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 0,
+          "valor": 23.5,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 4,
+          "valor": 22.8,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": 23,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 1,
+          "valor": 21,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
+          "valor": 19,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 7,
+          "valor": 17,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7673,7 +6056,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "produtos",
     "nome": "% HappyHour",
     "descricao": "% HappyHour - produtos",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": null,
     "dados": {
       "semanais": [
@@ -7686,7 +6069,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 06",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7700,7 +6083,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 08",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7714,7 +6097,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 10",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7728,7 +6111,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 12",
-          "valor": 4,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7756,7 +6139,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 16",
-          "valor": 7,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7770,7 +6153,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 7,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7784,7 +6167,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 20",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7798,7 +6181,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 22",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7826,7 +6209,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 26",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7840,7 +6223,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 28",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7856,42 +6239,42 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 0,
+          "valor": 22.1,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 16.5,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
+          "valor": 24,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 25,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
+          "valor": 18,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 2,
+          "valor": 11,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7917,70 +6300,70 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 06",
-          "valor": 673,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 1531,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 1622,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 885,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 572,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 1215,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
-          "valor": 1437,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 1121,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 1359,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -7994,91 +6377,91 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 17",
-          "valor": 1245,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
-          "valor": 1367,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 1181,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 1216,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 1191,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 1122,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 1501,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 1357,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 1449,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 1056,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 1721,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 1725,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 1490,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -8136,181 +6519,181 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "nome": "Tempo Saída Bar",
     "descricao": "Tempo Saída Bar - produtos",
     "unidade": "min",
-    "meta": null,
+    "meta": 4,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 4,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 4,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 1,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 8,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 8,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 3,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 5,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 2,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 2,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 2,
-          "meta": null,
+          "valor": 0,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
-          "meta": null,
+          "meta": 4,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -8318,44 +6701,44 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 4.1,
+          "meta": 4,
+          "status": "acima",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 1,
-          "meta": null,
-          "status": "dentro",
+          "valor": 2.9,
+          "meta": 4,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 2.3,
+          "meta": 4,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 2,
-          "meta": null,
-          "status": "dentro",
+          "valor": 2.3,
+          "meta": 4,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 2.2,
+          "meta": 4,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 1,
-          "meta": null,
-          "status": "dentro",
+          "valor": 5.4,
+          "meta": 4,
+          "status": "acima",
           "tendencia": "estavel"
         }
       ]
@@ -8379,168 +6762,168 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 06",
-          "valor": 630,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
-          "valor": 945,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
-          "valor": 934,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 720,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
-          "valor": 542,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 676,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
-          "valor": 840,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 736,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
-          "valor": 45,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 787,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
-          "valor": 4,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 577,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
-          "valor": 696,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 589,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 657,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 593,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 551,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 687,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 642,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 714,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 601,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 910,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 706,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 784,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -8598,181 +6981,181 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "nome": "Tempo Saída Cozinha",
     "descricao": "Tempo Saída Cozinha - produtos",
     "unidade": "min",
-    "meta": null,
+    "meta": 12,
     "dados": {
       "semanais": [
         {
           "semana": "Semana 05",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
-          "valor": 7,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
-          "valor": 5,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
-          "valor": 9,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
-          "valor": 4,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
-          "valor": 4,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 6,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 6,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 5,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 1,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 1,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
-          "meta": null,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 5,
-          "meta": null,
+          "valor": 0,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -8780,43 +7163,43 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 2,
-          "meta": null,
-          "status": "dentro",
+          "valor": 6.7,
+          "meta": 12,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 6.9,
+          "meta": 12,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 6,
-          "meta": null,
-          "status": "dentro",
+          "valor": 7.1,
+          "meta": 12,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
-          "meta": null,
-          "status": "dentro",
+          "valor": 7.4,
+          "meta": 12,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 4,
-          "meta": null,
-          "status": "dentro",
+          "valor": 7.3,
+          "meta": 12,
+          "status": "abaixo",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
-          "valor": 0,
-          "meta": null,
+          "valor": 10.5,
+          "meta": 12,
           "status": "dentro",
           "tendencia": "estavel"
         }
@@ -8828,238 +7211,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "vendas",
     "nome": "% Faturamento até 19h",
     "descricao": "% Faturamento até 19h - vendas",
-    "unidade": "unidade",
-    "meta": 15,
-    "dados": {
-      "semanais": [
-        {
-          "semana": "Semana 05",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 06",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 07",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 08",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 09",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 10",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 11",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 12",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 13",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 14",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 15",
-          "valor": 2,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 16",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 17",
-          "valor": 9,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 18",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 19",
-          "valor": 8,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 20",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 21",
-          "valor": 2,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 22",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 23",
-          "valor": 5,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 24",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 25",
-          "valor": 2,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 26",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 27",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 28",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "semana": "Semana 29",
-          "valor": 3,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ],
-      "mensais": [
-        {
-          "mes": "Fevereiro",
-          "valor": 5,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Março",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Abril",
-          "valor": 8,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Maio",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Junho",
-          "valor": 9,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        },
-        {
-          "mes": "Julho",
-          "valor": 0,
-          "meta": 15,
-          "status": "abaixo",
-          "tendencia": "estavel"
-        }
-      ]
-    }
-  },
-  {
-    "id": "venda-balcao",
-    "categoria": "vendas",
-    "nome": "Venda Balcão",
-    "descricao": "Venda Balcão - vendas",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": null,
     "dados": {
       "semanais": [
@@ -9093,7 +7245,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 09",
-          "valor": 40,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -9107,7 +7259,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 11",
-          "valor": 11,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -9121,7 +7273,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 13",
-          "valor": 70,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -9242,42 +7394,273 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 77,
+          "valor": 10,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 11,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 5,
+          "valor": 10,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 12,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 90,
+          "valor": 11,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Julho",
+          "valor": 12,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "venda-balcao",
+    "categoria": "vendas",
+    "nome": "Venda Balcão",
+    "descricao": "Venda Balcão - vendas",
+    "unidade": "R$",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
           "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 1333.46,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 102.7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 8342.75,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 13359.7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 882.05,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -9290,7 +7673,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "vendas",
     "nome": "Couvert / Atrações",
     "descricao": "Couvert / Atrações - vendas",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": 112,
     "dados": {
       "semanais": [
@@ -9298,175 +7681,175 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
           "semana": "Semana 05",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 06",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 07",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 08",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 09",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 10",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 11",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 12",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 13",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 14",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 15",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 16",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 17",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 18",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
           "valor": 0,
           "meta": 112,
-          "status": "abaixo",
+          "status": "dentro",
           "tendencia": "estavel"
         }
       ],
@@ -9618,84 +8001,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 4,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -9849,84 +8232,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 20848,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 29914,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 15390,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 19958,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 35845,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 15078,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 32604,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 18492,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 38461,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 17823,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 11488,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 10956,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10080,84 +8463,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 1083,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 2124,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 918,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 1171,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 1404,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 958,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 2206,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 787,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 1697,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 1320,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 341,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 650,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10311,84 +8694,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 271,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 609,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 261,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 503,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 288,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 153,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 443,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 228,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 416,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 256,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 118,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 202,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10445,7 +8828,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "marketing",
     "nome": "[O] Engajamento",
     "descricao": "[O] Engajamento - marketing",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": null,
     "dados": {
       "semanais": [
@@ -10549,7 +8932,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10563,7 +8946,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 21",
-          "valor": 1,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10591,7 +8974,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 25",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10605,7 +8988,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 27",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10619,7 +9002,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 29",
-          "valor": 4,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10628,35 +9011,35 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 3,
+          "valor": 7.2,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 3.8,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 4,
+          "valor": 5.9,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 5.6,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 4,
+          "valor": 4.9,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -10773,84 +9156,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 29,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 26,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 49,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 23,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 70,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 81,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 74,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 77,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 46,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 56,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 59,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 71,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11004,84 +9387,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 57216,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 40219,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 67777,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 38755,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 88203,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 122055,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 106153,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 115077,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 65623,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 78287,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 96596,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 113473,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11138,7 +9521,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "marketing",
     "nome": "[M] Valor Investido",
     "descricao": "[M] Valor Investido - marketing",
-    "unidade": "unidade",
+    "unidade": "R$",
     "meta": null,
     "dados": {
       "semanais": [
@@ -11242,7 +9625,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 49,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11256,7 +9639,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 21",
-          "valor": 61,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11270,7 +9653,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 23",
-          "valor": 54,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11284,7 +9667,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 25",
-          "valor": 61,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11298,7 +9681,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 27",
-          "valor": 48,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11312,7 +9695,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 29",
-          "valor": 51,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11321,35 +9704,35 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 65,
+          "valor": 10613,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 10629.01,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 76,
+          "valor": 12376.7,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 11322.99,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 43,
+          "valor": 11460.7,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11466,84 +9849,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 312069,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 289953,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 333013,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 216013,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 218562,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 322095,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 316758,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 232227,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 233585,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 168873,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 176549,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 167827,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11704,7 +10087,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 7,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11718,7 +10101,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 21",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11732,7 +10115,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 23",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11746,7 +10129,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 25",
-          "valor": 2,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11760,7 +10143,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 27",
-          "valor": 3,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11774,7 +10157,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 29",
-          "valor": 5,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11783,35 +10166,35 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 2,
+          "valor": 3.2,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 3.8,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 2,
+          "valor": 5.9,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 4.7,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 1,
+          "valor": 4.3,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11831,7 +10214,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "marketing",
     "nome": "[M] CPM (Custo por Visu)",
     "descricao": "[M] CPM (Custo por Visu) - marketing",
-    "unidade": "unidade",
+    "unidade": "R$",
     "meta": null,
     "dados": {
       "semanais": [
@@ -11935,7 +10318,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 25,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11949,7 +10332,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 21",
-          "valor": 23,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11963,7 +10346,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 23",
-          "valor": 89,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11977,7 +10360,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 25",
-          "valor": 35,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -11991,7 +10374,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 27",
-          "valor": 20,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12005,7 +10388,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 29",
-          "valor": 80,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12014,35 +10397,35 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 8,
+          "valor": 6.42,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 4.58,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 98,
+          "valor": 3.19,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 3.74,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 52,
+          "valor": 4.36,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12159,84 +10542,84 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 18",
-          "valor": 2507,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 19",
-          "valor": 2103,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 1355,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 1833,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 1939,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 1996,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 2132,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 1383,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 1753,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 2490,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 2429,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 3068,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12293,7 +10676,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "marketing",
     "nome": "[M] CTR (Taxa de Clique)",
     "descricao": "[M] CTR (Taxa de Clique) - marketing",
-    "unidade": "unidade",
+    "unidade": "%",
     "meta": null,
     "dados": {
       "semanais": [
@@ -12397,7 +10780,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 30,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12411,7 +10794,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 21",
-          "valor": 29,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12425,7 +10808,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 23",
-          "valor": 18,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12439,7 +10822,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 25",
-          "valor": 38,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12453,7 +10836,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 27",
-          "valor": 39,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12467,7 +10850,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 29",
-          "valor": 25,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12476,35 +10859,35 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 28,
+          "valor": 1.59,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 0.74,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 35,
+          "valor": 0.25,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 0.3,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 70,
+          "valor": 0.29,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12524,7 +10907,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     "categoria": "marketing",
     "nome": "[M] Custo por Clique",
     "descricao": "[M] Custo por Clique - marketing",
-    "unidade": "unidade",
+    "unidade": "R$",
     "meta": null,
     "dados": {
       "semanais": [
@@ -12628,7 +11011,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12642,7 +11025,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 21",
-          "valor": 13,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12656,7 +11039,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 23",
-          "valor": 22,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12670,7 +11053,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 25",
-          "valor": 13,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12684,7 +11067,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 27",
-          "valor": 9,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12698,7 +11081,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 29",
-          "valor": 51,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12707,35 +11090,35 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
       "mensais": [
         {
           "mes": "Fevereiro",
-          "valor": 48,
+          "valor": 0.41,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Março",
-          "valor": 0,
+          "valor": 0.62,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Abril",
-          "valor": 71,
+          "valor": 1.27,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Maio",
-          "valor": 0,
+          "valor": 1.23,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "mes": "Junho",
-          "valor": 94,
+          "valor": 1.49,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
@@ -12859,77 +11242,77 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         },
         {
           "semana": "Semana 19",
-          "valor": 41,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 20",
-          "valor": 42,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 21",
-          "valor": 51,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 22",
-          "valor": 62,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 23",
-          "valor": 55,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 24",
-          "valor": 65,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 25",
-          "valor": 58,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 26",
-          "valor": 46,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 27",
-          "valor": 66,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 28",
-          "valor": 70,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
         },
         {
           "semana": "Semana 29",
-          "valor": 68,
+          "valor": 0,
           "meta": null,
           "status": "dentro",
           "tendencia": "estavel"
