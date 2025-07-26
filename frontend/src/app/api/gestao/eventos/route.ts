@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET() {
   try {
     // Em produção, isso seria uma integração real via MCP Supabase
-    // Por enquanto, vou retornar dados que representam o que temos na base real
+    // Dados baseados nos 176 eventos reais que inserimos no banco
     
     const eventosReais = [
-      // Fevereiro 2025
+      // Fevereiro 2025 (22 eventos)
       {
         id: 1,
         nome: 'Soft Open',
@@ -18,66 +18,6 @@ export async function GET() {
         status: 'confirmado'
       },
       {
-        id: 2,
-        nome: 'Soft Open',
-        data_evento: '2025-02-04',
-        artista: '',
-        genero: 'DJ',
-        dia_semana: 'TERÇA',
-        tipo_evento: 'Soft Open',
-        status: 'confirmado'
-      },
-      {
-        id: 3,
-        nome: 'Soft Open',
-        data_evento: '2025-02-05',
-        artista: 'Breno Alves',
-        genero: 'Samba',
-        dia_semana: 'QUARTA',
-        tipo_evento: 'Soft Open',
-        status: 'confirmado'
-      },
-      {
-        id: 4,
-        nome: 'Soft Open',
-        data_evento: '2025-02-06',
-        artista: 'DJ Umiranda',
-        genero: 'DJ',
-        dia_semana: 'QUINTA',
-        tipo_evento: 'Soft Open',
-        status: 'confirmado'
-      },
-      {
-        id: 5,
-        nome: 'Soft Open',
-        data_evento: '2025-02-07',
-        artista: '',
-        genero: 'Samba',
-        dia_semana: 'SEXTA',
-        tipo_evento: 'Soft Open',
-        status: 'confirmado'
-      },
-      {
-        id: 6,
-        nome: 'Soft Open',
-        data_evento: '2025-02-08',
-        artista: '',
-        genero: 'DJ',
-        dia_semana: 'SÁBADO',
-        tipo_evento: 'Soft Open',
-        status: 'confirmado'
-      },
-      {
-        id: 7,
-        nome: 'Soft Open',
-        data_evento: '2025-02-11',
-        artista: '',
-        genero: 'DJ',
-        dia_semana: 'TERÇA',
-        tipo_evento: 'Soft Open',
-        status: 'confirmado'
-      },
-      {
         id: 8,
         nome: 'Quarta de Bamba',
         data_evento: '2025-02-12',
@@ -85,26 +25,6 @@ export async function GET() {
         genero: 'Samba',
         dia_semana: 'QUARTA',
         tipo_evento: 'Quarta de Bamba',
-        status: 'confirmado'
-      },
-      {
-        id: 9,
-        nome: 'Black music',
-        data_evento: '2025-02-13',
-        artista: '',
-        genero: 'DJ',
-        dia_semana: 'QUINTA',
-        tipo_evento: 'Black music',
-        status: 'confirmado'
-      },
-      {
-        id: 10,
-        nome: 'Samba das Dez',
-        data_evento: '2025-02-14',
-        artista: '',
-        genero: 'Samba',
-        dia_semana: 'SEXTA',
-        tipo_evento: 'Samba das Dez',
         status: 'confirmado'
       },
       {
@@ -137,49 +57,203 @@ export async function GET() {
         tipo_evento: 'Caramelo Jazz Night',
         status: 'confirmado'
       },
+      
+      // Março 2025 (27 eventos)
       {
-        id: 14,
-        nome: 'Quarta de Bamba',
-        data_evento: '2025-02-19',
-        artista: 'Breno Alves',
-        genero: 'Samba',
-        dia_semana: 'QUARTA',
-        tipo_evento: 'Quarta de Bamba',
+        id: 22,
+        nome: 'R&Baile',
+        data_evento: '2025-03-22',
+        artista: 'DJ Umiranda',
+        genero: 'DJ',
+        dia_semana: 'SÁBADO',
+        tipo_evento: 'R&Baile',
         status: 'confirmado'
       },
       {
-        id: 15,
-        nome: 'Discolate',
-        data_evento: '2025-02-20',
+        id: 24,
+        nome: 'Dia D',
+        data_evento: '2025-03-24',
+        artista: 'Duzão',
+        genero: 'Pagode',
+        dia_semana: 'SEGUNDA',
+        tipo_evento: 'Dia D',
+        status: 'confirmado'
+      },
+      {
+        id: 29,
+        nome: 'Perro Caliente',
+        data_evento: '2025-03-29',
+        artista: 'DJ Pequi',
+        genero: 'Cubana',
+        dia_semana: 'SÁBADO',
+        tipo_evento: 'Perro Caliente',
+        status: 'confirmado'
+      },
+      
+      // Abril 2025 (25 eventos)
+      {
+        id: 32,
+        nome: 'Libertadores no telão',
+        data_evento: '2025-04-01',
         artista: '',
         genero: 'DJ',
+        dia_semana: 'TERÇA',
+        tipo_evento: 'Libertadores no telão',
+        status: 'confirmado',
+        observacoes: 'Jogo'
+      },
+      {
+        id: 38,
+        nome: 'Jogos de futebol',
+        data_evento: '2025-04-08',
+        artista: 'KiPecado',
+        genero: 'Pagode',
+        dia_semana: 'TERÇA',
+        tipo_evento: 'Jogos de futebol',
+        status: 'confirmado',
+        observacoes: 'Jogo'
+      },
+      {
+        id: 48,
+        nome: 'Feriado',
+        data_evento: '2025-04-21',
+        artista: '',
+        genero: 'DJ',
+        dia_semana: 'SEGUNDA',
+        tipo_evento: 'Feriado',
+        status: 'confirmado',
+        observacoes: 'Feriado'
+      },
+      
+      // Maio 2025 (23 eventos)
+      {
+        id: 58,
+        nome: 'Pagode do Trabalhador',
+        data_evento: '2025-05-01',
+        artista: 'Benzadeus',
+        genero: 'Pagode',
         dia_semana: 'QUINTA',
-        tipo_evento: 'Discolate',
+        tipo_evento: 'Pagode do Trabalhador',
         status: 'confirmado'
       },
-      // Julho 2025 (mais próximo da data atual)
       {
-        id: 41,
-        nome: 'Jet - Segunda da Resenha',
-        data_evento: '2025-07-07',
+        id: 65,
+        nome: 'ESPECIAL - JORGE ARAGAO',
+        data_evento: '2025-05-10',
         artista: '',
-        genero: 'Samba',
+        genero: 'DJ',
+        dia_semana: 'SÁBADO',
+        tipo_evento: 'ESPECIAL - JORGE ARAGAO',
+        status: 'confirmado'
+      },
+      {
+        id: 69,
+        nome: 'ESPECIAL - BETH CARVALHO',
+        data_evento: '2025-05-17',
+        artista: '',
+        genero: 'DJ',
+        dia_semana: 'SÁBADO',
+        tipo_evento: 'ESPECIAL - BETH CARVALHO',
+        status: 'confirmado'
+      },
+      {
+        id: 73,
+        nome: 'Modão e Viola',
+        data_evento: '2025-05-22',
+        artista: 'Brener Viola',
+        genero: 'Sertanejo',
+        dia_semana: 'QUINTA',
+        tipo_evento: 'Modão e Viola',
+        status: 'confirmado'
+      },
+      {
+        id: 75,
+        nome: 'ESPECIAL - ZECA PAGODINHO',
+        data_evento: '2025-05-24',
+        artista: 'Nenel Vida',
+        genero: 'Vocal',
+        dia_semana: 'SÁBADO',
+        tipo_evento: 'ESPECIAL - ZECA PAGODINHO',
+        status: 'confirmado'
+      },
+      {
+        id: 80,
+        nome: 'ESPECIAL - ALCIONE',
+        data_evento: '2025-05-31',
+        artista: 'Karla Sangaletti',
+        genero: 'Vocal',
+        dia_semana: 'SÁBADO',
+        tipo_evento: 'ESPECIAL - ALCIONE',
+        status: 'confirmado'
+      },
+      
+      // Junho 2025 (26 eventos)
+      {
+        id: 81,
+        nome: 'Samba da tia zélia',
+        data_evento: '2025-06-01',
+        artista: 'Tia zélia',
+        genero: 'Pagode',
+        dia_semana: 'DOMINGO',
+        tipo_evento: 'Samba da tia zélia',
+        status: 'confirmado'
+      },
+      {
+        id: 82,
+        nome: 'Jet - Segunda da Resenha',
+        data_evento: '2025-06-02',
+        artista: '',
+        genero: 'DJ',
         dia_semana: 'SEGUNDA',
         tipo_evento: 'Jet - Segunda da Resenha',
         status: 'confirmado'
       },
       {
-        id: 42,
+        id: 97,
         nome: 'Quarta de Bamba',
-        data_evento: '2025-07-09',
+        data_evento: '2025-06-18',
         artista: 'Breno Alves',
-        genero: 'Pagode',
+        genero: 'Samba',
+        dia_semana: 'QUARTA',
+        tipo_evento: 'Quarta de Bamba',
+        status: 'confirmado',
+        observacoes: 'Feriado'
+      },
+      {
+        id: 102,
+        nome: 'Quarta de Bamba',
+        data_evento: '2025-06-25',
+        artista: 'Breno Alves',
+        genero: 'Samba',
+        dia_semana: 'QUARTA',
+        tipo_evento: 'Quarta de Bamba',
+        status: 'confirmado',
+        observacoes: 'Festival Junino'
+      },
+      
+      // Julho 2025 (26 eventos)
+      {
+        id: 108,
+        nome: 'Quarta de Bamba',
+        data_evento: '2025-07-02',
+        artista: 'Breno Alves',
+        genero: 'Samba',
         dia_semana: 'QUARTA',
         tipo_evento: 'Quarta de Bamba',
         status: 'confirmado'
       },
       {
-        id: 43,
+        id: 109,
+        nome: 'Pagode Lado a Lado',
+        data_evento: '2025-07-03',
+        artista: 'Lado a lado',
+        genero: 'Pagode',
+        dia_semana: 'QUINTA',
+        tipo_evento: 'Pagode Lado a Lado',
+        status: 'confirmado'
+      },
+      {
+        id: 115,
         nome: 'Pagode Sem Querer',
         data_evento: '2025-07-10',
         artista: 'Sem Querer',
@@ -189,17 +263,7 @@ export async function GET() {
         status: 'confirmado'
       },
       {
-        id: 44,
-        nome: 'Pagode Vira-Lata',
-        data_evento: '2025-07-11',
-        artista: 'Benzadeus',
-        genero: 'Pagode',
-        dia_semana: 'SEXTA',
-        tipo_evento: 'Pagode Vira-Lata',
-        status: 'confirmado'
-      },
-      {
-        id: 45,
+        id: 117,
         nome: 'Sambadona e Reconvexa',
         data_evento: '2025-07-12',
         artista: '',
@@ -209,9 +273,40 @@ export async function GET() {
         status: 'confirmado',
         observacoes: 'Label própria'
       },
-      // Agosto 2025
       {
-        id: 62,
+        id: 120,
+        nome: 'Lucas Alves',
+        data_evento: '2025-07-17',
+        artista: 'Lucas Alves',
+        genero: 'Pagode',
+        dia_semana: 'QUINTA',
+        tipo_evento: 'Lucas Alves',
+        status: 'confirmado'
+      },
+      {
+        id: 125,
+        nome: 'Dani Lemos',
+        data_evento: '2025-07-24',
+        artista: 'Dani Lemos',
+        genero: 'Pagode',
+        dia_semana: 'QUINTA',
+        tipo_evento: 'Dani Lemos',
+        status: 'confirmado'
+      },
+      
+      // Agosto 2025 (27 eventos)
+      {
+        id: 132,
+        nome: 'Lado a Lado',
+        data_evento: '2025-07-31',
+        artista: 'Lado a lado',
+        genero: 'Pagode',
+        dia_semana: 'QUINTA',
+        tipo_evento: 'Lado a Lado',
+        status: 'confirmado'
+      },
+      {
+        id: 133,
         nome: 'Pagode Vira-Lata',
         data_evento: '2025-08-01',
         artista: 'Benzadeus',
@@ -221,17 +316,7 @@ export async function GET() {
         status: 'confirmado'
       },
       {
-        id: 63,
-        nome: 'Samba Rainha',
-        data_evento: '2025-08-02',
-        artista: '',
-        genero: 'Samba',
-        dia_semana: 'SÁBADO',
-        tipo_evento: 'Samba Rainha',
-        status: 'confirmado'
-      },
-      {
-        id: 64,
+        id: 135,
         nome: 'STZ',
         data_evento: '2025-08-03',
         artista: 'Legado do samba',
@@ -242,27 +327,7 @@ export async function GET() {
         observacoes: 'Label própria'
       },
       {
-        id: 65,
-        nome: 'Jet - Segunda da Resenha',
-        data_evento: '2025-08-04',
-        artista: '',
-        genero: 'Samba',
-        dia_semana: 'SEGUNDA',
-        tipo_evento: 'Jet - Segunda da Resenha',
-        status: 'confirmado'
-      },
-      {
-        id: 66,
-        nome: 'Quarta de Bamba',
-        data_evento: '2025-08-06',
-        artista: 'Breno Alves',
-        genero: 'Samba',
-        dia_semana: 'QUARTA',
-        tipo_evento: 'Quarta de Bamba',
-        status: 'confirmado'
-      },
-      {
-        id: 67,
+        id: 139,
         nome: 'Quintal do Pagode',
         data_evento: '2025-08-07',
         artista: 'Stephanie',
@@ -272,33 +337,33 @@ export async function GET() {
         status: 'confirmado'
       },
       {
-        id: 68,
-        nome: 'Pagode Vira-Lata',
-        data_evento: '2025-08-08',
-        artista: 'Benzadeus',
+        id: 145,
+        nome: 'Quintal do Pagode de Bsb',
+        data_evento: '2025-08-14',
+        artista: 'Lado a lado',
         genero: 'Pagode',
-        dia_semana: 'SEXTA',
-        tipo_evento: 'Pagode Vira-Lata',
+        dia_semana: 'QUINTA',
+        tipo_evento: 'Quintal do Pagode de Bsb',
         status: 'confirmado'
       },
       {
-        id: 69,
-        nome: 'Sambadona',
-        data_evento: '2025-08-09',
+        id: 158,
+        nome: 'Samba Rainha e DJ a definir',
+        data_evento: '2025-08-30',
         artista: '',
         genero: 'Samba',
         dia_semana: 'SÁBADO',
-        tipo_evento: 'Sambadona',
+        tipo_evento: 'Samba Rainha e DJ a definir',
         status: 'confirmado'
       },
       {
-        id: 70,
-        nome: 'Uma Mesa e um Pagode',
-        data_evento: '2025-08-10',
-        artista: '12 por 8',
+        id: 159,
+        nome: 'PDJ',
+        data_evento: '2025-08-31',
+        artista: 'PDJ',
         genero: 'Pagode',
         dia_semana: 'DOMINGO',
-        tipo_evento: 'Uma Mesa e um Pagode',
+        tipo_evento: 'PDJ',
         status: 'confirmado'
       }
     ];
@@ -326,7 +391,7 @@ export async function POST(request: NextRequest) {
     // Em produção, isso seria uma inserção real via MCP
     // Por enquanto, simular sucesso
     const novoEvento = {
-      id: Math.floor(Math.random() * 10000) + 100,
+      id: Math.floor(Math.random() * 10000) + 200,
       ...body
     };
 
@@ -336,3 +401,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
+
