@@ -417,6 +417,30 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
         }))
       }
     },
+    {
+      id: 'clientes-ativos',
+      categoria: 'ovt',
+      nome: 'Clientes Ativos',
+      descricao: 'Número de clientes ativos',
+      unidade: 'clientes',
+      meta: 500,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 420 + (i * 15) + Math.random() * 30,
+          meta: 500,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 4800 + (i * 200) + Math.random() * 400,
+          meta: 5000,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
 
     // QUALIDADE - Indicadores de Qualidade
     {

@@ -137,7 +137,7 @@ export default function HomePage() {
       <div className="main-content bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm transition-colors duration-300">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="welcome-header text-2xl font-bold text-gray-900 dark:text-white mb-1">
+            <h1 className="welcome-header text-2xl font-bold text-gray-900 dark:text-white mb-1 mt-4">
               Bem-vindo de volta! 👋
             </h1>
             <p className="text-gray-500 dark:text-gray-400">

@@ -135,7 +135,7 @@ export default function MarketingPage() {
                     </div>
                     <div>
                       <CardTitle className="text-lg text-gray-900 dark:text-white">
-                        Marketing 360
+                        Marketing 360°
                       </CardTitle>
                       <CardDescription>Estratégia completa</CardDescription>
                     </div>

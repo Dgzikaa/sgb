@@ -44,7 +44,7 @@ export default function ConfiguracoesPage() {
               <Settings className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 dark:text-gray-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-4">
                 Configurações do Sistema
               </h1>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
