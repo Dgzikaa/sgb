@@ -159,13 +159,9 @@ export default function DesempenhoPage() {
 
   const getStatusIcon = (status: string, tendencia: string) => {
     if (status === 'acima') {
-      return tendencia === 'crescendo' ? 
-        <TrendingUp className="w-4 h-4 text-green-500" /> : 
-        <TrendingDown className="w-4 h-4 text-green-500" />
+      return <TrendingUp className="w-4 h-4 text-green-500" />
     } else if (status === 'abaixo') {
-      return tendencia === 'crescendo' ? 
-        <TrendingUp className="w-4 h-4 text-red-500" /> : 
-        <TrendingDown className="w-4 h-4 text-red-500" />
+      return <TrendingDown className="w-4 h-4 text-red-500" />
     } else {
       return <Minus className="w-4 h-4 text-gray-500" />
     }
@@ -259,7 +255,10 @@ export default function DesempenhoPage() {
                 </td>
                 <td className="sticky left-[250px] z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
                   <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    {indicador.meta ? formatarValor(indicador.meta, indicador.unidade) : '-'}
+                    {viewMode === 'semanal' 
+                      ? (indicador.dados.semanais[0]?.meta ? formatarValor(indicador.dados.semanais[0].meta, indicador.unidade) : '-')
+                      : (indicador.dados.mensais[0]?.meta ? formatarValor(indicador.dados.mensais[0].meta, indicador.unidade) : '-')
+                    }
                   </div>
                 </td>
                 {indicador.dados[viewMode === 'semanal' ? 'semanais' : 'mensais'].map((item, index) => (

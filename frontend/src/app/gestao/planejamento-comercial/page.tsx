@@ -216,23 +216,23 @@ export default function PlanejamentoComercialPage() {
                   <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-12">
                     Dia
                   </th>
-                                           <th className="px-2 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-40">
-                           Evento
-                         </th>
+                  <th className="px-2 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-60">
+                    Evento
+                  </th>
                   
-                                           {/* Faturamento */}
-                         <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                           Real (R$)
-                         </th>
-                         <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                           M1 (R$)
-                         </th>
-                         <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                           M2 (R$)
-                         </th>
-                         <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                           M3 (R$)
-                         </th>
+                  {/* Faturamento */}
+                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                    Real (R$)
+                  </th>
+                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                    M1 (R$)
+                  </th>
+                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                    M2 (R$)
+                  </th>
+                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                    M3 (R$)
+                  </th>
                   
                   {/* Clientes */}
                   <th className="px-2 py-3 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
@@ -320,8 +320,8 @@ export default function PlanejamentoComercialPage() {
                     <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
                       {item.dia}
                     </td>
-                    <td className="px-2 py-2 text-xs text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 w-40">
-                      <div className="truncate max-w-40" title={item.label}>
+                    <td className="px-2 py-2 text-xs text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 w-60 bg-gray-50 dark:bg-gray-800">
+                      <div className="truncate max-w-60" title={item.label}>
                         {item.label || '-'}
                       </div>
                     </td>

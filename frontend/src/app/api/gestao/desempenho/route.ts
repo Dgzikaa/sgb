@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
         indicador.dados.semanais.push({
           semana: registro.periodo,
           valor: parseFloat(registro.valor),
-          meta: registro.meta, // Usar meta específica do período semanal
+          meta: parseFloat(registro.meta), // Garantir que é número
           status: registro.status,
           tendencia: registro.tendencia
         })
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
         indicador.dados.mensais.push({
           mes: registro.periodo,
           valor: parseFloat(registro.valor),
-          meta: registro.meta, // Usar meta específica do período mensal
+          meta: parseFloat(registro.meta), // Garantir que é número
           status: registro.status,
           tendencia: registro.tendencia
         })
