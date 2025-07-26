@@ -194,7 +194,7 @@ export default function CalendarioPage() {
   }
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => (
-    <div className="flex flex-col justify-center h-full min-h-[40px] space-y-1">
+    <div className="flex flex-col justify-start pt-1 space-y-1">
       {/* Nome do evento */}
       <div className="text-xs font-medium text-gray-900 dark:text-white truncate leading-tight">
         {event.resource.nome}
@@ -220,14 +220,13 @@ export default function CalendarioPage() {
         backgroundColor: 'transparent',
         border: 'none',
         borderRadius: '6px',
-        padding: '6px 8px',
-        margin: '2px 0',
+        padding: '4px 6px',
+        margin: '1px 0',
         fontSize: '11px',
         fontWeight: '500',
         position: 'relative' as const,
-        minHeight: '40px',
         display: 'flex',
-        alignItems: 'center'
+        alignItems: 'flex-start'
       }
     }
   }

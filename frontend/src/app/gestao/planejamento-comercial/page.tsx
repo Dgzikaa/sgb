@@ -227,12 +227,6 @@ export default function PlanejamentoComercialPage() {
                   <th className="px-1 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
                     M1 (R$)
                   </th>
-                  <th className="px-1 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                    M2 (R$)
-                  </th>
-                  <th className="px-1 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                    M3 (R$)
-                  </th>
                   
                   {/* Clientes */}
                   <th className="px-2 py-3 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
@@ -332,12 +326,6 @@ export default function PlanejamentoComercialPage() {
                            </td>
                            <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {item.m1 > 0 ? formatarMoeda(item.m1) : '-'}
-                           </td>
-                           <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.m2 > 0 ? formatarMoeda(item.m2) : '-'}
-                           </td>
-                           <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.m3 > 0 ? formatarMoeda(item.m3) : '-'}
                            </td>
                     
                     {/* Clientes */}
