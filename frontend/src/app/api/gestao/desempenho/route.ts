@@ -50,7 +50,7 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
     'Semana 17', 'Semana 18', 'Semana 19', 'Semana 20', 'Semana 21', 'Semana 22',
     'Semana 23', 'Semana 24', 'Semana 25', 'Semana 26', 'Semana 27', 'Semana 28', 'Semana 29'
   ]
-  const meses = ['Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho']
+  const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
   return [
     // GUARDRAIL - Indicadores Estratégicos

@@ -151,8 +151,8 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
           <div className="flex">
             <ModernSidebar />
             <main className="flex-1 transition-all duration-300 ease-in-out md:ml-16 lg:ml-64">
-              {/* Aumentando drasticamente para pt-32 para garantir espaço suficiente abaixo do header fixo */}
-              <div className="pt-32 p-4 md:p-6 pb-24 md:pb-6">
+              {/* Aumentando para pt-40 para garantir espaço máximo abaixo do header fixo */}
+              <div className="pt-40 p-4 md:p-6 pb-24 md:pb-6">
                 <GlobalPageWrapper>{children}</GlobalPageWrapper>
               </div>
             </main>
