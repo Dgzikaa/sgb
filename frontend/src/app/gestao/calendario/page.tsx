@@ -335,8 +335,8 @@ export default function CalendarioPage() {
 
     return (
       <div className="rbc-toolbar flex items-center justify-between">
-        {/* Seletor de mês/ano na esquerda */}
-        <div className="flex items-center gap-2">
+        {/* Seletor de mês/ano isolado na esquerda */}
+        <div className="flex items-center">
           <Select 
             value={`${getYear(toolbar.date)}-${getMonth(toolbar.date)}`} 
             onValueChange={(value) => {
@@ -358,8 +358,8 @@ export default function CalendarioPage() {
           </Select>
         </div>
 
-        {/* Navegação com setas no centro */}
-        <div className="flex items-center gap-3">
+        {/* Navegação com setas centralizada */}
+        <div className="flex items-center gap-3 flex-1 justify-center">
           <Button onClick={goToPrev} variant="outline" size="sm">
             <ChevronLeft className="w-4 h-4" />
           </Button>
