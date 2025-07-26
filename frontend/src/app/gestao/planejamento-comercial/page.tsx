@@ -306,10 +306,10 @@ export default function PlanejamentoComercialPage() {
                     }`}
                   >
                     {/* Colunas fixas */}
-                    <td className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-2 py-2 text-xs font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                       {item.data}
                     </td>
-                    <td className="sticky left-16 z-10 bg-white dark:bg-gray-900 px-2 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
+                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
                       {item.dia}
                     </td>
                     <td className="px-2 py-2 text-xs text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
@@ -320,10 +320,10 @@ export default function PlanejamentoComercialPage() {
                     
                     {/* Faturamento */}
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.realizado > 0 ? formatarMoeda(item.realizado).replace('R$', '').trim() : '-'}
+                      {item.realizado > 0 ? formatarMoeda(item.realizado) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.m1 > 0 ? formatarMoeda(item.m1).replace('R$', '').trim() : '-'}
+                      {item.m1 > 0 ? formatarMoeda(item.m1) : '-'}
                     </td>
                     
                     {/* Clientes */}
@@ -345,19 +345,19 @@ export default function PlanejamentoComercialPage() {
                     
                     {/* Tickets */}
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketEntrada.planejado > 0 ? item.ticketEntrada.planejado.toFixed(0) : '-'}
+                      {item.ticketEntrada.planejado > 0 ? formatarMoeda(item.ticketEntrada.planejado) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketEntrada.real > 0 ? item.ticketEntrada.real.toFixed(0) : '-'}
+                      {item.ticketEntrada.real > 0 ? formatarMoeda(item.ticketEntrada.real) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketBar.planejado > 0 ? item.ticketBar.planejado.toFixed(0) : '-'}
+                      {item.ticketBar.planejado > 0 ? formatarMoeda(item.ticketBar.planejado) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketBar.real > 0 ? item.ticketBar.real.toFixed(0) : '-'}
+                      {item.ticketBar.real > 0 ? formatarMoeda(item.ticketBar.real) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketMedio > 0 ? item.ticketMedio.toFixed(0) : '-'}
+                      {item.ticketMedio > 0 ? formatarMoeda(item.ticketMedio) : '-'}
                     </td>
                     
                     {/* Rentabilidade */}

@@ -88,16 +88,16 @@ const getStatusIcon = (status: string) => {
 }
 
 export default function CalendarioPage() {
-  const [eventos, setEventos] = useState<Evento[]>([])
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
-  const [loading, setLoading] = useState(true)
+  // Estado para o calendário
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedMonth, setSelectedMonth] = useState(getMonth(new Date()))
-  const [selectedYear, setSelectedYear] = useState(getYear(new Date()))
-  const [filtrosAbertos, setFiltrosAbertos] = useState(false)
-  const [filtroStatus, setFiltroStatus] = useState<string>('')
-  const [filtroGenero, setFiltroGenero] = useState<string>('')
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [mesesComDados, setMesesComDados] = useState<MesComDados[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filtros, setFiltros] = useState({
+    status: 'todos',
+    genero: 'todos'
+  })
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false)
 
   const carregarEventos = async () => {
     try {
@@ -105,14 +105,13 @@ export default function CalendarioPage() {
       console.log('🔄 [CALENDARIO] Carregando eventos...')
       
       const params = new URLSearchParams()
-      if (filtroStatus && filtroStatus !== 'todos') params.append('status', filtroStatus)
-      if (filtroGenero && filtroGenero !== 'todos') params.append('genero', filtroGenero)
+      if (filtros.status && filtros.status !== 'todos') params.append('status', filtros.status)
+      if (filtros.genero && filtros.genero !== 'todos') params.append('genero', filtros.genero)
       
       const response = await fetch(`/api/gestao/eventos?${params}`)
       const data = await response.json()
       
       console.log('📊 [CALENDARIO] Eventos carregados:', data.eventos.length)
-      setEventos(data.eventos)
       
       // Converter eventos para formato do calendário
       const events = data.eventos.map((evento: Evento) => ({
@@ -166,8 +165,6 @@ export default function CalendarioPage() {
       if (events.length > 0) {
         const primeiroEvento = events[0]
         setCurrentDate(primeiroEvento.start)
-        setSelectedMonth(getMonth(primeiroEvento.start))
-        setSelectedYear(getYear(primeiroEvento.start))
       }
       
     } catch (error) {
@@ -179,19 +176,15 @@ export default function CalendarioPage() {
 
   useEffect(() => {
     carregarEventos()
-  }, [filtroStatus, filtroGenero])
+  }, [filtros.status, filtros.genero])
 
   const handleDateChange = (date: Date) => {
     setCurrentDate(date)
-    setSelectedMonth(getMonth(date))
-    setSelectedYear(getYear(date))
   }
 
   const handleMonthYearChange = (month: number, year: number) => {
     const newDate = new Date(year, month, 1)
     setCurrentDate(newDate)
-    setSelectedMonth(month)
-    setSelectedYear(year)
   }
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => (
@@ -305,13 +298,15 @@ export default function CalendarioPage() {
   }
 
   const limparFiltros = () => {
-    setFiltroStatus('todos')
-    setFiltroGenero('todos')
+    setFiltros({
+      status: 'todos',
+      genero: 'todos'
+    })
   }
 
-  const eventosConfirmados = eventos.filter(e => e.status.toLowerCase() === 'confirmado').length
-  const eventosPendentes = eventos.filter(e => e.status.toLowerCase() === 'pendente').length
-  const eventosCancelados = eventos.filter(e => e.status.toLowerCase() === 'cancelado').length
+  const eventosConfirmados = calendarEvents.filter(e => e.resource.status.toLowerCase() === 'confirmado').length
+  const eventosPendentes = calendarEvents.filter(e => e.resource.status.toLowerCase() === 'pendente').length
+  const eventosCancelados = calendarEvents.filter(e => e.resource.status.toLowerCase() === 'cancelado').length
 
   // Componente personalizado para o toolbar do calendário
   const CustomToolbar = (toolbar: any) => {
@@ -345,8 +340,9 @@ export default function CalendarioPage() {
               toolbar.onNavigate('current', newDate)
             }}
           >
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48 flex items-center justify-between">
               <SelectValue placeholder="Selecione um mês" />
+              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             </SelectTrigger>
             <SelectContent>
               {mesesComDados.map((mes) => (
@@ -405,7 +401,7 @@ export default function CalendarioPage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Total de Eventos</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{eventos.length}</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{calendarEvents.length}</p>
                   </div>
                 </div>
               </CardContent>
@@ -474,7 +470,7 @@ export default function CalendarioPage() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Status
                     </label>
-                    <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+                    <Select value={filtros.status} onValueChange={(value) => setFiltros(prev => ({ ...prev, status: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Todos os status" />
                       </SelectTrigger>
@@ -491,7 +487,7 @@ export default function CalendarioPage() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Gênero
                     </label>
-                    <Select value={filtroGenero} onValueChange={setFiltroGenero}>
+                    <Select value={filtros.genero} onValueChange={(value) => setFiltros(prev => ({ ...prev, genero: value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Todos os gêneros" />
                       </SelectTrigger>
