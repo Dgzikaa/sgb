@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import * as SelectPrimitive from '@radix-ui/react-select'
 import { ChevronDown, ChevronUp, Music, Calendar as CalendarIcon, Filter, Users, TrendingUp, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const locales = {
@@ -340,12 +341,10 @@ export default function CalendarioPage() {
               toolbar.onNavigate('current', newDate)
             }}
           >
-            <SelectTrigger className="w-48">
-              <div className="flex items-center justify-between w-full">
-                <SelectValue placeholder="Selecione um mês" />
-                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-2" />
-              </div>
-            </SelectTrigger>
+            <SelectPrimitive.Trigger className="w-48 flex h-10 items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50">
+              <SelectValue placeholder="Selecione um mês" />
+              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-2" />
+            </SelectPrimitive.Trigger>
             <SelectContent>
               {mesesComDados.map((mes) => (
                 <SelectItem key={`${mes.ano}-${mes.mes}`} value={`${mes.ano}-${mes.mes}`}>
