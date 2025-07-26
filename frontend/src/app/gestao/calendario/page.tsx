@@ -340,9 +340,8 @@ export default function CalendarioPage() {
               toolbar.onNavigate('current', newDate)
             }}
           >
-            <SelectTrigger className="w-48 flex items-center justify-between">
+            <SelectTrigger className="w-48">
               <SelectValue placeholder="Selecione um mês" />
-              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             </SelectTrigger>
             <SelectContent>
               {mesesComDados.map((mes) => (
