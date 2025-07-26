@@ -48,6 +48,65 @@
   @apply dark:bg-red-500 dark:hover:bg-red-600;
 }
 
+/* ===== ESTILOS REACT-BIG-CALENDAR - DARK MODE ===== */
+
+.calendar-dark .rbc-calendar {
+  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white;
+}
+
+.calendar-dark .rbc-header {
+  @apply bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 font-semibold;
+}
+
+.calendar-dark .rbc-month-view {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+}
+
+.calendar-dark .rbc-day-bg {
+  @apply bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700;
+}
+
+.calendar-dark .rbc-day-bg:hover {
+  @apply bg-gray-50 dark:bg-gray-750;
+}
+
+.calendar-dark .rbc-off-range-bg {
+  @apply bg-gray-50 dark:bg-gray-900;
+}
+
+.calendar-dark .rbc-today {
+  @apply bg-blue-50 dark:bg-blue-900/20;
+}
+
+.calendar-dark .rbc-date-cell {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.calendar-dark .rbc-button-link {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.calendar-dark .rbc-show-more {
+  @apply text-blue-600 dark:text-blue-400 text-xs;
+}
+
+.calendar-dark .rbc-event {
+  @apply bg-blue-600 text-white border-none rounded;
+}
+
+.calendar-dark .rbc-toolbar {
+  @apply mb-4;
+}
+
+.calendar-dark .rbc-toolbar button {
+  @apply px-3 py-1 mx-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-50 dark:hover:bg-gray-600;
+}
+
+.calendar-dark .rbc-toolbar button:focus,
+.calendar-dark .rbc-toolbar button.rbc-active {
+  @apply bg-blue-600 text-white border-blue-600;
+}
+
 /* Botão Aviso - Amarelo */
 .btn-warning {
   @apply btn-modern;

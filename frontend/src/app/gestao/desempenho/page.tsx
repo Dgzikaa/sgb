@@ -429,22 +429,24 @@ export default function DesempenhoPage() {
   }
 
   return (
-    <>
-      {/* Header Compacto */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Dashboard de Desempenho
-          </h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header Compacto */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Dashboard de Desempenho
+            </h1>
+          </div>
+        </div>
+
+        {/* Grupos de Indicadores */}
+        <div className="space-y-6">
+          {Object.entries(gruposIndicadores).map(([grupoId, grupo]) => 
+            renderizarGrupo(grupoId, grupo)
+          )}
         </div>
       </div>
-
-      {/* Grupos de Indicadores */}
-      <div className="space-y-6">
-        {Object.entries(gruposIndicadores).map(([grupoId, grupo]) => 
-          renderizarGrupo(grupoId, grupo)
-        )}
-      </div>
-    </>
+    </div>
   )
 }

@@ -19,10 +19,12 @@
     "lint:errors-only": "next lint --max-warnings=0"
   },
   "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-tabs": "^1.0.4",
     "@supabase/supabase-js": "^2.38.4",
+    "@types/react-big-calendar": "^1.16.2",
     "@vercel/blob": "^0.22.1",
     "autoprefixer": "10.4.21",
     "axios": "^1.6.2",
@@ -35,6 +37,7 @@
     "openai": "^4.20.1",
     "postcss": "8.4.31",
     "react": "^18.2.0",
+    "react-big-calendar": "^1.19.4",
     "react-dom": "^18.2.0",
     "recharts": "^2.8.0",
     "tailwind-merge": "^2.0.0",
