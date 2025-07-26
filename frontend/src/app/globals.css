@@ -67,7 +67,7 @@
 }
 
 .modern-calendar .rbc-day-bg:hover {
-  @apply bg-blue-50 dark:bg-gray-750 shadow-sm;
+  @apply bg-blue-50 dark:bg-gray-700 shadow-sm;
 }
 
 .modern-calendar .rbc-off-range-bg {

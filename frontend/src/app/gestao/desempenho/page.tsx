@@ -148,24 +148,7 @@ export default function DesempenhoPage() {
     carregarDados()
   }, [])
 
-  // Auto-scroll para a direita após os dados carregarem e componentes renderizarem
-  useEffect(() => {
-    if (dados && !loading) {
-      const timer = setTimeout(() => {
-        rolarParaDireita()
-      }, 500) // Aumentei o tempo para garantir que tudo foi renderizado
-      
-      return () => clearTimeout(timer)
-    }
-  }, [dados, loading])
 
-  const rolarParaDireita = () => {
-    Object.values(scrollContainerRefs.current).forEach(container => {
-      if (container) {
-        container.scrollLeft = container.scrollWidth
-      }
-    })
-  }
 
   const toggleSecao = (secaoId: string) => {
     setSecoesExpandidas(prev => ({

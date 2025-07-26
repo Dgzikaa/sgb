@@ -87,7 +87,7 @@ export default function CalendarioPage() {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [filtrosAbertos, setFiltrosAbertos] = useState(false)
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 1, 1)) // Fevereiro 2025
+  const [currentDate, setCurrentDate] = useState(new Date()) // Data atual
   
   // Filtros
   const [dataInicio, setDataInicio] = useState('')
@@ -107,42 +107,69 @@ export default function CalendarioPage() {
       if (statusFiltro) params.append('status', statusFiltro)
       if (generoFiltro) params.append('genero', generoFiltro)
       
-      console.log('🔍 Buscando eventos...', params.toString())
+      const urlFinal = `/api/gestao/eventos?${params.toString()}`
+      console.log('🔍 URL da requisição:', urlFinal)
       
-      const response = await fetch(`/api/gestao/eventos?${params.toString()}`)
+      const response = await fetch(urlFinal)
       
       if (!response.ok) {
-        throw new Error('Erro ao carregar eventos')
+        console.error('❌ Erro na resposta:', response.status, response.statusText)
+        throw new Error(`Erro ${response.status}: ${response.statusText}`)
       }
       
       const data = await response.json()
-      console.log('📅 Eventos carregados:', data.eventos?.length || 0)
+      console.log('📅 Resposta da API:', data)
+      console.log('📊 Total de eventos recebidos:', data.eventos?.length || 0)
       
-      setEventos(data.eventos || [])
-      
-      // Converter eventos para formato do calendário
-      const calEvents: CalendarEvent[] = (data.eventos || []).map((evento: Evento) => {
-        const eventDate = new Date(evento.data_evento + 'T10:00:00')
-        return {
-          id: evento.id,
-          title: evento.nome,
-          start: eventDate,
-          end: new Date(eventDate.getTime() + (4 * 60 * 60 * 1000)), // 4 horas de duração
-          resource: evento
+      if (data.eventos && Array.isArray(data.eventos)) {
+        setEventos(data.eventos)
+        
+        // Converter eventos para formato do calendário
+        const calEvents: CalendarEvent[] = data.eventos.map((evento: Evento) => {
+          console.log('🔄 Convertendo evento:', evento.nome, evento.data_evento)
+          
+          // Criar data corretamente
+          const eventDate = new Date(evento.data_evento + 'T14:00:00') // 14h
+          const endDate = new Date(evento.data_evento + 'T18:00:00')   // 18h
+          
+          console.log('📅 Data convertida:', eventDate, 'para evento:', evento.nome)
+          
+          return {
+            id: evento.id,
+            title: `${evento.nome}${evento.artista ? ` - ${evento.artista}` : ''}`,
+            start: eventDate,
+            end: endDate,
+            resource: evento
+          }
+        })
+        
+        console.log('📊 Eventos convertidos para calendário:', calEvents.length)
+        console.log('🎯 Primeiro evento:', calEvents[0])
+        setCalendarEvents(calEvents)
+        
+        // Se há eventos, navegar para o mês do primeiro evento
+        if (calEvents.length > 0) {
+          const primeiroEvento = calEvents[0].start
+          console.log('🎯 Navegando para data do primeiro evento:', primeiroEvento)
+          setCurrentDate(primeiroEvento)
         }
-      })
-      
-      console.log('📊 Eventos convertidos para calendário:', calEvents.length)
-      setCalendarEvents(calEvents)
+      } else {
+        console.warn('⚠️ Dados de eventos inválidos:', data)
+        setEventos([])
+        setCalendarEvents([])
+      }
       
     } catch (error) {
       console.error('❌ Erro ao carregar eventos:', error)
+      setEventos([])
+      setCalendarEvents([])
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
+    console.log('🚀 Iniciando carregamento de eventos...')
     carregarEventos()
   }, [dataInicio, dataFim, statusFiltro, generoFiltro])
 
@@ -178,6 +205,14 @@ export default function CalendarioPage() {
     setGeneroFiltro('')
   }
 
+  // Debug do estado atual
+  console.log('🔍 Estado atual:', {
+    eventos: eventos.length,
+    calendarEvents: calendarEvents.length,
+    currentDate,
+    loading
+  })
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -186,6 +221,9 @@ export default function CalendarioPage() {
             <div className="animate-pulse space-y-6">
               <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-lg"></div>
               <div className="h-96 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-xl"></div>
+            </div>
+            <div className="text-center mt-4 text-gray-600 dark:text-gray-400">
+              Carregando eventos...
             </div>
           </div>
         </div>
@@ -210,7 +248,7 @@ export default function CalendarioPage() {
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    {eventos.length} eventos encontrados
+                    {eventos.length} eventos encontrados | {calendarEvents.length} visíveis
                   </p>
                 </div>
               </div>
@@ -331,7 +369,10 @@ export default function CalendarioPage() {
                 endAccessor="end"
                 culture="pt-BR"
                 date={currentDate}
-                onNavigate={(date) => setCurrentDate(date)}
+                onNavigate={(date) => {
+                  console.log('📅 Navegação para:', date)
+                  setCurrentDate(date)
+                }}
                 messages={{
                   next: 'Próximo',
                   previous: 'Anterior',
@@ -450,8 +491,9 @@ export default function CalendarioPage() {
                   📊 Estatísticas
                 </h5>
                 <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                  <div>Total: {eventos.length} eventos</div>
-                  <div>Este mês: {calendarEvents.length} visíveis</div>
+                  <div>Total BD: {eventos.length} eventos</div>
+                  <div>Calendário: {calendarEvents.length} eventos</div>
+                  <div>Mês atual: {currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</div>
                 </div>
               </div>
             </div>
