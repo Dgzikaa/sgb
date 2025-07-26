@@ -5,13 +5,12 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
 import { format, parse, startOfWeek, getDay, getMonth, getYear } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { ChevronDown, ChevronUp, Music, Calendar as CalendarIcon, Filter, Users, TrendingUp, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronUp, Music, Calendar as CalendarIcon, Users, TrendingUp, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const locales = {
   'pt-BR': ptBR,
@@ -99,10 +98,6 @@ export default function CalendarioPage() {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [mesesComDados, setMesesComDados] = useState<MesComDados[]>([])
   const [loading, setLoading] = useState(true)
-  const [filtros, setFiltros] = useState({
-    genero: 'todos'
-  })
-  const [filtrosAbertos, setFiltrosAbertos] = useState(false)
 
   const carregarEventos = async () => {
     try {
@@ -110,7 +105,7 @@ export default function CalendarioPage() {
       console.log('🔄 [CALENDARIO] Carregando eventos...')
       
       const params = new URLSearchParams()
-      if (filtros.genero && filtros.genero !== 'todos') params.append('genero', filtros.genero)
+      // Removidas estatísticas de status pois não temos mais essa informação
       
       const response = await fetch(`/api/gestao/eventos?${params}`)
       const data = await response.json()
@@ -182,7 +177,7 @@ export default function CalendarioPage() {
 
   useEffect(() => {
     carregarEventos()
-  }, [filtros.genero])
+  }, [])
 
   const handleDateChange = (date: Date) => {
     setCurrentDate(date)
@@ -194,19 +189,19 @@ export default function CalendarioPage() {
   }
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => (
-    <div className="flex flex-col justify-start pt-1 space-y-1">
+    <div className="flex flex-col justify-center items-center w-full h-full min-h-[36px] px-1 pt-0.5 pb-1 space-y-0.5">
       {/* Nome do evento */}
-      <div className="text-xs font-medium text-gray-900 dark:text-white truncate leading-tight">
+      <div className="text-xs font-medium text-gray-900 dark:text-white truncate leading-tight w-full text-center">
         {event.resource.nome}
       </div>
       
       {/* Artista com ícone do gênero */}
       {event.resource.artista && (
-        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+        <div className="flex items-center justify-center gap-1 text-xs text-gray-600 dark:text-gray-400 w-full">
           <span className="flex-shrink-0">
             {getGeneroIcon(event.resource.genero)}
           </span>
-          <span className="truncate leading-tight">
+          <span className="truncate leading-tight text-center">
             {event.resource.artista}
           </span>
         </div>
@@ -226,7 +221,11 @@ export default function CalendarioPage() {
         fontWeight: '500',
         position: 'relative' as const,
         display: 'flex',
-        alignItems: 'flex-start'
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '40px',
+        height: 'auto',
+        width: '100%'
       }
     }
   }
@@ -263,12 +262,6 @@ export default function CalendarioPage() {
     }
     
     return baseProps
-  }
-
-  const limparFiltros = () => {
-    setFiltros({
-      genero: 'todos'
-    })
   }
 
   // Removidas estatísticas de status pois não temos mais essa informação
@@ -422,53 +415,6 @@ export default function CalendarioPage() {
             </Card>
           </div>
         </div>
-
-        {/* Filtros */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
-          <Collapsible open={filtrosAbertos} onOpenChange={setFiltrosAbertos}>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-4">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  <span>Filtros</span>
-                </div>
-                {filtrosAbertos ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Gênero
-                    </label>
-                    <Select value={filtros.genero} onValueChange={(value) => setFiltros(prev => ({ ...prev, genero: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Todos os gêneros" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todos">Todos os gêneros</SelectItem>
-                        <SelectItem value="DJ">DJ</SelectItem>
-                        <SelectItem value="Samba">Samba</SelectItem>
-                        <SelectItem value="Pagode">Pagode</SelectItem>
-                        <SelectItem value="Jazz">Jazz</SelectItem>
-                        <SelectItem value="Sertanejo">Sertanejo</SelectItem>
-                        <SelectItem value="Cubana">Cubana</SelectItem>
-                        <SelectItem value="Vocal">Vocal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-end">
-                    <Button onClick={limparFiltros} variant="outline" className="w-full">
-                      Limpar Filtros
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </Card>
 
         {/* Calendário */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">

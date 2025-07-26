@@ -154,6 +154,36 @@
   background: rgba(59, 130, 246, 0.1);
 }
 
+/* Melhorar posicionamento do conteúdo dos eventos */
+.modern-calendar .rbc-event-content {
+  font-size: 11px;
+  line-height: 1.2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px;
+}
+
+/* Ajustar altura das células do calendário para acomodar melhor os eventos */
+.modern-calendar .rbc-month-row {
+  border: none;
+  min-height: 100px;
+  position: relative;
+}
+
+.modern-calendar .rbc-day-bg {
+  min-height: 100px;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2px;
+  padding-top: 0px;
+}
+
+/* Garantir que o conteúdo dos eventos seja bem posicionado */
 .modern-calendar .rbc-event {
   background: var(--event-bg);
   border: none;
@@ -164,6 +194,13 @@
   font-weight: 500;
   color: var(--event-text);
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  height: auto;
+  width: 100%;
+  max-width: calc(100% - 8px);
 }
 
 .modern-calendar .rbc-event:hover {
@@ -268,17 +305,19 @@
   border-bottom-right-radius: 6px;
 }
 
-.modern-calendar .rbc-event-content {
-  font-size: 11px;
-  line-height: 1.2;
-}
-
+/* Garantir que as células de conteúdo tenham posição relativa */
 .modern-calendar .rbc-row-content {
   border: none;
+  position: relative;
 }
 
-.modern-calendar .rbc-month-row {
-  border: none;
+/* Ajustar posicionamento das células de data */
+.modern-calendar .rbc-date-cell {
+  padding: 4px 8px;
+  font-weight: 500;
+  color: var(--event-text);
+  position: relative;
+  z-index: 2;
 }
 
 /* Scrollbar personalizada */

@@ -210,14 +210,11 @@ export default function PlanejamentoComercialPage() {
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
                   {/* Colunas fixas - largura reduzida */}
-                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-16">
+                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
                     Data
                   </th>
-                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-16">
+                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
                     Dia
-                  </th>
-                  <th className="sticky left-32 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-40">
-                    Evento
                   </th>
                   
                   {/* Faturamento */}
@@ -303,9 +300,10 @@ export default function PlanejamentoComercialPage() {
                 {dados.map((item, index) => (
                   <tr 
                     key={index}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${
                       item.realizado > 0 ? 'bg-blue-50/20 dark:bg-blue-900/10' : ''
                     }`}
+                    title={item.label ? `Evento: ${item.label}` : 'Sem evento'}
                   >
                     {/* Colunas fixas */}
                     <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
@@ -313,11 +311,6 @@ export default function PlanejamentoComercialPage() {
                     </td>
                     <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
                       {item.dia}
-                    </td>
-                    <td className="sticky left-32 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      <div className="truncate" title={item.label}>
-                        {item.label || '-'}
-                      </div>
                     </td>
                     
                                                {/* Faturamento */}
