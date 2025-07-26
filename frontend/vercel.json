@@ -16,13 +16,6 @@
       "maxDuration": 300
     }
   },
-  "env": {
-    "CRON_SECRET": "@cron_secret",
-    "NIBO_BAR_ID": "@nibo_bar_id",
-    "NIBO_API_TOKEN": "@nibo_api_token",
-    "NIBO_ORGANIZATION_ID": "@nibo_organization_id",
-    "DISCORD_NIBO_WEBHOOK": "@discord_nibo_webhook"
-  },
   "git": {
     "deploymentEnabled": {
       "main": true
