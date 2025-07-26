@@ -44,15 +44,21 @@ interface CalendarEvent {
     artista?: string
     genero?: string
     tipo_evento?: string
+    nome: string
   }
+}
+
+interface MesComDados {
+  mes: number
+  ano: number
+  nome: string
+  quantidade: number
 }
 
 const meses = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
-
-const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i)
 
 const getGeneroIcon = (genero?: string) => {
   if (!genero) return '🎵'
@@ -91,6 +97,7 @@ export default function CalendarioPage() {
   const [filtrosAbertos, setFiltrosAbertos] = useState(false)
   const [filtroStatus, setFiltroStatus] = useState<string>('')
   const [filtroGenero, setFiltroGenero] = useState<string>('')
+  const [mesesComDados, setMesesComDados] = useState<MesComDados[]>([])
 
   const carregarEventos = async () => {
     try {
@@ -110,19 +117,50 @@ export default function CalendarioPage() {
       // Converter eventos para formato do calendário
       const events = data.eventos.map((evento: Evento) => ({
         id: evento.id,
-        title: evento.artista ? `${evento.nome} - ${evento.artista}` : evento.nome,
+        title: evento.nome, // Apenas o nome do evento
         start: new Date(`${evento.data_evento}T14:00:00`),
         end: new Date(`${evento.data_evento}T18:00:00`),
         resource: {
           status: evento.status,
           artista: evento.artista,
           genero: evento.genero,
-          tipo_evento: evento.tipo_evento
+          tipo_evento: evento.tipo_evento,
+          nome: evento.nome
         }
       }))
       
       setCalendarEvents(events)
       console.log('✅ [CALENDARIO] Eventos convertidos:', events.length)
+      
+      // Gerar lista de meses com dados
+      const mesesComEventos = new Map<string, { mes: number; ano: number; quantidade: number }>()
+      
+      events.forEach(event => {
+        const mes = getMonth(event.start)
+        const ano = getYear(event.start)
+        const key = `${ano}-${mes}`
+        
+        if (mesesComEventos.has(key)) {
+          mesesComEventos.get(key)!.quantidade++
+        } else {
+          mesesComEventos.set(key, { mes, ano, quantidade: 1 })
+        }
+      })
+      
+      const mesesOrdenados = Array.from(mesesComEventos.entries())
+        .map(([key, data]) => ({
+          mes: data.mes,
+          ano: data.ano,
+          nome: `${meses[data.mes]} ${data.ano}`,
+          quantidade: data.quantidade
+        }))
+        .sort((a, b) => {
+          if (a.ano !== b.ano) return a.ano - b.ano
+          return a.mes - b.mes
+        })
+      
+      setMesesComDados(mesesOrdenados)
+      console.log('📅 [CALENDARIO] Meses com dados:', mesesOrdenados)
       
       // Se não há eventos carregados, manter data atual
       if (events.length > 0) {
@@ -157,16 +195,30 @@ export default function CalendarioPage() {
   }
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => (
-    <div className="flex items-center gap-1 text-xs">
-      <span className="flex-shrink-0">
-        {getStatusIcon(event.resource.status)}
-      </span>
-      <span className="flex-shrink-0">
-        {getGeneroIcon(event.resource.genero)}
-      </span>
-      <span className="truncate font-medium">
-        {event.title}
-      </span>
+    <div className="space-y-1">
+      {/* Nome do evento */}
+      <div className="text-xs font-medium text-gray-900 dark:text-white truncate">
+        {event.resource.nome}
+      </div>
+      
+      {/* Artista com ícone do gênero */}
+      {event.resource.artista && (
+        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+          <span className="flex-shrink-0">
+            {getGeneroIcon(event.resource.genero)}
+          </span>
+          <span className="truncate">
+            {event.resource.artista}
+          </span>
+        </div>
+      )}
+      
+      {/* Status */}
+      <div className="flex items-center gap-1">
+        <span className="flex-shrink-0">
+          {getStatusIcon(event.resource.status)}
+        </span>
+      </div>
     </div>
   )
 
@@ -175,7 +227,7 @@ export default function CalendarioPage() {
       backgroundColor: 'transparent',
       border: 'none',
       borderRadius: '6px',
-      padding: '2px 4px',
+      padding: '4px 6px',
       margin: '1px 0',
       fontSize: '11px',
       fontWeight: '500'
@@ -256,29 +308,22 @@ export default function CalendarioPage() {
               </h1>
             </div>
             
-            {/* Seletor de Mês/Ano */}
+            {/* Seletor de Mês/Ano com Dados */}
             <div className="flex items-center gap-2">
-              <Select value={selectedMonth.toString()} onValueChange={(value) => handleMonthYearChange(parseInt(value), selectedYear)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
+              <Select 
+                value={`${selectedYear}-${selectedMonth}`} 
+                onValueChange={(value) => {
+                  const [ano, mes] = value.split('-').map(Number)
+                  handleMonthYearChange(mes, ano)
+                }}
+              >
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Selecione um mês" />
                 </SelectTrigger>
                 <SelectContent>
-                  {meses.map((mes, index) => (
-                    <SelectItem key={index} value={index.toString()}>
-                      {mes}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Select value={selectedYear.toString()} onValueChange={(value) => handleMonthYearChange(selectedMonth, parseInt(value))}>
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {anos.map((ano) => (
-                    <SelectItem key={ano} value={ano.toString()}>
-                      {ano}
+                  {mesesComDados.map((mes) => (
+                    <SelectItem key={`${mes.ano}-${mes.mes}`} value={`${mes.ano}-${mes.mes}`}>
+                      {mes.nome} ({mes.quantidade} eventos)
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -444,6 +489,7 @@ export default function CalendarioPage() {
                     month: "Mês",
                     noEventsInRange: "Não há eventos neste período."
                   }}
+                  culture="pt-BR"
                 />
               </div>
             )}
