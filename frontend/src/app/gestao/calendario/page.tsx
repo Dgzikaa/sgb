@@ -351,7 +351,7 @@ export default function CalendarioPage() {
             <SelectContent>
               {mesesComDados.map((mes) => (
                 <SelectItem key={`${mes.ano}-${mes.mes}`} value={`${mes.ano}-${mes.mes}`}>
-                  {mes.nome} ({mes.quantidade} eventos)
+                  {mes.nome}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -371,8 +371,12 @@ export default function CalendarioPage() {
           </Button>
         </div>
 
-        {/* Espaço vazio na direita para manter o layout */}
-        <div className="w-48"></div>
+        {/* Contador de eventos no extremo direito */}
+        <div className="flex items-center justify-end w-48">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {currentMonthEvents} eventos
+          </span>
+        </div>
       </div>
     )
   }
