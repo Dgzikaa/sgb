@@ -151,6 +151,12 @@ export function ModernSidebar() {
           href: '/gestao/calendario',
           description: 'Gestão de eventos e agendamentos',
         },
+        {
+          icon: BarChart3,
+          label: 'Planejamento Comercial',
+          href: '/gestao/planejamento-comercial',
+          description: 'Análise detalhada de eventos e indicadores',
+        },
       ],
     },
 

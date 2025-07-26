@@ -48,63 +48,101 @@
   @apply dark:bg-red-500 dark:hover:bg-red-600;
 }
 
-/* ===== ESTILOS REACT-BIG-CALENDAR - DARK MODE ===== */
+/* ===== ESTILOS REACT-BIG-CALENDAR - DARK MODE MODERNO ===== */
 
-.calendar-dark .rbc-calendar {
-  @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-white;
+.modern-calendar .rbc-calendar {
+  @apply bg-transparent text-gray-900 dark:text-white font-medium;
 }
 
-.calendar-dark .rbc-header {
-  @apply bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-600 font-semibold;
+.modern-calendar .rbc-header {
+  @apply bg-gradient-to-r from-slate-100 to-blue-100 dark:from-gray-700 dark:to-slate-700 text-gray-800 dark:text-white border-b-2 border-blue-200 dark:border-gray-600 font-bold text-sm py-3 px-2;
 }
 
-.calendar-dark .rbc-month-view {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+.modern-calendar .rbc-month-view {
+  @apply bg-transparent border-0;
 }
 
-.calendar-dark .rbc-day-bg {
-  @apply bg-white dark:bg-gray-800 border-r border-b border-gray-200 dark:border-gray-700;
+.modern-calendar .rbc-day-bg {
+  @apply bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 transition-all duration-200;
 }
 
-.calendar-dark .rbc-day-bg:hover {
-  @apply bg-gray-50 dark:bg-gray-750;
+.modern-calendar .rbc-day-bg:hover {
+  @apply bg-blue-50 dark:bg-gray-750 shadow-sm;
 }
 
-.calendar-dark .rbc-off-range-bg {
-  @apply bg-gray-50 dark:bg-gray-900;
+.modern-calendar .rbc-off-range-bg {
+  @apply bg-gray-50 dark:bg-gray-900 opacity-50;
 }
 
-.calendar-dark .rbc-today {
-  @apply bg-blue-50 dark:bg-blue-900/20;
+.modern-calendar .rbc-today {
+  @apply bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border-2 border-blue-300 dark:border-blue-600 shadow-md;
 }
 
-.calendar-dark .rbc-date-cell {
-  @apply text-gray-900 dark:text-gray-100;
+.modern-calendar .rbc-date-cell {
+  @apply text-gray-800 dark:text-gray-100 font-semibold;
 }
 
-.calendar-dark .rbc-button-link {
-  @apply text-gray-900 dark:text-gray-100;
+.modern-calendar .rbc-date-cell a {
+  @apply text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors;
 }
 
-.calendar-dark .rbc-show-more {
-  @apply text-blue-600 dark:text-blue-400 text-xs;
+.modern-calendar .rbc-button-link {
+  @apply text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors;
 }
 
-.calendar-dark .rbc-event {
-  @apply bg-blue-600 text-white border-none rounded;
+.modern-calendar .rbc-show-more {
+  @apply text-blue-600 dark:text-blue-400 text-xs font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors;
 }
 
-.calendar-dark .rbc-toolbar {
-  @apply mb-4;
+.modern-calendar .rbc-event {
+  @apply border-0 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg transform hover:scale-105;
 }
 
-.calendar-dark .rbc-toolbar button {
-  @apply px-3 py-1 mx-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-50 dark:hover:bg-gray-600;
+.modern-calendar .rbc-toolbar {
+  @apply mb-6 p-4 bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
 }
 
-.calendar-dark .rbc-toolbar button:focus,
-.calendar-dark .rbc-toolbar button.rbc-active {
-  @apply bg-blue-600 text-white border-blue-600;
+.modern-calendar .rbc-toolbar .rbc-toolbar-label {
+  @apply text-xl font-bold text-gray-800 dark:text-white;
+}
+
+.modern-calendar .rbc-toolbar button {
+  @apply px-4 py-2 mx-1 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 transition-all duration-200 font-medium shadow-sm hover:shadow-md;
+}
+
+.modern-calendar .rbc-toolbar button:focus,
+.modern-calendar .rbc-toolbar button.rbc-active {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600 shadow-lg transform scale-105;
+}
+
+.modern-calendar .rbc-toolbar .rbc-btn-group {
+  @apply flex gap-2;
+}
+
+/* Melhorias para o layout de eventos */
+.modern-calendar .rbc-event-content {
+  @apply p-1;
+}
+
+.modern-calendar .rbc-row-content {
+  @apply min-h-[80px];
+}
+
+.modern-calendar .rbc-month-row {
+  @apply min-h-[100px];
+}
+
+/* Scrollbar personalizada */
+.modern-calendar::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.modern-calendar::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800 rounded-lg;
+}
+
+.modern-calendar::-webkit-scrollbar-thumb {
+  @apply bg-blue-400 dark:bg-blue-600 rounded-lg hover:bg-blue-500 dark:hover:bg-blue-500;
 }
 
 /* Botão Aviso - Amarelo */
