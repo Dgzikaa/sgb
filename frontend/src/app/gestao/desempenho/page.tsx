@@ -257,7 +257,9 @@ export default function DesempenhoPage() {
                 Meta
               </th>
               {dados?.indicadores[0]?.dados[viewMode === 'semanal' ? 'semanais' : 'mensais'].map((item, index) => (
-                <th key={index} className="px-4 py-3 text-center text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider min-w-[120px] bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                <th key={index} className={`px-2 py-3 text-center text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 ${
+                  viewMode === 'mensal' ? 'min-w-[90px]' : 'min-w-[120px]'
+                }`}>
                   {viewMode === 'semanal' ? item.semana : item.mes}
                 </th>
               ))}
@@ -278,14 +280,14 @@ export default function DesempenhoPage() {
                   </div>
                 </td>
                 {indicador.dados[viewMode === 'semanal' ? 'semanais' : 'mensais'].map((item, index) => (
-                  <td key={index} className="px-4 py-4 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="font-semibold text-gray-900 dark:text-white text-sm">
+                  <td key={index} className={`text-center ${viewMode === 'mensal' ? 'px-2 py-3' : 'px-4 py-4'}`}>
+                    <div className={`flex flex-col items-center ${viewMode === 'mensal' ? 'gap-1' : 'gap-2'}`}>
+                      <div className={`font-semibold text-gray-900 dark:text-white ${viewMode === 'mensal' ? 'text-xs' : 'text-sm'}`}>
                         {formatarValor(item.valor, indicador.unidade)}
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className={`flex items-center ${viewMode === 'mensal' ? 'gap-0.5' : 'gap-1'}`}>
                         {getStatusIcon(item.status, item.tendencia)}
-                        {getStatusBadge(item.status)}
+                        {viewMode === 'semanal' && getStatusBadge(item.status)}
                       </div>
                     </div>
                   </td>

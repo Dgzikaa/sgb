@@ -107,17 +107,39 @@ export default function CalendarioPage() {
   const carregarEventos = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/gestao/eventos');
-      if (response.ok) {
-        const data = await response.json();
-        setEventos(data);
-      } else {
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar eventos",
-          variant: "destructive"
-        });
+      
+      // Carregar todos os eventos com paginação
+      let todosEventos: Evento[] = [];
+      let page = 1;
+      const limit = 50;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const response = await fetch(`/api/gestao/eventos?page=${page}&limit=${limit}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.eventos && data.eventos.length > 0) {
+            todosEventos = [...todosEventos, ...data.eventos];
+            hasMore = data.pagination?.hasNext || false;
+            page++;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+          toast({
+            title: "Erro",
+            description: "Erro ao carregar eventos",
+            variant: "destructive"
+          });
+        }
       }
+      
+      console.log(`[CALENDÁRIO] Carregados ${todosEventos.length} eventos total`);
+      setEventos(todosEventos);
+      
     } catch (error) {
       console.error('Erro ao carregar eventos:', error);
       toast({
