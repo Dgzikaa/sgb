@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from 'react'
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
-import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { format, parse, startOfWeek, getDay, getMonth, getYear } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronDown, ChevronUp, Music, Calendar as CalendarIcon, Filter, Users, TrendingUp } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ChevronDown, ChevronUp, Music, Calendar as CalendarIcon, Filter, Users, TrendingUp, CheckCircle, Clock, XCircle } from 'lucide-react'
 
 const locales = {
   'pt-BR': ptBR,
@@ -28,10 +29,9 @@ interface Evento {
   nome: string
   data_evento: string
   status: string
-  artista: string
-  genero: string
-  tipo_evento: string
-  observacoes: string
+  artista?: string
+  genero?: string
+  tipo_evento?: string
 }
 
 interface CalendarEvent {
@@ -41,83 +41,43 @@ interface CalendarEvent {
   end: Date
   resource: {
     status: string
-    artista: string
-    genero: string
-    tipo_evento: string
+    artista?: string
+    genero?: string
+    tipo_evento?: string
   }
 }
 
-// Função para obter ícone do gênero
-const getGeneroIcon = (genero: string) => {
-  switch (genero.toLowerCase()) {
-    case 'dj':
-      return '🎧'
-    case 'samba':
-      return '🎵'
-    case 'pagode':
-      return '🎸'
-    case 'jazz':
-      return '🎷'
-    case 'sertanejo':
-      return '🎤'
-    case 'cubana':
-      return '🥁'
-    case 'vocal':
-      return '🎭'
-    default:
-      return '🎶'
-  }
+const meses = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+]
+
+const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i)
+
+const getGeneroIcon = (genero?: string) => {
+  if (!genero) return '🎵'
+  
+  const generoLower = genero.toLowerCase()
+  if (generoLower.includes('dj')) return '🎧'
+  if (generoLower.includes('samba')) return '🎵'
+  if (generoLower.includes('pagode')) return '🎸'
+  if (generoLower.includes('jazz')) return '🎷'
+  if (generoLower.includes('sertanejo')) return '🎤'
+  if (generoLower.includes('cubana')) return '🥁'
+  if (generoLower.includes('vocal')) return '🎤'
+  return '🎵'
 }
 
-// Função para obter cor do status (mais sutil e profissional)
-const getStatusColor = (status: string) => {
+const getStatusIcon = (status: string) => {
   switch (status.toLowerCase()) {
     case 'confirmado':
-      return {
-        bg: 'bg-emerald-500/20',
-        border: 'border-emerald-500/30',
-        text: 'text-emerald-400'
-      }
+      return <CheckCircle className="w-3 h-3 text-green-500" />
     case 'pendente':
-      return {
-        bg: 'bg-amber-500/20',
-        border: 'border-amber-500/30',
-        text: 'text-amber-400'
-      }
+      return <Clock className="w-3 h-3 text-yellow-500" />
     case 'cancelado':
-      return {
-        bg: 'bg-red-500/20',
-        border: 'border-red-500/30',
-        text: 'text-red-400'
-      }
+      return <XCircle className="w-3 h-3 text-red-500" />
     default:
-      return {
-        bg: 'bg-slate-500/20',
-        border: 'border-slate-500/30',
-        text: 'text-slate-400'
-      }
-  }
-}
-
-// Função para obter cor do gênero (mais sutil)
-const getGeneroColor = (genero: string) => {
-  switch (genero.toLowerCase()) {
-    case 'dj':
-      return 'text-purple-400'
-    case 'samba':
-      return 'text-yellow-400'
-    case 'pagode':
-      return 'text-orange-400'
-    case 'jazz':
-      return 'text-blue-400'
-    case 'sertanejo':
-      return 'text-green-400'
-    case 'cubana':
-      return 'text-red-400'
-    case 'vocal':
-      return 'text-pink-400'
-    default:
-      return 'text-gray-400'
+      return <Clock className="w-3 h-3 text-gray-400" />
   }
 }
 
@@ -126,48 +86,54 @@ export default function CalendarioPage() {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [filtersOpen, setFiltersOpen] = useState(false)
-  const [selectedStatus, setSelectedStatus] = useState<string>('')
-  const [selectedGenero, setSelectedGenero] = useState<string>('')
+  const [selectedMonth, setSelectedMonth] = useState(getMonth(new Date()))
+  const [selectedYear, setSelectedYear] = useState(getYear(new Date()))
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false)
+  const [filtroStatus, setFiltroStatus] = useState<string>('')
+  const [filtroGenero, setFiltroGenero] = useState<string>('')
 
   const carregarEventos = async () => {
     try {
-      console.log('🔄 Carregando eventos...')
-      const response = await fetch('/api/gestao/eventos')
+      setLoading(true)
+      console.log('🔄 [CALENDARIO] Carregando eventos...')
+      
+      const params = new URLSearchParams()
+      if (filtroStatus) params.append('status', filtroStatus)
+      if (filtroGenero) params.append('genero', filtroGenero)
+      
+      const response = await fetch(`/api/gestao/eventos?${params}`)
       const data = await response.json()
       
-      console.log('📊 Eventos carregados:', data.eventos?.length || 0)
-      setEventos(data.eventos || [])
+      console.log('📊 [CALENDARIO] Eventos carregados:', data.eventos.length)
+      setEventos(data.eventos)
       
       // Converter eventos para formato do calendário
-      const events = (data.eventos || []).map((evento: Evento) => {
-        const startDate = new Date(evento.data_evento + 'T14:00:00')
-        const endDate = new Date(evento.data_evento + 'T18:00:00')
-        
-        return {
-          id: evento.id,
-          title: evento.artista ? `${evento.nome} - ${evento.artista}` : evento.nome,
-          start: startDate,
-          end: endDate,
-          resource: {
-            status: evento.status,
-            artista: evento.artista,
-            genero: evento.genero,
-            tipo_evento: evento.tipo_evento
-          }
+      const events = data.eventos.map((evento: Evento) => ({
+        id: evento.id,
+        title: evento.artista ? `${evento.nome} - ${evento.artista}` : evento.nome,
+        start: new Date(`${evento.data_evento}T14:00:00`),
+        end: new Date(`${evento.data_evento}T18:00:00`),
+        resource: {
+          status: evento.status,
+          artista: evento.artista,
+          genero: evento.genero,
+          tipo_evento: evento.tipo_evento
         }
-      })
+      }))
       
-      console.log('📅 Eventos convertidos:', events.length)
       setCalendarEvents(events)
+      console.log('✅ [CALENDARIO] Eventos convertidos:', events.length)
       
-      // Navegar para o primeiro evento se houver
+      // Se não há eventos carregados, manter data atual
       if (events.length > 0) {
-        setCurrentDate(events[0].start)
+        const primeiroEvento = events[0]
+        setCurrentDate(primeiroEvento.start)
+        setSelectedMonth(getMonth(primeiroEvento.start))
+        setSelectedYear(getYear(primeiroEvento.start))
       }
       
     } catch (error) {
-      console.error('❌ Erro ao carregar eventos:', error)
+      console.error('❌ [CALENDARIO] Erro ao carregar eventos:', error)
     } finally {
       setLoading(false)
     }
@@ -175,276 +141,370 @@ export default function CalendarioPage() {
 
   useEffect(() => {
     carregarEventos()
-  }, [])
+  }, [filtroStatus, filtroGenero])
 
-  // Componente personalizado para eventos
-  const EventComponent = ({ event }: { event: CalendarEvent }) => {
-    const statusColors = getStatusColor(event.resource.status)
-    const generoColors = getGeneroColor(event.resource.genero)
-    const generoIcon = getGeneroIcon(event.resource.genero)
-    
-    return (
-      <div className={`
-        p-2 rounded-lg border transition-all duration-200 hover:scale-105
-        ${statusColors.bg} ${statusColors.border} ${statusColors.text}
-        backdrop-blur-sm shadow-lg
-      `}>
-        <div className="font-semibold text-sm mb-1 truncate">
-          {event.title}
-        </div>
-        {event.resource.genero && (
-          <div className={`text-xs flex items-center gap-1 ${generoColors}`}>
-            <span>{generoIcon}</span>
-            <span>{event.resource.genero}</span>
-          </div>
-        )}
-      </div>
-    )
+  const handleDateChange = (date: Date) => {
+    setCurrentDate(date)
+    setSelectedMonth(getMonth(date))
+    setSelectedYear(getYear(date))
   }
 
-  // Propriedades personalizadas para eventos
+  const handleMonthYearChange = (month: number, year: number) => {
+    const newDate = new Date(year, month, 1)
+    setCurrentDate(newDate)
+    setSelectedMonth(month)
+    setSelectedYear(year)
+  }
+
+  const EventComponent = ({ event }: { event: CalendarEvent }) => (
+    <div className="flex items-center gap-1 text-xs">
+      <span className="flex-shrink-0">
+        {getStatusIcon(event.resource.status)}
+      </span>
+      <span className="flex-shrink-0">
+        {getGeneroIcon(event.resource.genero)}
+      </span>
+      <span className="truncate font-medium">
+        {event.title}
+      </span>
+    </div>
+  )
+
   const eventPropGetter = (event: CalendarEvent) => {
-    const statusColors = getStatusColor(event.resource.status)
-    return {
-      className: `${statusColors.bg} ${statusColors.border} ${statusColors.text}`,
-      style: {
-        backgroundColor: 'transparent',
-        border: 'none',
-        borderRadius: '8px',
-        padding: '4px',
-        margin: '1px',
-        fontSize: '12px',
-        fontWeight: '500'
-      }
+    const baseStyle = {
+      backgroundColor: 'transparent',
+      border: 'none',
+      borderRadius: '6px',
+      padding: '2px 4px',
+      margin: '1px 0',
+      fontSize: '11px',
+      fontWeight: '500'
+    }
+
+    // Apenas borda sutil baseada no status
+    switch (event.resource.status.toLowerCase()) {
+      case 'confirmado':
+        return {
+          style: {
+            ...baseStyle,
+            borderLeft: '3px solid #10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.05)'
+          }
+        }
+      case 'pendente':
+        return {
+          style: {
+            ...baseStyle,
+            borderLeft: '3px solid #f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.05)'
+          }
+        }
+      case 'cancelado':
+        return {
+          style: {
+            ...baseStyle,
+            borderLeft: '3px solid #ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.05)'
+          }
+        }
+      default:
+        return {
+          style: {
+            ...baseStyle,
+            borderLeft: '3px solid #6b7280',
+            backgroundColor: 'rgba(107, 114, 128, 0.05)'
+          }
+        }
     }
   }
 
-  // Propriedades personalizadas para dias
   const dayPropGetter = (date: Date) => {
     const today = new Date()
     const isToday = date.toDateString() === today.toDateString()
     
-    return {
-      className: isToday ? 'bg-blue-500/10 border-2 border-blue-500/30' : '',
-      style: {
-        backgroundColor: isToday ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-        border: isToday ? '2px solid rgba(59, 130, 246, 0.3)' : 'none',
-        borderRadius: isToday ? '8px' : '0'
+    if (isToday) {
+      return {
+        style: {
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          border: '1px solid rgba(59, 130, 246, 0.3)',
+          borderRadius: '8px'
+        }
       }
     }
+    return {}
   }
 
-  // Filtrar eventos
-  const filteredEvents = calendarEvents.filter(event => {
-    if (selectedStatus && event.resource.status !== selectedStatus) return false
-    if (selectedGenero && event.resource.genero !== selectedGenero) return false
-    return true
-  })
-
-  // Estatísticas
-  const totalEventos = eventos.length
-  const eventosConfirmados = eventos.filter(e => e.status === 'confirmado').length
-  const generosUnicos = [...new Set(eventos.map(e => e.genero).filter(Boolean))]
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-400 text-lg">Carregando calendário...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+  const limparFiltros = () => {
+    setFiltroStatus('')
+    setFiltroGenero('')
   }
+
+  const eventosConfirmados = eventos.filter(e => e.status.toLowerCase() === 'confirmado').length
+  const eventosPendentes = eventos.filter(e => e.status.toLowerCase() === 'pendente').length
+  const eventosCancelados = eventos.filter(e => e.status.toLowerCase() === 'cancelado').length
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-                <CalendarIcon className="w-8 h-8 text-blue-400" />
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <CalendarIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Calendário de Eventos
               </h1>
-              <p className="text-gray-400 text-lg">
-                Gerencie e visualize todos os eventos do bar
-              </p>
             </div>
             
-            {/* Estatísticas */}
-            <div className="flex flex-wrap gap-4">
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-blue-400" />
-                  <span className="text-white font-semibold">{totalEventos}</span>
-                  <span className="text-gray-400 text-sm">Total</span>
-                </div>
-              </div>
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-green-400" />
-                  <span className="text-white font-semibold">{eventosConfirmados}</span>
-                  <span className="text-gray-400 text-sm">Confirmados</span>
-                </div>
-              </div>
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 border border-gray-700/50">
-                <div className="flex items-center gap-2">
-                  <Music className="w-5 h-5 text-purple-400" />
-                  <span className="text-white font-semibold">{generosUnicos.length}</span>
-                  <span className="text-gray-400 text-sm">Gêneros</span>
-                </div>
-              </div>
+            {/* Seletor de Mês/Ano */}
+            <div className="flex items-center gap-2">
+              <Select value={selectedMonth.toString()} onValueChange={(value) => handleMonthYearChange(parseInt(value), selectedYear)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {meses.map((mes, index) => (
+                    <SelectItem key={index} value={index.toString()}>
+                      {mes}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={selectedYear.toString()} onValueChange={(value) => handleMonthYearChange(selectedMonth, parseInt(value))}>
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {anos.map((ano) => (
+                    <SelectItem key={ano} value={ano.toString()}>
+                      {ano}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+
+          {/* Estatísticas */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                    <CalendarIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Total de Eventos</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{eventos.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Confirmados</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{eventosConfirmados}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                    <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Pendentes</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{eventosPendentes}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Cancelados</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{eventosCancelados}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
         {/* Filtros */}
-        <Card className="mb-6 bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
-          <CardHeader className="pb-4">
-            <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
-              <CollapsibleTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className="w-full flex items-center justify-between p-0 h-auto text-white hover:bg-gray-700/50"
-                >
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-5 h-5 text-blue-400" />
-                    <span className="text-lg font-semibold">Filtros</span>
-                  </div>
-                  {filtersOpen ? (
-                    <ChevronUp className="w-5 h-5 text-gray-400" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              
-              <CollapsibleContent className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+          <Collapsible open={filtrosAbertos} onOpenChange={setFiltrosAbertos}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  <span>Filtros</span>
+                </div>
+                {filtrosAbertos ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                    <select
-                      value={selectedStatus}
-                      onChange={(e) => setSelectedStatus(e.target.value)}
-                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Todos os status</option>
-                      <option value="confirmado">Confirmado</option>
-                      <option value="pendente">Pendente</option>
-                      <option value="cancelado">Cancelado</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Status
+                    </label>
+                    <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todos os status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos os status</SelectItem>
+                        <SelectItem value="confirmado">Confirmado</SelectItem>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="cancelado">Cancelado</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Gênero</label>
-                    <select
-                      value={selectedGenero}
-                      onChange={(e) => setSelectedGenero(e.target.value)}
-                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Todos os gêneros</option>
-                      {generosUnicos.map(genero => (
-                        <option key={genero} value={genero}>{genero}</option>
-                      ))}
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Gênero
+                    </label>
+                    <Select value={filtroGenero} onValueChange={setFiltroGenero}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todos os gêneros" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos os gêneros</SelectItem>
+                        <SelectItem value="DJ">DJ</SelectItem>
+                        <SelectItem value="Samba">Samba</SelectItem>
+                        <SelectItem value="Pagode">Pagode</SelectItem>
+                        <SelectItem value="Jazz">Jazz</SelectItem>
+                        <SelectItem value="Sertanejo">Sertanejo</SelectItem>
+                        <SelectItem value="Cubana">Cubana</SelectItem>
+                        <SelectItem value="Vocal">Vocal</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  
-                  <div className="md:col-span-2 flex items-end">
-                    <Button
-                      onClick={() => {
-                        setSelectedStatus('')
-                        setSelectedGenero('')
-                      }}
-                      variant="outline"
-                      className="w-full bg-gray-700/50 border-gray-600 text-white hover:bg-gray-600/50"
-                    >
+
+                  <div className="flex items-end">
+                    <Button onClick={limparFiltros} variant="outline" className="w-full">
                       Limpar Filtros
                     </Button>
                   </div>
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </CardHeader>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </Card>
 
         {/* Calendário */}
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-6">
-            <div className="modern-calendar">
-              <Calendar
-                localizer={localizer}
-                events={filteredEvents}
-                startAccessor="start"
-                endAccessor="end"
-                style={{ height: 600 }}
-                views={['month']}
-                defaultView="month"
-                date={currentDate}
-                onNavigate={setCurrentDate}
-                components={{
-                  event: EventComponent
-                }}
-                eventPropGetter={eventPropGetter}
-                dayPropGetter={dayPropGetter}
-                messages={{
-                  next: "Próximo",
-                  previous: "Anterior",
-                  today: "Hoje",
-                  month: "Mês",
-                  week: "Semana",
-                  day: "Dia",
-                  agenda: "Agenda",
-                  noEventsInRange: "Não há eventos neste período."
-                }}
-                culture="pt-BR"
-              />
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Carregando eventos...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="modern-calendar">
+                <Calendar
+                  localizer={localizer}
+                  events={calendarEvents}
+                  startAccessor="start"
+                  endAccessor="end"
+                  style={{ height: 600 }}
+                  date={currentDate}
+                  onNavigate={handleDateChange}
+                  views={['month']}
+                  defaultView="month"
+                  components={{
+                    event: EventComponent
+                  }}
+                  eventPropGetter={eventPropGetter}
+                  dayPropGetter={dayPropGetter}
+                  messages={{
+                    next: "Próximo",
+                    previous: "Anterior",
+                    today: "Hoje",
+                    month: "Mês",
+                    noEventsInRange: "Não há eventos neste período."
+                  }}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Legenda */}
-        <Card className="mt-6 bg-gray-800/50 backdrop-blur-sm border-gray-700/50">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mt-6">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-blue-400" />
+            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
               Legenda
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-emerald-500/20 border border-emerald-500/30 rounded"></div>
-                <span className="text-gray-300 text-sm">Confirmado</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-amber-500/20 border border-amber-500/30 rounded"></div>
-                <span className="text-gray-300 text-sm">Pendente</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-red-500/20 border border-red-500/30 rounded"></div>
-                <span className="text-gray-300 text-sm">Cancelado</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-500/10 border-2 border-blue-500/30 rounded"></div>
-                <span className="text-gray-300 text-sm">Hoje</span>
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-gray-700/50">
-              <h4 className="text-white font-semibold mb-2">Gêneros Musicais:</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-                {generosUnicos.map(genero => (
-                  <div key={genero} className="flex items-center gap-2">
-                    <span className={getGeneroColor(genero)}>{getGeneroIcon(genero)}</span>
-                    <span className="text-gray-300 text-sm">{genero}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Status dos Eventos</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Confirmado</span>
                   </div>
-                ))}
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Pendente</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <XCircle className="w-4 h-4 text-red-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Cancelado</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Gêneros Musicais</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span>🎧</span>
+                    <span className="text-gray-600 dark:text-gray-400">DJ</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🎵</span>
+                    <span className="text-gray-600 dark:text-gray-400">Samba</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🎸</span>
+                    <span className="text-gray-600 dark:text-gray-400">Pagode</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🎷</span>
+                    <span className="text-gray-600 dark:text-gray-400">Jazz</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🎤</span>
+                    <span className="text-gray-600 dark:text-gray-400">Sertanejo</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>🥁</span>
+                    <span className="text-gray-600 dark:text-gray-400">Cubana</span>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
