@@ -45,12 +45,6 @@ export async function GET(request: NextRequest) {
         nome,
         artista,
         genero,
-        status,
-        total_ingressos_combinado,
-        faturamento_total_evento,
-        sympla_ticket_medio,
-        yuzer_ticket_medio_bilheteria,
-        capacidade_maxima,
         dia_semana
       `)
       .gte('data_evento', inicioMes)
@@ -85,26 +79,26 @@ export async function GET(request: NextRequest) {
         dia: diaSemana,
         obsData: '',
         label: temEventos ? primeiroEvento.nome || '' : '',
-        realizado: temEventos ? parseFloat(primeiroEvento.faturamento_total_evento || '0') : 0,
+        realizado: 0, // Não existe faturamento_total_evento
         m1: dadosMock.m1 || 0,
         m2: dadosMock.m2 || 0,
         m3: dadosMock.m3 || 0,
         clientes: {
           planejado: dadosMock.clientesPlan || 0,
-          real: temEventos ? parseInt(primeiroEvento.total_ingressos_combinado?.toString() || '0') : 0,
+          real: 0, // Não existe total_ingressos_combinado
           resTotal: dadosMock.resTotal || 0,
           resPresente: dadosMock.resPresente || 0,
-          lotMax: temEventos ? parseInt(primeiroEvento.capacidade_maxima?.toString() || '0') : 0
+          lotMax: 0 // Não existe capacidade_maxima
         },
         ticketEntrada: {
           planejado: dadosMock.ticketEntradaPlan || 0,
-          real: dadosMock.ticketEntradaReal || (temEventos ? parseFloat(primeiroEvento.yuzer_ticket_medio_bilheteria || '0') : 0)
+          real: dadosMock.ticketEntradaReal || 0 // Não existe yuzer_ticket_medio_bilheteria
         },
         ticketBar: {
           planejado: dadosMock.ticketBarPlan || 0,
           real: dadosMock.ticketBarReal || 0
         },
-        ticketMedio: temEventos ? parseFloat(primeiroEvento.sympla_ticket_medio || '0') : 0,
+        ticketMedio: 0, // Não existe sympla_ticket_medio
         rentabilidadeAtracoes: {
           custoArtistico: dadosMock.custoArtistico || 0,
           custoProducao: dadosMock.custoProducao || 0,
