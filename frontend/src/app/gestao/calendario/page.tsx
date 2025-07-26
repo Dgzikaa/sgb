@@ -309,33 +309,12 @@ export default function CalendarioPage() {
       toolbar.onNavigate('next', date)
     }
 
-    const goToCurrent = () => {
-      const now = new Date()
-      toolbar.onNavigate('current', now)
-    }
-
     const currentMonth = format(toolbar.date, 'MMMM yyyy', { locale: ptBR })
 
     return (
       <div className="rbc-toolbar flex items-center justify-between">
+        {/* Seletor de mês/ano na esquerda */}
         <div className="flex items-center gap-2">
-          <Button onClick={goToCurrent} variant="outline" size="sm">
-            Hoje
-          </Button>
-          <Button onClick={goToPrev} variant="outline" size="sm">
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <Button onClick={goToNext} variant="outline" size="sm">
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
-            {currentMonth}
-          </span>
-          
-          {/* Seletor de mês com dados */}
           <Select 
             value={`${getYear(toolbar.date)}-${getMonth(toolbar.date)}`} 
             onValueChange={(value) => {
@@ -356,6 +335,22 @@ export default function CalendarioPage() {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Navegação com setas no centro */}
+        <div className="flex items-center gap-3">
+          <Button onClick={goToPrev} variant="outline" size="sm">
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
+            {currentMonth}
+          </span>
+          <Button onClick={goToNext} variant="outline" size="sm">
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Espaço vazio na direita para manter o layout */}
+        <div className="w-48"></div>
       </div>
     )
   }
@@ -537,66 +532,6 @@ export default function CalendarioPage() {
                 />
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Legenda */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mt-6">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-              Legenda
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Status dos Eventos</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Confirmado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Pendente</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <XCircle className="w-4 h-4 text-red-500" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Cancelado</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Gêneros Musicais</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span>🎧</span>
-                    <span className="text-gray-600 dark:text-gray-400">DJ</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>🎵</span>
-                    <span className="text-gray-600 dark:text-gray-400">Samba</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>🎸</span>
-                    <span className="text-gray-600 dark:text-gray-400">Pagode</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>🎷</span>
-                    <span className="text-gray-600 dark:text-gray-400">Jazz</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>🎤</span>
-                    <span className="text-gray-600 dark:text-gray-400">Sertanejo</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>🥁</span>
-                    <span className="text-gray-600 dark:text-gray-400">Cubana</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
