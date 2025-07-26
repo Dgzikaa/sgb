@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronDown, ChevronUp, Music, Calendar as CalendarIcon, Filter, Users, TrendingUp, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { ChevronDown, ChevronUp, Music, Calendar as CalendarIcon, Filter, Users, TrendingUp, CheckCircle, Clock, XCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const locales = {
   'pt-BR': ptBR,
@@ -105,8 +105,8 @@ export default function CalendarioPage() {
       console.log('🔄 [CALENDARIO] Carregando eventos...')
       
       const params = new URLSearchParams()
-      if (filtroStatus) params.append('status', filtroStatus)
-      if (filtroGenero) params.append('genero', filtroGenero)
+      if (filtroStatus && filtroStatus !== 'todos') params.append('status', filtroStatus)
+      if (filtroGenero && filtroGenero !== 'todos') params.append('genero', filtroGenero)
       
       const response = await fetch(`/api/gestao/eventos?${params}`)
       const data = await response.json()
@@ -212,13 +212,6 @@ export default function CalendarioPage() {
           </span>
         </div>
       )}
-      
-      {/* Status */}
-      <div className="flex items-center gap-1">
-        <span className="flex-shrink-0">
-          {getStatusIcon(event.resource.status)}
-        </span>
-      </div>
     </div>
   )
 
@@ -230,18 +223,22 @@ export default function CalendarioPage() {
       padding: '4px 6px',
       margin: '1px 0',
       fontSize: '11px',
-      fontWeight: '500'
+      fontWeight: '500',
+      position: 'relative' as const
     }
 
+    const status = event.resource.status.toLowerCase()
+
     // Apenas borda sutil baseada no status
-    switch (event.resource.status.toLowerCase()) {
+    switch (status) {
       case 'confirmado':
         return {
           style: {
             ...baseStyle,
             borderLeft: '3px solid #10b981',
             backgroundColor: 'rgba(16, 185, 129, 0.05)'
-          }
+          },
+          'data-status': 'confirmado'
         }
       case 'pendente':
         return {
@@ -249,7 +246,8 @@ export default function CalendarioPage() {
             ...baseStyle,
             borderLeft: '3px solid #f59e0b',
             backgroundColor: 'rgba(245, 158, 11, 0.05)'
-          }
+          },
+          'data-status': 'pendente'
         }
       case 'cancelado':
         return {
@@ -257,7 +255,8 @@ export default function CalendarioPage() {
             ...baseStyle,
             borderLeft: '3px solid #ef4444',
             backgroundColor: 'rgba(239, 68, 68, 0.05)'
-          }
+          },
+          'data-status': 'cancelado'
         }
       default:
         return {
@@ -265,7 +264,8 @@ export default function CalendarioPage() {
             ...baseStyle,
             borderLeft: '3px solid #6b7280',
             backgroundColor: 'rgba(107, 114, 128, 0.05)'
-          }
+          },
+          'data-status': 'pendente'
         }
     }
   }
@@ -287,13 +287,78 @@ export default function CalendarioPage() {
   }
 
   const limparFiltros = () => {
-    setFiltroStatus('')
-    setFiltroGenero('')
+    setFiltroStatus('todos')
+    setFiltroGenero('todos')
   }
 
   const eventosConfirmados = eventos.filter(e => e.status.toLowerCase() === 'confirmado').length
   const eventosPendentes = eventos.filter(e => e.status.toLowerCase() === 'pendente').length
   const eventosCancelados = eventos.filter(e => e.status.toLowerCase() === 'cancelado').length
+
+  // Componente personalizado para o toolbar do calendário
+  const CustomToolbar = (toolbar: any) => {
+    const goToPrev = () => {
+      const date = new Date(toolbar.date)
+      date.setMonth(date.getMonth() - 1)
+      toolbar.onNavigate('prev', date)
+    }
+
+    const goToNext = () => {
+      const date = new Date(toolbar.date)
+      date.setMonth(date.getMonth() + 1)
+      toolbar.onNavigate('next', date)
+    }
+
+    const goToCurrent = () => {
+      const now = new Date()
+      toolbar.onNavigate('current', now)
+    }
+
+    const currentMonth = format(toolbar.date, 'MMMM yyyy', { locale: ptBR })
+
+    return (
+      <div className="rbc-toolbar flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button onClick={goToCurrent} variant="outline" size="sm">
+            Hoje
+          </Button>
+          <Button onClick={goToPrev} variant="outline" size="sm">
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button onClick={goToNext} variant="outline" size="sm">
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
+            {currentMonth}
+          </span>
+          
+          {/* Seletor de mês com dados */}
+          <Select 
+            value={`${getYear(toolbar.date)}-${getMonth(toolbar.date)}`} 
+            onValueChange={(value) => {
+              const [ano, mes] = value.split('-').map(Number)
+              const newDate = new Date(ano, mes, 1)
+              toolbar.onNavigate('current', newDate)
+            }}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Selecione um mês" />
+            </SelectTrigger>
+            <SelectContent>
+              {mesesComDados.map((mes) => (
+                <SelectItem key={`${mes.ano}-${mes.mes}`} value={`${mes.ano}-${mes.mes}`}>
+                  {mes.nome} ({mes.quantidade} eventos)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -306,28 +371,6 @@ export default function CalendarioPage() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Calendário de Eventos
               </h1>
-            </div>
-            
-            {/* Seletor de Mês/Ano com Dados */}
-            <div className="flex items-center gap-2">
-              <Select 
-                value={`${selectedYear}-${selectedMonth}`} 
-                onValueChange={(value) => {
-                  const [ano, mes] = value.split('-').map(Number)
-                  handleMonthYearChange(mes, ano)
-                }}
-              >
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Selecione um mês" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mesesComDados.map((mes) => (
-                    <SelectItem key={`${mes.ano}-${mes.mes}`} value={`${mes.ano}-${mes.mes}`}>
-                      {mes.nome} ({mes.quantidade} eventos)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
@@ -415,7 +458,7 @@ export default function CalendarioPage() {
                         <SelectValue placeholder="Todos os status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos os status</SelectItem>
+                        <SelectItem value="todos">Todos os status</SelectItem>
                         <SelectItem value="confirmado">Confirmado</SelectItem>
                         <SelectItem value="pendente">Pendente</SelectItem>
                         <SelectItem value="cancelado">Cancelado</SelectItem>
@@ -432,7 +475,7 @@ export default function CalendarioPage() {
                         <SelectValue placeholder="Todos os gêneros" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos os gêneros</SelectItem>
+                        <SelectItem value="todos">Todos os gêneros</SelectItem>
                         <SelectItem value="DJ">DJ</SelectItem>
                         <SelectItem value="Samba">Samba</SelectItem>
                         <SelectItem value="Pagode">Pagode</SelectItem>
@@ -478,7 +521,8 @@ export default function CalendarioPage() {
                   views={['month']}
                   defaultView="month"
                   components={{
-                    event: EventComponent
+                    event: EventComponent,
+                    toolbar: CustomToolbar
                   }}
                   eventPropGetter={eventPropGetter}
                   dayPropGetter={dayPropGetter}
