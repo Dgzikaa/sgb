@@ -210,10 +210,10 @@ export default function PlanejamentoComercialPage() {
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
                   {/* Colunas fixas - largura reduzida */}
-                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-16">
+                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 w-16">
                     Data
                   </th>
-                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-12">
+                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 w-12">
                     Dia
                   </th>
                   <th className="sticky left-28 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-40">
@@ -314,10 +314,10 @@ export default function PlanejamentoComercialPage() {
                     }`}
                   >
                     {/* Colunas fixas */}
-                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-900 dark:text-white">
                       {item.data}
                     </td>
-                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
+                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-700 dark:text-gray-300">
                       {item.dia}
                     </td>
                     <td className="sticky left-28 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 w-40">

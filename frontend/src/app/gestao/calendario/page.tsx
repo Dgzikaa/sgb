@@ -89,8 +89,11 @@ const getStatusIcon = (status: string) => {
 }
 
 export default function CalendarioPage() {
-  // Estado para o calendário
-  const [currentDate, setCurrentDate] = useState(new Date())
+  // Estado para o calendário - sempre inicia no mês atual
+  const [currentDate, setCurrentDate] = useState(() => {
+    const hoje = new Date()
+    return new Date(hoje.getFullYear(), hoje.getMonth(), 1) // Primeiro dia do mês atual
+  })
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [mesesComDados, setMesesComDados] = useState<MesComDados[]>([])
   const [loading, setLoading] = useState(true)
@@ -162,11 +165,8 @@ export default function CalendarioPage() {
       setMesesComDados(mesesOrdenados)
       console.log('📅 [CALENDARIO] Meses com dados:', mesesOrdenados)
       
-      // Se não há eventos carregados, manter data atual
-      if (events.length > 0) {
-        const primeiroEvento = events[0]
-        setCurrentDate(primeiroEvento.start)
-      }
+      // Manter sempre o mês atual, independente dos eventos
+      // Não alterar currentDate aqui para preservar o mês atual
       
     } catch (error) {
       console.error('❌ [CALENDARIO] Erro ao carregar eventos:', error)
@@ -342,11 +342,9 @@ export default function CalendarioPage() {
             }}
           >
             <SelectPrimitive.Trigger className="w-48 flex h-10 items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50">
-              <SelectValue placeholder="Selecione um mês" />
-              <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-2" />
-              {/* Remover a seta padrão do SelectPrimitive.Icon */}
-              <div style={{ display: 'none' }}>
-                <SelectPrimitive.Icon />
+              <div className="flex items-center justify-between w-full">
+                <SelectValue placeholder="Selecione um mês" />
+                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-2" />
               </div>
             </SelectPrimitive.Trigger>
             <SelectContent>
