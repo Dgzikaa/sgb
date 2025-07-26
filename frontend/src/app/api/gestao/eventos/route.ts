@@ -22,14 +22,14 @@ export async function GET(request: NextRequest) {
 
     // Primeiro, vamos testar uma query simples sem filtros
     console.log('🚀 [API] Testando query simples...')
-    const { data: todosEventos, error: errorTodos } = await supabase
+    const { data: countData, error: errorTodos } = await supabase
       .from('eventos')
       .select('count')
       .limit(1)
 
-    console.log('📊 [API] Teste simples - Count:', todosEventos, 'Erro:', errorTodos)
+    console.log('📊 [API] Teste simples - Count:', countData, 'Erro:', errorTodos)
 
-    // Agora a query principal
+    // Agora a query principal com paginação para retornar todos os eventos
     let query = supabase
       .from('eventos')
       .select('*')
@@ -57,23 +57,45 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('🚀 [API] Executando query principal no Supabase...')
-    const { data: eventos, error } = await query
-
-    console.log('📊 [API] Resultado da query principal:')
-    console.log('   - Eventos encontrados:', eventos?.length || 0)
-    console.log('   - Erro:', error)
     
-    if (eventos && eventos.length > 0) {
-      console.log('📋 [API] Primeiro evento:', eventos[0])
+    // Implementar paginação completa para retornar todos os eventos
+    let todosEventos: any[] = []
+    let from = 0
+    const pageSize = 100 // Supabase padrão
+    
+    while (true) {
+      const { data: eventos, error } = await query.range(from, from + pageSize - 1)
+      
+      if (error) {
+        console.error('❌ [API] Erro ao buscar eventos:', error)
+        return NextResponse.json({ error: 'Erro ao buscar eventos', details: error }, { status: 500 })
+      }
+      
+      if (!eventos || eventos.length === 0) {
+        break // Não há mais eventos
+      }
+      
+      todosEventos = todosEventos.concat(eventos)
+      from += pageSize
+      
+      console.log(`📄 [API] Página ${Math.floor(from / pageSize)}: ${eventos.length} eventos`)
+      
+      // Se retornou menos que pageSize, chegamos ao fim
+      if (eventos.length < pageSize) {
+        break
+      }
     }
 
-    if (error) {
-      console.error('❌ [API] Erro ao buscar eventos:', error)
-      return NextResponse.json({ error: 'Erro ao buscar eventos', details: error }, { status: 500 })
+    console.log('📊 [API] Resultado da query principal:')
+    console.log('   - Total de eventos encontrados:', todosEventos.length)
+    
+    if (todosEventos.length > 0) {
+      console.log('📋 [API] Primeiro evento:', todosEventos[0])
+      console.log('📋 [API] Último evento:', todosEventos[todosEventos.length - 1])
     }
 
     console.log('✅ [API] Retornando eventos com sucesso')
-    return NextResponse.json({ eventos: eventos || [] })
+    return NextResponse.json({ eventos: todosEventos })
 
   } catch (error) {
     console.error('💥 [API] Erro interno:', error)

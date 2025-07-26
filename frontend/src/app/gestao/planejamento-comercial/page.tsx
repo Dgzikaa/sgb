@@ -206,17 +206,17 @@ export default function PlanejamentoComercialPage() {
         {/* Tabela Otimizada para Espaço */}
         <div className="card-dark p-0 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm border-collapse border-spacing-0">
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
                   {/* Colunas fixas - largura reduzida */}
-                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 w-16">
+                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-16">
                     Data
                   </th>
-                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 w-12">
+                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-16">
                     Dia
                   </th>
-                  <th className="sticky left-28 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-40">
+                  <th className="sticky left-32 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-center font-medium text-gray-700 dark:text-gray-300 w-40">
                     Evento
                   </th>
                   
@@ -314,14 +314,14 @@ export default function PlanejamentoComercialPage() {
                     }`}
                   >
                     {/* Colunas fixas */}
-                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-900 dark:text-white">
+                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                       {item.data}
                     </td>
-                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
                       {item.dia}
                     </td>
-                    <td className="sticky left-28 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 w-40">
-                      <div className="truncate max-w-40" title={item.label}>
+                    <td className="sticky left-32 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                      <div className="truncate" title={item.label}>
                         {item.label || '-'}
                       </div>
                     </td>
