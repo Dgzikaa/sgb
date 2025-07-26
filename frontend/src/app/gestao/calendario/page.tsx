@@ -344,6 +344,10 @@ export default function CalendarioPage() {
             <SelectPrimitive.Trigger className="w-48 flex h-10 items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50">
               <SelectValue placeholder="Selecione um mês" />
               <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-2" />
+              {/* Remover a seta padrão do SelectPrimitive.Icon */}
+              <div style={{ display: 'none' }}>
+                <SelectPrimitive.Icon />
+              </div>
             </SelectPrimitive.Trigger>
             <SelectContent>
               {mesesComDados.map((mes) => (

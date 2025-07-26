@@ -210,27 +210,27 @@ export default function PlanejamentoComercialPage() {
               <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
                   {/* Colunas fixas - largura reduzida */}
-                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-16">
+                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-16">
                     Data
                   </th>
-                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-12">
+                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-12">
                     Dia
                   </th>
-                  <th className="sticky left-28 z-20 bg-gray-50 dark:bg-gray-800 px-2 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-60">
+                  <th className="sticky left-28 z-20 bg-gray-50 dark:bg-gray-800 px-0 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 w-40">
                     Evento
                   </th>
                   
                   {/* Faturamento */}
-                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                  <th className="px-1 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
                     Real (R$)
                   </th>
-                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                  <th className="px-1 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
                     M1 (R$)
                   </th>
-                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                  <th className="px-1 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
                     M2 (R$)
                   </th>
-                  <th className="px-2 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
+                  <th className="px-1 py-3 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
                     M3 (R$)
                   </th>
                   
@@ -314,29 +314,29 @@ export default function PlanejamentoComercialPage() {
                     }`}
                   >
                     {/* Colunas fixas */}
-                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                       {item.data}
                     </td>
-                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
+                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
                       {item.dia}
                     </td>
-                    <td className="sticky left-28 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 w-60">
-                      <div className="truncate max-w-60" title={item.label}>
+                    <td className="sticky left-28 z-10 bg-gray-50 dark:bg-gray-800 px-0 py-2 text-xs text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 w-40">
+                      <div className="truncate max-w-40" title={item.label}>
                         {item.label || '-'}
                       </div>
                     </td>
                     
                                                {/* Faturamento */}
-                           <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                           <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {item.realizado > 0 ? formatarMoeda(item.realizado) : '-'}
                            </td>
-                           <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                           <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {item.m1 > 0 ? formatarMoeda(item.m1) : '-'}
                            </td>
-                           <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                           <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {item.m2 > 0 ? formatarMoeda(item.m2) : '-'}
                            </td>
-                           <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                           <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {item.m3 > 0 ? formatarMoeda(item.m3) : '-'}
                            </td>
                     
