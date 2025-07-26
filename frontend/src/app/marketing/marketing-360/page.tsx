@@ -13,20 +13,28 @@ import {
   Users,
   BarChart3,
   DollarSign,
-  Calendar,
   Star,
   Eye,
   MessageSquare,
-  Instagram,
-  Facebook,
   AlertTriangle,
   CheckCircle,
   Zap,
-  ArrowUpRight,
-  ArrowDownRight,
   Activity,
   PieChart,
   LineChart,
+  Instagram,
+  Facebook,
+  Youtube,
+  Twitter,
+  Globe,
+  ArrowUpRight,
+  ArrowDownRight,
+  TrendingDown,
+  Calendar,
+  Clock,
+  Filter,
+  Download,
+  RefreshCcw,
 } from 'lucide-react';
 
 // Tipos para os dados
@@ -141,6 +149,16 @@ export default function Marketing360Page() {
       .slice(0, 5);
   };
 
+  const getTotalReach = () => {
+    if (instagramData.length === 0) return 0;
+    return instagramData[instagramData.length - 1].reach;
+  };
+
+  const getCurrentFollowers = () => {
+    if (instagramData.length === 0) return 0;
+    return instagramData[instagramData.length - 1].follower_count_1d;
+  };
+
   interface Insight {
     type: 'success' | 'warning' | 'info';
     icon: any;
@@ -160,7 +178,7 @@ export default function Marketing360Page() {
         icon: TrendingUp,
         title: 'Crescimento Excepcional',
         message: `Crescimento de ${growth.toFixed(1)}% nos seguidores do Instagram`,
-        color: 'text-green-600 dark:text-green-400'
+        color: 'text-emerald-600 dark:text-emerald-400'
       });
     }
 
@@ -172,7 +190,7 @@ export default function Marketing360Page() {
         icon: AlertTriangle,
         title: 'Nenhuma Campanha Ativa',
         message: 'Considere ativar campanhas para manter o engajamento',
-        color: 'text-yellow-600 dark:text-yellow-400'
+        color: 'text-amber-600 dark:text-amber-400'
       });
     }
 
@@ -184,7 +202,7 @@ export default function Marketing360Page() {
         icon: Star,
         title: 'Excelente Reputação',
         message: `Avaliação média de ${rating.toFixed(1)} no Google`,
-        color: 'text-green-600 dark:text-green-400'
+        color: 'text-emerald-600 dark:text-emerald-400'
       });
     }
 
@@ -193,68 +211,78 @@ export default function Marketing360Page() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando dados de marketing...</p>
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando dados de marketing...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="relative">
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <Button
-                  variant="ghost"
-                  onClick={() => router.push('/marketing')}
-                  className="text-white hover:bg-white/10 flex items-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Voltar
-                </Button>
-
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-                    <BarChart3 className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold">Marketing 360</h1>
-                    <p className="text-blue-100 mt-1">
-                      Análise completa de marketing e campanhas
-                    </p>
-                  </div>
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-6 py-4">
+          {/* Header Minimalista */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => router.push('/marketing')}
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 h-10 w-10 p-0"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Marketing 360</h1>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Análise completa de performance e campanhas
+                  </p>
                 </div>
               </div>
+            </div>
 
-              <div className="flex items-center gap-3">
-                <Badge className="bg-white/20 text-white border-white/30">
-                  <Activity className="w-3 h-3 mr-1" />
-                  Dashboard Ativo
-                </Badge>
-              </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Download className="w-4 h-4" />
+                Exportar
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
+                <RefreshCcw className="w-4 h-4" />
+                Atualizar
+              </Button>
+              <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
+                <Activity className="w-3 h-3 mr-1" />
+                Ativo
+              </Badge>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-gray-800">
+      <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* Tabs Modernas */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
             <TabsTrigger 
               value="analise-geral"
-              className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 dark:data-[state=active]:bg-blue-900 dark:data-[state=active]:text-blue-100"
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white rounded-lg font-medium"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
               Análise Geral
             </TabsTrigger>
             <TabsTrigger 
               value="campanhas"
-              className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-900 dark:data-[state=active]:bg-blue-900 dark:data-[state=active]:text-blue-100"
+              className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white rounded-lg font-medium"
             >
               <Target className="w-4 h-4 mr-2" />
               Campanhas
@@ -262,124 +290,160 @@ export default function Marketing360Page() {
           </TabsList>
 
           {/* Aba: Análise Geral */}
-          <TabsContent value="analise-geral" className="space-y-6">
+          <TabsContent value="analise-geral" className="space-y-8">
             {/* Cards de Métricas Principais */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="card-dark">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium card-description-dark">
-                    Total Investido
-                  </CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold card-title-dark">
-                    R$ {getTotalSpent().toFixed(2)}
+              {/* Total Investido */}
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Investido</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        R$ {getTotalSpent().toFixed(2)}
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm text-emerald-600 font-medium">+12.5%</span>
+                        <span className="text-sm text-gray-500">vs mês anterior</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <DollarSign className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="text-green-600 dark:text-green-400">+12.5%</span> vs mês anterior
-                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="card-dark">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium card-description-dark">
-                    Seguidores Instagram
-                  </CardTitle>
-                  <Instagram className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold card-title-dark">
-                    {instagramData.length > 0 ? instagramData[instagramData.length - 1].follower_count_1d : 0}
+              {/* Seguidores Instagram */}
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Seguidores Instagram</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {getCurrentFollowers().toLocaleString()}
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        {getFollowersGrowth() > 0 ? (
+                          <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                        ) : (
+                          <ArrowDownRight className="w-4 h-4 text-red-600" />
+                        )}
+                        <span className={`text-sm font-medium ${getFollowersGrowth() > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                          {getFollowersGrowth() > 0 ? '+' : ''}{getFollowersGrowth().toFixed(1)}%
+                        </span>
+                        <span className="text-sm text-gray-500">vs semana anterior</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded-xl">
+                      <Instagram className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className={getFollowersGrowth() > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
-                      {getFollowersGrowth() > 0 ? "+" : ""}{getFollowersGrowth().toFixed(1)}%
-                    </span> vs semana anterior
-                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="card-dark">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium card-description-dark">
-                    Avaliação Google
-                  </CardTitle>
-                  <Star className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold card-title-dark">
-                    {getAverageRating().toFixed(1)}
+              {/* Avaliação Google */}
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avaliação Google</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {getAverageRating().toFixed(1)} ⭐
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm text-emerald-600 font-medium">+0.2</span>
+                        <span className="text-sm text-gray-500">vs mês anterior</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                      <Globe className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="text-green-600 dark:text-green-400">+0.2</span> vs mês anterior
-                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="card-dark">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium card-description-dark">
-                    Campanhas Ativas
-                  </CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold card-title-dark">
-                    {getActiveCampaigns()}
+              {/* Alcance Total */}
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Alcance Total</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {getTotalReach().toLocaleString()}
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm text-emerald-600 font-medium">+8.3%</span>
+                        <span className="text-sm text-gray-500">vs semana anterior</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                      <Eye className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="text-blue-600 dark:text-blue-400">2</span> pausadas
-                  </p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Gráficos e Análises */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Gráfico de Crescimento de Seguidores */}
-              <Card className="card-dark">
-                <CardHeader>
-                  <CardTitle className="card-title-dark flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    Crescimento de Seguidores
-                  </CardTitle>
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-blue-600" />
+                      Crescimento de Seguidores
+                    </CardTitle>
+                    <Button variant="ghost" size="sm">
+                      <Filter className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
                     <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 dark:text-gray-400">Gráfico de crescimento</p>
+                      <LineChart className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">Gráfico de Crescimento</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500">Implementação em desenvolvimento</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Distribuição por Idade */}
-              <Card className="card-dark">
-                <CardHeader>
-                  <CardTitle className="card-title-dark flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Distribuição por Idade
-                  </CardTitle>
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Users className="w-5 h-5 text-purple-600" />
+                      Distribuição por Idade
+                    </CardTitle>
+                    <Button variant="ghost" size="sm">
+                      <Filter className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
                     <div className="text-center">
-                      <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 dark:text-gray-400">Gráfico de distribuição</p>
+                      <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">Gráfico de Distribuição</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500">Implementação em desenvolvimento</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Insights */}
-            <Card className="card-dark">
-              <CardHeader>
-                <CardTitle className="card-title-dark flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
+            {/* Insights Automáticos */}
+            <Card className="border-0 shadow-sm bg-white dark:bg-gray-900">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-amber-600" />
                   Insights Automáticos
                 </CardTitle>
               </CardHeader>
@@ -388,12 +452,14 @@ export default function Marketing360Page() {
                   {getInsights().map((insight, index) => {
                     const IconComponent = insight.icon;
                     return (
-                      <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center gap-3 mb-2">
-                          <IconComponent className={`w-5 h-5 ${insight.color}`} />
+                      <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                            <IconComponent className={`w-4 h-4 ${insight.color}`} />
+                          </div>
                           <h4 className="font-semibold text-gray-900 dark:text-white">{insight.title}</h4>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{insight.message}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{insight.message}</p>
                       </div>
                     );
                   })}
@@ -403,94 +469,122 @@ export default function Marketing360Page() {
           </TabsContent>
 
           {/* Aba: Campanhas */}
-          <TabsContent value="campanhas" className="space-y-6">
+          <TabsContent value="campanhas" className="space-y-8">
             {/* Resumo de Campanhas */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="card-dark">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium card-description-dark">
-                    Total de Campanhas
-                  </CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold card-title-dark">
-                    {campaignsData.length}
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total de Campanhas</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {campaignsData.length}
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm text-emerald-600 font-medium">+3</span>
+                        <span className="text-sm text-gray-500">este mês</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                      <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="text-green-600 dark:text-green-400">+3</span> este mês
-                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="card-dark">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium card-description-dark">
-                    Campanhas Ativas
-                  </CardTitle>
-                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold card-title-dark">
-                    {getActiveCampaigns()}
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Campanhas Ativas</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {getActiveCampaigns()}
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm text-emerald-600 font-medium">75%</span>
+                        <span className="text-sm text-gray-500">de eficiência</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                      <Activity className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="text-green-600 dark:text-green-400">75%</span> de eficiência
-                  </p>
                 </CardContent>
               </Card>
 
-              <Card className="card-dark">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium card-description-dark">
-                    ROI Médio
-                  </CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold card-title-dark">
-                    3.2x
+              <Card className="border-0 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">ROI Médio</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        3.2x
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <ArrowUpRight className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm text-emerald-600 font-medium">+0.5x</span>
+                        <span className="text-sm text-gray-500">vs mês anterior</span>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                      <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="text-green-600 dark:text-green-400">+0.5x</span> vs mês anterior
-                  </p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Lista de Campanhas */}
-            <Card className="card-dark">
-              <CardHeader>
-                <CardTitle className="card-title-dark flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Campanhas em Andamento
-                </CardTitle>
+            <Card className="border-0 shadow-sm bg-white dark:bg-gray-900">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    Campanhas em Andamento
+                  </CardTitle>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Filter className="w-4 h-4" />
+                    Filtrar
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {getTopPerformingCampaigns().map((campaign, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-                          {campaign.campaign}
-                        </h4>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                          <span>ID: {campaign.campaign_id}</span>
-                          <span>Objetivo: {campaign.campaign_objective}</span>
-                          <Badge 
-                            variant={campaign.campaign_effective_status === 'ACTIVE' ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {campaign.campaign_effective_status}
-                          </Badge>
+                    <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-white dark:bg-gray-700 rounded-lg">
+                              <Facebook className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white line-clamp-1">
+                              {campaign.campaign}
+                            </h4>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+                              ID: {campaign.campaign_id.slice(-8)}
+                            </span>
+                            <span>Objetivo: {campaign.campaign_objective}</span>
+                            <Badge 
+                              variant={campaign.campaign_effective_status === 'ACTIVE' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {campaign.campaign_effective_status === 'ACTIVE' ? 'Ativa' : 'Pausada'}
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900 dark:text-white">
-                          R$ {campaign.spend.toFixed(2)}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Orçamento: R$ {campaign.campaign_daily_budget?.toFixed(2) || 'N/A'}
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-gray-900 dark:text-white">
+                            R$ {campaign.spend.toFixed(2)}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Orçamento: R$ {campaign.campaign_daily_budget?.toFixed(2) || 'Ilimitado'}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -500,56 +594,64 @@ export default function Marketing360Page() {
             </Card>
 
             {/* Insights de Campanhas */}
-            <Card className="card-dark">
-              <CardHeader>
-                <CardTitle className="card-title-dark flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  Insights de Campanhas
+            <Card className="border-0 shadow-sm bg-white dark:bg-gray-900">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-amber-600" />
+                  Insights de Performance
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-3 mb-2">
-                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-800 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
                       <h4 className="font-semibold text-gray-900 dark:text-white">Campanha de Sucesso</h4>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      "[SS] [ORDI] [VV] Quarta de Bamba | Geral" está com desempenho 25% acima da média. 
-                      Considere aumentar o investimento.
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      <strong>"Quarta de Bamba | Geral"</strong> está com desempenho 25% acima da média. 
+                      Considere aumentar o investimento para maximizar resultados.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                    <div className="flex items-center gap-3 mb-2">
-                      <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                  <div className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-amber-100 dark:bg-amber-800 rounded-lg">
+                        <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
                       <h4 className="font-semibold text-gray-900 dark:text-white">Oportunidade de Otimização</h4>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      "[SS] [ORDI] [TURB] Vídeo de Lançamento 01" está com custo por clique alto. 
-                      Considere ajustar o targeting.
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      <strong>"Vídeo de Lançamento 01"</strong> apresenta custo por clique elevado. 
+                      Recomendamos ajustar o targeting para melhor eficiência.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center gap-3 mb-2">
-                      <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+                        <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
                       <h4 className="font-semibold text-gray-900 dark:text-white">Tendência Positiva</h4>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Campanhas de "Quarta de Bamba" estão gerando engajamento crescente. 
-                      Público nichado respondendo bem.
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      Campanhas focadas em <strong>"Quarta de Bamba"</strong> mostram engajamento crescente. 
+                      O público nichado está respondendo muito bem ao conteúdo.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <div className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                        <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      </div>
                       <h4 className="font-semibold text-gray-900 dark:text-white">Segmentação Eficaz</h4>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Campanhas estão atingindo principalmente público 25-44 anos. 
-                      Considere expandir para outras faixas etárias.
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      O público principal (25-44 anos) representa 78% do engajamento. 
+                      Considere expandir estratégias para outras faixas etárias.
                     </p>
                   </div>
                 </div>

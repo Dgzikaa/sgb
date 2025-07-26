@@ -132,7 +132,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-8">
       {/* Welcome Header */}
       <div className="main-content bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm transition-colors duration-300">
         <div className="flex items-center justify-between">

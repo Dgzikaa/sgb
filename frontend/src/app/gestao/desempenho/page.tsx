@@ -133,11 +133,6 @@ export default function DesempenhoPage() {
         if (response.ok) {
           const data = await response.json()
           setDados(data)
-          
-          // Rolar para a direita após carregar os dados
-          setTimeout(() => {
-            rolarParaDireita()
-          }, 100)
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -147,6 +142,17 @@ export default function DesempenhoPage() {
     }
     carregarDados()
   }, [])
+
+  // Auto-scroll para a direita após os dados carregarem e componentes renderizarem
+  useEffect(() => {
+    if (dados && !loading) {
+      const timer = setTimeout(() => {
+        rolarParaDireita()
+      }, 500) // Aumentei o tempo para garantir que tudo foi renderizado
+      
+      return () => clearTimeout(timer)
+    }
+  }, [dados, loading])
 
   const rolarParaDireita = () => {
     Object.values(scrollContainerRefs.current).forEach(container => {

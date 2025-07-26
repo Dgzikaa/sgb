@@ -950,24 +950,264 @@ function gerarDadosMockados(): IndicadorDesempenho[] {
 
     // PRODUTOS - Cockpit Produtos
     {
-      id: 'bebidas',
+      id: 'stockout-comidas',
       categoria: 'produtos',
-      nome: '% Bebidas',
-      descricao: 'Porcentagem de vendas de bebidas',
+      nome: 'StockOut Comidas',
+      descricao: 'Porcentagem de produtos de comida em falta',
       unidade: '%',
-      meta: 45,
+      meta: 3,
       dados: {
         semanais: semanas.map((semana, i) => ({
           semana,
-          valor: 42 + (i * 1) + Math.random() * 6,
-          meta: 45,
+          valor: Math.random() * 4,
+          meta: 3,
           status: Math.random() > 0.5 ? 'acima' : 'abaixo',
           tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
         })),
         mensais: meses.map((mes, i) => ({
           mes,
-          valor: 43 + (i * 0.5) + Math.random() * 4,
-          meta: 45,
+          valor: Math.random() * 4,
+          meta: 3,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'stockout-drinks',
+      categoria: 'produtos',
+      nome: 'StockOut Drinks',
+      descricao: 'Porcentagem de bebidas em falta',
+      unidade: '%',
+      meta: 3,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: Math.random() * 4,
+          meta: 3,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: Math.random() * 4,
+          meta: 3,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'stockout-bar',
+      categoria: 'produtos',
+      nome: 'Stockout Bar',
+      descricao: 'Porcentagem de produtos do bar em falta',
+      unidade: '%',
+      meta: 1,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: Math.random() * 2,
+          meta: 1,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: Math.random() * 2,
+          meta: 1,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'bebidas',
+      categoria: 'produtos',
+      nome: '% BEBIDAS',
+      descricao: 'Porcentagem de vendas de bebidas',
+      unidade: '%',
+      meta: 50,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 45 + Math.random() * 10,
+          meta: 50,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 47 + Math.random() * 6,
+          meta: 50,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'drinks',
+      categoria: 'produtos',
+      nome: '% DRINKS',
+      descricao: 'Porcentagem de vendas de drinks',
+      unidade: '%',
+      meta: 30,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 25 + Math.random() * 10,
+          meta: 30,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 27 + Math.random() * 6,
+          meta: 30,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'comida',
+      categoria: 'produtos',
+      nome: '% COMIDA',
+      descricao: 'Porcentagem de vendas de comida',
+      unidade: '%',
+      meta: 25,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 20 + Math.random() * 10,
+          meta: 25,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 22 + Math.random() * 6,
+          meta: 25,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'happy-hour',
+      categoria: 'produtos',
+      nome: '% HappyHour',
+      descricao: 'Porcentagem de vendas no happy hour',
+      unidade: '%',
+      meta: 20,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 15 + Math.random() * 10,
+          meta: 20,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 17 + Math.random() * 6,
+          meta: 20,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'qtde-itens-bar',
+      categoria: 'produtos',
+      nome: 'Qtde Itens Bar',
+      descricao: 'Quantidade de itens vendidos no bar',
+      unidade: 'itens',
+      meta: 1200,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 1000 + Math.random() * 400,
+          meta: 1200,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 4500 + Math.random() * 1000,
+          meta: 5000,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'tempo-saida-bar',
+      categoria: 'produtos',
+      nome: 'Tempo Saída Bar',
+      descricao: 'Tempo médio de saída do bar',
+      unidade: 'min',
+      meta: 3,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 2 + Math.random() * 3,
+          meta: 3,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 2.5 + Math.random() * 2,
+          meta: 3,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'qtde-itens-cozinha',
+      categoria: 'produtos',
+      nome: 'Qtde Itens Cozinha',
+      descricao: 'Quantidade de itens da cozinha',
+      unidade: 'itens',
+      meta: 800,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 600 + Math.random() * 400,
+          meta: 800,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 2500 + Math.random() * 1000,
+          meta: 3000,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        }))
+      }
+    },
+    {
+      id: 'tempo-saida-cozinha',
+      categoria: 'produtos',
+      nome: 'Tempo Saída Cozinha',
+      descricao: 'Tempo médio de saída da cozinha',
+      unidade: 'min',
+      meta: 10,
+      dados: {
+        semanais: semanas.map((semana, i) => ({
+          semana,
+          valor: 7 + Math.random() * 6,
+          meta: 10,
+          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
+          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
+        })),
+        mensais: meses.map((mes, i) => ({
+          mes,
+          valor: 8 + Math.random() * 4,
+          meta: 10,
           status: Math.random() > 0.5 ? 'acima' : 'abaixo',
           tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
         }))
