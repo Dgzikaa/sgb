@@ -1,673 +1,632 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  Calendar, 
-  CalendarDays, 
-  Clock, 
-  Users, 
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Target,
-  Music,
-  Star,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Activity,
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { usePageTitle } from '@/contexts/PageTitleContext';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
   Plus,
-  Eye,
-  BarChart3
-} from 'lucide-react'
+  Clock,
+  MapPin,
+  Users,
+  Music,
+  Mic,
+  Star,
+  Filter,
+  Search,
+  RefreshCw,
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-interface EventoCalendario {
-  id: string
-  data: string
-  label: string
-  artista: string
-  genero: string
-  reservas: {
-    total: number
-    presentes: number
-    canceladas: number
-  }
-  planejado: {
-    faturamento: number
-    clientes: number
-    ticket_medio: number
-  }
-  realizado?: {
-    faturamento: number
-    clientes: number
-    ticket_medio: number
-  }
-  status: 'agendado' | 'confirmado' | 'cancelado' | 'realizado'
-  observacoes?: string
+interface Evento {
+  id: number;
+  nome: string;
+  data_evento: string;
+  artista: string;
+  genero: string;
+  dia_semana: string;
+  tipo_evento: string;
+  status: string;
+  hora_inicio?: string;
+  hora_fim?: string;
+  capacidade_maxima?: number;
+  observacoes?: string;
 }
 
-interface ReservaEvento {
-  id: string
-  evento_id: string
-  nome: string
-  telefone: string
-  quantidade: number
-  horario: string
-  status: 'confirmada' | 'presente' | 'cancelada' | 'no_show'
-  observacoes?: string
-  data_criacao: string
-}
-
-interface MetaDiaria {
-  data: string
-  faturamento_meta: number
-  clientes_meta: number
-  ticket_medio_meta: number
-  custo_artistico: number
-  custo_producao: number
-}
-
-interface RespostaCalendario {
-  eventos: EventoCalendario[]
-  reservas: ReservaEvento[]
-  metas_diarias: MetaDiaria[]
-  resumo: {
-    totalEventos: number
-    eventosConfirmados: number
-    eventosCancelados: number
-    totalReservas: number
-    reservasConfirmadas: number
-    faturamentoPlanejado: number
-    faturamentoRealizado: number
-  }
-}
-
-// Funções auxiliares
-const formatarValor = (valor: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(valor)
-}
-
-const formatarData = (data: string): string => {
-  return new Date(data).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-}
-
-const formatarDataCompleta = (data: string): string => {
-  return new Date(data).toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case 'confirmado':
-      return <CheckCircle className="h-4 w-4 text-green-500" />
-    case 'cancelado':
-      return <XCircle className="h-4 w-4 text-red-500" />
-    case 'realizado':
-      return <Star className="h-4 w-4 text-yellow-500" />
-    default:
-      return <Clock className="h-4 w-4 text-blue-500" />
-  }
-}
-
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'confirmado':
-      return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Confirmado</Badge>
-    case 'cancelado':
-      return <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">Cancelado</Badge>
-    case 'realizado':
-      return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">Realizado</Badge>
-    default:
-      return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">Agendado</Badge>
-  }
-}
-
-const getGeneroColor = (genero: string) => {
-  const cores: { [key: string]: string } = {
-    'Rock': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-    'Pop': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
-    'Sertanejo': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-    'MPB': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-    'Eletrônica': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-    'Jazz': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300'
-  }
-  return cores[genero] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
-}
-
-const CalendarioMensal = ({ eventos, metasDiarias, onEventoClick }: {
-  eventos: EventoCalendario[]
-  metasDiarias: MetaDiaria[]
-  onEventoClick: (evento: EventoCalendario) => void
-}) => {
-  const [dataAtual, setDataAtual] = useState(new Date())
-
-  type DiaCalendario = {
-    dia: number
-    data: string
-    evento?: EventoCalendario
-    meta?: MetaDiaria
-  } | null
-
-  const obterDiasMes = (data: Date): (DiaCalendario)[] => {
-    const ano = data.getFullYear()
-    const mes = data.getMonth()
-    const primeiroDia = new Date(ano, mes, 1)
-    const ultimoDia = new Date(ano, mes + 1, 0)
-    const diasNoMes = ultimoDia.getDate()
-    const diaSemanaInicio = primeiroDia.getDay()
-
-    const dias: (DiaCalendario)[] = []
-
-    // Adicionar dias vazios no início
-    for (let i = 0; i < diaSemanaInicio; i++) {
-      dias.push(null)
-    }
-
-    // Adicionar dias do mês
-    for (let dia = 1; dia <= diasNoMes; dia++) {
-      const dataString = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
-      const evento = eventos.find(e => e.data === dataString)
-      const meta = metasDiarias.find(m => m.data === dataString)
-
-      dias.push({
-        dia,
-        data: dataString,
-        evento,
-        meta
-      })
-    }
-
-    return dias
-  }
-
-  const navegarMes = (direcao: 'anterior' | 'proximo') => {
-    setDataAtual(prev => {
-      const novaData = new Date(prev)
-      if (direcao === 'anterior') {
-        novaData.setMonth(prev.getMonth() - 1)
-      } else {
-        novaData.setMonth(prev.getMonth() + 1)
-      }
-      return novaData
-    })
-  }
-
-  const dias = obterDiasMes(dataAtual)
-  const nomesMeses = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ]
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-      {/* Header do Calendário */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <Button variant="outline" size="sm" onClick={() => navegarMes('anterior')}>
-          ←
-        </Button>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {nomesMeses[dataAtual.getMonth()]} {dataAtual.getFullYear()}
-        </h2>
-        <Button variant="outline" size="sm" onClick={() => navegarMes('proximo')}>
-          →
-        </Button>
-      </div>
-
-      {/* Grade do Calendário */}
-      <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700">
-        {/* Cabeçalhos dos dias da semana */}
-        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(dia => (
-          <div key={dia} className="bg-gray-50 dark:bg-gray-800 p-2 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
-            {dia}
-          </div>
-        ))}
-
-        {/* Dias do mês */}
-        {dias.map((dia, index) => (
-          <div
-            key={index}
-            className={`min-h-[80px] p-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 ${
-              dia ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''
-            }`}
-            onClick={() => dia?.evento && onEventoClick(dia.evento)}
-          >
-            {dia && (
-              <>
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                  {dia.dia}
-                </div>
-                {dia.evento && (
-                  <div className="space-y-1">
-                    <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 p-1 rounded truncate">
-                      {dia.evento.label}
-                    </div>
-                    {dia.meta && (
-                      <div className="text-xs text-gray-600 dark:text-gray-400">
-                        Meta: {formatarValor(dia.meta.faturamento_meta)}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const DetalhesEvento = ({ evento, reservas, meta, onClose }: {
-  evento: EventoCalendario
-  reservas: ReservaEvento[]
-  meta?: MetaDiaria
-  onClose: () => void
-}) => {
-  const reservasEvento = reservas.filter(r => r.evento_id === evento.id)
-
-  const calcularProgresso = (atual: number, meta: number) => {
-    if (meta === 0) return 0
-    return Math.min((atual / meta) * 100, 100)
-  }
-
-  return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{evento.label}</h2>
-        <Button variant="outline" onClick={onClose}>
-          ✕
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Informações do Evento */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg text-gray-900 dark:text-white">Informações do Evento</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Artista:</span>
-                <span className="font-medium text-gray-900 dark:text-white">{evento.artista}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Gênero:</span>
-                <Badge className={getGeneroColor(evento.genero)}>{evento.genero}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Data:</span>
-                <span className="font-medium text-gray-900 dark:text-white">{formatarDataCompleta(evento.data)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                {getStatusBadge(evento.status)}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Metas e Realizado */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg text-gray-900 dark:text-white">Metas vs Realizado</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Faturamento</span>
-                  <span className="text-gray-900 dark:text-white">
-                    {formatarValor(evento.planejado.faturamento)} / {meta ? formatarValor(meta.faturamento_meta) : 'N/A'}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full" 
-                    style={{ width: `${calcularProgresso(evento.planejado.faturamento, meta?.faturamento_meta || 0)}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">Clientes</span>
-                  <span className="text-gray-900 dark:text-white">
-                    {evento.planejado.clientes} / {meta ? meta.clientes_meta : 'N/A'}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-green-600 h-2 rounded-full" 
-                    style={{ width: `${calcularProgresso(evento.planejado.clientes, meta?.clientes_meta || 0)}%` }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Reservas */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg text-gray-900 dark:text-white">Reservas ({reservasEvento.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {reservasEvento.map(reserva => (
-                  <div key={reserva.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">{reserva.nome}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{reserva.telefone}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium text-gray-900 dark:text-white">{reserva.quantidade} pessoas</div>
-                      <Badge className="mt-1">
-                        {reserva.status === 'confirmada' ? 'Confirmada' : 
-                         reserva.status === 'presente' ? 'Presente' : 
-                         reserva.status === 'cancelada' ? 'Cancelada' : 'No Show'}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  )
+interface NovoEvento {
+  nome: string;
+  data_evento: string;
+  artista: string;
+  genero: string;
+  tipo_evento: string;
+  hora_inicio: string;
+  hora_fim: string;
+  capacidade_maxima: number;
+  observacoes: string;
 }
 
 export default function CalendarioPage() {
-  const [dados, setDados] = useState<RespostaCalendario | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [eventoSelecionado, setEventoSelecionado] = useState<EventoCalendario | null>(null)
-  const [viewMode, setViewMode] = useState<'calendario' | 'lista'>('calendario')
-  const [filtroStatus, setFiltroStatus] = useState('todos')
-  const [filtroGenero, setFiltroGenero] = useState('todos')
-
-  const carregarDados = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await fetch('/api/gestao/calendario')
-      if (!response.ok) {
-        throw new Error('Erro ao carregar dados do calendário')
-      }
-      
-      const dadosCalendario = await response.json()
-      setDados(dadosCalendario)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { setPageTitle } = usePageTitle();
+  const { toast } = useToast();
+  const router = useRouter();
+  
+  const [eventos, setEventos] = useState<Evento[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [mesAtual, setMesAtual] = useState(new Date());
+  const [modalAberto, setModalAberto] = useState(false);
+  const [filtroGenero, setFiltroGenero] = useState('todos');
+  const [busca, setBusca] = useState('');
+  const [salvandoEvento, setSalvandoEvento] = useState(false);
+  
+  const [novoEvento, setNovoEvento] = useState<NovoEvento>({
+    nome: '',
+    data_evento: '',
+    artista: '',
+    genero: '',
+    tipo_evento: '',
+    hora_inicio: '',
+    hora_fim: '',
+    capacidade_maxima: 0,
+    observacoes: ''
+  });
 
   useEffect(() => {
-    carregarDados()
-  }, [])
+    setPageTitle('Calendário de Eventos');
+    carregarEventos();
+  }, [setPageTitle]);
+
+  const carregarEventos = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/gestao/eventos');
+      if (response.ok) {
+        const data = await response.json();
+        setEventos(data);
+      } else {
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar eventos",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar eventos:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar eventos",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const salvarEvento = async () => {
+    try {
+      setSalvandoEvento(true);
+      
+      const response = await fetch('/api/gestao/eventos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(novoEvento)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Evento criado com sucesso!",
+          variant: "default"
+        });
+        setModalAberto(false);
+        carregarEventos();
+        setNovoEvento({
+          nome: '',
+          data_evento: '',
+          artista: '',
+          genero: '',
+          tipo_evento: '',
+          hora_inicio: '',
+          hora_fim: '',
+          capacidade_maxima: 0,
+          observacoes: ''
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Erro ao criar evento",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao salvar evento:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar evento",
+        variant: "destructive"
+      });
+    } finally {
+      setSalvandoEvento(false);
+    }
+  };
+
+  const proximoMes = () => {
+    setMesAtual(new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 1));
+  };
+
+  const mesAnterior = () => {
+    setMesAtual(new Date(mesAtual.getFullYear(), mesAtual.getMonth() - 1, 1));
+  };
+
+  const getDiasDoMes = (): (Date | null)[] => {
+    const inicio = new Date(mesAtual.getFullYear(), mesAtual.getMonth(), 1);
+    const fim = new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 0);
+    const dias: (Date | null)[] = [];
+
+    // Adicionar dias vazios do início
+    const primeiroDiaDaSemana = inicio.getDay();
+    for (let i = 0; i < primeiroDiaDaSemana; i++) {
+      dias.push(null);
+    }
+
+    // Adicionar dias do mês
+    for (let dia = 1; dia <= fim.getDate(); dia++) {
+      dias.push(new Date(mesAtual.getFullYear(), mesAtual.getMonth(), dia));
+    }
+
+    return dias;
+  };
+
+  const getEventosNoDia = (data: Date) => {
+    const dataStr = data.toISOString().split('T')[0];
+    return eventos.filter(evento => evento.data_evento === dataStr);
+  };
+
+  const eventosFiltrados = eventos.filter(evento => {
+    const matchGenero = filtroGenero === 'todos' || evento.genero?.toLowerCase().includes(filtroGenero.toLowerCase());
+    const matchBusca = busca === '' || 
+      evento.nome.toLowerCase().includes(busca.toLowerCase()) ||
+      evento.artista?.toLowerCase().includes(busca.toLowerCase());
+    return matchGenero && matchBusca;
+  });
+
+  const generos = [...new Set(eventos.map(e => e.genero).filter(Boolean))];
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'confirmado':
+        return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">Confirmado</Badge>;
+      case 'pendente':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800">Pendente</Badge>;
+      case 'cancelado':
+        return <Badge className="bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">Cancelado</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const getGeneroBadge = (genero: string) => {
+    switch (genero?.toLowerCase()) {
+      case 'samba':
+        return <Badge className="bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800"><Mic className="w-3 h-3 mr-1" />Samba</Badge>;
+      case 'dj':
+        return <Badge className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800"><Music className="w-3 h-3 mr-1" />DJ</Badge>;
+      case 'funk':
+        return <Badge className="bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900/20 dark:text-pink-400 dark:border-pink-800"><Music className="w-3 h-3 mr-1" />Funk</Badge>;
+      default:
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"><Star className="w-3 h-3 mr-1" />{genero}</Badge>;
+    }
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando calendário...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          Erro ao carregar dados: {error}
-        </AlertDescription>
-      </Alert>
-    )
-  }
-
-  if (!dados) {
-    return (
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          Nenhum dado disponível
-        </AlertDescription>
-      </Alert>
-    )
-  }
-
-  const eventosFiltrados = dados.eventos.filter(evento => {
-    const passaStatus = filtroStatus === 'todos' || evento.status === filtroStatus
-    const passaGenero = filtroGenero === 'todos' || evento.genero === filtroGenero
-    return passaStatus && passaGenero
-  })
-
-  const generos = [...new Set(dados.eventos.map(e => e.genero))]
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl w-fit">
-              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                Planejamento Comercial
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                Gerencie eventos, agendamentos e acompanhe o desempenho comercial
-              </p>
-            </div>
+      <ProtectedRoute requiredModule="gestao">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         </div>
+      </ProtectedRoute>
+    );
+  }
 
-        {/* Botões de Ação */}
-        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-2 mb-4 sm:mb-6">
-          <Button onClick={carregarDados} variant="outline" className="w-full sm:w-auto">
-            <Activity className="h-4 w-4 mr-2" />
-            Atualizar
-          </Button>
-          <Button className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Evento
-          </Button>
-        </div>
-
-        {/* Cards de Resumo */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total de Eventos
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-gray-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-                {dados.resumo.totalEventos}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
-                Eventos Confirmados
-              </CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">
-                {dados.resumo.eventosConfirmados}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total de Reservas
-              </CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {dados.resumo.totalReservas}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
-                Faturamento Planejado
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-purple-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {formatarValor(dados.resumo.faturamentoPlanejado)}
-              </div>
-            </CardContent>
-          </Card>
+  return (
+    <ProtectedRoute requiredModule="gestao">
+      <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Calendário de Eventos
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Gerencie a programação de eventos do estabelecimento
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={carregarEventos}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Atualizar
+            </Button>
+            <Button
+              onClick={() => setModalAberto(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Evento
+            </Button>
+          </div>
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
-          <div className="flex-1">
-            <Select value={filtroStatus} onValueChange={setFiltroStatus}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filtrar por status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os Status</SelectItem>
-                <SelectItem value="agendado">Agendado</SelectItem>
-                <SelectItem value="confirmado">Confirmado</SelectItem>
-                <SelectItem value="realizado">Realizado</SelectItem>
-                <SelectItem value="cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex-1">
-            <Select value={filtroGenero} onValueChange={setFiltroGenero}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filtrar por gênero" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os Gêneros</SelectItem>
-                {generos.map(genero => (
-                  <SelectItem key={genero} value={genero}>{genero}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-gray-900 dark:text-white">Filtros</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <Label htmlFor="busca" className="text-sm text-gray-700 dark:text-gray-300">Buscar</Label>
+                <div className="relative mt-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    id="busca"
+                    placeholder="Nome do evento ou artista..."
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+              <div className="w-full sm:w-48">
+                <Label className="text-sm text-gray-700 dark:text-gray-300">Gênero</Label>
+                <Select value={filtroGenero} onValueChange={setFiltroGenero}>
+                  <SelectTrigger className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os gêneros</SelectItem>
+                    {generos.map((genero) => (
+                      <SelectItem key={genero} value={genero}>{genero}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Conteúdo Principal */}
-        <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'calendario' | 'lista')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="calendario">Calendário Mensal</TabsTrigger>
-            <TabsTrigger value="lista">Lista de Eventos</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="calendario" className="space-y-4">
-            <CalendarioMensal 
-              eventos={eventosFiltrados}
-              metasDiarias={dados.metas_diarias}
-              onEventoClick={setEventoSelecionado}
-            />
-          </TabsContent>
-
-          <TabsContent value="lista" className="space-y-4">
-            <div className="grid gap-4">
-              {eventosFiltrados.map(evento => (
-                <Card key={evento.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setEventoSelecionado(evento)}>
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(evento.status)}
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">{evento.label}</div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">{evento.artista}</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                        <div className="text-right">
-                          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Data</div>
-                          <div className="font-medium text-sm">{formatarData(evento.data)}</div>
-                        </div>
-                        
-                        <div className="text-right">
-                          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Faturamento</div>
-                          <div className="font-medium text-sm">{formatarValor(evento.planejado.faturamento)}</div>
-                        </div>
-                        
-                        <div className="text-right">
-                          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Reservas</div>
-                          <div className="font-medium text-sm">{evento.reservas.total}</div>
-                        </div>
-                        
-                        <Badge className={getGeneroColor(evento.genero)}>
-                          {evento.genero}
-                        </Badge>
-                        
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+        {/* Calendário */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl text-gray-900 dark:text-white">
+                  {mesAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
+                  {eventosFiltrados.length} eventos encontrados
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={mesAnterior}
+                  variant="outline"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button 
+                  onClick={proximoMes}
+                  variant="outline"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            {/* Cabeçalho dos dias da semana */}
+            <div className="grid grid-cols-7 gap-2 mb-4">
+              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
+                <div
+                  key={dia}
+                  className="text-center text-sm font-medium text-gray-500 dark:text-gray-400 py-2"
+                >
+                  {dia}
+                </div>
               ))}
             </div>
-          </TabsContent>
-        </Tabs>
 
-        {/* Modal de Detalhes */}
-        {eventoSelecionado && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <DetalhesEvento 
-                evento={eventoSelecionado}
-                reservas={dados.reservas}
-                meta={dados.metas_diarias.find(m => m.data === eventoSelecionado.data)}
-                onClose={() => setEventoSelecionado(null)}
-              />
+            {/* Grade do calendário */}
+            <div className="grid grid-cols-7 gap-2">
+              {getDiasDoMes().map((dia, index) => {
+                if (!dia) {
+                  return <div key={index} className="aspect-square" />;
+                }
+                
+                const eventosNoDia = getEventosNoDia(dia);
+                const isHoje = dia.toDateString() === new Date().toDateString();
+                
+                return (
+                  <div
+                    key={`${dia.getFullYear()}-${dia.getMonth()}-${dia.getDate()}`}
+                    className={`
+                      aspect-square border border-gray-200 dark:border-gray-700 rounded-lg p-2 
+                      ${isHoje ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-800/50'}
+                      hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer
+                    `}
+                  >
+                    <div className="flex flex-col h-full">
+                      <div className={`text-sm font-medium mb-1 ${isHoje ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                        {dia.getDate()}
+                      </div>
+                      <div className="flex-1 space-y-1 overflow-hidden">
+                        {eventosNoDia.slice(0, 2).map((evento) => (
+                          <div
+                            key={evento.id}
+                            className="text-xs p-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 truncate"
+                            title={`${evento.nome} - ${evento.artista}`}
+                          >
+                            {evento.nome}
+                          </div>
+                        ))}
+                        {eventosNoDia.length > 2 && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            +{eventosNoDia.length - 2} eventos
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
+
+        {/* Lista de eventos */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-xl text-gray-900 dark:text-white">
+              Próximos Eventos
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
+              Lista detalhada dos próximos eventos programados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {eventosFiltrados
+                .filter(evento => new Date(evento.data_evento) >= new Date())
+                .sort((a, b) => new Date(a.data_evento).getTime() - new Date(b.data_evento).getTime())
+                .slice(0, 10)
+                .map((evento) => (
+                  <div
+                    key={evento.id}
+                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {evento.nome}
+                        </h3>
+                        {getStatusBadge(evento.status)}
+                        {evento.genero && getGeneroBadge(evento.genero)}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(evento.data_evento).toLocaleDateString('pt-BR')} - {evento.dia_semana}
+                        </div>
+                        {evento.artista && (
+                          <div className="flex items-center gap-1">
+                            <Mic className="w-4 h-4" />
+                            {evento.artista}
+                          </div>
+                        )}
+                        {evento.hora_inicio && (
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {evento.hora_inicio}
+                          </div>
+                        )}
+                        {evento.capacidade_maxima && (
+                          <div className="flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            {evento.capacidade_maxima} pessoas
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              
+              {eventosFiltrados.filter(evento => new Date(evento.data_evento) >= new Date()).length === 0 && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  Nenhum evento encontrado com os filtros aplicados
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Modal Novo Evento */}
+        <Dialog open={modalAberto} onOpenChange={setModalAberto}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">Novo Evento</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="nome" className="text-sm text-gray-700 dark:text-gray-300">Nome do Evento</Label>
+                <Input
+                  id="nome"
+                  value={novoEvento.nome}
+                  onChange={(e) => setNovoEvento({...novoEvento, nome: e.target.value})}
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="data_evento" className="text-sm text-gray-700 dark:text-gray-300">Data</Label>
+                <Input
+                  id="data_evento"
+                  type="date"
+                  value={novoEvento.data_evento}
+                  onChange={(e) => setNovoEvento({...novoEvento, data_evento: e.target.value})}
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="artista" className="text-sm text-gray-700 dark:text-gray-300">Artista</Label>
+                <Input
+                  id="artista"
+                  value={novoEvento.artista}
+                  onChange={(e) => setNovoEvento({...novoEvento, artista: e.target.value})}
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-gray-700 dark:text-gray-300">Gênero</Label>
+                  <Select value={novoEvento.genero} onValueChange={(value) => setNovoEvento({...novoEvento, genero: value})}>
+                    <SelectTrigger className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                      <SelectValue placeholder="Selecionar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Samba">Samba</SelectItem>
+                      <SelectItem value="DJ">DJ</SelectItem>
+                      <SelectItem value="Funk">Funk</SelectItem>
+                      <SelectItem value="Pop">Pop</SelectItem>
+                      <SelectItem value="Rock">Rock</SelectItem>
+                      <SelectItem value="Eletrônica">Eletrônica</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-sm text-gray-700 dark:text-gray-300">Tipo</Label>
+                  <Select value={novoEvento.tipo_evento} onValueChange={(value) => setNovoEvento({...novoEvento, tipo_evento: value})}>
+                    <SelectTrigger className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                      <SelectValue placeholder="Selecionar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Show">Show</SelectItem>
+                      <SelectItem value="Festa">Festa</SelectItem>
+                      <SelectItem value="Happy Hour">Happy Hour</SelectItem>
+                      <SelectItem value="Evento Especial">Evento Especial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="hora_inicio" className="text-sm text-gray-700 dark:text-gray-300">Hora Início</Label>
+                  <Input
+                    id="hora_inicio"
+                    type="time"
+                    value={novoEvento.hora_inicio}
+                    onChange={(e) => setNovoEvento({...novoEvento, hora_inicio: e.target.value})}
+                    className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="hora_fim" className="text-sm text-gray-700 dark:text-gray-300">Hora Fim</Label>
+                  <Input
+                    id="hora_fim"
+                    type="time"
+                    value={novoEvento.hora_fim}
+                    onChange={(e) => setNovoEvento({...novoEvento, hora_fim: e.target.value})}
+                    className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="capacidade_maxima" className="text-sm text-gray-700 dark:text-gray-300">Capacidade Máxima</Label>
+                <Input
+                  id="capacidade_maxima"
+                  type="number"
+                  value={novoEvento.capacidade_maxima}
+                  onChange={(e) => setNovoEvento({...novoEvento, capacidade_maxima: parseInt(e.target.value) || 0})}
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="observacoes" className="text-sm text-gray-700 dark:text-gray-300">Observações</Label>
+                <Textarea
+                  id="observacoes"
+                  value={novoEvento.observacoes}
+                  onChange={(e) => setNovoEvento({...novoEvento, observacoes: e.target.value})}
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setModalAberto(false)}
+                className="text-gray-700 dark:text-gray-300"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={salvarEvento}
+                disabled={salvandoEvento || !novoEvento.nome || !novoEvento.data_evento}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {salvandoEvento ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-    </div>
-  )
+    </ProtectedRoute>
+  );
 }

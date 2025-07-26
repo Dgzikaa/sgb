@@ -1324,555 +1324,558 @@ export default function AgendamentoPage() {
 
   return (
     <ProtectedRoute requiredModule="financeiro">
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-4 sm:py-6">
-          {/* Header */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl w-fit">
-                <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                  Agendamento de Pagamentos
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Gerencie agendamentos de pagamentos PIX com integração NIBO e
-                  Inter
-                </p>
-                {lastSave && (
-                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 mt-1">
-                    Último salvamento: {lastSave}
+      <div className="space-y-6 mt-8">
+        {/* Header Principal */}
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <div className="container mx-auto px-4 py-4 sm:py-6">
+            {/* Header */}
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl w-fit">
+                  <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                    Agendamento de Pagamentos
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Gerencie agendamentos de pagamentos PIX com integração NIBO e
+                    Inter
                   </p>
-                )}
+                  {lastSave && (
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 mt-1">
+                      Último salvamento: {lastSave}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
-            {/* Sidebar com Métricas */}
-            <div className="w-full lg:w-80 flex-shrink-0">
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg lg:sticky lg:top-6">
-                <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
-                    Resumo
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 bg-gray-100 dark:bg-gray-600 rounded-lg">
-                        <FileText className="w-4 w-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+              {/* Sidebar com Métricas */}
+              <div className="w-full lg:w-80 flex-shrink-0">
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg lg:sticky lg:top-6">
+                  <CardHeader>
+                    <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
+                      Resumo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 sm:space-y-4">
+                    <div className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                          <FileText className="w-4 w-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Total
+                        </span>
                       </div>
-                      <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Total
+                      <span className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                        {metricas.total}
                       </span>
                     </div>
-                    <span className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
-                      {metricas.total}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                        <Clock className="w-4 w-4 sm:w-5 sm:h-5 text-yellow-600 dark:text-yellow-400" />
+                    <div className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                          <Clock className="w-4 w-4 sm:w-5 sm:h-5 text-yellow-600 dark:text-yellow-400" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-yellow-700 dark:text-yellow-300">
+                          Pendentes
+                        </span>
                       </div>
-                      <span className="text-xs sm:text-sm font-medium text-yellow-700 dark:text-yellow-300">
-                        Pendentes
+                      <span className="text-base sm:text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                        {metricas.pendentes}
                       </span>
                     </div>
-                    <span className="text-base sm:text-lg font-bold text-yellow-600 dark:text-yellow-400">
-                      {metricas.pendentes}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                        <Calendar className="w-4 w-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
+                    <div className="flex items-center justify-between p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Calendar className="w-4 w-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">
+                          Agendados
+                        </span>
                       </div>
-                      <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">
-                        Agendados
+                      <span className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">
+                        {metricas.agendados}
                       </span>
                     </div>
-                    <span className="text-base sm:text-lg font-bold text-blue-600 dark:text-blue-400">
-                      {metricas.agendados}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                        <Clock className="w-4 w-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+                    <div className="flex items-center justify-between p-2 sm:p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                          <Clock className="w-4 w-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300">
+                          Aguardando Aprovação
+                        </span>
                       </div>
-                      <span className="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300">
-                        Aguardando Aprovação
+                      <span className="text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400">
+                        {metricas.aguardandoAprovacao}
                       </span>
                     </div>
-                    <span className="text-base sm:text-lg font-bold text-orange-600 dark:text-orange-400">
-                      {metricas.aguardandoAprovacao}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                        <CheckCircle className="w-4 w-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+                    <div className="flex items-center justify-between p-2 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                          <CheckCircle className="w-4 w-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
+                          Aprovados
+                        </span>
                       </div>
-                      <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
-                        Aprovados
+                      <span className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
+                        {metricas.aprovados}
                       </span>
                     </div>
-                    <span className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
-                      {metricas.aprovados}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center justify-between p-2 sm:p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                        <AlertCircle className="w-4 w-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
+                    <div className="flex items-center justify-between p-2 sm:p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                          <AlertCircle className="w-4 w-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">
+                          Erros
+                        </span>
                       </div>
-                      <span className="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">
-                        Erros
+                      <span className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400">
+                        {metricas.erros}
                       </span>
                     </div>
-                    <span className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400">
-                      {metricas.erros}
-                    </span>
-                  </div>
 
-                  {/* Botões de Ação */}
-                  <div className="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                    <Button
-                      onClick={agendarPagamentos}
-                      disabled={isProcessing || metricas.pendentes === 0}
-                      className="w-full btn-primary text-xs sm:text-sm"
+                    {/* Botões de Ação */}
+                    <div className="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                      <Button
+                        onClick={agendarPagamentos}
+                        disabled={isProcessing || metricas.pendentes === 0}
+                        className="w-full btn-primary text-xs sm:text-sm"
+                      >
+                        <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        Agendar no NIBO
+                      </Button>
+
+                      <Button
+                        onClick={enviarTodosParaInter}
+                        disabled={isProcessing || metricas.agendados === 0}
+                        className="w-full btn-secondary text-xs sm:text-sm"
+                      >
+                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        Enviar para Aprovação
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Conteúdo Principal */}
+              <div className="flex-1">
+                {/* Tabs de Funcionalidades */}
+                <Tabs defaultValue="manual" className="space-y-4 sm:space-y-6">
+                  <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                    <TabsTrigger
+                      value="manual"
+                      className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 rounded-md text-xs sm:text-sm"
                     >
-                      <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      Agendar no NIBO
-                    </Button>
-
-                    <Button
-                      onClick={enviarTodosParaInter}
-                      disabled={isProcessing || metricas.agendados === 0}
-                      className="w-full btn-secondary text-xs sm:text-sm"
+                      Adicionar Manual
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="lista"
+                      className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 rounded-md text-xs sm:text-sm"
                     >
-                      <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      Enviar para Aprovação
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                      Lista de Pagamentos
+                    </TabsTrigger>
+                  </TabsList>
 
-            {/* Conteúdo Principal */}
-            <div className="flex-1">
-              {/* Tabs de Funcionalidades */}
-              <Tabs defaultValue="manual" className="space-y-4 sm:space-y-6">
-                <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
-                  <TabsTrigger
-                    value="manual"
-                    className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 rounded-md text-xs sm:text-sm"
-                  >
-                    Adicionar Manual
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="lista"
-                    className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 rounded-md text-xs sm:text-sm"
-                  >
-                    Lista de Pagamentos
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Tab: Adicionar Manual */}
-                <TabsContent value="manual">
-                  <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
-                        Adicionar Pagamento Manual
-                      </CardTitle>
-                      <CardDescription className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
-                        Preencha os dados do pagamento para agendamento
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                          <Label
-                            htmlFor="cpf_cnpj"
-                            className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                          >
-                            CPF/CNPJ *
-                          </Label>
-                          <div className="flex gap-2 mt-1">
+                  {/* Tab: Adicionar Manual */}
+                  <TabsContent value="manual">
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+                      <CardHeader>
+                        <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
+                          Adicionar Pagamento Manual
+                        </CardTitle>
+                        <CardDescription className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+                          Preencha os dados do pagamento para agendamento
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          <div>
+                            <Label
+                              htmlFor="cpf_cnpj"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                            >
+                              CPF/CNPJ *
+                            </Label>
+                            <div className="flex gap-2 mt-1">
+                              <Input
+                                id="cpf_cnpj"
+                                value={novoPagamento.cpf_cnpj}
+                                onChange={e =>
+                                  setNovoPagamento(prev => ({
+                                    ...prev,
+                                    cpf_cnpj: formatarDocumento(e.target.value),
+                                  }))
+                                }
+                                placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                                className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs sm:text-sm"
+                              />
+                              <Button
+                                onClick={() =>
+                                  buscarStakeholder(novoPagamento.cpf_cnpj)
+                                }
+                                type="button"
+                                size="sm"
+                                className="btn-primary"
+                              >
+                                <Search className="w-3 h-3 sm:w-4 sm:h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <Label
+                              htmlFor="nome"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                            >
+                              Nome do Beneficiário *
+                            </Label>
                             <Input
-                              id="cpf_cnpj"
-                              value={novoPagamento.cpf_cnpj}
+                              id="nome"
+                              value={novoPagamento.nome_beneficiario}
                               onChange={e =>
                                 setNovoPagamento(prev => ({
                                   ...prev,
-                                  cpf_cnpj: formatarDocumento(e.target.value),
+                                  nome_beneficiario: e.target.value,
                                 }))
                               }
-                              placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                              className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs sm:text-sm"
+                              placeholder="Nome completo"
+                              disabled={!!novoPagamento.cpf_cnpj}
+                              className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 text-xs sm:text-sm"
                             />
-                            <Button
-                              onClick={() =>
-                                buscarStakeholder(novoPagamento.cpf_cnpj)
-                              }
-                              type="button"
-                              size="sm"
-                              className="btn-primary"
+                          </div>
+                          <div>
+                            <Label
+                              htmlFor="chave_pix"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
                             >
-                              <Search className="w-3 h-3 sm:w-4 sm:h-4" />
-                            </Button>
+                              Chave PIX
+                            </Label>
+                            <Input
+                              id="chave_pix"
+                              value={novoPagamento.chave_pix}
+                              onChange={e =>
+                                setNovoPagamento(prev => ({
+                                  ...prev,
+                                  chave_pix: e.target.value,
+                                }))
+                              }
+                              placeholder="CPF, CNPJ, email ou telefone"
+                              className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-xs sm:text-sm"
+                            />
+                          </div>
+                          <div>
+                            <Label
+                              htmlFor="valor"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                            >
+                              Valor *
+                            </Label>
+                            <Input
+                              id="valor"
+                              value={novoPagamento.valor}
+                              onChange={e =>
+                                setNovoPagamento(prev => ({
+                                  ...prev,
+                                  valor: e.target.value,
+                                }))
+                              }
+                              placeholder="R$ 0,00"
+                              className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-xs sm:text-sm"
+                            />
+                          </div>
+                          <div>
+                            <Label
+                              htmlFor="data_pagamento"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                            >
+                              Data de Pagamento *
+                            </Label>
+                            <Input
+                              id="data_pagamento"
+                              type="date"
+                              value={novoPagamento.data_pagamento}
+                              onChange={e =>
+                                setNovoPagamento(prev => ({
+                                  ...prev,
+                                  data_pagamento: e.target.value,
+                                }))
+                              }
+                              className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs sm:text-sm"
+                            />
+                          </div>
+                          <div>
+                            <Label
+                              htmlFor="data_competencia"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                            >
+                              Data de Competência
+                            </Label>
+                            <Input
+                              id="data_competencia"
+                              type="date"
+                              value={novoPagamento.data_competencia}
+                              onChange={e =>
+                                setNovoPagamento(prev => ({
+                                  ...prev,
+                                  data_competencia: e.target.value,
+                                }))
+                              }
+                              className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs sm:text-sm"
+                            />
+                          </div>
+                          <div>
+                            <Label
+                              htmlFor="categoria"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                            >
+                              Categoria *
+                            </Label>
+                            <SelectWithSearch
+                              options={categorias.map((categoria: any) => ({
+                                value: categoria.id,
+                                label: categoria.nome,
+                              }))}
+                              value={novoPagamento.categoria_id || null}
+                              onValueChange={value =>
+                                setNovoPagamento(prev => ({
+                                  ...prev,
+                                  categoria_id: value || '',
+                                }))
+                              }
+                              placeholder="Selecione uma categoria"
+                              searchPlaceholder="Buscar categoria..."
+                              disabled={isLoadingOptions}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label
+                              htmlFor="centro_custo"
+                              className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                            >
+                              Centro de Custo *
+                            </Label>
+                            <SelectWithSearch
+                              options={centrosCusto.map((centro: any) => ({
+                                value: centro.id,
+                                label: centro.nome,
+                              }))}
+                              value={novoPagamento.centro_custo_id || null}
+                              onValueChange={value =>
+                                setNovoPagamento(prev => ({
+                                  ...prev,
+                                  centro_custo_id: value || '',
+                                }))
+                              }
+                              placeholder="Selecione um centro de custo"
+                              searchPlaceholder="Buscar centro de custo..."
+                              disabled={isLoadingOptions}
+                              className="mt-1"
+                            />
                           </div>
                         </div>
                         <div>
                           <Label
-                            htmlFor="nome"
+                            htmlFor="descricao"
                             className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
                           >
-                            Nome do Beneficiário *
+                            Descrição
                           </Label>
-                          <Input
-                            id="nome"
-                            value={novoPagamento.nome_beneficiario}
+                          <Textarea
+                            id="descricao"
+                            value={novoPagamento.descricao}
                             onChange={e =>
                               setNovoPagamento(prev => ({
                                 ...prev,
-                                nome_beneficiario: e.target.value,
+                                descricao: e.target.value,
                               }))
                             }
-                            placeholder="Nome completo"
-                            disabled={!!novoPagamento.cpf_cnpj}
-                            className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:bg-gray-100 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 text-xs sm:text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="chave_pix"
-                            className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                          >
-                            Chave PIX
-                          </Label>
-                          <Input
-                            id="chave_pix"
-                            value={novoPagamento.chave_pix}
-                            onChange={e =>
-                              setNovoPagamento(prev => ({
-                                ...prev,
-                                chave_pix: e.target.value,
-                              }))
-                            }
-                            placeholder="CPF, CNPJ, email ou telefone"
+                            placeholder="Descrição do pagamento"
                             className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-xs sm:text-sm"
                           />
                         </div>
-                        <div>
-                          <Label
-                            htmlFor="valor"
-                            className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
+                          <Button
+                            onClick={adicionarPagamento}
+                            className="btn-primary text-xs sm:text-sm"
                           >
-                            Valor *
-                          </Label>
-                          <Input
-                            id="valor"
-                            value={novoPagamento.valor}
-                            onChange={e =>
-                              setNovoPagamento(prev => ({
-                                ...prev,
-                                valor: e.target.value,
-                              }))
-                            }
-                            placeholder="R$ 0,00"
-                            className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-xs sm:text-sm"
-                          />
+                            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            Adicionar à Lista
+                          </Button>
+                          <Button onClick={limparLista} className="btn-outline text-xs sm:text-sm">
+                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            Limpar Lista
+                          </Button>
                         </div>
-                        <div>
-                          <Label
-                            htmlFor="data_pagamento"
-                            className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                          >
-                            Data de Pagamento *
-                          </Label>
-                          <Input
-                            id="data_pagamento"
-                            type="date"
-                            value={novoPagamento.data_pagamento}
-                            onChange={e =>
-                              setNovoPagamento(prev => ({
-                                ...prev,
-                                data_pagamento: e.target.value,
-                              }))
-                            }
-                            className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs sm:text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="data_competencia"
-                            className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                          >
-                            Data de Competência
-                          </Label>
-                          <Input
-                            id="data_competencia"
-                            type="date"
-                            value={novoPagamento.data_competencia}
-                            onChange={e =>
-                              setNovoPagamento(prev => ({
-                                ...prev,
-                                data_competencia: e.target.value,
-                              }))
-                            }
-                            className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-xs sm:text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="categoria"
-                            className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                          >
-                            Categoria *
-                          </Label>
-                          <SelectWithSearch
-                            options={categorias.map((categoria: any) => ({
-                              value: categoria.id,
-                              label: categoria.nome,
-                            }))}
-                            value={novoPagamento.categoria_id || null}
-                            onValueChange={value =>
-                              setNovoPagamento(prev => ({
-                                ...prev,
-                                categoria_id: value || '',
-                              }))
-                            }
-                            placeholder="Selecione uma categoria"
-                            searchPlaceholder="Buscar categoria..."
-                            disabled={isLoadingOptions}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label
-                            htmlFor="centro_custo"
-                            className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                          >
-                            Centro de Custo *
-                          </Label>
-                          <SelectWithSearch
-                            options={centrosCusto.map((centro: any) => ({
-                              value: centro.id,
-                              label: centro.nome,
-                            }))}
-                            value={novoPagamento.centro_custo_id || null}
-                            onValueChange={value =>
-                              setNovoPagamento(prev => ({
-                                ...prev,
-                                centro_custo_id: value || '',
-                              }))
-                            }
-                            placeholder="Selecione um centro de custo"
-                            searchPlaceholder="Buscar centro de custo..."
-                            disabled={isLoadingOptions}
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="descricao"
-                          className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                        >
-                          Descrição
-                        </Label>
-                        <Textarea
-                          id="descricao"
-                          value={novoPagamento.descricao}
-                          onChange={e =>
-                            setNovoPagamento(prev => ({
-                              ...prev,
-                              descricao: e.target.value,
-                            }))
-                          }
-                          placeholder="Descrição do pagamento"
-                          className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-xs sm:text-sm"
-                        />
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
-                        <Button
-                          onClick={adicionarPagamento}
-                          className="btn-primary text-xs sm:text-sm"
-                        >
-                          <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                          Adicionar à Lista
-                        </Button>
-                        <Button onClick={limparLista} className="btn-outline text-xs sm:text-sm">
-                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                          Limpar Lista
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
 
-                {/* Tab: Lista de Pagamentos */}
-                <TabsContent value="lista">
-                  <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
-                            Lista de Pagamentos
-                          </CardTitle>
-                          <CardDescription className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
-                            {pagamentos.length} pagamento(s) na lista
-                          </CardDescription>
+                  {/* Tab: Lista de Pagamentos */}
+                  <TabsContent value="lista">
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
+                              Lista de Pagamentos
+                            </CardTitle>
+                            <CardDescription className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+                              {pagamentos.length} pagamento(s) na lista
+                            </CardDescription>
+                          </div>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {pagamentos.length === 0 ? (
-                        <div className="text-center py-8 sm:py-12">
-                          <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 sm:mb-4" />
-                          <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">
-                            Nenhum pagamento na lista
-                          </p>
-                          <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500">
-                            Adicione pagamentos manualmente para começar
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {pagamentos.map(pagamento => (
-                            <div
-                              key={pagamento.id}
-                              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 gap-3 sm:gap-4"
-                            >
-                              <div className="flex-1">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                                  <h3 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">
-                                    {pagamento.nome_beneficiario}
-                                  </h3>
-                                  {getStatusBadge(pagamento.status)}
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                  <div>
-                                    <span className="font-medium">
-                                      CPF/CNPJ:
-                                    </span>{' '}
-                                    {pagamento.cpf_cnpj
-                                      ? formatarDocumento(pagamento.cpf_cnpj)
-                                      : 'Não informado'}
+                      </CardHeader>
+                      <CardContent>
+                        {pagamentos.length === 0 ? (
+                          <div className="text-center py-8 sm:py-12">
+                            <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 sm:mb-4" />
+                            <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">
+                              Nenhum pagamento na lista
+                            </p>
+                            <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500">
+                              Adicione pagamentos manualmente para começar
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {pagamentos.map(pagamento => (
+                              <div
+                                key={pagamento.id}
+                                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 gap-3 sm:gap-4"
+                              >
+                                <div className="flex-1">
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                                    <h3 className="font-medium text-gray-900 dark:text-white text-sm sm:text-base">
+                                      {pagamento.nome_beneficiario}
+                                    </h3>
+                                    {getStatusBadge(pagamento.status)}
                                   </div>
-                                  <div>
-                                    <span className="font-medium">Valor:</span>{' '}
-                                    {pagamento.valor}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                                    <div>
+                                      <span className="font-medium">
+                                        CPF/CNPJ:
+                                      </span>{' '}
+                                      {pagamento.cpf_cnpj
+                                        ? formatarDocumento(pagamento.cpf_cnpj)
+                                        : 'Não informado'}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Valor:</span>{' '}
+                                      {pagamento.valor}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Data:</span>{' '}
+                                      {new Date(
+                                        pagamento.data_pagamento
+                                      ).toLocaleDateString('pt-BR')}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">
+                                        Chave PIX:
+                                      </span>{' '}
+                                      {pagamento.chave_pix || 'Não informada'}
+                                    </div>
                                   </div>
-                                  <div>
-                                    <span className="font-medium">Data:</span>{' '}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                    <div>
+                                      <span className="font-medium">
+                                        Categoria:
+                                      </span>{' '}
+                                      {categorias.find(
+                                        (c: any) =>
+                                          c.id === pagamento.categoria_id
+                                      )?.nome || 'Não selecionada'}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">
+                                        Centro de Custo:
+                                      </span>{' '}
+                                      {centrosCusto.find(
+                                        (c: any) =>
+                                          c.id === pagamento.centro_custo_id
+                                      )?.nome || 'Não selecionado'}
+                                    </div>
+                                  </div>
+                                  {pagamento.descricao && (
+                                    <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                      <span className="font-medium">
+                                        Descrição:
+                                      </span>{' '}
+                                      {pagamento.descricao}
+                                    </div>
+                                  )}
+                                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-500">
+                                    Criado:{' '}
                                     {new Date(
-                                      pagamento.data_pagamento
-                                    ).toLocaleDateString('pt-BR')}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">
-                                      Chave PIX:
-                                    </span>{' '}
-                                    {pagamento.chave_pix || 'Não informada'}
+                                      pagamento.created_at
+                                    ).toLocaleString('pt-BR')}{' '}
+                                    | Atualizado:{' '}
+                                    {new Date(
+                                      pagamento.updated_at
+                                    ).toLocaleString('pt-BR')}
                                   </div>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                  <div>
-                                    <span className="font-medium">
-                                      Categoria:
-                                    </span>{' '}
-                                    {categorias.find(
-                                      (c: any) =>
-                                        c.id === pagamento.categoria_id
-                                    )?.nome || 'Não selecionada'}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">
-                                      Centro de Custo:
-                                    </span>{' '}
-                                    {centrosCusto.find(
-                                      (c: any) =>
-                                        c.id === pagamento.centro_custo_id
-                                    )?.nome || 'Não selecionado'}
-                                  </div>
-                                </div>
-                                {pagamento.descricao && (
-                                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                    <span className="font-medium">
-                                      Descrição:
-                                    </span>{' '}
-                                    {pagamento.descricao}
-                                  </div>
-                                )}
-                                <div className="mt-2 text-xs text-gray-500 dark:text-gray-500">
-                                  Criado:{' '}
-                                  {new Date(
-                                    pagamento.created_at
-                                  ).toLocaleString('pt-BR')}{' '}
-                                  | Atualizado:{' '}
-                                  {new Date(
-                                    pagamento.updated_at
-                                  ).toLocaleString('pt-BR')}
+                                <div className="flex items-center gap-1 sm:gap-2 ml-0 sm:ml-4">
+                                  <Button
+                                    onClick={() => editarPagamento(pagamento)}
+                                    size="sm"
+                                    className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
+                                    title="Editar pagamento"
+                                  >
+                                    <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  </Button>
+                                  {pagamento.status !== 'pendente' && (
+                                    <Button
+                                      onClick={() =>
+                                        redefinirStatus(pagamento.id)
+                                      }
+                                      size="sm"
+                                      className="bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
+                                      title="Redefinir status para pendente"
+                                    >
+                                      <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    </Button>
+                                  )}
+                                  {pagamento.status === 'agendado' && (
+                                    <Button
+                                      onClick={() => enviarParaInter(pagamento)}
+                                      size="sm"
+                                      className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
+                                      title="Enviar para Aprovação"
+                                    >
+                                      <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    onClick={() => removerPagamento(pagamento.id)}
+                                    size="sm"
+                                    className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
+                                    title="Remover pagamento"
+                                  >
+                                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                                  </Button>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1 sm:gap-2 ml-0 sm:ml-4">
-                                <Button
-                                  onClick={() => editarPagamento(pagamento)}
-                                  size="sm"
-                                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
-                                  title="Editar pagamento"
-                                >
-                                  <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-                                </Button>
-                                {pagamento.status !== 'pendente' && (
-                                  <Button
-                                    onClick={() =>
-                                      redefinirStatus(pagamento.id)
-                                    }
-                                    size="sm"
-                                    className="bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
-                                    title="Redefinir status para pendente"
-                                  >
-                                    <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
-                                  </Button>
-                                )}
-                                {pagamento.status === 'agendado' && (
-                                  <Button
-                                    onClick={() => enviarParaInter(pagamento)}
-                                    size="sm"
-                                    className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
-                                    title="Enviar para Aprovação"
-                                  >
-                                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                                  </Button>
-                                )}
-                                <Button
-                                  onClick={() => removerPagamento(pagamento.id)}
-                                  size="sm"
-                                  className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg shadow-sm"
-                                  title="Remover pagamento"
-                                >
-                                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
             </div>
           </div>
         </div>

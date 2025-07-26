@@ -715,7 +715,7 @@ export default function TerminalProducao() {
     <ProtectedRoute requiredModule="operacoes">
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
-          <div className="space-y-6">
+          <div className="space-y-6 mt-8">
             {/* Seletor de Tipo e Receita */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
               <CardHeader>

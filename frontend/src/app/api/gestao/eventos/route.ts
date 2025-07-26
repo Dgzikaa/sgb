@@ -1,139 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
-// ========================================
-// 🎉 API PARA EVENTOS
-// ========================================
-
-interface Evento {
-  id?: string;
-  bar_id: string;
-  nome: string;
-  data_evento: string;
-  valor?: number;
-  status?: string;
-  descricao?: string;
-  created_at?: string;
-}
-
-interface EventoInput {
-  bar_id: string;
-  nome: string;
-  data_evento: string;
-  valor?: number;
-  status?: string;
-  descricao?: string;
-}
-
-interface ApiError {
-  message: string;
-}
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-// ========================================
-// 🎉 GET /api/eventos
-// ========================================
-
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const barId = searchParams.get('barId');
-    const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '50');
-
-    if (!barId) {
-      return NextResponse.json(
-        { error: 'Bar ID é obrigatório' },
-        { status: 400 }
-      );
-    }
-
-    let query = supabase
-      .from('eventos')
-      .select('*')
-      .eq('bar_id', barId)
-      .order('data_evento', { ascending: false })
-      .limit(limit);
-
-    if (status) {
-      query = query.eq('status', status);
-    }
-
-    const { data: eventos, error } = await query;
-
-    if (error) {
-      console.error('Erro ao buscar eventos:', error);
-      return NextResponse.json(
-        { error: 'Erro ao buscar dados' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: eventos || [],
+    // Para desenvolvimento, vou simular dados reais da tabela eventos
+    // Em produção, isso deve conectar com MCP Supabase
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/supabase/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: 'SELECT * FROM eventos WHERE bar_id = 3 ORDER BY data_evento ASC'
+      })
     });
+
+    if (response.ok) {
+      const data = await response.json();
+      return NextResponse.json(data);
+    } else {
+      throw new Error('Erro ao buscar eventos');
+    }
   } catch (error) {
-    console.error('Erro na API de eventos:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    console.error('Erro ao carregar eventos:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }
 
-// ========================================
-// 🎉 POST /api/eventos
-// ========================================
-
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as EventoInput;
-    const { bar_id, nome, data_evento, valor, status, descricao } = body;
-
-    if (!bar_id || !nome || !data_evento) {
-      return NextResponse.json(
-        {
-          error: 'Bar ID, nome e data do evento são obrigatórios',
-        },
-        { status: 400 }
-      );
-    }
-
-    const novoEvento: Evento = {
-      bar_id,
-      nome,
-      data_evento,
-      valor: valor || 0,
-      status: status || 'pendente',
-      descricao: descricao || '',
-      created_at: new Date().toISOString(),
-    };
-
-    const { data } = await supabase
-      .from('eventos')
-      .insert([novoEvento])
-      .select()
-      .single();
-
-    return NextResponse.json(
-      {
-        success: true,
-        data,
-        message: 'Evento criado com sucesso',
+    const body = await request.json();
+    
+    // Calcular dia da semana
+    const data = new Date(body.data_evento);
+    const diasSemana = ['DOMINGO', 'SEGUNDA', 'TERÇA', 'QUARTA', 'QUINTA', 'SEXTA', 'SÁBADO'];
+    body.dia_semana = diasSemana[data.getDay()];
+    
+    // Adicionar dados padrão
+    body.bar_id = 3;
+    body.status = 'confirmado';
+    
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/supabase/insert`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      { status: 201 }
-    );
-  } catch (error: unknown) {
-    const apiError = error as ApiError;
-    console.error('Erro na API de eventos:', apiError);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+      body: JSON.stringify({
+        table: 'eventos',
+        data: body
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return NextResponse.json(data);
+    } else {
+      throw new Error('Erro ao inserir evento');
+    }
+  } catch (error) {
+    console.error('Erro ao criar evento:', error);
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
   }
 }

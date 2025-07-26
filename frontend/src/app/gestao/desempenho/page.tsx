@@ -107,6 +107,11 @@ const gruposIndicadores = {
     nome: 'Cockpit Marketing',
     icon: Megaphone,
     categorias: ['marketing']
+  },
+  'cockpit-financeiro': {
+    nome: 'Cockpit Financeiro',
+    icon: DollarSign,
+    categorias: ['financeiro']
   }
 }
 
@@ -220,7 +225,27 @@ export default function DesempenhoPage() {
         scrollContainerRefs.current[`${grupoId}-${viewMode}`] = el
       }}
       className="w-full overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm"
+      style={{
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#6b7280 #374151'
+      }}
     >
+      <style jsx>{`
+        div::-webkit-scrollbar {
+          height: 12px;
+        }
+        div::-webkit-scrollbar-track {
+          background: #374151;
+          border-radius: 6px;
+        }
+        div::-webkit-scrollbar-thumb {
+          background: #6b7280;
+          border-radius: 6px;
+        }
+        div::-webkit-scrollbar-thumb:hover {
+          background: #9ca3af;
+        }
+      `}</style>
       <div className="min-w-[2000px]">
         <table className="w-full">
           <thead>
@@ -241,13 +266,13 @@ export default function DesempenhoPage() {
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {indicadores.map((indicador) => (
               <tr key={indicador.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <td className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
+                <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white text-sm">{indicador.nome}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">{indicador.unidade}</div>
                   </div>
                 </td>
-                <td className="sticky left-[250px] z-10 bg-white dark:bg-gray-900 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
+                <td className="sticky left-[250px] z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
                   <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     {indicador.meta ? formatarValor(indicador.meta, indicador.unidade) : '-'}
                   </div>
@@ -402,38 +427,36 @@ export default function DesempenhoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Dashboard de Desempenho
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                Acompanhe os indicadores estratégicos e de performance do negócio
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button 
-                onClick={rolarParaDireita}
-                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
-              >
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Ver Últimas Semanas
-              </Button>
-            </div>
+    <>
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Dashboard de Desempenho
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              Acompanhe os indicadores estratégicos e de performance do negócio
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              onClick={rolarParaDireita}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Ver Últimas Semanas
+            </Button>
           </div>
         </div>
-
-        {/* Grupos de Indicadores */}
-        <div className="space-y-6">
-          {Object.entries(gruposIndicadores).map(([grupoId, grupo]) => 
-            renderizarGrupo(grupoId, grupo)
-          )}
-        </div>
       </div>
-    </div>
+
+      {/* Grupos de Indicadores */}
+      <div className="space-y-6">
+        {Object.entries(gruposIndicadores).map(([grupoId, grupo]) => 
+          renderizarGrupo(grupoId, grupo)
+        )}
+      </div>
+    </>
   )
 }

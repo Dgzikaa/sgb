@@ -36,7 +36,7 @@ export default function ConfiguracoesPage() {
 
   return (
     <ProtectedRoute requiredModule="configuracoes">
-      <div className="space-y-6">
+      <div className="space-y-6 mt-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">

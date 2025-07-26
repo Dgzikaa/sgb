@@ -44,1749 +44,12944 @@ interface RespostaDesempenho {
 
 // Função para gerar dados mockados baseados na planilha
 function gerarDadosMockados(): IndicadorDesempenho[] {
-  const semanas = [
-    'Semana 5', 'Semana 6', 'Semana 7', 'Semana 8', 'Semana 9', 'Semana 10',
-    'Semana 11', 'Semana 12', 'Semana 13', 'Semana 14', 'Semana 15', 'Semana 16',
-    'Semana 17', 'Semana 18', 'Semana 19', 'Semana 20', 'Semana 21', 'Semana 22',
-    'Semana 23', 'Semana 24', 'Semana 25', 'Semana 26', 'Semana 27', 'Semana 28', 'Semana 29'
-  ]
-  const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-
   return [
-    // GUARDRAIL - Indicadores Estratégicos
-    {
-      id: 'faturamento-total',
-      categoria: 'guardrail',
-      nome: 'Faturamento Total',
-      descricao: 'Faturamento total do período',
-      unidade: 'R$',
-      meta: 222000,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 75314.54, meta: 222000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 75314.54, meta: 222000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 7', valor: 151226, meta: 222000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 180089.45, meta: 222000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 9', valor: 329574.73, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 241410.95, meta: 222000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 139217.99, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 12', valor: 238809.44, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 128591.38, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 242877.71, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 171070.14, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 16', valor: 282778.87, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 17', valor: 169775.55, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 18', valor: 221415.99, meta: 222000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 159472.19, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 147412.36, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 21', valor: 178423.96, meta: 222000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 188457.06, meta: 222000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 23', valor: 245583.76, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 210820.40, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 25', valor: 250704.99, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 26', valor: 219416.91, meta: 222000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 27', valor: 274440.95, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 306345.54, meta: 222000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 29', valor: 291813.33, meta: 222000, status: 'acima', tendencia: 'decrescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 525761.14, meta: 930000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 968716.05, meta: 930000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 940171.17, meta: 930000, status: 'acima', tendencia: 'decrescendo' },
-          { mes: 'Maio', valor: 758225.94, meta: 930000, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Junho', valor: 1004578.16, meta: 930000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 941632.44, meta: 930000, status: 'acima', tendencia: 'decrescendo' }
-        ]
-      }
-    },
-    {
-      id: 'ticket-medio',
-      categoria: 'guardrail',
-      nome: 'Ticket Médio ContaHub',
-      descricao: 'Valor médio por cliente',
-      unidade: 'R$',
-      meta: 93,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 99.11, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 89.70, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 7', valor: 95.31, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 91.67, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 93.08, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 84.77, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 88.48, meta: 93, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 88.32, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 13', valor: 86.48, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 92.45, meta: 93, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 89.58, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 16', valor: 91.92, meta: 93, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 17', valor: 90.81, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 18', valor: 93.21, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 88.36, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 102.88, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 106.43, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 98.92, meta: 93, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 97.56, meta: 93, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 24', valor: 102.45, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 106.49, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 26', valor: 98.36, meta: 93, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 27', valor: 103.47, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 103.71, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 29', valor: 99.21, meta: 93, status: 'acima', tendencia: 'decrescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 93.03, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 87.50, meta: 93, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Abril', valor: 91.32, meta: 93, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 97.88, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 101.66, meta: 93, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 101.95, meta: 93, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'cmv-limpo',
-      categoria: 'guardrail',
-      nome: 'CMV Limpo %',
-      descricao: 'Custo das Mercadorias Vendidas',
-      unidade: '%',
-      meta: 31,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 105.0, meta: 31, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: -98.6, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 7', valor: -14.7, meta: 31, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: -54.2, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 171.5, meta: 31, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 24.1, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 79.9, meta: 31, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: -48.7, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 13', valor: 46.9, meta: 31, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 14', valor: 34.4, meta: 31, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 15', valor: -3.6, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 16', valor: -12.0, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: -1.5, meta: 31, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: -2.2, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 19', valor: -2.9, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: -3.7, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 21', valor: -5.0, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 22', valor: 4.1, meta: 31, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 23', valor: 0.5, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 24', valor: -6.8, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 25', valor: 13.5, meta: 31, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 26', valor: -1.1, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 27', valor: -0.1, meta: 31, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 4.5, meta: 31, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: -4.1, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Março', valor: 5.8, meta: 31, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 0.0, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Maio', valor: -7.4, meta: 31, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Junho', valor: 4.5, meta: 31, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 2.1, meta: 31, status: 'abaixo', tendencia: 'decrescendo' }
-        ]
-      }
-    },
-    {
-      id: 'cmo',
-      categoria: 'guardrail',
-      nome: 'CMO%',
-      descricao: 'Custo de Mão de Obra',
-      unidade: '%',
-      meta: 20,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 51.1, meta: 20, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 26.0, meta: 20, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 7', valor: 24.0, meta: 20, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 8', valor: 16.9, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 16.3, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 10', valor: 28.0, meta: 20, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 11', valor: 18.5, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 12', valor: 31.3, meta: 20, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 19.4, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 23.9, meta: 20, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 14.9, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 16', valor: 26.0, meta: 20, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 17', valor: 18.7, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 18', valor: 26.4, meta: 20, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 28.9, meta: 20, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 20', valor: 21.5, meta: 20, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 21', valor: 20.5, meta: 20, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 22', valor: 16.8, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 19.6, meta: 20, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 16.5, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 25', valor: 18.3, meta: 20, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 26', valor: 14.6, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 27', valor: 12.6, meta: 20, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 28', valor: 12.2, meta: 20, status: 'abaixo', tendencia: 'decrescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 0.0, meta: 23, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Março', valor: 0.0, meta: 23, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Abril', valor: 0.0, meta: 23, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Maio', valor: 0.0, meta: 23, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Junho', valor: 0.0, meta: 23, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Julho', valor: 0.0, meta: 23, status: 'abaixo', tendencia: 'estavel' }
-        ]
-      }
-    },
-    {
-      id: 'atracao-faturamento',
-      categoria: 'guardrail',
-      nome: 'Atração/Faturamento',
-      descricao: 'Relação entre atração e faturamento',
-      unidade: '%',
-      meta: 17,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 6', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 7', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 8', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 9', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 10', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 11', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 12', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 13', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 14', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 15', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 16', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 17', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 18', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 19', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 20', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 21', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 22', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 23', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 24', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 25', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 26', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 27', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 28', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 29', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'estavel' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 1.1, meta: 17, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 1.3, meta: 17, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 1.7, meta: 17, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 1.9, meta: 17, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 1.6, meta: 17, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Julho', valor: 0.0, meta: 17, status: 'abaixo', tendencia: 'decrescendo' }
-        ]
-      }
-    },
-
-    // OVT - Outros Valores de Transformação
-    {
-      id: 'clientes-atendidos',
-      categoria: 'ovt',
-      nome: 'Clientes Atendidos',
-      descricao: 'Total de clientes atendidos',
-      unidade: 'clientes',
-      meta: 2645,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 133, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 849, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 1624, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 1997, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 9', valor: 1177, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 10', valor: 597, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 1579, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 2012, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 1490, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 2540, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 1914, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 16', valor: 2788, meta: 2645, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 17', valor: 1960, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 18', valor: 2401, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 1794, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 1459, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 21', valor: 1668, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 2036, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 23', valor: 2489, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 2200, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 25', valor: 2294, meta: 2645, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 26', valor: 2245, meta: 2645, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 27', valor: 2718, meta: 2645, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 2949, meta: 2645, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 29', valor: 3077, meta: 2645, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 5747, meta: 10000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 9794, meta: 10000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 10025, meta: 10000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 7789, meta: 10000, status: 'abaixo', tendencia: 'decrescendo' },
-          { mes: 'Junho', valor: 10135, meta: 10000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 8663, meta: 10000, status: 'abaixo', tendencia: 'decrescendo' }
-        ]
-      }
-    },
-    {
-      id: 'clientes-ativos',
-      categoria: 'ovt',
-      nome: 'Clientes Ativos',
-      descricao: 'Clientes que retornaram',
-      unidade: 'clientes',
-      meta: 3000,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 6', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 7', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 8', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 9', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 10', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 11', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 12', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 13', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 14', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 15', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 16', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 17', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 18', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 19', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 20', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 21', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 22', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 23', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 24', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 25', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 26', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 27', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 28', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { semana: 'Semana 29', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Março', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Abril', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Maio', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Junho', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' },
-          { mes: 'Julho', valor: 0, meta: 3000, status: 'abaixo', tendencia: 'estavel' }
-        ]
-      }
-    },
-    {
-      id: 'reservas-totais',
-      categoria: 'ovt',
-      nome: 'Reservas Totais',
-      descricao: 'Total de reservas realizadas',
-      unidade: 'reservas',
-      meta: 200,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 45 + (i * 5) + Math.random() * 15,
-          meta: 50,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 190 + (i * 20) + Math.random() * 40,
-          meta: 200,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'reservas-presentes',
-      categoria: 'ovt',
-      nome: 'Reservas Presentes',
-      descricao: 'Reservas que compareceram',
-      unidade: 'reservas',
-      meta: 160,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 35 + (i * 3) + Math.random() * 10,
-          meta: 40,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 155 + (i * 15) + Math.random() * 30,
-          meta: 160,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'clientes-ativos',
-      categoria: 'ovt',
-      nome: 'Clientes Ativos',
-      descricao: 'Número de clientes ativos',
-      unidade: 'clientes',
-      meta: 500,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 420 + (i * 15) + Math.random() * 30,
-          meta: 500,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 4800 + (i * 200) + Math.random() * 400,
-          meta: 5000,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-
-    // QUALIDADE - Indicadores de Qualidade
-    {
-      id: 'avaliacoes-5-estrelas',
-      categoria: 'qualidade',
-      nome: 'Avaliações 5 Estrelas',
-      descricao: 'Porcentagem de avaliações 5 estrelas',
-      unidade: '%',
-      meta: 85,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 82 + (i * 1) + Math.random() * 6,
-          meta: 85,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 83 + (i * 0.5) + Math.random() * 4,
-          meta: 85,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'media-google',
-      categoria: 'qualidade',
-      nome: 'Média Google',
-      descricao: 'Avaliação média no Google',
-      unidade: 'estrelas',
-      meta: 4.5,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 4.3 + (i * 0.05) + Math.random() * 0.4,
-          meta: 4.5,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 4.4 + (i * 0.03) + Math.random() * 0.2,
-          meta: 4.5,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-geral',
-      categoria: 'qualidade',
-      nome: 'NPS Geral',
-      descricao: 'Net Promoter Score geral',
-      unidade: 'pontos',
-      meta: 70,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 65 + (i * 2) + Math.random() * 10,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 68 + (i * 1) + Math.random() * 6,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-ambiente',
-      categoria: 'qualidade',
-      nome: 'NPS Ambiente',
-      descricao: 'Net Promoter Score do ambiente',
-      unidade: 'pontos',
-      meta: 75,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 70 + (i * 2) + Math.random() * 10,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 72 + (i * 1) + Math.random() * 6,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-atendimento',
-      categoria: 'qualidade',
-      nome: 'NPS Atendimento',
-      descricao: 'Net Promoter Score do atendimento',
-      unidade: 'pontos',
-      meta: 80,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 75 + (i * 2) + Math.random() * 10,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 77 + (i * 1) + Math.random() * 6,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-limpeza',
-      categoria: 'qualidade',
-      nome: 'NPS Limpeza',
-      descricao: 'Net Promoter Score da limpeza',
-      unidade: 'pontos',
-      meta: 85,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 80 + (i * 2) + Math.random() * 10,
-          meta: 85,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 82 + (i * 1) + Math.random() * 6,
-          meta: 85,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-musica',
-      categoria: 'qualidade',
-      nome: 'NPS Música',
-      descricao: 'Net Promoter Score da música',
-      unidade: 'pontos',
-      meta: 70,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 65 + (i * 2) + Math.random() * 10,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 67 + (i * 1) + Math.random() * 6,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-comida',
-      categoria: 'qualidade',
-      nome: 'NPS Comida',
-      descricao: 'Net Promoter Score da comida',
-      unidade: 'pontos',
-      meta: 75,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 70 + (i * 2) + Math.random() * 10,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 72 + (i * 1) + Math.random() * 6,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-drink',
-      categoria: 'qualidade',
-      nome: 'NPS Drink',
-      descricao: 'Net Promoter Score dos drinks',
-      unidade: 'pontos',
-      meta: 80,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 75 + (i * 2) + Math.random() * 10,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 77 + (i * 1) + Math.random() * 6,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-preco',
-      categoria: 'qualidade',
-      nome: 'NPS Preço',
-      descricao: 'Net Promoter Score do preço',
-      unidade: 'pontos',
-      meta: 65,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 60 + (i * 2) + Math.random() * 10,
-          meta: 65,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 62 + (i * 1) + Math.random() * 6,
-          meta: 65,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-reservas',
-      categoria: 'qualidade',
-      nome: 'NPS Reservas',
-      descricao: 'Net Promoter Score das reservas',
-      unidade: 'pontos',
-      meta: 70,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 65 + (i * 2) + Math.random() * 10,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 67 + (i * 1) + Math.random() * 6,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-felicidade-equipe',
-      categoria: 'qualidade',
-      nome: 'NPS Felicidade Equipe',
-      descricao: 'Net Promoter Score da felicidade da equipe',
-      unidade: 'pontos',
-      meta: 75,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 70 + (i * 2) + Math.random() * 10,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 72 + (i * 1) + Math.random() * 6,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-ambiente',
-      categoria: 'qualidade',
-      nome: 'NPS Ambiente',
-      descricao: 'Net Promoter Score do ambiente',
-      unidade: 'pontos',
-      meta: 75,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 70 + (i * 2) + Math.random() * 10,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 72 + (i * 1) + Math.random() * 6,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-atendimento',
-      categoria: 'qualidade',
-      nome: 'NPS Atendimento',
-      descricao: 'Net Promoter Score do atendimento',
-      unidade: 'pontos',
-      meta: 80,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 75 + (i * 2) + Math.random() * 10,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 77 + (i * 1) + Math.random() * 6,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-limpeza',
-      categoria: 'qualidade',
-      nome: 'NPS Limpeza',
-      descricao: 'Net Promoter Score da limpeza',
-      unidade: 'pontos',
-      meta: 85,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 80 + (i * 2) + Math.random() * 10,
-          meta: 85,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 82 + (i * 1) + Math.random() * 6,
-          meta: 85,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-musica',
-      categoria: 'qualidade',
-      nome: 'NPS Música',
-      descricao: 'Net Promoter Score da música',
-      unidade: 'pontos',
-      meta: 70,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 65 + (i * 2) + Math.random() * 10,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 67 + (i * 1) + Math.random() * 6,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-comida',
-      categoria: 'qualidade',
-      nome: 'NPS Comida',
-      descricao: 'Net Promoter Score da comida',
-      unidade: 'pontos',
-      meta: 75,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 70 + (i * 2) + Math.random() * 10,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 72 + (i * 1) + Math.random() * 6,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-drink',
-      categoria: 'qualidade',
-      nome: 'NPS Drink',
-      descricao: 'Net Promoter Score dos drinks',
-      unidade: 'pontos',
-      meta: 80,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 75 + (i * 2) + Math.random() * 10,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 77 + (i * 1) + Math.random() * 6,
-          meta: 80,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-preco',
-      categoria: 'qualidade',
-      nome: 'NPS Preço',
-      descricao: 'Net Promoter Score do preço',
-      unidade: 'pontos',
-      meta: 65,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 60 + (i * 2) + Math.random() * 10,
-          meta: 65,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 62 + (i * 1) + Math.random() * 6,
-          meta: 65,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-reservas',
-      categoria: 'qualidade',
-      nome: 'NPS Reservas',
-      descricao: 'Net Promoter Score das reservas',
-      unidade: 'pontos',
-      meta: 70,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 65 + (i * 2) + Math.random() * 10,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 67 + (i * 1) + Math.random() * 6,
-          meta: 70,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'nps-felicidade-equipe',
-      categoria: 'qualidade',
-      nome: 'NPS Felicidade Equipe',
-      descricao: 'Net Promoter Score da felicidade da equipe',
-      unidade: 'pontos',
-      meta: 75,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 70 + (i * 2) + Math.random() * 10,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 72 + (i * 1) + Math.random() * 6,
-          meta: 75,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-
-    // PRODUTOS - Cockpit Produtos
-    {
-      id: 'stockout-comidas',
-      categoria: 'produtos',
-      nome: 'StockOut Comidas',
-      descricao: 'Porcentagem de produtos de comida em falta',
-      unidade: '%',
-      meta: 3,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: Math.random() * 4,
-          meta: 3,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: Math.random() * 4,
-          meta: 3,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'stockout-drinks',
-      categoria: 'produtos',
-      nome: 'StockOut Drinks',
-      descricao: 'Porcentagem de bebidas em falta',
-      unidade: '%',
-      meta: 3,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: Math.random() * 4,
-          meta: 3,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: Math.random() * 4,
-          meta: 3,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'stockout-bar',
-      categoria: 'produtos',
-      nome: 'Stockout Bar',
-      descricao: 'Porcentagem de produtos do bar em falta',
-      unidade: '%',
-      meta: 1,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: Math.random() * 2,
-          meta: 1,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: Math.random() * 2,
-          meta: 1,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'bebidas',
-      categoria: 'produtos',
-      nome: '% BEBIDAS',
-      descricao: 'Porcentagem de vendas de bebidas',
-      unidade: '%',
-      meta: 50,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 45 + Math.random() * 10,
-          meta: 50,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 47 + Math.random() * 6,
-          meta: 50,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'drinks',
-      categoria: 'produtos',
-      nome: '% DRINKS',
-      descricao: 'Porcentagem de vendas de drinks',
-      unidade: '%',
-      meta: 30,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 25 + Math.random() * 10,
-          meta: 30,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 27 + Math.random() * 6,
-          meta: 30,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'comida',
-      categoria: 'produtos',
-      nome: '% COMIDA',
-      descricao: 'Porcentagem de vendas de comida',
-      unidade: '%',
-      meta: 25,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 20 + Math.random() * 10,
-          meta: 25,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 22 + Math.random() * 6,
-          meta: 25,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'happy-hour',
-      categoria: 'produtos',
-      nome: '% HappyHour',
-      descricao: 'Porcentagem de vendas no happy hour',
-      unidade: '%',
-      meta: 20,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 15 + Math.random() * 10,
-          meta: 20,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 17 + Math.random() * 6,
-          meta: 20,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'qtde-itens-bar',
-      categoria: 'produtos',
-      nome: 'Qtde Itens Bar',
-      descricao: 'Quantidade de itens vendidos no bar',
-      unidade: 'itens',
-      meta: 1200,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 1000 + Math.random() * 400,
-          meta: 1200,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 4500 + Math.random() * 1000,
-          meta: 5000,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'tempo-saida-bar',
-      categoria: 'produtos',
-      nome: 'Tempo Saída Bar',
-      descricao: 'Tempo médio de saída do bar',
-      unidade: 'min',
-      meta: 3,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 2 + Math.random() * 3,
-          meta: 3,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 2.5 + Math.random() * 2,
-          meta: 3,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'qtde-itens-cozinha',
-      categoria: 'produtos',
-      nome: 'Qtde Itens Cozinha',
-      descricao: 'Quantidade de itens da cozinha',
-      unidade: 'itens',
-      meta: 800,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 600 + Math.random() * 400,
-          meta: 800,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 2500 + Math.random() * 1000,
-          meta: 3000,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'tempo-saida-cozinha',
-      categoria: 'produtos',
-      nome: 'Tempo Saída Cozinha',
-      descricao: 'Tempo médio de saída da cozinha',
-      unidade: 'min',
-      meta: 10,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 7 + Math.random() * 6,
-          meta: 10,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 8 + Math.random() * 4,
-          meta: 10,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'drinks',
-      categoria: 'produtos',
-      nome: '% Drinks',
-      descricao: 'Porcentagem de vendas de drinks',
-      unidade: '%',
-      meta: 30,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 28 + (i * 0.5) + Math.random() * 4,
-          meta: 30,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 29 + (i * 0.3) + Math.random() * 3,
-          meta: 30,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'comida',
-      categoria: 'produtos',
-      nome: '% Comida',
-      descricao: 'Porcentagem de vendas de comida',
-      unidade: '%',
-      meta: 25,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 23 + (i * 0.5) + Math.random() * 4,
-          meta: 25,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 24 + (i * 0.3) + Math.random() * 3,
-          meta: 25,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    {
-      id: 'itens-vendidos',
-      categoria: 'produtos',
-      nome: 'Qtde Itens Vendidos',
-      descricao: 'Quantidade total de itens vendidos',
-      unidade: 'itens',
-      meta: 1200,
-      dados: {
-        semanais: semanas.map((semana, i) => ({
-          semana,
-          valor: 280 + (i * 20) + Math.random() * 60,
-          meta: 300,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        })),
-        mensais: meses.map((mes, i) => ({
-          mes,
-          valor: 1150 + (i * 100) + Math.random() * 200,
-          meta: 1200,
-          status: Math.random() > 0.5 ? 'acima' : 'abaixo',
-          tendencia: ['crescendo', 'decrescendo', 'estavel'][Math.floor(Math.random() * 3)] as any
-        }))
-      }
-    },
-    
-    // Indicadores de Qualidade
-    {
-      id: 'avaliacoes-5-google',
-      categoria: 'qualidade',
-      nome: 'Avaliações 5 Google/Trip',
-      descricao: 'Avaliações 5 estrelas no Google/TripAdvisor',
-      unidade: 'avaliações',
-      meta: 100,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 15, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 22, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 18, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 8', valor: 25, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 9', valor: 30, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 28, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 35, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 42, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 38, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 45, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 52, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 48, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 55, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 62, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 58, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 65, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 72, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 68, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 75, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 82, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 78, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 85, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 92, meta: 100, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 88, meta: 100, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 95, meta: 100, status: 'abaixo', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 120, meta: 400, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 180, meta: 400, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 220, meta: 400, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 280, meta: 400, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 320, meta: 400, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 360, meta: 400, status: 'abaixo', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'media-avaliacoes-google',
-      categoria: 'qualidade',
-      nome: 'Média Avaliações Google',
-      descricao: 'Média das avaliações no Google',
-      unidade: 'estrelas',
-      meta: 4.5,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 4.2, meta: 4.5, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 4.3, meta: 4.5, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 4.1, meta: 4.5, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 8', valor: 4.4, meta: 4.5, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 9', valor: 4.6, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 4.5, meta: 4.5, status: 'dentro', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 4.7, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 4.8, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 4.6, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 4.9, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 4.7, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 16', valor: 4.8, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 17', valor: 4.6, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 18', valor: 4.9, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 4.7, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 4.8, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 4.6, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 22', valor: 4.9, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 23', valor: 4.7, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 24', valor: 4.8, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 4.6, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 4.9, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 4.7, meta: 4.5, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 28', valor: 4.8, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 29', valor: 4.9, meta: 4.5, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 4.3, meta: 4.5, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 4.4, meta: 4.5, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 4.6, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 4.7, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 4.8, meta: 4.5, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 4.9, meta: 4.5, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'nps-geral',
-      categoria: 'qualidade',
-      nome: 'NPS Geral',
-      descricao: 'Net Promoter Score geral',
-      unidade: 'pontos',
-      meta: 50,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 45, meta: 50, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 47, meta: 50, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 52, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 49, meta: 50, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 51, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 48, meta: 50, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 53, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 55, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 51, meta: 50, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 54, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 56, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 52, meta: 50, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 57, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 59, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 55, meta: 50, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 58, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 60, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 56, meta: 50, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 61, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 63, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 59, meta: 50, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 62, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 64, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 60, meta: 50, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 65, meta: 50, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 48, meta: 50, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 51, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 53, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 55, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 57, meta: 50, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 59, meta: 50, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'nps-ambiente',
-      categoria: 'qualidade',
-      nome: 'NPS Ambiente',
-      descricao: 'Net Promoter Score do ambiente',
-      unidade: 'pontos',
-      meta: 60,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 55, meta: 60, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 57, meta: 60, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 62, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 59, meta: 60, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 61, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 58, meta: 60, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 63, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 65, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 61, meta: 60, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 64, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 66, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 62, meta: 60, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 67, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 69, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 65, meta: 60, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 68, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 70, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 66, meta: 60, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 71, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 73, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 69, meta: 60, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 72, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 74, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 70, meta: 60, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 75, meta: 60, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 58, meta: 60, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 61, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 63, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 65, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 67, meta: 60, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 69, meta: 60, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    
-    // Cockpit Vendas
-    {
-      id: 'faturamento-ate-19h',
-      categoria: 'vendas',
-      nome: '% Faturamento até 19h',
-      descricao: 'Porcentagem do faturamento até 19h',
-      unidade: '%',
-      meta: 30,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 25, meta: 30, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 28, meta: 30, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 32, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 29, meta: 30, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 31, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 27, meta: 30, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 33, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 35, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 31, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 34, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 36, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 32, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 37, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 39, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 35, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 38, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 40, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 36, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 41, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 43, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 39, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 42, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 44, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 40, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 45, meta: 30, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 28, meta: 30, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 31, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 33, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 35, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 37, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 39, meta: 30, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'venda-balcao',
-      categoria: 'vendas',
-      nome: 'Venda Balcão',
-      descricao: 'Vendas realizadas no balcão',
-      unidade: 'R$',
-      meta: 50000,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 45000, meta: 50000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 48000, meta: 50000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 52000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 49000, meta: 50000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 51000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 47000, meta: 50000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 53000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 55000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 51000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 54000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 56000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 52000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 57000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 59000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 55000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 58000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 60000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 56000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 61000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 63000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 59000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 62000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 64000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 60000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 65000, meta: 50000, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 480000, meta: 500000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 520000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 540000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 560000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 580000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 600000, meta: 500000, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'couvert-atracoes',
-      categoria: 'vendas',
-      nome: 'Couvert / Atrações',
-      descricao: 'Receita de couvert e atrações',
-      unidade: 'R$',
-      meta: 15000,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 12000, meta: 15000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 13500, meta: 15000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 16000, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 14500, meta: 15000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 15500, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 13000, meta: 15000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 16500, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 17500, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 15500, meta: 15000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 17000, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 18000, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 16000, meta: 15000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 18500, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 19500, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 17500, meta: 15000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 19000, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 20000, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 18000, meta: 15000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 20500, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 21500, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 19500, meta: 15000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 21000, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 22000, meta: 15000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 20000, meta: 15000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 22500, meta: 15000, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 140000, meta: 150000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 155000, meta: 150000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 160000, meta: 150000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 165000, meta: 150000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 170000, meta: 150000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 175000, meta: 150000, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'qui-sab-dom',
-      categoria: 'vendas',
-      nome: 'QUI+SÁB+DOM',
-      descricao: 'Faturamento nos dias de maior movimento',
-      unidade: 'R$',
-      meta: 80000,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 75000, meta: 80000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 78000, meta: 80000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 82000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 79000, meta: 80000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 81000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 77000, meta: 80000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 83000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 85000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 81000, meta: 80000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 84000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 86000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 82000, meta: 80000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 87000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 89000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 85000, meta: 80000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 88000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 90000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 86000, meta: 80000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 91000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 93000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 89000, meta: 80000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 92000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 94000, meta: 80000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 90000, meta: 80000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 95000, meta: 80000, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 780000, meta: 800000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 820000, meta: 800000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 840000, meta: 800000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 860000, meta: 800000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 880000, meta: 800000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 900000, meta: 800000, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    
-    // Cockpit Marketing
-    {
-      id: 'posts-org',
-      categoria: 'marketing',
-      nome: '[O] Nº de Posts',
-      descricao: 'Número de posts orgânicos',
-      unidade: 'posts',
-      meta: 30,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 25, meta: 30, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 28, meta: 30, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 32, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 29, meta: 30, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 31, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 27, meta: 30, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 33, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 35, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 31, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 34, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 36, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 32, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 37, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 39, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 35, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 38, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 40, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 36, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 41, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 43, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 39, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 42, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 44, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 40, meta: 30, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 45, meta: 30, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 28, meta: 30, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 31, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 33, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 35, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 37, meta: 30, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 39, meta: 30, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'alcance-org',
-      categoria: 'marketing',
-      nome: '[O] Alcance',
-      descricao: 'Alcance orgânico',
-      unidade: 'pessoas',
-      meta: 50000,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 45000, meta: 50000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 48000, meta: 50000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 52000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 49000, meta: 50000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 51000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 47000, meta: 50000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 53000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 55000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 51000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 54000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 56000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 52000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 57000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 59000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 55000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 58000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 60000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 56000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 61000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 63000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 59000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 62000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 64000, meta: 50000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 60000, meta: 50000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 65000, meta: 50000, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 480000, meta: 500000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 520000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 540000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 560000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 580000, meta: 500000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 600000, meta: 500000, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
-    },
-    {
-      id: 'interacao-org',
-      categoria: 'marketing',
-      nome: '[O] Interação',
-      descricao: 'Interações orgânicas',
-      unidade: 'interações',
-      meta: 2000,
-      dados: {
-        semanais: [
-          { semana: 'Semana 5', valor: 1800, meta: 2000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 6', valor: 1900, meta: 2000, status: 'abaixo', tendencia: 'crescendo' },
-          { semana: 'Semana 7', valor: 2100, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 8', valor: 1950, meta: 2000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 9', valor: 2050, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 10', valor: 1850, meta: 2000, status: 'abaixo', tendencia: 'decrescendo' },
-          { semana: 'Semana 11', valor: 2150, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 12', valor: 2250, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 13', valor: 2050, meta: 2000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 14', valor: 2200, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 15', valor: 2300, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 16', valor: 2100, meta: 2000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 17', valor: 2350, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 18', valor: 2450, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 19', valor: 2250, meta: 2000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 20', valor: 2400, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 21', valor: 2500, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 22', valor: 2300, meta: 2000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 23', valor: 2550, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 24', valor: 2650, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 25', valor: 2450, meta: 2000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 26', valor: 2600, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 27', valor: 2700, meta: 2000, status: 'acima', tendencia: 'crescendo' },
-          { semana: 'Semana 28', valor: 2500, meta: 2000, status: 'acima', tendencia: 'decrescendo' },
-          { semana: 'Semana 29', valor: 2750, meta: 2000, status: 'acima', tendencia: 'crescendo' }
-        ],
-        mensais: [
-          { mes: 'Fevereiro', valor: 19000, meta: 20000, status: 'abaixo', tendencia: 'crescendo' },
-          { mes: 'Março', valor: 21000, meta: 20000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Abril', valor: 22000, meta: 20000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Maio', valor: 23000, meta: 20000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Junho', valor: 24000, meta: 20000, status: 'acima', tendencia: 'crescendo' },
-          { mes: 'Julho', valor: 25000, meta: 20000, status: 'acima', tendencia: 'crescendo' }
-        ]
-      }
+  {
+    "id": "faturamento-total",
+    "categoria": "guardrail",
+    "nome": "Faturamento Total",
+    "descricao": "Faturamento Total - guardrail",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 54,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 54,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 45,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 73,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 95,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 99,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 44,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 38,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 71,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 14,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 87,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 99,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 19,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 36,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
     }
-  ]
+  },
+  {
+    "id": "faturamento-couvert",
+    "categoria": "guardrail",
+    "nome": "Faturamento Couvert",
+    "descricao": "Faturamento Couvert - guardrail",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 32,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 29,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 66,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 86,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "faturamento-bar",
+    "categoria": "guardrail",
+    "nome": "Faturamento Bar",
+    "descricao": "Faturamento Bar - guardrail",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 54,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 54,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 45,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 73,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 95,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 99,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 44,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 38,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 39,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 14,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 58,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 33,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 33,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 36,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cmv-rs",
+    "categoria": "guardrail",
+    "nome": "CMV R$",
+    "descricao": "CMV R$ - guardrail",
+    "unidade": "R$",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 96,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 16,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 72,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 28,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 99,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 64,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 17,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 53,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 59,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 60,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 46,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 98,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 32,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 60,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ticket-medio-contahub",
+    "categoria": "guardrail",
+    "nome": "Ticket Médio ContaHub",
+    "descricao": "Ticket Médio ContaHub - guardrail",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 11,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 70,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 31,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 67,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 77,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 48,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 32,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 48,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 45,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 58,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 92,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 21,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 36,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 88,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tm-entrada",
+    "categoria": "guardrail",
+    "nome": "TM Entrada",
+    "descricao": "TM Entrada - guardrail",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 50,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 68,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 41,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 96,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 75,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 73,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 34,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 72,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 85,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 56,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 92,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 68,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 68,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tm-bar",
+    "categoria": "guardrail",
+    "nome": "TM Bar",
+    "descricao": "TM Bar - guardrail",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 50,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 11,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 31,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 26,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 12,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 75,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 98,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 75,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 59,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 91,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 29,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 68,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 20,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cmv-limpo-percent",
+    "categoria": "guardrail",
+    "nome": "CMV Limpo %",
+    "descricao": "CMV Limpo % - guardrail",
+    "unidade": "unidade",
+    "meta": 31,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 6,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 7,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 2,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 5,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 1,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 9,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 7,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 9,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 4,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 6,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 2,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 9,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 7,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 31,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cmv-global-real",
+    "categoria": "guardrail",
+    "nome": "CMV Global Real",
+    "descricao": "CMV Global Real - guardrail",
+    "unidade": "unidade",
+    "meta": 27,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 1,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 5,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 3,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 6,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 5,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 2,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 6,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 9,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 1,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 8,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 7,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 7,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 3,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 9,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 27,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "cmv-teorico",
+    "categoria": "guardrail",
+    "nome": "CMV Teórico",
+    "descricao": "CMV Teórico - guardrail",
+    "unidade": "unidade",
+    "meta": 29,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 4,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 1,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 1,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 1,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 4,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 1,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 4,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 7,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 1,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 8,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 2,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 2,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 8,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 29,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "retencao",
+    "categoria": "ovt",
+    "nome": "Retenção",
+    "descricao": "Retenção - ovt",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "clientes-atendidos",
+    "categoria": "ovt",
+    "nome": "Clientes Atendidos",
+    "descricao": "Clientes Atendidos - ovt",
+    "unidade": "unidade",
+    "meta": 2645,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 133,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 849,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 1624,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 1997,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 1177,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 597,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 1579,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 2012,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 1490,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 2540,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 1914,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 2788,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 1960,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 2401,
+          "meta": 2645,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 1794,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 1459,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 1668,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 2036,
+          "meta": 2645,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 2489,
+          "meta": 2645,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 2200,
+          "meta": 2645,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 2294,
+          "meta": 2645,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 2245,
+          "meta": 2645,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 2718,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 2949,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 3077,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 5747,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 9794,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 10025,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 7789,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 10135,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 8663,
+          "meta": 2645,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "clientes-ativos",
+    "categoria": "ovt",
+    "nome": "Clientes Ativos",
+    "descricao": "Clientes Ativos - ovt",
+    "unidade": "unidade",
+    "meta": 3000,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 3000,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "reservas-totais",
+    "categoria": "ovt",
+    "nome": "Reservas Totais",
+    "descricao": "Reservas Totais - ovt",
+    "unidade": "unidade",
+    "meta": 800,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 788,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 580,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 638,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 521,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 571,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 644,
+          "meta": 800,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 760,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 870,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 806,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 771,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 837,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 1044,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 808,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 978,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 839,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 946,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 800,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 1586,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 2692,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 3486,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 3524,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 2712,
+          "meta": 800,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "reservas-presentes",
+    "categoria": "ovt",
+    "nome": "Reservas Presentes",
+    "descricao": "Reservas Presentes - ovt",
+    "unidade": "unidade",
+    "meta": 650,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 608,
+          "meta": 650,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 578,
+          "meta": 650,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 650,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 622,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 801,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 703,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 747,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 650,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 2738,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 2478,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 2236,
+          "meta": 650,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "avaliacoes-5-google",
+    "categoria": "qualidade",
+    "nome": "Avaliações 5 Google/Trip",
+    "descricao": "Avaliações 5 Google/Trip - qualidade",
+    "unidade": "estrelas",
+    "meta": 75,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 43,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 74,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 35,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 60,
+          "meta": 75,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 10,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 172,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 163,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 53,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 23,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 19,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 29,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 73,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 152,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 87,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 58,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 109,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 129,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 127,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 58,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 96,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 55,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 87,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 70,
+          "meta": 75,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 226,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 193,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 417,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 142,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 528,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 369,
+          "meta": 75,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 75,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "media-avaliacoes-google",
+    "categoria": "qualidade",
+    "nome": "Média Avaliações Google",
+    "descricao": "Média Avaliações Google - qualidade",
+    "unidade": "estrelas",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 92,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 29,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 97,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 23,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 92,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 92,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 95,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 63,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 82,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 77,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 87,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 69,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 94,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-geral",
+    "categoria": "qualidade",
+    "nome": "NPS Geral",
+    "descricao": "NPS Geral - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 87,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 90,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 91,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-ambiente",
+    "categoria": "qualidade",
+    "nome": "NPS Ambiente",
+    "descricao": "NPS Ambiente - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 88,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 86,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 88,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 86,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-atendimento",
+    "categoria": "qualidade",
+    "nome": "NPS Atendimento",
+    "descricao": "NPS Atendimento - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 94,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 85,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 88,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 80,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-limpeza",
+    "categoria": "qualidade",
+    "nome": "NPS Limpeza",
+    "descricao": "NPS Limpeza - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 68,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 78,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 81,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 82,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-musica",
+    "categoria": "qualidade",
+    "nome": "NPS Música",
+    "descricao": "NPS Música - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 94,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 85,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 93,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 86,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-comida",
+    "categoria": "qualidade",
+    "nome": "NPS Comida",
+    "descricao": "NPS Comida - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 68,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 71,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 86,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 75,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-drink",
+    "categoria": "qualidade",
+    "nome": "NPS Drink",
+    "descricao": "NPS Drink - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 72,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 79,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 85,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 77,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-preco",
+    "categoria": "qualidade",
+    "nome": "NPS Preço",
+    "descricao": "NPS Preço - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 79,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 44,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 65,
+          "meta": 70,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 51,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-reservas",
+    "categoria": "qualidade",
+    "nome": "NPS Reservas",
+    "descricao": "NPS Reservas - qualidade",
+    "unidade": "estrelas",
+    "meta": 70,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 5,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 92,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 29,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 97,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 23,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 92,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 92,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 95,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 63,
+          "meta": 70,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 82,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 70,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 75,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 83,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 100,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 100,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 78,
+          "meta": 70,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nps-felicidade-equipe",
+    "categoria": "qualidade",
+    "nome": "NPS Felicidade Equipe",
+    "descricao": "NPS Felicidade Equipe - qualidade",
+    "unidade": "estrelas",
+    "meta": 60,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 944,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 7833,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 86,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 3,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 2,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 12,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 76,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 87,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 70,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 81,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 72,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 79,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 84,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 60,
+          "meta": 60,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 60,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "stockout-comidas",
+    "categoria": "produtos",
+    "nome": "StockOut Comidas",
+    "descricao": "StockOut Comidas - produtos",
+    "unidade": "unidade",
+    "meta": 3,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 6,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 2,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 7,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 3,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 8,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 6,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "stockout-drinks",
+    "categoria": "produtos",
+    "nome": "StockOut Drinks",
+    "descricao": "StockOut Drinks - produtos",
+    "unidade": "unidade",
+    "meta": 3,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 2,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 2,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 2,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 7,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 7,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 5,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 1,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 6,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 4,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 7,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 7,
+          "meta": 3,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 3,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "stockout-bar",
+    "categoria": "produtos",
+    "nome": "Stockout Bar",
+    "descricao": "Stockout Bar - produtos",
+    "unidade": "unidade",
+    "meta": 1,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 3,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 3,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 6,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 4,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 9,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 2,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 9,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 1,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 2,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 6,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 6,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 5,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 3,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": 1,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 3,
+          "meta": 1,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "percent-bebidas",
+    "categoria": "produtos",
+    "nome": "% BEBIDAS",
+    "descricao": "% BEBIDAS - produtos",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 6,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 6,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 6,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "percent-drinks",
+    "categoria": "produtos",
+    "nome": "% DRINKS",
+    "descricao": "% DRINKS - produtos",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 6,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "percent-comida",
+    "categoria": "produtos",
+    "nome": "% COMIDA",
+    "descricao": "% COMIDA - produtos",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "percent-happyhour",
+    "categoria": "produtos",
+    "nome": "% HappyHour",
+    "descricao": "% HappyHour - produtos",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "qtde-itens-bar",
+    "categoria": "produtos",
+    "nome": "Qtde Itens Bar",
+    "descricao": "Qtde Itens Bar - produtos",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 673,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 1531,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 1622,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 885,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 572,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 1215,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 1437,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 1121,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 1359,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 1245,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 1367,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 1181,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 1216,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 1191,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 1122,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 1501,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 1357,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 1449,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 1056,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 1721,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 1725,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 1490,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 4872,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 4350,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 3024,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 5644,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 5532,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 4785,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tempo-saida-bar",
+    "categoria": "produtos",
+    "nome": "Tempo Saída Bar",
+    "descricao": "Tempo Saída Bar - produtos",
+    "unidade": "min",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "qtde-itens-cozinha",
+    "categoria": "produtos",
+    "nome": "Qtde Itens Cozinha",
+    "descricao": "Qtde Itens Cozinha - produtos",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 630,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 945,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 934,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 720,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 542,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 676,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 840,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 736,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 45,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 787,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 577,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 696,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 589,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 657,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 593,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 551,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 687,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 642,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 714,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 601,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 910,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 706,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 784,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 3134,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 2992,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 1692,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 2743,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 2830,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 2278,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "tempo-saida-cozinha",
+    "categoria": "produtos",
+    "nome": "Tempo Saída Cozinha",
+    "descricao": "Tempo Saída Cozinha - produtos",
+    "unidade": "min",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 6,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 6,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 6,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "percent-faturamento-19h",
+    "categoria": "vendas",
+    "nome": "% Faturamento até 19h",
+    "descricao": "% Faturamento até 19h - vendas",
+    "unidade": "unidade",
+    "meta": 15,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 2,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 9,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 8,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 2,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 5,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 2,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 3,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 5,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 8,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 9,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": 15,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "venda-balcao",
+    "categoria": "vendas",
+    "nome": "Venda Balcão",
+    "descricao": "Venda Balcão - vendas",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 40,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 11,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 70,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 77,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 90,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "couvert-atracoes",
+    "categoria": "vendas",
+    "nome": "Couvert / Atrações",
+    "descricao": "Couvert / Atrações - vendas",
+    "unidade": "unidade",
+    "meta": 112,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 0,
+          "meta": 112,
+          "status": "abaixo",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 2232,
+          "meta": 112,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 2454,
+          "meta": 112,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 1694,
+          "meta": 112,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 1430,
+          "meta": 112,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 1490,
+          "meta": 112,
+          "status": "acima",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 1396,
+          "meta": 112,
+          "status": "acima",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "o-num-posts",
+    "categoria": "marketing",
+    "nome": "[O] Nº de Posts",
+    "descricao": "[O] Nº de Posts - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 14,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 13,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 13,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 11,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "o-alcance",
+    "categoria": "marketing",
+    "nome": "[O] Alcance",
+    "descricao": "[O] Alcance - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 20848,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 29914,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 15390,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 19958,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 35845,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 15078,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 32604,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 18492,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 38461,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 17823,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 11488,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 10956,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 140498,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 139185,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 138831,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 112049,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 111648,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "o-interacao",
+    "categoria": "marketing",
+    "nome": "[O] Interação",
+    "descricao": "[O] Interação - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 1083,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 2124,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 918,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 1171,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 1404,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 958,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 2206,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 787,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 1697,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 1320,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 341,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 650,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 10157,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 5345,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 8187,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 6302,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 5455,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "o-compartilhamento",
+    "categoria": "marketing",
+    "nome": "[O] Compartilhamento",
+    "descricao": "[O] Compartilhamento - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 271,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 609,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 261,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 503,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 288,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 153,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 443,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 228,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 416,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 256,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 118,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 202,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 3299,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 1503,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 2739,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 1885,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 954,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "o-engajamento",
+    "categoria": "marketing",
+    "nome": "[O] Engajamento",
+    "descricao": "[O] Engajamento - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 4,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "o-num-stories",
+    "categoria": "marketing",
+    "nome": "[O] Nº Stories",
+    "descricao": "[O] Nº Stories - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 29,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 26,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 49,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 23,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 70,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 81,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 74,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 77,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 46,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 56,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 59,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 71,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 187,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 250,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 230,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 171,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 301,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "o-visu-stories",
+    "categoria": "marketing",
+    "nome": "[O] Visu Stories",
+    "descricao": "[O] Visu Stories - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 57216,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 40219,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 67777,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 38755,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 88203,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 122055,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 106153,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 115077,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 65623,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 78287,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 96596,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 113473,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 111441,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 249088,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 450659,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-valor-investido",
+    "categoria": "marketing",
+    "nome": "[M] Valor Investido",
+    "descricao": "[M] Valor Investido - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 49,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 61,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 54,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 61,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 48,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 51,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 65,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 76,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 43,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-alcance",
+    "categoria": "marketing",
+    "nome": "[M] Alcance",
+    "descricao": "[M] Alcance - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 312069,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 289953,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 333013,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 216013,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 218562,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 322095,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 316758,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 232227,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 233585,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 168873,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 176549,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 167827,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 518720,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 614549,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 653886,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 647709,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 609604,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-frequencia",
+    "categoria": "marketing",
+    "nome": "[M] Frequencia",
+    "descricao": "[M] Frequencia - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 7,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 3,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 5,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 2,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 1,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-cpm",
+    "categoria": "marketing",
+    "nome": "[M] CPM (Custo por Visu)",
+    "descricao": "[M] CPM (Custo por Visu) - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 25,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 23,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 89,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 35,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 20,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 80,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 8,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 98,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 52,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-cliques",
+    "categoria": "marketing",
+    "nome": "[M] Cliques",
+    "descricao": "[M] Cliques - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 2507,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 2103,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 1355,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 1833,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 1939,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 1996,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 2132,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 1383,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 1753,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 2490,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 2429,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 3068,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 26202,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 17062,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 9771,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 9179,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 7667,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-ctr",
+    "categoria": "marketing",
+    "nome": "[M] CTR (Taxa de Clique)",
+    "descricao": "[M] CTR (Taxa de Clique) - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 30,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 29,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 18,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 38,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 39,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 25,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 28,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 35,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 70,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-custo-clique",
+    "categoria": "marketing",
+    "nome": "[M] Custo por Clique",
+    "descricao": "[M] Custo por Clique - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 13,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 22,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 13,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 9,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 51,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 48,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 71,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 94,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  },
+  {
+    "id": "m-conversas-iniciadas",
+    "categoria": "marketing",
+    "nome": "[M] Conversas Iniciadas",
+    "descricao": "[M] Conversas Iniciadas - marketing",
+    "unidade": "unidade",
+    "meta": null,
+    "dados": {
+      "semanais": [
+        {
+          "semana": "Semana 05",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 06",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 07",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 08",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 09",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 10",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 11",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 12",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 13",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 14",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 15",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 16",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 17",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 18",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 19",
+          "valor": 41,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 20",
+          "valor": 42,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 21",
+          "valor": 51,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 22",
+          "valor": 62,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 23",
+          "valor": 55,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 24",
+          "valor": 65,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 25",
+          "valor": 58,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 26",
+          "valor": 46,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 27",
+          "valor": 66,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 28",
+          "valor": 70,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "semana": "Semana 29",
+          "valor": 68,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ],
+      "mensais": [
+        {
+          "mes": "Fevereiro",
+          "valor": 69,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Março",
+          "valor": 274,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Abril",
+          "valor": 225,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Maio",
+          "valor": 224,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Junho",
+          "valor": 242,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        },
+        {
+          "mes": "Julho",
+          "valor": 0,
+          "meta": null,
+          "status": "dentro",
+          "tendencia": "estavel"
+        }
+      ]
+    }
+  }
+]
 }
 
 export async function GET(request: NextRequest) {

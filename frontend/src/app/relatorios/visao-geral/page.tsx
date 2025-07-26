@@ -186,7 +186,7 @@ export default function VisaoGeralPage() {
 
   return (
     <ProtectedRoute requiredModule="relatorios">
-      <div className="space-y-6">
+      <div className="space-y-6 mt-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
