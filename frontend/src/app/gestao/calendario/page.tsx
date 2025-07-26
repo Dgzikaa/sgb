@@ -274,16 +274,34 @@ export default function CalendarioPage() {
     const today = new Date()
     const isToday = date.toDateString() === today.toDateString()
     
+    // Verificar se há eventos neste dia
+    const dayEvents = calendarEvents.filter(event => 
+      event.start.toDateString() === date.toDateString()
+    )
+    
+    const hasEvents = dayEvents.length > 0
+    const status = hasEvents ? dayEvents[0]?.resource.status.toLowerCase() : null
+    
+    const baseProps: any = {
+      'data-has-events': hasEvents.toString()
+    }
+    
+    if (status) {
+      baseProps['data-status'] = status
+    }
+    
     if (isToday) {
       return {
         style: {
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
           borderRadius: '8px'
-        }
+        },
+        ...baseProps
       }
     }
-    return {}
+    
+    return baseProps
   }
 
   const limparFiltros = () => {
@@ -310,6 +328,10 @@ export default function CalendarioPage() {
     }
 
     const currentMonth = format(toolbar.date, 'MMMM yyyy', { locale: ptBR })
+    const currentMonthEvents = calendarEvents.filter(event => 
+      getMonth(event.start) === getMonth(toolbar.date) && 
+      getYear(event.start) === getYear(toolbar.date)
+    ).length
 
     return (
       <div className="rbc-toolbar flex items-center justify-between">

@@ -107,6 +107,7 @@
   background: var(--day-bg);
   border: 1px solid var(--calendar-border);
   transition: background-color 0.2s ease;
+  position: relative;
 }
 
 .modern-calendar .rbc-day-bg:hover {
@@ -163,7 +164,6 @@
   font-weight: 500;
   color: var(--event-text);
   transition: all 0.2s ease;
-  position: relative;
 }
 
 .modern-calendar .rbc-event:hover {
@@ -171,25 +171,26 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Ícone de status no canto superior esquerdo */
-.modern-calendar .rbc-event::after {
+/* Ícone de status no canto superior esquerdo da célula do dia */
+.modern-calendar .rbc-day-bg[data-has-events="true"]::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 4px;
+  left: 4px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #10b981;
   border: 1px solid #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 1;
 }
 
-.modern-calendar .rbc-event[data-status="pendente"]::after {
+.modern-calendar .rbc-day-bg[data-status="pendente"]::after {
   background: #f59e0b;
 }
 
-.modern-calendar .rbc-event[data-status="cancelado"]::after {
+.modern-calendar .rbc-day-bg[data-status="cancelado"]::after {
   background: #ef4444;
 }
 
