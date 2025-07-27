@@ -249,14 +249,14 @@ export default function DesempenhoPage() {
             background: #9ca3af;
           }
         `}</style>
-        <div className="min-w-[2000px]">
+        <div className="min-w-[1600px]">
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-700">
-                <th className="sticky left-0 z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[250px]">
+                <th className="sticky left-0 z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-3 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[180px]">
                   Indicador
                 </th>
-                <th className="sticky left-[250px] z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[100px]">
+                <th className="sticky left-[180px] z-20 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 px-3 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider border-r border-gray-200 dark:border-gray-700 min-w-[80px]">
                   Meta
                 </th>
                 {cabecalhos.map((cabecalho, index) => (
@@ -271,13 +271,13 @@ export default function DesempenhoPage() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {indicadoresComDados.map((indicador) => (
                 <tr key={indicador.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                  <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
+                  <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-3 py-4 border-r border-gray-200 dark:border-gray-700">
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white text-sm">{indicador.nome}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{indicador.unidade}</div>
                     </div>
                   </td>
-                  <td className="sticky left-[250px] z-10 bg-gray-50 dark:bg-gray-800 px-4 py-4 border-r border-gray-200 dark:border-gray-700">
+                  <td className="sticky left-[180px] z-10 bg-gray-50 dark:bg-gray-800 px-3 py-4 border-r border-gray-200 dark:border-gray-700">
                     <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       {viewMode === 'semanal' 
                         ? (indicador.dados.semanais[0]?.meta ? formatarValor(indicador.dados.semanais[0].meta, indicador.unidade) : '-')
