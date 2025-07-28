@@ -47,8 +47,10 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Função para obter configuração da API Sympla
 function getSymplaConfig() {
-  // CHAVE ESPECÍFICA PARA TESTE
-  const token = '3085e782ebcccbbc75b26f6a5057f170e4dfa4aeabe4c19974fc2639fbfc0a77';
+  // CHAVES DISPONÍVEIS - DESCOMENTE APENAS 1 POR VEZ:
+  const token = '3085e782ebcccbbc75b26f6a5057f170e4dfa4aeabe4c19974fc2639fbfc0a77'; // CHAVE_ORIGINAL
+  //const token = 'e96a8233fd5acc27c65b166bf424dd8e1874f4d48b16ee2029c93b6f80fd6a06'; // CHAVE_1
+  //const token = '24a8cb785b622adeb3239928dd2ac79ec3f1a076558b0159ee9d4d27c8099022'; // CHAVE_2
   
   if (!token) {
     throw new Error('SYMPLA_API_TOKEN não encontrado nos secrets - configure a variável de ambiente');
@@ -257,7 +259,7 @@ async function inserirParticipantes(supabase, eventoId, participantes) {
     const { data, error } = await supabase
       .from('sympla_participantes')
       .upsert(lote, {
-        onConflict: 'participante_sympla_id',
+        onConflict: 'participante_sympla_id,evento_sympla_id',
         ignoreDuplicates: false
       })
       .select('id');
@@ -286,6 +288,8 @@ async function inserirPedidos(supabase, eventoId, pedidos) {
     tipo_transacao: pedido.transaction_type,
     nome_comprador: `${pedido.buyer_first_name || ''} ${pedido.buyer_last_name || ''}`.trim(),
     email_comprador: pedido.buyer_email,
+    valor_bruto: pedido.order_total_sale_price || 0,
+    valor_liquido: pedido.order_total_net_value || 0,
     dados_utm: pedido.utm,
     dados_comprador: {
       buyer_first_name: pedido.buyer_first_name,
@@ -308,7 +312,7 @@ async function inserirPedidos(supabase, eventoId, pedidos) {
     const { data, error } = await supabase
       .from('sympla_pedidos')
       .upsert(lote, {
-        onConflict: 'pedido_sympla_id',
+        onConflict: 'pedido_sympla_id,evento_sympla_id',
         ignoreDuplicates: false
       })
       .select('id');

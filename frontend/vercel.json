@@ -2,16 +2,10 @@
   "crons": [
     {
       "path": "/api/configuracoes/credenciais/nibo-sync",
-      "schedule": "0 7 * * *"
+      "schedule": "0 8,12,16,20 * * *"
     }
   ],
   "functions": {
-    "src/app/api/cron/meta-social-collect/route.ts": {
-      "maxDuration": 300
-    },
-    "src/app/api/meta/collect/route.ts": {
-      "maxDuration": 180
-    },
     "src/app/api/configuracoes/credenciais/nibo-sync/route.ts": {
       "maxDuration": 300
     }

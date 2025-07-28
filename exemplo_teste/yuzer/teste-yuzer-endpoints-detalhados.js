@@ -79,29 +79,102 @@ async function makeYuzerRequest(endpoint, method = 'GET', body = null, salesPane
 async function buscarSalesPanels() {
   console.log('\n📋 Buscando Sales Panels...');
   
-  try {
-    const response = await makeYuzerRequest('/api/salesPanels');
-    
-    if (response.error) {
-      console.log(`❌ Erro ao buscar sales panels: ${response.message}`);
-      return [];
+  // Tentar diferentes métodos para buscar sales panels
+  const metodosParaTestar = [
+    {
+      nome: 'POST /api/salesPanels',
+      endpoint: '/api/salesPanels',
+      method: 'POST',
+      body: {}
+    },
+    {
+      nome: 'POST /api/salesPanels com período',
+      endpoint: '/api/salesPanels',
+      method: 'POST',
+      body: {
+        from: new Date('2025-01-01T00:00:00.000Z').toISOString(),
+        to: new Date('2025-12-31T23:59:59.999Z').toISOString()
+      }
+    },
+    {
+      nome: 'POST /api/dashboards/recentEvents/search',
+      endpoint: '/api/dashboards/recentEvents/search',
+      method: 'POST',
+      body: {
+        from: new Date('2025-01-01T00:00:00.000Z').toISOString(),
+        to: new Date('2025-12-31T23:59:59.999Z').toISOString()
+      }
+    },
+    {
+      nome: 'POST /api/dashboards/ongoing',
+      endpoint: '/api/dashboards/ongoing',
+      method: 'POST',
+      body: {}
+    },
+    {
+      nome: 'POST /api/dashboards/salesPanels/statistics (do script original)',
+      endpoint: '/api/dashboards/salesPanels/statistics',
+      method: 'POST',
+      body: {
+        from: new Date('2025-01-01T00:00:00.000Z').toISOString(),
+        to: new Date('2025-12-31T23:59:59.999Z').toISOString()
+      }
     }
+  ];
+  
+  for (const metodo of metodosParaTestar) {
+    console.log(`\n🔍 Tentando: ${metodo.nome}`);
     
-    console.log(`✅ Encontrados ${response.length || 0} sales panels`);
-    
-    // Mostrar informações básicas dos sales panels
-    if (Array.isArray(response)) {
-      response.forEach((panel, index) => {
-        console.log(`   ${index + 1}. ID: ${panel.id} - Nome: ${panel.name || 'Sem nome'} - Status: ${panel.status || 'N/A'}`);
-      });
+    try {
+      const response = await makeYuzerRequest(metodo.endpoint, metodo.method, metodo.body);
+      
+      if (response.error) {
+        console.log(`   ❌ ${response.message}`);
+        continue;
+      }
+      
+      if (response.empty) {
+        console.log(`   ⚠️ Resposta vazia`);
+        continue;
+      }
+      
+      // Verificar se a resposta contém dados úteis
+      let salesPanels = [];
+      
+      if (Array.isArray(response)) {
+        salesPanels = response;
+      } else if (response.content && Array.isArray(response.content)) {
+        salesPanels = response.content;
+      } else if (response.data && Array.isArray(response.data)) {
+        salesPanels = response.data;
+      } else if (response.events && Array.isArray(response.events)) {
+        salesPanels = response.events;
+      } else {
+        console.log(`   ⚠️ Estrutura não reconhecida:`, Object.keys(response));
+        continue;
+      }
+      
+      if (salesPanels.length > 0) {
+        console.log(`   ✅ Encontrados ${salesPanels.length} sales panels`);
+        
+        // Mostrar informações básicas dos sales panels
+        salesPanels.forEach((panel, index) => {
+          const id = panel.id || panel.salesPanelId || panel.eventId;
+          const nome = panel.name || panel.title || panel.eventName || 'Sem nome';
+          const status = panel.status || panel.state || 'N/A';
+          console.log(`      ${index + 1}. ID: ${id} - Nome: ${nome} - Status: ${status}`);
+        });
+        
+        return salesPanels;
+      }
+      
+    } catch (error) {
+      console.log(`   ❌ Erro inesperado: ${error.message}`);
     }
-    
-    return response;
-    
-  } catch (error) {
-    console.log(`❌ Erro inesperado: ${error.message}`);
-    return [];
   }
+  
+  console.log('\n❌ Não foi possível encontrar sales panels por nenhum método');
+  return [];
 }
 
 // Função para encontrar o sales panel do evento de 27/07/2025
@@ -114,33 +187,68 @@ function encontrarSalesPanelDoEvento(salesPanels) {
     /27\/7/,
     /2025-07-27/,
     /jul.*27/i,
-    /ordinário.*27/i
+    /ordinário.*27/i,
+    /27.*jul/i
   ];
   
   for (const panel of salesPanels) {
-    const nome = panel.name || '';
-    const descricao = panel.description || '';
-    const dataStr = `${nome} ${descricao}`.toLowerCase();
+    // Diferentes campos possíveis para nome e descrição
+    const campos = [
+      panel.name,
+      panel.title,
+      panel.eventName,
+      panel.description,
+      panel.eventDescription
+    ].filter(Boolean);
+    
+    const textoCompleto = campos.join(' ').toLowerCase();
     
     for (const padrao of padroesBusca) {
-      if (padrao.test(dataStr)) {
-        console.log(`✅ Encontrado: ID ${panel.id} - ${panel.name}`);
-        return panel;
+      if (padrao.test(textoCompleto)) {
+        const id = panel.id || panel.salesPanelId || panel.eventId;
+        const nome = panel.name || panel.title || panel.eventName || 'Sem nome';
+        console.log(`✅ Encontrado: ID ${id} - ${nome}`);
+        return {
+          id: id,
+          name: nome,
+          status: panel.status || panel.state || 'N/A',
+          originalData: panel
+        };
       }
     }
   }
   
   // Se não encontrar por data, pegar o primeiro ativo
-  const panelAtivo = salesPanels.find(p => p.status === 'ACTIVE' || p.status === 'ONGOING');
+  const statusAtivos = ['ACTIVE', 'ONGOING', 'OPEN', 'RUNNING'];
+  const panelAtivo = salesPanels.find(p => {
+    const status = (p.status || p.state || '').toUpperCase();
+    return statusAtivos.includes(status);
+  });
+  
   if (panelAtivo) {
-    console.log(`⚠️ Não encontrou por data, usando primeiro ativo: ID ${panelAtivo.id} - ${panelAtivo.name}`);
-    return panelAtivo;
+    const id = panelAtivo.id || panelAtivo.salesPanelId || panelAtivo.eventId;
+    const nome = panelAtivo.name || panelAtivo.title || panelAtivo.eventName || 'Sem nome';
+    console.log(`⚠️ Não encontrou por data, usando primeiro ativo: ID ${id} - ${nome}`);
+    return {
+      id: id,
+      name: nome,
+      status: panelAtivo.status || panelAtivo.state || 'N/A',
+      originalData: panelAtivo
+    };
   }
   
   // Se não encontrar nenhum ativo, pegar o primeiro
   if (salesPanels.length > 0) {
-    console.log(`⚠️ Usando primeiro disponível: ID ${salesPanels[0].id} - ${salesPanels[0].name}`);
-    return salesPanels[0];
+    const primeiro = salesPanels[0];
+    const id = primeiro.id || primeiro.salesPanelId || primeiro.eventId;
+    const nome = primeiro.name || primeiro.title || primeiro.eventName || 'Sem nome';
+    console.log(`⚠️ Usando primeiro disponível: ID ${id} - ${nome}`);
+    return {
+      id: id,
+      name: nome,
+      status: primeiro.status || primeiro.state || 'N/A',
+      originalData: primeiro
+    };
   }
   
   return null;
