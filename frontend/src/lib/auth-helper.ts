@@ -9,7 +9,7 @@ export interface UserAuth {
   role: 'admin' | 'financeiro' | 'funcionario';
   bar_id: number;
   permissao: string; // Alias para role para compatibilidade
-  modulos_permitidos: string[];
+  modulos_permitidos: string[] | Record<string, any>;
   ativo: boolean;
 }
 
@@ -83,7 +83,18 @@ export function hasPermission(user: UserAuth, permission: string): boolean {
 
   // Verificar permissões específicas
   const permissions = user.modulos_permitidos || [];
-  return permissions.includes(permission) || permissions.includes('admin');
+  
+  // Se modulos_permitidos é um array
+  if (Array.isArray(permissions)) {
+    return permissions.includes(permission) || permissions.includes('admin');
+  }
+  
+  // Se modulos_permitidos é um objeto
+  if (typeof permissions === 'object') {
+    return permissions[permission] === true || permissions['admin'] === true;
+  }
+  
+  return false;
 }
 
 /**

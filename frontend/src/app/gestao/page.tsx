@@ -162,7 +162,7 @@ export default function GestaoPage() {
 
         {filteredCards.length === 0 && (
           <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-            Nenhuma funcionalidade encontrada para "{searchTerm}".
+            Nenhuma funcionalidade encontrada para &quot;{searchTerm}&quot;.
           </div>
         )}
       </div>

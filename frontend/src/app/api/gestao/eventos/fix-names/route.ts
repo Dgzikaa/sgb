@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
     const dateNameMap: Record<string, string> = {};
 
     for (const linha of linhas) {
-      const partes = linha.split('\t').map((p: unknown) => p.trim());
+      const partes = linha.split('\t').map((p: string) => p.trim());
       if (partes.length < 3) continue;
 
       const [dataStr, , eventoStr] = partes;
@@ -252,7 +252,12 @@ export async function POST(request: NextRequest) {
     console.log(`📥 Found ${eventos?.length || 0} events to update`);
 
     let updatedCount = 0;
-    const updates = [];
+    const updates: Array<{
+      id: any;
+      data_evento: any;
+      old_name: any;
+      new_name: string;
+    }> = [];
 
     // Update events with correct names
     for (const evento of eventos || []) {

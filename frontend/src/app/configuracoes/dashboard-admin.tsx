@@ -2329,7 +2329,7 @@ export default function AdminPage() {
                           startDate.getDate() - firstDay.getDay()
                         );
 
-                        const days = [];
+                        const days: React.JSX.Element[] = [];
                         for (let i = 0; i < 42; i++) {
                           const date = new Date(startDate);
                           date.setDate(startDate.getDate() + i);
@@ -2466,7 +2466,7 @@ export default function AdminPage() {
                                   ✏️
                                 </button>
                                 <button
-                                  onClick={() => deleteEvento(evento.id)}
+                                  onClick={() => deleteEvento(evento.id || 0)}
                                   className="btn btn-small btn-outline btn-danger"
                                 >
                                   🗑️
@@ -2673,7 +2673,7 @@ export default function AdminPage() {
                           ...editingEvent,
                           valor_cover: e.target.value
                             ? parseFloat(e.target.value)
-                            : null,
+                            : 0,
                         })
                       }
                       placeholder="0.00"
@@ -2692,7 +2692,7 @@ export default function AdminPage() {
                           ...editingEvent,
                           valor_show: e.target.value
                             ? parseFloat(e.target.value)
-                            : null,
+                            : 0,
                         })
                       }
                       placeholder="0.00"
@@ -2710,7 +2710,7 @@ export default function AdminPage() {
                           ...editingEvent,
                           capacidade_estimada: e.target.value
                             ? parseInt(e.target.value)
-                            : null,
+                            : 0,
                         })
                       }
                       placeholder="Ex: 200"
@@ -2806,7 +2806,7 @@ function AnalyticsContent({ barId }: { barId: number }) {
     if (barId) {
       carregarAnalytics();
     }
-  }, [carregarAnalytics]);
+  }, [carregarAnalytics, barId]);
 
   return (
     <div className="analytics-content">

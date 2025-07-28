@@ -62,8 +62,9 @@ export async function GET(request: NextRequest) {
     let todosEventos: any[] = []
     let from = 0
     const pageSize = 100 // Supabase padrão
+    let hasMore = true
     
-    while (true) {
+    while (hasMore) {
       const { data: eventos, error } = await query.range(from, from + pageSize - 1)
       
       if (error) {
@@ -72,7 +73,8 @@ export async function GET(request: NextRequest) {
       }
       
       if (!eventos || eventos.length === 0) {
-        break // Não há mais eventos
+        hasMore = false // Não há mais eventos
+        break
       }
       
       todosEventos = todosEventos.concat(eventos)
@@ -82,7 +84,7 @@ export async function GET(request: NextRequest) {
       
       // Se retornou menos que pageSize, chegamos ao fim
       if (eventos.length < pageSize) {
-        break
+        hasMore = false
       }
     }
 

@@ -1,6 +1,26 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 
+// Interfaces para tipagem
+interface ChecklistItem {
+  id: number;
+  titulo: string;
+  descricao: string;
+  area: string;
+  prioridade: string;
+  tempo_estimado: number;
+  responsavel: string;
+  status: string;
+  observacoes?: string;
+  horario_inicio?: string;
+  horario_conclusao?: string;
+  verificado_por?: string;
+}
+
+interface ChecklistItemStatus {
+  status: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -99,10 +119,10 @@ export async function POST(request: NextRequest) {
     // Calcular estatísticas
     const total_itens = itens.length;
     const itens_concluidos = itens.filter(
-      (item: unknown) => item.status === 'concluido'
+      (item: ChecklistItem) => item.status === 'concluido'
     ).length;
     const itens_problemas = itens.filter(
-      (item: unknown) => item.status === 'problema'
+      (item: ChecklistItem) => item.status === 'problema'
     ).length;
     const percentual_conclusao =
       total_itens > 0 ? (itens_concluidos / total_itens) * 100 : 0;
@@ -146,7 +166,7 @@ export async function POST(request: NextRequest) {
       .eq('checklist_id', checklistData.id);
 
     // Inserir novos itens
-    const itensParaInserir = itens.map((item: unknown) => ({
+    const itensParaInserir = itens.map((item: ChecklistItem) => ({
       checklist_id: checklistData.id,
       item_id: item.id,
       titulo: item.titulo,
@@ -242,10 +262,10 @@ export async function PUT(request: NextRequest) {
     if (!itensError && itens) {
       const total_itens = itens.length;
       const itens_concluidos = itens.filter(
-        (item: unknown) => item.status === 'concluido'
+        (item: ChecklistItemStatus) => item.status === 'concluido'
       ).length;
       const itens_problemas = itens.filter(
-        (item: unknown) => item.status === 'problema'
+        (item: ChecklistItemStatus) => item.status === 'problema'
       ).length;
       const percentual_conclusao =
         total_itens > 0 ? (itens_concluidos / total_itens) * 100 : 0;

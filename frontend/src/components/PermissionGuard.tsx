@@ -63,8 +63,19 @@ export default function PermissionGuard({
 
     // Admin tem acesso a tudo por padrão (exceto se tem permissões específicas)
     if (user.role === 'admin') {
-      const hasExplicitPermissions =
-        user.modulos_permitidos && user.modulos_permitidos.length < 23;
+      let hasExplicitPermissions = false;
+      
+      if (user.modulos_permitidos) {
+        // Se modulos_permitidos é um array
+        if (Array.isArray(user.modulos_permitidos)) {
+          hasExplicitPermissions = user.modulos_permitidos.length < 23;
+        }
+        // Se modulos_permitidos é um objeto
+        else if (typeof user.modulos_permitidos === 'object') {
+          hasExplicitPermissions = Object.keys(user.modulos_permitidos).length < 23;
+        }
+      }
+      
       if (!hasExplicitPermissions) {
         return; // Admin com acesso total
       }
@@ -145,7 +156,16 @@ export default function PermissionGuard({
                     </div>
                     <div>
                       <strong>Seus módulos:</strong>{' '}
-                      {user?.modulos_permitidos?.join(', ') || 'Nenhum'}
+                      {(() => {
+                        if (!user?.modulos_permitidos) return 'Nenhum';
+                        if (Array.isArray(user.modulos_permitidos)) {
+                          return user.modulos_permitidos.join(', ');
+                        }
+                        if (typeof user.modulos_permitidos === 'object') {
+                          return Object.keys(user.modulos_permitidos).join(', ');
+                        }
+                        return 'Nenhum';
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -209,8 +229,19 @@ export function usePermissionGuard(
 
     // Admin com acesso total
     if (user.role === 'admin') {
-      const hasExplicitPermissions =
-        user.modulos_permitidos && user.modulos_permitidos.length < 23;
+      let hasExplicitPermissions = false;
+      
+      if (user.modulos_permitidos) {
+        // Se modulos_permitidos é um array
+        if (Array.isArray(user.modulos_permitidos)) {
+          hasExplicitPermissions = user.modulos_permitidos.length < 23;
+        }
+        // Se modulos_permitidos é um objeto
+        else if (typeof user.modulos_permitidos === 'object') {
+          hasExplicitPermissions = Object.keys(user.modulos_permitidos).length < 23;
+        }
+      }
+      
       if (!hasExplicitPermissions) {
         return { allowed: true, loading: false };
       }

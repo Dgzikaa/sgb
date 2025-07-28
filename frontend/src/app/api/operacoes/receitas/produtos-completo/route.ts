@@ -1,8 +1,47 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
+// Interfaces para tipagem
+interface Produto {
+  id: number;
+  codigo: string;
+  nome: string;
+  rendimento_percentual: number;
+  quantidade_base: number;
+  unidade_final: string;
+  observacoes?: string;
+  ativo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Receita {
+  id: number;
+  produto_codigo: string;
+  insumo_codigo: string;
+  quantidade_receita: number;
+  created_at: string;
+  insumos?: {
+    id: number;
+    codigo: string;
+    nome: string;
+    unidade_medida: string;
+    categoria: string;
+    custo_unitario: number;
+  };
+}
+
+interface Insumo {
+  id: number;
+  codigo: string;
+  nome: string;
+  unidade_medida: string;
+  categoria: string;
+  custo_unitario: number;
+}
+
 // Criar tabelas de produtos e receitas
-const criarTabelas = async (supabase: unknown) => {
+const criarTabelas = async (supabase: any) => {
   const { error } = await supabase.rpc('exec_sql', {
     sql: `
       -- Tabela de produtos
@@ -93,54 +132,48 @@ export async function GET(request: NextRequest) {
     const produtosComReceitas = produtos || [];
 
     if (comReceitas && produtos && produtos.length > 0) {
-      for (const produto of produtos) {
+      for (const produto of produtos as Produto[]) {
         // Buscar receitas do produto com dados dos insumos
         const { data: receitas } = await supabase
           .from('receitas')
           .select(
             `
-            quantidade_receita,
-            insumos (
+            *,
+            insumos!receitas_insumo_codigo_fkey (
+              id,
               codigo,
               nome,
-              custo_unitario,
-              unidade,
-              peso_volume_unidade
+              unidade_medida,
+              categoria,
+              custo_unitario
             )
           `
           )
           .eq('produto_codigo', produto.codigo);
 
         // Calcular custo total da receita
-        let custoTotalReceita = 0;
-        const insumosReceita =
-          receitas?.map((receita: unknown) => {
-            const custoInsumo =
-              receita.quantidade_receita * receita.insumos.custo_unitario;
-            custoTotalReceita += custoInsumo;
+        const custoTotal = (receitas || []).reduce(
+          (total: number, receita: Receita) =>
+            total + (receita.quantidade_receita * (receita.insumos?.custo_unitario || 0)),
+          0
+        );
 
-            return {
-              insumo_codigo: receita.insumos.codigo,
-              insumo_nome: receita.insumos.nome,
-              quantidade_receita: receita.quantidade_receita,
-              custo_unitario: receita.insumos.custo_unitario,
-              custo_total: custoInsumo,
-              unidade: receita.insumos.unidade,
-            };
-          }) || [];
-
-        produto.insumos = insumosReceita;
-        produto.custo_total_receita = custoTotalReceita;
+        // Adicionar receitas e custo ao produto
+        (produto as any).receitas = receitas || [];
+        (produto as any).custo_total_receita = custoTotal;
       }
     }
 
     return NextResponse.json({
       success: true,
-      data: produtosComReceitas,
-      total: produtosComReceitas.length,
+      produtos: produtosComReceitas,
+      meta: {
+        total: produtosComReceitas.length,
+        com_receitas: comReceitas,
+      },
     });
   } catch (error) {
-    console.error('❌ Erro interno:', error);
+    console.error('❌ Erro na API produtos:', error);
     return NextResponse.json(
       {
         success: false,
@@ -221,7 +254,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se todos os insumos existem
-    const insumoCodigos = receita.map((r: unknown) => r.insumo_codigo);
+    const insumoCodigos = receita.map((r: any) => r.insumo_codigo);
     const { data: insumosExistentes } = await supabase
       .from('insumos')
       .select('codigo')
@@ -229,7 +262,7 @@ export async function POST(request: NextRequest) {
       .eq('ativo', true);
 
     const codigosExistentes =
-      insumosExistentes?.map((i: unknown) => i.codigo) || [];
+      insumosExistentes?.map((i: any) => i.codigo) || [];
     const insumosInvalidos = insumoCodigos.filter(
       (codigo: string) => !codigosExistentes.includes(codigo)
     );
@@ -271,7 +304,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Inserir receitas
-    const receitasParaInserir = receita.map((r: unknown) => ({
+    const receitasParaInserir = receita.map((r: any) => ({
       produto_codigo: codigo,
       insumo_codigo: r.insumo_codigo,
       quantidade_receita: parseFloat(r.quantidade_receita),
@@ -381,7 +414,7 @@ export async function PUT(request: NextRequest) {
       await supabase.from('receitas').delete().eq('produto_codigo', codigo);
 
       // Inserir novas receitas
-      const receitasParaInserir = receita.map((r: unknown) => ({
+      const receitasParaInserir = receita.map((r: any) => ({
         produto_codigo: codigo,
         insumo_codigo: r.insumo_codigo,
         quantidade_receita: parseFloat(r.quantidade_receita),
@@ -396,7 +429,7 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            error: 'Erro ao atualizar receitas',
+            error: 'Erro ao atualizar receitas do produto',
           },
           { status: 500 }
         );

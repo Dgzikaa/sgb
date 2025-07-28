@@ -62,6 +62,16 @@ interface AIAnomaly {
   status: string;
 }
 
+interface WeeklyStats {
+  tendencia?: string;
+  melhor_dia?: string;
+  pior_dia?: string;
+  top_funcionario?: string;
+  top_checklist?: string;
+  meta_atingida?: boolean;
+  semana?: string;
+}
+
 export class DiscordChecklistService {
   private static readonly WEBHOOK_URL =
     'https://discord.com/api/webhooks/1392957511912525926/s0TR7ba9jCJxnGXJNwbiQzHMpWTjmm1NcOnWtfijXvQiFk0L4ze9Q1oZJkatGV6UeIN3';
@@ -314,7 +324,7 @@ export class DiscordChecklistService {
   /**
    * Envia resumo semanal de checklists
    */
-  static async sendWeeklyReport(weeklyStats: unknown): Promise<boolean> {
+  static async sendWeeklyReport(weeklyStats: WeeklyStats): Promise<boolean> {
     const embed = {
       title: '📊 Resumo Semanal - Checklists',
       description: '📅 **Performance da Semana**',
@@ -478,6 +488,7 @@ export class DiscordChecklistService {
    */
   private static async sendWebhook(payload: unknown): Promise<boolean> {
     try {
+      const bodyObj = typeof payload === 'object' && payload !== null ? payload : {};
       const response = await fetch(this.WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -486,7 +497,7 @@ export class DiscordChecklistService {
         body: JSON.stringify({
           username: 'SGB Checklist Bot',
           avatar_url: 'https://i.imgur.com/checklist-icon.png',
-          ...payload,
+          ...bodyObj,
         }),
       });
 

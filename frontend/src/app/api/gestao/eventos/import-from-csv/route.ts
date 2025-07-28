@@ -64,7 +64,22 @@ export async function POST() {
     console.log('✅ Eventos existentes removidos com sucesso');
 
     // 2. Processar CSV e inserir eventos
-    const eventosParaInserir = [];
+    const eventosParaInserir: Array<{
+      bar_id: number;
+      nome_evento: string;
+      nome_artista: string | null;
+      genero_musical: string;
+      observacoes: string | null;
+      data_evento: string;
+      horario_inicio: string;
+      horario_fim: string;
+      status: string;
+      categoria: string;
+      tipo_evento: string;
+      divulgacao_ativa: boolean;
+      created_at: string;
+      updated_at: string;
+    }> = [];
 
     // Pular o cabeçalho (primeira linha)
     for (let i = 1; i < lines.length; i++) {

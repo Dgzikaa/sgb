@@ -17,6 +17,8 @@ export function useDragAndDropPersistence<T>(
   // Create storage key with version
   const storageKey = `dragdrop_${key}_v${version}`;
 
+
+
   // Load from localStorage on mount
   useEffect(() => {
     if (!enabled) {
@@ -80,10 +82,10 @@ export function useDragAndDropPersistence<T>(
 
     if (hasIds) {
       const defaultMap = new Map(
-        defaults.map(item => [(item as unknown).id, item])
+        defaults.map(item => [(item as any).id, item])
       );
       const storedMap = new Map(
-        stored.map(item => [(item as unknown).id, item])
+        stored.map(item => [(item as any).id, item])
       );
 
       // Preserve order from stored, add new items from defaults
@@ -91,14 +93,14 @@ export function useDragAndDropPersistence<T>(
 
       // First, add stored items that still exist in defaults
       stored.forEach(item => {
-        if (defaultMap.has((item as unknown).id)) {
+        if (defaultMap.has((item as any).id)) {
           merged.push(item);
         }
       });
 
       // Then, add new items from defaults that aren't in stored
       defaults.forEach(item => {
-        if (!storedMap.has((item as unknown).id)) {
+        if (!storedMap.has((item as any).id)) {
           merged.push(item);
         }
       });

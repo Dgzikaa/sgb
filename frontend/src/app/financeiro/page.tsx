@@ -21,6 +21,7 @@ import {
   Calculator,
   Clock,
   AlertCircle,
+  BarChart3,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -170,36 +171,49 @@ export default function FinanceiroPage() {
               </CardContent>
             </Card>
 
-            {/* Em Desenvolvimento */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg opacity-60">
+            {/* DRE - Demonstrativo de Resultado */}
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <TrendingUp className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg text-gray-500 dark:text-gray-400">
-                        Receitas
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
+                        DRE
                       </CardTitle>
-                      <CardDescription>Em desenvolvimento</CardDescription>
+                      <CardDescription>Demonstrativo de Resultado</CardDescription>
                     </div>
                   </div>
                   <Badge
                     variant="secondary"
-                    className="bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                    className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
                   >
-                    Em breve
+                    Ativo
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
-                  Módulo em desenvolvimento
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Acompanhe o resultado financeiro do seu negócio
                 </p>
-                <Button className="w-full" disabled>
-                  Em Desenvolvimento
-                </Button>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    Dashboard completo
+                  </span>
+                  <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 rounded-full"
+                      style={{ width: '100%' }}
+                    ></div>
+                  </div>
+                </div>
+                <Link href="/financeiro/dre">
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+                    Ver DRE
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 

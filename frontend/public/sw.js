@@ -1,5 +1,5 @@
-// Service Worker para SGB_V2 PWA
-const CACHE_NAME = 'sgb-v2-cache-v1.0.1'
+// Service Worker para SGB_V2 PWA - Atualizado para usar dre-yearly
+const CACHE_NAME = 'sgb-v2-cache-v1.0.2'
 const OFFLINE_URL = '/offline'
 
 // Recursos críticos para cache
@@ -34,13 +34,14 @@ const OFFLINE_FALLBACK_APIS = [
   '/api/financeiro/nibo/stakeholders',
   '/api/financeiro/nibo/categorias',
   '/api/financeiro/nibo/centros-custo',
+  '/api/financeiro/nibo/dre-yearly',
   '/api/financeiro/inter/pix',
   '/api/webhook-inter-banking'
 ]
 
 // Instalar Service Worker
 self.addEventListener('install', event => {
-  console.log('🚀 SW: Instalando Service Worker...')
+  console.log('🚀 SW: Instalando Service Worker v1.0.2 (dre-yearly)...')
   
   event.waitUntil(
     (async () => {
@@ -66,7 +67,7 @@ self.addEventListener('install', event => {
 
 // Ativar Service Worker
 self.addEventListener('activate', event => {
-  console.log('🔄 SW: Ativando Service Worker...')
+  console.log('🔄 SW: Ativando Service Worker v1.0.2 (dre-yearly)...')
   
   event.waitUntil(
     (async () => {

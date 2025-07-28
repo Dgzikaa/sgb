@@ -146,7 +146,7 @@ export default function TabelaDesempenhoPage() {
     if (selectedBar?.id) {
       carregarDados();
     }
-  }, [carregarDados]);
+  }, [carregarDados, selectedBar?.id]);
 
   const sincronizarComGoogleSheets = async () => {
     if (!selectedBar?.id) {

@@ -24,6 +24,9 @@ interface UserData {
   estado?: string;
   cep?: string;
   preferencias_privacidade?: Record<string, boolean>;
+  lastLogin?: string;
+  createdAt?: string;
+  loginCount?: number;
 }
 
 export default function PrivacidePage() {
@@ -46,7 +49,7 @@ export default function PrivacidePage() {
     const loadUserData = async () => {
       try {
         const data = await exerciseRights.accessData();
-        setUserData(data);
+        setUserData(data as UserData);
       } catch {
         console.error('Erro ao carregar dados do usuário');
       }

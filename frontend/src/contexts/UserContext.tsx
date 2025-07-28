@@ -7,7 +7,7 @@ interface Usuario {
   email: string;
   nome: string;
   role: 'admin' | 'manager' | 'funcionario';
-  modulos_permitidos: string[];
+  modulos_permitidos: string[] | Record<string, any>;
   ativo: boolean;
 }
 

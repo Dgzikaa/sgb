@@ -71,8 +71,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const results = [];
-    const errors = [];
+    const results: Array<{
+      number: string;
+      status: string;
+      message_id: any;
+      timestamp: string;
+    }> = [];
+    const errors: Array<{
+      number: string;
+      error: any;
+    }> = [];
 
     // Enviar para cada número
     for (const number of numbers) {
@@ -82,7 +90,7 @@ export async function POST(req: NextRequest) {
           number: cleanNumber,
           message: finalMessage,
           type: 'text',
-          ...(media && { media }),
+          ...(media && typeof media === 'object' ? { media } : {}),
         };
 
         const response = await sendToEvolutionAPI(messageData);

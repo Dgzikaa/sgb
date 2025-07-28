@@ -36,23 +36,15 @@ async function executeNiboSync(barId?: string) {
 
     console.log(`✅ Credenciais encontradas para bar_id: ${targetBarId}`);
 
-    // Usar variáveis de ambiente do Vercel para tokens
-    const niboApiToken = process.env.NIBO_API_TOKEN;
-    const niboOrganizationId = process.env.NIBO_ORGANIZATION_ID;
-
-    if (!niboApiToken || !niboOrganizationId) {
-      throw new Error('Variáveis de ambiente NIBO_API_TOKEN ou NIBO_ORGANIZATION_ID não configuradas');
-    }
-
     // Log da sincronização
     const logData = {
       bar_id: parseInt(targetBarId),
-      tipo_sincronizacao: 'automatica',
+      tipo_sincronizacao: 'automatica_vercel',
       status: 'iniciada',
       detalhes: {
         horario_inicio: agoraBrasil.toISO(),
         credenciais_id: credenciais.id,
-        organization_id: niboOrganizationId
+        trigger_source: 'vercel_cron'
       },
       criado_em: new Date().toISOString()
     };
@@ -68,13 +60,30 @@ async function executeNiboSync(barId?: string) {
       console.error('Erro ao criar log de início:', logError);
     }
 
-    // Aqui você implementaria a lógica de sincronização com a API do Nibo
-    // Por enquanto, vamos simular uma sincronização bem-sucedida
+    console.log(`🔄 Chamando Edge Function NIBO para bar_id: ${targetBarId}`);
     
-    console.log(`🔄 Iniciando sincronização com Nibo para bar_id: ${targetBarId}`);
+    // ✅ CHAMADA REAL para a Edge Function do NIBO
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    // Simular delay de processamento
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const response = await fetch(`${supabaseUrl}/functions/v1/nibo-sync`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        barId: targetBarId,
+        cronSecret: process.env.CRON_SECRET
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Edge Function falhou: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
     
     // Atualizar log com sucesso
     if (logInicio) {
@@ -85,8 +94,8 @@ async function executeNiboSync(barId?: string) {
           detalhes: {
             ...logData.detalhes,
             horario_fim: DateTime.now().setZone('America/Sao_Paulo').toISO(),
-            registros_processados: 0,
-            mensagem: 'Sincronização automática executada com sucesso'
+            resultado_edge_function: result,
+            mensagem: 'Sincronização automática via Vercel Cron executada com sucesso'
           },
           atualizado_em: new Date().toISOString()
         })
@@ -97,7 +106,8 @@ async function executeNiboSync(barId?: string) {
       success: true,
       message: `Sincronização com Nibo executada com sucesso para bar_id: ${targetBarId}`,
       timestamp: agoraBrasil.toFormat('dd/MM/yyyy HH:mm:ss'),
-      log_id: logInicio?.id
+      log_id: logInicio?.id,
+      edge_function_result: result
     };
 
   } catch (error) {
@@ -109,11 +119,12 @@ async function executeNiboSync(barId?: string) {
         .from('nibo_logs_sincronizacao')
         .insert({
           bar_id: parseInt(barId || process.env.NIBO_BAR_ID || '0'),
-          tipo_sincronizacao: 'automatica',
+          tipo_sincronizacao: 'automatica_vercel',
           status: 'erro',
           detalhes: {
             erro: error instanceof Error ? error.message : 'Erro desconhecido',
-            horario_erro: DateTime.now().setZone('America/Sao_Paulo').toISO()
+            horario_erro: DateTime.now().setZone('America/Sao_Paulo').toISO(),
+            trigger_source: 'vercel_cron'
           },
           criado_em: new Date().toISOString()
         });

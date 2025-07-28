@@ -586,11 +586,11 @@ async function getProdutosMaisVendidos(bar_id: number, limite: number) {
 
   const produtosOrdenados = Object.values(produtosAgrupados)
     .sort(
-      (a: Record<string, unknown>, b: Record<string, unknown>) =>
+      (a: any, b: any) =>
         (b.quantidade_total as number) - (a.quantidade_total as number)
     )
     .slice(0, limite)
-    .map((produto: Record<string, unknown>, index) => ({
+    .map((produto: any, index) => ({
       posicao: index + 1,
       ...produto,
       preco_medio:

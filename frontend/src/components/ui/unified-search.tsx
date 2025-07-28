@@ -357,6 +357,39 @@ export default function UnifiedSearch({
   );
 
   // Handlers
+  const handleResultSelect = useCallback((result: SearchResult) => {
+    // Adicionar aos recentes
+    setRecentSearches(prev => {
+      const filtered = prev.filter(item => item.id !== result.id);
+      return [result, ...filtered].slice(0, 5);
+    });
+
+    // Executar ação baseada no tipo
+    if (result.category === 'page') {
+      if (result.href) {
+        if (onNavigate) {
+          onNavigate(result.href);
+        } else {
+          router.push(result.href);
+        }
+      }
+      onClose();
+    } else if (result.category === 'action') {
+      if (result.action) {
+        result.action();
+      }
+      onClose();
+    }
+  }, [router, onNavigate, onClose]);
+
+  const toggleFavorite = (resultId: string) => {
+    setFavorites(prev =>
+      prev.includes(resultId)
+        ? prev.filter(id => id !== resultId)
+        : [...prev, resultId]
+    );
+  };
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'k') {
@@ -388,42 +421,8 @@ export default function UnifiedSearch({
           break;
       }
     },
-    [isOpen, selectedIndex, categoryFilteredResults, onClose]
+    [isOpen, selectedIndex, categoryFilteredResults, onClose, handleResultSelect]
   );
-
-  const handleResultSelect = (result: SearchResult) => {
-    // Adicionar aos recentes
-    setRecentSearches(prev => {
-      const newRecent = [
-        result.title,
-        ...prev.filter(r => r !== result.title),
-      ].slice(0, 5);
-      return newRecent;
-    });
-
-    // Atualizar last used
-    result.lastUsed = new Date();
-
-    if (result.href) {
-      if (onNavigate) {
-        onNavigate(result.href);
-      } else {
-        router.push(result.href);
-      }
-    } else if (result.action) {
-      result.action();
-    }
-
-    onClose();
-  };
-
-  const toggleFavorite = (resultId: string) => {
-    setFavorites(prev =>
-      prev.includes(resultId)
-        ? prev.filter(id => id !== resultId)
-        : [...prev, resultId]
-    );
-  };
 
   // Effects
   useEffect(() => {

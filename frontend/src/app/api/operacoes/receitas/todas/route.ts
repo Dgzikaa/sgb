@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     );
 
     // Agrupar receitas por código
-    const receitasAgrupadas = new Map();
+    const receitasAgrupadas = new Map<string, any>();
 
     for (const receita of todasReceitas || []) {
       const codigo = receita.receita_codigo;
@@ -87,9 +87,10 @@ export async function GET(request: NextRequest) {
       }
 
       // Adicionar insumo à receita
-      if (receita.insumos) {
+      if (receita.insumos && Array.isArray(receita.insumos) && receita.insumos[0]) {
         const receitaObj = receitasAgrupadas.get(codigo);
-        const isChefe = receita.insumo_chefe_id === receita.insumos.id;
+        const insumo = receita.insumos[0];
+        const isChefe = receita.insumo_chefe_id === insumo.id;
 
         // Se este é o insumo chefe, aplicar o rendimento esperado à receita
         if (isChefe && receita.rendimento_esperado) {
@@ -97,12 +98,12 @@ export async function GET(request: NextRequest) {
         }
 
         receitaObj.insumos.push({
-          id: receita.insumos.id,
-          codigo: receita.insumos.codigo,
-          nome: receita.insumos.nome,
+          id: insumo.id,
+          codigo: insumo.codigo,
+          nome: insumo.nome,
           quantidade_necessaria: receita.quantidade_necessaria,
-          unidade_medida: receita.insumos.unidade_medida,
-          categoria: receita.insumos.categoria,
+          unidade_medida: insumo.unidade_medida,
+          categoria: insumo.categoria,
           is_chefe: isChefe,
         });
       }

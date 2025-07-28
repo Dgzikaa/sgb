@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const results = [];
+    const results: any[] = [];
     let successCount = 0;
     let errorCount = 0;
 

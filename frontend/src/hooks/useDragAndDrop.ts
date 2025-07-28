@@ -301,7 +301,7 @@ export function useDragAndDrop({
           if (targetData) {
             try {
               const targetItem = JSON.parse(targetData) as DraggableItem;
-              handleDrop(e as unknown, targetItem);
+              handleDrop(e as any, targetItem);
             } catch (error) {
               console.warn('Could not parse drop target data:', error);
             }

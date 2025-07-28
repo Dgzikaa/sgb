@@ -12,7 +12,7 @@ interface Usuario {
   email: string;
   role: string;
   ativo: boolean;
-  modulos_permitidos: string[];
+  modulos_permitidos: string[] | Record<string, any>;
 }
 
 interface Meta {

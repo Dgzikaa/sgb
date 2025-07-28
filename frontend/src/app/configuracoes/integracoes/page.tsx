@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -58,51 +58,25 @@ export default function IntegracoesPage() {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [loading, setLoading] = useState(true);
 
-  console.log('🏪 BarContext:', {
-    selectedBar,
-    barLoading,
-    availableBarsCount: availableBars?.length,
-  });
+  const updateIntegrationsWithStatus = useCallback((statusData: any) => {
+    setIntegrations(prevIntegrations =>
+      prevIntegrations.map(integration => {
+        const status = statusData[integration.id];
+        if (status) {
+          return {
+            ...integration,
+            status: status.status,
+            hasCredentials: status.hasCredentials,
+            hasWebhook: status.hasWebhook,
+            webhookCount: status.activeWebhooks || 0,
+          };
+        }
+        return integration;
+      })
+    );
+  }, []);
 
-  console.log('👤 UserContext:', {
-    user,
-    userLoading,
-    userInitialized,
-  });
-
-  useEffect(() => {
-    console.log('🔄 useEffect executado:', {
-      selectedBarId: selectedBar?.id,
-      selectedBarName: selectedBar?.nome,
-      userId: user?.id,
-      userName: user?.nome,
-      userEmail: user?.email,
-      userRole: user?.role,
-      barLoading,
-      userLoading,
-      userInitialized,
-    });
-
-    // Aguardar que os contextos sejam inicializados
-    if (barLoading || userLoading || !userInitialized) {
-      console.log('⏳ Aguardando inicialização dos contextos...');
-      return;
-    }
-
-    if (selectedBar?.id && user) {
-      console.log('✅ Condições atendidas, chamando loadIntegrationsStatus...');
-      loadIntegrationsStatus();
-    } else {
-      console.log('❌ Condições não atendidas:', {
-        hasSelectedBar: !!selectedBar?.id,
-        selectedBarValue: selectedBar,
-        hasUser: !!user,
-        userValue: user,
-      });
-    }
-  }, [selectedBar?.id, user, barLoading, userLoading, userInitialized]);
-
-  const loadIntegrationsStatus = async () => {
+  const loadIntegrationsStatus = useCallback(async () => {
     try {
       console.log('🔄 Iniciando carregamento de integrações...');
       console.log('👤 Usuário:', user?.nome);
@@ -144,7 +118,7 @@ export default function IntegracoesPage() {
       console.log('🏁 Finalizando carregamento...');
       setLoading(false);
     }
-  };
+  }, [user, selectedBar?.id, updateIntegrationsWithStatus]);
 
   const setDefaultIntegrations = () => {
     const defaultIntegrations: Integration[] = [
@@ -247,24 +221,6 @@ export default function IntegracoesPage() {
     setIntegrations(defaultIntegrations);
   };
 
-  const updateIntegrationsWithStatus = (statusData: any) => {
-    setIntegrations(prevIntegrations =>
-      prevIntegrations.map(integration => {
-        const status = statusData[integration.id];
-        if (status) {
-          return {
-            ...integration,
-            status: status.status,
-            hasCredentials: status.hasCredentials,
-            hasWebhook: status.hasWebhook,
-            webhookCount: status.activeWebhooks || 0,
-          };
-        }
-        return integration;
-      })
-    );
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -334,6 +290,12 @@ export default function IntegracoesPage() {
         return 'Geral';
     }
   };
+
+  useEffect(() => {
+    if (selectedBar?.id && user && !barLoading && !userLoading && userInitialized) {
+      loadIntegrationsStatus();
+    }
+  }, [selectedBar?.id, user, barLoading, userLoading, userInitialized, loadIntegrationsStatus]);
 
   if (loading) {
     return (

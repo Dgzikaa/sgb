@@ -466,7 +466,7 @@ async function processarEnvioBrowser(
       canal: 'browser',
       status: 'falha',
       tentativa: 1,
-      erro_detalhes: error.message,
+      erro_detalhes: error instanceof Error ? error.message : String(error),
     });
   }
 }
@@ -498,24 +498,24 @@ async function calcularEstatisticasRapidas(
     };
   }
 
-  const naoLidas = minhasStats.filter((n: unknown) =>
+  const naoLidas = minhasStats.filter((n: NotificacaoData) =>
     ['pendente', 'enviada'].includes(n.status)
   ).length;
-  const altaPrioridade = minhasStats.filter((n: unknown) => {
+  const altaPrioridade = minhasStats.filter((n: NotificacaoData) => {
     const prioridade = n.dados?.prioridade || 'media';
     return ['alta', 'critica'].includes(prioridade);
   }).length;
 
-  const porTipo = minhasStats.reduce((acc: unknown, n: unknown) => {
+  const porTipo = minhasStats.reduce((acc: Record<string, number>, n: NotificacaoData) => {
     acc[n.tipo] = (acc[n.tipo] || 0) + 1;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
-  const porModulo = minhasStats.reduce((acc: unknown, n: unknown) => {
+  const porModulo = minhasStats.reduce((acc: Record<string, number>, n: NotificacaoData) => {
     const modulo = n.dados?.modulo || 'sistema';
     acc[modulo] = (acc[modulo] || 0) + 1;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
   return {
     total_semana: minhasStats.length,

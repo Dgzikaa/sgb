@@ -1,8 +1,13 @@
 ﻿import { TabsContent } from '@/components/ui/tabs';
 import NiboIntegrationCard from '@/components/configuracoes/NiboIntegrationCard';
 
+interface Bar {
+  id: number;
+  nome: string;
+}
+
 interface NiboSectionProps {
-  selectedBar: unknown;
+  selectedBar: Bar | null;
 }
 
 export function NiboSection({ selectedBar }: NiboSectionProps) {

@@ -47,6 +47,7 @@ const routeMapping: Record<
   // Financeiro
   '/financeiro': { name: 'Financeiro' },
   '/financeiro/agendamento': { name: 'Agendamento' },
+  '/financeiro/dre': { name: 'DRE' },
 
   // Configurações
   '/configuracoes': { name: 'Configurações' },

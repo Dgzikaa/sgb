@@ -611,7 +611,7 @@ export default function Marketing360Page() {
                       <h4 className="font-semibold text-gray-900 dark:text-white">Campanha de Sucesso</h4>
                     </div>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                      <strong>"Quarta de Bamba | Geral"</strong> está com desempenho 25% acima da média. 
+                      <strong>&quot;Quarta de Bamba | Geral&quot;</strong> está com desempenho 25% acima da média. 
                       Considere aumentar o investimento para maximizar resultados.
                     </p>
                   </div>
@@ -624,7 +624,7 @@ export default function Marketing360Page() {
                       <h4 className="font-semibold text-gray-900 dark:text-white">Oportunidade de Otimização</h4>
                     </div>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                      <strong>"Vídeo de Lançamento 01"</strong> apresenta custo por clique elevado. 
+                      <strong>&quot;Vídeo de Lançamento 01&quot;</strong> apresenta custo por clique elevado. 
                       Recomendamos ajustar o targeting para melhor eficiência.
                     </p>
                   </div>
@@ -637,7 +637,7 @@ export default function Marketing360Page() {
                       <h4 className="font-semibold text-gray-900 dark:text-white">Tendência Positiva</h4>
                     </div>
                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                      Campanhas focadas em <strong>"Quarta de Bamba"</strong> mostram engajamento crescente. 
+                      Campanhas focadas em <strong>&quot;Quarta de Bamba&quot;</strong> mostram engajamento crescente. 
                       O público nichado está respondendo muito bem ao conteúdo.
                     </p>
                   </div>

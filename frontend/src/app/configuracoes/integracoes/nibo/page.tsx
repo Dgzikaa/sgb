@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -66,38 +66,40 @@ export default function NiboPage() {
   const [testing, setTesting] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  useEffect(() => {
-    if (selectedBar?.id) {
-      loadConfig();
-    }
-  }, [selectedBar?.id]);
+  const loadConfig = useCallback(async () => {
+    if (!selectedBar?.id) return;
 
-  const loadConfig = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/configuracoes/credenciais/nibo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bar_id: selectedBar?.id }),
-      });
+      const response = await fetch(`/api/configuracoes/integracoes/nibo?bar_id=${selectedBar.id}`);
+      const data = await response.json();
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.config) {
-          setConfig(data.config);
-        }
+      if (data.success) {
+        setConfig(data.config);
+      } else {
+        toast({
+          title: 'Erro',
+          description: data.error || 'Erro ao carregar configuração',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error('Erro ao carregar configuração NIBO:', error);
+      console.error('Erro ao carregar configuração:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível carregar a configuração do NIBO',
+        description: 'Erro ao conectar com o servidor',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBar?.id, toast]);
+
+  useEffect(() => {
+    if (selectedBar?.id) {
+      loadConfig();
+    }
+  }, [selectedBar?.id, loadConfig]);
 
   const saveConfig = async () => {
     try {

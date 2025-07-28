@@ -25,7 +25,12 @@ export async function POST() {
     ];
 
     let successCount = 0;
-    const results = [];
+    const results: Array<{
+      date: string;
+      status: string;
+      error?: string;
+      rowsAffected?: number;
+    }> = [];
 
     for (const update of updates) {
       console.log(`Updating ${update.date} to "${update.name}"`);

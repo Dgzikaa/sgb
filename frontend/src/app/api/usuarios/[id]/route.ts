@@ -11,7 +11,7 @@ const AtualizarUsuarioSchema = z.object({
   nome: z.string().min(2).max(100).optional(),
   email: z.string().email().optional(),
   role: z.enum(['admin', 'gerente', 'funcionario']).optional(),
-  modulos_permitidos: z.array(z.string()).optional(),
+  modulos_permitidos: z.union([z.array(z.string()), z.record(z.string(), z.any())]).optional(),
   ativo: z.boolean().optional(),
   celular: z.string().optional(),
 });

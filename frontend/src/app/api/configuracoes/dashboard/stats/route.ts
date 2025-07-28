@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     console.error('❌ Erro na API de stats:', error);
     return NextResponse.json(
-      { success: false, error: `Erro interno: ${error.message}` },
+      { success: false, error: `Erro interno: ${(error as any).message}` },
       { status: 500 }
     );
   }

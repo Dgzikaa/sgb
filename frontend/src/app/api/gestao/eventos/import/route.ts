@@ -228,15 +228,15 @@ function parseEventos(
   dados: string,
   barId: number,
   ano: number = 2025
-): unknown[] {
+): any[] {
   const linhas = dados
     .trim()
     .split('\n')
     .filter(linha => linha.trim());
-  const eventos: unknown[] = [];
+  const eventos: any[] = [];
 
   for (const linha of linhas) {
-    const partes = linha.split('\t').map((p: unknown) => p.trim());
+    const partes = linha.split('\t').map((p: string) => p.trim());
     if (partes.length < 3) continue;
 
     const [dataStr, diaSemana, eventoStr] = partes;
@@ -559,29 +559,29 @@ export async function POST(request: NextRequest) {
       message: `${eventosParaImportar.length} eventos importados com sucesso!`,
       eventos_importados: totalInseridos,
       resumo: {
-        fevereiro: eventosParaImportar.filter((e: unknown) =>
+        fevereiro: eventosParaImportar.filter((e: any) =>
           e.data_evento.includes('-02-')
         ).length,
-        marco: eventosParaImportar.filter((e: unknown) =>
+        marco: eventosParaImportar.filter((e: any) =>
           e.data_evento.includes('-03-')
         ).length,
-        abril: eventosParaImportar.filter((e: unknown) =>
+        abril: eventosParaImportar.filter((e: any) =>
           e.data_evento.includes('-04-')
         ).length,
-        maio: eventosParaImportar.filter((e: unknown) =>
+        maio: eventosParaImportar.filter((e: any) =>
           e.data_evento.includes('-05-')
         ).length,
-        junho: eventosParaImportar.filter((e: unknown) =>
+        junho: eventosParaImportar.filter((e: any) =>
           e.data_evento.includes('-06-')
         ).length,
       },
       generos_detectados: [
-        ...new Set(eventosParaImportar.map((e: unknown) => e.genero_musical)),
+        ...new Set(eventosParaImportar.map((e: any) => e.genero_musical)),
       ],
       artistas_detectados: [
         ...new Set(
           eventosParaImportar
-            .map((e: unknown) => e.nome_artista)
+            .map((e: any) => e.nome_artista)
             .filter(Boolean)
         ),
       ],

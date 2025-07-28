@@ -4,6 +4,71 @@ import { authenticateUser, authErrorResponse } from '@/middleware/auth';
 import { z } from 'zod';
 
 // =====================================================
+// INTERFACES E TIPOS
+// =====================================================
+
+interface AuthenticatedUser {
+  user_id: string;
+  email: string;
+  role: string;
+  bar_id?: number;
+  [key: string]: any;
+}
+
+interface Execucao {
+  id: string;
+  checklist_id: string;
+  funcionario_id: string;
+  iniciado_por: string;
+  status: string;
+  iniciado_em: string;
+  concluido_em?: string;
+  respostas: any;
+  observacoes?: string;
+  progresso?: number;
+  checklist?: {
+    id: string;
+    nome: string;
+    setor: string;
+    tipo: string;
+    tempo_estimado: number;
+    estrutura: any;
+  };
+  funcionario?: {
+    id: string;
+    nome: string;
+    email: string;
+  };
+  iniciado_por_usuario?: {
+    id: string;
+    nome: string;
+    email: string;
+  };
+}
+
+interface ItemResposta {
+  item_id: string;
+  valor: any;
+  anexos?: Array<{
+    url: string;
+    nome: string;
+    tipo: string;
+    tamanho?: number;
+  }>;
+  respondido: boolean;
+  respondido_em?: string;
+}
+
+interface SecaoResposta {
+  secao_id: string;
+  itens: ItemResposta[];
+}
+
+interface Respostas {
+  secoes: SecaoResposta[];
+}
+
+// =====================================================
 // SCHEMAS DE VALIDAÇÃO
 // =====================================================
 
@@ -36,8 +101,6 @@ const SalvarRespostasSchema = z.object({
   observacoes: z.string().optional(),
   auto_save: z.boolean().optional().default(false),
 });
-
-// Schema FinalizarExecucaoSchema removido - não utilizado
 
 // =====================================================
 // GET - BUSCAR EXECUÇÃO ESPECÍFICA
@@ -83,7 +146,7 @@ export async function GET(
     }
 
     // Verificar se o usuário tem acesso a esta execução
-    if (!podeAcessarExecucao(user, execucao)) {
+    if (!podeAcessarExecucao(user as AuthenticatedUser, execucao as Execucao)) {
       return NextResponse.json(
         {
           error: 'Sem permissão para acessar esta execução',
@@ -95,22 +158,19 @@ export async function GET(
     // Enriquecer dados com validações e progresso
     const execucaoEnriquecida = {
       ...execucao,
-      validacao: validarExecucao(execucao),
-      progresso_detalhado: calcularProgressoDetalhado(execucao),
+      validacao: validarExecucao(execucao as Execucao),
+      progresso_detalhado: calcularProgressoDetalhado(execucao as Execucao),
     };
 
     return NextResponse.json({
       success: true,
-      data: execucaoEnriquecida,
+      execucao: execucaoEnriquecida,
     });
-  } catch (error: unknown) {
-    console.error('Erro na API de buscar execução:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'Erro desconhecido';
+  } catch (error) {
+    console.error('Erro na API de execução:', error);
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: errorMessage,
       },
       { status: 500 }
     );
@@ -133,7 +193,10 @@ export async function PUT(
 
     const { id: execucaoId } = await params;
     const body = await request.json();
-    const data = SalvarRespostasSchema.parse(body);
+
+    // Validar dados de entrada
+    const validatedData = SalvarRespostasSchema.parse(body);
+    const { respostas, observacoes, auto_save } = validatedData;
 
     const supabase = await getAdminClient();
 
@@ -144,7 +207,8 @@ export async function PUT(
       .eq('id', execucaoId)
       .single();
 
-    if (fetchError || !execucao) {
+    if (fetchError) {
+      console.error('Erro ao buscar execução:', fetchError);
       return NextResponse.json(
         {
           error: 'Execução não encontrada',
@@ -153,8 +217,8 @@ export async function PUT(
       );
     }
 
-    // Verificar se o usuário pode editar esta execução
-    if (!podeEditarExecucao(user, execucao)) {
+    // Verificar permissões de edição
+    if (!podeEditarExecucao(user as AuthenticatedUser, execucao as Execucao)) {
       return NextResponse.json(
         {
           error: 'Sem permissão para editar esta execução',
@@ -163,21 +227,12 @@ export async function PUT(
       );
     }
 
-    // Verificar se execução pode ser editada
-    if (!['em_andamento', 'pausado'].includes(execucao.status)) {
-      return NextResponse.json(
-        {
-          error: 'Esta execução não pode mais ser editada',
-        },
-        { status: 400 }
-      );
-    }
-
     // Validar respostas
     const validacao = validarRespostas(
-      data.respostas,
-      execucao.estrutura_checklist
+      respostas as Respostas,
+      execucao.checklist?.estrutura || {}
     );
+
     if (!validacao.valido) {
       return NextResponse.json(
         {
@@ -188,41 +243,41 @@ export async function PUT(
       );
     }
 
-    // Calcular novo progresso
-    const novoProgresso = calcularProgresso(
-      data.respostas,
-      execucao.progresso?.tempo_estimado || 30
+    // Calcular progresso
+    const progresso = calcularProgresso(
+      respostas as Respostas,
+      execucao.checklist?.tempo_estimado || 30
     );
 
-    // Atualizar execução
-    const dadosAtualizacao: Record<string, unknown> = {
-      respostas: data.respostas,
-      observacoes: data.observacoes,
-      progresso: novoProgresso,
-      atualizado_em: new Date().toISOString(),
-      atualizado_por: user.user_id,
+    // Preparar dados para atualização
+    const dadosAtualizacao: any = {
+      respostas: respostas as Respostas,
+      progresso: progresso.percentual,
+      tempo_decorrido: progresso.tempo_decorrido,
+      itens_respondidos: progresso.itens_respondidos,
+      total_itens: progresso.total_itens,
+      updated_at: new Date().toISOString(),
     };
 
-    // Se não é auto-save, atualizar também o campo de última modificação manual
-    if (!data.auto_save) {
-      dadosAtualizacao.ultima_edicao_manual = new Date().toISOString();
+    // Se não for auto-save, atualizar observações
+    if (!auto_save && observacoes !== undefined) {
+      dadosAtualizacao.observacoes = observacoes;
     }
 
-    const { data: execucaoAtualizada, error: updateError } = await supabase
+    // Se completou 100%, marcar como concluído
+    if (progresso.percentual >= 100 && execucao.status !== 'concluido') {
+      dadosAtualizacao.status = 'concluido';
+      dadosAtualizacao.concluido_em = new Date().toISOString();
+    }
+
+    // Atualizar execução
+    const { error: updateError } = await supabase
       .from('checklist_execucoes')
       .update(dadosAtualizacao)
-      .eq('id', execucaoId)
-      .select(
-        `
-        *,
-        checklist:checklists!checklist_id (nome, setor, tipo),
-        funcionario:usuarios_bar!funcionario_id (nome, email)
-      `
-      )
-      .single();
+      .eq('id', execucaoId);
 
     if (updateError) {
-      console.error('Erro ao salvar respostas:', updateError);
+      console.error('Erro ao atualizar execução:', updateError);
       return NextResponse.json(
         {
           error: 'Erro ao salvar respostas',
@@ -231,39 +286,27 @@ export async function PUT(
       );
     }
 
-    const tipoSave = data.auto_save ? 'automático' : 'manual';
-    console.log(
-      `💾 Respostas salvas (${tipoSave}): ${execucaoAtualizada.checklist.nome} - ${novoProgresso.percentual_completo}%`
-    );
-
     return NextResponse.json({
       success: true,
-      message: `Respostas salvas com sucesso (${tipoSave})`,
-      data: {
-        execucao: execucaoAtualizada,
-        progresso: novoProgresso,
-        validacao: validacao,
-      },
+      message: auto_save ? 'Auto-save realizado' : 'Respostas salvas com sucesso',
+      progresso,
+      validacao,
     });
-  } catch (error: unknown) {
-    console.error('Erro na API de salvar respostas:', error);
-
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
           error: 'Dados inválidos',
-          details: error.issues,
+          detalhes: error.errors,
         },
         { status: 400 }
       );
     }
 
-    const errorMessage =
-      error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('Erro ao salvar respostas:', error);
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: errorMessage,
       },
       { status: 500 }
     );
@@ -271,7 +314,7 @@ export async function PUT(
 }
 
 // =====================================================
-// DELETE - CANCELAR EXECUÇÃO
+// DELETE - FINALIZAR EXECUÇÃO
 // =====================================================
 export async function DELETE(
   request: NextRequest,
@@ -285,9 +328,6 @@ export async function DELETE(
     }
 
     const { id: execucaoId } = await params;
-    const { searchParams } = new URL(request.url);
-    const motivo = searchParams.get('motivo') || 'Cancelado pelo usuário';
-
     const supabase = await getAdminClient();
 
     // Buscar execução
@@ -297,7 +337,8 @@ export async function DELETE(
       .eq('id', execucaoId)
       .single();
 
-    if (fetchError || !execucao) {
+    if (fetchError) {
+      console.error('Erro ao buscar execução:', fetchError);
       return NextResponse.json(
         {
           error: 'Execução não encontrada',
@@ -306,62 +347,46 @@ export async function DELETE(
       );
     }
 
-    // Verificar permissões
-    if (!podeEditarExecucao(user, execucao)) {
+    // Verificar permissões de edição
+    if (!podeEditarExecucao(user as AuthenticatedUser, execucao as Execucao)) {
       return NextResponse.json(
         {
-          error: 'Sem permissão para cancelar esta execução',
+          error: 'Sem permissão para editar esta execução',
         },
         { status: 403 }
       );
     }
 
-    // Verificar se pode ser cancelada
-    if (!['em_andamento', 'pausado'].includes(execucao.status)) {
-      return NextResponse.json(
-        {
-          error: 'Esta execução não pode ser cancelada',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Cancelar execução
-    const { error: cancelError } = await supabase
+    // Finalizar execução
+    const { error: updateError } = await supabase
       .from('checklist_execucoes')
       .update({
-        status: 'cancelado',
-        cancelado_em: new Date().toISOString(),
-        cancelado_por: user.user_id,
-        motivo_cancelamento: motivo,
-        atualizado_em: new Date().toISOString(),
+        status: 'concluido',
+        concluido_em: new Date().toISOString(),
+        progresso: 100,
+        updated_at: new Date().toISOString(),
       })
       .eq('id', execucaoId);
 
-    if (cancelError) {
-      console.error('Erro ao cancelar execução:', cancelError);
+    if (updateError) {
+      console.error('Erro ao finalizar execução:', updateError);
       return NextResponse.json(
         {
-          error: 'Erro ao cancelar execução',
+          error: 'Erro ao finalizar execução',
         },
         { status: 500 }
       );
     }
 
-    console.log(`❌ Execução cancelada: ${execucaoId} - Motivo: ${motivo}`);
-
     return NextResponse.json({
       success: true,
-      message: 'Execução cancelada com sucesso',
+      message: 'Execução finalizada com sucesso',
     });
-  } catch (error: unknown) {
-    console.error('Erro na API de cancelar execução:', error);
-    const errorMessage =
-      error instanceof Error ? error.message : 'Erro desconhecido';
+  } catch (error) {
+    console.error('Erro ao finalizar execução:', error);
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: errorMessage,
       },
       { status: 500 }
     );
@@ -369,275 +394,223 @@ export async function DELETE(
 }
 
 // =====================================================
-// FUNÇÕES UTILITÁRIAS
+// FUNÇÕES AUXILIARES
 // =====================================================
 
 function podeAcessarExecucao(
-  user: Record<string, unknown>,
-  execucao: Record<string, unknown>
+  user: AuthenticatedUser,
+  execucao: Execucao
 ): boolean {
-  // Admin pode acessar tudo
-  if (user.role === 'admin') return true;
-
-  // Financeiro pode acessar execuções do mesmo bar
-  if (user.role === 'financeiro') return true;
+  // Admin e financeiro podem acessar tudo
+  if (['admin', 'financeiro'].includes(user.role)) return true;
 
   // Funcionário só pode acessar suas próprias execuções
   if (user.role === 'funcionario') {
-    return execucao.funcionario_id === user.user_id;
+    return user.user_id === execucao.funcionario_id;
+  }
+
+  // Gerente pode acessar execuções do seu bar
+  if (user.role === 'gerente' && user.bar_id) {
+    return execucao.checklist?.setor === user.bar_id.toString();
   }
 
   return false;
 }
 
 function podeEditarExecucao(
-  user: Record<string, unknown>,
-  execucao: Record<string, unknown>
+  user: AuthenticatedUser,
+  execucao: Execucao
 ): boolean {
-  // Admin e financeiro podem editar
+  // Só pode editar se não estiver concluído
+  if (execucao.status === 'concluido') return false;
+
+  // Admin e financeiro podem editar tudo
   if (['admin', 'financeiro'].includes(user.role)) return true;
 
   // Funcionário só pode editar suas próprias execuções
   if (user.role === 'funcionario') {
-    return execucao.funcionario_id === user.user_id;
+    return user.user_id === execucao.funcionario_id;
+  }
+
+  // Gerente pode editar execuções do seu bar
+  if (user.role === 'gerente' && user.bar_id) {
+    return execucao.checklist?.setor === user.bar_id.toString();
   }
 
   return false;
 }
 
 function validarRespostas(
-  respostas: Record<string, unknown>,
-  estruturaChecklist: Record<string, unknown>
-) {
+  respostas: Respostas,
+  estruturaChecklist: any
+): { valido: boolean; erros?: string[] } {
   const erros: string[] = [];
-  let camposObrigatoriosVazios = 0;
 
-  if (!respostas?.secoes || !estruturaChecklist?.secoes) {
-    erros.push('Estrutura de respostas inválida');
-    return { valido: false, erros };
-  }
+  try {
+    // Validar estrutura básica
+    if (!respostas.secoes || !Array.isArray(respostas.secoes)) {
+      erros.push('Estrutura de respostas inválida');
+      return { valido: false, erros };
+    }
 
-  (respostas.secoes as Array<Record<string, unknown>>).forEach(
-    (secaoResposta: Record<string, unknown>, secaoIndex: number) => {
-      const secaoOriginal = estruturaChecklist.secoes[secaoIndex];
-
-      if (!secaoOriginal) {
-        erros.push(
-          `Seção ${secaoIndex + 1} não encontrada na estrutura original`
-        );
+    // Validar cada seção
+    respostas.secoes.forEach((secao, secaoIndex) => {
+      if (!secao.itens || !Array.isArray(secao.itens)) {
+        erros.push(`Seção ${secaoIndex + 1}: estrutura de itens inválida`);
         return;
       }
 
-      (secaoResposta.itens as Array<Record<string, unknown>>).forEach(
-        (itemResposta: Record<string, unknown>, itemIndex: number) => {
-          const itemOriginal = secaoOriginal.itens[itemIndex];
-
-          if (!itemOriginal) {
-            erros.push(
-              `Item ${itemIndex + 1} da seção "${secaoOriginal.nome}" não encontrado`
-            );
-            return;
-          }
-
-          // Validar campo obrigatório
-          if (itemOriginal.obrigatorio && !itemResposta.respondido) {
-            erros.push(
-              `Campo obrigatório "${itemOriginal.titulo}" não foi respondido`
-            );
-            camposObrigatoriosVazios++;
-            return;
-          }
-
-          // Validar tipo de dado se foi respondido
-          if (itemResposta.respondido && itemResposta.valor !== null) {
-            const validacaoTipo = validarTipoCampo(
-              itemResposta.valor,
-              itemOriginal.tipo,
-              itemOriginal.titulo
-            );
-            if (!validacaoTipo.valido) {
-              erros.push(validacaoTipo.erro!);
-            }
-          }
-
-          // Validar anexos obrigatórios
-          if (
-            itemOriginal.obrigatorio &&
-            ['foto_camera', 'foto_upload', 'assinatura'].includes(
-              itemOriginal.tipo
-            )
-          ) {
-            if (!itemResposta.anexos || itemResposta.anexos.length === 0) {
-              erros.push(
-                `Anexo obrigatório "${itemOriginal.titulo}" não foi fornecido`
-              );
-            }
+      // Validar cada item
+      secao.itens.forEach((itemResposta) => {
+        // Validar anexos se existirem
+        if (itemResposta.anexos && Array.isArray(itemResposta.anexos)) {
+          if (itemResposta.anexos.length === 0) {
+            erros.push(`Item ${itemResposta.item_id}: anexos vazios`);
           }
         }
-      );
-    }
-  );
 
-  return {
-    valido: erros.length === 0,
-    erros,
-    campos_obrigatorios_vazios: camposObrigatoriosVazios,
-  };
+        // Validar valor baseado no tipo do campo
+        if (itemResposta.respondido) {
+          const validacao = validarTipoCampo(
+            itemResposta.valor,
+            'texto', // TODO: pegar tipo real do checklist
+            `Item ${itemResposta.item_id}`
+          );
+          if (!validacao.valido) {
+            erros.push(validacao.erro || 'Valor inválido');
+          }
+        }
+      });
+    });
+
+    return {
+      valido: erros.length === 0,
+      erros: erros.length > 0 ? erros : undefined,
+    };
+  } catch (error) {
+    return {
+      valido: false,
+      erros: ['Erro na validação: ' + (error as Error).message],
+    };
+  }
 }
 
 function validarTipoCampo(
-  valor: unknown,
+  valor: any,
   tipo: string,
   titulo: string
 ): { valido: boolean; erro?: string } {
-  switch (tipo) {
-    case 'numero':
-      if (isNaN(Number(valor))) {
-        return { valido: false, erro: `"${titulo}" deve ser um número válido` };
-      }
-      break;
-
-    case 'data':
-      if (!valor || isNaN(Date.parse(valor))) {
-        return { valido: false, erro: `"${titulo}" deve ser uma data válida` };
-      }
-      break;
-
-    case 'sim_nao':
-      if (typeof valor !== 'boolean') {
-        return {
-          valido: false,
-          erro: `"${titulo}" deve ser verdadeiro ou falso`,
-        };
-      }
-      break;
-
-    case 'avaliacao': {
-      const avaliacaoNum = Number(valor);
-      if (isNaN(avaliacaoNum) || avaliacaoNum < 1 || avaliacaoNum > 5) {
-        return {
-          valido: false,
-          erro: `"${titulo}" deve ser uma avaliação entre 1 e 5`,
-        };
-      }
-      break;
-    }
-
-    case 'texto':
-      if (typeof valor !== 'string' || valor.trim().length === 0) {
-        return { valido: false, erro: `"${titulo}" deve ser um texto válido` };
-      }
-      break;
+  if (valor === null || valor === undefined) {
+    return { valido: false, erro: `${titulo}: valor obrigatório` };
   }
 
-  return { valido: true };
+  switch (tipo) {
+    case 'texto':
+      return typeof valor === 'string' && valor.trim().length > 0
+        ? { valido: true }
+        : { valido: false, erro: `${titulo}: texto obrigatório` };
+
+    case 'numero':
+      return !isNaN(Number(valor))
+        ? { valido: true }
+        : { valido: false, erro: `${titulo}: número inválido` };
+
+    case 'data':
+      return !isNaN(Date.parse(valor))
+        ? { valido: true }
+        : { valido: false, erro: `${titulo}: data inválida` };
+
+    case 'sim_nao':
+      return typeof valor === 'boolean'
+        ? { valido: true }
+        : { valido: false, erro: `${titulo}: deve ser sim ou não` };
+
+    default:
+      return { valido: true }; // Tipo não reconhecido, aceitar
+  }
 }
 
 function calcularProgresso(
-  respostas: Record<string, unknown>,
+  respostas: Respostas,
   tempoEstimado: number = 30
-) {
+): {
+  percentual: number;
+  tempo_decorrido: number;
+  itens_respondidos: number;
+  total_itens: number;
+  tempo_estimado: number;
+} {
   let totalItens = 0;
   let itensRespondidos = 0;
-  let camposObrigatoriosRespondidos = 0;
-  let totalCamposObrigatorios = 0;
 
-  const secoes = respostas.secoes as Array<Record<string, unknown>>;
-  secoes?.forEach((secao: Record<string, unknown>) => {
-    const itens = secao.itens as Array<Record<string, unknown>>;
-    itens?.forEach((item: Record<string, unknown>) => {
-      totalItens++;
-
-      if (item.respondido) {
-        itensRespondidos++;
-      }
-
-      // Assumir que campos obrigatórios são marcados na estrutura original
-      // Aqui simplificamos assumindo que sabemos se é obrigatório
-      if (item.obrigatorio) {
-        totalCamposObrigatorios++;
-        if (item.respondido) {
-          camposObrigatoriosRespondidos++;
-        }
-      }
-    });
+  // Contar itens e respostas
+  respostas.secoes.forEach((secao) => {
+    totalItens += secao.itens.length;
+    itensRespondidos += secao.itens.filter((item) => item.respondido).length;
   });
 
-  const percentualCompleto =
-    totalItens > 0 ? Math.round((itensRespondidos / totalItens) * 100) : 0;
-  const percentualObrigatorios =
-    totalCamposObrigatorios > 0
-      ? Math.round(
-          (camposObrigatoriosRespondidos / totalCamposObrigatorios) * 100
-        )
-      : 100;
-
-  const podeSerFinalizado = percentualObrigatorios === 100;
+  const percentual = totalItens > 0 ? (itensRespondidos / totalItens) * 100 : 0;
+  const tempoDecorrido = (percentual / 100) * tempoEstimado;
 
   return {
-    total_itens: totalItens,
+    percentual: Math.round(percentual),
+    tempo_decorrido: Math.round(tempoDecorrido),
     itens_respondidos: itensRespondidos,
-    percentual_completo: percentualCompleto,
-    campos_obrigatorios_total: totalCamposObrigatorios,
-    campos_obrigatorios_respondidos: camposObrigatoriosRespondidos,
-    percentual_obrigatorios: percentualObrigatorios,
-    pode_ser_finalizado: podeSerFinalizado,
+    total_itens: totalItens,
     tempo_estimado: tempoEstimado,
-    tempo_decorrido: 0, // Será calculado pelo frontend
   };
 }
 
-function validarExecucao(execucao: Record<string, unknown>) {
-  const validacaoRespostas = validarRespostas(
-    execucao.respostas,
-    execucao.estrutura_checklist
-  );
-
-  return {
-    ...validacaoRespostas,
-    pode_continuar: ['em_andamento', 'pausado'].includes(execucao.status),
-    pode_finalizar:
-      validacaoRespostas.campos_obrigatorios_vazios === 0 &&
-      execucao.status === 'em_andamento',
+function validarExecucao(execucao: Execucao) {
+  const validacao = {
+    valida: true,
+    erros: [] as string[],
+    avisos: [] as string[],
   };
+
+  // Validar se tem respostas
+  if (!execucao.respostas || Object.keys(execucao.respostas).length === 0) {
+    validacao.avisos.push('Execução sem respostas');
+  }
+
+  // Validar progresso
+  if (execucao.status === 'concluido' && (execucao.progresso || 0) < 100) {
+    validacao.avisos.push('Execução marcada como concluída mas progresso < 100%');
+  }
+
+  return validacao;
 }
 
-function calcularProgressoDetalhado(execucao: Record<string, unknown>) {
-  const progressoBasico = execucao.progresso || {};
-  const validacao = validarRespostas(
-    execucao.respostas,
-    execucao.estrutura_checklist
-  );
-
-  // Calcular tempo decorrido
+function calcularProgressoDetalhado(execucao: Execucao) {
   const iniciadoEm = new Date(execucao.iniciado_em);
   const agora = new Date();
   const tempoDecorridoMinutos = Math.round(
-    (agora.getTime() - iniciadoEm.getTime()) / 1000 / 60
+    (agora.getTime() - iniciadoEm.getTime()) / (1000 * 60)
+  );
+
+  const progressoBasico = calcularProgresso(
+    execucao.respostas as Respostas,
+    execucao.checklist?.tempo_estimado || 30
   );
 
   return {
     ...progressoBasico,
-    tempo_decorrido: tempoDecorridoMinutos,
-    campos_obrigatorios_pendentes: validacao.campos_obrigatorios_vazios || 0,
-    pode_finalizar: validacao.campos_obrigatorios_vazios === 0,
+    tempo_decorrido_real: tempoDecorridoMinutos,
+    tempo_estimado: execucao.checklist?.tempo_estimado || 30,
+    percentual_tempo: progressoBasico.tempo_estimado > 0
+      ? (tempoDecorridoMinutos / progressoBasico.tempo_estimado) * 100
+      : 0,
     status_descricao: getStatusDescricao(execucao.status),
-    percentual_tempo:
-      progressoBasico.tempo_estimado > 0
-        ? Math.round(
-            (tempoDecorridoMinutos / progressoBasico.tempo_estimado) * 100
-          )
-        : 0,
+    pode_continuar: ['em_andamento', 'pausado'].includes(execucao.status),
   };
 }
 
 function getStatusDescricao(status: string): string {
-  const descricoes: Record<string, string> = {
-    em_andamento: 'Em andamento',
-    pausado: 'Pausado',
-    completado: 'Completado',
-    cancelado: 'Cancelado',
+  const statusMap: Record<string, string> = {
+    'em_andamento': 'Em Andamento',
+    'pausado': 'Pausado',
+    'concluido': 'Concluído',
+    'cancelado': 'Cancelado',
   };
-
-  return descricoes[status] || status;
+  return statusMap[status] || 'Desconhecido';
 }

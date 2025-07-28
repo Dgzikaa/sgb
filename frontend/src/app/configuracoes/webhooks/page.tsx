@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useToast } from '@/components/ui/toast';
@@ -68,7 +68,7 @@ interface InterAuthResponse {
 export default function WebhooksPage() {
   const { setPageTitle } = usePageTitle();
   const { showToast } = useToast();
-  const toast = (options: {
+  const toast = useCallback((options: {
     title: string;
     description?: string;
     variant?: 'destructive';
@@ -79,7 +79,7 @@ export default function WebhooksPage() {
       message: options.description,
       duration: 5000,
     });
-  };
+  }, [showToast]);
 
   const [webhooks, setWebhooks] = useState<WebhookConfig[]>([]);
   const [modalConfig, setModalConfig] = useState(false);
@@ -98,7 +98,7 @@ export default function WebhooksPage() {
     setPageTitle('Configuração de Webhooks');
   }, [setPageTitle]);
 
-  const carregarWebhooks = async () => {
+  const carregarWebhooks = useCallback(async () => {
     setIsLoading(true);
     try {
       // Carregar webhook PIX
@@ -141,11 +141,11 @@ export default function WebhooksPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     carregarWebhooks();
-  }, []);
+  }, [carregarWebhooks]);
 
   const testarAutenticacaoInter = async () => {
     setIsTestandoAuth(true);

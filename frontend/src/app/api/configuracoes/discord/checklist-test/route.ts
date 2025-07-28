@@ -146,11 +146,21 @@ export async function POST(req: NextRequest) {
         const anomalyTest = await DiscordChecklistService.sendAnomalyAlert({
           titulo: 'Queda na Taxa de Conclusão de Checklists',
           tipo_anomalia: 'performance_checklist',
+          subtipo: 'taxa_conclusao',
+          descricao: 'Detectada queda significativa na taxa de conclusão de checklists',
           severidade: 'alta',
           confianca_deteccao: 0.87,
           valor_esperado: 85,
           valor_observado: 62,
           desvio_percentual: -27.1,
+          impacto_estimado: 'Médio',
+          metricas_anomalia: {
+            taxa_conclusao: 62,
+            tempo_medio: 45,
+            alertas_ativos: 3
+          },
+          periodo_deteccao: '2024-01-01 a 2024-01-07',
+          status: 'ativo',
           possivel_causa:
             'Possível sobrecarga de funcionários ou problemas operacionais',
           acoes_sugeridas: [

@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 
 // Interfaces para tipagem adequada
 interface UserData {
@@ -114,7 +114,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Criar cliente Supabase
-    const supabase = createServiceRoleClient();
+    const supabase = await getSupabaseClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Erro ao conectar com o banco de dados' },
+        { status: 500 }
+      );
+    }
 
     // Buscar configuração existente
     const { data: config, error } = await supabase
@@ -199,7 +206,15 @@ export async function POST(request: NextRequest) {
     const validatedData = ConfigWhatsAppSchema.parse(body);
 
     // Verificar se já existe configuração
-    const supabase = createServiceRoleClient();
+    const supabase = await getSupabaseClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Erro ao conectar com o banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const { data: existing } = await supabase
       .from('whatsapp_configuracoes')
       .select('id')
@@ -305,7 +320,15 @@ export async function PUT(request: NextRequest) {
     const validatedData = UpdateConfigSchema.parse(body);
 
     // Verificar se configuração existe
-    const supabase = createServiceRoleClient();
+    const supabase = await getSupabaseClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Erro ao conectar com o banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const { data: existing, error: fetchError } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
@@ -413,7 +436,15 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verificar se há mensagens pendentes
-    const supabase = createServiceRoleClient();
+    const supabase = await getSupabaseClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Erro ao conectar com o banco de dados' },
+        { status: 500 }
+      );
+    }
+
     const { data: pendingMessages } = await supabase
       .from('whatsapp_mensagens')
       .select('id')

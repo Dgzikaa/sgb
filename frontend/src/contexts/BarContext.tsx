@@ -108,7 +108,7 @@ export function BarProvider({ children }: { children: ReactNode }) {
 
         // Se não há usuário, verificar localStorage como fallback
         const storedUser = localStorage.getItem('sgb_user');
-        let userEmail = null;
+        let userEmail: string | null = null;
 
         if (storedUser) {
           try {

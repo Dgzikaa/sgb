@@ -11,7 +11,7 @@ interface UsuarioInput {
   nome: string;
   password: string;
   role?: string;
-  modulos_permitidos?: string[];
+  modulos_permitidos?: string[] | Record<string, any>;
 }
 
 interface AuthUser {

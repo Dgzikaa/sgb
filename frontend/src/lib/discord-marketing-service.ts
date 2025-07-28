@@ -450,16 +450,16 @@ export const sgbMarketingBot = new DiscordMarketingService();
 // ========================================
 export async function notifyMarketingUpdate(
   tipo: 'coleta' | 'erro' | 'marco' | 'relatorio',
-  dados: unknown
+  dados: any
 ): Promise<boolean> {
   try {
     switch (tipo) {
       case 'coleta':
-        if (dados.iniciando) {
-          return await sgbMarketingBot.notificarColetaIniciada(dados.tipo);
+        if ((dados as any).iniciando) {
+          return await sgbMarketingBot.notificarColetaIniciada((dados as any).tipo);
         } else {
           return await sgbMarketingBot.notificarColetaConcluida(
-            dados.resultado
+            (dados as any).resultado
           );
         }
 
@@ -467,10 +467,10 @@ export async function notifyMarketingUpdate(
         return await sgbMarketingBot.notificarErro(dados);
 
       case 'marco':
-        return await sgbMarketingBot.alertarMarcoImportante(dados.tipo, dados);
+        return await sgbMarketingBot.alertarMarcoImportante((dados as any).tipo, dados);
 
       case 'relatorio':
-        return await sgbMarketingBot.enviarRelatorioMetricas(dados.metrics);
+        return await sgbMarketingBot.enviarRelatorioMetricas((dados as any).metrics);
 
       default:
         return false;

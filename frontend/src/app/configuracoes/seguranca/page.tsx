@@ -139,20 +139,21 @@ export default function SecurityPage() {
       setLoading(false);
       setIsLoading(false);
     }
-  }, []); // Sem dependências para evitar recriações
+  }, [isLoading, toast]); // Sem dependências para evitar recriações
 
   useEffect(() => {
-    loadSecurityData();
-
-    let interval: NodeJS.Timeout;
     if (autoRefresh) {
-      interval = setInterval(loadSecurityData, 30000); // Atualizar a cada 30 segundos
-    }
+      const interval = setInterval(() => {
+        if (!loading) {
+          loadSecurityData();
+        }
+      }, 30000); // 30 segundos
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [autoRefresh]); // Removido loadSecurityData das dependências
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }
+  }, [autoRefresh, loadSecurityData, loading]);
 
   const getLevelColor = (level: string) => {
     switch (level) {

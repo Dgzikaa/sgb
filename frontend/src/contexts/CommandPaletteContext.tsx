@@ -31,9 +31,9 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
     setIsOpen(false);
   }, []);
 
-  const togglePalette = useCallback(() => {
+  const toggleCommandPalette = useCallback(() => {
     setIsOpen(prev => !prev);
-  }, [isOpen]);
+  }, []);
 
   // Global keyboard shortcut listener
   useEffect(() => {
@@ -41,7 +41,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
       // Cmd+K ou Ctrl+K
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
-        togglePalette();
+        toggleCommandPalette();
         return;
       }
 
@@ -52,7 +52,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
         event.key === 'P'
       ) {
         event.preventDefault();
-        togglePalette();
+        toggleCommandPalette();
         return;
       }
 
@@ -78,7 +78,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, openPalette, closePalette, togglePalette]);
+  }, [isOpen, openPalette, closePalette, toggleCommandPalette]);
 
   // Prevent body scroll when palette is open
   useEffect(() => {
@@ -95,7 +95,7 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
 
   return (
     <CommandPaletteContext.Provider
-      value={{ isOpen, openPalette, closePalette, togglePalette }}
+      value={{ isOpen, openPalette, closePalette, togglePalette: toggleCommandPalette }}
     >
       {children}
     </CommandPaletteContext.Provider>

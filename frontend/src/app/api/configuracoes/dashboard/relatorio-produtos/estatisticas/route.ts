@@ -208,8 +208,10 @@ export async function GET(request: NextRequest) {
         produtoMap.set(key, { tempos: [], produto: item.prd_desc, pedidos: 0 });
       }
       const produto = produtoMap.get(key);
-      produto.tempos.push(item.t1_t2);
-      produto.pedidos += item.itm_qtd || 1;
+      if (produto) {
+        produto.tempos.push(item.t1_t2);
+        produto.pedidos += item.itm_qtd || 1;
+      }
     });
 
     // Verificar produtos do dia específico/comparação
@@ -224,8 +226,10 @@ export async function GET(request: NextRequest) {
         });
       }
       const produto = produtosComparacaoMap.get(key);
-      produto.tempos.push(item.t1_t2);
-      produto.pedidos += item.itm_qtd || 1;
+      if (produto) {
+        produto.tempos.push(item.t1_t2);
+        produto.pedidos += item.itm_qtd || 1;
+      }
     });
 
     // Identificar produtos com problemas

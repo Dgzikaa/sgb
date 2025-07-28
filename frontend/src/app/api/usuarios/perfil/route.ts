@@ -111,7 +111,7 @@ export async function PUT(request: NextRequest) {
     const adminClient = await getAdminClient();
 
     // Preparar dados para atualização (apenas campos não vazios)
-    const updateData: unknown = {
+    const updateData: Record<string, any> = {
       atualizado_em: new Date().toISOString(),
       ultima_atividade: new Date().toISOString(),
     };

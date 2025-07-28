@@ -3,6 +3,36 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+// Interfaces para tipagem
+interface Produto {
+  id: number;
+  codigo: string;
+  nome: string;
+  tipo: string;
+  [key: string]: any;
+}
+
+interface Insumo {
+  id: number;
+  codigo: string;
+  nome: string;
+  unidade_medida: string;
+  categoria: string;
+}
+
+interface Receita {
+  id: number;
+  quantidade_necessaria: number;
+  insumo_chefe_id: number | null;
+  rendimento_esperado: number;
+  insumos: Insumo;
+}
+
+interface ProdutoComReceitas extends Produto {
+  tipo_local: string;
+  receitas: Receita[];
+}
+
 // GET - Buscar produtos com receitas
 export async function GET(request: NextRequest) {
   try {
@@ -43,7 +73,7 @@ export async function GET(request: NextRequest) {
     console.log(`📦 ${produtos.length} produtos encontrados`);
 
     // Se não encontrou produtos para este bar_id, buscar de todos os bars
-    let produtosFinal = produtos;
+    let produtosFinal = produtos as Produto[];
     if (produtos.length === 0) {
       console.log(
         '⚠️ Nenhum produto encontrado para este bar_id, buscando todos...'
@@ -65,7 +95,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      produtosFinal = todosProdutos;
+      produtosFinal = todosProdutos as Produto[];
       console.log(
         `📦 ${produtosFinal.length} produtos encontrados (todos os bars)`
       );
@@ -73,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     // 2. Para cada produto, buscar receitas com insumos
     const produtosComReceitas = await Promise.all(
-      produtosFinal.map(async (produto: unknown) => {
+      produtosFinal.map(async (produto: Produto) => {
         try {
           // Buscar receitas do produto com insumos usando relacionamento específico
           const { data: receitasData, error: receitasError } = await supabase
@@ -104,12 +134,12 @@ export async function GET(request: NextRequest) {
               ...produto,
               tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
               receitas: [],
-            };
+            } as ProdutoComReceitas;
           }
 
           // 3. Processar receitas com dados corretos do banco
           const receitasFormatadas = (receitasData || []).map(
-            (receita: unknown) => {
+            (receita: any) => {
               return {
                 id: receita.id,
                 quantidade_necessaria: receita.quantidade_necessaria,
@@ -121,7 +151,7 @@ export async function GET(request: NextRequest) {
                   nome: receita.insumos.nome,
                   unidade_medida: receita.insumos.unidade_medida,
                 },
-              };
+              } as Receita;
             }
           );
 
@@ -129,14 +159,14 @@ export async function GET(request: NextRequest) {
             ...produto,
             tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
             receitas: receitasFormatadas,
-          };
+          } as ProdutoComReceitas;
         } catch (err) {
           console.warn(`⚠️ Erro na receita do produto ${produto.codigo}:`, err);
           return {
             ...produto,
             tipo_local: produto.tipo === 'bebida' ? 'bar' : 'cozinha',
             receitas: [],
-          };
+          } as ProdutoComReceitas;
         }
       })
     );

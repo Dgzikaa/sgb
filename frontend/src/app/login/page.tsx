@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, Eye, EyeOff, Fingerprint } from 'lucide-react';
 import BiometricAuth from '@/components/auth/BiometricAuth';
 import { api } from '@/lib/api-client';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -156,7 +157,7 @@ export default function LoginPage() {
 
         // Salvar dados do usuário no localStorage e cookie
         const { syncAuthData } = await import('@/lib/cookies');
-        syncAuthData(userData);
+        syncAuthData(userData as any);
 
         const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home';
         setSuccess(
@@ -281,9 +282,11 @@ export default function LoginPage() {
             suppressHydrationWarning
           >
             {!logoError ? (
-              <img
+              <Image
                 src="/logos/logo_640x640.png"
                 alt="SGB Logo"
+                width={288}
+                height={288}
                 className="w-52 h-52 lg:w-72 lg:h-72 object-cover"
                 onError={() => setLogoError(true)}
               />

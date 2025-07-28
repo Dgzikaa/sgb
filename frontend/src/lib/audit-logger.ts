@@ -1,5 +1,6 @@
 ﻿// Sistema centralizado de logging para audit trail e eventos de segurança
 import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from '@/lib/supabase-admin';
 
 export interface AuditLogParams {
   // Obrigatórios

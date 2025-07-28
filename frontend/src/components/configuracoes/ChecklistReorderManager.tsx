@@ -79,7 +79,7 @@ export function ChecklistReorderManager({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          checklists: checklists.map(c => ({
+          checklists: checklists.map((c: any) => ({
             id: c.id,
             ordem: c.ordem,
           })),
@@ -221,10 +221,10 @@ export function ChecklistReorderManager({
 
         {/* Sortable List */}
         <SortableList
-          items={checklists}
+          items={checklists as any}
           onReorder={handleReorder}
           disabled={disabled}
-          renderItem={(checklist, index) => (
+          renderItem={(checklist: ChecklistTemplate, index) => (
             <div className="space-y-3">
               {/* Header */}
               <div className="flex items-center justify-between">
@@ -275,7 +275,7 @@ export function ChecklistReorderManager({
               </div>
             </div>
           )}
-          getId={checklist => checklist.id}
+          getId={(checklist: ChecklistTemplate) => checklist.id}
           gap="md"
           itemClassName="hover:bg-gray-50 dark:hover:bg-gray-800/50"
         />

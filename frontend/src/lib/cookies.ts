@@ -5,7 +5,7 @@ export interface UserCookie {
   email: string;
   nome: string;
   role: string;
-  modulos_permitidos: string[];
+  modulos_permitidos: string[] | Record<string, any>;
   ativo: boolean;
 }
 
@@ -14,7 +14,7 @@ interface UserData {
   email: string;
   nome: string;
   role: string;
-  modulos_permitidos?: string[];
+  modulos_permitidos?: string[] | Record<string, any>;
   ativo?: boolean;
 }
 

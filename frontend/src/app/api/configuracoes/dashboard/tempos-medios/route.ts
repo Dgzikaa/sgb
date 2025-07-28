@@ -3,6 +3,21 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+// Interface para tipagem dos dados de tempo
+interface TempoData {
+  prd_desc: string;
+  grp_desc: string;
+  loc_desc: string;
+  t0_t1: number | null;
+  t0_t2: number | null;
+  t0_t3: number | null;
+  t1_t2: number | null;
+  t1_t3: number | null;
+  t2_t3: number | null;
+  itm_qtd: string | number;
+  dia: number;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -210,10 +225,10 @@ export async function GET(request: NextRequest) {
       let pedidosCozinha = 0;
       let pedidosBar = 0;
 
-      temposData.forEach((item: unknown) => {
+      temposData.forEach((item: TempoData) => {
         const produto = item.prd_desc || '';
         const grupo = item.grp_desc || '';
-        const quantidade = parseInt(item.itm_qtd || '1');
+        const quantidade = parseInt(String(item.itm_qtd) || '1');
 
         let tempo = 0;
         let isValidTempo = false;

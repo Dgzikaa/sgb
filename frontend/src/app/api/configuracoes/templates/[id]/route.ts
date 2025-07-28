@@ -276,7 +276,7 @@ export async function PUT(
     };
 
     // Remover tags do updateData - será tratado separadamente
-    const tags = updateData.tags;
+    const tags = updateData.tags as string[] | undefined;
     delete updateData.tags;
 
     // Atualizar template
@@ -296,7 +296,7 @@ export async function PUT(
     }
 
     // Atualizar tags se fornecidas
-    if (tags !== undefined) {
+    if (tags && tags.length > 0) {
       // Remover todas as tags existentes
       await supabase
         .from('checklist_tags')
@@ -304,31 +304,29 @@ export async function PUT(
         .eq('template_id', templateId);
 
       // Adicionar novas tags
-      if (tags.length > 0) {
-        for (const tagNome of tags) {
-          // Buscar ou criar tag
-          let { data: tag } = await supabase
+      for (const tagNome of tags) {
+        // Buscar ou criar tag
+        let { data: tag } = await supabase
+          .from('template_tags')
+          .select('id')
+          .eq('nome', tagNome)
+          .single();
+
+        if (!tag) {
+          const { data: novaTag } = await supabase
             .from('template_tags')
-            .select('id')
-            .eq('nome', tagNome)
+            .insert({ nome: tagNome })
+            .select()
             .single();
+          tag = novaTag;
+        }
 
-          if (!tag) {
-            const { data: novaTag } = await supabase
-              .from('template_tags')
-              .insert({ nome: tagNome })
-              .select()
-              .single();
-            tag = novaTag;
-          }
-
-          if (tag) {
-            // Associar tag ao template
-            await supabase.from('checklist_tags').insert({
-              template_id: templateId,
-              tag_id: tag.id,
-            });
-          }
+        if (tag) {
+          // Associar tag ao template
+          await supabase.from('checklist_tags').insert({
+            template_id: templateId,
+            tag_id: tag.id,
+          });
         }
       }
     }

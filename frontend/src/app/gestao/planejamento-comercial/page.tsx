@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,54 +21,68 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { apiCall } from '@/lib/api-client';
 
 interface PlanejamentoData {
-  data: string;
-  dia: string;
-  obsData: string;
-  label: string;
-  realizado: number;
-  m1: number;
-  m2: number;
-  m3: number;
-  clientes: {
-    planejado: number;
-    real: number;
-    resTotal: number;
-    resPresente: number;
-    lotMax: number;
-  };
-  ticketEntrada: {
-    planejado: number;
-    real: number;
-  };
-  ticketBar: {
-    planejado: number;
-    real: number;
-  };
-  ticketMedio: number;
-  rentabilidadeAtracoes: {
-    custoArtistico: number;
-    custoProducao: number;
-    percArtFat: string;
-  };
-  cesta: {
-    percBebidas: string;
-    percDrinks: string;
-    percCozinha: string;
-  };
-  tempo: {
-    cozinha: number;
-    bar: number;
-  };
-  faturamentoAte19h: string;
+  evento_id: number;
+  data_evento: string;
+  dia_semana: string;
+  evento_nome: string;
+  bar_id: number;
+  bar_nome: string;
+  dia: number;
+  mes: number;
+  ano: number;
+  dia_formatado: string;
+  data_curta: string;
+  real_receita: number;
+  m1_receita: number;
+  clientes_plan: number;
+  clientes_real: number;
+  res_total: number;
+  res_presente: number;
+  lot_max: number;
+  te_plan: number;
+  te_real: number;
+  tb_plan: number;
+  tb_real: number;
+  t_medio: number;
+  c_art: number;
+  c_prod: number;
+  percent_art_fat: number;
+  percent_b: number;
+  percent_d: number;
+  percent_c: number;
+  t_coz: number;
+  t_bar: number;
+  fat_19h: number;
+  pagamentos_liquido: number;
+  total_vendas: number;
+  vendas_bebida: number;
+  vendas_drink: number;
+  vendas_comida: number;
+  percentual_atingimento_receita: number;
+  percentual_atingimento_clientes: number;
+  performance_geral: number;
 }
 
 export default function PlanejamentoComercialPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Pega mes/ano da URL ou do sistema
+  const now = new Date();
+  const mesUrl = Number(searchParams.get('mes'));
+  const anoUrl = Number(searchParams.get('ano'));
+  const mesInicial = mesUrl && mesUrl >= 1 && mesUrl <= 12 ? mesUrl - 1 : now.getMonth();
+  const anoInicial = anoUrl || now.getFullYear();
+
   const [dados, setDados] = useState<PlanejamentoData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mesAtual, setMesAtual] = useState(new Date(2025, 6)); // Julho 2025
+  const [mesAtual, setMesAtual] = useState(new Date(anoInicial, mesInicial));
   const [totalEventos, setTotalEventos] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const mesesNomes = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -76,36 +90,55 @@ export default function PlanejamentoComercialPage() {
   ];
 
   // Buscar dados da API
-  const buscarDados = async () => {
-    setLoading(true);
+  const buscarDados = useCallback(async () => {
     try {
+      setLoading(true);
       const mes = mesAtual.getMonth() + 1;
       const ano = mesAtual.getFullYear();
       
-      console.log('Frontend buscando dados:', { mes, ano, mesAtual });
+      // Buscar dados do usuário do localStorage
+      const userData = localStorage.getItem('sgb_user');
+      if (!userData) {
+        setError('Usuário não autenticado');
+        return;
+      }
+
+      const user = JSON.parse(userData);
       
-      const response = await fetch(`/api/gestao/planejamento-comercial?mes=${mes}&ano=${ano}`);
-      const result = await response.json();
-      
-      console.log('Resultado da API:', result);
-      
-      if (response.ok) {
-        setDados(result.dados || []);
-        setTotalEventos(result.totalEventos || 0);
-        console.log('Dados carregados:', result.dados?.slice(0, 5));
+      const data = await apiCall(`/api/gestao/planejamento-comercial?mes=${mes}&ano=${ano}`, {
+        headers: {
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        }
+      });
+
+      if (data.data) {
+        console.log('📊 Dados recebidos na página:', data.data);
+        console.log('📊 Quantidade de registros:', data.data.length);
+        setDados(data.data);
+        setTotalEventos(data.data.length || 0);
+        setError(null);
       } else {
-        console.error('Erro ao carregar dados:', result.error);
+        console.log('❌ Erro ou dados vazios:', data);
+        setError(data.error || 'Erro ao carregar dados');
       }
     } catch (error) {
-      console.error('Erro ao buscar dados:', error);
+      console.error('Erro ao carregar dados:', error);
+      setError('Erro ao conectar com o servidor');
     } finally {
       setLoading(false);
     }
-  };
+  }, [mesAtual]);
+
+  // Atualiza a URL ao mudar de mês
+  useEffect(() => {
+    const mes = mesAtual.getMonth() + 1;
+    const ano = mesAtual.getFullYear();
+    router.replace(`/gestao/planejamento-comercial?mes=${mes}&ano=${ano}`);
+  }, [mesAtual, router]);
 
   useEffect(() => {
     buscarDados();
-  }, [mesAtual]);
+  }, [buscarDados]);
 
   const navegarMes = (direcao: 'anterior' | 'proximo') => {
     const novoMes = new Date(mesAtual);
@@ -301,93 +334,93 @@ export default function PlanejamentoComercialPage() {
                   <tr 
                     key={index}
                     className={`hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${
-                      item.realizado > 0 ? 'bg-blue-50/20 dark:bg-blue-900/10' : ''
+                      item.real_receita > 0 ? 'bg-blue-50/20 dark:bg-blue-900/10' : ''
                     }`}
-                    title={item.label ? `Evento: ${item.label}` : 'Sem evento'}
+                    title={item.evento_nome ? `Evento: ${item.evento_nome}` : 'Sem evento'}
                   >
                     {/* Colunas fixas */}
                     <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.data}
+                      {item.dia_semana}
                     </td>
                     <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-2 py-2 text-xs text-center font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
-                      {item.dia}
+                      {item.dia_formatado}
                     </td>
                     
                                                {/* Faturamento */}
                            <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.realizado > 0 ? formatarMoeda(item.realizado) : '-'}
+                             {item.real_receita > 0 ? formatarMoeda(item.real_receita) : '-'}
                            </td>
                            <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.m1 > 0 ? formatarMoeda(item.m1) : '-'}
+                             {item.m1_receita > 0 ? formatarMoeda(item.m1_receita) : '-'}
                            </td>
                     
                     {/* Clientes */}
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.clientes.planejado || '-'}
+                      {item.clientes_plan || '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.clientes.real || '-'}
+                      {item.clientes_real || '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.clientes.resTotal || '-'}
+                      {item.res_total || '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.clientes.resPresente || '-'}
+                      {item.res_presente || '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.clientes.lotMax || '-'}
+                      {item.lot_max || '-'}
                     </td>
                     
                     {/* Tickets */}
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketEntrada.planejado > 0 ? formatarMoeda(item.ticketEntrada.planejado) : '-'}
+                      {item.te_plan > 0 ? formatarMoeda(item.te_plan) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketEntrada.real > 0 ? formatarMoeda(item.ticketEntrada.real) : '-'}
+                      {item.te_real > 0 ? formatarMoeda(item.te_real) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketBar.planejado > 0 ? formatarMoeda(item.ticketBar.planejado) : '-'}
+                      {item.tb_plan > 0 ? formatarMoeda(item.tb_plan) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketBar.real > 0 ? formatarMoeda(item.ticketBar.real) : '-'}
+                      {item.tb_real > 0 ? formatarMoeda(item.tb_real) : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.ticketMedio > 0 ? formatarMoeda(item.ticketMedio) : '-'}
+                      {item.t_medio > 0 ? formatarMoeda(item.t_medio) : '-'}
                     </td>
                     
                                                {/* Rentabilidade */}
                            <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.rentabilidadeAtracoes.custoArtistico > 0 ? formatarMoeda(item.rentabilidadeAtracoes.custoArtistico) : '-'}
+                             {item.c_art > 0 ? formatarMoeda(item.c_art) : '-'}
                            </td>
                            <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.rentabilidadeAtracoes.custoProducao > 0 ? formatarMoeda(item.rentabilidadeAtracoes.custoProducao) : '-'}
+                             {item.c_prod > 0 ? formatarMoeda(item.c_prod) : '-'}
                            </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.rentabilidadeAtracoes.percArtFat !== '0%' ? item.rentabilidadeAtracoes.percArtFat : '-'}
+                      {item.percent_art_fat > 0 ? `${item.percent_art_fat.toFixed(1)}%` : '-'}
                     </td>
                     
                     {/* Cesta */}
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.cesta.percBebidas !== '0%' ? item.cesta.percBebidas : '-'}
+                      {item.percent_b > 0 ? `${item.percent_b.toFixed(1)}%` : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.cesta.percDrinks !== '0%' ? item.cesta.percDrinks : '-'}
+                      {item.percent_d > 0 ? `${item.percent_d.toFixed(1)}%` : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.cesta.percCozinha !== '0%' ? item.cesta.percCozinha : '-'}
+                      {item.percent_c > 0 ? `${item.percent_c.toFixed(1)}%` : '-'}
                     </td>
                     
                     {/* Tempo */}
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.tempo.cozinha > 0 ? item.tempo.cozinha.toFixed(0) : '-'}
+                      {item.t_coz > 0 ? `${item.t_coz.toFixed(1)} min` : '-'}
                     </td>
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.tempo.bar > 0 ? item.tempo.bar.toFixed(0) : '-'}
+                      {item.t_bar > 0 ? `${item.t_bar.toFixed(1)} min` : '-'}
                     </td>
                     
                     {/* Faturamento até 19h */}
                     <td className="px-2 py-2 text-xs text-center text-gray-900 dark:text-white">
-                      {item.faturamentoAte19h !== '0%' ? item.faturamentoAte19h : '-'}
+                      {item.fat_19h > 0 ? formatarMoeda(item.fat_19h) : '-'}
                     </td>
                   </tr>
                 ))}

@@ -102,25 +102,25 @@ export async function POST(request: NextRequest) {
     let receita_bar = 0;
 
     // 1. Público real - somar pessoas da tabela período
-    publico_real = periodoData.reduce((sum: number, item: unknown) => {
+    publico_real = periodoData.reduce((sum: number, item: any) => {
       return sum + parseInt(item.pessoas || '0');
     }, 0);
 
     // 2. Faturamento líquido - somar pagamentos
     faturamento_liquido = pagamentosData.reduce(
-      (sum: number, item: unknown) => {
+      (sum: number, item: any) => {
         return sum + parseFloat(item.liquido || '0');
       },
       0
     );
 
     // 3. Receita de couvert - tanto de período quanto pagamentos
-    receita_couvert = periodoData.reduce((sum: number, item: unknown) => {
+    receita_couvert = periodoData.reduce((sum: number, item: any) => {
       return sum + parseFloat(item.vr_couvert || '0');
     }, 0);
 
     const couvertPagamentos = pagamentosData.reduce(
-      (sum: number, item: unknown) => {
+      (sum: number, item: any) => {
         return sum + parseFloat(item.vr_couvert || '0');
       },
       0
@@ -129,18 +129,18 @@ export async function POST(request: NextRequest) {
     receita_couvert = Math.max(receita_couvert, couvertPagamentos);
 
     // 4. Receita de ingressos - Sympla
-    receita_ingressos = symplaData.reduce((sum: number, item: unknown) => {
+    receita_ingressos = symplaData.reduce((sum: number, item: any) => {
       return sum + parseFloat(item.total_liquido || '0');
     }, 0);
 
     // 5. Receita do bar - produtos
-    receita_bar = periodoData.reduce((sum: number, item: unknown) => {
+    receita_bar = periodoData.reduce((sum: number, item: any) => {
       return sum + parseFloat(item.vr_produtos || '0');
     }, 0);
 
     // Se não temos público da tabela período, tentar usar checkins do Sympla
     if (publico_real === 0 && symplaData.length > 0) {
-      publico_real = symplaData.reduce((sum: number, item: unknown) => {
+      publico_real = symplaData.reduce((sum: number, item: any) => {
         return sum + parseInt(item.qtd_checkins_realizados || '0');
       }, 0);
     }

@@ -461,7 +461,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: apiError.message,
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
@@ -491,7 +491,21 @@ export async function POST(request: NextRequest) {
     if (body.action === 'install_predefined') {
       console.log('📦 Instalando templates predefinidos...');
 
-      const templatesParaInstalar = [];
+      const templatesParaInstalar: Array<{
+        nome: string;
+        descricao: string;
+        categoria: string;
+        setor: string;
+        tipo: string;
+        frequencia: string;
+        tempo_estimado: number;
+        tags: string[];
+        estrutura: TemplateEstrutura;
+        publico: boolean;
+        predefinido: boolean;
+        bar_id: null;
+        criado_por: string;
+      }> = [];
 
       for (const template of TEMPLATES_PREDEFINIDOS) {
         // Verificar se já existe
@@ -649,7 +663,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: apiError.message,
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
@@ -763,7 +777,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: apiError.message,
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );

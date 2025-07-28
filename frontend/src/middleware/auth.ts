@@ -9,7 +9,7 @@ export interface AuthenticatedUser {
   nome: string;
   role: 'admin' | 'financeiro' | 'funcionario';
   bar_id: number;
-  modulos_permitidos: string[];
+  modulos_permitidos: string[] | Record<string, any>;
   ativo: boolean;
 }
 
@@ -109,14 +109,27 @@ export function checkPermission(
   // Verificar permissões específicas do módulo
   const modulePermissions = user.modulos_permitidos || [];
 
+  // Função helper para verificar permissão
+  const hasModulePermission = (perm: string): boolean => {
+    // Se modulos_permitidos é um array
+    if (Array.isArray(modulePermissions)) {
+      return modulePermissions.includes(perm);
+    }
+    // Se modulos_permitidos é um objeto
+    if (typeof modulePermissions === 'object') {
+      return modulePermissions[perm] === true;
+    }
+    return false;
+  };
+
   switch (permission.module) {
     case 'checklists':
       switch (permission.action) {
         case 'read':
           // Todos podem ler checklists
           return (
-            modulePermissions.includes('checklists') ||
-            modulePermissions.includes('checklists_read') ||
+            hasModulePermission('checklists') ||
+            hasModulePermission('checklists_read') ||
             user.role === 'financeiro'
           );
 
@@ -124,15 +137,15 @@ export function checkPermission(
           // Financeiro e admin podem criar/editar
           return (
             user.role === 'financeiro' ||
-            modulePermissions.includes('checklists_write') ||
-            modulePermissions.includes('checklists_admin')
+            hasModulePermission('checklists_write') ||
+            hasModulePermission('checklists_admin')
           );
 
         case 'delete':
           // Só admin pode deletar
           return (
             (user.role as string) === 'admin' ||
-            modulePermissions.includes('checklists_admin')
+            hasModulePermission('checklists_admin')
           );
 
         case 'admin':

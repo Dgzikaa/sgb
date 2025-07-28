@@ -64,7 +64,7 @@ export default function RelatorioProdutos() {
     try {
       const params = new URLSearchParams({
         data_especifica: dataEspecifica,
-        ...filtros,
+        ...(typeof filtros === 'object' && filtros !== null ? filtros : {}),
         bar_id: (selectedBar?.id || 1).toString(),
       });
 

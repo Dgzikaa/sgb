@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 
 // Interfaces para tipagem adequada
 interface PagamentoData {
@@ -64,7 +64,14 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
   );
 
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await getSupabaseClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Erro ao conectar com o banco de dados' },
+        { status: 500 }
+      );
+    }
 
     // Extrair parâmetros
     const { searchParams } = new URL(request.url);

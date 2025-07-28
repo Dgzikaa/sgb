@@ -212,6 +212,8 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     }
   }, [execucao]);
 
+
+
   // =====================================================
   // AÇÕES PRINCIPAIS
   // =====================================================

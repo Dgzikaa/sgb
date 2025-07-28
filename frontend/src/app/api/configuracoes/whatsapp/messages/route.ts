@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 import { z } from 'zod';
 
 // Interfaces para tipagem adequada
@@ -83,7 +83,14 @@ const FilterSchema = z.object({
 // ========================================
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await getSupabaseClient();
+    
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Erro ao conectar com o banco de dados' },
+        { status: 500 }
+      );
+    }
 
     // Extrair bar_id do header ou query
     const bar_id = request.headers.get('x-bar-id') || 
@@ -227,7 +234,14 @@ export async function GET(request: NextRequest) {
 // ========================================
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceRoleClient();
+    const supabase = await getSupabaseClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Erro ao conectar com o banco de dados' },
+        { status: 500 }
+      );
+    }
 
     // Extrair bar_id do header ou query
     const bar_id = request.headers.get('x-bar-id') || 
@@ -406,7 +420,11 @@ async function getOrCreateContact(
   numeroWhatsapp: string,
   usuarioId?: number
 ) {
-  const supabase = createServiceRoleClient();
+  const supabase = await getSupabaseClient();
+
+  if (!supabase) {
+    return null;
+  }
 
   // Primeiro, tentar buscar contato existente
   const { data: contato } = await supabase

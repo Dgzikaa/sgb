@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const temChefe = insumos.some((i: unknown) => i.is_chefe);
+    const temChefe = insumos.some((i: any) => i.is_chefe);
     if (!temChefe) {
       return NextResponse.json(
         {
@@ -72,16 +72,16 @@ export async function PUT(request: NextRequest) {
     }
 
     // Inserir novas receitas com os insumos atualizados
-    const insumoChefe = insumos.find((i: unknown) => i.is_chefe);
-    console.log('🔄 Insumo chefe encontrado:', insumoChefe);
-    console.log('🔄 Dados recebidos:', {
+    const insumoChefe = insumos.find((i: any) => i.is_chefe);
+    console.log('🗄️ Insumo chefe encontrado:', insumoChefe);
+    console.log('🗄️ Dados recebidos:', {
       receita_codigo,
       tipo_local,
       bar_id,
       insumos,
     });
 
-    const receitasData = insumos.map((insumo: unknown) => ({
+    const receitasData = insumos.map((insumo: any) => ({
       bar_id: bar_id,
       receita_codigo: receita_codigo.trim(),
       receita_nome: receita_nome.trim(),

@@ -221,7 +221,7 @@ export default function ScheduleDialog({
                   onClick={() =>
                     setConfig(prev => ({
                       ...prev,
-                      frequencia: option.value as unknown,
+                      frequencia: option.value as 'diaria' | 'semanal' | 'mensal' | 'personalizada',
                     }))
                   }
                 >

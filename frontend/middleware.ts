@@ -6,7 +6,7 @@ interface User {
   email: string;
   nome: string;
   role: 'admin' | 'manager' | 'funcionario';
-  modulos_permitidos: string[];
+  modulos_permitidos: string[] | Record<string, any>;
   ativo: boolean;
 }
 
@@ -38,8 +38,19 @@ function hasMarketingPermission(user: User): boolean {
   }
 
   // Verificar se tem módulo marketing_360 (ID 18)
-  const hasModule18 = user.modulos_permitidos.includes('18');
-  const hasModuleMarketing = user.modulos_permitidos.includes('marketing_360');
+  let hasModule18 = false;
+  let hasModuleMarketing = false;
+
+  // Se modulos_permitidos é um array
+  if (Array.isArray(user.modulos_permitidos)) {
+    hasModule18 = user.modulos_permitidos.includes('18');
+    hasModuleMarketing = user.modulos_permitidos.includes('marketing_360');
+  }
+  // Se modulos_permitidos é um objeto
+  else if (typeof user.modulos_permitidos === 'object') {
+    hasModule18 = user.modulos_permitidos['18'] === true;
+    hasModuleMarketing = user.modulos_permitidos['marketing_360'] === true;
+  }
 
   console.log(`🔍 Tem módulo 18? ${hasModule18}`);
   console.log(`🔍 Tem módulo marketing_360? ${hasModuleMarketing}`);

@@ -224,7 +224,7 @@ export function useFileUpload() {
           [uploadId]: {
             loading: false,
             progress: 0,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
             result: null,
           },
         }));

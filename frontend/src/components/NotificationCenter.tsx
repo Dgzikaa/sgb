@@ -32,9 +32,10 @@ import {
 
 // Interfaces para tipagem
 interface NotificacaoAcao {
-  action: 'redirect' | 'download';
+  action: 'redirect' | 'download' | 'callback';
   url?: string;
   label?: string;
+  callback?: string;
 }
 
 interface Notificacao {
@@ -118,17 +119,20 @@ export function NotificationCenter() {
   // =====================================================
 
   useEffect(() => {
-    if (configuracoes.autoRefresh) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      intervalRef.current = setInterval(() => {
-        if (!loading) {
-          carregarNotificacoes({ apenas_nao_lidas: false, limit: 20 });
-        }
-      }, configuracoes.refreshInterval);
-    }
+    carregarNotificacoes();
   }, [carregarNotificacoes]);
+
+  useEffect(() => {
+    if (configuracoes.autoRefresh && configuracoes.refreshInterval > 0) {
+      const interval = setInterval(() => {
+        if (!loading) {
+          carregarNotificacoes();
+        }
+      }, configuracoes.refreshInterval * 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [configuracoes.autoRefresh, configuracoes.refreshInterval, loading, carregarNotificacoes]);
 
   // =====================================================
   // FILTRAR NOTIFICAÇÕES

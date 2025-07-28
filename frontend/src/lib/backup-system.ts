@@ -1,5 +1,6 @@
 ﻿// Sistema de backup automático para dados críticos
 import { createClient } from '@supabase/supabase-js';
+import { getAdminClient } from '@/lib/supabase-admin';
 
 export interface BackupConfig {
   tables: string[];
@@ -181,7 +182,6 @@ export class BackupSystem {
       console.log(`🔄 Restaurando backup ${backupId}...`);
 
       const backupData = await this.loadBackup(backupId) as BackupData;
-      const { getAdminClient } = await import('@/lib/supabase-admin');
       const supabase = await getAdminClient();
 
       // Verificar versão
@@ -230,7 +230,6 @@ export class BackupSystem {
 
   async listBackups(barId?: number): Promise<BackupResult[]> {
     try {
-      const { getAdminClient } = await import('@/lib/supabase-admin');
       const supabase = await getAdminClient();
 
       let query = supabase

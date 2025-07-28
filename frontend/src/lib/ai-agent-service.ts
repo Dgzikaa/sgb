@@ -6,6 +6,8 @@ import {
 } from './discord-service';
 import { notifyMarketingUpdate } from './discord-marketing-service';
 import DiscordChecklistService from './discord-checklist-service';
+import { getAdminClient } from '@/lib/supabase-admin';
+import { DiscordService } from '@/lib/discord-service';
 
 // Configuração do Supabase
 const supabase = createClient(
@@ -1251,7 +1253,7 @@ export class AIIntelligentAgent {
         for (const anomalia of anomalias) {
           // 🎮 ENVIAR PARA DISCORD
           try {
-            await sgbDiscordService.enviarAlertaAnomalia(anomalia);
+            await DiscordService.enviarAlertaAnomalia(anomalia);
             console.log(
               `📨 Anomalia crítica enviada para Discord: ${anomalia.titulo}`
             );
@@ -1314,7 +1316,7 @@ export class AIIntelligentAgent {
 
       if (dashboardData && dashboardData.success) {
         // Enviar para Discord
-        const sucesso = await sgbDiscordService.enviarRelatorioMatinal(
+        const sucesso = await DiscordService.enviarRelatorioMatinal(
           dashboardData.data
         );
 
@@ -1337,7 +1339,7 @@ export class AIIntelligentAgent {
         'relatorio_discord',
         'Erro no Relatório Matinal',
         'erro',
-        error.message || String(error)
+        (error instanceof Error ? error.message : String(error))
       );
     }
   }
@@ -1422,7 +1424,7 @@ export class AIIntelligentAgent {
         'relatorio_checklist',
         'Erro no Relatório Checklist Matinal',
         'erro',
-        error.message || String(error)
+        (error instanceof Error ? error.message : String(error))
       );
     }
   }
@@ -1550,7 +1552,7 @@ export class AIIntelligentAgent {
         'relatorio_marketing',
         'Erro no Relatório Marketing Matinal',
         'erro',
-        error.message || String(error)
+        (error instanceof Error ? error.message : String(error))
       );
     }
   }

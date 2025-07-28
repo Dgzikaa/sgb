@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     let eventosImportados = 0;
     let eventosAtualizados = 0;
-    const erros = [];
+    const erros: string[] = [];
 
     for (const evento of dados) {
       try {
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
           eventosImportados++;
         }
       } catch (error: unknown) {
-        erros.push(`Evento ${evento.nome}: ${error.message}`);
+        erros.push(`Evento ${evento.nome}: ${(error as any).message}`);
       }
     }
 
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Erro interno do servidor',
-        details: error.message,
+        details: (error as any).message,
       },
       { status: 500 }
     );

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Extrair grupos únicos
-    const gruposUnicos = [...new Set(grupos?.map((g: unknown) => g.grp_desc))]
+    const gruposUnicos = [...new Set(grupos?.map((g: any) => g.grp_desc))]
       .filter(Boolean)
       .sort();
 

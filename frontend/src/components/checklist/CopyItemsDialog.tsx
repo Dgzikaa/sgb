@@ -178,7 +178,6 @@ export default function CopyItemsDialog({
 
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id="only-required"
                     checked={onlyRequired}
                     onCheckedChange={setOnlyRequired}
                   />

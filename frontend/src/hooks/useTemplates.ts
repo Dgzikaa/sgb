@@ -118,9 +118,7 @@ export function useTemplates(
   // EFEITOS
   // =====================================================
 
-  useEffect(() => {
-    carregarTemplates();
-  }, [filtros]);
+
 
   // =====================================================
   // FUNÇÕES PRINCIPAIS
@@ -249,11 +247,7 @@ export function useTemplate(id?: string): UseTemplateResult {
   // EFEITOS
   // =====================================================
 
-  useEffect(() => {
-    if (id && id !== 'novo') {
-      carregarTemplate();
-    }
-  }, [id]);
+
 
   // =====================================================
   // FUNÇÕES

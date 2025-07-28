@@ -32,6 +32,7 @@ import {
   MessageSquare,
   CreditCard,
 } from 'lucide-react';
+import React from 'react'; // Added missing import for React
 
 interface SubMenuItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -59,6 +60,13 @@ export function ModernSidebar() {
   const pathname = usePathname();
   const { isRole } = usePermissions();
   const { badges } = useMenuBadges();
+
+  // Auto-expandir Financeiro se estiver na página DRE
+  React.useEffect(() => {
+    if (pathname.includes('/financeiro/dre') && !expandedItems.includes('Financeiro')) {
+      setExpandedItems(prev => [...prev, 'Financeiro']);
+    }
+  }, [pathname, expandedItems]);
 
   // Função para obter itens da sidebar com badges dinâmicos
   const getSidebarItems = (): SidebarItem[] => [
@@ -171,6 +179,12 @@ export function ModernSidebar() {
           label: 'Agendamento',
           href: '/financeiro/agendamento',
           description: 'Agendar pagamentos',
+        },
+        {
+          icon: BarChart3,
+          label: 'DRE',
+          href: '/financeiro/dre',
+          description: 'Demonstrativo de Resultado',
         },
       ],
     },

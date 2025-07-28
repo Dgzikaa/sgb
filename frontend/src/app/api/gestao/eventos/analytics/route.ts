@@ -59,14 +59,14 @@ export async function GET(request: NextRequest) {
 
     // Agrupamento por status
     const porStatus =
-      eventos?.reduce((acc: unknown, evento: unknown) => {
+      eventos?.reduce((acc: Record<string, number>, evento: any) => {
         acc[evento.status] = (acc[evento.status] || 0) + 1;
         return acc;
-      }, {}) || {};
+      }, {} as Record<string, number>) || {};
 
     // Agrupamento por mês
     const porMes =
-      eventos?.reduce((acc: unknown, evento: unknown) => {
+      eventos?.reduce((acc: Record<string, { mes: string; eventos: number; valor: number }>, evento: any) => {
         const mes = new Date(evento.data_evento).toLocaleDateString('pt-BR', {
           month: 'short',
         });
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         acc[mes].eventos++;
         acc[mes].valor += evento.valor || 0;
         return acc;
-      }, {}) || {};
+      }, {} as Record<string, { mes: string; eventos: number; valor: number }>) || {};
 
     return NextResponse.json({
       success: true,

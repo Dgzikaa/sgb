@@ -274,7 +274,11 @@ export default function AdvancedCharts({
             />
             <Tooltip
               formatter={(value: unknown, name: string) => [
-                typeof value === 'number' ? `${value.toFixed(2)}%` : value,
+                typeof value === 'number'
+                  ? `${value.toFixed(2)}%`
+                  : typeof value === 'string'
+                  ? value
+                  : String(value),
                 name,
               ]}
               contentStyle={{
@@ -346,7 +350,11 @@ export default function AdvancedCharts({
             </Pie>
             <Tooltip
               formatter={(value: unknown) => [
-                value.toLocaleString(),
+                typeof value === 'number'
+                  ? value.toLocaleString()
+                  : typeof value === 'string'
+                  ? value
+                  : String(value),
                 'Interações',
               ]}
             />

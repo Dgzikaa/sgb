@@ -40,7 +40,7 @@ export default function TimezoneDebugPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(agora());
-      setTimezoneInfo(debugTimezone());
+      setTimezoneInfo(debugTimezone() as TimezoneInfo);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -48,7 +48,7 @@ export default function TimezoneDebugPage() {
 
   // Carregar timezone info inicial
   useEffect(() => {
-    setTimezoneInfo(debugTimezone());
+    setTimezoneInfo(debugTimezone() as TimezoneInfo);
     testarSupabaseTimezone();
   }, []);
 
@@ -200,10 +200,10 @@ export default function TimezoneDebugPage() {
                 <strong>Comparação UTC vs Brasil:</strong>
                 {timezoneInfo && (
                   <div className="space-y-1 mt-1">
-                    <div className="text-sm">UTC: {timezoneInfo.utc}</div>
-                    <div className="text-sm">Brasil: {timezoneInfo.brasil}</div>
+                    <div className="text-sm">UTC: {(timezoneInfo as any).utc}</div>
+                    <div className="text-sm">Brasil: {(timezoneInfo as any).brasil}</div>
                     <div className="text-sm">
-                      Offset: {timezoneInfo.offset_horas}h
+                      Offset: {(timezoneInfo as any).offset_horas}h
                     </div>
                   </div>
                 )}

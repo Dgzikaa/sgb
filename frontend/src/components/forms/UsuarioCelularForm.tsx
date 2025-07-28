@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,13 +41,7 @@ export default function UsuarioCelularForm({
     'unknown' | 'valid' | 'invalid'
   >('unknown');
 
-  useEffect(() => {
-    if (usuarioId) {
-      loadUsuario();
-    }
-  }, [usuarioId]);
-
-  const loadUsuario = async () => {
+  const loadUsuario = useCallback(async () => {
     try {
       const response = await fetch(`/api/usuarios/${usuarioId}`);
       const data = await response.json();
@@ -59,7 +53,13 @@ export default function UsuarioCelularForm({
     } catch (error) {
       console.error('Erro ao carregar usuário:', error);
     }
-  };
+  }, [usuarioId]);
+
+  useEffect(() => {
+    if (usuarioId) {
+      loadUsuario();
+    }
+  }, [usuarioId, loadUsuario]);
 
   const formatCelular = (value: string) => {
     // Remove tudo que não é número

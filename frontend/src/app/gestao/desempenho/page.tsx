@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -130,11 +130,7 @@ export default function DesempenhoPage() {
   const [viewMode, setViewMode] = useState<'semanal' | 'mensal'>('semanal')
   const scrollContainerRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
-  useEffect(() => {
-    carregarDados()
-  }, [viewMode])
-
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch(`/api/gestao/desempenho?tipo=${viewMode}`)
@@ -148,7 +144,11 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [viewMode]);
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
 
 
   const toggleSecao = (secaoId: string) => {

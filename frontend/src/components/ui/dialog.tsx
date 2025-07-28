@@ -81,7 +81,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
           if (React.isValidElement(child) && child.type === DialogContent) {
             return React.cloneElement(child, {
               onClose: () => onOpenChange(false),
-            } as unknown);
+            } as any);
           }
           return child;
         })}

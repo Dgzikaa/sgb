@@ -288,7 +288,7 @@ export default function InterCertificadosPage() {
                   Banco Inter
                 </p>
                 <p>
-                  <strong>2.</strong> Vá em "Certificados" ou "mTLS"
+                  <strong>2.</strong> Vá em &quot;Certificados&quot; ou &quot;mTLS&quot;
                 </p>
                 <p>
                   <strong>3.</strong> Gere ou baixe os certificados necessários

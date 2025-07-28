@@ -355,7 +355,7 @@ async function getBasicSalesData(
 
     const total =
       vendas?.reduce(
-        (sum: number, venda: unknown) => sum + parseFloat(venda.liquido || '0'),
+        (sum: number, venda: any) => sum + parseFloat(venda.liquido || '0'),
         0
       ) || 0;
     const quantidade = vendas?.length || 0;
@@ -399,7 +399,7 @@ async function analyzeToday(
 
     const total =
       vendas?.reduce(
-        (sum: number, venda: unknown) => sum + parseFloat(venda.liquido || '0'),
+        (sum: number, venda: any) => sum + parseFloat(venda.liquido || '0'),
         0
       ) || 0;
     const quantidade = vendas?.length || 0;
@@ -471,12 +471,13 @@ async function processUserInput(
 
   try {
     console.log('🤖 Processando com ChatGPT:', input);
-    let contextData = undefined;
+    let contextData: any = undefined;
     if (
       lowercaseInput.includes('vendas') ||
       lowercaseInput.includes('faturamento')
     ) {
-      contextData = await getBasicSalesData(barInfo);
+      const basicData = await getBasicSalesData(barInfo);
+      contextData = Object.keys(basicData).length > 0 ? basicData : undefined;
     }
     const response = await openaiClient.chat({
       message: input,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -311,6 +311,26 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     setSelectedIndex(0);
   }, [query]);
 
+  const handleSelectCommand = useCallback(async (command: CommandItem) => {
+    if (isExecuting) return;
+
+    setIsExecuting(true);
+
+    try {
+      if (command.action) {
+        await command.action();
+      } else if (command.href) {
+        router.push(command.href);
+      }
+    } catch (error) {
+      console.error('Erro ao executar comando:', error);
+    } finally {
+      setIsExecuting(false);
+      onClose();
+      setQuery('');
+    }
+  }, [isExecuting, onClose, router]);
+
   // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
@@ -344,27 +364,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, filteredCommands, selectedIndex, onClose]);
-
-  const handleSelectCommand = async (command: Command) => {
-    if (isExecuting) return;
-
-    setIsExecuting(true);
-
-    try {
-      if (command.action) {
-        await command.action();
-      } else if (command.href) {
-        router.push(command.href);
-      }
-    } catch (error) {
-      console.error('Erro ao executar comando:', error);
-    } finally {
-      setIsExecuting(false);
-      onClose();
-      setQuery('');
-    }
-  };
+  }, [isOpen, filteredCommands, selectedIndex, onClose, handleSelectCommand]);
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
@@ -410,7 +410,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         acc[command.category].push(command);
         return acc;
       },
-      {} as Record<string, Command[]>
+      {} as Record<string, CommandItem[]>
     );
 
     return Object.entries(groups).sort(([a], [b]) => {

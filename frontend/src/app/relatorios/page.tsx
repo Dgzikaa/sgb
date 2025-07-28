@@ -338,7 +338,7 @@ export default function RelatoriosPage() {
                   </span>
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 </div>
-                <Link href="/relatorios/contahub-teste">
+                <Link href="/relatorios/contahub">
                   <Button className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white">
                     Acessar ContaHub
                   </Button>

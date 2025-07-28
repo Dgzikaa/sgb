@@ -131,7 +131,7 @@ export async function getPerformanceFuncionarios(
   // Agrupar por funcionário
   const funcionarios: Record<string, FuncionarioStats> = {};
 
-  execucoes.forEach((exec: ChecklistExecucao) => {
+  execucoes.forEach((exec: any) => {
     const id = exec.funcionario_id;
     if (!funcionarios[id]) {
       funcionarios[id] = {

@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 export default function AuthSuccessPage() {
@@ -11,65 +11,48 @@ export default function AuthSuccessPage() {
   const [error, setError] = useState<string>('');
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const code = searchParams.get('code');
-    // state removido - não utilizado
-
-    if (!code) {
-      setStatus('error');
-      setError('Código de autorização não encontrado');
-      return;
-    }
-
-    console.log('🔄 Trocando código por token...');
-
-    // Trocar código por token
-    exchangeCodeForToken(code);
-  }, [searchParams]);
-
-  const exchangeCodeForToken = async (code: string) => {
+  const exchangeCodeForToken = useCallback(async (code: string) => {
     try {
-      const response = await fetch('/api/auth/google', {
+      setStatus('loading');
+      setError('');
+
+      const response = await fetch('/api/auth/exchange-code', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'exchange',
-          code: code,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
       });
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Falha ao obter token');
+      if (data.success) {
+        setStatus('success');
+        setTokenData(data.token);
+        
+        // Testar acesso ao My Business
+        if (data.token) {
+          await testMyBusinessAccess(data.token);
+        }
+      } else {
+        setStatus('error');
+        setError(data.error || 'Erro ao trocar código por token');
       }
-
-      console.log('✅ Token obtido com sucesso!');
-
-      // Salvar token no localStorage para uso posterior
-      const tokenInfo = {
-        access_token: data.data.access_token,
-        refresh_token: data.data.refresh_token,
-        expires_in: data.data.expires_in,
-        token_type: data.data.token_type,
-        created_at: Date.now(),
-      };
-
-      localStorage.setItem('google_oauth_token', JSON.stringify(tokenInfo));
-
-      setTokenData(tokenInfo);
-      setStatus('success');
-
-      // Testar acesso às contas do My Business
-      testMyBusinessAccess(tokenInfo.access_token);
-    } catch {
-      console.error('❌ Erro ao trocar código por token:');
+    } catch (error) {
+      console.error('Erro ao trocar código por token:', error);
       setStatus('error');
-      setError('Erro desconhecido');
+      setError('Erro ao conectar com o servidor');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const code = searchParams.get('code');
+    if (!code) {
+      console.error('❌ Código de autorização não encontrado');
+      setError('Código de autorização não encontrado');
+      return;
+    }
+    console.log('🔄 Trocando código por token...');
+    exchangeCodeForToken(code);
+  }, [searchParams, exchangeCodeForToken]);
 
   const testMyBusinessAccess = async (accessToken: string) => {
     try {
@@ -130,7 +113,7 @@ export default function AuthSuccessPage() {
         },
         body: JSON.stringify({
           action: 'test',
-          access_token: tokenData.access_token,
+          access_token: (tokenData as any).access_token,
         }),
       });
 
@@ -204,13 +187,13 @@ export default function AuthSuccessPage() {
                 <div>
                   <span className="font-medium text-gray-600">Tipo:</span>
                   <span className="ml-2 text-gray-800">
-                    {tokenData?.token_type || 'Bearer'}
+                    {(tokenData as any)?.token_type || 'Bearer'}
                   </span>
                 </div>
                 <div>
                   <span className="font-medium text-gray-600">Expira em:</span>
                   <span className="ml-2 text-gray-800">
-                    {tokenData?.expires_in || 0} segundos
+                    {(tokenData as any)?.expires_in || 0} segundos
                   </span>
                 </div>
                 <div>
@@ -218,16 +201,16 @@ export default function AuthSuccessPage() {
                     Refresh Token:
                   </span>
                   <span className="ml-2 text-gray-800">
-                    {tokenData?.refresh_token ? '✅ Sim' : '❌ Não'}
+                    {(tokenData as any)?.refresh_token ? '✅ Sim' : '❌ Não'}
                   </span>
                 </div>
-                {tokenData?.my_business_accounts && (
+                {(tokenData as any)?.my_business_accounts && (
                   <div>
                     <span className="font-medium text-gray-600">
                       Contas My Business:
                     </span>
                     <span className="ml-2 text-gray-800">
-                      {tokenData.my_business_accounts.length}
+                      {(tokenData as any).my_business_accounts.length}
                     </span>
                   </div>
                 )}

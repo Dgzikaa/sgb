@@ -102,8 +102,8 @@ export function AdvancedDataTable<T extends Record<string, unknown>>({
     }
 
     return [...filteredData].sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
+      const aVal: any = a[sortConfig.key];
+      const bVal: any = b[sortConfig.key];
 
       if (aVal < bVal) {
         return sortConfig.direction === 'asc' ? -1 : 1;

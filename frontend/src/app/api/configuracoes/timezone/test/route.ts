@@ -45,11 +45,11 @@ export async function GET() {
       },
       supabase: supabaseResult
         ? {
-            timezone_config: supabaseResult[0]?.timezone_config,
-            utc_time: supabaseResult[0]?.utc_time,
-            brasil_time: supabaseResult[0]?.brasil_time,
-            agora_brasil_func: supabaseResult[0]?.agora_brasil_func,
-            formatado_brasil: supabaseResult[0]?.formatado_brasil,
+            timezone_config: (supabaseResult as any)[0]?.timezone_config,
+            utc_time: (supabaseResult as any)[0]?.utc_time,
+            brasil_time: (supabaseResult as any)[0]?.brasil_time,
+            agora_brasil_func: (supabaseResult as any)[0]?.agora_brasil_func,
+            formatado_brasil: (supabaseResult as any)[0]?.formatado_brasil,
           }
         : {
             error: 'Não foi possível conectar ao Supabase',

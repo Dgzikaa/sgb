@@ -48,8 +48,13 @@ interface NiboIntegrationData {
   configuracao?: Record<string, unknown>;
 }
 
+interface Bar {
+  id: number;
+  nome: string;
+}
+
 interface NiboIntegrationCardProps {
-  selectedBar: unknown;
+  selectedBar: Bar | null;
 }
 
 export default function NiboIntegrationCard({
@@ -96,7 +101,7 @@ export default function NiboIntegrationCard({
     if (barId) {
       loadNiboStatus();
     }
-  }, [loadNiboStatus]);
+  }, [barId, loadNiboStatus]);
 
   const handleConnect = async () => {
     if (!apiKey || !organizationId) {
@@ -279,9 +284,7 @@ export default function NiboIntegrationCard({
                   </div>
                   <div className="flex items-center gap-2">
                     <code className="text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                      {showApiKey
-                        ? niboStatus.configuracao?.apiKeyMasked
-                        : '••••••••••••••••'}
+                      {(niboStatus.configuracao?.apiKeyMasked as string) || '••••••••••••••••'}
                     </code>
                     <Button
                       variant="ghost"
@@ -420,8 +423,7 @@ export default function NiboIntegrationCard({
                       Conecte sua conta NIBO
                     </h3>
                     <p className="text-sm text-yellow-600 dark:text-yellow-300">
-                      {niboStatus?.message ||
-                        'Configure sua API key para começar a sincronizar dados financeiros'}
+                      {'Configure sua API key para começar a sincronizar dados financeiros'}
                     </p>
                   </div>
                 </div>

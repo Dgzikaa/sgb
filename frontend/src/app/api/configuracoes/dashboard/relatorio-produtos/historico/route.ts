@@ -3,8 +3,44 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+// Interfaces para tipagem
+interface TempoItem {
+  t0_lancamento: string;
+  t1_t2: number;
+  prd_desc: string;
+  grp_desc: string;
+  itm_qtd: number;
+}
+
+interface DadosDia {
+  data: string;
+  tempos: number[];
+  pedidos: number;
+  produtos_problema: Set<string>;
+}
+
+interface HistoricoItem {
+  data: string;
+  tempo_medio: number;
+  total_pedidos: number;
+  produtos_problema: string[];
+}
+
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const dataEspecifica = searchParams.get('data_especifica');
+    const periodoAnalise = searchParams.get('periodo_analise') || '7d';
+    const grupoFiltro = searchParams.get('grupo_filtro') || 'todos';
+    const barId = parseInt(searchParams.get('bar_id') || '3');
+
+    console.log('📊 API Histórico - Parâmetros:', {
+      dataEspecifica,
+      periodoAnalise,
+      grupoFiltro,
+      barId,
+    });
+
     const supabase = await getSupabaseClient();
     if (!supabase) {
       return NextResponse.json(
@@ -13,29 +49,27 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const dataEspecifica = searchParams.get('data_especifica');
-    const periodoAnalise = searchParams.get('periodo_analise') || '30';
-    const grupoFiltro = searchParams.get('grupo_filtro') || 'todos';
-    const barId = parseInt(searchParams.get('bar_id') || '1');
-
-    if (!dataEspecifica) {
-      return NextResponse.json(
-        { error: 'Data específica é obrigatória' },
-        { status: 400 }
-      );
+    // Calcular período de análise
+    const dataFim = dataEspecifica
+      ? new Date(dataEspecifica)
+      : new Date();
+    const dataInicio = new Date(dataFim);
+    
+    switch (periodoAnalise) {
+      case '7d':
+        dataInicio.setDate(dataInicio.getDate() - 7);
+        break;
+      case '30d':
+        dataInicio.setDate(dataInicio.getDate() - 30);
+        break;
+      case '90d':
+        dataInicio.setDate(dataInicio.getDate() - 90);
+        break;
+      default:
+        dataInicio.setDate(dataInicio.getDate() - 7);
     }
 
-    // Calcular período para histórico (últimos 30 dias)
-    const dataFim = new Date(dataEspecifica);
-    const dataInicio = new Date(dataFim);
-    dataInicio.setDate(dataFim.getDate() - 30);
-
-    console.log(
-      `📈 Buscando histórico de ${dataInicio.toISOString().split('T')[0]} até ${dataFim.toISOString().split('T')[0]}`
-    );
-
-    // Query base
+    // Buscar dados históricos
     let query = supabase
       .from('tempo')
       .select(
@@ -71,9 +105,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Agrupar dados por data
-    const dadosPorData = new Map();
+    const dadosPorData = new Map<string, DadosDia>();
 
-    dadosHistorico?.forEach((item: unknown) => {
+    dadosHistorico?.forEach((item: TempoItem) => {
       const data = item.t0_lancamento.split('T')[0];
 
       if (!dadosPorData.has(data)) {
@@ -86,17 +120,19 @@ export async function GET(request: NextRequest) {
       }
 
       const dadosDia = dadosPorData.get(data);
-      dadosDia.tempos.push(item.t1_t2);
-      dadosDia.pedidos += item.itm_qtd || 1;
+      if (dadosDia) {
+        dadosDia.tempos.push(item.t1_t2);
+        dadosDia.pedidos += item.itm_qtd || 1;
 
-      // Identificar produtos com tempo alto (> 20 minutos)
-      if (item.t1_t2 > 1200) {
-        dadosDia.produtos_problema.add(item.prd_desc);
+        // Identificar produtos com tempo alto (> 20 minutos)
+        if (item.t1_t2 > 1200) {
+          dadosDia.produtos_problema.add(item.prd_desc);
+        }
       }
     });
 
     // Calcular estatísticas por dia
-    const historico = Array.from(dadosPorData.values()).map((dia: unknown) => {
+    const historico: HistoricoItem[] = Array.from(dadosPorData.values()).map((dia: DadosDia) => {
       const tempoMedio =
         dia.tempos.length > 0
           ? dia.tempos.reduce((a: number, b: number) => a + b, 0) /

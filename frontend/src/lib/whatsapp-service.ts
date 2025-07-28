@@ -1,4 +1,5 @@
 ﻿import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 
 // ========================================
 // 📱 WHATSAPP NOTIFICATION SERVICE
@@ -969,21 +970,12 @@ Data: {data}`,
     failed: number;
     lastSent?: string;
   }> {
-    try {
-      // Implementação básica - pode ser expandida
-      return {
-        total: 0,
-        sent: 0,
-        failed: 0,
-      };
-    } catch (error) {
-      console.error('Erro ao buscar estatísticas:', error);
-      return {
-        total: 0,
-        sent: 0,
-        failed: 0,
-      };
-    }
+    // TODO: Implementar busca real de estatísticas
+    return {
+      total: 0,
+      sent: 0,
+      failed: 0,
+    };
   }
 
   // ========================================

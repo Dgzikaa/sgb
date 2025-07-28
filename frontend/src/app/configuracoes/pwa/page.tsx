@@ -67,14 +67,14 @@ export default function PWAPage() {
       setInstallPrompt(e);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as any);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener(
         'beforeinstallprompt',
-        handleBeforeInstallPrompt
+        handleBeforeInstallPrompt as any
       );
     };
   }, []);

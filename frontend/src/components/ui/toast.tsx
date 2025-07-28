@@ -114,6 +114,10 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
     setTimeout(() => onRemove(toast.id), 300);
   };
 
+  const dismiss = useCallback(() => {
+    onRemove(toast.id);
+  }, [onRemove, toast.id]);
+
   const getToastStyles = () => {
     const baseStyles =
       'flex items-start gap-3 p-4 rounded-xl border-0 shadow-2xl backdrop-blur-md transition-all duration-300 transform';

@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    const response: unknown = {
+    const response: Record<string, any> = {
       success: true,
       com_whatsapp: usuariosValidados,
       total_com_whatsapp: usuariosValidados.length,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     if (operacao === 'validar_whatsapp') {
       // Validar números WhatsApp em lote
-      const resultados = [];
+      const resultados: any[] = [];
 
       for (const usuario of usuarios) {
         const numero = usuario.celular?.replace(/\D/g, '');

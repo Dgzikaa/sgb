@@ -228,7 +228,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   // Auto tracking de page view quando pathname muda
   useEffect(() => {
     trackPageView();
-  }, [pathname]); // Removido trackPageView da dependência para evitar loop
+  }, [trackPageView]);
 
   return {
     trackEvent,

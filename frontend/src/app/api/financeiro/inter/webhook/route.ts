@@ -78,6 +78,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verificar se temos um token válido
+    if (!accessToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Não foi possível obter um token de acesso válido',
+        },
+        { status: 500 }
+      );
+    }
+
     // Pequeno delay para garantir que o token seja processado
     if (!access_token) {
       console.log('⏳ Aguardando processamento do token...');
@@ -170,7 +181,7 @@ export async function POST(request: NextRequest) {
           try {
             console.log('📨 Resposta bruta do Inter:', data);
 
-            if (res.statusCode >= 200 && res.statusCode < 300) {
+            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
               console.log('✅ Webhook configurado com sucesso');
               resolve(
                 NextResponse.json({
@@ -187,10 +198,10 @@ export async function POST(request: NextRequest) {
                 NextResponse.json(
                   {
                     success: false,
-                    error: `Erro ${res.statusCode}: ${res.statusMessage}`,
+                    error: `Erro ${res.statusCode || 'unknown'}: ${res.statusMessage || 'Unknown error'}`,
                     details: data,
                   },
-                  { status: res.statusCode }
+                  { status: res.statusCode || 500 }
                 )
               );
             }

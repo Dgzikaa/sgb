@@ -1,4 +1,4 @@
-﻿import { sgbDiscordService, DiscordEmbed } from './discord-service';
+﻿import { sgbDiscordService, DiscordEmbed, DiscordService } from './discord-service';
 import {
   getScoreSaudeGeral,
   getDashboardExecutivo,
@@ -359,7 +359,7 @@ export class DiscordBotService {
     };
 
     switch (queryType) {
-      case 'score_saude_geral':
+      case 'score_saude_geral': {
         const saude = typeof data.score_saude === 'object' ? data.score_saude : { score_saude: data.score_saude || 0 };
         embed.fields = [
           {
@@ -374,8 +374,9 @@ export class DiscordBotService {
           },
         ];
         break;
+      }
 
-      case 'dashboard_executivo':
+      case 'dashboard_executivo': {
         const kpis = data.kpis_principais;
         if (kpis) {
           embed.fields = [
@@ -397,6 +398,7 @@ export class DiscordBotService {
           ];
         }
         break;
+      }
 
       case 'status_checklists': {
         const resumo = data.resumo;
@@ -548,9 +550,9 @@ export class DiscordBotService {
   async sendResponse(response: BotResponse): Promise<boolean> {
     try {
       if (response.embed) {
-        return await sgbDiscordService.sendEmbed(response.embed);
-              } else if (response.text) {
-          return await DiscordService.sendMessage(response.text);
+        return await DiscordService.sendEmbed(response.embed);
+      } else if (response.text) {
+        return await DiscordService.sendMessage(response.text);
       }
       return false;
     } catch (error) {

@@ -98,12 +98,12 @@ export async function POST(request: NextRequest) {
     // 3. Calcular nota geral usando sistema inteligente
     let scoreResult: unknown = null;
     try {
-      const { calcularScoreTotal } = await import('@/lib/checklist-scoring');
+      const checklistScoring = await import('@/lib/checklist-scoring');
       const mockExecucao = {
         respostas: { secoes: respostas.map((r: unknown) => ({ itens: [r] })) },
         estrutura_checklist: { secoes: [] }, // Estrutura simplificada para compatibilidade
       };
-      scoreResult = calcularScoreTotal(mockExecucao as any);
+      scoreResult = checklistScoring.calcularScore(mockExecucao as any, 0, 0);
 
       // Atualizar execução com score calculado
       const { error: scoreError } = await supabase

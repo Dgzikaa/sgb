@@ -1,7 +1,6 @@
 import { ReactNode, useCallback, useId } from 'react';
 import { cn } from '@/lib/utils';
 import { useSortableList } from '@/hooks/useDragAndDrop';
-import { DraggableItem } from './DraggableItem';
 
 export interface SortableListProps<T> {
   items: T[];
@@ -141,17 +140,8 @@ export function SortableList<T>({
         const itemKey = getId ? getId(item.originalItem, index) : index;
 
         return (
-          <DraggableItem
+          <div
             key={itemKey}
-            item={item}
-            dragHandlers={dragHandlers}
-            isDragging={item.isDragging}
-            isDragOver={item.isDragOver}
-            disabled={disabled}
-            renderDragHandle={showDragHandle}
-            onKeyboardReorder={direction =>
-              handleKeyboardReorder(index, direction)
-            }
             className={cn(
               'sortable-item',
               'card-dark p-4',
@@ -173,7 +163,7 @@ export function SortableList<T>({
             )}
           >
             {renderItem(item.originalItem, index)}
-          </DraggableItem>
+          </div>
         );
       })}
 

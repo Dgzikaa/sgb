@@ -115,7 +115,7 @@ export async function PUT(
     // Buscar notificação atual
     const { data: notificacaoAtual, error: fetchError } = await supabase
       .from('notificacoes')
-      .select('usuario_id, role_alvo, status')
+      .select('usuario_id, role_alvo, status, dados_extras')
       .eq('id', notificationId)
       .eq('bar_id', user.bar_id)
       .single();
@@ -157,7 +157,7 @@ export async function PUT(
 
     if (data.dados_extras) {
       dadosAtualizacao.dados_extras = {
-        ...notificacaoAtual.dados_extras,
+        ...(notificacaoAtual.dados_extras as Record<string, any> || {}),
         ...data.dados_extras,
       };
     }

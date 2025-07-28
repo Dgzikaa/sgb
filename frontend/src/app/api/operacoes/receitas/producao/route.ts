@@ -232,7 +232,7 @@ export async function GET(request: NextRequest) {
 
     // Transformar dados para incluir informações do produto
     const producoesComProdutos =
-      producoes?.map((producao: unknown) => ({
+      producoes?.map((producao: any) => ({
         ...producao,
         produto_codigo: producao.produtos?.codigo,
         produto_nome: producao.produtos?.nome,

@@ -623,7 +623,7 @@ export function useReports(): UseReportsResult {
         const itemFormatado: Record<string, unknown> = {};
 
         Object.entries(campos).forEach(
-          ([campo, config]: [string, Record<string, unknown>]) => {
+          ([campo, config]: [string, any]) => {
             const valor = item[campo];
 
             switch (config.tipo as string) {

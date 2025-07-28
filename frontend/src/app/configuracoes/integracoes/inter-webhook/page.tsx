@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -44,33 +44,40 @@ export default function InterWebhookPage() {
 
   const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhook-inter-banking`;
 
-  useEffect(() => {
-    if (selectedBar?.id) {
-      loadWebhookStatus();
-    }
-  }, [selectedBar?.id]);
-
-  const loadWebhookStatus = async () => {
+  const loadWebhookStatus = useCallback(async () => {
     if (!selectedBar?.id) return;
 
     try {
       setLoading(true);
-      const response = await fetch('/api/configuracoes/credenciais/inter/webhook-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bar_id: selectedBar.id }),
-      });
+      const response = await fetch(`/api/configuracoes/integracoes/inter-webhook/status?bar_id=${selectedBar.id}`);
+      const data = await response.json();
 
-      if (response.ok) {
-        const data = await response.json();
-        setWebhookStatus(data.webhook);
+      if (data.success) {
+        setWebhookStatus(data.status);
+      } else {
+        toast({
+          title: 'Erro',
+          description: data.error || 'Erro ao carregar status do webhook',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Erro ao carregar status do webhook:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao conectar com o servidor',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBar?.id, toast]);
+
+  useEffect(() => {
+    if (selectedBar?.id) {
+      loadWebhookStatus();
+    }
+  }, [selectedBar?.id, loadWebhookStatus]);
 
   const testWebhook = async () => {
     if (!selectedBar?.id) return;

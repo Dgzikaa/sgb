@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useFileUpload, UploadOptions } from '@/hooks/useFileUpload';
+import Image from 'next/image';
 
 interface PhotoUploadProps {
   onUploadComplete?: (result: unknown) => void;
@@ -182,9 +183,11 @@ export default function PhotoUpload({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {previews.map((preview, index) => (
               <div key={index} className="relative group">
-                <img
+                <Image
                   src={preview}
                   alt={`Preview ${index + 1}`}
+                  width={100}
+                  height={100}
                   className="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
                 />
                 <button

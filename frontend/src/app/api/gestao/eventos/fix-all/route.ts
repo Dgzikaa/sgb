@@ -25,7 +25,7 @@ export async function POST() {
     console.log('?? Starting complete event name fix...');
 
     let totalFixed = 0;
-    const errors = [];
+    const errors: string[] = [];
 
     // Fix each mapping
     for (const mapping of eventMappings) {

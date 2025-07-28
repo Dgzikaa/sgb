@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Card,
@@ -122,69 +122,40 @@ export default function DiscordPage() {
     },
   ];
 
-  useEffect(() => {
-    if (selectedBar?.id) {
-      loadWebhooks();
-    }
-  }, [selectedBar?.id]);
-
-  const loadWebhooks = async () => {
+  const loadWebhooks = useCallback(async () => {
     if (!selectedBar?.id) return;
 
     try {
       setLoading(true);
+      const response = await fetch(`/api/configuracoes/integracoes/discord/webhooks?bar_id=${selectedBar.id}`);
+      const data = await response.json();
 
-      // Buscar webhooks da tabela api_credentials
-      const response = await fetch('/api/configuracoes/credenciais/discord/webhooks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bar_id: selectedBar.id,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // Mapear webhooks do banco para o formato da interface
-        const loadedWebhooks = defaultWebhooks.map(webhook => {
-          // Buscar webhook específico baseado no ID
-          let webhookUrl = '';
-
-          // Mapear IDs para sistemas específicos
-          if (webhook.id === 'inter') {
-            webhookUrl = data.banco_inter?.webhook_url || '';
-          } else if (webhook.id === 'nibo') {
-            webhookUrl = data.nibo?.webhook_url || '';
-          } else if (webhook.id === 'checklist') {
-            webhookUrl = data.checklists?.webhook_url || '';
-          } else if (webhook.id === 'contahub') {
-            webhookUrl = data.contahub?.webhook_url || '';
-          } else if (webhook.id === 'sympla') {
-            webhookUrl = data.sympla?.webhook_url || '';
-          } else if (webhook.id === 'yuzer') {
-            webhookUrl = data.yuzer?.webhook_url || '';
-          } else if (webhook.id === 'geral') {
-            webhookUrl = data.sistema?.webhook_url || '';
-          }
-
-          return {
-            ...webhook,
-            webhook_url: webhookUrl,
-            enabled: webhookUrl ? true : false,
-          };
-        });
-        setWebhooks(loadedWebhooks);
+      if (data.success) {
+        setWebhooks(data.webhooks || []);
       } else {
-        setWebhooks(defaultWebhooks);
+        toast({
+          title: 'Erro',
+          description: data.error || 'Erro ao carregar webhooks',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Erro ao carregar webhooks:', error);
-      setWebhooks(defaultWebhooks);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao conectar com o servidor',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBar?.id, toast]);
+
+  useEffect(() => {
+    if (selectedBar?.id) {
+      loadWebhooks();
+    }
+  }, [selectedBar?.id, loadWebhooks]);
 
   const saveWebhooks = async () => {
     if (!selectedBar?.id) return;

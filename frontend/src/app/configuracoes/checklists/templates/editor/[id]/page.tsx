@@ -879,7 +879,7 @@ export default function TemplateEditorPage() {
                                             value={item.tipo}
                                             onValueChange={(value: string) =>
                                               atualizarItem(secao.id, item.id, {
-                                                tipo: value,
+                                                tipo: value as ItemChecklist['tipo'],
                                               })
                                             }
                                           >

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api-client';
 
 // =====================================================
@@ -158,12 +158,7 @@ export function useChecklistEditor(
   // EFEITOS
   // =====================================================
 
-  useEffect(() => {
-    if (checklistId) {
-      carregarChecklist();
-      carregarVersoes();
-    }
-  }, [checklistId]);
+
 
   useEffect(() => {
     if (checklist && checklistOriginal) {
@@ -176,41 +171,42 @@ export function useChecklistEditor(
   // FUNÇÕES PRINCIPAIS
   // =====================================================
 
-  const carregarChecklist = async (): Promise<void> => {
+  const carregarChecklist = useCallback(async () => {
+    if (!checklistId) return;
+
     try {
       setLoading(true);
-      setError(null);
-
-      const response = await api.get(
-        `/api/checklists/${checklistId}?incluir_historico=false`
-      );
-
+      const response = await api.get(`/api/configuracoes/checklists/${checklistId}`);
+      
       if (response.success) {
-        const dados = response.data.checklist;
-        setChecklist(dados);
-        setChecklistOriginal(deepClone(dados));
+        setChecklist(response.data);
+        setChecklistOriginal(deepClone(response.data));
       } else {
         setError(response.error || 'Erro ao carregar checklist');
       }
-    } catch (err: unknown) {
-      console.error('Erro ao carregar checklist:', err);
-      setError('Erro ao carregar checklist');
+    } catch (error) {
+      console.error('Erro ao carregar checklist:', error);
+      setError('Erro ao conectar com o servidor');
     } finally {
       setLoading(false);
     }
-  };
+  }, [checklistId]);
 
-  const carregarVersoes = async (): Promise<void> => {
+
+
+  const carregarVersoes = useCallback(async () => {
+    if (!checklistId) return;
+
     try {
-      const response = await api.get(`/api/checklists/${checklistId}/rollback`);
-
+      const response = await api.get(`/api/configuracoes/checklists/${checklistId}/versoes`);
+      
       if (response.success) {
-        setVersoes(response.data.versoes_disponiveis || []);
+        setVersoes(response.data || []);
       }
-    } catch (err: unknown) {
-      console.error('Erro ao carregar versões:', err);
+    } catch (error) {
+      console.error('Erro ao carregar versões:', error);
     }
-  };
+  }, [checklistId]);
 
   const salvarChecklist = async (comentario?: string): Promise<boolean> => {
     if (!checklist || !mudancasDetectadas.temAlteracoes) {

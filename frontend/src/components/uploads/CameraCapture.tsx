@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Camera, RotateCcw, X, Check, AlertTriangle } from 'lucide-react';
+import Image from 'next/image';
 
 interface CameraCaptureProps {
   onCapture: (blob: Blob) => void;
@@ -173,10 +174,11 @@ export default function CameraCapture({
               </Button>
             </div>
           ) : capturedImage ? (
-            <img
+            <Image
               src={capturedImage}
               alt="Foto capturada"
-              className="max-w-full max-h-full object-contain"
+              width={600}
+              height={400}
             />
           ) : (
             <>

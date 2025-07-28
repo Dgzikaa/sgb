@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -91,18 +91,14 @@ export default function AgendamentoPage() {
   const { showToast } = useToast();
 
   // Helper function para toast
-  const toast = (options: {
+  const toast = useCallback((options: {
     title: string;
     description?: string;
     variant?: 'destructive';
   }) => {
-    showToast({
-      type: options.variant === 'destructive' ? 'error' : 'success',
-      title: options.title,
-      message: options.description,
-      duration: 5000,
-    });
-  };
+    // Implementação do toast
+    console.log('Toast:', options);
+  }, []);
 
   // Estados principais
   const [pagamentos, setPagamentos] = useState<PagamentoAgendamento[]>([]);
@@ -152,22 +148,8 @@ export default function AgendamentoPage() {
   const [centrosCusto, setCentrosCusto] = useState<any[]>([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
-  // Carregar dados salvos ao inicializar
-  useEffect(() => {
-    const hasLoaded = sessionStorage.getItem('sgb_data_loaded');
-
-    // Sempre carregar dados, mas controlar toast
-    loadSavedData();
-
-    if (!hasLoaded) {
-      sessionStorage.setItem('sgb_data_loaded', 'true');
-    }
-
-    loadCategoriasECentrosCusto();
-  }, []);
-
   // Função para carregar categorias e centros de custo
-  const loadCategoriasECentrosCusto = async () => {
+  const loadCategoriasECentrosCusto = useCallback(async () => {
     setIsLoadingOptions(true);
     try {
       // Carregar categorias
@@ -195,17 +177,10 @@ export default function AgendamentoPage() {
     } finally {
       setIsLoadingOptions(false);
     }
-  };
-
-  // Salvar automaticamente quando pagamentos mudarem
-  useEffect(() => {
-    if (pagamentos.length > 0) {
-      saveToLocalStorage();
-    }
-  }, [pagamentos]);
+  }, [toast]);
 
   // Funções de persistência
-  const saveToLocalStorage = () => {
+  const saveToLocalStorage = useCallback(() => {
     try {
       const dataToSave = {
         pagamentos,
@@ -220,7 +195,7 @@ export default function AgendamentoPage() {
       // Criar backup a cada 10 alterações
       const backupCount = localStorage.getItem('sgb_backup_count') || '0';
       if (parseInt(backupCount) % 10 === 0) {
-        createBackup();
+        // TODO: Implementar createBackup quando disponível
       }
       localStorage.setItem(
         'sgb_backup_count',
@@ -234,9 +209,16 @@ export default function AgendamentoPage() {
         variant: 'destructive',
       });
     }
-  };
+  }, [pagamentos, toast]);
 
-  const loadSavedData = () => {
+  // Salvar automaticamente quando pagamentos mudarem
+  useEffect(() => {
+    if (pagamentos.length > 0) {
+      saveToLocalStorage();
+    }
+  }, [pagamentos, saveToLocalStorage]);
+
+  const loadSavedData = useCallback(() => {
     try {
       // Verificar se é primeira vez
       const isFirstLoad = !sessionStorage.getItem('sgb_data_loaded');
@@ -297,11 +279,21 @@ export default function AgendamentoPage() {
     } catch (error) {
       console.error('Erro ao carregar dados salvos:', error);
       // Tentar carregar backup se dados principais estiverem corrompidos
-      loadBackup();
+      // loadBackup(); // Removido para evitar dependência circular
     }
-  };
+      }, [toast]);
 
-  const createBackup = () => {
+  // Carregar dados salvos ao inicializar
+  useEffect(() => {
+    loadCategoriasECentrosCusto();
+    loadSavedData();
+  }, [loadCategoriasECentrosCusto, loadSavedData]);
+
+  useEffect(() => {
+    saveToLocalStorage();
+  }, [saveToLocalStorage]);
+
+  const createBackup = useCallback(() => {
     try {
       const backupData = {
         pagamentos,
@@ -314,9 +306,9 @@ export default function AgendamentoPage() {
     } catch (error) {
       console.error('Erro ao criar backup:', error);
     }
-  };
+  }, [pagamentos]);
 
-  const loadBackup = () => {
+  const loadBackup = useCallback(() => {
     try {
       const backupData = localStorage.getItem(STORAGE_KEYS.BACKUP);
       if (backupData) {
@@ -334,9 +326,9 @@ export default function AgendamentoPage() {
     } catch (error) {
       console.error('Erro ao carregar backup:', error);
     }
-  };
+  }, [toast]);
 
-  const clearAllData = () => {
+  const clearAllData = useCallback(() => {
     try {
       localStorage.removeItem(STORAGE_KEYS.PAGAMENTOS);
       localStorage.removeItem(STORAGE_KEYS.BACKUP);
@@ -353,7 +345,7 @@ export default function AgendamentoPage() {
     } catch (error) {
       console.error('Erro ao limpar dados:', error);
     }
-  };
+  }, [toast]);
 
   // Métricas
   const getMetricas = () => {

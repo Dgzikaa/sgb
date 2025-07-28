@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -55,36 +55,40 @@ export default function WhatsAppPage() {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
 
+  const loadConfig = useCallback(async () => {
+    if (!selectedBar?.id) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/configuracoes/integracoes/whatsapp?bar_id=${selectedBar.id}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setConfig(data.config);
+      } else {
+        toast({
+          title: 'Erro',
+          description: data.error || 'Erro ao carregar configuração',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configuração:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao conectar com o servidor',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedBar?.id, toast]);
+
   useEffect(() => {
     if (selectedBar?.id) {
       loadConfig();
     }
-  }, [selectedBar?.id]);
-
-  const loadConfig = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/configuracoes/whatsapp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bar_id: selectedBar?.id,
-          action: 'get',
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.config) {
-          setConfig(data.config);
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao carregar configuração WhatsApp:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [selectedBar?.id, loadConfig]);
 
   const saveConfig = async () => {
     if (!selectedBar?.id) return;

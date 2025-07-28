@@ -15,7 +15,7 @@ interface UsuarioBar {
   senha_redefinida: boolean;
   permissao: string;
   bar_id: string;
-  modulos_permitidos?: string[];
+  modulos_permitidos?: string[] | Record<string, any>;
 }
 
 interface LoginFailureLog {
@@ -333,7 +333,7 @@ export async function POST(request: NextRequest) {
       (bar: {
         bar_id: string;
         role: string;
-        modulos_permitidos?: string[];
+        modulos_permitidos?: string[] | Record<string, any>;
       }) => {
         const barData = barsData?.find(
           (b: { id: string; nome: string }) => b.id === bar.bar_id

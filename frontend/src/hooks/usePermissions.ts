@@ -6,7 +6,7 @@ interface Usuario {
   email: string;
   nome: string;
   role: 'admin' | 'manager' | 'funcionario';
-  modulos_permitidos: string[];
+  modulos_permitidos: string[] | Record<string, any>;
   ativo: boolean;
 }
 
@@ -82,16 +82,46 @@ export function usePermissions(): PermissionsHook {
   // Memoizar as permissões do usuário para evitar recálculos desnecessários
   const userPermissions = useMemo(() => {
     if (!user || !user.ativo) return new Set<string>();
-    return new Set(
-      Array.isArray(user.modulos_permitidos) ? user.modulos_permitidos : []
-    );
-  }, [user?.id, user?.ativo, user?.modulos_permitidos]);
+    
+    const permissions = new Set<string>();
+    
+    // Adicionar módulos permitidos
+    if (user.modulos_permitidos) {
+      // Se modulos_permitidos é um array
+      if (Array.isArray(user.modulos_permitidos)) {
+        user.modulos_permitidos.forEach(modulo => permissions.add(modulo));
+      }
+      // Se modulos_permitidos é um objeto
+      else if (typeof user.modulos_permitidos === 'object') {
+        Object.keys(user.modulos_permitidos).forEach(modulo => {
+          if (user.modulos_permitidos[modulo] === true) {
+            permissions.add(modulo);
+          }
+        });
+      }
+    }
+    
+    return permissions;
+  }, [user]);
 
   // Memoizar se o admin tem permissões específicas
   const adminHasExplicitPermissions = useMemo(() => {
     if (!user || user.role !== 'admin') return false;
-    return user.modulos_permitidos && user.modulos_permitidos.length < 23;
-  }, [user?.role, user?.modulos_permitidos]);
+    
+    if (!user.modulos_permitidos) return false;
+    
+    // Se modulos_permitidos é um array
+    if (Array.isArray(user.modulos_permitidos)) {
+      return user.modulos_permitidos.length > 0;
+    }
+    
+    // Se modulos_permitidos é um objeto
+    if (typeof user.modulos_permitidos === 'object') {
+      return Object.keys(user.modulos_permitidos).length > 0;
+    }
+    
+    return false;
+  }, [user]);
 
   const hasPermission = useCallback(
     (moduloId: string): boolean => {
@@ -295,7 +325,20 @@ export function usePermissions(): PermissionsHook {
   // Função para detectar se admin está usando permissões específicas
   const isAdminWithSpecificPermissions = useCallback((): boolean => {
     if (!user || user.role !== 'admin') return false;
-    return user.modulos_permitidos && user.modulos_permitidos.length < 23;
+    
+    if (!user.modulos_permitidos) return false;
+    
+    // Se modulos_permitidos é um array
+    if (Array.isArray(user.modulos_permitidos)) {
+      return user.modulos_permitidos.length < 23;
+    }
+    
+    // Se modulos_permitidos é um objeto
+    if (typeof user.modulos_permitidos === 'object') {
+      return Object.keys(user.modulos_permitidos).length < 23;
+    }
+    
+    return false;
   }, [user]);
 
   return {
