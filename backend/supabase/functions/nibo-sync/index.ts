@@ -283,8 +283,13 @@ class NiboSyncService {
 
       while (hasMore) {
         pageCount++
+        // Buscar apenas últimos 30 dias para otimizar performance
+        const thirtyDaysAgo = new Date()
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+        const filterDate = thirtyDaysAgo.toISOString().split('T')[0] // YYYY-MM-DD
+        
         const pageParams = {
-          $filter: "createDate ge 2024-01-01",
+          $filter: `createDate ge ${filterDate}`,
           $orderby: "createDate desc",
           $top: top,
           $skip: skip
