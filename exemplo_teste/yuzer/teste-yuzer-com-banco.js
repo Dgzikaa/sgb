@@ -67,172 +67,158 @@ async function buscarEventos() {
   
   console.log(`📅 Período de busca: ${dataInicio.toLocaleDateString('pt-BR')} até ${dataHoje.toLocaleDateString('pt-BR')}`);
   
-  // Tentar diferentes métodos para buscar sales panels
-  const metodosParaTestar = [
-    {
-      nome: 'POST /api/dashboards/ongoing (body vazio)',
-      endpoint: '/api/dashboards/ongoing',
-      method: 'POST',
-      body: {}
-    },
-    {
-      nome: 'POST /api/dashboards/salesPanels/statistics (que funcionou)',
-      endpoint: '/api/dashboards/salesPanels/statistics',
-      method: 'POST',
-      body: {
-        from: dataInicio.toISOString(),
-        to: new Date('2025-12-31T23:59:59.999Z').toISOString()
-      }
-    },
-    {
-      nome: 'POST /api/dashboards/ongoing (com parâmetros)',
-      endpoint: '/api/dashboards/ongoing',
-      method: 'POST',
-      body: {
-        from: dataInicio.toISOString(),
-        to: dataHoje.toISOString(),
-        addTaxInTotal: false,
-        currency: null,
-        page: 0,
-        perPage: 100,
-        q: "",
-        sort: "desc",
-        sortColumn: "dateStart",
-        operationIds: [],
-        companiesIds: [],
-        status: "ALL",
-        idsNotIn: [],
-        channels: [],
-        expandCombo: false
-      }
-    },
-    {
-      nome: 'POST /api/dashboards/recentEvents/search',
-      endpoint: '/api/dashboards/recentEvents/search',
-      method: 'POST',
-      body: {
-        from: dataInicio.toISOString(),
-        to: dataHoje.toISOString(),
-        page: 0,
-        perPage: 50
-      }
-    }
-  ];
+  // Usar apenas o método que funcionou
+  const response = await yuzerFetch('/api/dashboards/salesPanels/statistics', 'POST', {
+    from: dataInicio.toISOString(),
+    to: new Date('2025-12-31T23:59:59.999Z').toISOString()
+  });
   
-  for (const metodo of metodosParaTestar) {
-    try {
-      console.log(`🔍 ${metodo.nome}...`);
-      const response = await yuzerFetch(metodo.endpoint, metodo.method, metodo.body);
-      
-      if (!response) {
-        console.log(`   ❌ Resposta vazia`);
-        continue;
-      }
-      
-      // Tentar diferentes estruturas de resposta
-      let salesPanels = [];
-      
-      if (Array.isArray(response)) {
-        // /api/dashboards/ongoing retorna array direto
-        salesPanels = response;
-      } else if (response.salesPanels && Array.isArray(response.salesPanels)) {
-        salesPanels = response.salesPanels;
-      } else if (response.content && Array.isArray(response.content)) {
-        salesPanels = response.content;
-      } else if (response.data && Array.isArray(response.data)) {
-        // /api/dashboards/salesPanels/statistics retorna { data: [...] }
-        salesPanels = response.data;
-      } else if (response.events && Array.isArray(response.events)) {
-        salesPanels = response.events;
-      }
-      
-      if (salesPanels.length > 0) {
-        console.log(`✅ Encontrados ${salesPanels.length} eventos via ${metodo.nome}`);
-        
-        // Mostrar resumo dos eventos encontrados
-        console.log(`   📋 Eventos: ${salesPanels.slice(0, 3).map(e => e.name || 'Sem nome').join(', ')}${salesPanels.length > 3 ? '...' : ''}`);
-        console.log(`   🎯 Usando evento principal: ${(salesPanels.find(e => e.name?.includes('27/07')) || salesPanels[0]).name}`);
-        
-        return salesPanels;
-      }
-      
-      console.log(`   ❌ Nenhum evento encontrado neste método`);
-      
-    } catch (error) {
-      console.log(`   ❌ Erro: ${error.message}`);
-    }
+  if (!response || !response.data) {
+    console.log('❌ Nenhum evento encontrado');
+    return [];
   }
   
-  console.log('❌ Nenhum evento encontrado em nenhum método');
-  return [];
+  const salesPanels = response.data;
+  console.log(`✅ Encontrados ${salesPanels.length} eventos`);
+  
+  // Filtrar apenas eventos que têm dados (total > 0 ou count > 0)
+  const eventosComDados = salesPanels.filter(evento => 
+    (evento.total && evento.total > 0) || (evento.count && evento.count > 0)
+  );
+  
+  console.log(`📊 Eventos com dados: ${eventosComDados.length} de ${salesPanels.length}`);
+  return eventosComDados;
 }
 
 // 2. SALVAR DADOS DO EVENTO
 async function salvarEventos(eventos) {
   console.log('\n🎯 2. SALVANDO EVENTOS NO BANCO...');
   
+  // Preparar dados de todos os eventos
+  const eventosData = [];
+  
   for (const evento of eventos) {
-    try {
-      // Identificar ID do evento
-      const eventoId = evento.id || evento.salesPanelId || evento.eventId;
-      if (!eventoId) {
-        console.log(`⚠️ Evento sem ID válido:`, evento);
-        continue;
+    const eventoId = evento.id || evento.salesPanelId || evento.eventId;
+    if (!eventoId) continue;
+    
+    // Usar dados básicos primeiro, buscar detalhes só se necessário
+    const eventoData = {
+      bar_id: BAR_ID,
+      evento_id: eventoId,
+      nome_evento: evento.name || evento.title || `Evento ${eventoId}`,
+      data_inicio: null, // Será extraído do nome se possível
+      data_fim: null,
+      status: evento.status || 'UNKNOWN',
+      company_name: null,
+      company_document: null,
+      raw_data: evento,
+      updated_at: new Date().toISOString()
+    };
+    
+    // Tentar extrair data do nome do evento
+    const regex = /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/;
+    const match = eventoData.nome_evento.match(regex);
+    if (match) {
+      let [, dia, mes, ano] = match;
+      if (ano.length === 2) {
+        ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
       }
-      
-      let detalhes = {};
-      
-      // Tentar buscar detalhes completos do evento
-      try {
-        detalhes = await yuzerFetch(`/api/salesPanels/${eventoId}`);
-      } catch (detailError) {
-        console.log(`⚠️ Não foi possível buscar detalhes do evento ${eventoId}: ${detailError.message}`);
-        // Usar dados básicos do evento se não conseguir buscar detalhes
-        detalhes = evento;
-      }
-      
-      const eventoData = {
-        bar_id: BAR_ID,
-        evento_id: eventoId,
-        nome_evento: evento.name || evento.title || detalhes.name || `Evento ${eventoId}`,
-        data_inicio: detalhes.dateStart ? new Date(detalhes.dateStart).toISOString() : null,
-        data_fim: detalhes.dateEnd ? new Date(detalhes.dateEnd).toISOString() : null,
-        status: evento.status || detalhes.status || 'UNKNOWN',
-        company_name: detalhes.company?.name || null,
-        company_document: detalhes.company?.document || null,
-        raw_data: detalhes,
-        updated_at: new Date().toISOString()
-      };
-      
-      // UPSERT no banco
-      const { data, error } = await supabase
-        .from('yuzer_eventos')
-        .upsert(eventoData, { onConflict: 'evento_id' })
-        .select();
-      
-      if (error) throw error;
-      
-      console.log(`✅ Evento salvo: ${eventoData.nome_evento} (ID: ${eventoId})`);
-      
-    } catch (error) {
-      console.error(`❌ Erro ao salvar evento:`, error.message);
+      const dataEvento = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+      eventoData.data_inicio = `${dataEvento}T18:00:00.000Z`; // Estimar início às 18h
+      eventoData.data_fim = `${dataEvento}T23:59:59.999Z`;   // Estimar fim às 23h59
     }
+    
+    eventosData.push(eventoData);
   }
+  
+  // Inserir todos os eventos em lote
+  const inseridos = await insertBatch('yuzer_eventos', eventosData, 'evento_id');
+  console.log(`✅ ${inseridos} eventos salvos no banco`);
 }
 
 // 3. SALVAR FATURAMENTO POR HORA
 async function salvarFaturamentoPorHora(eventoId, nomeEvento) {
   console.log(`\n🎯 3. SALVANDO FATURAMENTO POR HORA - ${nomeEvento}...`);
   
-  try {
-    const response = await yuzerFetch(
+  // Extrair data do evento e criar período
+  const dataEvento = extrairDataDoNomeEvento(nomeEvento);
+  const dataInicio = new Date(`${dataEvento}T00:00:00.000Z`);
+  const dataFim = new Date(`${dataEvento}T23:59:59.999Z`);
+  
+  console.log(`   📅 Período: ${dataEvento} (${dataInicio.toLocaleDateString('pt-BR')})`);
+  
+  const bodyPeriodo = {
+    from: dataInicio.toISOString(),
+    to: dataFim.toISOString()
+  };
+  
+    try {
+    // Tentar primeiro com período específico
+    let response = await yuzerFetch(
       `/api/salesPanels/${eventoId}/dashboards/earningsAndSells/hour`, 
       'POST', 
-      {}
+      bodyPeriodo
     );
     
-    if (!response || !Array.isArray(response)) {
-      console.log('❌ Dados de faturamento por hora não encontrados');
+    // Se não funcionar com período específico, tentar com body vazio
+    if (!response || !response.categories || (response.categories && response.categories.length === 0)) {
+      console.log('   🔄 Período específico vazio, tentando body vazio...');
+      response = await yuzerFetch(
+        `/api/salesPanels/${eventoId}/dashboards/earningsAndSells/hour`, 
+        'POST', 
+        {}
+      );
+    }
+    
+    // Se ainda não funcionar, tentar período mais amplo (mês inteiro)
+    if (!response || !response.categories || (response.categories && response.categories.length === 0)) {
+      console.log('   🔄 Body vazio falhou, tentando período mensal...');
+      const dataEventoObj = new Date(dataEvento);
+      const inicioMes = new Date(dataEventoObj.getFullYear(), dataEventoObj.getMonth(), 1);
+      const fimMes = new Date(dataEventoObj.getFullYear(), dataEventoObj.getMonth() + 1, 0, 23, 59, 59);
+      
+      const bodyMensal = {
+        from: inicioMes.toISOString(),
+        to: fimMes.toISOString()
+      };
+      
+      response = await yuzerFetch(
+        `/api/salesPanels/${eventoId}/dashboards/earningsAndSells/hour`, 
+        'POST', 
+        bodyMensal
+      );
+    }
+    
+    if (!response) {
+      console.log('⚠️ Resposta vazia em todas as tentativas');
+      return;
+    }
+    
+    // Estrutura correta: { categories: [...], series: [{ data: [...] }] }
+    if (!response.categories || !response.series || !Array.isArray(response.series)) {
+      console.log('⚠️ Estrutura inválida:', Object.keys(response));
+      console.log('⚠️ Dados de response:', JSON.stringify(response, null, 2));
+      return;
+    }
+    
+    const categories = response.categories;
+    const seriesData = response.series[0]?.data || [];
+    
+    if (categories.length === 0 || seriesData.length === 0) {
+      console.log('⚠️ Dados vazios');
+      return;
+    }
+    
+    // Verificar se tem dados não zerados
+    // Dados vêm como objetos: { total: X, sells: Y }
+    const totalFaturamento = seriesData.reduce((sum, item) => {
+      const valor = item && typeof item === 'object' ? (item.total || 0) : (Number(item) || 0);
+      return sum + valor;
+    }, 0);
+    console.log(`   💰 Total faturamento: R$ ${(totalFaturamento || 0).toFixed(2)}`);
+    
+    if (!totalFaturamento || totalFaturamento === 0) {
+      console.log('⚠️ Faturamento por hora zerado');
       return;
     }
     
@@ -240,17 +226,21 @@ async function salvarFaturamentoPorHora(eventoId, nomeEvento) {
     const dataEvento = extrairDataDoNomeEvento(nomeEvento);
     
     // Preparar todos os dados para inserção em lote
-    const dadosFatHora = response.map((horario, index) => ({
-      bar_id: BAR_ID,
-      evento_id: eventoId,
-      data_evento: dataEvento,
-      hora: index, // 0-23
-      hora_formatada: `${dataEvento} ${index.toString().padStart(2, '0')}:00`,
-      faturamento: horario.total || 0,
-      vendas: horario.sells || 0,
-      raw_data: horario,
-      updated_at: new Date().toISOString()
-    }));
+    const dadosFatHora = categories.map((categoria, index) => {
+      const item = seriesData[index];
+      return {
+        bar_id: BAR_ID,
+        evento_id: eventoId,
+        data_evento: dataEvento,
+        hora: index, // 0-23
+        hora_formatada: categoria, // Ex: "27/07/2025 18:00"
+        faturamento: item && typeof item === 'object' ? (item.total || 0) : (Number(item) || 0),
+        vendas: item && typeof item === 'object' ? (item.sells || 0) : 0, // Agora temos vendas também!
+        raw_data: item, // Objeto completo { total: X, sells: Y }
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    });
     
     // Inserir em lote com UPSERT
     const inseridos = await insertBatch('yuzer_fatporhora', dadosFatHora, 'bar_id,evento_id,data_evento,hora');
@@ -265,17 +255,33 @@ async function salvarFaturamentoPorHora(eventoId, nomeEvento) {
 async function salvarDadosPagamento(eventoId, nomeEvento) {
   console.log(`\n🎯 4. SALVANDO DADOS DE PAGAMENTO - ${nomeEvento}...`);
   
+  // Extrair data do evento e criar período
+  const dataEvento = extrairDataDoNomeEvento(nomeEvento);
+  const dataInicio = new Date(`${dataEvento}T00:00:00.000Z`);
+  const dataFim = new Date(`${dataEvento}T23:59:59.999Z`);
+  
+  const bodyPeriodo = {
+    from: dataInicio.toISOString(),
+    to: dataFim.toISOString()
+  };
+  
   try {
     const response = await yuzerFetch(
       `/api/salesPanels/${eventoId}/dashboards/payments/statistics`, 
       'POST', 
-      {}
+      bodyPeriodo
     );
-    
-    if (!response || !response.methods) {
-      console.log('❌ Dados de pagamento não encontrados');
-      return;
-    }
+      
+      if (!response || !response.methods) {
+        console.log('⚠️ Sem dados de pagamento');
+        return;
+      }
+      
+      // Verificar se tem faturamento
+      if (!response.total || response.total === 0) {
+        console.log('⚠️ Faturamento zerado');
+        return;
+      }
     
     // Extrair valores por método
     const methods = response.methods;
@@ -286,12 +292,12 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
     const producao = methods.find(m => m.name === 'PRODUCTION')?.total || 0;
     const cancelado = methods.find(m => m.name === 'CANCELLED')?.total || 0;
     
-    // CALCULAR VALOR LÍQUIDO
+    // CALCULAR VALOR LÍQUIDO (apenas descontos de pagamento, aluguel agora é produto)
     const descontoCredito = credito * TAXA_CREDITO;
     const descontoDebitoPix = (debito + pix) * TAXA_DEBITO_PIX;
     const totalDescontos = descontoCredito + descontoDebitoPix;
     const faturamentoBruto = response.total || 0;
-    const valorLiquido = faturamentoBruto - totalDescontos - ALUGUEL_EQUIPAMENTOS;
+    const valorLiquido = faturamentoBruto - totalDescontos; // Sem aluguel aqui
     
     const dataEvento = extrairDataDoNomeEvento(nomeEvento);
     
@@ -308,7 +314,7 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
       desconto_credito: descontoCredito,
       desconto_debito_pix: descontoDebitoPix,
       total_descontos: totalDescontos,
-      aluguel_equipamentos: ALUGUEL_EQUIPAMENTOS,
+      aluguel_equipamentos: 0, // Agora é produto, não desconto
       valor_liquido: valorLiquido,
       total_cancelado: cancelado,
       quantidade_pedidos: response.count || 0,
@@ -326,13 +332,12 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
     console.log(`✅ Dados de pagamento salvos:`);
     console.log(`   💰 Faturamento Bruto: R$ ${faturamentoBruto.toFixed(2)}`);
     console.log(`   💳 Crédito: R$ ${credito.toFixed(2)} (desc: R$ ${descontoCredito.toFixed(2)})`);
-    console.log(`   💰 Débito: R$ ${debito.toFixed(2)}`);
-    console.log(`   🔄 PIX: R$ ${pix.toFixed(2)}`);
+    console.log(`   💰 Débito: R$ ${debito.toFixed(2)} + PIX: R$ ${pix.toFixed(2)} (desc: R$ ${descontoDebitoPix.toFixed(2)})`);
     console.log(`   💵 Dinheiro: R$ ${dinheiro.toFixed(2)}`);
     console.log(`   📦 Produção: R$ ${producao.toFixed(2)}`);
     console.log(`   ❌ Cancelado: R$ ${cancelado.toFixed(2)}`);
-    console.log(`   🏛️ Aluguel: R$ ${ALUGUEL_EQUIPAMENTOS.toFixed(2)}`);
-    console.log(`   ✅ VALOR LÍQUIDO: R$ ${valorLiquido.toFixed(2)}`);
+    console.log(`   📊 Total Descontos: R$ ${totalDescontos.toFixed(2)}`);
+    console.log(`   ✅ VALOR LÍQUIDO (sem aluguel): R$ ${valorLiquido.toFixed(2)}`);
     
   } catch (error) {
     console.error(`❌ Erro ao salvar dados de pagamento:`, error.message);
@@ -343,22 +348,55 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
 async function salvarProdutos(eventoId, nomeEvento) {
   console.log(`\n🎯 5. SALVANDO PRODUTOS - ${nomeEvento}...`);
   
-  try {
+  // Extrair data do evento e criar período
+  const dataEvento = extrairDataDoNomeEvento(nomeEvento);
+  const dataInicio = new Date(`${dataEvento}T00:00:00.000Z`);
+  const dataFim = new Date(`${dataEvento}T23:59:59.999Z`);
+  
+  const bodyPeriodo = {
+    from: dataInicio.toISOString(),
+    to: dataFim.toISOString()
+  };
+  
+    try {
     const response = await yuzerFetch(
       `/api/salesPanels/${eventoId}/dashboards/products/statistics`, 
       'POST', 
-      {}
+      bodyPeriodo
     );
     
-    if (!response || !Array.isArray(response)) {
-      console.log('❌ Dados de produtos não encontrados');
+    if (!response) {
+      console.log('⚠️ Resposta vazia');
+      return;
+    }
+    
+    // Estrutura correta: { total: 41889.5, count: 2277, data: [...] }
+    if (!response.data || !Array.isArray(response.data)) {
+      console.log('⚠️ Estrutura inválida:', Object.keys(response));
+      return;
+    }
+    
+    const produtos = response.data;
+    
+    if (produtos.length === 0) {
+      console.log('⚠️ Array de produtos vazio');
+      return;
+    }
+    
+    // Verificar se tem vendas
+    const totalVendas = response.total || 0;
+    console.log(`   💰 Total vendas: R$ ${totalVendas.toFixed(2)}`);
+    console.log(`   📦 Produtos: ${produtos.length} itens`);
+    
+    if (totalVendas === 0) {
+      console.log('⚠️ Vendas de produtos zeradas');
       return;
     }
     
     const dataEvento = extrairDataDoNomeEvento(nomeEvento);
     
     // Preparar todos os dados para inserção em lote
-    const dadosProdutos = response.map(produto => {
+    const dadosProdutos = produtos.map(produto => {
       // Categorização automática
       const nomeUpper = (produto.name || '').toUpperCase();
       const ehIngresso = nomeUpper.includes('INGRESSO');
@@ -384,12 +422,38 @@ async function salvarProdutos(eventoId, nomeEvento) {
       };
     });
     
+    // Adicionar produto do aluguel de equipamentos (-R$ 500)
+    // ID único baseado no evento_id para evitar conflitos
+    const aluguelProdutoId = parseInt(`99${eventoId}`); // Ex: evento 13963 → 9913963
+    
+    const produtoAluguel = {
+      bar_id: BAR_ID,
+      evento_id: eventoId,
+      data_evento: dataEvento,
+      produto_id: aluguelProdutoId, // ID único por evento
+      produto_nome: 'Aluguel de Equipamentos',
+      quantidade: 1,
+      valor_total: -500, // Valor negativo
+      percentual: 0,
+      categoria: 'SERVICO',
+      eh_ingresso: false,
+      raw_data: {
+        tipo: 'aluguel_equipamentos',
+        descricao: 'Taxa fixa de aluguel de equipamentos Yuzer',
+        valor: -500,
+        evento_referencia: eventoId
+      },
+      updated_at: new Date().toISOString()
+    };
+    
+    dadosProdutos.push(produtoAluguel);
+    
     // Inserir em lote com UPSERT
     const inseridos = await insertBatch('yuzer_produtos', dadosProdutos, 'bar_id,evento_id,data_evento,produto_id');
-    console.log(`✅ Produtos salvos: ${inseridos} itens`);
+    console.log(`✅ Produtos salvos: ${inseridos} itens (incluindo aluguel -R$ 500)`);
     
     // Mostrar ingressos encontrados
-    const ingressos = response.filter(p => (p.name || '').toUpperCase().includes('INGRESSO'));
+    const ingressos = produtos.filter(p => (p.name || '').toUpperCase().includes('INGRESSO'));
     if (ingressos.length > 0) {
       console.log(`🎫 Ingressos encontrados:`);
       ingressos.forEach(ing => {

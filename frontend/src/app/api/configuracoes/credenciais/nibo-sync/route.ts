@@ -70,7 +70,7 @@ async function executeNiboSync(barId?: string) {
       },
       body: JSON.stringify({
         barId: targetBarId,
-        cronSecret: process.env.CRON_SECRET
+        cronSecret: 'vercel_cron'
       })
     });
 

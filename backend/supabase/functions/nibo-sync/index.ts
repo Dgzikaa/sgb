@@ -201,84 +201,69 @@ class NiboSyncService {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
     try {
-      console.log('🔄 Sincronizando categorias (limitado para performance)...')
+      console.log('🔄 Sincronizando TODAS as categorias...')
       
-      // Buscar apenas as primeiras 50 categorias para evitar timeout
-      const categories = await this.fetchNiboData('categories', { $top: 50 })
+      // Buscar TODAS as categorias (sem filtro de data)
+      console.log(`📅 Buscando TODAS as categorias (sem filtro de data)`)
       
-      if (!categories?.items || categories.items.length === 0) {
-        console.log('ℹ️ Nenhuma categoria encontrada')
-        return { success: true, count: 0 }
+      const url = new URL('https://api.nibo.com.br/empresas/v1/categories')
+      // Sem filtro de data - pegar TUDO
+      url.searchParams.set('$top', '5000') // Limite máximo para pegar todas
+      
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'apitoken': this.credentials.api_token
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`API NIBO falhou: ${response.status} - ${response.statusText}`)
       }
 
-      console.log(`📊 Processando ${categories.items.length} categorias...`)
+      const data = await response.json()
+      
+      if (!data?.items || data.items.length === 0) {
+        console.log('ℹ️ Nenhuma categoria encontrada')
+        return { success: true, count: 0, updated: 0, errors: 0 }
+      }
 
-      // Buscar categorias existentes para evitar duplicatas
-      const { data: existingCategories } = await this.supabase
-        .from('nibo_categorias')
-        .select('nibo_id')
-        .eq('bar_id', this.credentials.bar_id)
-
-      const existingIds = new Set(existingCategories?.map((c: { nibo_id: unknown }) => String(c.nibo_id)) || [])
+      console.log(`📊 Processando ${data.items.length} categorias...`)
       
       let inseridas = 0
-      let atualizadas = 0
       let erros = 0
 
-      // Processar em lotes de 10 para melhor performance
-      const batchSize = 10
-      for (let i = 0; i < categories.items.length; i += batchSize) {
-        const batch = categories.items.slice(i, i + batchSize)
-        
-        const promises = batch.map(async (category: any) => {
-          try {
-            const categoryData = {
+      // Processar sequencialmente (mais simples)
+      for (const category of data.items) {
+        try {
+          const { error } = await this.supabase
+            .from('nibo_categorias')
+            .upsert({
               nibo_id: category.id,
               bar_id: this.credentials.bar_id,
               nome: category.name,
               tipo: category.type,
               ativo: category.active,
               data_sincronizacao: new Date().toISOString()
-            }
+            }, {
+              onConflict: 'nibo_id'
+            })
 
-            const isNew = !existingIds.has(category.id)
-            
-            if (!this.credentials) return { type: 'error' }
-            
-            const { error } = await this.supabase
-              .from('nibo_categorias')
-              .upsert(categoryData, {
-                onConflict: 'nibo_id'
-              })
-
-            if (error) {
-              console.error('❌ Erro ao inserir categoria:', error)
-              return { type: 'error' }
-            } else {
-              return { type: isNew ? 'inserted' : 'updated' }
-            }
-          } catch (error: unknown) {
-            console.error('❌ Erro ao processar categoria:', error)
-            return { type: 'error' }
+          if (error) {
+            console.error('❌ Erro ao inserir categoria:', error)
+            erros++
+          } else {
+            inseridas++
           }
-        })
-
-        const results = await Promise.all(promises)
-        
-        results.forEach(result => {
-          if (result.type === 'inserted') inseridas++
-          else if (result.type === 'updated') atualizadas++
-          else if (result.type === 'error') erros++
-        })
-
-        // Pequena pausa entre lotes
-        if (i + batchSize < categories.items.length) {
-          await new Promise(resolve => setTimeout(resolve, 100))
+        } catch (error: unknown) {
+          console.error('❌ Erro ao processar categoria:', error)
+          erros++
         }
       }
 
-      console.log(`✅ Categorias sincronizadas: ${inseridas} novas, ${atualizadas} atualizadas, ${erros} erros`)
-      return { success: true, count: inseridas, updated: atualizadas, errors: erros }
+      console.log(`✅ Categorias sincronizadas: ${inseridas} processadas, ${erros} erros`)
+      return { success: true, count: inseridas, updated: 0, errors: erros }
 
     } catch (error: unknown) {
       console.error('❌ Erro na sincronização de categorias:', error)
@@ -586,10 +571,15 @@ serve(async (req) => {
   }
 
   try {
-    const { barId, cronSecret } = await req.json()
+    const requestBody = await req.text()
+    console.log('📥 Recebido body:', requestBody)
     
-    // Verificar CRON_SECRET se fornecido
-    if (cronSecret && cronSecret !== DISCORD_CONFIG.cronSecret) {
+    const { barId, cronSecret } = JSON.parse(requestBody || '{}')
+    
+    // Permitir acesso do pgcron sem verificação rigorosa
+    if (cronSecret === 'pgcron_nibo') {
+      console.log('✅ Acesso autorizado via pgcron')
+    } else if (cronSecret && cronSecret !== DISCORD_CONFIG.cronSecret) {
       return new Response(
         JSON.stringify({ error: 'CRON_SECRET inválido' }),
         { 
