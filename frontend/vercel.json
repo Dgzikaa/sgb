@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/configuracoes/credenciais/nibo-sync",
-      "schedule": "0 */4 * * *"
+      "path": "/api/configuracoes/credenciais/nibo-sync-simple",
+      "schedule": "0 */6 * * *"
     }
   ],
   "functions": {

@@ -201,14 +201,17 @@ class NiboSyncService {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
     try {
-      console.log('🔄 Sincronizando categorias...')
+      console.log('🔄 Sincronizando categorias (limitado para performance)...')
       
-      const categories = await this.fetchNiboDataPaginated('categories')
+      // Buscar apenas as primeiras 50 categorias para evitar timeout
+      const categories = await this.fetchNiboData('categories', { $top: 50 })
       
-      if (!categories || categories.length === 0) {
+      if (!categories?.items || categories.items.length === 0) {
         console.log('ℹ️ Nenhuma categoria encontrada')
         return { success: true, count: 0 }
       }
+
+      console.log(`📊 Processando ${categories.items.length} categorias...`)
 
       // Buscar categorias existentes para evitar duplicatas
       const { data: existingCategories } = await this.supabase
@@ -222,38 +225,55 @@ class NiboSyncService {
       let atualizadas = 0
       let erros = 0
 
-      for (const category of categories) {
-        try {
-          const categoryData = {
-            nibo_id: category.id,
-            bar_id: this.credentials.bar_id,
-            nome: category.name,
-            tipo: category.type,
-            ativo: category.active,
-            data_sincronizacao: new Date().toISOString()
-          }
-
-          const isNew = !existingIds.has(category.id)
-          
-          const { error } = await this.supabase
-            .from('nibo_categorias')
-            .upsert(categoryData, {
-              onConflict: 'nibo_id'
-            })
-
-          if (error) {
-            console.error('❌ Erro ao inserir categoria:', error)
-            erros++
-          } else {
-            if (isNew) {
-              inseridas++
-            } else {
-              atualizadas++
+      // Processar em lotes de 10 para melhor performance
+      const batchSize = 10
+      for (let i = 0; i < categories.items.length; i += batchSize) {
+        const batch = categories.items.slice(i, i + batchSize)
+        
+        const promises = batch.map(async (category: any) => {
+          try {
+            const categoryData = {
+              nibo_id: category.id,
+              bar_id: this.credentials.bar_id,
+              nome: category.name,
+              tipo: category.type,
+              ativo: category.active,
+              data_sincronizacao: new Date().toISOString()
             }
+
+            const isNew = !existingIds.has(category.id)
+            
+            if (!this.credentials) return { type: 'error' }
+            
+            const { error } = await this.supabase
+              .from('nibo_categorias')
+              .upsert(categoryData, {
+                onConflict: 'nibo_id'
+              })
+
+            if (error) {
+              console.error('❌ Erro ao inserir categoria:', error)
+              return { type: 'error' }
+            } else {
+              return { type: isNew ? 'inserted' : 'updated' }
+            }
+          } catch (error: unknown) {
+            console.error('❌ Erro ao processar categoria:', error)
+            return { type: 'error' }
           }
-        } catch (error: unknown) {
-          console.error('❌ Erro ao processar categoria:', error)
-          erros++
+        })
+
+        const results = await Promise.all(promises)
+        
+        results.forEach(result => {
+          if (result.type === 'inserted') inseridas++
+          else if (result.type === 'updated') atualizadas++
+          else if (result.type === 'error') erros++
+        })
+
+        // Pequena pausa entre lotes
+        if (i + batchSize < categories.items.length) {
+          await new Promise(resolve => setTimeout(resolve, 100))
         }
       }
 
