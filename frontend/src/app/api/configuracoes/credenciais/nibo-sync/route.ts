@@ -40,12 +40,8 @@ async function executeNiboSync(barId?: string) {
     const logData = {
       bar_id: parseInt(targetBarId),
       tipo_sincronizacao: 'automatica_vercel',
-      status: 'iniciada',
-      detalhes: {
-        horario_inicio: agoraBrasil.toISO(),
-        credenciais_id: credenciais.id,
-        trigger_source: 'vercel_cron'
-      },
+      status: 'iniciado',
+      data_inicio: new Date().toISOString(),
       criado_em: new Date().toISOString()
     };
 
@@ -90,14 +86,9 @@ async function executeNiboSync(barId?: string) {
       await supabase
         .from('nibo_logs_sincronizacao')
         .update({
-          status: 'concluida',
-          detalhes: {
-            ...logData.detalhes,
-            horario_fim: DateTime.now().setZone('America/Sao_Paulo').toISO(),
-            resultado_edge_function: result,
-            mensagem: 'Sincronização automática via Vercel Cron executada com sucesso'
-          },
-          atualizado_em: new Date().toISOString()
+          status: 'concluido',
+          data_fim: new Date().toISOString(),
+          mensagem_erro: null
         })
         .eq('id', logInicio.id);
     }
@@ -121,11 +112,9 @@ async function executeNiboSync(barId?: string) {
           bar_id: parseInt(barId || process.env.NIBO_BAR_ID || '0'),
           tipo_sincronizacao: 'automatica_vercel',
           status: 'erro',
-          detalhes: {
-            erro: error instanceof Error ? error.message : 'Erro desconhecido',
-            horario_erro: DateTime.now().setZone('America/Sao_Paulo').toISO(),
-            trigger_source: 'vercel_cron'
-          },
+          data_inicio: new Date().toISOString(),
+          data_fim: new Date().toISOString(),
+          mensagem_erro: error instanceof Error ? error.message : 'Erro desconhecido',
           criado_em: new Date().toISOString()
         });
     } catch (logError) {

@@ -169,7 +169,7 @@ class NiboSyncService {
           const { error } = await this.supabase
             .from('nibo_stakeholders')
             .upsert(stakeholderData, {
-              onConflict: 'nibo_id,bar_id'
+              onConflict: 'nibo_id'
             })
 
           if (error) {
@@ -238,7 +238,7 @@ class NiboSyncService {
           const { error } = await this.supabase
             .from('nibo_categorias')
             .upsert(categoryData, {
-              onConflict: 'nibo_id,bar_id'
+              onConflict: 'nibo_id'
             })
 
           if (error) {
@@ -427,7 +427,7 @@ class NiboSyncService {
           const { error } = await this.supabase
             .from('nibo_agendamentos')
             .upsert(agendamentoData, {
-              onConflict: 'nibo_id,bar_id'
+              onConflict: 'nibo_id'
             })
 
           if (error) {
