@@ -32,21 +32,34 @@ class NiboSyncService {
     this.supabase = createClient(supabaseUrl, supabaseServiceKey)
   }
 
-  loadCredentials(): boolean {
+  async loadCredentials(barId: number): Promise<boolean> {
     try {
-      // Usar variáveis de ambiente do Vercel
-      if (!NIBO_CONFIG.apiToken || !NIBO_CONFIG.organizationId || !NIBO_CONFIG.barId) {
-        console.error('❌ Variáveis de ambiente NIBO não configuradas')
+      // Buscar credenciais do banco de dados
+      const { data: integracao, error } = await this.supabase
+        .from('integracoes_config')
+        .select('credenciais')
+        .eq('tipo', 'nibo')
+        .eq('bar_id', barId)
+        .eq('ativo', true)
+        .single()
+
+      if (error) {
+        console.error('❌ Erro ao buscar credenciais NIBO:', error.message)
+        return false
+      }
+
+      if (!integracao?.credenciais) {
+        console.error('❌ Credenciais NIBO não encontradas para o bar', barId)
         return false
       }
 
       this.credentials = {
-        api_token: NIBO_CONFIG.apiToken,
-        organization_id: NIBO_CONFIG.organizationId,
-        bar_id: NIBO_CONFIG.barId
+        api_token: integracao.credenciais.api_token,
+        organization_id: integracao.credenciais.organization_id,
+        bar_id: integracao.credenciais.bar_id || barId.toString()
       }
 
-      console.log('✅ Credenciais NIBO carregadas das variáveis de ambiente')
+      console.log('✅ Credenciais NIBO carregadas do banco de dados')
       return true
     } catch (error: unknown) {
       console.error('❌ Erro ao carregar credenciais:', error)
@@ -67,7 +80,7 @@ class NiboSyncService {
       url.searchParams.set(key, value)
     })
 
-    try {
+        try {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
@@ -77,7 +90,10 @@ class NiboSyncService {
       })
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        const errorText = await response.text()
+        console.error(`❌ HTTP ${response.status}: ${response.statusText}`)
+        console.error(`❌ Response body: ${errorText}`)
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`)
       }
 
       const data = await response.json()
@@ -100,7 +116,8 @@ class NiboSyncService {
       const pageParams = {
         ...params,
         $top: top,
-        $skip: skip
+        $skip: skip,
+        $orderby: 'id' // NIBO exige ordenação para usar $skip
       }
 
       const data = await this.fetchNiboData(endpoint, pageParams)
@@ -132,12 +149,30 @@ class NiboSyncService {
     try {
       console.log('🔄 Sincronizando stakeholders...')
       
-      const stakeholders = await this.fetchNiboDataPaginated('stakeholders')
+      // Testar primeiro sem paginação - se retornar limite, volta para paginação
+      console.log('🔍 Testando busca sem paginação...')
+      let stakeholders
+      try {
+        const result = await this.fetchNiboData('stakeholders')
+        stakeholders = result?.items || []
+        console.log(`📊 Busca simples retornou: ${stakeholders.length} stakeholders`)
+        
+        // Se retornou exatamente 500, pode estar limitado - usar paginação
+        if (stakeholders.length === 500) {
+          console.log('⚠️ Retornou exatamente 500 - pode estar limitado, usando paginação...')
+          stakeholders = await this.fetchNiboDataPaginated('stakeholders')
+        }
+      } catch (error) {
+        console.log('❌ Erro na busca simples, usando paginação...')
+        stakeholders = await this.fetchNiboDataPaginated('stakeholders')
+      }
       
       if (!stakeholders || stakeholders.length === 0) {
         console.log('ℹ️ Nenhum stakeholder encontrado')
         return { success: true, count: 0 }
       }
+
+      console.log(`📊 Processando ${stakeholders.length} stakeholders...`)
 
       // Buscar stakeholders existentes para evitar duplicatas
       const { data: existingStakeholders } = await this.supabase
@@ -193,7 +228,8 @@ class NiboSyncService {
 
     } catch (error: unknown) {
       console.error('❌ Erro na sincronização de stakeholders:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido' }
+      // Continuar mesmo com erro de stakeholders para não travar outras sincronizações
+      return { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido', count: 0, updated: 0, errors: 1 }
     }
   }
 
@@ -267,7 +303,8 @@ class NiboSyncService {
 
     } catch (error: unknown) {
       console.error('❌ Erro na sincronização de categorias:', error)
-      return { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido' }
+      // Continuar mesmo com erro de categorias para não travar outras sincronizações
+      return { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido', count: 0, updated: 0, errors: 1 }
     }
   }
 
@@ -275,24 +312,28 @@ class NiboSyncService {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
     try {
-      console.log('🔄 Sincronizando agendamentos...')
+      console.log('🔄 Sincronizando agendamentos (Background Job)...')
 
-      // Buscar agendamentos desde 2024 com paginação completa
+      // Gerar batch ID único para este job
+      const batchId = crypto.randomUUID()
+      console.log(`📋 Batch ID: ${batchId}`)
+
+      // Buscar agendamentos dos últimos 30 dias
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const filterDate = thirtyDaysAgo.toISOString().split('T')[0]
+      
+      console.log(`📅 Buscando agendamentos dos últimos 30 dias (desde ${filterDate})...`)
+      
+      // Buscar todas as páginas da API NIBO
       const allAgendamentos = []
       let skip = 0
-      const top = 500 // NIBO tem limite de 500 por página
+      const top = 500 // Maior para reduzir requests
       let hasMore = true
       let pageCount = 0
 
-      console.log('📄 Buscando agendamentos com paginação completa...')
-
       while (hasMore) {
         pageCount++
-        // Buscar apenas últimos 30 dias para otimizar performance
-        const thirtyDaysAgo = new Date()
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-        const filterDate = thirtyDaysAgo.toISOString().split('T')[0] // YYYY-MM-DD
-        
         const pageParams = {
           $filter: `createDate ge ${filterDate}`,
           $orderby: "createDate desc",
@@ -302,167 +343,85 @@ class NiboSyncService {
 
         console.log(`📄 Buscando página ${pageCount} (skip: ${skip}, top: ${top})...`)
 
-        const data = await this.fetchNiboDataPaginated('schedules', pageParams)
+        const data = await this.fetchNiboData('schedules', pageParams)
+        const items = data?.items || []
         
-        if (!data || data.length === 0) {
+        if (!items || items.length === 0) {
           console.log(`📄 Página ${pageCount}: Nenhum dado retornado`)
           hasMore = false
           break
         }
 
-        allAgendamentos.push(...data)
-        console.log(`📄 Página ${pageCount}: ${data.length} agendamentos`)
+        allAgendamentos.push(...items)
+        console.log(`📄 Página ${pageCount}: ${items.length} agendamentos`)
         
         skip += top
         
         // Se retornou menos que o top, chegou ao fim
-        if (data.length < top) {
-          console.log(`📄 Página ${pageCount}: Última página (${data.length} < ${top})`)
+        if (items.length < top) {
+          console.log(`📄 Página ${pageCount}: Última página (${items.length} < ${top})`)
           hasMore = false
         }
 
-        // Pequena pausa para não sobrecarregar a API
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Pequena pausa para não sobrecarregar a API NIBO
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
 
       if (allAgendamentos.length === 0) {
         console.log('ℹ️ Nenhum agendamento encontrado')
-        return { success: true, count: 0 }
+        return { success: true, count: 0, message: 'Nenhum agendamento encontrado' }
       }
 
       console.log(`📊 Total de agendamentos encontrados: ${allAgendamentos.length}`)
 
-      // Buscar agendamentos existentes para evitar duplicatas
-      const { data: existingAgendamentos } = await this.supabase
-        .from('nibo_agendamentos')
-        .select('nibo_id')
-        .eq('bar_id', this.credentials.bar_id)
+      // Criar job de controle
+      await this.supabase
+        .from('nibo_background_jobs')
+        .insert({
+          batch_id: batchId,
+          bar_id: this.credentials.bar_id,
+          job_type: 'agendamentos',
+          status: 'pending',
+          total_records: allAgendamentos.length
+        })
 
-      const existingIds = new Set(existingAgendamentos?.map((a: { nibo_id: unknown }) => String(a.nibo_id)) || [])
+      // Inserir dados brutos na tabela temporária (bulk insert)
+      console.log('💾 Inserindo dados na tabela temporária...')
+      const tempData = allAgendamentos.map(agendamento => ({
+        batch_id: batchId,
+        bar_id: this.credentials.bar_id,
+        raw_data: agendamento
+      }))
 
-      let inseridos = 0
-      let atualizados = 0
-      let erros = 0
-
-      for (const agendamento of allAgendamentos) {
-        try {
-          // Buscar categoria se existir
-          let categoriaId = null
-          if (agendamento.category?.id) {
-            const { data: categoria } = await this.supabase
-              .from('nibo_categorias')
-              .select('id')
-              .eq('nibo_id', agendamento.category.id)
-              .single()
-            categoriaId = categoria?.id
-          }
-
-          // Buscar stakeholder se existir
-          let stakeholderId = null
-          if (agendamento.stakeholder?.id) {
-            const { data: stakeholder } = await this.supabase
-              .from('nibo_stakeholders')
-              .select('id')
-              .eq('nibo_id', agendamento.stakeholder.id)
-              .single()
-            stakeholderId = stakeholder?.id
-          }
-
-          // Buscar conta bancária se existir
-          let contaBancariaId = null
-          if (agendamento.bankAccount?.id) {
-            const { data: contaBancaria } = await this.supabase
-              .from('nibo_contas_bancarias')
-              .select('id')
-              .eq('nibo_id', agendamento.bankAccount.id)
-              .single()
-            contaBancariaId = contaBancaria?.id
-          }
-
-          // Processar centro de custo
-          let centroCustoId = null
-          let centroCustoNome = null
-          let centroCustoConfig = {}
-
-          if (agendamento.costCenters && agendamento.costCenters.length > 0) {
-            // Pegar o primeiro centro de custo (assumindo que é o principal)
-            const primeiroCentroCusto = agendamento.costCenters[0]
-            centroCustoId = primeiroCentroCusto.costCenterId
-            centroCustoNome = primeiroCentroCusto.costCenterDescription
-            centroCustoConfig = {
-              costCenters: agendamento.costCenters,
-              costCenterValueType: agendamento.costCenterValueType || 0
-            }
-          }
-
-          const agendamentoData = {
-            nibo_id: agendamento.scheduleId,
-            bar_id: this.credentials.bar_id,
-            tipo: agendamento.type === 'Credit' ? 'Receivable' : 'Payable',
-            titulo: agendamento.description,
-            status: agendamento.isPaid ? 'Paid' : (agendamento.isDued ? 'Overdue' : 'Open'),
-            valor: agendamento.value,
-            valor_pago: agendamento.paidValue || 0,
-            data_vencimento: agendamento.dueDate,
-            data_pagamento: agendamento.isPaid ? agendamento.dueDate : null,
-            descricao: agendamento.description,
-            observacoes: agendamento.description,
-            categoria_id: agendamento.category?.id || null,
-            categoria_nome: agendamento.category?.name || null,
-            stakeholder_id: agendamento.stakeholder?.id || null,
-            stakeholder_nome: agendamento.stakeholder?.name || null,
-            stakeholder_tipo: agendamento.stakeholder?.type || null,
-            conta_bancaria_id: agendamento.bankAccount?.id || null,
-            conta_bancaria_nome: agendamento.bankAccount?.name || null,
-            centro_custo_id: centroCustoId,
-            centro_custo_nome: centroCustoNome,
-            centro_custo_config: centroCustoConfig,
-            numero_documento: null,
-            numero_parcela: null,
-            total_parcelas: null,
-            recorrente: agendamento.hasRecurrence || false,
-            frequencia_recorrencia: null,
-            anexos: [],
-            tags: [],
-            recorrencia_config: {},
-            deletado: agendamento.isDeleted || false,
-            stakeholder_id_interno: stakeholderId,
-            conta_bancaria_id_interno: contaBancariaId,
-            data_atualizacao: agendamento.updateDate || agendamento.createDate,
-            usuario_atualizacao: agendamento.updateUser || agendamento.createUser
-          }
-
-          const isNew = !existingIds.has(agendamento.scheduleId)
-
-          const { error } = await this.supabase
-            .from('nibo_agendamentos')
-            .upsert(agendamentoData, {
-              onConflict: 'nibo_id'
-            })
-
-          if (error) {
-            console.error('❌ Erro ao inserir agendamento:', error)
-            erros++
-          } else {
-            if (isNew) {
-              inseridos++
-            } else {
-              atualizados++
-            }
-
-            // Log para registros com centro de custo
-            if (centroCustoId) {
-              console.log(`  ✅ Agendamento com centro de custo: ${agendamento.description} -> ${centroCustoNome}`)
-            }
-          }
-        } catch (error: unknown) {
-          console.error('❌ Erro ao processar agendamento:', error)
-          erros++
-        }
+      // Inserir em batches para não sobrecarregar
+      const insertBatchSize = 100
+      for (let i = 0; i < tempData.length; i += insertBatchSize) {
+        const batch = tempData.slice(i, i + insertBatchSize)
+        await this.supabase
+          .from('nibo_temp_agendamentos')
+          .insert(batch)
+        
+        console.log(`💾 Inseridos ${Math.min(i + insertBatchSize, tempData.length)}/${tempData.length} registros temporários`)
       }
 
-      console.log(`✅ Agendamentos sincronizados: ${inseridos} novos, ${atualizados} atualizados, ${erros} erros`)
-      return { success: true, count: inseridos, updated: atualizados, errors: erros }
+      // Iniciar processamento em background (assíncrono)
+      console.log('🚀 Iniciando processamento em background...')
+      this.supabase.rpc('process_nibo_agendamentos_background', { p_batch_id: batchId })
+        .then(() => {
+          console.log('✅ Background job iniciado com sucesso')
+        })
+        .catch((error) => {
+          console.error('❌ Erro ao iniciar background job:', error)
+        })
+
+      console.log(`✅ Agendamentos enviados para processamento background: ${allAgendamentos.length} registros`)
+      return { 
+        success: true, 
+        count: allAgendamentos.length, 
+        message: `${allAgendamentos.length} agendamentos enviados para processamento em background`,
+        batch_id: batchId,
+        processing_mode: 'background'
+      }
 
     } catch (error: unknown) {
       console.error('❌ Erro na sincronização de agendamentos:', error)
@@ -543,13 +502,19 @@ class NiboSyncService {
     const color = totalErrors > 0 ? 0xff9900 : 0x00ff00
     const status = totalErrors > 0 ? '⚠️ Concluída com erros' : '✅ Concluída com sucesso'
     
+    // Determinar mensagem baseada no modo de processamento
+    const agendamentosMsg = results.agendamentos.processing_mode === 'background' 
+      ? `**Agendamentos:** ${results.agendamentos.count} enviados para processamento em background 🚀`
+      : `**Agendamentos:** ${totalAgendamentos} (${results.agendamentos.count} novos, ${results.agendamentos.updated} atualizados)`
+    
     await this.sendDiscordNotification(
       `${status} - Sincronização NIBO`,
       `**Stakeholders:** ${totalStakeholders} (${results.stakeholders.count} novos, ${results.stakeholders.updated} atualizados)\n` +
       `**Categorias:** ${totalCategories} (${results.categories.count} novas, ${results.categories.updated} atualizadas)\n` +
-      `**Agendamentos:** ${totalAgendamentos} (${results.agendamentos.count} novos, ${results.agendamentos.updated} atualizados)\n` +
+      agendamentosMsg + `\n` +
       `**Erros:** ${totalErrors}\n` +
-      `**Bar ID:** ${this.credentials.bar_id}`,
+      `**Bar ID:** ${this.credentials.bar_id}` +
+      (results.agendamentos.batch_id ? `\n**Batch ID:** \`${results.agendamentos.batch_id}\`` : ''),
       color
     )
 
@@ -604,7 +569,7 @@ serve(async (req) => {
     const niboSync = new NiboSyncService()
     
     // Carregar credenciais
-    const credentialsLoaded = niboSync.loadCredentials()
+    const credentialsLoaded = await niboSync.loadCredentials(parseInt(barId))
     if (!credentialsLoaded) {
       return new Response(
         JSON.stringify({ error: 'Credenciais NIBO não encontradas' }),

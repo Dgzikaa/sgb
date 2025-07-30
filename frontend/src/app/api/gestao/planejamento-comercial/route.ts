@@ -48,6 +48,17 @@ interface PlanejamentoData {
   percentual_atingimento_receita: number;
   percentual_atingimento_clientes: number;
   performance_geral: number;
+  
+  // Flags para coloração verde/vermelho
+  real_vs_m1_green: boolean;
+  ci_real_vs_plan_green: boolean;
+  te_real_vs_plan_green: boolean;
+  tb_real_vs_plan_green: boolean;
+  t_medio_green: boolean;
+  percent_art_fat_green: boolean;
+  t_coz_green: boolean;
+  t_bar_green: boolean;
+  fat_19h_green: boolean;
 }
 
 export async function GET(request: NextRequest) {
@@ -101,46 +112,57 @@ export async function GET(request: NextRequest) {
 
     // Transformar dados para o formato esperado pela página
     const resultado: PlanejamentoData[] = dados?.map(item => ({
-      evento_id: item.evento_id,
+      evento_id: item.evento_id || null,
       data_evento: item.data_evento,
-      dia_semana: item.dia_semana,
+      dia_semana: item.dia_semana, // Usar dia_semana da view (PostgreSQL)
       evento_nome: item.evento_nome,
       bar_id: item.bar_id,
-      bar_nome: item.bar_nome,
-      dia: item.dia,
+      bar_nome: item.bar_nome || 'Ordinário Bar',
+      dia: parseInt(item.data_evento.split('-')[2]), // Extrair dia da string YYYY-MM-DD
       mes: item.mes,
       ano: item.ano,
-      dia_formatado: item.dia_formatado,
-      data_curta: item.data_curta,
-      real_receita: item.real_receita,
-      m1_receita: item.m1_receita,
-      clientes_plan: item.clientes_plan,
-      clientes_real: item.clientes_real,
-      res_total: item.res_total,
-      res_presente: item.res_presente,
-      lot_max: item.lot_max,
-      te_plan: item.te_plan,
-      te_real: item.te_real,
-      tb_plan: item.tb_plan,
-      tb_real: item.tb_real,
-      t_medio: item.t_medio,
-      c_art: item.c_art,
-      c_prod: item.c_prod,
-      percent_art_fat: item.percent_art_fat,
-      percent_b: item.percent_b,
-      percent_d: item.percent_d,
-      percent_c: item.percent_c,
-      t_coz: item.t_coz,
-      t_bar: item.t_bar,
-      fat_19h: item.fat_19h,
-      pagamentos_liquido: item.pagamentos_liquido,
-      total_vendas: item.total_vendas,
-      vendas_bebida: item.vendas_bebida,
-      vendas_drink: item.vendas_drink,
-      vendas_comida: item.vendas_comida,
-      percentual_atingimento_receita: item.percentual_atingimento_receita,
-      percentual_atingimento_clientes: item.percentual_atingimento_clientes,
-      performance_geral: item.performance_geral
+      dia_formatado: item.data_evento.split('-')[2], // Usar dia da string YYYY-MM-DD
+      data_curta: `${item.data_evento.split('-')[2]}/${item.data_evento.split('-')[1]}`, // Formato DD/MM direto da string
+      real_receita: parseFloat(item.real_receita) || 0,
+      m1_receita: parseFloat(item.m1_receita) || 0,
+      
+      // Flags para coloração verde/vermelho
+      real_vs_m1_green: parseFloat(item.real_receita) > parseFloat(item.m1_receita),
+      ci_real_vs_plan_green: parseFloat(item.clientes_real) > parseFloat(item.clientes_plan),
+      te_real_vs_plan_green: parseFloat(item.te_real) > parseFloat(item.te_plan),
+      tb_real_vs_plan_green: parseFloat(item.tb_real) > parseFloat(item.tb_plan),
+      t_medio_green: parseFloat(item.t_medio) > 93.00,
+      percent_art_fat_green: parseFloat(item.percent_art_fat) < 112,
+      t_coz_green: parseFloat(item.t_coz) < 12,
+      t_bar_green: parseFloat(item.t_bar) < 4,
+      fat_19h_green: parseFloat(item.fat_19h) > 15,
+      clientes_plan: parseInt(item.clientes_plan) || 0,
+      clientes_real: parseInt(item.clientes_real) || 0,
+      res_total: 0, // Campo não existe na VIEW
+      res_presente: 0, // Campo não existe na VIEW
+      lot_max: parseInt(item.lot_max) || 0,
+      te_plan: parseFloat(item.te_plan) || 0,
+      te_real: parseFloat(item.te_real) || 0,
+      tb_plan: parseFloat(item.tb_plan) || 0,
+      tb_real: parseFloat(item.tb_real) || 0,
+      t_medio: parseFloat(item.t_medio) || 0,
+      c_art: parseFloat(item.c_art) || 0,
+      c_prod: parseFloat(item.c_prod) || 0,
+      percent_art_fat: parseFloat(item.percent_art_fat) || 0,
+      percent_b: parseFloat(item.percent_b) || 0,
+      percent_d: parseFloat(item.percent_d) || 0,
+      percent_c: parseFloat(item.percent_c) || 0,
+      t_coz: parseFloat(item.t_coz) || 0,
+      t_bar: parseFloat(item.t_bar) || 0,
+      fat_19h: parseFloat(item.fat_19h) || 0,
+      pagamentos_liquido: 0, // Campo não existe na VIEW
+      total_vendas: 0, // Campo não existe na VIEW
+      vendas_bebida: 0, // Campo não existe na VIEW
+      vendas_drink: 0, // Campo não existe na VIEW
+      vendas_comida: 0, // Campo não existe na VIEW
+      percentual_atingimento_receita: item.real_receita > 0 && item.m1_receita > 0 ? ((parseFloat(item.real_receita) / parseFloat(item.m1_receita)) * 100) : 0,
+      percentual_atingimento_clientes: item.clientes_real > 0 && item.clientes_plan > 0 ? ((parseInt(item.clientes_real) / parseInt(item.clientes_plan)) * 100) : 0,
+      performance_geral: 85 // Campo calculado como número
     })) || [];
 
     console.log(`✅ Dados processados: ${resultado.length} registros`);

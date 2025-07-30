@@ -4,16 +4,17 @@
 
 const fs = require('fs');
 const path = require('path');
-const { createClient } = require('../../frontend/node_modules/@supabase/supabase-js/dist/module');
+// Usar o pacote do frontend
+const { createClient } = require('../../frontend/node_modules/@supabase/supabase-js');
 
-// Função simples para parsear CSV sem dependência externa
+// Função robusta para parsear CSV tratando campos vazios e valores com vírgulas
 function parseCSV(content) {
   const lines = content.split('\n').filter(line => line.trim());
   if (lines.length === 0) return { headers: [], data: [] };
   
-  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+  const headers = parseCSVLine(lines[0]);
   const data = lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+    const values = parseCSVLine(line);
     const row = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
@@ -24,10 +25,42 @@ function parseCSV(content) {
   return { headers, data };
 }
 
+// Função para parsear uma linha CSV tratando aspas e campos vazios
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      // Campo completo, adicionar ao resultado
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  
+  // Adicionar o último campo
+  result.push(current.trim());
+  
+  // Limpar aspas dos valores e converter campos vazios em null
+  return result.map(value => {
+    const cleaned = value.replace(/^"/, '').replace(/"$/, '').trim();
+    return cleaned === '' ? null : cleaned;
+  });
+}
+
 // Tentar carregar variáveis do .env.local
 function loadEnvFile() {
   try {
-    const envPath = path.join(__dirname, '../frontend/.env.local');
+    const envPath = path.join(__dirname, '../../frontend/.env.local');
+    console.log(`🔍 Procurando .env.local em: ${envPath}`);
+    
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, 'utf8');
       const envVars = {};
@@ -37,7 +70,7 @@ function loadEnvFile() {
         if (trimmed && !trimmed.startsWith('#')) {
           const [key, ...valueParts] = trimmed.split('=');
           if (key && valueParts.length > 0) {
-            envVars[key] = valueParts.join('=');
+            envVars[key] = valueParts.join('=').replace(/"/g, '');
           }
         }
       });
@@ -45,7 +78,10 @@ function loadEnvFile() {
       // Aplicar as variáveis ao process.env
       Object.assign(process.env, envVars);
       console.log('✅ Arquivo .env.local carregado com sucesso!');
+      console.log(`🔑 Variáveis carregadas: ${Object.keys(envVars).join(', ')}`);
       return true;
+    } else {
+      console.log('❌ Arquivo .env.local não encontrado');
     }
   } catch (error) {
     console.log('⚠️ Não foi possível carregar .env.local:', error.message);
@@ -58,13 +94,15 @@ loadEnvFile();
 
 // Configuração do Supabase
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://uqtgsvujwcbymjmvkjhy.supabase.co').replace(/"/g, '');
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY.replace(/"/g, '');
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.replace(/"/g, '') || '';
 
 // Verificar se as variáveis foram carregadas
 if (!SUPABASE_KEY) {
   console.error('❌ Erro: SUPABASE_SERVICE_ROLE_KEY não encontrada!');
-  console.error('Verifique se o arquivo ../frontend/.env.local existe e contém SUPABASE_SERVICE_ROLE_KEY');
-  console.error('Ou execute o script com: SUPABASE_SERVICE_ROLE_KEY=sua_chave node populate-contahub-tables.js');
+  console.error('Verifique se o arquivo ../../frontend/.env.local existe e contém SUPABASE_SERVICE_ROLE_KEY');
+  console.error('📋 Variáveis disponíveis no process.env:');
+  console.error(Object.keys(process.env).filter(k => k.includes('SUPABASE')).join(', '));
+  console.error('💡 Ou execute o script com: SUPABASE_SERVICE_ROLE_KEY=sua_chave node populate-contahub-tables.js');
   process.exit(1);
 }
 
@@ -74,10 +112,26 @@ console.log(`🔑 API Key carregada: ${SUPABASE_KEY.substring(0, 20)}...`);
 console.log('✅ Variáveis de ambiente carregadas com sucesso!');
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Arquivos CSV - Apenas a tabela tempo (as outras já foram populadas)
+// Arquivos CSV - Todas as tabelas que precisam ser populadas
 const CSV_FILES = [
   {
-    file: 'contahub/tempo.csv',
+    file: 'analitico.csv',
+    tables: ['contahub_analitico'],
+  },
+  {
+    file: 'fatporhora.csv',
+    tables: ['contahub_fatporhora'],
+  },
+  {
+    file: 'pagamentos.csv',
+    tables: ['contahub_pagamentos'],
+  },
+  {
+    file: 'periodo.csv',
+    tables: ['contahub_periodo'],
+  },
+  {
+    file: 'tempo.csv',
     tables: ['contahub_tempo'],
   },
 ];
@@ -121,7 +175,7 @@ const CSV_TO_TABLE_MAPPING = {
 function detectSheet(lines, table) {
   const header = TABLE_COLUMNS[table];
   for (let i = 0; i < lines.length; i++) {
-    const cols = lines[i].split(',').map(s => s.trim().replace(/\"/g, ''));
+    const cols = parseCSVLine(lines[i]);
     if (cols.length >= header.length) {
       // Verificar se os cabeçalhos correspondem (considerando mapeamento)
       const mappedCols = cols.map(col => CSV_TO_TABLE_MAPPING[table]?.[col] || col);
@@ -135,7 +189,10 @@ function detectSheet(lines, table) {
 
 // Função para converter valores para tipos corretos
 function convertValue(table, col, value) {
-  if (value === undefined || value === null || value === '' || value.trim() === '') return null;
+  // Tratar valores nulos, vazios ou undefined
+  if (value === undefined || value === null || value === '' || (typeof value === 'string' && value.trim() === '')) {
+    return null;
+  }
   
   // Timestamps (campos de tempo)
   if (col.match(/t0_lancamento|t1_prodini|t2_prodfim|t3_entrega/)) {
@@ -156,22 +213,38 @@ function convertValue(table, col, value) {
     return null;
   }
   
-  // Números
+  // Números inteiros
   if (col.match(/qtd|quantidade|pessoas|ano|mes|dia|dds|itm_qtd/)) {
-    return parseInt(value.replace(/\D/g, '')) || 0;
+    const numValue = parseInt(value.toString().replace(/\D/g, ''));
+    return isNaN(numValue) ? null : numValue;
   }
   
-  // Valores monetários
+  // Valores monetários - tratar vírgula como separador decimal brasileiro
   if (col.match(/valor|vr_|liquido|taxa|perc|custo|desconto|final|repique|couvert/)) {
-    return parseFloat(value.replace(/\./g, '').replace(/,/g, '.')) || 0;
+    const cleanValue = value.toString().trim();
+    // Se tem ponto e vírgula, remover pontos (separadores de milhares) e trocar vírgula por ponto
+    if (cleanValue.includes('.') && cleanValue.includes(',')) {
+      return parseFloat(cleanValue.replace(/\./g, '').replace(/,/g, '.')) || null;
+    }
+    // Se só tem vírgula, trocar por ponto (decimal brasileiro)
+    if (cleanValue.includes(',') && !cleanValue.includes('.')) {
+      return parseFloat(cleanValue.replace(/,/g, '.')) || null;
+    }
+    // Se só tem ponto, assumir que é decimal americano
+    return parseFloat(cleanValue) || null;
   }
   
   // Campos numéricos de tempo (t0_t1, t0_t2, etc.)
   if (col.match(/t0_t1|t0_t2|t0_t3|t1_t2|t1_t3|t2_t3/)) {
-    return parseFloat(value.replace(/\./g, '').replace(/,/g, '.')) || 0;
+    const cleanValue = value.toString().trim();
+    if (cleanValue.includes(',')) {
+      return parseFloat(cleanValue.replace(/,/g, '.')) || null;
+    }
+    return parseFloat(cleanValue) || null;
   }
   
-  return value.replace(/\"/g, '').trim();
+  // Retornar string limpa (as aspas já foram removidas no parseCSVLine)
+  return value.toString().trim();
 }
 
 async function processTableFromCSV(csvPath, table, lines) {
@@ -195,14 +268,17 @@ async function processTableFromCSV(csvPath, table, lines) {
   }
   
   const records = dataLines.map(line => {
-    const cols = line.split(',').map(s => s.trim().replace(/\"/g, ''));
+    const cols = parseCSVLine(line);
     const obj = {};
     header.forEach((col, idx) => {
       // Usar mapeamento se existir, senão usar o nome original
       const csvColName = Object.keys(CSV_TO_TABLE_MAPPING[table] || {}).find(key => CSV_TO_TABLE_MAPPING[table][key] === col) || col;
       const csvColIndex = cols.findIndex(c => c === csvColName);
-      obj[col] = convertValue(table, col, csvColIndex >= 0 ? cols[csvColIndex] : cols[idx]);
+      const rawValue = csvColIndex >= 0 ? cols[csvColIndex] : cols[idx];
+      obj[col] = convertValue(table, col, rawValue);
     });
+    // Adicionar bar_id = 3 (Ordinário) para todos os registros
+    obj.bar_id = 3;
     return obj;
   });
   

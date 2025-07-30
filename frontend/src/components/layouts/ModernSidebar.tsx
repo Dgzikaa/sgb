@@ -347,7 +347,7 @@ export function ModernSidebar() {
 
       <div className="flex flex-col h-full pt-4 pb-4">
         {/* Navigation items */}
-        <nav className="flex-1 px-2 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-2 overflow-hidden">
           <div className="space-y-1">
             {/* Command Palette Search Button removido da sidebar */}
 

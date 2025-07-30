@@ -27,9 +27,29 @@ function parseIntSafe(value: any): number {
   return 0;
 }
 
+function formatDiaFromISO(isoString: string): number {
+  if (!isoString || typeof isoString !== 'string') return 0;
+  try {
+    // Extrair data do formato: "2025-07-28T00:00:00-0300"
+    const datePart = isoString.split('T')[0]; // "2025-07-28"
+    const [year, month, day] = datePart.split('-');
+    return parseInt(`${year}${month}${day}`); // 20250728
+  } catch (error) {
+    console.error('Erro ao formatar data:', error);
+    return 0;
+  }
+}
+
 function generateDynamicTimestamp(): string {
   const now = new Date();
   return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}${String(now.getMilliseconds()).padStart(3, '0')}`;
+}
+
+// Função para timeout aleatório entre chamadas
+function randomTimeout(): number {
+  const min = 5000; // 5 segundos
+  const max = 30000; // 30 segundos
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 // Função para enviar notificação Discord
@@ -80,10 +100,15 @@ async function loginContaHub(email: string, password: string): Promise<string> {
     "usr_password_sha1": passwordSha1
   });
   
-  const loginResponse = await fetch('https://sp.contahub.com/vd/mob_login.asp', {
+  // Usar a URL correta do login da API REST (baseado no teste-sync-contahub.js)
+  console.log('🔍 Fazendo login no ContaHub via API REST...');
+  const loginTimestamp = generateDynamicTimestamp();
+  const loginResponse = await fetch(`https://sp.contahub.com/rest/contahub.cmds.UsuarioCmd/login/${loginTimestamp}?emp=0`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Accept': 'application/json'
     },
     body: loginData,
   });
@@ -93,67 +118,145 @@ async function loginContaHub(email: string, password: string): Promise<string> {
   }
   
   const sessionData = await loginResponse.text();
+  console.log('🔍 Resposta do ContaHub (primeiros 500 chars):', sessionData.substring(0, 500));
+  console.log('🔍 Status da resposta:', loginResponse.status);
+  console.log('🔍 Headers da resposta:', Object.fromEntries(loginResponse.headers.entries()));
   
-  // Extrair session token da resposta
-  const sessionMatch = sessionData.match(/sessaoativa=([^&]+)/);
-  if (!sessionMatch) {
-    throw new Error('Token de sessão não encontrado na resposta do login');
+  // Extrair cookies do header (como no código antigo que funcionava)
+  const setCookieHeaders = loginResponse.headers.get('set-cookie');
+  console.log('🔍 Set-Cookie headers:', setCookieHeaders);
+  
+  // Para API REST, verificar se retornou JSON com sucesso
+  if (loginResponse.status === 200) {
+    console.log('✅ Login bem-sucedido - API REST retornou 200');
+    
+    if (!setCookieHeaders) {
+      console.log('⚠️ Cookies não encontrados no header');
+      throw new Error(`Cookies de sessão não encontrados no login da API REST`);
+    }
+    
+    // Usar cookies como session token
+    const sessionToken = setCookieHeaders;
+    console.log('✅ Login ContaHub realizado com sucesso (com cookies da API REST)');
+    return sessionToken;
   }
   
-  const sessionToken = sessionMatch[1];
-  console.log('✅ Login ContaHub realizado com sucesso');
-  return sessionToken;
+  throw new Error(`Login ContaHub falhou. Status: ${loginResponse.status}, Resposta: ${sessionData.substring(0, 200)}`);
 }
 
 // Função para fazer requisições ao ContaHub
 async function fetchContaHubData(url: string, sessionToken: string) {
+  console.log(`🔗 Fazendo requisição: ${url}`);
+  console.log(`🍪 Cookies: ${sessionToken?.substring(0, 100)}...`);
+  
   const response = await fetch(url, {
     method: 'GET',
     headers: {
-      'Cookie': `sessaoativa=${sessionToken}`,
+      'Cookie': sessionToken, // sessionToken já são os cookies completos
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Accept': 'application/json'
     },
   });
   
+  console.log(`📡 Status da resposta: ${response.status}`);
+  console.log(`📄 Headers da resposta:`, Object.fromEntries(response.headers.entries()));
+  
   if (!response.ok) {
+    const errorText = await response.text();
+    console.log(`❌ Erro na resposta: ${errorText.substring(0, 200)}`);
     throw new Error(`Erro na requisição ContaHub: ${response.statusText}`);
   }
   
-  return await response.json();
+  const responseText = await response.text();
+  console.log(`📄 Resposta (primeiros 200 chars): ${responseText.substring(0, 200)}`);
+  
+  return JSON.parse(responseText);
 }
 
 // Função para limpar dados antigos antes de inserir novos
-async function clearPreviousData(supabase: any, dataOntem: string, tableName: string) {
-  console.log(`🗑️ Limpando dados antigos da tabela ${tableName} para ${dataOntem}...`);
+async function clearPreviousData(supabase: any, dataFormatted: string, tableName: string, barId: number = 3) {
+  console.log(`🗑️ Limpando dados antigos da tabela ${tableName} para bar_id=${barId} e data=${dataFormatted}...`);
   
-  const { error } = await supabase
+  // Converter data para formato correto conforme cada tabela
+  const start_date = dataFormatted.split('.').reverse().join('-');
+  
+  let deleteQuery = supabase
     .from(tableName)
     .delete()
-    .eq('bar_id', 3);
+    .eq('bar_id', barId);
+
+  // Adicionar filtro de data específico para cada tabela
+  switch (tableName) {
+    case 'contahub_analitico':
+      deleteQuery = deleteQuery.eq('trn_dtgerencial', start_date);
+      break;
+    case 'contahub_fatporhora':
+      deleteQuery = deleteQuery.eq('vd_dtgerencial', start_date);
+      break;
+    case 'contahub_pagamentos':
+      deleteQuery = deleteQuery.eq('dt_gerencial', start_date);
+      break;
+    case 'contahub_periodo':
+      deleteQuery = deleteQuery.eq('dt_gerencial', start_date);
+      break;
+    case 'contahub_tempo':
+      deleteQuery = deleteQuery.eq('t0_lancamento', start_date);
+      break;
+    default:
+      console.log(`⚠️ Tabela ${tableName} não mapeada para filtro de data`);
+  }
+  
+  const { error, count } = await deleteQuery;
   
   if (error) {
     console.error(`❌ Erro ao limpar dados de ${tableName}:`, error);
     throw error;
   }
   
-  console.log(`✅ Dados antigos de ${tableName} removidos`);
+  console.log(`✅ Dados antigos de ${tableName} removidos: ${count || 0} registros`);
 }
 
 // Função para processar dados analíticos
-async function processAnaliticData(supabase: any, sessionToken: string, baseUrl: string, dataOntem: string) {
+async function processAnaliticData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
   console.log('📊 Processando dados analíticos...');
   
-  const analiticUrl = `${baseUrl}/apps/appvdanalitico.asp?dtini=${dataOntem}&dtfim=${dataOntem}&formato=json&request=${generateDynamicTimestamp()}`;
-  const analiticData = await fetchContaHubData(analiticUrl, sessionToken);
+  const start_date = dataFormatted.split('.').reverse().join('-');
+  const end_date = dataFormatted.split('.').reverse().join('-');
+  const queryTimestamp = generateDynamicTimestamp();
+  const analiticUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=77&d0=${start_date}&d1=${end_date}&produto=&grupo=&local=&turno=&mesa=&emp=3768&nfe=1`;
   
-  if (!analiticData || !Array.isArray(analiticData)) {
+  console.log(`🔗 URL Analítico: ${analiticUrl}`);
+  console.log(`🍪 SessionToken: ${sessionToken ? 'PRESENTE' : 'AUSENTE'}`);
+  console.log(`📅 Data processamento: ${dataFormatted} → ${start_date}`);
+  
+  let analiticData;
+  try {
+    console.log('🚀 Iniciando fetchContaHubData para analítico...');
+    analiticData = await fetchContaHubData(analiticUrl, sessionToken);
+    console.log('✅ fetchContaHubData analítico concluído');
+  } catch (error) {
+    console.error('❌ Erro detalhado em fetchContaHubData analítico:', error);
+    throw error;
+  }
+  
+    // Verificar se os dados estão em uma propriedade (como no teste-sync-contahub.js)
+  let finalData = analiticData;
+  if (!Array.isArray(analiticData)) {
+    console.log('🔍 Dados não são array, verificando propriedades...');
+    if (analiticData?.list) finalData = analiticData.list;
+    else if (analiticData?.rows) finalData = analiticData.rows;
+    else if (analiticData?.data) finalData = analiticData.data;
+    else if (analiticData?.result) finalData = analiticData.result;
+  }
+
+  if (!finalData || !Array.isArray(finalData)) {
     console.log('⚠️ Nenhum dado analítico encontrado');
     return 0;
   }
-  
-  await clearPreviousData(supabase, dataOntem, 'contahub_analitico');
-  
-  const processedData = analiticData.map(item => ({
+
+  await clearPreviousData(supabase, dataFormatted, 'contahub_analitico', 3); // bar_id = 3 (Ordinário)
+
+  const processedData = finalData.map((item: any) => ({
     vd_mesadesc: item.vd_mesadesc || null,
     vd_localizacao: item.vd_localizacao || null,
     itm: item.itm || null,
@@ -194,26 +297,47 @@ async function processAnaliticData(supabase: any, sessionToken: string, baseUrl:
 }
 
 // Função para processar faturamento por hora
-async function processFatPorHora(supabase: any, sessionToken: string, baseUrl: string, dataOntem: string) {
+async function processFatPorHora(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
   console.log('🕐 Processando faturamento por hora...');
   
-  const fatHoraUrl = `${baseUrl}/apps/appvdfatporhora.asp?dtini=${dataOntem}&dtfim=${dataOntem}&formato=json&request=${generateDynamicTimestamp()}`;
-  const fatHoraData = await fetchContaHubData(fatHoraUrl, sessionToken);
-  
-  if (!fatHoraData || !Array.isArray(fatHoraData)) {
+  const start_date = dataFormatted.split('.').reverse().join('-');
+  const end_date = dataFormatted.split('.').reverse().join('-');
+  const queryTimestamp = generateDynamicTimestamp();
+  const fatHoraUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=101&d0=${start_date}&d1=${end_date}&emp=3768&nfe=1`;
+  let fatHoraData;
+  try {
+    console.log('🚀 Iniciando fetchContaHubData para faturamento por hora...');
+    fatHoraData = await fetchContaHubData(fatHoraUrl, sessionToken);
+    console.log('✅ fetchContaHubData faturamento por hora concluído');
+  } catch (error) {
+    console.error('❌ Erro detalhado em fetchContaHubData faturamento por hora:', error);
+    throw error;
+  }
+
+  // Verificar se os dados estão em uma propriedade (como no teste-sync-contahub.js)
+  let finalData = fatHoraData;
+  if (!Array.isArray(fatHoraData)) {
+    console.log('🔍 Dados não são array, verificando propriedades...');
+    if (fatHoraData?.list) finalData = fatHoraData.list;
+    else if (fatHoraData?.rows) finalData = fatHoraData.rows;
+    else if (fatHoraData?.data) finalData = fatHoraData.data;
+    else if (fatHoraData?.result) finalData = fatHoraData.result;
+  }
+
+  if (!finalData || !Array.isArray(finalData)) {
     console.log('⚠️ Nenhum dado de faturamento por hora encontrado');
     return 0;
   }
   
-  await clearPreviousData(supabase, dataOntem, 'contahub_fatporhora');
+  await clearPreviousData(supabase, dataFormatted, 'contahub_fatporhora', 3);
   
-  const processedData = fatHoraData.map(item => ({
+  const processedData = finalData.map((item: any) => ({
     vd_dtgerencial: item.vd_dtgerencial || null,
     dds: parseIntSafe(item.dds),
     dia: item.dia || null,
     hora: item.hora || null,
     qtd: parseIntSafe(item.qtd),
-    valor: parseFloatSafe(item.valor),
+    valor: parseFloatSafe(item.$valor || item.valor),
     bar_id: 3
   }));
   
@@ -231,20 +355,43 @@ async function processFatPorHora(supabase: any, sessionToken: string, baseUrl: s
 }
 
 // Função para processar pagamentos
-async function processPagamentos(supabase: any, sessionToken: string, baseUrl: string, dataOntem: string) {
+async function processPagamentos(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
   console.log('💳 Processando pagamentos...');
   
-  const pagamentosUrl = `${baseUrl}/apps/appvdpagamento.asp?dtini=${dataOntem}&dtfim=${dataOntem}&formato=json&request=${generateDynamicTimestamp()}`;
-  const pagamentosData = await fetchContaHubData(pagamentosUrl, sessionToken);
-  
-  if (!pagamentosData || !Array.isArray(pagamentosData)) {
+  const start_date = dataFormatted.split('.').reverse().join('-');
+  const end_date = dataFormatted.split('.').reverse().join('-');
+  const queryTimestamp = generateDynamicTimestamp();
+  const pagamentosUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=7&d0=${start_date}&d1=${end_date}&meio=&emp=3768&nfe=1`;
+  let pagamentosData;
+  try {
+    console.log('🚀 Iniciando fetchContaHubData para pagamentos...');
+    pagamentosData = await fetchContaHubData(pagamentosUrl, sessionToken);
+    console.log('✅ fetchContaHubData pagamentos concluído');
+  } catch (error) {
+    console.error('❌ Erro detalhado em fetchContaHubData pagamentos:', error);
+    throw error;
+  }
+
+  // Verificar se os dados estão em uma propriedade (como no teste-sync-contahub.js)
+  let finalData = pagamentosData;
+  if (!Array.isArray(pagamentosData)) {
+    console.log('🔍 Dados não são array, verificando propriedades...');
+    if (pagamentosData?.list) finalData = pagamentosData.list;
+    else if (pagamentosData?.rows) finalData = pagamentosData.rows;
+    else if (pagamentosData?.data) finalData = pagamentosData.data;
+    else if (pagamentosData?.result) finalData = pagamentosData.result;
+  }
+
+  if (!finalData || !Array.isArray(finalData)) {
     console.log('⚠️ Nenhum dado de pagamentos encontrado');
     return 0;
   }
   
-  await clearPreviousData(supabase, dataOntem, 'contahub_pagamentos');
+  await clearPreviousData(supabase, dataFormatted, 'contahub_pagamentos', 3);
   
-  const processedData = pagamentosData.map(item => ({
+
+
+  const processedData = finalData.map((item: any) => ({
     vd: item.vd || null,
     trn: item.trn || null,
     dt_gerencial: item.dt_gerencial || null,
@@ -254,12 +401,12 @@ async function processPagamentos(supabase: any, sessionToken: string, baseUrl: s
     mesa: item.mesa || null,
     cli: item.cli || null,
     cliente: item.cliente || null,
-    vr_pagamentos: parseFloatSafe(item.vr_pagamentos),
+    vr_pagamentos: parseFloatSafe(item.$vr_pagamentos),
     pag: item.pag || null,
-    valor: parseFloatSafe(item.valor),
-    taxa: parseFloatSafe(item.taxa),
-    perc: parseFloatSafe(item.perc),
-    liquido: parseFloatSafe(item.liquido),
+    valor: parseFloatSafe(item.$valor),
+    taxa: parseFloatSafe(item.taxa), // campo sem $ (se existir)
+    perc: parseFloatSafe(item.perc), // campo sem $ (se existir)
+    liquido: parseFloatSafe(item.$liquido),
     tipo: item.tipo || null,
     meio: item.meio || null,
     cartao: item.cartao || null,
@@ -271,6 +418,8 @@ async function processPagamentos(supabase: any, sessionToken: string, baseUrl: s
     motivodesconto: item.motivodesconto || null,
     bar_id: 3
   }));
+  
+
   
   const { error } = await supabase
     .from('contahub_pagamentos')
@@ -286,20 +435,39 @@ async function processPagamentos(supabase: any, sessionToken: string, baseUrl: s
 }
 
 // Função para processar dados por período
-async function processPeriodo(supabase: any, sessionToken: string, baseUrl: string, dataOntem: string) {
+async function processPeriodo(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
   console.log('📅 Processando dados por período...');
   
-  const periodoUrl = `${baseUrl}/apps/appvdperiodo.asp?dtini=${dataOntem}&dtfim=${dataOntem}&formato=json&request=${generateDynamicTimestamp()}`;
-  const periodoData = await fetchContaHubData(periodoUrl, sessionToken);
-  
-  if (!periodoData || !Array.isArray(periodoData)) {
+  const start_date = dataFormatted.split('.').reverse().join('-');
+  const end_date = dataFormatted.split('.').reverse().join('-');
+  const queryTimestamp = generateDynamicTimestamp();
+  const periodoUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${start_date}&d1=${end_date}&emp=3768&nfe=1`;
+    let periodoData;
+  try {
+    periodoData = await fetchContaHubData(periodoUrl, sessionToken);
+  } catch (error) {
+    console.error('❌ Erro em fetchContaHubData período:', error);
+    throw error;
+  }
+
+  let finalData = periodoData;
+  if (!Array.isArray(periodoData)) {
+    if (periodoData?.list) finalData = periodoData.list;
+    else if (periodoData?.rows) finalData = periodoData.rows;
+    else if (periodoData?.data) finalData = periodoData.data;
+    else if (periodoData?.result) finalData = periodoData.result;
+  }
+
+  if (!finalData || !Array.isArray(finalData)) {
     console.log('⚠️ Nenhum dado de período encontrado');
     return 0;
   }
-  
-  await clearPreviousData(supabase, dataOntem, 'contahub_periodo');
-  
-  const processedData = periodoData.map(item => ({
+
+  await clearPreviousData(supabase, dataFormatted, 'contahub_periodo', 3);
+
+
+
+  const processedData = finalData.map((item: any) => ({
     dt_gerencial: item.dt_gerencial || null,
     tipovenda: item.tipovenda || null,
     vd_mesadesc: item.vd_mesadesc || null,
@@ -312,17 +480,19 @@ async function processPeriodo(supabase: any, sessionToken: string, baseUrl: stri
     usr_abriu: item.usr_abriu || null,
     pessoas: parseIntSafe(item.pessoas),
     qtd_itens: parseIntSafe(item.qtd_itens),
-    vr_pagamentos: parseFloatSafe(item.vr_pagamentos),
-    vr_produtos: parseFloatSafe(item.vr_produtos),
-    vr_repique: parseFloatSafe(item.vr_repique),
-    vr_couvert: parseFloatSafe(item.vr_couvert),
-    vr_desconto: parseFloatSafe(item.vr_desconto),
+    vr_pagamentos: parseFloatSafe(item.$vr_pagamentos),
+    vr_produtos: parseFloatSafe(item.$vr_produtos),
+    vr_repique: parseFloatSafe(item.$vr_repique),
+    vr_couvert: parseFloatSafe(item.$vr_couvert),
+    vr_desconto: parseFloatSafe(item.$vr_desconto),
     motivo: item.motivo || null,
     dt_contabil: item.dt_contabil || null,
     ultimo_pedido: item.ultimo_pedido || null,
     vd_dtcontabil: item.vd_dtcontabil || null,
     bar_id: 3
   }));
+  
+
   
   const { error } = await supabase
     .from('contahub_periodo')
@@ -338,35 +508,52 @@ async function processPeriodo(supabase: any, sessionToken: string, baseUrl: stri
 }
 
 // Função para processar dados de tempo
-async function processTempo(supabase: any, sessionToken: string, baseUrl: string, dataOntem: string) {
+async function processTempo(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
   console.log('⏱️ Processando dados de tempo...');
   
-  const tempoUrl = `${baseUrl}/apps/appvdtempo.asp?dtini=${dataOntem}&dtfim=${dataOntem}&formato=json&request=${generateDynamicTimestamp()}`;
-  const tempoData = await fetchContaHubData(tempoUrl, sessionToken);
-  
-  if (!tempoData || !Array.isArray(tempoData)) {
+  const start_date = dataFormatted.split('.').reverse().join('-');
+  const end_date = dataFormatted.split('.').reverse().join('-');
+  const queryTimestamp = generateDynamicTimestamp();
+  const tempoUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=81&d0=${start_date}&d1=${end_date}&prod=&grupo=&local=&emp=3768&nfe=1`;
+    let tempoData;
+  try {
+    tempoData = await fetchContaHubData(tempoUrl, sessionToken);
+  } catch (error) {
+    console.error('❌ Erro em fetchContaHubData tempo:', error);
+    throw error;
+  }
+
+  let finalData = tempoData;
+  if (!Array.isArray(tempoData)) {
+    if (tempoData?.list) finalData = tempoData.list;
+    else if (tempoData?.rows) finalData = tempoData.rows;
+    else if (tempoData?.data) finalData = tempoData.data;
+    else if (tempoData?.result) finalData = tempoData.result;
+  }
+
+  if (!finalData || !Array.isArray(finalData)) {
     console.log('⚠️ Nenhum dado de tempo encontrado');
     return 0;
   }
-  
-  await clearPreviousData(supabase, dataOntem, 'contahub_tempo');
-  
-  const processedData = tempoData.map(item => ({
+
+  await clearPreviousData(supabase, dataFormatted, 'contahub_tempo', 3);
+
+  const processedData = finalData.map((item: any) => ({
     grp_desc: item.grp_desc || null,
     prd_desc: item.prd_desc || null,
     vd_mesadesc: item.vd_mesadesc || null,
     vd_localizacao: item.vd_localizacao || null,
     itm: item.itm || null,
-    t0_lancamento: item.t0_lancamento || null,
-    t1_prodini: item.t1_prodini || null,
-    t2_prodfim: item.t2_prodfim || null,
-    t3_entrega: item.t3_entrega || null,
-    t0_t1: parseFloatSafe(item.t0_t1),
-    t0_t2: parseFloatSafe(item.t0_t2),
-    t0_t3: parseFloatSafe(item.t0_t3),
-    t1_t2: parseFloatSafe(item.t1_t2),
-    t1_t3: parseFloatSafe(item.t1_t3),
-    t2_t3: parseFloatSafe(item.t2_t3),
+    t0_lancamento: item['t0-lancamento'] || null,
+    t1_prodini: item['t1-prodini'] || null,
+    t2_prodfim: item['t2-prodfim'] || null,
+    t3_entrega: item['t3-entrega'] || null,
+    t0_t1: parseFloatSafe(item['t0-t1']),
+    t0_t2: parseFloatSafe(item['t0-t2']),
+    t0_t3: parseFloatSafe(item['t0-t3']),
+    t1_t2: parseFloatSafe(item['t1-t2']),
+    t1_t3: parseFloatSafe(item['t1-t3']),
+    t2_t3: parseFloatSafe(item['t2-t3']),
     prd: item.prd || null,
     prd_idexterno: item.prd_idexterno || null,
     loc_desc: item.loc_desc || null,
@@ -379,7 +566,7 @@ async function processTempo(supabase: any, sessionToken: string, baseUrl: string
     tipovenda: item.tipovenda || null,
     ano: parseIntSafe(item.ano),
     mes: parseIntSafe(item.mes),
-    dia: parseIntSafe(item.dia),
+    dia: formatDiaFromISO(item.dia),
     dds: parseIntSafe(item.dds),
     diadasemana: item.diadasemana || null,
     hora: item.hora || null,
@@ -401,8 +588,14 @@ async function processTempo(supabase: any, sessionToken: string, baseUrl: string
 }
 
 Deno.serve(async (req) => {
+  console.log('🚀 INICIANDO EDGE FUNCTION - contahub-sync-automatico');
+  console.log('🔍 Method:', req.method);
+  console.log('🔍 URL:', req.url);
+  console.log('🔍 Headers:', Object.fromEntries(req.headers.entries()));
+  
   // Handle CORS
   if (req.method === 'OPTIONS') {
+    console.log('✅ Retornando CORS OK');
     return new Response('ok', { headers: corsHeaders });
   }
 
@@ -410,11 +603,23 @@ Deno.serve(async (req) => {
   const inicioExecucao = new Date();
 
   try {
+    console.log('📥 Tentando ler body da requisição...');
+    
     // Verificar se é chamada do pgcron
     const requestBody = await req.text()
-    console.log('📥 Recebido body:', requestBody)
+    console.log('📥 Body recebido:', requestBody)
     
-    const { cronSecret } = JSON.parse(requestBody || '{}')
+    let cronSecret = '';
+    let dataEspecifica = '';
+    try {
+      const parsed = JSON.parse(requestBody || '{}');
+      cronSecret = parsed.cronSecret || '';
+      dataEspecifica = parsed.dataEspecifica || '';
+      console.log('🔑 cronSecret extraído:', cronSecret);
+      console.log('📅 dataEspecifica extraída:', dataEspecifica);
+    } catch (parseError) {
+      console.log('⚠️ Erro ao fazer parse do JSON:', parseError);
+    }
     
     // Permitir acesso do pgcron sem verificação rigorosa
     if (cronSecret === 'pgcron_contahub') {
@@ -426,19 +631,36 @@ Deno.serve(async (req) => {
     console.log('🔧 Testando acesso ao Deno.env...');
     
     // Verificar se Deno.env funciona
-    console.log('🔍 Todas as variáveis disponíveis:', Object.keys(Deno.env.toObject()));
+    const allEnvVars = Deno.env.toObject();
+    console.log('🔍 Total de variáveis disponíveis:', Object.keys(allEnvVars).length);
+    console.log('🔍 Variáveis que começam com SUPABASE:', Object.keys(allEnvVars).filter(k => k.startsWith('SUPABASE')));
+    console.log('🔍 Variáveis que começam com CONTAHUB:', Object.keys(allEnvVars).filter(k => k.startsWith('CONTAHUB')));
+    console.log('🔍 Variáveis que começam com DISCORD:', Object.keys(allEnvVars).filter(k => k.startsWith('DISCORD')));
     
     // Configuração do Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    console.log('🔍 Variáveis Supabase:', {
-      url: supabaseUrl ? 'OK' : 'FALTANDO',
-      serviceKey: supabaseServiceKey ? 'OK' : 'FALTANDO'
+    console.log('🔍 Variáveis Supabase detalhadas:', {
+      url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'FALTANDO',
+      serviceKey: supabaseServiceKey ? `${supabaseServiceKey.substring(0, 20)}...` : 'FALTANDO'
     });
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Variáveis do Supabase não encontradas');
+      const erro = 'Variáveis do Supabase não encontradas';
+      console.error('❌', erro);
+      return new Response(JSON.stringify({
+        success: false,
+        error: erro,
+        debug: {
+          supabaseUrl: !!supabaseUrl,
+          supabaseServiceKey: !!supabaseServiceKey,
+          allEnvCount: Object.keys(allEnvVars).length
+        }
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      });
     }
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -460,34 +682,48 @@ Deno.serve(async (req) => {
 
     // Configuração Discord
     const discordWebhook = Deno.env.get('DISCORD_WEBHOOK');
-    if (!discordWebhook) {
-      console.log('⚠️ DISCORD_WEBHOOK não configurado - notificações desabilitadas');
+    if (!discordWebhook || !discordWebhook.startsWith('https://')) {
+      console.log('⚠️ DISCORD_WEBHOOK não configurado ou inválido - notificações desabilitadas');
     }
     
-    // Calcular data de ontem
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    // Determinar data para sincronização
+    let targetDate;
+    let dataFormatted;
+    let dataISO;
     
-    const day = String(yesterday.getDate()).padStart(2, '0');
-    const month = String(yesterday.getMonth() + 1).padStart(2, '0');
-    const year = yesterday.getFullYear();
+    if (dataEspecifica) {
+      // Usar data específica informada (formato esperado: DD.MM.YYYY)
+      console.log(`📅 Usando data específica: ${dataEspecifica}`);
+      const [dayStr, monthStr, yearStr] = dataEspecifica.split('.');
+      targetDate = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr));
+      dataFormatted = dataEspecifica;
+      dataISO = `${yearStr}-${monthStr}-${dayStr}`;
+    } else {
+      // Calcular data de ontem (comportamento padrão)
+      targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - 1);
+      
+      const day = String(targetDate.getDate()).padStart(2, '0');
+      const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+      const year = targetDate.getFullYear();
+      
+      dataFormatted = `${day}.${month}.${year}`;
+      dataISO = `${year}-${month}-${day}`;
+    }
     
-    const dataOntem = `${day}.${month}.${year}`;
-    const dataOntemISO = `${year}-${month}-${day}`;
-    
-    console.log(`📅 Sincronizando dados de: ${dataOntem}`);
+    console.log(`📅 Sincronizando dados de: ${dataFormatted}`);
 
     // Criar log inicial
     const { data: logData, error: logError } = await supabase
       .from('sync_logs_contahub')
       .insert({
         bar_id: 3,
-        data_sync: dataOntemISO,
+        data_sync: dataISO,
         status: 'iniciado',
         inicio_execucao: inicioExecucao.toISOString(),
         triggered_by: cronSecret === 'pgcron_contahub' ? 'pgcron' : 'manual',
         detalhes: {
-          data_requisitada: dataOntem,
+          data_requisitada: dataFormatted,
           inicio: inicioExecucao.toISOString()
         }
       })
@@ -502,14 +738,14 @@ Deno.serve(async (req) => {
     }
 
     // Enviar notificação Discord de início
-    if (discordWebhook) {
+    if (discordWebhook && discordWebhook.startsWith('https://')) {
       await sendDiscordNotification(
         discordWebhook,
         '🚀 ContaHub Sync Iniciado',
-        `Iniciando sincronização automática dos dados do ContaHub para **${dataOntem}**`,
+        `Iniciando sincronização automática dos dados do ContaHub para **${dataFormatted}**`,
         3447003, // Azul
         [
-          { name: '📅 Data', value: dataOntem, inline: true },
+          { name: '📅 Data', value: dataFormatted, inline: true },
           { name: '🕐 Início', value: `<t:${Math.floor(inicioExecucao.getTime() / 1000)}:T>`, inline: true },
           { name: '🤖 Trigger', value: cronSecret === 'pgcron_contahub' ? 'Cron Automático' : 'Manual', inline: true }
         ]
@@ -521,12 +757,37 @@ Deno.serve(async (req) => {
     
     console.log('🔄 Iniciando sincronização ContaHub...');
     
-    // Processar cada tipo de dados
-    const totalAnalitico = await processAnaliticData(supabase, sessionToken, contahubBaseUrl, dataOntem);
-    const totalFatporhora = await processFatPorHora(supabase, sessionToken, contahubBaseUrl, dataOntem);
-    const totalPagamentos = await processPagamentos(supabase, sessionToken, contahubBaseUrl, dataOntem);
-    const totalPeriodo = await processPeriodo(supabase, sessionToken, contahubBaseUrl, dataOntem);
-    const totalTempo = await processTempo(supabase, sessionToken, contahubBaseUrl, dataOntem);
+    // Processar cada tipo de dados com timeouts aleatórios
+    console.log('📊 [1/5] Processando dados analíticos...');
+    const totalAnalitico = await processAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    const timeout1 = randomTimeout();
+    console.log(`⏸️ Pausando ${Math.round(timeout1/1000)}s antes do próximo módulo...`);
+    await new Promise(resolve => setTimeout(resolve, timeout1));
+    
+    console.log('🕐 [2/5] Processando faturamento por hora...');
+    const totalFatporhora = await processFatPorHora(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    const timeout2 = randomTimeout();
+    console.log(`⏸️ Pausando ${Math.round(timeout2/1000)}s antes do próximo módulo...`);
+    await new Promise(resolve => setTimeout(resolve, timeout2));
+    
+    console.log('💳 [3/5] Processando pagamentos...');
+    const totalPagamentos = await processPagamentos(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    const timeout3 = randomTimeout();
+    console.log(`⏸️ Pausando ${Math.round(timeout3/1000)}s antes do próximo módulo...`);
+    await new Promise(resolve => setTimeout(resolve, timeout3));
+    
+    console.log('📅 [4/5] Processando dados por período...');
+    const totalPeriodo = await processPeriodo(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    const timeout4 = randomTimeout();
+    console.log(`⏸️ Pausando ${Math.round(timeout4/1000)}s antes do último módulo...`);
+    await new Promise(resolve => setTimeout(resolve, timeout4));
+    
+    console.log('⏱️ [5/5] Processando dados de tempo...');
+    const totalTempo = await processTempo(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
     const fimExecucao = new Date();
     const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
@@ -550,7 +811,7 @@ Deno.serve(async (req) => {
           total_tempo: totalTempo,
           session_token: sessionToken,
           detalhes: {
-            data_requisitada: dataOntem,
+            data_requisitada: dataFormatted,
             inicio: inicioExecucao.toISOString(),
             fim: fimExecucao.toISOString(),
             duracao_segundos: duracaoSegundos,
@@ -575,16 +836,16 @@ Deno.serve(async (req) => {
     }
 
     // Enviar notificação Discord de sucesso
-    if (discordWebhook) {
+    if (discordWebhook && discordWebhook.startsWith('https://')) {
       await sendDiscordNotification(
         discordWebhook,
         '✅ ContaHub Sync Concluído',
-        `Sincronização automática concluída com **sucesso** para ${dataOntem}`,
+        `Sincronização automática concluída com **sucesso** para ${dataFormatted}`,
         5763719, // Verde
         [
           { name: '📊 Total de Registros', value: totalRegistros.toString(), inline: true },
           { name: '⏱️ Duração', value: `${duracaoSegundos}s`, inline: true },
-          { name: '📅 Data', value: dataOntem, inline: true },
+          { name: '📅 Data', value: dataFormatted, inline: true },
           { name: '📈 Analítico', value: totalAnalitico.toString(), inline: true },
           { name: '🕐 Fat/Hora', value: totalFatporhora.toString(), inline: true },
           { name: '💳 Pagamentos', value: totalPagamentos.toString(), inline: true },
@@ -599,7 +860,7 @@ Deno.serve(async (req) => {
       success: true,
       message: 'Sincronização ContaHub concluída com sucesso',
       data: {
-        data_sincronizada: dataOntem,
+        data_sincronizada: dataFormatted,
         total_registros: totalRegistros,
         duracao_segundos: duracaoSegundos,
         detalhes: {
@@ -656,7 +917,7 @@ Deno.serve(async (req) => {
 
     // Enviar notificação Discord de erro
     const discordWebhook = Deno.env.get('DISCORD_WEBHOOK');
-    if (discordWebhook) {
+    if (discordWebhook && discordWebhook.startsWith('https://')) {
       await sendDiscordNotification(
         discordWebhook,
         '❌ ContaHub Sync Falhou',
