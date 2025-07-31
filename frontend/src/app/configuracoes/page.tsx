@@ -28,6 +28,7 @@ import {
   Bell,
   Key,
   CreditCard,
+  UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -346,6 +347,98 @@ export default function ConfiguracoesPage() {
               <Link href="/configuracoes/whatsapp">
                 <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs sm:text-sm">
                   Configurar WhatsApp
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Usuários */}
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 sm:p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                    <Users className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base sm:text-lg text-gray-900 dark:text-white">
+                      Usuários
+                    </CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Gerenciar usuários</CardDescription>
+                  </div>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs"
+                >
+                  Ativo
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
+                Gerencie usuários e suas informações no sistema
+              </p>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-500">
+                  Usuários 12
+                </span>
+                <div className="w-12 sm:w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-indigo-500 rounded-full"
+                    style={{ width: '100%' }}
+                  ></div>
+                </div>
+              </div>
+              <Link href="/configuracoes/usuarios">
+                <Button className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white text-xs sm:text-sm">
+                  Gerenciar Usuários
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Permissões */}
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 sm:p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                    <UserCog className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base sm:text-lg text-gray-900 dark:text-white">
+                      Permissões
+                    </CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Configurar permissões</CardDescription>
+                  </div>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs"
+                >
+                  Sistema
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
+                Configure permissões e acessos do sistema
+              </p>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-500">
+                  Roles 3
+                </span>
+                <div className="w-12 sm:w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-yellow-500 rounded-full"
+                    style={{ width: '100%' }}
+                  ></div>
+                </div>
+              </div>
+              <Link href="/configuracoes/permissoes">
+                <Button className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs sm:text-sm">
+                  Configurar Permissões
                 </Button>
               </Link>
             </CardContent>

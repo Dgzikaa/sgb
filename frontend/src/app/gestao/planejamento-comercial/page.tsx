@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Calendar, 
   Download, 
@@ -19,7 +23,10 @@ import {
   Target,
   Activity,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit,
+  Save,
+  X
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiCall } from '@/lib/api-client';
@@ -94,6 +101,12 @@ export default function PlanejamentoComercialPage() {
   const [mesAtual, setMesAtual] = useState(new Date(anoInicial, mesInicial));
   const [totalEventos, setTotalEventos] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estados do Modal de Edição
+  const [modalOpen, setModalOpen] = useState(false);
+  const [eventoSelecionado, setEventoSelecionado] = useState<PlanejamentoData | null>(null);
+  const [editData, setEditData] = useState<any>({});
+  const [salvando, setSalvando] = useState(false);
 
   const mesesNomes = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -177,6 +190,66 @@ export default function PlanejamentoComercialPage() {
   // Função para aplicar cor verde/vermelho baseado na condição
   const getColorClass = (isGreen: boolean): string => {
     return isGreen ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+  };
+
+  // Funções do Modal de Edição
+  const abrirModal = (evento: PlanejamentoData) => {
+    setEventoSelecionado(evento);
+    setEditData({
+      nome_evento: evento.evento_nome || '',
+      m1_receita: evento.m1_receita || 0,
+      real_receita: evento.real_receita || 0,
+      clientes_plan: evento.clientes_plan || 0,
+      te_plan: evento.te_plan || 0,
+      tb_plan: evento.tb_plan || 0,
+      observacoes: ''
+    });
+    setModalOpen(true);
+  };
+
+  const fecharModal = () => {
+    setModalOpen(false);
+    setEventoSelecionado(null);
+    setEditData({});
+  };
+
+  const salvarEdicao = async () => {
+    if (!eventoSelecionado) return;
+    
+    setSalvando(true);
+    try {
+      const response = await apiCall(`/api/eventos/${eventoSelecionado.evento_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          nome: editData.nome_evento,
+          m1_r: parseFloat(editData.m1_receita) || 0,
+          cl_plan: parseInt(editData.clientes_plan) || 0,
+          te_plan: parseFloat(editData.te_plan) || 0,
+          tb_plan: parseFloat(editData.tb_plan) || 0,
+          observacoes: editData.observacoes || ''
+        })
+      });
+
+      if (response.ok) {
+        // Atualizar dados locais
+        buscarDados();
+        fecharModal();
+      } else {
+        throw new Error('Erro ao salvar');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar evento:', error);
+      setError('Erro ao salvar alterações');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setEditData((prev: any) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   if (loading) {
@@ -489,11 +562,9 @@ export default function PlanejamentoComercialPage() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              
               <span className="text-sm font-bold text-white">
                   {mesesNomes[mesAtual.getMonth()]} {mesAtual.getFullYear()}
                 </span>
-              
               <Button
                 onClick={() => navegarMes('proximo')}
                 variant="outline"
@@ -503,15 +574,13 @@ export default function PlanejamentoComercialPage() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            
             <Button onClick={buscarDados} variant="outline" size="sm" className="h-8 px-3 bg-gray-800 border-gray-600 text-white">
               <RefreshCcw className="h-3 w-3" />
             </Button>
           </div>
         </div>
-
-        {/* Área Principal da Tabela */}
-        <div className="flex-1 overflow-hidden bg-white dark:bg-gray-800 pt-0">
+         {/* Área Principal da Tabela */}
+         <div className="flex-1 overflow-hidden bg-white dark:bg-gray-800 pt-0">
           {/* Container da tabela - empurrada para baixo */}
           <div className="h-full overflow-auto pt-0">
             <div className="mt-8">
@@ -519,21 +588,19 @@ export default function PlanejamentoComercialPage() {
               <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10 border-b-2 border-gray-300 dark:border-gray-600">
                 <tr>
                   {/* Colunas fixas - largura reduzida */}
-                  <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
+              <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
                     Data
                   </th>
-                  <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
+              <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
                     Dia
                   </th>
-                  
                   {/* Faturamento */}
                   <th className="px-1 py-1 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                    Real (R$)
+                    Real
                   </th>
                   <th className="px-1 py-1 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                    M1 (R$)
+                    M1
                   </th>
-                  
                   {/* Clientes */}
                   <th className="px-2 py-1 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
                     Cl.Plan
@@ -550,55 +617,46 @@ export default function PlanejamentoComercialPage() {
                   <th className="px-2 py-1 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
                     Lot.Max
                   </th>
-                  
                   {/* Tickets */}
-                  <th className="px-2 py-1 text-center font-medium text-white bg-purple-600 border-r border-purple-500 w-16">
-                    T.E.Plan
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
+                    TE.Plan
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-purple-600 border-r border-purple-500 w-16">
-                    T.E.Real
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
+                    TE.Real
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-purple-600 border-r border-purple-500 w-16">
-                    T.B.Plan
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
+                    TB.Plan
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-purple-600 border-r border-purple-500 w-16">
-                    T.B.Real
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
+                    TB.Real
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-purple-600 border-r border-purple-500 w-16">
-                    T.Médio
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
+                    T.Medio
                   </th>
-                  
-                  {/* Rentabilidade */}
-                  <th className="px-2 py-1 text-center font-medium text-white bg-orange-600 border-r border-orange-500 w-18">
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
                     C.Art
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-orange-600 border-r border-orange-500 w-18">
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
                     C.Prod
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-orange-600 border-r border-orange-500 w-16">
-                    %Art/Fat
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
+                    %Art.Fat
                   </th>
-                  
-                  {/* Cesta */}
-                  <th className="px-2 py-1 text-center font-medium text-white bg-teal-600 border-r border-teal-500 w-12">
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
                     %B
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-teal-600 border-r border-teal-500 w-12">
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
                     %D
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-teal-600 border-r border-teal-500 w-12">
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
                     %C
                   </th>
-                  
-                  {/* Tempo */}
-                  <th className="px-2 py-1 text-center font-medium text-white bg-red-600 border-r border-red-500 w-16">
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
                     T.Coz
                   </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-red-600 border-r border-red-500 w-16">
+                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
                     T.Bar
                   </th>
-                  
-                  {/* Faturamento até 19h */}
                   <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 w-16">
                     Fat.19h
                   </th>
@@ -610,10 +668,11 @@ export default function PlanejamentoComercialPage() {
                   return (
                   <tr 
                     key={index}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors ${
                       item.real_receita > 0 ? 'bg-blue-50/20 dark:bg-blue-900/10' : ''
                     }`}
-                    title={item.evento_nome ? `Evento: ${item.evento_nome}` : 'Sem evento'}
+                    title={`${item.evento_nome ? `Evento: ${item.evento_nome}` : 'Sem evento'} - Clique para editar`}
+                    onClick={() => abrirModal(item)}
                   >
                     {/* Colunas fixas */}
                     <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-xs text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
@@ -622,15 +681,13 @@ export default function PlanejamentoComercialPage() {
                     <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-xs text-center font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
                       {item.dia_formatado}
                     </td>
-                    
                                                {/* Faturamento */}
-                           <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.real_vs_m1_green)}`}>
+                     <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.real_vs_m1_green)}`}>
                              {(item.real_receita && Number(item.real_receita) > 0) ? formatarMoeda(Number(item.real_receita)) : '-'}
                            </td>
                            <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {(item.m1_receita && Number(item.m1_receita) > 0) ? formatarMoeda(Number(item.m1_receita)) : '-'}
                            </td>
-                    
                     {/* Clientes */}
                     <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                       {item.clientes_plan || '-'}
@@ -647,7 +704,6 @@ export default function PlanejamentoComercialPage() {
                     <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                       {item.lot_max || '-'}
                     </td>
-                    
                     {/* Tickets */}
                     <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                       {item.te_plan > 0 ? formatarMoeda(item.te_plan) : '-'}
@@ -664,12 +720,11 @@ export default function PlanejamentoComercialPage() {
                     <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_medio_green)}`}>
                       {item.t_medio > 0 ? formatarMoeda(item.t_medio) : '-'}
                     </td>
-                    
                                                {/* Rentabilidade */}
-                           <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {item.c_art > 0 ? formatarMoeda(item.c_art) : '-'}
                            </td>
-                           <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                              {item.c_prod > 0 ? formatarMoeda(item.c_prod) : '-'}
                            </td>
                     <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${
@@ -712,6 +767,162 @@ export default function PlanejamentoComercialPage() {
           </div>
         </div>
       </div>
+      
+      {/* Modal de Edição do Evento */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <Edit className="h-5 w-5" />
+              Editar Evento - {eventoSelecionado?.dia_formatado}/{mesAtual.getMonth() + 1}/{mesAtual.getFullYear()}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid gap-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome_evento" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Nome do Evento
+                </Label>
+                <Input
+                  id="nome_evento"
+                  value={editData.nome_evento || ''}
+                  onChange={(e) => handleInputChange('nome_evento', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  placeholder="Nome do evento"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="m1_receita" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Meta M1 (R$)
+                </Label>
+                <Input
+                  id="m1_receita"
+                  type="number"
+                  value={editData.m1_receita || ''}
+                  onChange={(e) => handleInputChange('m1_receita', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="clientes_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Clientes Planejados
+                </Label>
+                <Input
+                  id="clientes_plan"
+                  type="number"
+                  value={editData.clientes_plan || ''}
+                  onChange={(e) => handleInputChange('clientes_plan', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  placeholder="0"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="te_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  TE Plan (R$)
+                </Label>
+                <Input
+                  id="te_plan"
+                  type="number"
+                  value={editData.te_plan || ''}
+                  onChange={(e) => handleInputChange('te_plan', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="tb_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  TB Plan (R$)
+                </Label>
+                <Input
+                  id="tb_plan"
+                  type="number"
+                  value={editData.tb_plan || ''}
+                  onChange={(e) => handleInputChange('tb_plan', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="observacoes" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Observações
+              </Label>
+              <Textarea
+                id="observacoes"
+                value={editData.observacoes || ''}
+                onChange={(e) => handleInputChange('observacoes', e.target.value)}
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white min-h-[100px]"
+                placeholder="Adicione observações sobre ajustes manuais, receitas por fora, etc..."
+              />
+            </div>
+
+            {/* Dados Atuais (Read-only) */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Dados Atuais do Sistema</h4>
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div className="space-y-1">
+                  <span className="text-gray-500 dark:text-gray-400">Receita Real:</span>
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {formatarMoeda(eventoSelecionado?.real_receita || 0)}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-gray-500 dark:text-gray-400">Clientes Real:</span>
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {eventoSelecionado?.clientes_real || 0}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-gray-500 dark:text-gray-400">Ticket Médio:</span>
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {formatarMoeda(eventoSelecionado?.t_medio || 0)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={fecharModal}
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancelar
+            </Button>
+            <Button
+              onClick={salvarEdicao}
+              disabled={salvando}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+            >
+              {salvando ? (
+                <>
+                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Salvar Alterações
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

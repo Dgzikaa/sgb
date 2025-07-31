@@ -5,36 +5,8 @@ import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { useForceDarkMode } from '@/hooks/useForceDarkMode';
 import {
-  TrendingUp,
-  Users,
-  DollarSign,
-  Activity,
-  Calendar,
   BarChart3,
-  Target,
-  Award,
-  Zap,
-  Star,
   CheckCircle,
-  AlertTriangle,
-  Info,
-  ArrowRight,
-  Plus,
-  Settings,
-  Bell,
-  Search,
-  Filter,
-  Download,
-  Share2,
-  Eye,
-  Edit,
-  Trash2,
-  MoreHorizontal,
-  ChevronDown,
-  ChevronRight,
-  XCircle,
-  AlertTriangle as AlertTriangleIcon,
-  Info as InfoIcon,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -48,43 +20,7 @@ export default function HomePage() {
     setPageTitle('🏠 Home');
   }, [setPageTitle]);
 
-  const stats = [
-    {
-      label: 'Receita Hoje',
-      value: 'R$ 2.450,00',
-      change: '+12%',
-      positive: true,
-      icon: DollarSign,
-      color:
-        'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-    },
-    {
-      label: 'Clientes Atendidos',
-      value: '34',
-      change: '+8%',
-      positive: true,
-      icon: Users,
-      color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    },
-    {
-      label: 'Ticket Médio',
-      value: 'R$ 72,06',
-      change: '+5%',
-      positive: true,
-      icon: TrendingUp,
-      color:
-        'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-    },
-    {
-      label: 'Reservas Hoje',
-      value: '8',
-      change: '2 pendentes',
-      positive: false,
-      icon: Calendar,
-      color:
-        'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-    },
-  ];
+
 
   const quickActions = [
     {
@@ -100,13 +36,6 @@ export default function HomePage() {
       href: '/relatorios',
       icon: BarChart3,
       color: 'bg-blue-500',
-    },
-    {
-      title: 'Configurações',
-      description: 'Gerenciar configurações',
-      href: '/configuracoes',
-      icon: AlertTriangle,
-      color: 'bg-gray-500',
     },
   ];
 
@@ -155,32 +84,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-colors duration-300"
-          >
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors duration-300 ${stat.color}`}
-            >
-              <stat.icon className="w-6 h-6" />
-            </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              {stat.value}
-            </div>
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-              {stat.label}
-            </div>
-            <div
-              className={`text-sm font-medium ${stat.positive ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}
-            >
-              {stat.change}
-            </div>
-          </div>
-        ))}
-      </div>
+
 
       {/* Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

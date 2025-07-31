@@ -114,8 +114,8 @@ export async function GET(request: NextRequest) {
     const resultado: PlanejamentoData[] = dados?.map(item => ({
       evento_id: item.evento_id || null,
       data_evento: item.data_evento,
-      dia_semana: item.dia_semana, // Usar dia_semana da view (PostgreSQL)
-      evento_nome: item.evento_nome,
+      dia_semana: item.dia_semana_nome, // ✅ CORRIGIDO: Usar dia_semana_nome da view
+      evento_nome: item.nome_evento,
       bar_id: item.bar_id,
       bar_nome: item.bar_nome || 'Ordinário Bar',
       dia: parseInt(item.data_evento.split('-')[2]), // Extrair dia da string YYYY-MM-DD
@@ -123,45 +123,45 @@ export async function GET(request: NextRequest) {
       ano: item.ano,
       dia_formatado: item.data_evento.split('-')[2], // Usar dia da string YYYY-MM-DD
       data_curta: `${item.data_evento.split('-')[2]}/${item.data_evento.split('-')[1]}`, // Formato DD/MM direto da string
-      real_receita: parseFloat(item.real_receita) || 0,
-      m1_receita: parseFloat(item.m1_receita) || 0,
+      real_receita: parseFloat(item.receita_real_total) || 0,
+      m1_receita: parseFloat(item.m1_meta) || 0,
       
       // Flags para coloração verde/vermelho
-      real_vs_m1_green: parseFloat(item.real_receita) > parseFloat(item.m1_receita),
-      ci_real_vs_plan_green: parseFloat(item.cl_real) > parseFloat(item.cl_plan),
+      real_vs_m1_green: parseFloat(item.receita_real_total) > parseFloat(item.m1_meta),
+      ci_real_vs_plan_green: parseFloat(item.cl_real_total) > parseFloat(item.cl_plan), 
       te_real_vs_plan_green: parseFloat(item.te_real) > parseFloat(item.te_plan),
       tb_real_vs_plan_green: parseFloat(item.tb_real) > parseFloat(item.tb_plan),
       t_medio_green: parseFloat(item.t_medio) > 93.00,
-      percent_art_fat_green: parseFloat(item.percent_art_fat) < 112,
+      percent_art_fat_green: parseFloat(item.percent_art_fat) < 15, 
       t_coz_green: parseFloat(item.t_coz) < 12,
       t_bar_green: parseFloat(item.t_bar) < 4,
-      fat_19h_green: parseFloat(item.fat_19h) > 15,
-      clientes_plan: parseInt(item.cl_plan) || 0,
-      clientes_real: parseInt(item.cl_real) || 0,
-      res_total: parseInt(item.res_tot) || 0,
-      res_presente: parseInt(item.res_p) || 0,
+      fat_19h_green: parseFloat(item.fat_19h_percent) > 15,
+      clientes_plan: parseInt(item.cl_plan) || 0, // ✅ CORRIGIDO: cl_plan da view
+      clientes_real: parseInt(item.cl_real_total) || 0, // ✅ CORRIGIDO: cl_real_total da view
+      res_total: parseInt(item.res_tot) || 0, // ✅ CORRIGIDO: res_tot da view
+      res_presente: parseInt(item.res_p) || 0, // ✅ CORRIGIDO: res_p da view
       lot_max: parseInt(item.lot_max) || 0,
       te_plan: parseFloat(item.te_plan) || 0,
       te_real: parseFloat(item.te_real) || 0,
       tb_plan: parseFloat(item.tb_plan) || 0,
       tb_real: parseFloat(item.tb_real) || 0,
       t_medio: parseFloat(item.t_medio) || 0,
-      c_art: parseFloat(item.c_art) || 0,
-      c_prod: parseFloat(item.c_prod) || 0,
-      percent_art_fat: parseFloat(item.percent_art_fat) || 0,
-      percent_b: parseFloat(item.percent_b) || 0,
-      percent_d: parseFloat(item.percent_d) || 0,
-      percent_c: parseFloat(item.percent_c) || 0,
+      c_art: parseFloat(item.c_art) || 0, // TODO: implementar campo na view
+      c_prod: parseFloat(item.c_prod) || 0, // TODO: implementar campo na view  
+      percent_art_fat: parseFloat(item.percent_art_fat) || 0, // TODO: implementar campo na view
+      percent_b: parseFloat(item.percent_bebidas) || 0,
+      percent_d: parseFloat(item.percent_drinks) || 0,
+      percent_c: parseFloat(item.percent_comidas) || 0,
       t_coz: parseFloat(item.t_coz) || 0,
       t_bar: parseFloat(item.t_bar) || 0,
-      fat_19h: parseFloat(item.fat_19h) || 0,
+      fat_19h: parseFloat(item.fat_19h_percent) || 0,
       pagamentos_liquido: 0, // Campo não existe na VIEW
       total_vendas: 0, // Campo não existe na VIEW
       vendas_bebida: 0, // Campo não existe na VIEW
       vendas_drink: 0, // Campo não existe na VIEW
       vendas_comida: 0, // Campo não existe na VIEW
-      percentual_atingimento_receita: item.real_receita > 0 && item.m1_receita > 0 ? ((parseFloat(item.real_receita) / parseFloat(item.m1_receita)) * 100) : 0,
-      percentual_atingimento_clientes: item.cl_real > 0 && item.cl_plan > 0 ? ((parseInt(item.cl_real) / parseInt(item.cl_plan)) * 100) : 0,
+      percentual_atingimento_receita: parseFloat(item.percentual_atingimento_m1) || 0,
+      percentual_atingimento_clientes: item.cl_real_total > 0 && item.cl_plan > 0 ? ((parseInt(item.cl_real_total) / parseInt(item.cl_plan)) * 100) : 0,
       performance_geral: 85 // Campo calculado como número
     })) || [];
 
@@ -186,4 +186,4 @@ export async function POST(request: NextRequest) {
     console.error('Erro ao salvar dados:', error);
     return NextResponse.json({ error: 'Erro ao salvar dados' }, { status: 500 });
   }
-} 
+}
