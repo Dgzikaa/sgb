@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       
       // Flags para coloração verde/vermelho
       real_vs_m1_green: parseFloat(item.real_receita) > parseFloat(item.m1_receita),
-      ci_real_vs_plan_green: parseFloat(item.clientes_real) > parseFloat(item.clientes_plan),
+      ci_real_vs_plan_green: parseFloat(item.cl_real) > parseFloat(item.cl_plan),
       te_real_vs_plan_green: parseFloat(item.te_real) > parseFloat(item.te_plan),
       tb_real_vs_plan_green: parseFloat(item.tb_real) > parseFloat(item.tb_plan),
       t_medio_green: parseFloat(item.t_medio) > 93.00,
@@ -136,10 +136,10 @@ export async function GET(request: NextRequest) {
       t_coz_green: parseFloat(item.t_coz) < 12,
       t_bar_green: parseFloat(item.t_bar) < 4,
       fat_19h_green: parseFloat(item.fat_19h) > 15,
-      clientes_plan: parseInt(item.clientes_plan) || 0,
-      clientes_real: parseInt(item.clientes_real) || 0,
-      res_total: 0, // Campo não existe na VIEW
-      res_presente: 0, // Campo não existe na VIEW
+      clientes_plan: parseInt(item.cl_plan) || 0,
+      clientes_real: parseInt(item.cl_real) || 0,
+      res_total: parseInt(item.res_tot) || 0,
+      res_presente: parseInt(item.res_p) || 0,
       lot_max: parseInt(item.lot_max) || 0,
       te_plan: parseFloat(item.te_plan) || 0,
       te_real: parseFloat(item.te_real) || 0,
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
       vendas_drink: 0, // Campo não existe na VIEW
       vendas_comida: 0, // Campo não existe na VIEW
       percentual_atingimento_receita: item.real_receita > 0 && item.m1_receita > 0 ? ((parseFloat(item.real_receita) / parseFloat(item.m1_receita)) * 100) : 0,
-      percentual_atingimento_clientes: item.clientes_real > 0 && item.clientes_plan > 0 ? ((parseInt(item.clientes_real) / parseInt(item.clientes_plan)) * 100) : 0,
+      percentual_atingimento_clientes: item.cl_real > 0 && item.cl_plan > 0 ? ((parseInt(item.cl_real) / parseInt(item.cl_plan)) * 100) : 0,
       performance_geral: 85 // Campo calculado como número
     })) || [];
 

@@ -1,0 +1,10 @@
+[33mae0913d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix: restaurar VIEW planejamento_comercial_view completa com todas as regras de negócio
+[33mc7e8e88[m mobile ajustes
+[33medb32de[m muita coisa edge functions funcionando
+[33m80c40c2[m feat: implementa sistema completo de logs e notificações Discord para sync ContaHub
+[33mc4a72ab[m fix: configura pgcron para NIBO com timeout de 15min e ajusta Vercel cron para teste simples
+[33me156588[m feat: adiciona endpoint de teste simples NIBO para debug
+[33m52b10f1[m feat: otimiza NIBO sync para últimos 30 dias para melhor performance
+[33m07b584c[m feat: adiciona endpoint de teste para debug NIBO
+[33m0185f26[m fix: corrige onConflict das Edge Functions NIBO para usar apenas nibo_id
+[33mfbba3fc[m fix vercel cron
