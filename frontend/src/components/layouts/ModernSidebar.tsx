@@ -40,6 +40,7 @@ interface SubMenuItem {
   href: string;
   badge?: number;
   description?: string;
+  permission?: string;
 }
 
 interface SidebarItem {
@@ -48,6 +49,7 @@ interface SidebarItem {
   href?: string;
   badge?: number;
   color?: string;
+  permission?: string;
   subItems?: SubMenuItem[];
 }
 
@@ -58,7 +60,17 @@ export function ModernSidebar() {
     []
   );
   const pathname = usePathname();
-  const { isRole } = usePermissions();
+  const { isRole, hasPermission, user } = usePermissions();
+  
+  // Debug: Log das permissões do usuário
+  React.useEffect(() => {
+    if (user) {
+      console.log('🔍 Debug Sidebar - Usuário:', user);
+      console.log('🔍 Debug Sidebar - Permissões:', user.modulos_permitidos);
+      console.log('🔍 Debug Sidebar - hasPermission("checklists"):', hasPermission('checklists'));
+      console.log('🔍 Debug Sidebar - hasPermission("todos"):', hasPermission('todos'));
+    }
+  }, [user, hasPermission]);
   const { badges } = useMenuBadges();
 
   // Auto-expandir Financeiro se estiver na página DRE
@@ -68,197 +80,288 @@ export function ModernSidebar() {
     }
   }, [pathname, expandedItems]);
 
-  // Função para obter itens da sidebar com badges dinâmicos
-  const getSidebarItems = (): SidebarItem[] => [
-    {
-      icon: Home,
-      label: 'Home',
-      href: '/home',
-      color: 'text-blue-600 dark:text-blue-400',
-      badge: badges.home > 0 ? badges.home : undefined,
-    },
+  // Função para obter itens da sidebar com badges dinâmicos e filtros de permissão
+  const getSidebarItems = (): SidebarItem[] => {
+    const allItems: SidebarItem[] = [
+      {
+        icon: Home,
+        label: 'Home',
+        href: '/home',
+        color: 'text-blue-600 dark:text-blue-400',
+        badge: badges.home > 0 ? badges.home : undefined,
+        permission: 'home',
+      },
 
-    {
-      icon: Zap,
-      label: 'Operações',
-      href: '/operacoes',
-      color: 'text-orange-600 dark:text-orange-400',
-      subItems: [
-        {
-          icon: CheckSquare,
-          label: 'Gestão de Checklists',
-          href: '/operacoes/checklists',
-          description: 'Gestão de checklists',
-        },
-        {
-          icon: Users,
-          label: 'Meus Checklists',
-          href: '/operacoes/checklists/checklists-funcionario',
-          description: 'Meus checklists pessoais',
-        },
-        {
-          icon: FileText,
-          label: 'Receitas',
-          href: '/operacoes/receitas',
-          description: 'Gestão de receitas operacionais',
-        },
-        {
-          icon: Zap,
-          label: 'Terminal de Produção',
-          href: '/operacoes/terminal',
-          description: 'Terminal de produção em tempo real',
-        },
-      ],
-    },
+      {
+        icon: Zap,
+        label: 'Operações',
+        href: '/operacoes',
+        color: 'text-orange-600 dark:text-orange-400',
+        permission: 'operacoes',
+        subItems: [
+          {
+            icon: CheckSquare,
+            label: 'Gestão de Checklists',
+            href: '/operacoes/checklists',
+            description: 'Gestão de checklists',
+            permission: 'checklists',
+          },
+          {
+            icon: Users,
+            label: 'Meus Checklists',
+            href: '/operacoes/checklists/checklists-funcionario',
+            description: 'Meus checklists pessoais',
+            permission: 'checklists',
+          },
+          {
+            icon: FileText,
+            label: 'Receitas',
+            href: '/operacoes/receitas',
+            description: 'Gestão de receitas operacionais',
+            permission: 'receitas_insumos',
+          },
+          {
+            icon: Zap,
+            label: 'Terminal de Produção',
+            href: '/operacoes/terminal',
+            description: 'Terminal de produção em tempo real',
+            permission: 'terminal_producao',
+          },
+        ],
+      },
 
-    {
-      icon: BarChart3,
-      label: 'Relatórios',
-      href: '/relatorios',
-      color: 'text-blue-600 dark:text-blue-400',
-      subItems: [
-        {
-          icon: BarChart3,
-          label: 'Visão Geral',
-          href: '/relatorios/visao-geral',
-          description: 'Dashboard principal',
-        },
-      ],
-    },
+      {
+        icon: BarChart3,
+        label: 'Relatórios',
+        href: '/relatorios',
+        color: 'text-blue-600 dark:text-blue-400',
+        permission: 'relatorio_producoes',
+        subItems: [
+          {
+            icon: BarChart3,
+            label: 'Visão Geral',
+            href: '/relatorios/visao-geral',
+            description: 'Dashboard principal',
+            permission: 'dashboard_diario',
+          },
+        ],
+      },
 
-    {
-      icon: TrendingUp,
-      label: 'Marketing',
-      href: '/marketing',
-      color: 'text-pink-600 dark:text-pink-400',
-      subItems: [
-        {
-          icon: TrendingUp,
-          label: 'Marketing 360',
-          href: '/marketing/marketing-360',
-          description: 'Estratégia completa',
-        },
-      ],
-    },
+      {
+        icon: TrendingUp,
+        label: 'Marketing',
+        href: '/marketing',
+        color: 'text-pink-600 dark:text-pink-400',
+        permission: 'marketing',
+        subItems: [
+          {
+            icon: TrendingUp,
+            label: 'Marketing 360',
+            href: '/marketing/marketing-360',
+            description: 'Estratégia completa',
+            permission: 'marketing_360',
+          },
+        ],
+      },
 
-    {
-      icon: Users,
-      label: 'Gestão',
-      href: '/gestao',
-      color: 'text-indigo-600 dark:text-indigo-400',
-      subItems: [
-        {
-          icon: TrendingUp,
-          label: 'Tabela de Desempenho',
-          href: '/gestao/desempenho',
-          description: 'Métricas e ranking da equipe',
-        },
-        {
-          icon: Calendar,
-          label: 'Calendário',
-          href: '/gestao/calendario',
-          description: 'Gestão de eventos e agendamentos',
-        },
-        {
-          icon: BarChart3,
-          label: 'Planejamento Comercial',
-          href: '/gestao/planejamento-comercial',
-          description: 'Análise detalhada de eventos e indicadores',
-        },
-      ],
-    },
+      {
+        icon: Users,
+        label: 'Gestão',
+        href: '/gestao',
+        color: 'text-indigo-600 dark:text-indigo-400',
+        permission: 'gestao',
+        subItems: [
+          {
+            icon: TrendingUp,
+            label: 'Tabela de Desempenho',
+            href: '/gestao/desempenho',
+            description: 'Métricas e ranking da equipe',
+            permission: 'tempo',
+          },
+          {
+            icon: Calendar,
+            label: 'Calendário',
+            href: '/gestao/calendario',
+            description: 'Gestão de eventos e agendamentos',
+            permission: 'planejamento',
+          },
+          {
+            icon: BarChart3,
+            label: 'Planejamento Comercial',
+            href: '/gestao/planejamento-comercial',
+            description: 'Análise detalhada de eventos e indicadores',
+            permission: 'planejamento',
+          },
+        ],
+      },
 
-    {
-      icon: DollarSign,
-      label: 'Financeiro',
-      href: '/financeiro',
-      color: 'text-green-600 dark:text-green-400',
-      subItems: [
-        {
-          icon: Calendar,
-          label: 'Agendamento',
-          href: '/financeiro/agendamento',
-          description: 'Agendar pagamentos',
-        },
-        {
-          icon: BarChart3,
-          label: 'DRE',
-          href: '/financeiro/dre',
-          description: 'Demonstrativo de Resultado',
-        },
-      ],
-    },
+      {
+        icon: DollarSign,
+        label: 'Financeiro',
+        href: '/financeiro',
+        color: 'text-green-600 dark:text-green-400',
+        permission: 'financeiro',
+        subItems: [
+          {
+            icon: Calendar,
+            label: 'Agendamento',
+            href: '/financeiro/agendamento',
+            description: 'Agendar pagamentos',
+            permission: 'pagamentos',
+          },
+          {
+            icon: BarChart3,
+            label: 'DRE',
+            href: '/financeiro/dre',
+            description: 'Demonstrativo de Resultado',
+            permission: 'dashboard_financeiro_mensal',
+          },
+        ],
+      },
 
-    {
-      icon: Settings,
-      label: 'Configurações',
-      href: '/configuracoes',
-      color: 'text-gray-600 dark:text-gray-400',
-      badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
-      subItems: [
-        {
-          icon: CheckSquare,
-          label: 'Checklists',
-          href: '/configuracoes/checklists',
-          description: 'Configurar checklists',
-        },
-        {
-          icon: Target,
-          label: 'Metas',
-          href: '/configuracoes/metas',
-          description: 'Configurar metas',
-        },
-        {
-          icon: Database,
-          label: 'Integrações',
-          href: '/configuracoes/integracoes',
-          description: 'APIs e integrações',
-        },
-        {
-          icon: Shield,
-          label: 'Segurança',
-          href: '/configuracoes/seguranca',
-          description: 'Configurações de segurança',
-        },
-        {
-          icon: MessageSquare,
-          label: 'WhatsApp',
-          href: '/configuracoes/whatsapp',
-          description: 'Configurar WhatsApp',
-        },
-        {
-          icon: Zap,
-          label: 'ContaHub Auto',
-          href: '/configuracoes/contahub-automatico',
-          description: 'Sincronização automática',
-        },
-        {
-          icon: Clock,
-          label: 'Meta Config',
-          href: '/configuracoes/meta-config',
-          description: 'Configuração Meta',
-        },
-        {
-          icon: FileText,
-          label: 'Templates',
-          href: '/configuracoes/templates',
-          description: 'Gerenciar templates',
-        },
-        {
-          icon: BarChart3,
-          label: 'Analytics',
-          href: '/configuracoes/analytics',
-          description: 'Configurar analytics',
-        },
-        {
-          icon: Smartphone,
-          label: 'PWA',
-          href: '/configuracoes/pwa',
-          description: 'Progressive Web App',
-        },
-      ],
-    },
-  ];
+      {
+        icon: Settings,
+        label: 'Configurações',
+        href: '/configuracoes',
+        color: 'text-gray-600 dark:text-gray-400',
+        badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
+        permission: 'configuracoes',
+        subItems: [
+          {
+            icon: CheckSquare,
+            label: 'Checklists',
+            href: '/configuracoes/checklists',
+            description: 'Configurar checklists',
+            permission: 'configuracoes_checklists',
+          },
+          {
+            icon: Target,
+            label: 'Metas',
+            href: '/configuracoes/metas',
+            description: 'Configurar metas',
+            permission: 'configuracoes_metas',
+          },
+          {
+            icon: Database,
+            label: 'Integrações',
+            href: '/configuracoes/integracoes',
+            description: 'APIs e integrações',
+            permission: 'configuracoes_integracoes',
+          },
+          {
+            icon: Shield,
+            label: 'Segurança',
+            href: '/configuracoes/seguranca',
+            description: 'Configurações de segurança',
+            permission: 'configuracoes_seguranca',
+          },
+          {
+            icon: MessageSquare,
+            label: 'WhatsApp',
+            href: '/configuracoes/whatsapp',
+            description: 'Configurar WhatsApp',
+            permission: 'configuracoes_whatsapp',
+          },
+          {
+            icon: Zap,
+            label: 'ContaHub Auto',
+            href: '/configuracoes/contahub-automatico',
+            description: 'Sincronização automática',
+            permission: 'configuracoes_contahub',
+          },
+          {
+            icon: Clock,
+            label: 'Meta Config',
+            href: '/configuracoes/meta-config',
+            description: 'Configuração Meta',
+            permission: 'configuracoes_meta_config',
+          },
+          {
+            icon: FileText,
+            label: 'Templates',
+            href: '/configuracoes/templates',
+            description: 'Gerenciar templates',
+            permission: 'configuracoes_templates',
+          },
+          {
+            icon: BarChart3,
+            label: 'Analytics',
+            href: '/configuracoes/analytics',
+            description: 'Configurar analytics',
+            permission: 'configuracoes_analytics',
+          },
+          {
+            icon: Smartphone,
+            label: 'PWA',
+            href: '/configuracoes/pwa',
+            description: 'Progressive Web App',
+            permission: 'configuracoes_pwa',
+          },
+        ],
+      },
+    ];
+
+    // Filtrar itens baseado nas permissões do usuário
+    const filterItemsByPermissions = (items: SidebarItem[]): SidebarItem[] => {
+      return items.filter(item => {
+        // Home sempre é visível
+        if (item.label === 'Home') {
+          return true;
+        }
+
+        // Operações é visível se tem qualquer permissão relacionada
+        if (item.label === 'Operações') {
+          return hasPermission('checklists') || 
+                 hasPermission('terminal_producao') || 
+                 hasPermission('receitas_insumos') ||
+                 hasPermission('operacoes') ||
+                 hasPermission('todos');
+        }
+
+        // Se o item tem permissão definida, verificar se o usuário tem acesso
+        // Caso contrário, assumir que tem acesso (para itens sem permissão específica)
+        let hasItemAccess = true;
+        
+        if (item.permission) {
+          hasItemAccess = hasPermission(item.permission) || 
+                         hasPermission(item.label.toLowerCase()) ||
+                         hasPermission(item.label.toLowerCase().replace(' ', '_')) ||
+                         hasPermission('todos'); // Permissão especial "todos"
+        }
+
+        // Se o item tem subitens, filtrar os subitens também
+        if (item.subItems) {
+          const filteredSubItems = item.subItems.filter(subItem => {
+            if (!subItem.permission) return true;
+            
+            // Verificar múltiplas variações da permissão
+            return hasPermission(subItem.permission) ||
+                   hasPermission(subItem.label.toLowerCase()) ||
+                   hasPermission(subItem.label.toLowerCase().replace(' ', '_')) ||
+                   hasPermission(subItem.label.toLowerCase().replace(/\s+/g, '_')) ||
+                   hasPermission('todos'); // Permissão especial "todos"
+          });
+          
+          // Se há subitens após filtrar, mostrar o item pai
+          if (filteredSubItems.length > 0) {
+            item.subItems = filteredSubItems;
+            return true;
+          }
+          
+          // Se não há subitens mas o item pai tem acesso direto, mostrar
+          if (hasItemAccess) {
+            return true;
+          }
+          
+          return false;
+        }
+
+        return hasItemAccess;
+      });
+    };
+
+    return filterItemsByPermissions(allItems);
+  };
 
   // Obter itens da sidebar com badges
   const sidebarItems = getSidebarItems();

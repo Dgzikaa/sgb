@@ -12,8 +12,7 @@ import {
   DialogDescription, 
   DialogFooter, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  DialogTitle
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -68,7 +67,7 @@ const ROLES_OPCOES = [
   { value: 'financeiro', label: 'Financeiro', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
 ];
 
-export default function UsuariosPage() {
+function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -303,13 +302,18 @@ export default function UsuariosPage() {
                 Gerencie usuários do sistema e suas permissões
               </p>
             </div>
+            <Button 
+              onClick={() => {
+                resetForm();
+                setIsDialogOpen(true);
+              }} 
+              className="btn-primary-dark"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Usuário
+            </Button>
+
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={resetForm} className="btn-primary-dark">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Usuário
-                </Button>
-              </DialogTrigger>
               <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-4xl max-h-[90vh] overflow-hidden">
                 <DialogHeader className="border-b border-gray-700 pb-4">
                   <div className="flex items-center gap-3">
@@ -552,8 +556,8 @@ export default function UsuariosPage() {
                     <CheckCircle className="w-4 h-4 mr-2" />
                     {editingUser ? 'Atualizar' : 'Criar'} Usuário
                   </Button>
-                </DialogFooter>
-              </DialogContent>
+                                  </DialogFooter>
+                </DialogContent>
             </Dialog>
           </div>
 
@@ -663,3 +667,5 @@ export default function UsuariosPage() {
     </div>
   );
 }
+
+export default UsuariosPage;

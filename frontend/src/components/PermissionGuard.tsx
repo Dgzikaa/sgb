@@ -121,80 +121,96 @@ export default function PermissionGuard({
     }
 
     return (
-      <div className="min-h-[400px] flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="max-w-2xl mx-auto p-8">
-          <Alert className="border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              <div className="text-center">
-                <div className="mb-4">
-                  <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-red-800 mb-2">
-                    Acesso Negado
-                  </h2>
-                  <p className="text-red-700 mb-4">
-                    Você não tem permissão para acessar esta página.
-                  </p>
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-8">
+            <div className="text-center">
+              <div className="mb-6">
+                <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-10 h-10 text-red-500 dark:text-red-400" />
                 </div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Acesso Negado
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Você não tem permissão para acessar esta página.
+                </p>
+              </div>
 
-                <div className="bg-red-100 rounded-lg p-4 mb-6">
-                  <div className="text-sm space-y-2">
-                    {requiredRoles.length > 0 && (
-                      <div>
-                        <strong>Roles necessários:</strong>{' '}
-                        {requiredRoles.join(', ')}
-                      </div>
-                    )}
-                    {requiredModules.length > 0 && (
-                      <div>
-                        <strong>Módulos necessários:</strong>{' '}
-                        {requiredModules.join(', ')}
-                      </div>
-                    )}
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6 text-left">
+                <div className="text-sm space-y-2 text-gray-700 dark:text-gray-300">
+                  {requiredRoles.length > 0 && (
                     <div>
-                      <strong>Seu role:</strong> {user?.role || 'Não definido'}
+                      <strong className="text-gray-900 dark:text-white">Funções necessárias:</strong>{' '}
+                      <span className="text-red-600 dark:text-red-400">{requiredRoles.join(', ')}</span>
                     </div>
+                  )}
+                  {requiredModules.length > 0 && (
                     <div>
-                      <strong>Seus módulos:</strong>{' '}
+                      <strong className="text-gray-900 dark:text-white">Módulos necessários:</strong>{' '}
+                      <span className="text-red-600 dark:text-red-400">{requiredModules.join(', ')}</span>
+                    </div>
+                  )}
+                  <div>
+                    <strong className="text-gray-900 dark:text-white">Sua função:</strong>{' '}
+                    <span className="text-blue-600 dark:text-blue-400">{user?.role || 'Não definido'}</span>
+                  </div>
+                  <div>
+                    <strong className="text-gray-900 dark:text-white">Seus módulos:</strong>{' '}
+                    <span className="text-green-600 dark:text-green-400">
                       {(() => {
                         if (!user?.modulos_permitidos) return 'Nenhum';
                         if (Array.isArray(user.modulos_permitidos)) {
-                          return user.modulos_permitidos.join(', ');
+                          return user.modulos_permitidos.length > 0 ? user.modulos_permitidos.join(', ') : 'Nenhum';
                         }
                         if (typeof user.modulos_permitidos === 'object') {
-                          return Object.keys(user.modulos_permitidos).join(', ');
+                          const keys = Object.keys(user.modulos_permitidos);
+                          return keys.length > 0 ? keys.join(', ') : 'Nenhum';
                         }
                         return 'Nenhum';
                       })()}
-                    </div>
+                    </span>
                   </div>
                 </div>
-
-                <div className="flex items-center justify-center space-x-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.back()}
-                    className="text-red-700 border-red-300 hover:bg-red-100"
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Voltar
-                  </Button>
-                  <Button
-                    onClick={() => router.push(redirectTo)}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    <Home className="w-4 h-4 mr-2" />
-                    Ir para Home
-                  </Button>
-                </div>
-
-                <p className="text-xs text-red-600 mt-4">
-                  Entre em contato com o administrador se precisar de acesso a
-                  esta funcionalidade.
-                </p>
               </div>
-            </AlertDescription>
-          </Alert>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Tentar voltar, mas se não conseguir, ir para home
+                    try {
+                      if (window.history.length > 1) {
+                        router.back();
+                      } else {
+                        router.push(redirectTo);
+                      }
+                    } catch {
+                      router.push(redirectTo);
+                    }
+                  }}
+                  className="bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 w-full sm:w-auto"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Voltar
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Forçar navegação para home
+                    window.location.href = redirectTo;
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Ir para Home
+                </Button>
+              </div>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-6">
+                Entre em contato com o administrador se precisar de acesso a esta funcionalidade.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );

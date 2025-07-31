@@ -1,45 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Definindo as permissões do sistema baseadas na estrutura atual
+// Definindo as permissões baseadas na SIDEBAR REAL do sistema
 const MODULOS_SISTEMA = [
+  // Home
+  { id: 'home', nome: 'Home', categoria: 'principal' },
+  
   // Operações
-  { id: 'checklists', nome: 'Checklists', categoria: 'operacoes' },
-  { id: 'terminal_producao', nome: 'Terminal de Produção', categoria: 'operacoes' },
-  { id: 'receitas_insumos', nome: 'Receitas e Insumos', categoria: 'operacoes' },
-  { id: 'produtos', nome: 'Produtos', categoria: 'operacoes' },
-  { id: 'periodo', nome: 'Gestão de Período', categoria: 'operacoes' },
+  { id: 'operacoes_checklists', nome: 'Gestão de Checklists', categoria: 'operacoes' },
+  { id: 'operacoes_meus_checklists', nome: 'Meus Checklists', categoria: 'operacoes' },
+  { id: 'operacoes_receitas', nome: 'Receitas', categoria: 'operacoes' },
+  { id: 'operacoes_terminal', nome: 'Terminal de Produção', categoria: 'operacoes' },
   
   // Relatórios
-  { id: 'relatorio_producoes', nome: 'Relatório de Produções', categoria: 'relatorios' },
-  { id: 'relatorio_produtos', nome: 'Relatório de Produtos', categoria: 'relatorios' },
-  { id: 'analitico', nome: 'Relatório Analítico', categoria: 'relatorios' },
-  { id: 'fatporhora', nome: 'Faturamento por Hora', categoria: 'relatorios' },
-  { id: 'tempo', nome: 'Relatório de Tempo', categoria: 'relatorios' },
-  { id: 'pagamentos', nome: 'Relatório de Pagamentos', categoria: 'relatorios' },
+  { id: 'relatorios_visao_geral', nome: 'Visão Geral', categoria: 'relatorios' },
   
-  // Dashboards
-  { id: 'dashboard_diario', nome: 'Dashboard Diário', categoria: 'dashboards' },
-  { id: 'dashboard_semanal', nome: 'Dashboard Semanal', categoria: 'dashboards' },
-  { id: 'dashboard_mensal', nome: 'Dashboard Mensal', categoria: 'dashboards' },
-  { id: 'dashboard_financeiro_mensal', nome: 'Dashboard Financeiro', categoria: 'dashboards' },
-  { id: 'dashboard_metrica_evolucao', nome: 'Métricas de Evolução', categoria: 'dashboards' },
-  { id: 'dashboard_metricas_barras', nome: 'Métricas em Barras', categoria: 'dashboards' },
-  { id: 'dashboard_comparativo', nome: 'Dashboard Comparativo', categoria: 'dashboards' },
-  { id: 'dashboard_garcons', nome: 'Dashboard de Garçons', categoria: 'dashboards' },
+  // Marketing
+  { id: 'marketing_360', nome: 'Marketing 360', categoria: 'marketing' },
   
   // Gestão
-  { id: 'planejamento', nome: 'Planejamento Comercial', categoria: 'gestao' },
-  { id: 'recorrencia', nome: 'Gestão de Recorrência', categoria: 'gestao' },
-  
-  // Configurações
-  { id: 'configuracoes', nome: 'Configurações Gerais', categoria: 'configuracoes' },
-  { id: 'integracoes', nome: 'Integrações', categoria: 'configuracoes' },
-  { id: 'usuarios', nome: 'Gestão de Usuários', categoria: 'configuracoes' },
-  { id: 'permissoes', nome: 'Gestão de Permissões', categoria: 'configuracoes' },
+  { id: 'gestao_desempenho', nome: 'Tabela de Desempenho', categoria: 'gestao' },
+  { id: 'gestao_calendario', nome: 'Calendário', categoria: 'gestao' },
+  { id: 'gestao_planejamento_comercial', nome: 'Planejamento Comercial', categoria: 'gestao' },
   
   // Financeiro
-  { id: 'nfs', nome: 'Notas Fiscais', categoria: 'financeiro' },
-  { id: 'financeiro_geral', nome: 'Financeiro Geral', categoria: 'financeiro' },
+  { id: 'financeiro_agendamento', nome: 'Agendamento', categoria: 'financeiro' },
+  { id: 'financeiro_dre', nome: 'DRE', categoria: 'financeiro' },
+  
+  // Configurações
+  { id: 'configuracoes_checklists', nome: 'Checklists', categoria: 'configuracoes' },
+  { id: 'configuracoes_metas', nome: 'Metas', categoria: 'configuracoes' },
+  { id: 'configuracoes_integracoes', nome: 'Integrações', categoria: 'configuracoes' },
+  { id: 'configuracoes_seguranca', nome: 'Segurança', categoria: 'configuracoes' },
+  { id: 'configuracoes_whatsapp', nome: 'WhatsApp', categoria: 'configuracoes' },
+  { id: 'configuracoes_contahub', nome: 'ContaHub Auto', categoria: 'configuracoes' },
+  { id: 'configuracoes_meta_config', nome: 'Meta Config', categoria: 'configuracoes' },
+  { id: 'configuracoes_templates', nome: 'Templates', categoria: 'configuracoes' },
+  { id: 'configuracoes_analytics', nome: 'Analytics', categoria: 'configuracoes' },
+  { id: 'configuracoes_pwa', nome: 'PWA', categoria: 'configuracoes' },
+  { id: 'configuracoes_usuarios', nome: 'Usuários', categoria: 'configuracoes' },
+  { id: 'configuracoes_permissoes', nome: 'Permissões', categoria: 'configuracoes' },
 ];
 
 const ROLES_PADRAO = {
@@ -52,30 +51,23 @@ const ROLES_PADRAO = {
     nome: 'Funcionário',
     descricao: 'Acesso apenas a operações básicas',
     modulos: [
-      'checklists',
-      'terminal_producao',
-      'produtos',
+      'home',
+      'operacoes_checklists',
+      'operacoes_meus_checklists',
+      'operacoes_receitas',
+      'operacoes_terminal',
     ],
   },
   financeiro: {
     nome: 'Financeiro',
-    descricao: 'Acesso a relatórios e dashboards financeiros',
+    descricao: 'Acesso a relatórios e área financeira',
     modulos: [
-      'relatorio_producoes',
-      'relatorio_produtos',
-      'analitico',
-      'fatporhora',
-      'tempo',
-      'pagamentos',
-      'dashboard_diario',
-      'dashboard_semanal',
-      'dashboard_mensal',
-      'dashboard_financeiro_mensal',
-      'dashboard_metrica_evolucao',
-      'dashboard_metricas_barras',
-      'dashboard_comparativo',
-      'nfs',
-      'financeiro_geral',
+      'home',
+      'relatorios_visao_geral',
+      'gestao_desempenho',
+      'gestao_planejamento_comercial',
+      'financeiro_agendamento',
+      'financeiro_dre',
     ],
   },
 };
