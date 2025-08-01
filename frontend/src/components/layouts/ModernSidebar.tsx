@@ -415,45 +415,24 @@ export function ModernSidebar() {
   };
 
   return (
-    <div
-      className={`hidden md:block fixed left-0 top-0 bottom-0 z-40 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-out ${
-        isHovered ? 'w-64' : 'w-16'
-      }`}
+    <aside
+      className={`
+        hidden md:flex flex-col flex-shrink-0 h-screen z-40
+        bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
+        transition-width duration-300 ease-out
+        ${isHovered ? 'w-64' : 'w-14'}
+      `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
-        // Reset manual toggles after leaving hover for better UX
-        setTimeout(() => {
-          setManuallyToggledItems([]);
-        }, 3000);
+        setTimeout(() => setManuallyToggledItems([]), 3000);
       }}
     >
-      {/* Header spacer com design integrado */}
-      <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
-        <div className="flex items-center h-full px-4">
-          <div
-            className={`flex items-center transition-all duration-300 ${
-              isHovered ? 'justify-start' : 'justify-center'
-            }`}
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
-            {isHovered && (
-              <span className="ml-3 font-semibold text-gray-900 dark:text-white animate-slide-in-from-left">
-                SGB
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
 
       <div className="flex flex-col h-full pt-4 pb-4">
         {/* Navigation items */}
-        <nav className="flex-1 px-2 overflow-hidden">
+        <nav className="flex-1 px-2 overflow-hidden mt-10">
           <div className="space-y-1">
-            {/* Command Palette Search Button removido da sidebar */}
-
             {allSidebarItems.map(item => {
               const isItemActive = item.href
                 ? isActive(item.href)
@@ -464,18 +443,17 @@ export function ModernSidebar() {
                 <div key={item.label}>
                   {/* Main item */}
                   <div
-                    className={`group flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 relative cursor-pointer ${
-                      isItemActive
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
-                    }`}
+                    className={`group flex items-center h-10 px-3 transition-width transition-colors duration-200 rounded-xl relative cursor-pointer
+                      ${ isHovered ? 'justify-start' : 'justify-center'}
+                      ${ isItemActive
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+                      }
+                   `}
                   >
                     {/* Link wrapper for items with direct href - clicar no nome/ícone navega */}
                     {item.href ? (
-                      <Link
-                        href={item.href}
-                        className="flex items-center flex-1"
-                      >
+                      <Link href={item.href} className="flex items-center flex-1">
                         <ItemContent
                           item={item}
                           isItemActive={isItemActive}
@@ -504,7 +482,7 @@ export function ModernSidebar() {
                           e.stopPropagation();
                           toggleExpanded(item.label);
                         }}
-                        className="ml-2 p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        className="ml-2 p-1 rounded-[6px] hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                       >
                         {itemExpanded ? (
                           <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -533,7 +511,7 @@ export function ModernSidebar() {
                           <Link
                             key={subItem.href}
                             href={subItem.href}
-                            className={`group flex items-center px-3 py-2 rounded-lg transition-all duration-200 text-sm ${
+                            className={`group flex items-center px-3 py-2 rounded-[8px] transition-all duration-200 text-sm ${
                               isSubActive
                                 ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
                                 : 'text-gray-500 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
@@ -582,7 +560,7 @@ export function ModernSidebar() {
           </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
 
@@ -606,7 +584,7 @@ function ItemContent({
     <>
       {/* Icon */}
       <item.icon
-        className={`w-5 h-5 flex-shrink-0 transition-colors ${
+        className={`w-4 h-4 flex-shrink-0 transition-colors ${
           isItemActive
             ? 'text-blue-600 dark:text-blue-400'
             : item.color || 'text-gray-500 dark:text-gray-400'
@@ -615,7 +593,7 @@ function ItemContent({
 
       {/* Label */}
       {isHovered && (
-        <span className="ml-3 font-medium animate-slide-in-from-left duration-200 flex-1">
+        <span className="ml-3 font-medium animate-slide-in-from-left duration-200 flex-1 text-sm">
           {item.label}
         </span>
       )}

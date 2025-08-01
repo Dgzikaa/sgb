@@ -123,12 +123,12 @@ const DialogContent: React.FC<
       {/* Close button profissional */}
       <button
         onClick={onClose}
-        className="absolute top-6 right-6 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-all duration-200 z-10 shadow-sm"
+        className="absolute top-6 right-6 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-all duration-200 z-10 shadow-sm"
         title="Fechar"
         aria-label="Fechar modal"
         type="button"
       >
-        <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+        <X className="w-4 h-4 text-gray-600 dark:text-gray-300" />
       </button>
 
       {/* Content com scroll adequado */}
