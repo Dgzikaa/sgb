@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Definindo as permissões baseadas na SIDEBAR REAL do sistema
 const MODULOS_SISTEMA = [
+  // Permissão especial
+  { id: 'todos', nome: 'Acesso Total (Administrador)', categoria: 'especial' },
+  
   // Home
   { id: 'home', nome: 'Home', categoria: 'principal' },
   

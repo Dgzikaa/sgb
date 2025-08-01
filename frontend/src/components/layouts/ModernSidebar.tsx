@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -12,27 +12,20 @@ import {
   BarChart3,
   Calendar,
   Users,
-  TrendingUp,
   Database,
   Zap,
-  ChefHat,
   FileText,
   ChevronDown,
   ChevronRight,
   Clock,
-  Package,
-  Utensils,
-  Calculator,
   Shield,
-  RefreshCw,
-  CheckCircle,
   Target,
   Smartphone,
   DollarSign,
   MessageSquare,
-  CreditCard,
+  TrendingUp,
+  Briefcase,
 } from 'lucide-react';
-import React from 'react'; // Added missing import for React
 
 interface SubMenuItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -53,334 +46,342 @@ interface SidebarItem {
   subItems?: SubMenuItem[];
 }
 
+// Permission mapping para cada item do sidebar
+const PERMISSION_MAPPINGS: Record<string, string[]> = {
+  // Permissões principais - 'todos' só é checado pelo hook hasPermission
+  home: ['home'],
+  operacoes: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos', 'operacoes_checklists', 'operacoes_receitas', 'operacoes_meus_checklists', 'operacoes_terminal'],
+  gestao: ['gestao', 'tempo', 'planejamento'],
+  marketing: ['marketing', 'marketing_360'],
+  financeiro: ['financeiro', 'financeiro_agendamento', 'dashboard_financeiro_mensal'],
+  configuracoes: ['configuracoes'],
+  
+  // Submenu mappings específicos - SEM 'todos' para testar permissões granulares
+  checklists: ['checklists', 'operacoes_checklists', 'operacoes_meus_checklists'],
+  terminal_producao: ['terminal_producao', 'operacoes_terminal'],
+  receitas_insumos: ['receitas_insumos', 'operacoes_receitas'],
+  tempo: ['tempo'],
+  planejamento: ['planejamento'],
+  marketing_360: ['marketing_360'],
+  financeiro_agendamento: ['financeiro_agendamento'],
+  dashboard_financeiro_mensal: ['dashboard_financeiro_mensal'],
+  configuracoes_checklists: ['configuracoes_checklists'],
+  configuracoes_metas: ['configuracoes_metas'],
+  configuracoes_integracoes: ['configuracoes_integracoes'],
+  configuracoes_seguranca: ['configuracoes_seguranca'],
+  configuracoes_whatsapp: ['configuracoes_whatsapp'],
+  configuracoes_contahub: ['configuracoes_contahub'],
+  configuracoes_meta_config: ['configuracoes_meta_config'],
+  configuracoes_templates: ['configuracoes_templates'],
+  configuracoes_analytics: ['configuracoes_analytics'],
+  configuracoes_pwa: ['configuracoes_pwa'],
+};
+
+// Estrutura base do sidebar
+const defaultSidebarItems: SidebarItem[] = [
+    {
+      icon: Home,
+      label: 'Home',
+      href: '/home',
+      color: 'text-blue-600 dark:text-blue-400',
+    permission: 'home',
+    },
+    {
+      icon: Zap,
+      label: 'Operações',
+      href: '/operacoes',
+      color: 'text-orange-600 dark:text-orange-400',
+    permission: 'operacoes',
+      subItems: [
+        {
+          icon: CheckSquare,
+          label: 'Gestão de Checklists',
+          href: '/operacoes/checklists',
+          description: 'Gestão de checklists',
+        permission: 'checklists',
+        },
+        {
+          icon: Users,
+          label: 'Meus Checklists',
+          href: '/operacoes/checklists/checklists-funcionario',
+          description: 'Meus checklists pessoais',
+        permission: 'checklists',
+        },
+        {
+          icon: FileText,
+          label: 'Receitas',
+          href: '/operacoes/receitas',
+          description: 'Gestão de receitas operacionais',
+        permission: 'receitas_insumos',
+        },
+        {
+          icon: Zap,
+          label: 'Terminal de Produção',
+          href: '/operacoes/terminal',
+          description: 'Terminal de produção em tempo real',
+        permission: 'terminal_producao',
+        },
+      ],
+    },
+    {
+      icon: Briefcase,
+      label: 'Gestão',
+      href: '/gestao',
+      color: 'text-purple-600 dark:text-purple-400',
+      permission: 'gestao',
+      subItems: [
+        {
+          icon: Clock,
+          label: 'Tabela de Desempenho',
+          href: '/gestao/tempo',
+          description: 'Gestão de tempo e produtividade',
+          permission: 'tempo',
+        },
+        {
+          icon: Calendar,
+          label: 'Planejamento Comercial',
+          href: '/gestao/planejamento-comercial',
+          description: 'Planejamento estratégico comercial',
+          permission: 'planejamento',
+        },
+      ],
+    },
+    {
+      icon: TrendingUp,
+      label: 'Marketing',
+      href: '/marketing',
+      color: 'text-pink-600 dark:text-pink-400',
+      permission: 'marketing',
+      subItems: [
+        {
+          icon: BarChart3,
+          label: 'Marketing 360',
+          href: '/marketing/360',
+          description: 'Visão completa de marketing',
+          permission: 'marketing_360',
+        },
+      ],
+    },
+    {
+      icon: DollarSign,
+      label: 'Financeiro',
+      href: '/financeiro',
+      color: 'text-green-600 dark:text-green-400',
+    permission: 'financeiro',
+      subItems: [
+        {
+          icon: Calendar,
+          label: 'Agendamento',
+          href: '/financeiro/agendamento',
+          description: 'Agendar pagamentos',
+        permission: 'financeiro_agendamento',
+        },
+        {
+          icon: BarChart3,
+          label: 'DRE',
+          href: '/financeiro/dre',
+          description: 'Demonstrativo de Resultado',
+        permission: 'dashboard_financeiro_mensal',
+        },
+      ],
+    },
+    {
+      icon: Settings,
+      label: 'Configurações',
+      href: '/configuracoes',
+      color: 'text-gray-600 dark:text-gray-400',
+    permission: 'configuracoes',
+      subItems: [
+        {
+          icon: CheckSquare,
+          label: 'Checklists',
+          href: '/configuracoes/checklists',
+          description: 'Configurar checklists',
+        permission: 'configuracoes_checklists',
+        },
+        {
+          icon: Target,
+          label: 'Metas',
+          href: '/configuracoes/metas',
+          description: 'Configurar metas',
+        permission: 'configuracoes_metas',
+        },
+        {
+          icon: Database,
+          label: 'Integrações',
+          href: '/configuracoes/integracoes',
+          description: 'APIs e integrações',
+        permission: 'configuracoes_integracoes',
+        },
+        {
+          icon: Shield,
+          label: 'Segurança',
+          href: '/configuracoes/seguranca',
+          description: 'Configurações de segurança',
+        permission: 'configuracoes_seguranca',
+        },
+        {
+          icon: MessageSquare,
+          label: 'WhatsApp',
+          href: '/configuracoes/whatsapp',
+          description: 'Configurar WhatsApp',
+        permission: 'configuracoes_whatsapp',
+        },
+        {
+          icon: Zap,
+          label: 'ContaHub Auto',
+          href: '/configuracoes/contahub-automatico',
+          description: 'Sincronização automática',
+        permission: 'configuracoes_contahub',
+        },
+        {
+          icon: Clock,
+          label: 'Meta Config',
+          href: '/configuracoes/meta-config',
+          description: 'Configuração Meta',
+        permission: 'configuracoes_meta_config',
+        },
+        {
+          icon: FileText,
+          label: 'Templates',
+          href: '/configuracoes/templates',
+          description: 'Gerenciar templates',
+        permission: 'configuracoes_templates',
+        },
+        {
+          icon: BarChart3,
+          label: 'Analytics',
+          href: '/configuracoes/analytics',
+          description: 'Configurar analytics',
+        permission: 'configuracoes_analytics',
+        },
+        {
+          icon: Smartphone,
+          label: 'PWA',
+          href: '/configuracoes/pwa',
+          description: 'Progressive Web App',
+        permission: 'configuracoes_pwa',
+        },
+      ],
+    },
+  ];
+
+// Loading skeleton para quando estiver carregando
+function SidebarSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 p-4 w-16">
+      <div className="h-10 bg-gray-700/20 animate-pulse rounded-lg"></div>
+      <div className="h-10 bg-gray-700/20 animate-pulse rounded-lg"></div>
+      <div className="h-10 bg-gray-700/20 animate-pulse rounded-lg"></div>
+    </div>
+  );
+}
+
+// Componente helper para conteúdo do item
+function ItemContent({
+  item,
+  isItemActive,
+  isHovered,
+}: {
+  item: SidebarItem;
+  isItemActive: boolean;
+  isHovered: boolean;
+}) {
+  return (
+    <>
+      <item.icon
+        className={`w-5 h-5 flex-shrink-0 transition-colors ${
+          isItemActive
+            ? 'text-blue-600 dark:text-blue-400'
+            : item.color || 'text-gray-500 dark:text-gray-400'
+        }`}
+      />
+      {isHovered && (
+        <span className="ml-3 font-medium animate-slide-in-from-left duration-200 flex-1">
+          {item.label}
+        </span>
+      )}
+      {item.badge && isHovered && (
+        <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-slide-in-from-right duration-200 shadow-sm">
+          {item.badge}
+        </span>
+      )}
+    </>
+  );
+}
+
 export function ModernSidebar() {
+  // 1. Estados do componente
   const [isHovered, setIsHovered] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const [manuallyToggledItems, setManuallyToggledItems] = useState<string[]>(
-    []
-  );
+  const [manuallyToggledItems, setManuallyToggledItems] = useState<string[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // 2. Hooks de contexto
   const pathname = usePathname();
-  const { isRole, hasPermission, user } = usePermissions();
-  
-  // Debug: Log das permissões do usuário
-  React.useEffect(() => {
-    if (user) {
-      console.log('🔍 Debug Sidebar - Usuário:', user);
-      console.log('🔍 Debug Sidebar - Permissões:', user.modulos_permitidos);
-      console.log('🔍 Debug Sidebar - hasPermission("checklists"):', hasPermission('checklists'));
-      console.log('🔍 Debug Sidebar - hasPermission("todos"):', hasPermission('todos'));
-    }
-  }, [user, hasPermission]);
+  const { hasPermission, user, loading: userLoading } = usePermissions();
   const { badges } = useMenuBadges();
 
-  // Auto-expandir Financeiro se estiver na página DRE
-  React.useEffect(() => {
-    if (pathname.includes('/financeiro/dre') && !expandedItems.includes('Financeiro')) {
-      setExpandedItems(prev => [...prev, 'Financeiro']);
+  // 3. Função helper para verificar permissões
+  const hasAnyMappedPermission = useCallback((permissionKey: string) => {
+    if (!permissionKey) return false;
+    
+    // Se o usuário tem permissão "todos", dar acesso a tudo
+    if (hasPermission('todos')) {
+      return true;
     }
-  }, [pathname, expandedItems]);
+    
+    const mappedPermissions = PERMISSION_MAPPINGS[permissionKey] || [permissionKey];
+    
+    // Verifica cada permissão mapeada
+    const permissionResults = mappedPermissions.map(perm => ({
+      permission: perm,
+      hasAccess: hasPermission(perm)
+    }));
+    
+    const hasAccess = permissionResults.some(result => result.hasAccess);
+    
+    return hasAccess;
+  }, [hasPermission, user]);
 
-  // Função para obter itens da sidebar com badges dinâmicos e filtros de permissão
-  const getSidebarItems = (): SidebarItem[] => {
-    const allItems: SidebarItem[] = [
-      {
-        icon: Home,
-        label: 'Home',
-        href: '/home',
-        color: 'text-blue-600 dark:text-blue-400',
-        badge: badges.home > 0 ? badges.home : undefined,
-        permission: 'home',
-      },
+  // 4. Items do sidebar filtrados por permissão
+  const sidebarItems = useMemo(() => {
+    if (!user || userLoading) return [];
 
-      {
-        icon: Zap,
-        label: 'Operações',
-        href: '/operacoes',
-        color: 'text-orange-600 dark:text-orange-400',
-        permission: 'operacoes',
-        subItems: [
-          {
-            icon: CheckSquare,
-            label: 'Gestão de Checklists',
-            href: '/operacoes/checklists',
-            description: 'Gestão de checklists',
-            permission: 'checklists',
-          },
-          {
-            icon: Users,
-            label: 'Meus Checklists',
-            href: '/operacoes/checklists/checklists-funcionario',
-            description: 'Meus checklists pessoais',
-            permission: 'checklists',
-          },
-          {
-            icon: FileText,
-            label: 'Receitas',
-            href: '/operacoes/receitas',
-            description: 'Gestão de receitas operacionais',
-            permission: 'receitas_insumos',
-          },
-          {
-            icon: Zap,
-            label: 'Terminal de Produção',
-            href: '/operacoes/terminal',
-            description: 'Terminal de produção em tempo real',
-            permission: 'terminal_producao',
-          },
-        ],
-      },
-
-      {
-        icon: BarChart3,
-        label: 'Relatórios',
-        href: '/relatorios',
-        color: 'text-blue-600 dark:text-blue-400',
-        permission: 'relatorio_producoes',
-        subItems: [
-          {
-            icon: BarChart3,
-            label: 'Visão Geral',
-            href: '/relatorios/visao-geral',
-            description: 'Dashboard principal',
-            permission: 'dashboard_diario',
-          },
-        ],
-      },
-
-      {
-        icon: TrendingUp,
-        label: 'Marketing',
-        href: '/marketing',
-        color: 'text-pink-600 dark:text-pink-400',
-        permission: 'marketing',
-        subItems: [
-          {
-            icon: TrendingUp,
-            label: 'Marketing 360',
-            href: '/marketing/marketing-360',
-            description: 'Estratégia completa',
-            permission: 'marketing_360',
-          },
-        ],
-      },
-
-      {
-        icon: Users,
-        label: 'Gestão',
-        href: '/gestao',
-        color: 'text-indigo-600 dark:text-indigo-400',
-        permission: 'gestao',
-        subItems: [
-          {
-            icon: TrendingUp,
-            label: 'Tabela de Desempenho',
-            href: '/gestao/desempenho',
-            description: 'Métricas e ranking da equipe',
-            permission: 'tempo',
-          },
-          {
-            icon: Calendar,
-            label: 'Calendário',
-            href: '/gestao/calendario',
-            description: 'Gestão de eventos e agendamentos',
-            permission: 'planejamento',
-          },
-          {
-            icon: BarChart3,
-            label: 'Planejamento Comercial',
-            href: '/gestao/planejamento-comercial',
-            description: 'Análise detalhada de eventos e indicadores',
-            permission: 'planejamento',
-          },
-        ],
-      },
-
-      {
-        icon: DollarSign,
-        label: 'Financeiro',
-        href: '/financeiro',
-        color: 'text-green-600 dark:text-green-400',
-        permission: 'financeiro',
-        subItems: [
-          {
-            icon: Calendar,
-            label: 'Agendamento',
-            href: '/financeiro/agendamento',
-            description: 'Agendar pagamentos',
-            permission: 'pagamentos',
-          },
-          {
-            icon: BarChart3,
-            label: 'DRE',
-            href: '/financeiro/dre',
-            description: 'Demonstrativo de Resultado',
-            permission: 'dashboard_financeiro_mensal',
-          },
-        ],
-      },
-
-      {
-        icon: Settings,
-        label: 'Configurações',
-        href: '/configuracoes',
-        color: 'text-gray-600 dark:text-gray-400',
-        badge: badges.configuracoes > 0 ? badges.configuracoes : undefined,
-        permission: 'configuracoes',
-        subItems: [
-          {
-            icon: CheckSquare,
-            label: 'Checklists',
-            href: '/configuracoes/checklists',
-            description: 'Configurar checklists',
-            permission: 'configuracoes_checklists',
-          },
-          {
-            icon: Target,
-            label: 'Metas',
-            href: '/configuracoes/metas',
-            description: 'Configurar metas',
-            permission: 'configuracoes_metas',
-          },
-          {
-            icon: Database,
-            label: 'Integrações',
-            href: '/configuracoes/integracoes',
-            description: 'APIs e integrações',
-            permission: 'configuracoes_integracoes',
-          },
-          {
-            icon: Shield,
-            label: 'Segurança',
-            href: '/configuracoes/seguranca',
-            description: 'Configurações de segurança',
-            permission: 'configuracoes_seguranca',
-          },
-          {
-            icon: MessageSquare,
-            label: 'WhatsApp',
-            href: '/configuracoes/whatsapp',
-            description: 'Configurar WhatsApp',
-            permission: 'configuracoes_whatsapp',
-          },
-          {
-            icon: Zap,
-            label: 'ContaHub Auto',
-            href: '/configuracoes/contahub-automatico',
-            description: 'Sincronização automática',
-            permission: 'configuracoes_contahub',
-          },
-          {
-            icon: Clock,
-            label: 'Meta Config',
-            href: '/configuracoes/meta-config',
-            description: 'Configuração Meta',
-            permission: 'configuracoes_meta_config',
-          },
-          {
-            icon: FileText,
-            label: 'Templates',
-            href: '/configuracoes/templates',
-            description: 'Gerenciar templates',
-            permission: 'configuracoes_templates',
-          },
-          {
-            icon: BarChart3,
-            label: 'Analytics',
-            href: '/configuracoes/analytics',
-            description: 'Configurar analytics',
-            permission: 'configuracoes_analytics',
-          },
-          {
-            icon: Smartphone,
-            label: 'PWA',
-            href: '/configuracoes/pwa',
-            description: 'Progressive Web App',
-            permission: 'configuracoes_pwa',
-          },
-        ],
-      },
-    ];
-
-    // Filtrar itens baseado nas permissões do usuário
     const filterItemsByPermissions = (items: SidebarItem[]): SidebarItem[] => {
       return items.filter(item => {
-        // Home sempre é visível
-        if (item.label === 'Home') {
-          return true;
-        }
+        // Verifica permissão do item principal
+        const hasMainPermission = hasAnyMappedPermission(item.permission || '');
 
-        // Operações é visível se tem qualquer permissão relacionada
-        if (item.label === 'Operações') {
-          return hasPermission('checklists') || 
-                 hasPermission('terminal_producao') || 
-                 hasPermission('receitas_insumos') ||
-                 hasPermission('operacoes') ||
-                 hasPermission('todos');
-        }
-
-        // Se o item tem permissão definida, verificar se o usuário tem acesso
-        // Caso contrário, assumir que tem acesso (para itens sem permissão específica)
-        let hasItemAccess = true;
-        
-        if (item.permission) {
-          hasItemAccess = hasPermission(item.permission) || 
-                         hasPermission(item.label.toLowerCase()) ||
-                         hasPermission(item.label.toLowerCase().replace(' ', '_')) ||
-                         hasPermission('todos'); // Permissão especial "todos"
-        }
-
-        // Se o item tem subitens, filtrar os subitens também
+        // Se tem subitems, filtra eles também
         if (item.subItems) {
           const filteredSubItems = item.subItems.filter(subItem => {
-            if (!subItem.permission) return true;
-            
-            // Verificar múltiplas variações da permissão
-            return hasPermission(subItem.permission) ||
-                   hasPermission(subItem.label.toLowerCase()) ||
-                   hasPermission(subItem.label.toLowerCase().replace(' ', '_')) ||
-                   hasPermission(subItem.label.toLowerCase().replace(/\s+/g, '_')) ||
-                   hasPermission('todos'); // Permissão especial "todos"
+            const hasSubPermission = hasAnyMappedPermission(subItem.permission || '');
+            return hasSubPermission;
           });
-          
-          // Se há subitens após filtrar, mostrar o item pai
-          if (filteredSubItems.length > 0) {
+
+          // Mostra o pai se tem pelo menos um subitem visível OU se tem permissão principal
+          if (filteredSubItems.length > 0 || hasMainPermission) {
             item.subItems = filteredSubItems;
             return true;
           }
-          
-          // Se não há subitens mas o item pai tem acesso direto, mostrar
-          if (hasItemAccess) {
-            return true;
-          }
-          
-          return false;
         }
 
-        return hasItemAccess;
+        return hasMainPermission;
       });
     };
 
-    return filterItemsByPermissions(allItems);
-  };
+    // Aplica badges
+    const itemsWithBadges = defaultSidebarItems.map(item => ({
+      ...item,
+      badge: item.label === 'Home' && badges?.home > 0 ? badges.home : undefined,
+    }));
 
-  // Obter itens da sidebar com badges
-  const sidebarItems = getSidebarItems();
+    return filterItemsByPermissions(itemsWithBadges);
+  }, [user, userLoading, hasAnyMappedPermission, badges]);
 
-  // Usar diretamente os itens da sidebar (já inclui configurações)
-  const allSidebarItems = sidebarItems;
-
-  const isActive = (href: string) => {
-    if (!pathname) return false;
-    if (href === '/home') return pathname === '/home';
-    return pathname.startsWith(href);
-  };
-
-  const hasActiveSubItem = (subItems?: SubMenuItem[]) => {
-    if (!subItems || !pathname) return false;
-    return subItems.some(subItem => pathname.startsWith(subItem.href));
-  };
-
-  const toggleExpanded = (label: string) => {
+  // 5. Callbacks
+  const toggleExpanded = useCallback((label: string) => {
     setExpandedItems(prev => {
       const newState = prev.includes(label)
         ? prev.filter(item => item !== label)
@@ -388,32 +389,59 @@ export function ModernSidebar() {
       return newState;
     });
 
-    // Marcar como manualmente manipulado
     setManuallyToggledItems(prev =>
       prev.includes(label) ? prev : [...prev, label]
     );
-  };
+  }, []);
 
-  const isExpanded = (label: string) => {
-    // Se o item foi manipulado manualmente, respeita apenas o estado manual
+  const isActive = useCallback((href: string) => {
+    if (!pathname) return false;
+    if (href === '/home') return pathname === '/home';
+    return pathname.startsWith(href);
+  }, [pathname]);
+
+  const hasActiveSubItem = useCallback((subItems?: SubMenuItem[]) => {
+    if (!subItems || !pathname) return false;
+    return subItems.some(subItem => pathname.startsWith(subItem.href));
+  }, [pathname]);
+
+  const isExpanded = useCallback((label: string) => {
     if (manuallyToggledItems.includes(label)) {
-      const result = expandedItems.includes(label);
-      return result;
+      return expandedItems.includes(label);
     }
 
-    // Se não foi manipulado manualmente, pode usar expansão automática por hover
-    if (
-      isHovered &&
-      hasActiveSubItem(
-        allSidebarItems.find(item => item.label === label)?.subItems
-      )
-    ) {
+    if (isHovered) {
+      const item = sidebarItems.find(item => item.label === label);
+      if (item?.subItems && hasActiveSubItem(item.subItems)) {
       return true;
+      }
     }
 
     return false;
-  };
+  }, [manuallyToggledItems, expandedItems, isHovered, hasActiveSubItem, sidebarItems]);
 
+  // 6. Effects
+  useEffect(() => {
+    if (pathname?.includes('/financeiro/dre') && !expandedItems.includes('Financeiro')) {
+      setExpandedItems(prev => [...prev, 'Financeiro']);
+    }
+  }, [pathname, expandedItems]);
+
+  useEffect(() => {
+    setIsInitialized(true);
+  }, []);
+
+  // 7. Loading and error states
+  const isLoading = userLoading || !isInitialized;
+  if (isLoading) {
+    return <SidebarSkeleton />;
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  // 8. Render principal
   return (
     <aside
       className={`
@@ -432,7 +460,7 @@ export function ModernSidebar() {
         {/* Navigation items */}
         <nav className="flex-1 px-2 overflow-hidden">
           <div className="space-y-1">
-            {allSidebarItems.map(item => {
+            {sidebarItems.map(item => {
               const isItemActive = item.href
                 ? isActive(item.href)
                 : hasActiveSubItem(item.subItems);
@@ -440,7 +468,7 @@ export function ModernSidebar() {
 
               return (
                 <div key={item.label}>
-                  {/* Main item */}
+                  {/* Item principal */}
                   <div
                     className={`group flex items-center h-10 px-3 transition-width transition-colors duration-200 rounded-xl relative cursor-pointer
                       ${ isHovered ? 'justify-start' : 'justify-center'}
@@ -450,16 +478,13 @@ export function ModernSidebar() {
                       }
                    `}
                   >
-                    {/* Link wrapper for items with direct href - clicar no nome/ícone navega */}
+                    {/* Link wrapper */}
                     {item.href ? (
                       <Link href={item.href} className="flex items-center flex-1">
                         <ItemContent
                           item={item}
                           isItemActive={isItemActive}
                           isHovered={isHovered}
-                          hasSubItems={!!item.subItems}
-                          isExpanded={itemExpanded}
-                          showExpandIcon={false}
                         />
                       </Link>
                     ) : (
@@ -467,14 +492,11 @@ export function ModernSidebar() {
                         item={item}
                         isItemActive={isItemActive}
                         isHovered={isHovered}
-                        hasSubItems={!!item.subItems}
-                        isExpanded={itemExpanded}
-                        showExpandIcon={false}
                       />
                     )}
 
-                    {/* Botão separado para expandir/colapsar - clicar na setinha expande */}
-                    {item.subItems && isHovered && (
+                    {/* Botão expand/collapse */}
+                    {item.subItems && item.subItems.length > 0 && isHovered && (
                       <button
                         onClick={e => {
                           e.preventDefault();
@@ -491,7 +513,7 @@ export function ModernSidebar() {
                       </button>
                     )}
 
-                    {/* Tooltip for collapsed state */}
+                    {/* Tooltip */}
                     {!isHovered && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                         {item.label}
@@ -501,7 +523,7 @@ export function ModernSidebar() {
                   </div>
 
                   {/* Sub-items */}
-                  {item.subItems && isHovered && itemExpanded && (
+                  {item.subItems && item.subItems.length > 0 && isHovered && itemExpanded && (
                     <div className="ml-6 mt-1 space-y-1 animate-slide-in-from-top">
                       {item.subItems.map(subItem => {
                         const isSubActive = isActive(subItem.href);
@@ -536,7 +558,7 @@ export function ModernSidebar() {
           </div>
         </nav>
 
-        {/* Bottom section */}
+        {/* Footer */}
         <div className="px-2 pt-4 border-t border-gray-100 dark:border-gray-800">
           <div
             className={`flex items-center transition-all duration-300 ${
@@ -560,60 +582,5 @@ export function ModernSidebar() {
         </div>
       </div>
     </aside>
-  );
-}
-
-// Componente auxiliar para renderizar o conteúdo do item
-function ItemContent({
-  item,
-  isItemActive,
-  isHovered,
-  hasSubItems = false,
-  isExpanded = false,
-  showExpandIcon = true,
-}: {
-  item: SidebarItem;
-  isItemActive: boolean;
-  isHovered: boolean;
-  hasSubItems?: boolean;
-  isExpanded?: boolean;
-  showExpandIcon?: boolean;
-}) {
-  return (
-    <>
-      {/* Icon */}
-      <item.icon
-        className={`w-4 h-4 flex-shrink-0 transition-colors ${
-          isItemActive
-            ? 'text-blue-600 dark:text-blue-400'
-            : item.color || 'text-gray-500 dark:text-gray-400'
-        }`}
-      />
-
-      {/* Label */}
-      {isHovered && (
-        <span className="ml-3 font-medium animate-slide-in-from-left duration-200 flex-1 text-sm">
-          {item.label}
-        </span>
-      )}
-
-      {/* Badge */}
-      {item.badge && isHovered && (
-        <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-slide-in-from-right duration-200 shadow-sm">
-          {item.badge}
-        </span>
-      )}
-
-      {/* Expand/Collapse Icon for items with subitems */}
-      {showExpandIcon && hasSubItems && isHovered && (
-        <div className="ml-2">
-          {isExpanded ? (
-            <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-          )}
-        </div>
-      )}
-    </>
   );
 }
