@@ -267,22 +267,12 @@ async function clearPreviousData(supabase: any, dataFormatted: string, tableName
   }
 }
 
-// Função para salvar dados brutos (como no Nibo)
+// Função para salvar dados brutos (como no Nibo) - SUPER SIMPLES
 async function saveRawData(supabase: any, dataType: string, rawData: any, dataFormatted: string) {
   console.log(`💾 Salvando dados brutos de ${dataType}...`);
   
   try {
-    // Primeiro, limpar dados anteriores do mesmo tipo e data
-    console.log(`🧹 Limpando dados anteriores de ${dataType}...`);
-    await supabase
-      .from('contahub_raw_data')
-      .delete()
-      .eq('bar_id', 3)
-      .eq('data_type', dataType)
-      .eq('data_date', dataFormatted.split('.').reverse().join('-'));
-    
-    // Inserir novos dados
-    console.log(`📥 Inserindo novos dados de ${dataType}...`);
+    // Inserir direto - SEM limpeza prévia (trigger vai limpar depois)
     const { error } = await supabase
       .from('contahub_raw_data')
       .insert({
@@ -290,8 +280,7 @@ async function saveRawData(supabase: any, dataType: string, rawData: any, dataFo
         data_type: dataType,
         data_date: dataFormatted.split('.').reverse().join('-'),
         raw_json: rawData,
-        processed: false,
-        created_at: new Date().toISOString()
+        processed: false
       });
     
     if (error) {
@@ -324,11 +313,16 @@ async function fetchAnaliticData(supabase: any, sessionToken: string, baseUrl: s
     const analiticData = await fetchContaHubData(analiticUrl, sessionToken);
     console.log('✅ Dados analíticos obtidos do ContaHub');
     
+    // Debug: verificar tamanho e estrutura dos dados
+    const dataSize = JSON.stringify(analiticData).length;
+    const recordCount = Array.isArray(analiticData) ? analiticData.length : (analiticData?.list?.length || 0);
+    console.log(`📊 Debug - Tamanho: ${dataSize} chars, Registros: ${recordCount}`);
+    
     // Salvar dados brutos
     return await saveRawData(supabase, 'analitico', analiticData, dataFormatted);
     
   } catch (error) {
-    console.error('❌ Erro ao buscar dados analíticos:', error);
+    console.error('❌ Erro ao buscar dados analíticos:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
@@ -614,21 +608,16 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     
     console.log('🔄 Iniciando sincronização ContaHub...');
     
-    // Buscar dados brutos apenas (processamento externo depois)
-    console.log('📊 [1/5] Buscando dados analíticos...');
+    // TESTE: Buscar apenas dados analíticos primeiro (debug)
+    console.log('📊 [1/1] Buscando APENAS dados analíticos para debug...');
     const totalAnalitico = await fetchAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
-    console.log('🕐 [2/5] Buscando faturamento por hora...');
-    const totalFatporhora = await fetchFatPorHoraData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
-    
-    console.log('💳 [3/5] Buscando pagamentos...');
-    const totalPagamentos = await fetchPagamentosData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
-    
-    console.log('📅 [4/5] Buscando dados por período...');
-    const totalPeriodo = await fetchPeriodoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
-    
-    console.log('⏱️ [5/5] Buscando dados de tempo...');
-    const totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    // Outros tipos comentados para debug
+    console.log('⏸️ Outros tipos de dados foram desabilitados para debug');
+    const totalFatporhora = 0;
+    const totalPagamentos = 0;
+    const totalPeriodo = 0;
+    const totalTempo = 0;
     
     const fimExecucao = new Date();
     const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
