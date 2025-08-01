@@ -235,65 +235,47 @@ async function clearPreviousData(supabase: any, dataFormatted: string, tableName
   }
 }
 
-// Função para salvar dados brutos em LOTES PEQUENOS
+// Função SIMPLES para salvar dados brutos (apenas 1 registro por API)
 async function saveRawData(supabase: any, dataType: string, rawData: any, dataFormatted: string) {
   console.log(`💾 Salvando dados brutos de ${dataType}...`);
   
   try {
-    // Extrair array dos dados
-    let dataArray = rawData;
+    // Contar registros para log
+    let recordCount = 0;
     if (rawData?.list) {
-      dataArray = rawData.list;
-    } else if (rawData?.rows) {
-      dataArray = rawData.rows;
-    } else if (!Array.isArray(rawData)) {
-      dataArray = [rawData];
+      recordCount = rawData.list.length;
+    } else if (Array.isArray(rawData)) {
+      recordCount = rawData.length;
+    } else {
+      recordCount = 1;
     }
     
-    console.log(`📦 Dividindo ${dataArray.length} registros em lotes pequenos...`);
+    console.log(`📊 ${dataType}: ${recordCount} registros recebidos da API`);
     
-    // Dividir em lotes MUITO pequenos de 10 registros por vez
-    const batchSize = 10;
-    let totalSaved = 0;
+    // Salvar JSON completo em UM ÚNICO registro (trigger processa depois)
+    const { error } = await supabase
+      .from('contahub_raw_data')
+      .insert({
+        bar_id: 3,
+        data_type: dataType,
+        data_date: dataFormatted.split('.').reverse().join('-'),
+        raw_json: rawData, // JSON completo da API
+        processed: false
+      });
     
-    for (let i = 0; i < dataArray.length; i += batchSize) {
-      const batch = dataArray.slice(i, i + batchSize);
-      const batchNumber = Math.floor(i / batchSize) + 1;
-      const totalBatches = Math.ceil(dataArray.length / batchSize);
-      
-      console.log(`💾 Salvando lote ${batchNumber}/${totalBatches} (${batch.length} registros)...`);
-      
-      // Salvar lote
-      const { error } = await supabase
-        .from('contahub_raw_data')
-        .insert({
-          bar_id: 3,
-          data_type: `${dataType}_batch_${batchNumber}`,
-          data_date: dataFormatted.split('.').reverse().join('-'),
-          raw_json: { list: batch }, // Manter estrutura original
-          processed: false
-        });
-      
-      if (error) {
-        console.error(`❌ Erro no lote ${batchNumber}:`, JSON.stringify(error, null, 2));
-        throw error;
-      }
-      
-      totalSaved += batch.length;
-      console.log(`✅ Lote ${batchNumber}/${totalBatches} salvo (${batch.length} registros)`);
-      
-      // Pausa maior entre lotes para evitar timeout
-      if (i + batchSize < dataArray.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
+    if (error) {
+      const errorMessage = error?.message || error?.details || JSON.stringify(error);
+      console.error(`❌ Erro ao salvar ${dataType}:`, errorMessage);
+      throw new Error(`Erro ao salvar ${dataType}: ${errorMessage}`);
     }
     
-    console.log(`✅ Todos os dados de ${dataType} salvos (${totalSaved} registros em lotes)`);
-    return totalSaved;
+    console.log(`✅ ${dataType} salvo com sucesso (${recordCount} registros)`);
+    return recordCount;
     
   } catch (error) {
-    console.error(`❌ Falha ao salvar dados brutos de ${dataType}:`, JSON.stringify(error, null, 2));
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`❌ Falha ao salvar dados brutos de ${dataType}:`, errorMessage);
+    throw new Error(`Erro ao salvar ${dataType}: ${errorMessage}`);
   }
 }
 
@@ -321,8 +303,10 @@ async function fetchAnaliticData(supabase: any, sessionToken: string, baseUrl: s
     return await saveRawData(supabase, 'analitico', analiticData, dataFormatted);
     
   } catch (error) {
-    console.error('❌ Erro ao buscar dados analíticos:', JSON.stringify(error, null, 2));
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erro ao buscar dados analíticos:', errorMessage);
+    console.error('❌ Detalhes do erro:', JSON.stringify(error, null, 2));
+    throw new Error(`Erro ao buscar analíticos: ${errorMessage}`);
   }
 }
 
@@ -342,8 +326,9 @@ async function fetchFatPorHoraData(supabase: any, sessionToken: string, baseUrl:
     return await saveRawData(supabase, 'fatporhora', fatHoraData, dataFormatted);
     
   } catch (error) {
-    console.error('❌ Erro ao buscar faturamento por hora:', error);
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erro ao buscar faturamento por hora:', errorMessage);
+    throw new Error(`Erro ao buscar fatporhora: ${errorMessage}`);
   }
 }
 
@@ -363,8 +348,9 @@ async function fetchPagamentosData(supabase: any, sessionToken: string, baseUrl:
     return await saveRawData(supabase, 'pagamentos', pagamentosData, dataFormatted);
     
   } catch (error) {
-    console.error('❌ Erro ao buscar pagamentos:', error);
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erro ao buscar pagamentos:', errorMessage);
+    throw new Error(`Erro ao buscar pagamentos: ${errorMessage}`);
   }
 }
 
@@ -384,8 +370,9 @@ async function fetchPeriodoData(supabase: any, sessionToken: string, baseUrl: st
     return await saveRawData(supabase, 'periodo', periodoData, dataFormatted);
     
   } catch (error) {
-    console.error('❌ Erro ao buscar dados de período:', error);
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erro ao buscar dados de período:', errorMessage);
+    throw new Error(`Erro ao buscar periodo: ${errorMessage}`);
   }
 }
 
@@ -405,8 +392,9 @@ async function fetchTempoData(supabase: any, sessionToken: string, baseUrl: stri
     return await saveRawData(supabase, 'tempo', tempoData, dataFormatted);
     
   } catch (error) {
-    console.error('❌ Erro ao buscar dados de tempo:', error);
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Erro ao buscar dados de tempo:', errorMessage);
+    throw new Error(`Erro ao buscar tempo: ${errorMessage}`);
   }
 }
 
@@ -642,6 +630,28 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     
     console.log('⏱️ [5/5] Buscando dados de tempo...');
     const totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    console.log('🔄 Processando todos os dados salvos...');
+    // Processar todos os dados de uma vez ao final usando função otimizada
+    try {
+      const { data: processResults, error: processError } = await supabase.rpc('process_pending_contahub_data');
+      if (processError) {
+        console.error(`❌ Erro no processamento final:`, processError);
+        throw new Error(`Erro no processamento: ${processError.message}`);
+      }
+      
+      if (processResults && processResults.length > 0) {
+        console.log(`✅ Processamento final concluído: ${processResults.length} tipos processados`);
+        processResults.forEach((result: any) => {
+          console.log(`  - ${result.processed_type}: ${result.record_count} registros (ID: ${result.processed_id})`);
+        });
+      } else {
+        console.log('✅ Nenhum dado pendente para processar');
+      }
+    } catch (processErr) {
+      console.error(`❌ Falha no processamento final:`, processErr);
+      throw new Error(`Falha no processamento: ${processErr.message}`);
+    }
     
     const fimExecucao = new Date();
     const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
