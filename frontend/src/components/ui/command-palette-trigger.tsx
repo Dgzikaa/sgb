@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useMemo } from "react";
 import { Button } from '@/components/ui/button';
 import { useCommandPalette } from '@/hooks/useCommandPalette';
 import { Search } from 'lucide-react';
@@ -11,6 +12,24 @@ interface CommandPaletteTriggerProps {
   className?: string;
 }
 
+interface SearchButtonProps {
+  placeholder?: string;
+  className?: string;
+}
+
+function useKeyHint() {
+  const [isMac, setIsMac] = useState(false);
+  useEffect(() => {
+    if (typeof navigator !== 'undefined') {
+      // Usa userAgentData quando disponível, senão faz fallback para userAgent
+      const platform =
+        (navigator as any).userAgentData?.platform || navigator.userAgent || '';
+      setIsMac(/Mac|iPhone|iPod|iPad/.test(platform));
+    }
+  }, []);
+  return useMemo(() => (isMac ? '⌘' : 'Ctrl'), [isMac]);
+}
+
 export function CommandPaletteTrigger({
   variant = 'outline',
   size = 'md',
@@ -18,6 +37,7 @@ export function CommandPaletteTrigger({
   className = '',
 }: CommandPaletteTriggerProps) {
   const { openPalette } = useCommandPalette();
+  const keyHint = useKeyHint();
 
   const getButtonProps = () => {
     switch (variant) {
@@ -58,7 +78,7 @@ export function CommandPaletteTrigger({
       onClick={openPalette}
       {...buttonProps}
       {...sizeProps}
-      title="Abrir Command Palette (Cmd+K)"
+      title={`Abrir Command Palette (${keyHint}+K)`}
     >
       {variant === 'sidebar' ? (
         <>
@@ -67,7 +87,7 @@ export function CommandPaletteTrigger({
           {showShortcut && (
             <div className="flex items-center gap-1 text-xs opacity-60">
               <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">
-                ⌘K
+                 {keyHint}K
               </kbd>
             </div>
           )}
@@ -79,7 +99,7 @@ export function CommandPaletteTrigger({
           {showShortcut && (
             <div className="ml-2 flex items-center gap-1 text-xs opacity-60">
               <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">
-                ⌘K
+                 {keyHint}K
               </kbd>
             </div>
           )}
@@ -118,13 +138,14 @@ export function CommandPaletteIconTrigger({
 
 // Placeholder de busca que abre o Command Palette
 export function CommandPaletteSearchPlaceholder({
-  placeholder = 'Buscar... (Cmd+K)',
+  placeholder = 'Buscar...',
   className = '',
 }: {
   placeholder?: string;
   className?: string;
 }) {
   const { openPalette } = useCommandPalette();
+  const keyHint = useKeyHint();
 
   const handleClick = () => {
     openPalette();
@@ -134,8 +155,8 @@ export function CommandPaletteSearchPlaceholder({
     <div
       onClick={handleClick}
       className={`
-        flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 dark:bg-gray-800 
-        border border-gray-200 dark:border-gray-700 rounded-lg 
+        flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1 sm:py-1 bg-gray-100 dark:bg-gray-800 
+        border border-gray-200 dark:border-gray-700 rounded-full
         cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50
         transition-colors ${className}
       `}
@@ -144,9 +165,9 @@ export function CommandPaletteSearchPlaceholder({
       <span className="text-gray-500 dark:text-gray-400 text-sm flex-1 truncate">
         {placeholder}
       </span>
-      <div className="hidden lg:flex items-center gap-1 text-xs text-gray-400">
-        <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-600 rounded text-xs">
-          ⌘K
+      <div className=" lg:flex items-center gap-1 text-xs text-gray-500 dark:text-gray-300">
+        <kbd className="px-1.5 py-0.5 text-xs">
+          {`${keyHint}+K`}
         </kbd>
       </div>
     </div>

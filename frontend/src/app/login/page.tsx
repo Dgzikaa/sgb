@@ -25,8 +25,7 @@ export default function LoginPage() {
   const [loginMethod, setLoginMethod] = useState<'traditional' | 'biometric'>(
     'traditional'
   );
-  const [showBiometricRegistration, setShowBiometricRegistration] =
-    useState(false);
+  const [showBiometricRegistration, setShowBiometricRegistration] = useState(false);
   const [lastLoginData, setLastLoginData] = useState<Record<
     string,
     unknown
@@ -259,10 +258,8 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
-            <div className="text-center py-8">
-              <div className="animate-pulse">Carregando...</div>
-            </div>
+          <div className="text-center py-8">
+            <div className="animate-pulse">Carregando...</div>
           </div>
         </div>
       </div>
@@ -278,21 +275,20 @@ export default function LoginPage() {
         {/* Logo e Header */}
         <div className="text-center mb-8" suppressHydrationWarning>
           <div
-            className="inline-flex items-center justify-center w-52 h-52 lg:w-72 lg:h-72 mb-4"
+            className="inline-flex items-center justify-center w-52 h-32:w-72 lg:h-32 mb-4"
             suppressHydrationWarning
           >
             {!logoError ? (
               <Image
-                src="/logos/logo_640x640.png"
+                src="/logos/processed_logoSGB.png"
                 alt="SGB Logo"
                 width={288}
-                height={288}
-                className="w-52 h-52 lg:w-72 lg:h-72 object-cover"
+                height={128}
                 onError={() => setLogoError(true)}
               />
             ) : (
               <div
-                className="w-52 h-52 lg:w-72 lg:h-72 bg-indigo-600 flex items-center justify-center"
+                className="w-52 h-52 lg:w-72 lg:h-32 bg-indigo-600 flex items-center justify-center"
                 suppressHydrationWarning
               >
                 <span className="text-8xl lg:text-9xl text-white">🏪</span>
@@ -449,8 +445,8 @@ export default function LoginPage() {
                 </button>
               </div>
             ) : (
-              <div className="p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
-                <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm">
+              <div className="p-1 bg-gray-100 dark:bg-gray-800 rounded-[10px] border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-[8px] font-medium text-sm bg-white dark:bg-gray-700 text-slate-800 dark:text-white shadow-sm">
                   <LogIn className="w-4 h-4" />
                   Email & Senha
                 </div>
@@ -480,7 +476,7 @@ export default function LoginPage() {
                         type="email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
-                        className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                        className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded-[4px]"
                         placeholder="seu@email.com"
                         required
                       />
@@ -501,7 +497,7 @@ export default function LoginPage() {
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={e => setPassword(e.target.value)}
-                        className="elegant-input w-full pr-12 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                        className="elegant-input w-full px-2 py-1 rounded-[4px] bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                         placeholder="••••••••"
                         required
                       />
@@ -649,7 +645,7 @@ export default function LoginPage() {
                     type="email"
                     value={forgotEmail}
                     onChange={e => setForgotEmail(e.target.value)}
-                    className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded-[4px]"
                     placeholder="seu@email.com"
                     required
                   />
@@ -670,7 +666,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={forgotLoading}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {forgotLoading ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />

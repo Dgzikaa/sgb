@@ -233,8 +233,8 @@ export function NotificationCenter() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" className="relative rounded-[4px] hover:text-gray-500 text-gray-500 h-8 p-2 py-2">
+          <Bell className="h-4 w-4" />
           {configuracoes.showBadge && totalNaoLidas > 0 && (
             <Badge
               variant="destructive"
