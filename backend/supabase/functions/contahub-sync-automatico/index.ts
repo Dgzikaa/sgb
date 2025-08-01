@@ -267,30 +267,61 @@ async function clearPreviousData(supabase: any, dataFormatted: string, tableName
   }
 }
 
-// Função para salvar dados brutos (como no Nibo) - SUPER SIMPLES
+// Função para salvar dados brutos em LOTES PEQUENOS
 async function saveRawData(supabase: any, dataType: string, rawData: any, dataFormatted: string) {
   console.log(`💾 Salvando dados brutos de ${dataType}...`);
   
   try {
-    // Inserir direto - SEM limpeza prévia (trigger vai limpar depois)
-    const { error } = await supabase
-      .from('contahub_raw_data')
-      .insert({
-        bar_id: 3,
-        data_type: dataType,
-        data_date: dataFormatted.split('.').reverse().join('-'),
-        raw_json: rawData,
-        processed: false
-      });
-    
-    if (error) {
-      console.error(`❌ Erro ao salvar dados brutos de ${dataType}:`, JSON.stringify(error, null, 2));
-      throw error;
+    // Extrair array dos dados
+    let dataArray = rawData;
+    if (rawData?.list) {
+      dataArray = rawData.list;
+    } else if (rawData?.rows) {
+      dataArray = rawData.rows;
+    } else if (!Array.isArray(rawData)) {
+      dataArray = [rawData];
     }
     
-    const recordCount = Array.isArray(rawData) ? rawData.length : (rawData?.list?.length || 0);
-    console.log(`✅ Dados brutos de ${dataType} salvos (${recordCount} registros)`);
-    return recordCount;
+    console.log(`📦 Dividindo ${dataArray.length} registros em lotes pequenos...`);
+    
+    // Dividir em lotes de 100 registros por vez
+    const batchSize = 100;
+    let totalSaved = 0;
+    
+    for (let i = 0; i < dataArray.length; i += batchSize) {
+      const batch = dataArray.slice(i, i + batchSize);
+      const batchNumber = Math.floor(i / batchSize) + 1;
+      const totalBatches = Math.ceil(dataArray.length / batchSize);
+      
+      console.log(`💾 Salvando lote ${batchNumber}/${totalBatches} (${batch.length} registros)...`);
+      
+      // Salvar lote
+      const { error } = await supabase
+        .from('contahub_raw_data')
+        .insert({
+          bar_id: 3,
+          data_type: `${dataType}_batch_${batchNumber}`,
+          data_date: dataFormatted.split('.').reverse().join('-'),
+          raw_json: { list: batch }, // Manter estrutura original
+          processed: false
+        });
+      
+      if (error) {
+        console.error(`❌ Erro no lote ${batchNumber}:`, JSON.stringify(error, null, 2));
+        throw error;
+      }
+      
+      totalSaved += batch.length;
+      console.log(`✅ Lote ${batchNumber}/${totalBatches} salvo (${batch.length} registros)`);
+      
+      // Pequena pausa entre lotes
+      if (i + batchSize < dataArray.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    
+    console.log(`✅ Todos os dados de ${dataType} salvos (${totalSaved} registros em lotes)`);
+    return totalSaved;
     
   } catch (error) {
     console.error(`❌ Falha ao salvar dados brutos de ${dataType}:`, JSON.stringify(error, null, 2));
