@@ -1,5 +1,5 @@
 // Service Worker para SGB_V2 PWA - Atualizado para usar dre-yearly
-const CACHE_NAME = 'sgb-v2-cache-v1.0.2'
+const CACHE_NAME = 'sgb-v2-cache-v1.0.3'
 const OFFLINE_URL = '/offline'
 
 // Recursos críticos para cache
@@ -42,6 +42,8 @@ const OFFLINE_FALLBACK_APIS = [
 // Instalar Service Worker
 self.addEventListener('install', event => {
   console.log('🚀 SW: Instalando Service Worker v1.0.2 (dre-yearly)...')
+  // assim que for instalado, avança para o estado “activated”
+  self.skipWaiting();
   
   event.waitUntil(
     (async () => {
@@ -93,10 +95,30 @@ self.addEventListener('activate', event => {
 
 // Interceptar requisições
 self.addEventListener('fetch', event => {
-  // Só processar requisições HTTP/HTTPS
+  const url = new URL(event.request.url)
   if (!event.request.url.startsWith('http')) return
 
-  event.respondWith(handleFetch(event.request))
+  if (event.request.destination === 'style') {
+    event.respondWith(
+      fetch(event.request)
+        .then(res => {
+          // opcional: re-cachear se quiser
+          return res
+        })
+        .catch(() => caches.match(event.request))
+    )
+    return
+  }
+
+  // imagens e scripts podem continuar cache-first
+  if (
+    event.request.destination === 'image' ||
+    event.request.destination === 'script' ||
+    url.pathname.startsWith('/_next/static/')
+  ) {
+    event.respondWith(handleStaticRequest(event.request))
+    return
+  }
 })
 
 // Estratégia principal de fetch
