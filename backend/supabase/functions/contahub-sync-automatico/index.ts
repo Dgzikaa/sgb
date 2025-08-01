@@ -8,38 +8,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Funções auxiliares para tratamento seguro de valores
-function parseFloatSafe(value: any): number {
-  if (!value || value === null || value === undefined) return 0;
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') {
-    return parseFloat(value.replace(',', '.')) || 0;
-  }
-  return 0;
-}
-
-function parseIntSafe(value: any): number {
-  if (!value || value === null || value === undefined) return 0;
-  if (typeof value === 'number') return Math.floor(value);
-  if (typeof value === 'string') {
-    return parseInt(value) || 0;
-  }
-  return 0;
-}
-
-function formatDiaFromISO(isoString: string): number {
-  if (!isoString || typeof isoString !== 'string') return 0;
-  try {
-    // Extrair data do formato: "2025-07-28T00:00:00-0300"
-    const datePart = isoString.split('T')[0]; // "2025-07-28"
-    const [year, month, day] = datePart.split('-');
-    return parseInt(`${year}${month}${day}`); // 20250728
-  } catch (error) {
-    console.error('Erro ao formatar data:', error);
-    return 0;
-  }
-}
-
 function generateDynamicTimestamp(): string {
   const now = new Date();
   return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}${String(now.getMilliseconds()).padStart(3, '0')}`;
@@ -639,18 +607,38 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     
     console.log('🔄 Iniciando sincronização ContaHub...');
     
-    // Buscar dados de TODAS as 5 APIs ContaHub
+    // Buscar dados de TODAS as 5 APIs ContaHub com timeouts aleatórios
     console.log('📊 [1/5] Buscando dados analíticos...');
     const totalAnalitico = await fetchAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    // Timeout aleatório entre APIs usando função existente
+    const timeout1 = randomTimeout();
+    console.log(`⏰ Aguardando ${Math.round(timeout1/1000)}s antes da próxima API...`);
+    await new Promise(resolve => setTimeout(resolve, timeout1));
     
     console.log('🕐 [2/5] Buscando faturamento por hora...');
     const totalFatporhora = await fetchFatPorHoraData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
+    // Timeout aleatório
+    const timeout2 = randomTimeout();
+    console.log(`⏰ Aguardando ${Math.round(timeout2/1000)}s antes da próxima API...`);
+    await new Promise(resolve => setTimeout(resolve, timeout2));
+    
     console.log('💳 [3/5] Buscando pagamentos...');
     const totalPagamentos = await fetchPagamentosData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
+    // Timeout aleatório
+    const timeout3 = randomTimeout();
+    console.log(`⏰ Aguardando ${Math.round(timeout3/1000)}s antes da próxima API...`);
+    await new Promise(resolve => setTimeout(resolve, timeout3));
+    
     console.log('📅 [4/5] Buscando dados por período...');
     const totalPeriodo = await fetchPeriodoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    // Timeout aleatório
+    const timeout4 = randomTimeout();
+    console.log(`⏰ Aguardando ${Math.round(timeout4/1000)}s antes da próxima API...`);
+    await new Promise(resolve => setTimeout(resolve, timeout4));
     
     console.log('⏱️ [5/5] Buscando dados de tempo...');
     const totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
