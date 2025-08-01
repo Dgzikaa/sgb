@@ -639,16 +639,21 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     
     console.log('🔄 Iniciando sincronização ContaHub...');
     
-    // TESTE: Buscar apenas dados analíticos primeiro (debug)
-    console.log('📊 [1/1] Buscando APENAS dados analíticos para debug...');
+    // Buscar dados de TODAS as 5 APIs ContaHub
+    console.log('📊 [1/5] Buscando dados analíticos...');
     const totalAnalitico = await fetchAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
-    // Outros tipos comentados para debug
-    console.log('⏸️ Outros tipos de dados foram desabilitados para debug');
-    const totalFatporhora = 0;
-    const totalPagamentos = 0;
-    const totalPeriodo = 0;
-    const totalTempo = 0;
+    console.log('🕐 [2/5] Buscando faturamento por hora...');
+    const totalFatporhora = await fetchFatPorHoraData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    console.log('💳 [3/5] Buscando pagamentos...');
+    const totalPagamentos = await fetchPagamentosData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    console.log('📅 [4/5] Buscando dados por período...');
+    const totalPeriodo = await fetchPeriodoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    
+    console.log('⏱️ [5/5] Buscando dados de tempo...');
+    const totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
     const fimExecucao = new Date();
     const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
