@@ -31,7 +31,7 @@ export default function OperacoesPage() {
 
   return (
     <ProtectedRoute requiredModule="operacoes">
-      <div className="space-y-6 mt-8">
+      <div className="space-y-6 p-4">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -39,7 +39,7 @@ export default function OperacoesPage() {
               <Zap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Operações
               </h1>
               <p className="text-gray-600 dark:text-gray-400">

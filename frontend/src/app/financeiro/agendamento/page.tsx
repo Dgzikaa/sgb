@@ -1316,7 +1316,7 @@ export default function AgendamentoPage() {
 
   return (
     <ProtectedRoute requiredModule="financeiro">
-      <div className="space-y-6 mt-8">
+      <div className="space-y-6 p-4">
         {/* Header Principal */}
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4 py-4 sm:py-6">

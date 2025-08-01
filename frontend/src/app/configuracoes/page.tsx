@@ -37,7 +37,7 @@ export default function ConfiguracoesPage() {
 
   return (
     <ProtectedRoute requiredModule="configuracoes">
-      <div className="space-y-6 mt-8">
+      <div className="space-y-6 p-4">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
@@ -45,7 +45,7 @@ export default function ConfiguracoesPage() {
               <Settings className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 dark:text-gray-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 Configurações do Sistema
               </h1>
               <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">

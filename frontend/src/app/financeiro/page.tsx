@@ -30,7 +30,7 @@ export default function FinanceiroPage() {
 
   return (
     <ProtectedRoute requiredModule="financeiro">
-      <div className="space-y-6 mt-8">
+      <div className="space-y-6 p-4">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">

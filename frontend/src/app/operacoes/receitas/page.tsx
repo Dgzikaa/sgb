@@ -864,10 +864,10 @@ export default function ReceitasPage() {
 
   return (
     <ProtectedRoute requiredModule="operacoes">
-      <div className="space-y-6 mt-8">
+      <div className="space-y-6 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               Receitas e Insumos
             </h1>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
