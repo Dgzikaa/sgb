@@ -252,8 +252,8 @@ async function saveRawData(supabase: any, dataType: string, rawData: any, dataFo
     
     console.log(`📦 Dividindo ${dataArray.length} registros em lotes pequenos...`);
     
-    // Dividir em lotes de 100 registros por vez
-    const batchSize = 100;
+    // Dividir em lotes MUITO pequenos de 10 registros por vez
+    const batchSize = 10;
     let totalSaved = 0;
     
     for (let i = 0; i < dataArray.length; i += batchSize) {
@@ -282,9 +282,9 @@ async function saveRawData(supabase: any, dataType: string, rawData: any, dataFo
       totalSaved += batch.length;
       console.log(`✅ Lote ${batchNumber}/${totalBatches} salvo (${batch.length} registros)`);
       
-      // Pequena pausa entre lotes
+      // Pausa maior entre lotes para evitar timeout
       if (i + batchSize < dataArray.length) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
     
