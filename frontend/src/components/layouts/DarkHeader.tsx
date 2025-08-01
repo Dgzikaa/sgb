@@ -189,7 +189,7 @@ export function DarkHeader() {
   // const unreadCount = notifications.filter(n => n.unread).length
 
   return (
-    <header className="fixed w-full top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
+    <header className="sticky inset-x-0 top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
       <div className="flex items-center h-12 px-2 sm:px-4 justify-between">
         <div className='flex flex-row'>
           <div className="flex items-center mr-4">

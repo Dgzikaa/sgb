@@ -417,7 +417,7 @@ export function ModernSidebar() {
   return (
     <aside
       className={`
-        hidden md:flex flex-col flex-shrink-0 h-screen z-40
+        hidden md:flex flex-col flex-shrink-0 h-full
         bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
         transition-width duration-300 ease-out
         ${isHovered ? 'w-64' : 'w-14'}
@@ -428,10 +428,9 @@ export function ModernSidebar() {
         setTimeout(() => setManuallyToggledItems([]), 3000);
       }}
     >
-
-      <div className="flex flex-col h-full pt-4 pb-4">
+      <div className="flex flex-col h-full pt-2 pb-2">
         {/* Navigation items */}
-        <nav className="flex-1 px-2 overflow-hidden mt-10">
+        <nav className="flex-1 px-2 overflow-hidden">
           <div className="space-y-1">
             {allSidebarItems.map(item => {
               const isItemActive = item.href

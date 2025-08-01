@@ -146,15 +146,12 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
   return (
     <AuthGuard>
       <PageTitleProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
           <DarkHeader />
-          <div className="flex flex-1">
+          <div className="flex flex-1 overflow-hidden">
             <ModernSidebar />
-            <main className="flex-1 transition-all duration-300 ease-in-out">
-              {/* Aumentando para pt-40 para garantir espaço máximo abaixo do header fixo */}
-              <div className="pt-40 p-4 md:p-6 pb-24 md:pb-6">
-                <GlobalPageWrapper>{children}</GlobalPageWrapper>
-              </div>
+            <main className="flex-1 transition-all duration-300 ease-in-out overflow-auto">
+              <GlobalPageWrapper>{children}</GlobalPageWrapper>
             </main>
           </div>
           <BottomNavigation />
