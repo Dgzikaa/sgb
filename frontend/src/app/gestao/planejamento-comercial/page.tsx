@@ -215,31 +215,25 @@ export default function PlanejamentoComercialPage() {
 
   const salvarEdicao = async () => {
     if (!eventoSelecionado) return;
-    
     setSalvando(true);
     try {
-      const response = await apiCall(`/api/eventos/${eventoSelecionado.evento_id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          nome: editData.nome_evento,
-          m1_r: parseFloat(editData.m1_receita) || 0,
-          cl_plan: parseInt(editData.clientes_plan) || 0,
-          te_plan: parseFloat(editData.te_plan) || 0,
-          tb_plan: parseFloat(editData.tb_plan) || 0,
-          observacoes: editData.observacoes || ''
-        })
-      });
-
-      if (response.ok) {
-        // Atualizar dados locais
-        buscarDados();
-        fecharModal();
-      } else {
-        throw new Error('Erro ao salvar');
-      }
-    } catch (error) {
-      console.error('Erro ao salvar evento:', error);
-      setError('Erro ao salvar alterações');
+      const resp = await apiCall(
+        `/api/eventos/${eventoSelecionado.evento_id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            nome: editData.nome_evento,
+            m1_r: Number(editData.m1_receita),
+            cl_plan: Number(editData.clientes_plan),
+            te_plan: Number(editData.te_plan),
+            tb_plan: Number(editData.tb_plan),
+            observacoes: editData.observacoes
+          })
+        }
+      );
+      if (resp.ok) { buscarDados(); setModalOpen(false); }
+    } catch (err) {
+      console.error(err);
     } finally {
       setSalvando(false);
     }
@@ -252,303 +246,291 @@ export default function PlanejamentoComercialPage() {
     }));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <RefreshCcw className="h-6 w-6 animate-spin text-blue-600" />
-          <span className="text-gray-700 dark:text-gray-300">Carregando dados...</span>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <RefreshCcw className="h-6 w-6 animate-spin text-blue-600" />
+      <span className="ml-2 text-gray-700 dark:text-gray-300">Carregando...</span>
+    </div>
+  );
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+    <div className="flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900 ">
       {/* Layout Lateral */}
-      <div className="h-full flex pt-0 overflow-hidden">
-        {/* Sidebar Analytics */}
-        <div className="w-80 bg-gray-900 border-r border-gray-700 p-2 hidden lg:block overflow-hidden">
-          <div className="space-y-1 pt-6">
-            {/* Navegação de Mês */}
-            <div>
-              <label className="text-xs font-medium text-gray-300 mb-1 block">
-                📅 Período
-              </label>
-              <div className="flex items-center space-x-2">
-                <Button
-                  onClick={() => navegarMes('anterior')}
-                  variant="outline"
-                  size="sm"
-                  className="h-8 w-8 p-0 bg-gray-800 border-gray-600 hover:bg-gray-700 text-white"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex-1 px-3 py-2 bg-blue-600 rounded-lg text-center">
-                  <span className="text-sm font-bold text-white">
-                    {mesesNomes[mesAtual.getMonth()]} {mesAtual.getFullYear()}
-                  </span>
-                </div>
-                
-                <Button
-                  onClick={() => navegarMes('proximo')}
-                  variant="outline"
-                  size="sm"
-                  className="h-8 w-8 p-0 bg-gray-800 border-gray-600 hover:bg-gray-700 text-white"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+      <aside className="flex flex-col w-80 bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="space-y-6 w-full">
+          {/* Navegação de Mês */}
+          <div>
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => navegarMes('anterior')}
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 rounded-l-full"
+              >
+                <ChevronLeft className="h-4 w-4 dark:text-white" />
+              </Button>
+              
+              <div className="flex-1 px-3 py-1.5 bg-blue-600 rounded-[4px] text-center text-sm font-bold text-white">
+                {mesesNomes[mesAtual.getMonth()]} {mesAtual.getFullYear()}
               </div>
+              
+              <Button
+                onClick={() => navegarMes('proximo')}
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 rounded-r-full"
+              >
+                <ChevronRight className="h-4 w-4 dark:text-white" />
+              </Button>
             </div>
+          </div>
 
-            {/* Analytics Totais */}
-              <div>
-              <label className="text-xs font-medium text-gray-300 mb-1 block">
-                📊 Analytics do Mês
-              </label>
-              <div className="space-y-1 overflow-hidden">
-                {/* Total M1 vs Real */}
-                <div className="bg-gray-800 rounded-lg p-2 border border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-400">Total M1 vs Real</span>
-                    <div className="flex items-center space-x-1">
-                      {(() => {
-                        const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                        const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                        const performance = totalM1 > 0 ? (totalReal / totalM1) * 100 : 0;
-                        
-                        if (performance >= 100) {
-                          return <span className="text-green-400">🚀</span>;
-                        } else if (performance >= 80) {
-                          return <span className="text-yellow-400">⚡</span>;
-                        } else {
-                          return <span className="text-red-400">⬇️</span>;
-                        }
-                      })()}
-                    </div>
+          {/* Analytics Totais */}
+          <div>
+            <label className="text-xs font-medium dark:text-gray-300 text-gray-800 mb-1 block ">
+              Analytics do Mês
+            </label>
+            <div className="space-y-1 overflow-hidden">
+              {/* Total M1 vs Real */}
+              <div className="dark:bg-gray-800 bg-gray-50 rounded-t-[6px] p-2 border dark:border-gray-700 border-gray-300">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs dark:text-gray-400 text-gray-700">Total M1 vs Real</span>
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
+                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
+                      const performance = totalM1 > 0 ? (totalReal / totalM1) * 100 : 0;
+                      
+                      if (performance >= 100) {
+                        return <span className="text-green-400">🚀</span>;
+                      } else if (performance >= 80) {
+                        return <span className="text-yellow-400">⚡</span>;
+                      } else {
+                        return <span className="text-red-400">⬇️</span>;
+                      }
+                    })()}
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-blue-400">Planejado:</span>
-                      <span className="font-medium text-white">
-                        R$ {dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-green-400">Realizado:</span>
-                      <span className="font-bold text-white">
-                        R$ {dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs pt-1 border-t border-gray-700">
-                      <span className="text-gray-400">Resultado:</span>
-                      <span className={`font-bold ${(() => {
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-400">Planejado:</span>
+                    <span className="font-medium dark:text-white text-black">
+                      R$ {dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-green-400">Realizado:</span>
+                    <span className="font-bold dark:text-white text-black">
+                      R$ {dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs pt-1 border-t border-gray-700">
+                    <span className="dark:text-gray-400 text-gray-700">Resultado:</span>
+                    <span className={`font-bold ${(() => {
+                      const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
+                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
+                      const resultado = totalReal - totalM1;
+                      return resultado >= 0 ? 'text-green-400' : 'text-red-400';
+                    })()}`}>
+                      {(() => {
                         const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
                         const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
                         const resultado = totalReal - totalM1;
-                        return resultado >= 0 ? 'text-green-400' : 'text-red-400';
-                      })()}`}>
-                        {(() => {
-                          const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                          const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                          const resultado = totalReal - totalM1;
-                          return resultado >= 0 ? `+R$ ${resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : `R$ ${resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-                        })()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-400">Performance:</span>
-                      <span className={`font-bold ${(() => {
+                        return resultado >= 0 ? `+R$ ${resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : `R$ ${resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                      })()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="dark:text-gray-400 text-gray-700">Performance:</span>
+                    <span className={`font-bold ${(() => {
+                      const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
+                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
+                      const perf = totalM1 > 0 ? ((totalReal - totalM1) / totalM1) * 100 : 0;
+                      return perf >= 0 ? 'text-green-400' : 'text-red-400';
+                    })()}`}>
+                      {(() => {
                         const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
                         const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
                         const perf = totalM1 > 0 ? ((totalReal - totalM1) / totalM1) * 100 : 0;
-                        return perf >= 0 ? 'text-green-400' : 'text-red-400';
-                      })()}`}>
-                        {(() => {
-                          const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                          const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                          const perf = totalM1 > 0 ? ((totalReal - totalM1) / totalM1) * 100 : 0;
-                          return perf >= 0 ? `+${perf.toFixed(1)}%` : `${perf.toFixed(1)}%`;
-                        })()}
-                      </span>
-                    </div>
+                        return perf >= 0 ? `+${perf.toFixed(1)}%` : `${perf.toFixed(1)}%`;
+                      })()}
+                    </span>
                   </div>
                 </div>
+              </div>
 
-                {/* Clientes Plan vs Real */}
-                <div className="bg-gray-800 rounded-lg p-2 border border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-400">Clientes Plan vs Real</span>
-                    <div className="flex items-center space-x-1">
-                      {(() => {
-                        const totalPlan = dados.reduce((sum, item) => sum + (Number(item.clientes_plan) || 0), 0);
-                        const totalReal = dados.reduce((sum, item) => sum + (Number(item.clientes_real) || 0), 0);
-                        const performance = totalPlan > 0 ? (totalReal / totalPlan) * 100 : 0;
-                        
-                        if (performance >= 100) {
-                          return <span className="text-green-400">🚀</span>;
-                        } else if (performance >= 80) {
-                          return <span className="text-yellow-400">⚡</span>;
-                        } else {
-                          return <span className="text-red-400">⬇️</span>;
-                        }
-                      })()}
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-blue-400">Planejado:</span>
-                      <span className="font-medium text-white">
-                        {dados.reduce((sum, item) => sum + (Number(item.clientes_plan) || 0), 0).toLocaleString('pt-BR')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-green-400">Realizado:</span>
-                      <span className="font-bold text-white">
-                        {dados.reduce((sum, item) => sum + (Number(item.clientes_real) || 0), 0).toLocaleString('pt-BR')}
-                      </span>
-                    </div>
+              {/* Clientes Plan vs Real */}
+              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs dark:text-gray-400 text-gray-700">Clientes Plan vs Real</span>
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const totalPlan = dados.reduce((sum, item) => sum + (Number(item.clientes_plan) || 0), 0);
+                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.clientes_real) || 0), 0);
+                      const performance = totalPlan > 0 ? (totalReal / totalPlan) * 100 : 0;
+                      
+                      if (performance >= 100) {
+                        return <span className="text-green-400">🚀</span>;
+                      } else if (performance >= 80) {
+                        return <span className="text-yellow-400">⚡</span>;
+                      } else {
+                        return <span className="text-red-400">⬇️</span>;
+                      }
+                    })()}
                   </div>
                 </div>
-
-                {/* Ticket Médio */}
-                <div className="bg-gray-800 rounded-lg p-2 border border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-400">Ticket Médio</span>
-                    <div className="flex items-center space-x-1">
-                      {(() => {
-                        const mediaTicket = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_medio) || 0), 0) / dados.filter(item => Number(item.t_medio) > 0).length : 0;
-                        const meta = 93.00;
-                        
-                        if (mediaTicket >= meta) {
-                          return <span className="text-green-400">🚀</span>;
-                        } else {
-                          return <span className="text-red-400">⬇️</span>;
-                        }
-                      })()}
-                    </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-400">Planejado:</span>
+                    <span className="font-medium dark:text-white text-black">
+                      {dados.reduce((sum, item) => sum + (Number(item.clientes_plan) || 0), 0).toLocaleString('pt-BR')}
+                    </span>
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-blue-400">Planejado:</span>
-                      <span className="font-medium text-white">R$ 93,00</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-green-400">Realizado:</span>
-                      <span className="font-bold text-white">
-                        R$ {(() => {
-                          const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_medio) || 0), 0) / dados.filter(item => Number(item.t_medio) > 0).length : 0;
-                          return media.toFixed(2);
-                        })()}
-                      </span>
-                    </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-green-400">Realizado:</span>
+                    <span className="font-bold dark:text-white text-black">
+                      {dados.reduce((sum, item) => sum + (Number(item.clientes_real) || 0), 0).toLocaleString('pt-BR')}
+                    </span>
                   </div>
                 </div>
+              </div>
 
-                {/* Tempo Médio de Bar */}
-                <div className="bg-gray-800 rounded-lg p-2 border border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-400">Tempo Médio de Bar</span>
-                    <div className="flex items-center space-x-1">
-                      {(() => {
-                        const mediaBar = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_bar) || 0), 0) / dados.filter(item => Number(item.t_bar) > 0).length : 0;
-                        
-                        if (mediaBar <= 4) {
-                          return <span className="text-green-400">🚀</span>;
-                        } else {
-                          return <span className="text-red-400">⬇️</span>;
-                        }
-                      })()}
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-blue-400">Planejado:</span>
-                      <span className="font-medium text-white">≤ 4min</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-green-400">Realizado:</span>
-                      <span className="font-bold text-white">
-                        {(() => {
-                          const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_bar) || 0), 0) / dados.filter(item => Number(item.t_bar) > 0).length : 0;
-                          return media.toFixed(1);
-                        })()}min
-                      </span>
-                    </div>
+              {/* Ticket Médio */}
+              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs dark:text-gray-400 text-gray-700">Ticket Médio</span>
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const mediaTicket = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_medio) || 0), 0) / dados.filter(item => Number(item.t_medio) > 0).length : 0;
+                      const meta = 93.00;
+                      
+                      if (mediaTicket >= meta) {
+                        return <span className="text-green-400">🚀</span>;
+                      } else {
+                        return <span className="text-red-400">⬇️</span>;
+                      }
+                    })()}
                   </div>
                 </div>
-
-                {/* Tempo Médio de Cozinha */}
-                <div className="bg-gray-800 rounded-lg p-2 border border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-400">Tempo Médio de Cozinha</span>
-                    <div className="flex items-center space-x-1">
-                      {(() => {
-                        const mediaCoz = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_coz) || 0), 0) / dados.filter(item => Number(item.t_coz) > 0).length : 0;
-                        
-                        if (mediaCoz <= 12) {
-                          return <span className="text-green-400">🚀</span>;
-                        } else {
-                          return <span className="text-red-400">⬇️</span>;
-                        }
-                      })()}
-                    </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-400">Planejado:</span>
+                    <span className="font-medium dark:text-white text-black">R$ 93,00</span>
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-blue-400">Planejado:</span>
-                      <span className="font-medium text-white">≤ 12min</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-green-400">Realizado:</span>
-                      <span className="font-bold text-white">
-                        {(() => {
-                          const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_coz) || 0), 0) / dados.filter(item => Number(item.t_coz) > 0).length : 0;
-                          return media.toFixed(1);
-                        })()}min
-                      </span>
-                    </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-green-400">Realizado:</span>
+                    <span className="font-bold dark:text-white text-black">
+                      R$ {(() => {
+                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_medio) || 0), 0) / dados.filter(item => Number(item.t_medio) > 0).length : 0;
+                        return media.toFixed(2);
+                      })()}
+                    </span>
                   </div>
                 </div>
+              </div>
 
-                {/* Fat até 19h */}
-                <div className="bg-gray-800 rounded-lg p-2 border border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-gray-400">Fat até 19h</span>
-                    <div className="flex items-center space-x-1">
-                      {(() => {
-                        const mediaFat = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.fat_19h) || 0), 0) / dados.filter(item => Number(item.fat_19h) > 0).length : 0;
-                        const meta = 15;
-                        
-                        if (mediaFat >= meta) {
-                          return <span className="text-green-400">🚀</span>;
-                        } else {
-                          return <span className="text-red-400">⬇️</span>;
-                        }
-                      })()}
-                    </div>
+              {/* Tempo Médio de Bar */}
+              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs dark:text-gray-400 text-gray-700">Tempo Médio de Bar</span>
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const mediaBar = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_bar) || 0), 0) / dados.filter(item => Number(item.t_bar) > 0).length : 0;
+                      
+                      if (mediaBar <= 4) {
+                        return <span className="text-green-400">🚀</span>;
+                      } else {
+                        return <span className="text-red-400">⬇️</span>;
+                      }
+                    })()}
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-blue-400">Planejado:</span>
-                      <span className="font-medium text-white">≥ 15%</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-green-400">Realizado:</span>
-                      <span className="font-bold text-white">
-                        {(() => {
-                          const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.fat_19h) || 0), 0) / dados.filter(item => Number(item.fat_19h) > 0).length : 0;
-                          return media.toFixed(1);
-                        })()}%
-                      </span>
-                    </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-400">Planejado:</span>
+                    <span className="font-medium dark:text-white text-black">≤ 4min</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-green-400">Realizado:</span>
+                    <span className="font-bold dark:text-white text-black">
+                      {(() => {
+                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_bar) || 0), 0) / dados.filter(item => Number(item.t_bar) > 0).length : 0;
+                        return media.toFixed(1);
+                      })()}min
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tempo Médio de Cozinha */}
+              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs dark:text-gray-400 text-gray-700">Tempo Médio de Cozinha</span>
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const mediaCoz = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_coz) || 0), 0) / dados.filter(item => Number(item.t_coz) > 0).length : 0;
+                      
+                      if (mediaCoz <= 12) {
+                        return <span className="text-green-400">🚀</span>;
+                      } else {
+                        return <span className="text-red-400">⬇️</span>;
+                      }
+                    })()}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-400">Planejado:</span>
+                    <span className="font-medium dark:text-white text-black">≤ 12min</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-green-400">Realizado:</span>
+                    <span className="font-bold dark:text-white text-black">
+                      {(() => {
+                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_coz) || 0), 0) / dados.filter(item => Number(item.t_coz) > 0).length : 0;
+                        return media.toFixed(1);
+                      })()}min
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fat até 19h */}
+              <div className="dark:bg-gray-800 bg-gray-50 p-2 border rounded-b-[6px] dark:border-gray-700 border-gray-300">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs dark:text-gray-400 text-gray-700">Fat até 19h</span>
+                  <div className="flex items-center space-x-1">
+                    {(() => {
+                      const mediaFat = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.fat_19h) || 0), 0) / dados.filter(item => Number(item.fat_19h) > 0).length : 0;
+                      const meta = 15;
+                      
+                      if (mediaFat >= meta) {
+                        return <span className="text-green-400">🚀</span>;
+                      } else {
+                        return <span className="text-red-400">⬇️</span>;
+                      }
+                    })()}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-blue-400">Planejado:</span>
+                    <span className="font-medium dark:text-white text-black">≥ 15%</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-green-400">Realizado:</span>
+                    <span className="font-bold dark:text-white text-black">
+                      {(() => {
+                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.fat_19h) || 0), 0) / dados.filter(item => Number(item.fat_19h) > 0).length : 0;
+                        return media.toFixed(1);
+                      })()}%
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
-              </div>
-            </div>
+          </div>
+        </div>
 
         {/* Mobile Header - só no mobile */}
         <div className="lg:hidden bg-gray-900 p-3 border-b border-gray-700">
@@ -579,193 +561,139 @@ export default function PlanejamentoComercialPage() {
             </Button>
           </div>
         </div>
-         {/* Área Principal da Tabela */}
-         <div className="flex-1 overflow-hidden bg-white dark:bg-gray-800 pt-0">
-          {/* Container da tabela - empurrada para baixo */}
-          <div className="h-full overflow-auto pt-0">
-            <div className="mt-8">
-              <table className="w-full text-xs border-collapse border-spacing-0">
-              <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10 border-b-2 border-gray-300 dark:border-gray-600">
-                <tr>
-                  {/* Colunas fixas - largura reduzida */}
-              <th className="sticky left-0 z-20 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
-                    Data
-                  </th>
-              <th className="sticky left-16 z-20 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-center font-medium text-gray-700 dark:text-gray-300 w-16 border-r border-gray-200 dark:border-gray-700">
-                    Dia
-                  </th>
-                  {/* Faturamento */}
-                  <th className="px-1 py-1 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                    Real
-                  </th>
-                  <th className="px-1 py-1 text-center font-medium text-white bg-blue-600 border-r border-blue-500 w-20">
-                    M1
-                  </th>
-                  {/* Clientes */}
-                  <th className="px-2 py-1 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
-                    Cl.Plan
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
-                    Cl.Real
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
-                    Res.Tot
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
-                    Res.P
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-green-600 border-r border-green-500 w-16">
-                    Lot.Max
-                  </th>
-                  {/* Tickets */}
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    TE.Plan
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    TE.Real
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    TB.Plan
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    TB.Real
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    T.Medio
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    C.Art
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    C.Prod
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    %Art.Fat
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    %B
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    %D
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    %C
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    T.Coz
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 border-r border-yellow-500 w-16">
-                    T.Bar
-                  </th>
-                  <th className="px-2 py-1 text-center font-medium text-white bg-yellow-600 w-16">
-                    Fat.19h
-                  </th>
-                </tr>
-              </thead>
+      </aside>
 
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {dados.map((item, index) => {
-                  return (
-                  <tr 
-                    key={index}
-                    className={`hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors ${
-                      item.real_receita > 0 ? 'bg-blue-50/20 dark:bg-blue-900/10' : ''
-                    }`}
-                    title={`${item.evento_nome ? `Evento: ${item.evento_nome}` : 'Sem evento'} - Clique para editar`}
-                    onClick={() => abrirModal(item)}
-                  >
-                    {/* Colunas fixas */}
-                    <td className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-xs text-center font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.dia_semana}
-                    </td>
-                    <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-xs text-center font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
-                      {item.dia_formatado}
-                    </td>
-                                               {/* Faturamento */}
-                     <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.real_vs_m1_green)}`}>
-                             {(item.real_receita && Number(item.real_receita) > 0) ? formatarMoeda(Number(item.real_receita)) : '-'}
-                           </td>
-                           <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {(item.m1_receita && Number(item.m1_receita) > 0) ? formatarMoeda(Number(item.m1_receita)) : '-'}
-                           </td>
-                    {/* Clientes */}
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.clientes_plan || '-'}
-                    </td>
-                    <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.ci_real_vs_plan_green)}`}>
-                      {item.clientes_real || '-'}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.res_total || '-'}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.res_presente || '-'}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.lot_max || '-'}
-                    </td>
-                    {/* Tickets */}
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.te_plan > 0 ? formatarMoeda(item.te_plan) : '-'}
-                    </td>
-                    <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.te_real_vs_plan_green)}`}>
-                      {item.te_real > 0 ? formatarMoeda(item.te_real) : '-'}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {item.tb_plan > 0 ? formatarMoeda(item.tb_plan) : '-'}
-                    </td>
-                    <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.tb_real_vs_plan_green)}`}>
-                      {item.tb_real > 0 ? formatarMoeda(item.tb_real) : '-'}
-                    </td>
-                    <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_medio_green)}`}>
-                      {item.t_medio > 0 ? formatarMoeda(item.t_medio) : '-'}
-                    </td>
-                                               {/* Rentabilidade */}
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.c_art > 0 ? formatarMoeda(item.c_art) : '-'}
-                           </td>
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                             {item.c_prod > 0 ? formatarMoeda(item.c_prod) : '-'}
-                           </td>
-                    <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${
-                      item.percent_art_fat > 0 
-                        ? (item.percent_art_fat < 15 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')
-                        : 'text-gray-900 dark:text-white'
-                    }`}>
-                      {item.percent_art_fat > 0 ? `${item.percent_art_fat.toFixed(1)}%` : '-'}
-                    </td>
-                    
-                    {/* Cesta */}
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {(item.percent_b && Number(item.percent_b) > 0) ? `${Number(item.percent_b).toFixed(1)}%` : '-'}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {(item.percent_d && Number(item.percent_d) > 0) ? `${Number(item.percent_d).toFixed(1)}%` : '-'}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                      {(item.percent_c && Number(item.percent_c) > 0) ? `${Number(item.percent_c).toFixed(1)}%` : '-'}
-                    </td>
-                    
-                    {/* Tempo */}
-                    <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_coz_green)}`}>
-                      {item.t_coz > 0 ? item.t_coz.toFixed(1) : '-'}
-                    </td>
-                    <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_bar_green)}`}>
-                      {item.t_bar > 0 ? item.t_bar.toFixed(1) : '-'}
-                    </td>
-                    
-                    {/* Faturamento até 19h */}
-                    <td className={`px-1 py-1 text-xs text-center ${getColorClass(item.fat_19h_green)}`}>
-                      {item.fat_19h > 0 ? `${item.fat_19h.toFixed(1)}%` : '-'}
-                    </td>
-                  </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </div>
+      {/* Área Principal da Tabela */}
+      <div className="flex-1 overflow-x-visible overflow-y-auto hide-scrollbar">
+        <table className="min-w-[1200px] max-h-[900px] w-full table-auto border-collapse border-spacing-0 whitespace-nowrap text-xs dark:bg-transparent ">
+          <thead className="bg-transparent dark:text-white border-b border-gray-200 dark:border-gray-700">
+            <tr>
+              <th className="sticky left-0 bg-transparent px-2 py-1 w-16 text-center font-medium">Data</th>
+              <th className="sticky left-0 bg-transparent px-2 py-1 w-16 text-center font-medium">Dia</th>
+              {/* Faturamento */}
+              <th className="px-1 py-1 w-20">Real</th>
+              <th className="px-1 py-1 w-20">M1</th>
+              {/* Clientes */}
+              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Cl.Plan</th>
+              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Cl.Real</th>
+              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Res.Tot</th>
+              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Res.P</th>
+              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Lot.Max</th>
+              {/* Tickets */}
+              <th className="hidden md:table-cell px-2 py-1 w-16">TE.Plan</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">TE.Real</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">TB.Plan</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">TB.Real</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">T.Medio</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">C.Art</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">C.Prod</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">%Art.Fat</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">%B</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">%D</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">%C</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">T.Coz</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">T.Bar</th>
+              <th className="hidden md:table-cell px-2 py-1 w-16">Fat.19h</th>
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {dados.map((item, index) => {
+              return (
+              <tr 
+                key={index}
+                onClick={() => abrirModal(item)}
+                className={`cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800`}
+              >
+                {/* Colunas fixas */}
+                <td className="sticky left-0 dark:bg-gray-800 px-2 py-1 text-center text-xs font-medium border-r border-gray-200 dark:border-gray-700 dark:text-white">
+                  {item.dia_semana}
+                </td>
+                <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-xs text-center font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
+                  {item.dia_formatado}
+                </td>
+                {/* Faturamento */}
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.real_vs_m1_green)}`}>
+                  {(item.real_receita && Number(item.real_receita) > 0) ? formatarMoeda(Number(item.real_receita)) : '-'}
+                </td>
+                <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {(item.m1_receita && Number(item.m1_receita) > 0) ? formatarMoeda(Number(item.m1_receita)) : '-'}
+                </td>
+                {/* Clientes */}
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.clientes_plan || '-'}
+                </td>
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.ci_real_vs_plan_green)}`}>
+                  {item.clientes_real || '-'}
+                </td>
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.res_total || '-'}
+                </td>
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.res_presente || '-'}
+                </td>
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.lot_max || '-'}
+                </td>
+                {/* Tickets */}
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.te_plan > 0 ? formatarMoeda(item.te_plan) : '-'}
+                </td>
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.te_real_vs_plan_green)}`}>
+                  {item.te_real > 0 ? formatarMoeda(item.te_real) : '-'}
+                </td>
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.tb_plan > 0 ? formatarMoeda(item.tb_plan) : '-'}
+                </td>
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.tb_real_vs_plan_green)}`}>
+                  {item.tb_real > 0 ? formatarMoeda(item.tb_real) : '-'}
+                </td>
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_medio_green)}`}>
+                  {item.t_medio > 0 ? formatarMoeda(item.t_medio) : '-'}
+                </td>
+                {/* Rentabilidade */}
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.c_art > 0 ? formatarMoeda(item.c_art) : '-'}
+                </td>
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.c_prod > 0 ? formatarMoeda(item.c_prod) : '-'}
+                </td>
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${
+                  item.percent_art_fat > 0 
+                    ? (item.percent_art_fat < 15 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')
+                    : 'text-gray-900 dark:text-white'
+                }`}>
+                  {item.percent_art_fat > 0 ? `${item.percent_art_fat.toFixed(1)}%` : '-'}
+                </td>
+                
+                {/* Cesta */}
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {(item.percent_b && Number(item.percent_b) > 0) ? `${Number(item.percent_b).toFixed(1)}%` : '-'}
+                </td>
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {(item.percent_d && Number(item.percent_d) > 0) ? `${Number(item.percent_d).toFixed(1)}%` : '-'}
+                </td>
+                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {(item.percent_c && Number(item.percent_c) > 0) ? `${Number(item.percent_c).toFixed(1)}%` : '-'}
+                </td>
+                
+                {/* Tempo */}
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_coz_green)}`}>
+                  {item.t_coz > 0 ? item.t_coz.toFixed(1) : '-'}
+                </td>
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_bar_green)}`}>
+                  {item.t_bar > 0 ? item.t_bar.toFixed(1) : '-'}
+                </td>
+                
+                {/* Faturamento até 19h */}
+                <td className={`px-1 py-1 text-xs text-center ${getColorClass(item.fat_19h_green)}`}>
+                  {item.fat_19h > 0 ? `${item.fat_19h.toFixed(1)}%` : '-'}
+                </td>
+              </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
       
       {/* Modal de Edição do Evento */}
