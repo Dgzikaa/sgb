@@ -11,6 +11,17 @@
   @apply disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
+/* para Chrome, Safari e Edge */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* para Firefox */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
 /* Botão Primário - Azul */
 .btn-primary {
   @apply btn-modern;
@@ -209,7 +220,7 @@
 }
 
 /* Ícone de status no canto superior esquerdo da célula do dia */
-.modern-calendar .rbc-day-bg[data-has-events="true"]::after {
+.modern-calendar .rbc-day-bg[data-has-events='true']::after {
   content: '';
   position: absolute;
   top: 4px;
@@ -223,11 +234,11 @@
   z-index: 1;
 }
 
-.modern-calendar .rbc-day-bg[data-status="pendente"]::after {
+.modern-calendar .rbc-day-bg[data-status='pendente']::after {
   background: #f59e0b;
 }
 
-.modern-calendar .rbc-day-bg[data-status="cancelado"]::after {
+.modern-calendar .rbc-day-bg[data-status='cancelado']::after {
   background: #ef4444;
 }
 
@@ -344,16 +355,16 @@
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .modern-calendar .rbc-toolbar-label {
     font-size: 18px;
   }
-  
+
   .modern-calendar .rbc-header {
     padding: 8px 4px;
     font-size: 12px;
   }
-  
+
   .modern-calendar .rbc-date-cell {
     padding: 4px;
     font-size: 12px;
@@ -396,7 +407,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
   pointer-events: none;
   border-radius: 12px;
 }
