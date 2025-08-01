@@ -1,4 +1,6 @@
-﻿import { useState, useEffect, useCallback, useMemo } from 'react';
+﻿'use client';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { safeLocalStorage, isClient } from '@/lib/client-utils';
 
 interface Usuario {
@@ -39,12 +41,24 @@ export function usePermissions(): PermissionsHook {
         
         if (userData) {
           const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
+          if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.modulos_permitidos) {
+            setUser(parsedUser);
+            setLoading(false);
+            return;
+          }
         }
+        
+        // Se chegou aqui, não tem dados válidos
+        safeLocalStorage.removeItem('sgb_user');
+        setUser(null);
+        setLoading(false);
+        window.location.href = '/login'; // Redirecionar para login se não tiver dados válidos
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
-      } finally {
+        safeLocalStorage.removeItem('sgb_user');
+        setUser(null);
         setLoading(false);
+        window.location.href = '/login';
       }
     };
 
@@ -63,44 +77,60 @@ export function usePermissions(): PermissionsHook {
       loadUserData();
     };
 
+    // Listener para mudanças de permissões de outros usuários
+    const handlePermissionsChanged = (e: CustomEvent) => {
+      const currentUserData = safeLocalStorage.getItem('sgb_user');
+      if (currentUserData) {
+        const parsedUser = JSON.parse(currentUserData);
+        // Se é o usuário atual que teve permissões alteradas, recarregar do servidor
+        if (parsedUser.id === e.detail?.userId || parsedUser.email === e.detail?.email) {
+          // Aqui poderia fazer uma chamada para o servidor para buscar dados atualizados
+          // Por enquanto, apenas recarregar do localStorage
+          loadUserData();
+        }
+      }
+    };
+
     if (isClient) {
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('userDataUpdated', handleCustomStorageChange);
+      window.addEventListener('userPermissionsChanged', handlePermissionsChanged as EventListener);
     }
 
     return () => {
       if (isClient) {
         window.removeEventListener('storage', handleStorageChange);
-        window.removeEventListener(
-          'userDataUpdated',
-          handleCustomStorageChange
-        );
+        window.removeEventListener('userDataUpdated', handleCustomStorageChange);
+        window.removeEventListener('userPermissionsChanged', handlePermissionsChanged as EventListener);
       }
     };
   }, []);
 
   // Memoizar as permissões do usuário para evitar recálculos desnecessários
   const userPermissions = useMemo(() => {
-    if (!user || !user.ativo) return new Set<string>();
+    if (!user || !user.ativo || !user.modulos_permitidos) {
+      return new Set<string>();
+    }
     
     const permissions = new Set<string>();
     
-    // Adicionar módulos permitidos
-    if (user.modulos_permitidos) {
-      // Se modulos_permitidos é um array
-      if (Array.isArray(user.modulos_permitidos)) {
-        user.modulos_permitidos.forEach(modulo => permissions.add(modulo));
-      }
-      // Se modulos_permitidos é um objeto
-      else if (typeof user.modulos_permitidos === 'object') {
-        Object.keys(user.modulos_permitidos).forEach(modulo => {
-          if (user.modulos_permitidos[modulo] === true) {
-            permissions.add(modulo);
-          }
-        });
-      }
+    // Se modulos_permitidos é um array
+    if (Array.isArray(user.modulos_permitidos)) {
+      user.modulos_permitidos.forEach(modulo => {
+        if (typeof modulo === 'string') {
+          permissions.add(modulo.toLowerCase());
+        }
+      });
     }
-    
+    // Se modulos_permitidos é um objeto
+    else if (typeof user.modulos_permitidos === 'object') {
+      Object.entries(user.modulos_permitidos).forEach(([modulo, value]) => {
+        if (value === true) {
+          permissions.add(modulo.toLowerCase());
+        }
+      });
+    }
+
     return permissions;
   }, [user]);
 
@@ -117,7 +147,7 @@ export function usePermissions(): PermissionsHook {
     
     // Se modulos_permitidos é um objeto
     if (typeof user.modulos_permitidos === 'object') {
-      return Object.keys(user.modulos_permitidos).length > 0;
+      return Object.values(user.modulos_permitidos).some(value => value === true);
     }
     
     return false;
@@ -132,14 +162,24 @@ export function usePermissions(): PermissionsHook {
       // Se admin tem permissões específicas configuradas, respeitar elas
       if (user.role === 'admin') {
         if (adminHasExplicitPermissions) {
-          return userPermissions.has(moduloId);
+          // Primeiro verificar se tem permissão "todos"
+          if (userPermissions.has('todos')) {
+            return true;
+          }
+          return userPermissions.has(moduloId.toLowerCase());
         }
         // Admin sem permissões específicas = acesso total
         return true;
       }
 
+      // Verificar permissão especial "todos"
+      const hasTodos = userPermissions.has('todos');
+      if (hasTodos) {
+        return true;
+      }
+
       // Verificar se o módulo está na lista de permissões
-      const hasDirectPermission = userPermissions.has(moduloId);
+      const hasDirectPermission = userPermissions.has(moduloId.toLowerCase());
 
       // Se é o módulo "operacoes", verificar se tem qualquer permissão relacionada
       if (moduloId === 'operacoes') {
@@ -153,13 +193,40 @@ export function usePermissions(): PermissionsHook {
           'planejamento_operacional',
           'recorrencia_tarefas',
           'controle_periodo',
+          'checklists',
+          'vendas',
+          'eventos',
+          'clientes',
+          'producao',
+          'produtos',
         ];
 
-        const hasAnyOperacoesPermission = operacoesPermissions.some(perm =>
-          userPermissions.has(perm)
+        const hasAnyOperacoesPermission = operacoesPermissions.some(perm => 
+          userPermissions.has(perm.toLowerCase())
         );
-
         return hasDirectPermission || hasAnyOperacoesPermission;
+      }
+
+      // Se é o módulo "financeiro", verificar se tem qualquer permissão relacionada
+      if (moduloId === 'financeiro' || moduloId.startsWith('financeiro_')) {
+        const financeiroPermissions = [
+          'financeiro',
+          'financeiro_agendamento',
+          'pagamentos',
+          'dashboard_financeiro_mensal',
+          'nfs',
+          'fatporhora',
+          'vendas',
+          'eventos',
+          'clientes',
+          'producao',
+          'produtos',
+        ];
+
+        const hasAnyFinanceiroPermission = financeiroPermissions.some(perm => 
+          userPermissions.has(perm.toLowerCase())
+        );
+        return hasDirectPermission || hasAnyFinanceiroPermission;
       }
 
       return hasDirectPermission;
@@ -174,13 +241,13 @@ export function usePermissions(): PermissionsHook {
       // Se admin tem permissões específicas configuradas, respeitar elas
       if (user.role === 'admin') {
         if (adminHasExplicitPermissions) {
-          return modulosIds.some(modulo => userPermissions.has(modulo));
+          return modulosIds.some(modulo => userPermissions.has(modulo.toLowerCase()));
         }
         return true;
       }
 
       // Verificar se tem pelo menos uma permissão
-      return modulosIds.some(modulo => userPermissions.has(modulo));
+      return modulosIds.some(modulo => userPermissions.has(modulo.toLowerCase()));
     },
     [user, userPermissions, adminHasExplicitPermissions]
   );
@@ -335,7 +402,8 @@ export function usePermissions(): PermissionsHook {
     
     // Se modulos_permitidos é um objeto
     if (typeof user.modulos_permitidos === 'object') {
-      return Object.keys(user.modulos_permitidos).length < 23;
+      const truePermissions = Object.values(user.modulos_permitidos).filter(value => value === true);
+      return truePermissions.length < 23;
     }
     
     return false;

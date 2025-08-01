@@ -35,6 +35,8 @@ import {
   CreditCard
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { usePermissions } from '@/hooks/usePermissions';
+import { safeLocalStorage } from '@/lib/client-utils';
 
 interface Usuario {
   id: number;
@@ -68,6 +70,7 @@ const ROLES_OPCOES = [
 ];
 
 function UsuariosPage() {
+  const { user: currentUser, refreshUserData } = usePermissions();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,6 +152,36 @@ function UsuariosPage() {
           title: 'Sucesso',
           description: `Usuário ${editingUser ? 'atualizado' : 'criado'} com sucesso`,
         });
+        
+        // Se o usuário editou a si mesmo, atualizar localStorage
+        if (editingUser && currentUser && editingUser.id === currentUser.id) {
+          const updatedUser = {
+            ...currentUser,
+            ...formData,
+            modulos_permitidos: formData.modulos_permitidos
+          };
+          
+          // Atualizar localStorage
+          safeLocalStorage.setItem('sgb_user', JSON.stringify(updatedUser));
+          
+          // Disparar evento para atualizar contexto de permissões
+          window.dispatchEvent(new CustomEvent('userDataUpdated'));
+          
+          // Mostrar notificação adicional
+          setTimeout(() => {
+            toast({
+              title: 'Permissões Atualizadas',
+              description: 'Suas permissões foram atualizadas. A sidebar será atualizada automaticamente.',
+            });
+          }, 500);
+        }
+        
+        // Para qualquer edição de usuário, disparar evento para possível atualização
+        // (caso o usuário editado esteja logado em outra aba)
+        window.dispatchEvent(new CustomEvent('userPermissionsChanged', {
+          detail: { userId: editingUser?.id, email: editingUser?.email }
+        }));
+        
         setIsDialogOpen(false);
         resetForm();
         fetchUsuarios();

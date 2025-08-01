@@ -173,52 +173,145 @@ async function fetchContaHubData(url: string, sessionToken: string) {
   return JSON.parse(responseText);
 }
 
-// Função para limpar dados antigos antes de inserir novos
+// Função para limpar dados antigos em lotes (evitar timeout)
 async function clearPreviousData(supabase: any, dataFormatted: string, tableName: string, barId: number = 3) {
   console.log(`🗑️ Limpando dados antigos da tabela ${tableName} para bar_id=${barId} e data=${dataFormatted}...`);
   
   // Converter data para formato correto conforme cada tabela
   const start_date = dataFormatted.split('.').reverse().join('-');
   
-  let deleteQuery = supabase
-    .from(tableName)
-    .delete()
-    .eq('bar_id', barId);
+  try {
+    // Primeiro, contar quantos registros existem
+    let countQuery = supabase
+      .from(tableName)
+      .select('id', { count: 'exact', head: true })
+      .eq('bar_id', barId);
 
-  // Adicionar filtro de data específico para cada tabela
-  switch (tableName) {
-    case 'contahub_analitico':
-      deleteQuery = deleteQuery.eq('trn_dtgerencial', start_date);
-      break;
-    case 'contahub_fatporhora':
-      deleteQuery = deleteQuery.eq('vd_dtgerencial', start_date);
-      break;
-    case 'contahub_pagamentos':
-      deleteQuery = deleteQuery.eq('dt_gerencial', start_date);
-      break;
-    case 'contahub_periodo':
-      deleteQuery = deleteQuery.eq('dt_gerencial', start_date);
-      break;
-    case 'contahub_tempo':
-      deleteQuery = deleteQuery.eq('t0_lancamento', start_date);
-      break;
-    default:
-      console.log(`⚠️ Tabela ${tableName} não mapeada para filtro de data`);
+    // Adicionar filtro de data específico para cada tabela
+    switch (tableName) {
+      case 'contahub_analitico':
+        countQuery = countQuery.eq('trn_dtgerencial', start_date);
+        break;
+      case 'contahub_fatporhora':
+        countQuery = countQuery.eq('vd_dtgerencial', start_date);
+        break;
+      case 'contahub_pagamentos':
+        countQuery = countQuery.eq('dt_gerencial', start_date);
+        break;
+      case 'contahub_periodo':
+        countQuery = countQuery.eq('dt_gerencial', start_date);
+        break;
+      case 'contahub_tempo':
+        countQuery = countQuery.eq('t0_lancamento', start_date);
+        break;
+      default:
+        console.log(`⚠️ Tabela ${tableName} não mapeada para filtro de data`);
+        return;
+    }
+    
+    const { count: totalRecords } = await countQuery;
+    
+    if (!totalRecords || totalRecords === 0) {
+      console.log(`✅ Nenhum dado antigo encontrado em ${tableName} para ${start_date}`);
+      return;
+    }
+    
+    console.log(`📊 Encontrados ${totalRecords} registros para limpar em ${tableName}`);
+    
+    // Se há muitos registros, deletar em lotes menores
+    if (totalRecords > 1000) {
+      console.log(`⚠️ Muitos registros (${totalRecords}). Pulando limpeza para evitar timeout.`);
+      console.log(`💡 Sugestão: Limpar manualmente ou usar processo em background.`);
+      return;
+    }
+    
+    // Para poucos registros, deletar normalmente
+    let deleteQuery = supabase
+      .from(tableName)
+      .delete()
+      .eq('bar_id', barId);
+
+    // Adicionar filtro de data específico para cada tabela
+    switch (tableName) {
+      case 'contahub_analitico':
+        deleteQuery = deleteQuery.eq('trn_dtgerencial', start_date);
+        break;
+      case 'contahub_fatporhora':
+        deleteQuery = deleteQuery.eq('vd_dtgerencial', start_date);
+        break;
+      case 'contahub_pagamentos':
+        deleteQuery = deleteQuery.eq('dt_gerencial', start_date);
+        break;
+      case 'contahub_periodo':
+        deleteQuery = deleteQuery.eq('dt_gerencial', start_date);
+        break;
+      case 'contahub_tempo':
+        deleteQuery = deleteQuery.eq('t0_lancamento', start_date);
+        break;
+    }
+    
+    const result = await deleteQuery;
+    
+    if (result && result.error) {
+      console.error(`❌ Erro ao limpar dados de ${tableName}:`, result.error);
+      console.log(`⚠️ Continuando sem limpar dados antigos...`);
+      return; // Não throw, apenas continua
+    }
+    
+    console.log(`✅ Dados antigos de ${tableName} removidos: ${result?.count || totalRecords} registros`);
+    
+  } catch (error) {
+    console.error(`❌ Erro na limpeza de ${tableName}:`, error);
+    console.log(`⚠️ Continuando sem limpar dados antigos...`);
+    // Não throw, apenas continua sem limpar
   }
-  
-  const { error, count } = await deleteQuery;
-  
-  if (error) {
-    console.error(`❌ Erro ao limpar dados de ${tableName}:`, error);
-    throw error;
-  }
-  
-  console.log(`✅ Dados antigos de ${tableName} removidos: ${count || 0} registros`);
 }
 
-// Função para processar dados analíticos
-async function processAnaliticData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
-  console.log('📊 Processando dados analíticos...');
+// Função para salvar dados brutos (como no Nibo)
+async function saveRawData(supabase: any, dataType: string, rawData: any, dataFormatted: string) {
+  console.log(`💾 Salvando dados brutos de ${dataType}...`);
+  
+  try {
+    // Primeiro, limpar dados anteriores do mesmo tipo e data
+    console.log(`🧹 Limpando dados anteriores de ${dataType}...`);
+    await supabase
+      .from('contahub_raw_data')
+      .delete()
+      .eq('bar_id', 3)
+      .eq('data_type', dataType)
+      .eq('data_date', dataFormatted.split('.').reverse().join('-'));
+    
+    // Inserir novos dados
+    console.log(`📥 Inserindo novos dados de ${dataType}...`);
+    const { error } = await supabase
+      .from('contahub_raw_data')
+      .insert({
+        bar_id: 3,
+        data_type: dataType,
+        data_date: dataFormatted.split('.').reverse().join('-'),
+        raw_json: rawData,
+        processed: false,
+        created_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error(`❌ Erro ao salvar dados brutos de ${dataType}:`, JSON.stringify(error, null, 2));
+      throw error;
+    }
+    
+    const recordCount = Array.isArray(rawData) ? rawData.length : (rawData?.list?.length || 0);
+    console.log(`✅ Dados brutos de ${dataType} salvos (${recordCount} registros)`);
+    return recordCount;
+    
+  } catch (error) {
+    console.error(`❌ Falha ao salvar dados brutos de ${dataType}:`, JSON.stringify(error, null, 2));
+    throw error;
+  }
+}
+
+// Função simplificada para buscar dados analíticos
+async function fetchAnaliticData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+  console.log('📊 Buscando dados analíticos...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
   const end_date = dataFormatted.split('.').reverse().join('-');
@@ -226,368 +319,109 @@ async function processAnaliticData(supabase: any, sessionToken: string, baseUrl:
   const analiticUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=77&d0=${start_date}&d1=${end_date}&produto=&grupo=&local=&turno=&mesa=&emp=3768&nfe=1`;
   
   console.log(`🔗 URL Analítico: ${analiticUrl}`);
-  console.log(`🍪 SessionToken: ${sessionToken ? 'PRESENTE' : 'AUSENTE'}`);
-  console.log(`📅 Data processamento: ${dataFormatted} → ${start_date}`);
   
-  let analiticData;
   try {
-    console.log('🚀 Iniciando fetchContaHubData para analítico...');
-    analiticData = await fetchContaHubData(analiticUrl, sessionToken);
-    console.log('✅ fetchContaHubData analítico concluído');
+    const analiticData = await fetchContaHubData(analiticUrl, sessionToken);
+    console.log('✅ Dados analíticos obtidos do ContaHub');
+    
+    // Salvar dados brutos
+    return await saveRawData(supabase, 'analitico', analiticData, dataFormatted);
+    
   } catch (error) {
-    console.error('❌ Erro detalhado em fetchContaHubData analítico:', error);
+    console.error('❌ Erro ao buscar dados analíticos:', error);
     throw error;
   }
-  
-    // Verificar se os dados estão em uma propriedade (como no teste-sync-contahub.js)
-  let finalData = analiticData;
-  if (!Array.isArray(analiticData)) {
-    console.log('🔍 Dados não são array, verificando propriedades...');
-    if (analiticData?.list) finalData = analiticData.list;
-    else if (analiticData?.rows) finalData = analiticData.rows;
-    else if (analiticData?.data) finalData = analiticData.data;
-    else if (analiticData?.result) finalData = analiticData.result;
-  }
-
-  if (!finalData || !Array.isArray(finalData)) {
-    console.log('⚠️ Nenhum dado analítico encontrado');
-    return 0;
-  }
-
-  await clearPreviousData(supabase, dataFormatted, 'contahub_analitico', 3); // bar_id = 3 (Ordinário)
-
-  const processedData = finalData.map((item: any) => ({
-    vd_mesadesc: item.vd_mesadesc || null,
-    vd_localizacao: item.vd_localizacao || null,
-    itm: item.itm || null,
-    trn: item.trn || null,
-    trn_desc: item.trn_desc || null,
-    prefixo: item.prefixo || null,
-    tipo: item.tipo || null,
-    tipovenda: item.tipovenda || null,
-    ano: parseIntSafe(item.ano),
-    mes: parseIntSafe(item.mes),
-    trn_dtgerencial: item.trn_dtgerencial || null,
-    usr_lancou: item.usr_lancou || null,
-    prd: item.prd || null,
-    prd_desc: item.prd_desc || null,
-    grp_desc: item.grp_desc || null,
-    loc_desc: item.loc_desc || null,
-    qtd: parseIntSafe(item.qtd),
-    desconto: parseFloatSafe(item.desconto),
-    valorfinal: parseFloatSafe(item.valorfinal),
-    custo: parseFloatSafe(item.custo),
-    itm_obs: item.itm_obs || null,
-    comandaorigem: item.comandaorigem || null,
-    itemorigem: item.itemorigem || null,
-    bar_id: 3
-  }));
-  
-  const { error } = await supabase
-    .from('contahub_analitico')
-    .insert(processedData);
-  
-  if (error) {
-    console.error('❌ Erro ao inserir dados analíticos:', error);
-    throw error;
-  }
-  
-  console.log(`✅ ${processedData.length} registros analíticos inseridos`);
-  return processedData.length;
 }
 
-// Função para processar faturamento por hora
-async function processFatPorHora(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
-  console.log('🕐 Processando faturamento por hora...');
+// Função simplificada para buscar faturamento por hora
+async function fetchFatPorHoraData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+  console.log('🕐 Buscando faturamento por hora...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
   const end_date = dataFormatted.split('.').reverse().join('-');
   const queryTimestamp = generateDynamicTimestamp();
   const fatHoraUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=101&d0=${start_date}&d1=${end_date}&emp=3768&nfe=1`;
-  let fatHoraData;
+  
   try {
-    console.log('🚀 Iniciando fetchContaHubData para faturamento por hora...');
-    fatHoraData = await fetchContaHubData(fatHoraUrl, sessionToken);
-    console.log('✅ fetchContaHubData faturamento por hora concluído');
+    const fatHoraData = await fetchContaHubData(fatHoraUrl, sessionToken);
+    console.log('✅ Dados de faturamento por hora obtidos');
+    
+    return await saveRawData(supabase, 'fatporhora', fatHoraData, dataFormatted);
+    
   } catch (error) {
-    console.error('❌ Erro detalhado em fetchContaHubData faturamento por hora:', error);
+    console.error('❌ Erro ao buscar faturamento por hora:', error);
     throw error;
   }
-
-  // Verificar se os dados estão em uma propriedade (como no teste-sync-contahub.js)
-  let finalData = fatHoraData;
-  if (!Array.isArray(fatHoraData)) {
-    console.log('🔍 Dados não são array, verificando propriedades...');
-    if (fatHoraData?.list) finalData = fatHoraData.list;
-    else if (fatHoraData?.rows) finalData = fatHoraData.rows;
-    else if (fatHoraData?.data) finalData = fatHoraData.data;
-    else if (fatHoraData?.result) finalData = fatHoraData.result;
-  }
-
-  if (!finalData || !Array.isArray(finalData)) {
-    console.log('⚠️ Nenhum dado de faturamento por hora encontrado');
-    return 0;
-  }
-  
-  await clearPreviousData(supabase, dataFormatted, 'contahub_fatporhora', 3);
-  
-  const processedData = finalData.map((item: any) => ({
-    vd_dtgerencial: item.vd_dtgerencial || null,
-    dds: parseIntSafe(item.dds),
-    dia: item.dia || null,
-    hora: item.hora || null,
-    qtd: parseIntSafe(item.qtd),
-    valor: parseFloatSafe(item.$valor || item.valor),
-    bar_id: 3
-  }));
-  
-  const { error } = await supabase
-    .from('contahub_fatporhora')
-    .insert(processedData);
-  
-  if (error) {
-    console.error('❌ Erro ao inserir faturamento por hora:', error);
-    throw error;
-  }
-  
-  console.log(`✅ ${processedData.length} registros de faturamento por hora inseridos`);
-  return processedData.length;
 }
 
-// Função para processar pagamentos
-async function processPagamentos(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
-  console.log('💳 Processando pagamentos...');
+// Função simplificada para buscar pagamentos
+async function fetchPagamentosData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+  console.log('💳 Buscando pagamentos...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
   const end_date = dataFormatted.split('.').reverse().join('-');
   const queryTimestamp = generateDynamicTimestamp();
   const pagamentosUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=7&d0=${start_date}&d1=${end_date}&meio=&emp=3768&nfe=1`;
-  let pagamentosData;
+  
   try {
-    console.log('🚀 Iniciando fetchContaHubData para pagamentos...');
-    pagamentosData = await fetchContaHubData(pagamentosUrl, sessionToken);
-    console.log('✅ fetchContaHubData pagamentos concluído');
+    const pagamentosData = await fetchContaHubData(pagamentosUrl, sessionToken);
+    console.log('✅ Dados de pagamentos obtidos');
+    
+    return await saveRawData(supabase, 'pagamentos', pagamentosData, dataFormatted);
+    
   } catch (error) {
-    console.error('❌ Erro detalhado em fetchContaHubData pagamentos:', error);
+    console.error('❌ Erro ao buscar pagamentos:', error);
     throw error;
   }
-
-  // Verificar se os dados estão em uma propriedade (como no teste-sync-contahub.js)
-  let finalData = pagamentosData;
-  if (!Array.isArray(pagamentosData)) {
-    console.log('🔍 Dados não são array, verificando propriedades...');
-    if (pagamentosData?.list) finalData = pagamentosData.list;
-    else if (pagamentosData?.rows) finalData = pagamentosData.rows;
-    else if (pagamentosData?.data) finalData = pagamentosData.data;
-    else if (pagamentosData?.result) finalData = pagamentosData.result;
-  }
-
-  if (!finalData || !Array.isArray(finalData)) {
-    console.log('⚠️ Nenhum dado de pagamentos encontrado');
-    return 0;
-  }
-  
-  await clearPreviousData(supabase, dataFormatted, 'contahub_pagamentos', 3);
-  
-
-
-  const processedData = finalData.map((item: any) => ({
-    vd: item.vd || null,
-    trn: item.trn || null,
-    dt_gerencial: item.dt_gerencial || null,
-    hr_lancamento: item.hr_lancamento || null,
-    hr_transacao: item.hr_transacao || null,
-    dt_transacao: item.dt_transacao || null,
-    mesa: item.mesa || null,
-    cli: item.cli || null,
-    cliente: item.cliente || null,
-    vr_pagamentos: parseFloatSafe(item.$vr_pagamentos),
-    pag: item.pag || null,
-    valor: parseFloatSafe(item.$valor),
-    taxa: parseFloatSafe(item.taxa), // campo sem $ (se existir)
-    perc: parseFloatSafe(item.perc), // campo sem $ (se existir)
-    liquido: parseFloatSafe(item.$liquido),
-    tipo: item.tipo || null,
-    meio: item.meio || null,
-    cartao: item.cartao || null,
-    autorizacao: item.autorizacao || null,
-    dt_credito: item.dt_credito || null,
-    usr_abriu: item.usr_abriu || null,
-    usr_lancou: item.usr_lancou || null,
-    usr_aceitou: item.usr_aceitou || null,
-    motivodesconto: item.motivodesconto || null,
-    bar_id: 3
-  }));
-  
-
-  
-  const { error } = await supabase
-    .from('contahub_pagamentos')
-    .insert(processedData);
-  
-  if (error) {
-    console.error('❌ Erro ao inserir pagamentos:', error);
-    throw error;
-  }
-  
-  console.log(`✅ ${processedData.length} registros de pagamentos inseridos`);
-  return processedData.length;
 }
 
-// Função para processar dados por período
-async function processPeriodo(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
-  console.log('📅 Processando dados por período...');
+// Função simplificada para buscar período
+async function fetchPeriodoData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+  console.log('📅 Buscando dados por período...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
   const end_date = dataFormatted.split('.').reverse().join('-');
   const queryTimestamp = generateDynamicTimestamp();
   const periodoUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${start_date}&d1=${end_date}&emp=3768&nfe=1`;
-    let periodoData;
+  
   try {
-    periodoData = await fetchContaHubData(periodoUrl, sessionToken);
+    const periodoData = await fetchContaHubData(periodoUrl, sessionToken);
+    console.log('✅ Dados de período obtidos');
+    
+    return await saveRawData(supabase, 'periodo', periodoData, dataFormatted);
+    
   } catch (error) {
-    console.error('❌ Erro em fetchContaHubData período:', error);
+    console.error('❌ Erro ao buscar dados de período:', error);
     throw error;
   }
-
-  let finalData = periodoData;
-  if (!Array.isArray(periodoData)) {
-    if (periodoData?.list) finalData = periodoData.list;
-    else if (periodoData?.rows) finalData = periodoData.rows;
-    else if (periodoData?.data) finalData = periodoData.data;
-    else if (periodoData?.result) finalData = periodoData.result;
-  }
-
-  if (!finalData || !Array.isArray(finalData)) {
-    console.log('⚠️ Nenhum dado de período encontrado');
-    return 0;
-  }
-
-  await clearPreviousData(supabase, dataFormatted, 'contahub_periodo', 3);
-
-
-
-  const processedData = finalData.map((item: any) => ({
-    dt_gerencial: item.dt_gerencial || null,
-    tipovenda: item.tipovenda || null,
-    vd_mesadesc: item.vd_mesadesc || null,
-    vd_localizacao: item.vd_localizacao || null,
-    cht_nome: item.cht_nome || null,
-    cli_nome: item.cli_nome || null,
-    cli_dtnasc: item.cli_dtnasc || null,
-    cli_email: item.cli_email || null,
-    cli_fone: item.cli_fone || null,
-    usr_abriu: item.usr_abriu || null,
-    pessoas: parseIntSafe(item.pessoas),
-    qtd_itens: parseIntSafe(item.qtd_itens),
-    vr_pagamentos: parseFloatSafe(item.$vr_pagamentos),
-    vr_produtos: parseFloatSafe(item.$vr_produtos),
-    vr_repique: parseFloatSafe(item.$vr_repique),
-    vr_couvert: parseFloatSafe(item.$vr_couvert),
-    vr_desconto: parseFloatSafe(item.$vr_desconto),
-    motivo: item.motivo || null,
-    dt_contabil: item.dt_contabil || null,
-    ultimo_pedido: item.ultimo_pedido || null,
-    vd_dtcontabil: item.vd_dtcontabil || null,
-    bar_id: 3
-  }));
-  
-
-  
-  const { error } = await supabase
-    .from('contahub_periodo')
-    .insert(processedData);
-  
-  if (error) {
-    console.error('❌ Erro ao inserir dados de período:', error);
-    throw error;
-  }
-  
-  console.log(`✅ ${processedData.length} registros de período inseridos`);
-  return processedData.length;
 }
 
-// Função para processar dados de tempo
-async function processTempo(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
-  console.log('⏱️ Processando dados de tempo...');
+// Função simplificada para buscar tempo
+async function fetchTempoData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+  console.log('⏱️ Buscando dados de tempo...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
   const end_date = dataFormatted.split('.').reverse().join('-');
   const queryTimestamp = generateDynamicTimestamp();
   const tempoUrl = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=81&d0=${start_date}&d1=${end_date}&prod=&grupo=&local=&emp=3768&nfe=1`;
-    let tempoData;
+  
   try {
-    tempoData = await fetchContaHubData(tempoUrl, sessionToken);
+    const tempoData = await fetchContaHubData(tempoUrl, sessionToken);
+    console.log('✅ Dados de tempo obtidos');
+    
+    return await saveRawData(supabase, 'tempo', tempoData, dataFormatted);
+    
   } catch (error) {
-    console.error('❌ Erro em fetchContaHubData tempo:', error);
+    console.error('❌ Erro ao buscar dados de tempo:', error);
     throw error;
   }
-
-  let finalData = tempoData;
-  if (!Array.isArray(tempoData)) {
-    if (tempoData?.list) finalData = tempoData.list;
-    else if (tempoData?.rows) finalData = tempoData.rows;
-    else if (tempoData?.data) finalData = tempoData.data;
-    else if (tempoData?.result) finalData = tempoData.result;
-  }
-
-  if (!finalData || !Array.isArray(finalData)) {
-    console.log('⚠️ Nenhum dado de tempo encontrado');
-    return 0;
-  }
-
-  await clearPreviousData(supabase, dataFormatted, 'contahub_tempo', 3);
-
-  const processedData = finalData.map((item: any) => ({
-    grp_desc: item.grp_desc || null,
-    prd_desc: item.prd_desc || null,
-    vd_mesadesc: item.vd_mesadesc || null,
-    vd_localizacao: item.vd_localizacao || null,
-    itm: item.itm || null,
-    t0_lancamento: item['t0-lancamento'] || null,
-    t1_prodini: item['t1-prodini'] || null,
-    t2_prodfim: item['t2-prodfim'] || null,
-    t3_entrega: item['t3-entrega'] || null,
-    t0_t1: parseFloatSafe(item['t0-t1']),
-    t0_t2: parseFloatSafe(item['t0-t2']),
-    t0_t3: parseFloatSafe(item['t0-t3']),
-    t1_t2: parseFloatSafe(item['t1-t2']),
-    t1_t3: parseFloatSafe(item['t1-t3']),
-    t2_t3: parseFloatSafe(item['t2-t3']),
-    prd: item.prd || null,
-    prd_idexterno: item.prd_idexterno || null,
-    loc_desc: item.loc_desc || null,
-    usr_abriu: item.usr_abriu || null,
-    usr_lancou: item.usr_lancou || null,
-    usr_produziu: item.usr_produziu || null,
-    usr_entregou: item.usr_entregou || null,
-    usr_transfcancelou: item.usr_transfcancelou || null,
-    prefixo: item.prefixo || null,
-    tipovenda: item.tipovenda || null,
-    ano: parseIntSafe(item.ano),
-    mes: parseIntSafe(item.mes),
-    dia: formatDiaFromISO(item.dia),
-    dds: parseIntSafe(item.dds),
-    diadasemana: item.diadasemana || null,
-    hora: item.hora || null,
-    itm_qtd: parseIntSafe(item.itm_qtd),
-    bar_id: 3
-  }));
-  
-  const { error } = await supabase
-    .from('contahub_tempo')
-    .insert(processedData);
-  
-  if (error) {
-    console.error('❌ Erro ao inserir dados de tempo:', error);
-    throw error;
-  }
-  
-  console.log(`✅ ${processedData.length} registros de tempo inseridos`);
-  return processedData.length;
 }
 
-Deno.serve(async (req) => {
+
+
+
+
+Deno.serve(async (req: Request): Promise<Response> => {
   console.log('🚀 INICIANDO EDGE FUNCTION - contahub-sync-automatico');
   console.log('🔍 Method:', req.method);
   console.log('🔍 URL:', req.url);
@@ -599,9 +433,32 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  let logId: number | null = null;
+  // Criar timeout para a function (15 minutos)
+  const functionTimeout = 15 * 60 * 1000; // 15 minutos
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Timeout da Edge Function após 15 minutos'));
+    }, functionTimeout);
+  });
+
   const inicioExecucao = new Date();
 
+  try {
+    // Executar o processamento principal com timeout
+    return await Promise.race([
+      processMainFunction(req, inicioExecucao),
+      timeoutPromise
+    ]);
+    
+  } catch (error) {
+    return await handleMainError(error, null, inicioExecucao);
+  }
+});
+
+// Função principal de processamento
+async function processMainFunction(req: Request, inicioExecucao: Date): Promise<Response> {
+  let logId: number | null = null;
+  
   try {
     console.log('📥 Tentando ler body da requisição...');
     
@@ -757,37 +614,21 @@ Deno.serve(async (req) => {
     
     console.log('🔄 Iniciando sincronização ContaHub...');
     
-    // Processar cada tipo de dados com timeouts aleatórios
-    console.log('📊 [1/5] Processando dados analíticos...');
-    const totalAnalitico = await processAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    // Buscar dados brutos apenas (processamento externo depois)
+    console.log('📊 [1/5] Buscando dados analíticos...');
+    const totalAnalitico = await fetchAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
-    const timeout1 = randomTimeout();
-    console.log(`⏸️ Pausando ${Math.round(timeout1/1000)}s antes do próximo módulo...`);
-    await new Promise(resolve => setTimeout(resolve, timeout1));
+    console.log('🕐 [2/5] Buscando faturamento por hora...');
+    const totalFatporhora = await fetchFatPorHoraData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
-    console.log('🕐 [2/5] Processando faturamento por hora...');
-    const totalFatporhora = await processFatPorHora(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    console.log('💳 [3/5] Buscando pagamentos...');
+    const totalPagamentos = await fetchPagamentosData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
-    const timeout2 = randomTimeout();
-    console.log(`⏸️ Pausando ${Math.round(timeout2/1000)}s antes do próximo módulo...`);
-    await new Promise(resolve => setTimeout(resolve, timeout2));
+    console.log('📅 [4/5] Buscando dados por período...');
+    const totalPeriodo = await fetchPeriodoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
-    console.log('💳 [3/5] Processando pagamentos...');
-    const totalPagamentos = await processPagamentos(supabase, sessionToken, contahubBaseUrl, dataFormatted);
-    
-    const timeout3 = randomTimeout();
-    console.log(`⏸️ Pausando ${Math.round(timeout3/1000)}s antes do próximo módulo...`);
-    await new Promise(resolve => setTimeout(resolve, timeout3));
-    
-    console.log('📅 [4/5] Processando dados por período...');
-    const totalPeriodo = await processPeriodo(supabase, sessionToken, contahubBaseUrl, dataFormatted);
-    
-    const timeout4 = randomTimeout();
-    console.log(`⏸️ Pausando ${Math.round(timeout4/1000)}s antes do último módulo...`);
-    await new Promise(resolve => setTimeout(resolve, timeout4));
-    
-    console.log('⏱️ [5/5] Processando dados de tempo...');
-    const totalTempo = await processTempo(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    console.log('⏱️ [5/5] Buscando dados de tempo...');
+    const totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
     const fimExecucao = new Date();
     const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
@@ -878,67 +719,72 @@ Deno.serve(async (req) => {
     });
     
   } catch (error) {
-    const fimExecucao = new Date();
-    const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const stackTrace = error instanceof Error ? error.stack : null;
-    
-    console.error('❌ Erro na sincronização:', errorMessage);
+    return await handleMainError(error, logId, inicioExecucao);
+  }
+}
 
-    // Atualizar log com erro
-    if (logId) {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL');
-      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-      
-      if (supabaseUrl && supabaseServiceKey) {
-        try {
-          const supabase = createClient(supabaseUrl, supabaseServiceKey);
-          await supabase
-            .from('sync_logs_contahub')
-            .update({
-              status: 'erro',
-              fim_execucao: fimExecucao.toISOString(),
-              duracao_segundos: duracaoSegundos,
-              erro: errorMessage,
-              stack_trace: stackTrace,
-              detalhes: {
-                inicio: inicioExecucao.toISOString(),
-                fim: fimExecucao.toISOString(),
-                erro_detalhado: errorMessage,
-                stack_trace: stackTrace
-              }
-            })
-            .eq('id', logId);
-        } catch (logUpdateError) {
-          console.error('❌ Erro ao atualizar log:', logUpdateError);
-        }
+// Função para tratar erros principais
+async function handleMainError(error: unknown, logId: number | null, inicioExecucao: Date): Promise<Response> {
+  const fimExecucao = new Date();
+  const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const stackTrace = error instanceof Error ? error.stack : null;
+  
+  console.error('❌ Erro na sincronização:', errorMessage);
+
+  // Atualizar log com erro
+  if (logId) {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (supabaseUrl && supabaseServiceKey) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        await supabase
+          .from('sync_logs_contahub')
+          .update({
+            status: 'erro',
+            fim_execucao: fimExecucao.toISOString(),
+            duracao_segundos: duracaoSegundos,
+            erro: errorMessage,
+            stack_trace: stackTrace,
+            detalhes: {
+              inicio: inicioExecucao.toISOString(),
+              fim: fimExecucao.toISOString(),
+              erro_detalhado: errorMessage,
+              stack_trace: stackTrace
+            }
+          })
+          .eq('id', logId);
+      } catch (logUpdateError) {
+        console.error('❌ Erro ao atualizar log:', logUpdateError);
       }
     }
-
-    // Enviar notificação Discord de erro
-    const discordWebhook = Deno.env.get('DISCORD_WEBHOOK');
-    if (discordWebhook && discordWebhook.startsWith('https://')) {
-      await sendDiscordNotification(
-        discordWebhook,
-        '❌ ContaHub Sync Falhou',
-        `Erro na sincronização automática do ContaHub`,
-        15158332, // Vermelho
-        [
-          { name: '🚨 Erro', value: errorMessage.substring(0, 1024), inline: false },
-          { name: '⏱️ Duração até o erro', value: `${duracaoSegundos}s`, inline: true },
-          { name: '🆔 Log ID', value: logId?.toString() || 'N/A', inline: true },
-          { name: '🕐 Hora do erro', value: `<t:${Math.floor(fimExecucao.getTime() / 1000)}:T>`, inline: true }
-        ]
-      );
-    }
-    
-    return new Response(JSON.stringify({
-      success: false,
-      error: errorMessage,
-      log_id: logId
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
-    });
   }
-}); 
+
+  // Enviar notificação Discord de erro
+  const discordWebhook = Deno.env.get('DISCORD_WEBHOOK');
+  if (discordWebhook && discordWebhook.startsWith('https://')) {
+    await sendDiscordNotification(
+      discordWebhook,
+      '❌ ContaHub Sync Falhou',
+      `Erro na sincronização automática do ContaHub`,
+      15158332, // Vermelho
+      [
+        { name: '🚨 Erro', value: errorMessage.substring(0, 1024), inline: false },
+        { name: '⏱️ Duração até o erro', value: `${duracaoSegundos}s`, inline: true },
+        { name: '🆔 Log ID', value: logId?.toString() || 'N/A', inline: true },
+        { name: '🕐 Hora do erro', value: `<t:${Math.floor(fimExecucao.getTime() / 1000)}:T>`, inline: true }
+      ]
+    );
+  }
+  
+  return new Response(JSON.stringify({
+    success: false,
+    error: errorMessage,
+    log_id: logId
+  }), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    status: 500
+  });
+} 
