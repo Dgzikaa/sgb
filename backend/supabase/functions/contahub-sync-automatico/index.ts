@@ -631,26 +631,47 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     console.log('⏱️ [5/5] Buscando dados de tempo...');
     const totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
     
-    console.log('🔄 Processando todos os dados salvos...');
-    // Processar todos os dados de uma vez ao final usando função otimizada
-    try {
-      const { data: processResults, error: processError } = await supabase.rpc('process_pending_contahub_data');
-      if (processError) {
-        console.error(`❌ Erro no processamento final:`, processError);
-        throw new Error(`Erro no processamento: ${processError.message}`);
+    console.log('🔄 Processando dados um por vez...');
+    // Processar registros um por vez para evitar timeout
+    let totalProcessed = 0;
+    let maxIterations = 10; // Máximo 10 tentativas
+    
+    for (let i = 0; i < maxIterations; i++) {
+      try {
+        const { data: processResult, error: processError } = await supabase.rpc('process_single_pending_record');
+        
+        if (processError) {
+          console.error(`❌ Erro no processamento (iteração ${i + 1}):`, processError);
+          break;
+        }
+        
+        if (!processResult || processResult.length === 0) {
+          console.log('✅ Todos os registros foram processados');
+          break;
+        }
+        
+        const result = processResult[0];
+        if (result.success) {
+          console.log(`✅ Processado: ${result.processed_type} (ID: ${result.processed_id})`);
+          totalProcessed++;
+        } else {
+          console.log(`⚠️ Erro ao processar: ${result.processed_type} (ID: ${result.processed_id}) - ${result.error_message}`);
+          totalProcessed++; // Conta mesmo com erro
+        }
+        
+        // Pequena pausa entre processamentos
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+      } catch (processErr) {
+        console.error(`❌ Falha na iteração ${i + 1}:`, processErr);
+        break;
       }
-      
-      if (processResults && processResults.length > 0) {
-        console.log(`✅ Processamento final concluído: ${processResults.length} tipos processados`);
-        processResults.forEach((result: any) => {
-          console.log(`  - ${result.processed_type}: ${result.record_count} registros (ID: ${result.processed_id})`);
-        });
-      } else {
-        console.log('✅ Nenhum dado pendente para processar');
-      }
-    } catch (processErr) {
-      console.error(`❌ Falha no processamento final:`, processErr);
-      throw new Error(`Falha no processamento: ${processErr.message}`);
+    }
+    
+    console.log(`✅ Processamento concluído: ${totalProcessed} registros`);
+    
+    if (totalProcessed === 0) {
+      console.log('⚠️ Nenhum registro foi processado - dados salvos apenas na raw_data');
     }
     
     const fimExecucao = new Date();
