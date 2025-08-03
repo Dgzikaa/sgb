@@ -235,42 +235,149 @@ async function clearPreviousData(supabase: any, dataFormatted: string, tableName
   }
 }
 
-// Função SIMPLES para salvar dados brutos (apenas 1 registro por API)
-async function saveRawData(supabase: any, dataType: string, rawData: any, dataFormatted: string) {
+// Função para salvar dados brutos em lotes (evitar timeout)
+async function saveRawData(supabase: any, dataType: string, rawData: any, dataFormatted: string, logId?: number) {
   console.log(`💾 Salvando dados brutos de ${dataType}...`);
   
   try {
     // Contar registros para log
     let recordCount = 0;
+    let dataToProcess: any[] = [];
+    
     if (rawData?.list) {
+      dataToProcess = rawData.list;
       recordCount = rawData.list.length;
     } else if (Array.isArray(rawData)) {
+      dataToProcess = rawData;
       recordCount = rawData.length;
     } else {
+      dataToProcess = [rawData];
       recordCount = 1;
     }
     
     console.log(`📊 ${dataType}: ${recordCount} registros recebidos da API`);
     
-    // Salvar JSON completo em UM ÚNICO registro (trigger processa depois)
-    const { error } = await supabase
-      .from('contahub_raw_data')
-      .insert({
-        bar_id: 3,
-        data_type: dataType,
-        data_date: dataFormatted.split('.').reverse().join('-'),
-        raw_json: rawData, // JSON completo da API
-        processed: false
-      });
-    
-    if (error) {
-      const errorMessage = error?.message || error?.details || JSON.stringify(error);
-      console.error(`❌ Erro ao salvar ${dataType}:`, errorMessage);
-      throw new Error(`Erro ao salvar ${dataType}: ${errorMessage}`);
+    // Se não há dados para processar, retornar 0
+    if (recordCount === 0) {
+      console.log(`⚠️ Nenhum dado para processar em ${dataType}`);
+      return 0;
     }
     
-    console.log(`✅ ${dataType} salvo com sucesso (${recordCount} registros)`);
-    return recordCount;
+    // Quebrar em lotes de 500 para evitar timeout
+    const BATCH_SIZE = 500;
+    const batches: any[][] = [];
+    
+    for (let i = 0; i < dataToProcess.length; i += BATCH_SIZE) {
+      batches.push(dataToProcess.slice(i, i + BATCH_SIZE));
+    }
+    
+    console.log(`📦 Processando ${batches.length} lotes de até ${BATCH_SIZE} registros cada`);
+    
+    let totalInserted = 0;
+    let batchErrors: Array<{batch: number, error: string}> = [];
+    
+    // Processar cada lote sequencialmente (aguardar trigger entre lotes)
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+      console.log(`🔄 Processando lote ${batchIndex + 1}/${batches.length} (${batch.length} registros)`);
+      
+      try {
+        // Inserir lote na tabela raw_data
+        const { error } = await supabase
+          .from('contahub_raw_data')
+          .insert({
+            bar_id: 3,
+            data_type: dataType,
+            data_date: dataFormatted.split('.').reverse().join('-'),
+            raw_json: batch,
+            processed: false
+          });
+          
+        if (error) {
+          const errorMessage = error?.message || error?.details || JSON.stringify(error);
+          console.error(`❌ Erro no lote ${batchIndex + 1}:`, errorMessage);
+          batchErrors.push({ batch: batchIndex + 1, error: errorMessage });
+          
+          // Se for timeout, tentar salvar apenas no log
+          if (errorMessage.includes('timeout')) {
+            console.log(`⚠️ Timeout no lote ${batchIndex + 1}. Salvando no log...`);
+            
+            if (logId) {
+              const { error: logError } = await supabase
+                .from('sync_logs_contahub')
+                .update({
+                  detalhes: {
+                    ...(logId ? { log_id: logId } : {}),
+                    timeout_lote: `Timeout no lote ${batchIndex + 1} de ${dataType}.`,
+                    lote_tamanho: batch.length,
+                    total_lotes: batches.length,
+                    lote_atual: batchIndex + 1
+                  }
+                })
+                .eq('id', logId);
+                
+              if (logError) {
+                console.error(`❌ Erro ao salvar log de timeout:`, logError);
+              }
+            }
+          }
+        } else {
+          totalInserted += batch.length;
+          console.log(`✅ Lote ${batchIndex + 1} inserido com sucesso (${batch.length} registros)`);
+          
+          // Aguardar processamento do trigger antes do próximo lote
+          if (batchIndex < batches.length - 1) {
+            console.log(`⏳ Aguardando processamento do trigger (${dataType} - lote ${batchIndex + 1})...`);
+            
+            // Aguardar tempo suficiente para o trigger processar
+            const triggerWaitTime = Math.max(5000, batch.length * 10); // 5s mínimo ou 10ms por registro
+            console.log(`⏰ Aguardando ${Math.round(triggerWaitTime/1000)}s para processamento do trigger...`);
+            await new Promise(resolve => setTimeout(resolve, triggerWaitTime));
+            
+            // Verificar se o trigger processou (opcional - para debug)
+            try {
+              const { count } = await supabase
+                .from('contahub_raw_data')
+                .select('*', { count: 'exact', head: true })
+                .eq('data_type', dataType)
+                .eq('processed', true);
+                
+              console.log(`📊 Trigger processou ${count || 0} registros até agora`);
+            } catch (checkError) {
+              console.log(`⚠️ Não foi possível verificar processamento do trigger:`, checkError);
+            }
+          }
+        }
+        
+      } catch (batchError) {
+        console.error(`❌ Erro inesperado no lote ${batchIndex + 1}:`, batchError);
+        batchErrors.push({ batch: batchIndex + 1, error: batchError.toString() });
+      }
+    }
+    
+    // Relatório final
+    console.log(`📊 Resumo ${dataType}: ${totalInserted}/${recordCount} registros inseridos`);
+    
+    if (batchErrors.length > 0) {
+      console.log(`⚠️ ${batchErrors.length} lotes com erro:`, batchErrors);
+      
+      // Salvar erros no log
+      if (logId) {
+        await supabase
+          .from('sync_logs_contahub')
+          .update({
+            detalhes: {
+              ...(logId ? { log_id: logId } : {}),
+              erros_lotes: batchErrors,
+              total_inseridos: totalInserted,
+              total_recebidos: recordCount
+            }
+          })
+          .eq('id', logId);
+      }
+    }
+    
+    return totalInserted;
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -280,7 +387,7 @@ async function saveRawData(supabase: any, dataType: string, rawData: any, dataFo
 }
 
 // Função simplificada para buscar dados analíticos
-async function fetchAnaliticData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+async function fetchAnaliticData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string, logId?: number) {
   console.log('📊 Buscando dados analíticos...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
@@ -300,7 +407,7 @@ async function fetchAnaliticData(supabase: any, sessionToken: string, baseUrl: s
     console.log(`📊 Debug - Tamanho: ${dataSize} chars, Registros: ${recordCount}`);
     
     // Salvar dados brutos
-    return await saveRawData(supabase, 'analitico', analiticData, dataFormatted);
+    return await saveRawData(supabase, 'analitico', analiticData, dataFormatted, logId);
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -311,7 +418,7 @@ async function fetchAnaliticData(supabase: any, sessionToken: string, baseUrl: s
 }
 
 // Função simplificada para buscar faturamento por hora
-async function fetchFatPorHoraData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+async function fetchFatPorHoraData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string, logId?: number) {
   console.log('🕐 Buscando faturamento por hora...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
@@ -323,7 +430,7 @@ async function fetchFatPorHoraData(supabase: any, sessionToken: string, baseUrl:
     const fatHoraData = await fetchContaHubData(fatHoraUrl, sessionToken);
     console.log('✅ Dados de faturamento por hora obtidos');
     
-    return await saveRawData(supabase, 'fatporhora', fatHoraData, dataFormatted);
+    return await saveRawData(supabase, 'fatporhora', fatHoraData, dataFormatted, logId);
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -333,7 +440,7 @@ async function fetchFatPorHoraData(supabase: any, sessionToken: string, baseUrl:
 }
 
 // Função simplificada para buscar pagamentos
-async function fetchPagamentosData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+async function fetchPagamentosData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string, logId?: number) {
   console.log('💳 Buscando pagamentos...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
@@ -345,7 +452,7 @@ async function fetchPagamentosData(supabase: any, sessionToken: string, baseUrl:
     const pagamentosData = await fetchContaHubData(pagamentosUrl, sessionToken);
     console.log('✅ Dados de pagamentos obtidos');
     
-    return await saveRawData(supabase, 'pagamentos', pagamentosData, dataFormatted);
+    return await saveRawData(supabase, 'pagamentos', pagamentosData, dataFormatted, logId);
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -355,7 +462,7 @@ async function fetchPagamentosData(supabase: any, sessionToken: string, baseUrl:
 }
 
 // Função simplificada para buscar período
-async function fetchPeriodoData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+async function fetchPeriodoData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string, logId?: number) {
   console.log('📅 Buscando dados por período...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
@@ -367,7 +474,7 @@ async function fetchPeriodoData(supabase: any, sessionToken: string, baseUrl: st
     const periodoData = await fetchContaHubData(periodoUrl, sessionToken);
     console.log('✅ Dados de período obtidos');
     
-    return await saveRawData(supabase, 'periodo', periodoData, dataFormatted);
+    return await saveRawData(supabase, 'periodo', periodoData, dataFormatted, logId);
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -377,7 +484,7 @@ async function fetchPeriodoData(supabase: any, sessionToken: string, baseUrl: st
 }
 
 // Função simplificada para buscar tempo
-async function fetchTempoData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string) {
+async function fetchTempoData(supabase: any, sessionToken: string, baseUrl: string, dataFormatted: string, logId?: number) {
   console.log('⏱️ Buscando dados de tempo...');
   
   const start_date = dataFormatted.split('.').reverse().join('-');
@@ -389,7 +496,7 @@ async function fetchTempoData(supabase: any, sessionToken: string, baseUrl: stri
     const tempoData = await fetchContaHubData(tempoUrl, sessionToken);
     console.log('✅ Dados de tempo obtidos');
     
-    return await saveRawData(supabase, 'tempo', tempoData, dataFormatted);
+    return await saveRawData(supabase, 'tempo', tempoData, dataFormatted, logId);
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -597,7 +704,16 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     
     // Buscar dados de TODAS as 5 APIs ContaHub com timeouts aleatórios
     console.log('📊 [1/5] Buscando dados analíticos...');
-    const totalAnalitico = await fetchAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    let totalAnalitico = 0;
+    let analiticoSuccess = false;
+    try {
+      totalAnalitico = await fetchAnaliticData(supabase, sessionToken, contahubBaseUrl, dataFormatted, logId || undefined);
+      analiticoSuccess = true;
+      console.log('✅ Analítico processado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro no analítico:', error);
+      analiticoSuccess = false;
+    }
     
     // Timeout aleatório entre APIs usando função existente
     const timeout1 = randomTimeout();
@@ -605,7 +721,16 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     await new Promise(resolve => setTimeout(resolve, timeout1));
     
     console.log('🕐 [2/5] Buscando faturamento por hora...');
-    const totalFatporhora = await fetchFatPorHoraData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    let totalFatporhora = 0;
+    let fatporhoraSuccess = false;
+    try {
+      totalFatporhora = await fetchFatPorHoraData(supabase, sessionToken, contahubBaseUrl, dataFormatted, logId || undefined);
+      fatporhoraSuccess = true;
+      console.log('✅ Fat/Hora processado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro no fat/hora:', error);
+      fatporhoraSuccess = false;
+    }
     
     // Timeout aleatório
     const timeout2 = randomTimeout();
@@ -613,7 +738,16 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     await new Promise(resolve => setTimeout(resolve, timeout2));
     
     console.log('💳 [3/5] Buscando pagamentos...');
-    const totalPagamentos = await fetchPagamentosData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    let totalPagamentos = 0;
+    let pagamentosSuccess = false;
+    try {
+      totalPagamentos = await fetchPagamentosData(supabase, sessionToken, contahubBaseUrl, dataFormatted, logId || undefined);
+      pagamentosSuccess = true;
+      console.log('✅ Pagamentos processado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro nos pagamentos:', error);
+      pagamentosSuccess = false;
+    }
     
     // Timeout aleatório
     const timeout3 = randomTimeout();
@@ -621,7 +755,16 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     await new Promise(resolve => setTimeout(resolve, timeout3));
     
     console.log('📅 [4/5] Buscando dados por período...');
-    const totalPeriodo = await fetchPeriodoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    let totalPeriodo = 0;
+    let periodoSuccess = false;
+    try {
+      totalPeriodo = await fetchPeriodoData(supabase, sessionToken, contahubBaseUrl, dataFormatted, logId || undefined);
+      periodoSuccess = true;
+      console.log('✅ Período processado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro no período:', error);
+      periodoSuccess = false;
+    }
     
     // Timeout aleatório
     const timeout4 = randomTimeout();
@@ -629,50 +772,121 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     await new Promise(resolve => setTimeout(resolve, timeout4));
     
     console.log('⏱️ [5/5] Buscando dados de tempo...');
-    const totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted);
+    let totalTempo = 0;
+    let tempoSuccess = false;
+    try {
+      totalTempo = await fetchTempoData(supabase, sessionToken, contahubBaseUrl, dataFormatted, logId || undefined);
+      tempoSuccess = true;
+      console.log('✅ Tempo processado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro no tempo:', error);
+      tempoSuccess = false;
+    }
     
-    console.log('🔄 Processando dados um por vez...');
-    // Processar registros um por vez para evitar timeout
-    let totalProcessed = 0;
-    let maxIterations = 10; // Máximo 10 tentativas
+    console.log('✅ Dados salvos na tabela raw_data - processamento será feito automaticamente pelo trigger do banco');
+    console.log('💡 Os dados serão processados em background pelas triggers automáticas do PostgreSQL');
     
-    for (let i = 0; i < maxIterations; i++) {
+    // Atualizar campo processed baseado no sucesso de cada tipo
+    console.log('🔄 Atualizando status processed para cada tipo...');
+    
+    const processedUpdates: string[] = [];
+    
+    // Atualizar analítico
+    if (analiticoSuccess) {
       try {
-        const { data: processResult, error: processError } = await supabase.rpc('process_single_pending_record');
-        
-        if (processError) {
-          console.error(`❌ Erro no processamento (iteração ${i + 1}):`, processError);
-          break;
-        }
-        
-        if (!processResult || processResult.length === 0) {
-          console.log('✅ Todos os registros foram processados');
-          break;
-        }
-        
-        const result = processResult[0];
-        if (result.success) {
-          console.log(`✅ Processado: ${result.processed_type} (ID: ${result.processed_id})`);
-          totalProcessed++;
-        } else {
-          console.log(`⚠️ Erro ao processar: ${result.processed_type} (ID: ${result.processed_id}) - ${result.error_message}`);
-          totalProcessed++; // Conta mesmo com erro
-        }
-        
-        // Pequena pausa entre processamentos
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-      } catch (processErr) {
-        console.error(`❌ Falha na iteração ${i + 1}:`, processErr);
-        break;
+        await supabase
+          .from('contahub_raw_data')
+          .update({ processed: true })
+          .eq('bar_id', 3)
+          .eq('data_type', 'analitico')
+          .eq('data_date', dataFormatted.split('.').reverse().join('-'));
+        processedUpdates.push('analitico: true');
+        console.log('✅ Analítico marcado como processado');
+      } catch (error) {
+        console.error('❌ Erro ao marcar analítico como processado:', error);
       }
+    } else {
+      processedUpdates.push('analitico: false (erro)');
+      console.log('⚠️ Analítico mantido como não processado (erro)');
     }
     
-    console.log(`✅ Processamento concluído: ${totalProcessed} registros`);
-    
-    if (totalProcessed === 0) {
-      console.log('⚠️ Nenhum registro foi processado - dados salvos apenas na raw_data');
+    // Atualizar fat/hora
+    if (fatporhoraSuccess) {
+      try {
+        await supabase
+          .from('contahub_raw_data')
+          .update({ processed: true })
+          .eq('bar_id', 3)
+          .eq('data_type', 'fatporhora')
+          .eq('data_date', dataFormatted.split('.').reverse().join('-'));
+        processedUpdates.push('fatporhora: true');
+        console.log('✅ Fat/Hora marcado como processado');
+      } catch (error) {
+        console.error('❌ Erro ao marcar fat/hora como processado:', error);
+      }
+    } else {
+      processedUpdates.push('fatporhora: false (erro)');
+      console.log('⚠️ Fat/Hora mantido como não processado (erro)');
     }
+    
+    // Atualizar pagamentos
+    if (pagamentosSuccess) {
+      try {
+        await supabase
+          .from('contahub_raw_data')
+          .update({ processed: true })
+          .eq('bar_id', 3)
+          .eq('data_type', 'pagamentos')
+          .eq('data_date', dataFormatted.split('.').reverse().join('-'));
+        processedUpdates.push('pagamentos: true');
+        console.log('✅ Pagamentos marcado como processado');
+      } catch (error) {
+        console.error('❌ Erro ao marcar pagamentos como processado:', error);
+      }
+    } else {
+      processedUpdates.push('pagamentos: false (erro)');
+      console.log('⚠️ Pagamentos mantido como não processado (erro)');
+    }
+    
+    // Atualizar período
+    if (periodoSuccess) {
+      try {
+        await supabase
+          .from('contahub_raw_data')
+          .update({ processed: true })
+          .eq('bar_id', 3)
+          .eq('data_type', 'periodo')
+          .eq('data_date', dataFormatted.split('.').reverse().join('-'));
+        processedUpdates.push('periodo: true');
+        console.log('✅ Período marcado como processado');
+      } catch (error) {
+        console.error('❌ Erro ao marcar período como processado:', error);
+      }
+    } else {
+      processedUpdates.push('periodo: false (erro)');
+      console.log('⚠️ Período mantido como não processado (erro)');
+    }
+    
+    // Atualizar tempo
+    if (tempoSuccess) {
+      try {
+        await supabase
+          .from('contahub_raw_data')
+          .update({ processed: true })
+          .eq('bar_id', 3)
+          .eq('data_type', 'tempo')
+          .eq('data_date', dataFormatted.split('.').reverse().join('-'));
+        processedUpdates.push('tempo: true');
+        console.log('✅ Tempo marcado como processado');
+      } catch (error) {
+        console.error('❌ Erro ao marcar tempo como processado:', error);
+      }
+    } else {
+      processedUpdates.push('tempo: false (erro)');
+      console.log('⚠️ Tempo mantido como não processado (erro)');
+    }
+    
+    console.log('📊 Status final dos processamentos:', processedUpdates.join(', '));
     
     const fimExecucao = new Date();
     const duracaoSegundos = Math.round((fimExecucao.getTime() - inicioExecucao.getTime()) / 1000);
@@ -714,7 +928,15 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
               periodo: totalPeriodo,
               tempo: totalTempo,
               total: totalRegistros
-            }
+            },
+            status_processamento: {
+              analitico: analiticoSuccess,
+              fatporhora: fatporhoraSuccess,
+              pagamentos: pagamentosSuccess,
+              periodo: periodoSuccess,
+              tempo: tempoSuccess
+            },
+            processed_updates: processedUpdates
           }
         })
         .eq('id', logId);
@@ -724,11 +946,11 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
     if (discordWebhook && discordWebhook.startsWith('https://')) {
       await sendDiscordNotification(
         discordWebhook,
-        '✅ ContaHub Sync Concluído',
-        `Sincronização automática concluída com **sucesso** para ${dataFormatted}`,
+        '✅ ContaHub Sync - Dados Coletados',
+        `Dados do ContaHub coletados com **sucesso** para ${dataFormatted}. Processamento automático iniciado.`,
         5763719, // Verde
         [
-          { name: '📊 Total de Registros', value: totalRegistros.toString(), inline: true },
+          { name: '📊 Total Coletado', value: totalRegistros.toString(), inline: true },
           { name: '⏱️ Duração', value: `${duracaoSegundos}s`, inline: true },
           { name: '📅 Data', value: dataFormatted, inline: true },
           { name: '📈 Analítico', value: totalAnalitico.toString(), inline: true },
@@ -736,18 +958,18 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
           { name: '💳 Pagamentos', value: totalPagamentos.toString(), inline: true },
           { name: '📅 Período', value: totalPeriodo.toString(), inline: true },
           { name: '⏱️ Tempo', value: totalTempo.toString(), inline: true },
-          { name: '🆔 Log ID', value: logId?.toString() || 'N/A', inline: true }
+          { name: '🔄 Status', value: 'Processamento automático em andamento', inline: false }
         ]
       );
     }
     
     return new Response(JSON.stringify({
       success: true,
-      message: 'Sincronização ContaHub concluída com sucesso',
+      message: 'Dados ContaHub coletados com sucesso - processamento automático iniciado',
       data: {
-        data_sincronizada: dataFormatted,
-        total_registros: totalRegistros,
-        duracao_segundos: duracaoSegundos,
+        data_coletada: dataFormatted,
+        total_registros_coletados: totalRegistros,
+        duracao_coleta_segundos: duracaoSegundos,
         detalhes: {
           analitico: totalAnalitico,
           fatporhora: totalFatporhora,
@@ -755,6 +977,7 @@ async function processMainFunction(req: Request, inicioExecucao: Date): Promise<
           periodo: totalPeriodo,
           tempo: totalTempo
         },
+        processamento: 'Em andamento via triggers automáticas',
         log_id: logId
       }
     }), {
