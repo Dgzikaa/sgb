@@ -255,75 +255,112 @@ export default function OrcamentacaoPage() {
     return (
       <ProtectedRoute requiredModule="configuracoes">
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <div className="container mx-auto px-4 py-6">
-            <div className="mb-8">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                  <DollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
+          <div className="container mx-auto px-4 py-6 space-y-6">
+            <div className="card-dark p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
+                  <DollarSign className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  <h1 className="card-title-dark text-3xl font-bold">
                     Orçamentação
                   </h1>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Gerencie o orçamento anual do seu estabelecimento
+                  <p className="card-description-dark text-lg">
+                    Sistema integrado de gestão orçamentária com dados do Nibo em tempo real
                   </p>
+                </div>
+              </div>
+              
+              {/* Info cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-center gap-3">
+                    <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    <div>
+                      <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Planejamento</p>
+                      <p className="text-xs text-blue-500 dark:text-blue-300">Orçamento estratégico</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-green-200 dark:border-green-700">
+                  <div className="flex items-center gap-3">
+                    <RefreshCw className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    <div>
+                      <p className="text-sm text-green-600 dark:text-green-400 font-medium">Sincronização</p>
+                      <p className="text-xs text-green-500 dark:text-green-300">Dados do Nibo</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-700">
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                    <div>
+                      <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Análise</p>
+                      <p className="text-xs text-purple-500 dark:text-purple-300">Variações orçamentárias</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              <Card
-                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer"
+              <div
+                className="card-dark p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-105"
                 onClick={() => iniciarOrcamento('2024')}
               >
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <Calendar className="w-12 h-12 text-blue-600 dark:text-blue-400" />
-                    <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                      Histórico
-                    </Badge>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40 transition-colors">
+                    <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mt-4">
+                  <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                    Histórico
+                  </Badge>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="card-title-dark text-2xl mb-2">
                     Orçamento 2024
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
+                  </h3>
+                  <p className="card-description-dark">
                     Visualize e analise o orçamento realizado em 2024
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Acessar 2024
-                  </Button>
-                </CardContent>
-              </Card>
+                  </p>
+                </div>
 
-              <Card
-                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer"
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Acessar 2024
+                </Button>
+              </div>
+
+              <div
+                className="card-dark p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-105"
                 onClick={() => iniciarOrcamento('2025')}
               >
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <Target className="w-12 h-12 text-green-600 dark:text-green-400" />
-                    <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                      Atual
-                    </Badge>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-800/40 transition-colors">
+                    <Target className="w-8 h-8 text-green-600 dark:text-green-400" />
                   </div>
-                  <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mt-4">
+                  <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                    Atual
+                  </Badge>
+                </div>
+                
+                <div className="mb-6">
+                  <h3 className="card-title-dark text-2xl mb-2">
                     Orçamento 2025
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
+                  </h3>
+                  <p className="card-description-dark">
                     Planeje e acompanhe o orçamento do ano atual
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white">
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Acessar 2025
-                  </Button>
-                </CardContent>
-              </Card>
+                  </p>
+                </div>
+
+                <Button className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white">
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Acessar 2025
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -336,137 +373,187 @@ export default function OrcamentacaoPage() {
     <ProtectedRoute requiredModule="configuracoes">
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setAnoSelecionado('')}
-                className="mr-2"
-              >
-                ← Voltar
-              </Button>
-              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                <DollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
+          {/* Header Elegante */}
+          <div className="card-dark p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => setAnoSelecionado('')}
+                  className="mr-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                >
+                  ← Voltar
+                </Button>
+                <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
+                  <DollarSign className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="card-title-dark text-3xl font-bold">
+                    Orçamento {anoSelecionado}
+                  </h1>
+                  <p className="card-description-dark text-lg">
+                    Gestão orçamentária integrada com Nibo em tempo real
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Orçamento {anoSelecionado}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Gestão orçamentária integrada com Nibo
-                </p>
+              
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => carregarDados()}
+                  disabled={loading}
+                  variant="outline"
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Atualizar
+                </Button>
+                <Button
+                  onClick={sincronizarNibo}
+                  disabled={syncing}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg"
+                >
+                  {syncing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Sincronizando...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Sincronizar Nibo
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => carregarDados()}
-                disabled={loading}
-                variant="outline"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Atualizar
-              </Button>
-              <Button
-                onClick={sincronizarNibo}
-                disabled={syncing}
-                className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
-              >
-                {syncing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Sincronizando...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Sincronizar Nibo
-                  </>
-                )}
-              </Button>
+            
+            {/* Status info */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Ano Selecionado</p>
+                    <p className="text-xs text-blue-500 dark:text-blue-300">{anoSelecionado}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-green-200 dark:border-green-700">
+                <div className="flex items-center gap-3">
+                  <Target className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  <div>
+                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">Categorias</p>
+                    <p className="text-xs text-green-500 dark:text-green-300">{categorias.length} ativas</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-700">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  <div>
+                    <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Dados</p>
+                    <p className="text-xs text-purple-500 dark:text-purple-300">{dados.length} registros</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Filtros */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Filtros
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Mês
-                  </label>
-                  <Select value={mesSelecionado} onValueChange={setMesSelecionado}>
-                    <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {meses.map(mes => (
-                        <SelectItem key={mes.value} value={mes.value}>
-                          {mes.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          <div className="card-dark p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-            </CardContent>
-          </Card>
+              <h2 className="card-title-dark text-lg">Filtros</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Mês
+                </label>
+                <Select value={mesSelecionado} onValueChange={setMesSelecionado}>
+                  <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {meses.map(mes => (
+                      <SelectItem key={mes.value} value={mes.value}>
+                        {mes.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
 
           {/* Resumo por Categoria */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="card-dark p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl">
+                <BarChart3 className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="card-title-dark text-2xl">Resumo por Categoria</h2>
+                <p className="card-description-dark">Visão consolidada do orçamento</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categorias.map(categoria => (
-              <Card key={categoria.nome} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-medium text-gray-900 dark:text-white">
-                      {categoria.nome}
-                    </CardTitle>
-                    <Badge variant="outline">
-                      {((categoria.total_realizado / categoria.total_previsto) * 100).toFixed(0)}%
-                    </Badge>
+              <div key={categoria.nome} className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {categoria.nome}
+                  </h3>
+                  <Badge variant="outline" className="bg-white dark:bg-gray-700">
+                    {((categoria.total_realizado / categoria.total_previsto) * 100).toFixed(0)}%
+                  </Badge>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Previsto:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {formatarMoeda(categoria.total_previsto)}
+                    </span>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Previsto:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {formatarMoeda(categoria.total_previsto)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Realizado:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {formatarMoeda(categoria.total_realizado)}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
-                      <div
-                        className="bg-green-500 h-2 rounded-full transition-all"
-                        style={{
-                          width: `${Math.min((categoria.total_realizado / categoria.total_previsto) * 100, 100)}%`,
-                        }}
-                      />
-                    </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Realizado:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {formatarMoeda(categoria.total_realizado)}
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mt-4">
+                    <div
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min((categoria.total_realizado / categoria.total_previsto) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             ))}
+            </div>
+          </div>
           </div>
 
           {/* Tabela Detalhada */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Detalhamento do Orçamento
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="card-dark p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="card-title-dark text-2xl">Detalhamento do Orçamento</h2>
+                <p className="card-description-dark">Análise completa por categoria e subcategoria</p>
+              </div>
+            </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
