@@ -254,7 +254,8 @@ export default function OrcamentacaoPage() {
   // Se não tiver ano selecionado, mostrar cards de seleção
   if (!anoSelecionado) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <ProtectedRoute requiredModule="configuracoes">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4 py-6 space-y-6">
             <div className="card-dark p-8">
               <div className="flex items-center gap-4 mb-6">
@@ -271,6 +272,7 @@ export default function OrcamentacaoPage() {
                 </div>
               </div>
               
+              {/* Info cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-700">
                   <div className="flex items-center gap-3">
@@ -363,12 +365,14 @@ export default function OrcamentacaoPage() {
             </div>
           </div>
         </div>
+      </ProtectedRoute>
     );
   }
 
   // Página principal com dados
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <ProtectedRoute requiredModule="configuracoes">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6 space-y-6">
           {/* Header Elegante */}
           <div className="card-dark p-8">
@@ -538,6 +542,7 @@ export default function OrcamentacaoPage() {
             ))}
             </div>
           </div>
+          </div>
 
           {/* Tabela Detalhada */}
           <div className="card-dark p-8">
@@ -647,8 +652,10 @@ export default function OrcamentacaoPage() {
                   </tbody>
                 </table>
               </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
+    </ProtectedRoute>
   );
 }
