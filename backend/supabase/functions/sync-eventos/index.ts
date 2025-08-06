@@ -244,6 +244,33 @@ serve(async (req) => {
       })
     }
 
+    // 🚀 CHAMAR DISCORD NOTIFICATION para EVENTOS (Sync)
+    try {
+      const discordResponse = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/discord-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+        },
+        body: JSON.stringify({
+          title: '✅ Sync Eventos Concluído',
+          webhook_type: 'eventos',
+          processed_records: eventosAtualizados.length,
+          bar_id: barId,
+          execution_time: 'N/A',
+          custom_message: `🔄 **Sincronização de eventos finalizada!**\n\n📊 **Resultados:**\n• **Eventos atualizados:** ${eventosAtualizados.length}\n• **Bar ID:** ${barId}\n• **Período:** ${dataInicio || 'Hoje'} até ${dataFim || 'Hoje'}\n\n💾 **Dados atualizados:** Métricas de performance e custos NIBO\n⏰ **Concluído:** ${new Date().toLocaleString('pt-BR')}`
+        })
+      });
+
+      if (!discordResponse.ok) {
+        console.error('❌ Erro ao enviar notificação Discord Sync-Eventos:', discordResponse.status);
+      } else {
+        console.log('📢 Notificação Discord Sync-Eventos enviada');
+      }
+    } catch (discordError) {
+      console.error('❌ Erro ao enviar notificação Discord Sync-Eventos:', discordError);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

@@ -256,7 +256,7 @@ export default function PlanejamentoComercialPage() {
   return (
     <div className="flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900 ">
       {/* Layout Lateral */}
-      <aside className="flex flex-col w-80 bg-gray-50 dark:bg-gray-900 p-4">
+      <aside className={`flex flex-col w-80 bg-gray-50 dark:bg-gray-900 p-4 ${modalOpen ? 'hidden' : 'block'}`}>
         <div className="space-y-6 w-full">
           {/* Navegação de Mês */}
           <div>
@@ -564,7 +564,7 @@ export default function PlanejamentoComercialPage() {
       </aside>
 
       {/* Área Principal da Tabela */}
-      <div className="flex-1 overflow-x-visible overflow-y-auto hide-scrollbar">
+      <div className={`flex-1 overflow-x-visible overflow-y-auto hide-scrollbar ${modalOpen ? 'hidden' : ''}`}>
         <table className="min-w-[1200px] max-h-[900px] w-full table-auto border-collapse border-spacing-0 whitespace-nowrap text-xs dark:bg-transparent ">
           <thead className="bg-transparent dark:text-white border-b border-gray-200 dark:border-gray-700">
             <tr>

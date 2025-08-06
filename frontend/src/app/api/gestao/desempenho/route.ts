@@ -1,275 +1,185 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supabase-admin'
-import { authenticateUser, authErrorResponse } from '@/middleware/auth'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-// Interfaces baseadas na estrutura da tabela
-interface IndicadorDesempenho {
-  id: string
-  categoria: 'guardrail' | 'ovt' | 'qualidade' | 'produtos' | 'vendas' | 'marketing'
-  nome: string
-  descricao?: string
-  unidade: string
-  meta?: number
-  dados: {
-    semanais: DadoSemanal[]
-    mensais: DadoMensal[]
-  }
-}
-
-interface DadoSemanal {
-  semana: string
-  valor: number
-  meta?: number
-  status: 'acima' | 'abaixo' | 'dentro'
-  tendencia: 'crescendo' | 'decrescendo' | 'estavel'
-}
-
-interface DadoMensal {
-  mes: string
-  valor: number
-  meta?: number
-  status: 'acima' | 'abaixo' | 'dentro'
-  tendencia: 'crescendo' | 'decrescendo' | 'estavel'
-}
-
-interface RespostaDesempenho {
-  indicadores: IndicadorDesempenho[]
-  resumo: {
-    totalIndicadores: number
-    acimaMeta: number
-    abaixoMeta: number
-    dentroMeta: number
-  }
-}
-
-// Função para mapear período para número da semana
-function extrairNumeroSemana(periodo: string): number {
-  const match = periodo.match(/Semana (\d+)/)
-  return match ? parseInt(match[1]) : 0
-}
-
-// Função para mapear mês para número
-function extrairNumeroMes(mes: string): number {
-  const meses = {
-    'Janeiro': 1, 'Fevereiro': 2, 'Março': 3, 'Abril': 4,
-    'Maio': 5, 'Junho': 6, 'Julho': 7, 'Agosto': 8,
-    'Setembro': 9, 'Outubro': 10, 'Novembro': 11, 'Dezembro': 12
-  }
-  return meses[mes as keyof typeof meses] || 0
-}
-
-export async function GET(request: NextRequest) {
-  const authResult = await authenticateUser(request)
-  if (!authResult) {
-    return authErrorResponse('Não autorizado')
-  }
-
+// GET - Buscar dados de desempenho
+export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const tipo = searchParams.get('tipo') // 'semanal' ou 'mensal'
-    
-    const supabase = await getAdminClient()
-    
-    if (tipo === 'mensal') {
-      // Buscar apenas dados mensais
-      const { data: dadosMensais, error: errorMensais } = await supabase
-        .from('tabela_desempenho_mensal')
-        .select('*')
-        .eq('ativo', true)
-        .order('ordem_exibicao')
-        .order('mes')
+    const { searchParams } = new URL(request.url);
+    const barId = request.headers.get('x-user-data')
+      ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id
+      : null;
 
-      if (errorMensais) {
-        console.error('Erro ao buscar dados mensais:', errorMensais)
-        return NextResponse.json(
-          { error: 'Erro ao buscar dados mensais' },
-          { status: 500 }
-        )
-      }
-
-      // Agrupar dados mensais por indicador
-      const indicadoresMap = new Map<string, any>()
-      
-      // Primeiro, criar todos os indicadores únicos
-      dadosMensais?.forEach(registro => {
-        const key = registro.indicador_id
-        if (!indicadoresMap.has(key)) {
-          indicadoresMap.set(key, {
-            id: registro.indicador_id,
-            categoria: registro.categoria,
-            nome: registro.nome,
-            descricao: registro.descricao || '',
-            unidade: registro.unidade,
-            meta: registro.meta,
-            dados: {
-              semanais: [],
-              mensais: []
-            }
-          })
-        }
-      })
-      
-      // Depois, adicionar os dados mensais
-      dadosMensais?.forEach(registro => {
-        const indicador = indicadoresMap.get(registro.indicador_id)
-        if (indicador) {
-          indicador.dados.mensais.push({
-            mes: registro.mes,
-            valor: parseFloat(registro.valor),
-            meta: parseFloat(registro.meta),
-            status: registro.status,
-            tendencia: registro.tendencia
-          })
-        }
-      })
-
-      // Converter para array e ordenar dados
-      const indicadores: IndicadorDesempenho[] = Array.from(indicadoresMap.values()).map(indicador => ({
-        ...indicador,
-        dados: {
-          semanais: [],
-          mensais: indicador.dados.mensais.sort((a: DadoMensal, b: DadoMensal) => 
-            extrairNumeroMes(b.mes) - extrairNumeroMes(a.mes)
-          )
-        }
-      }))
-
-      // Calcular resumo
-      const totalIndicadores = indicadores.length
-      let acimaMeta = 0
-      let abaixoMeta = 0
-      let dentroMeta = 0
-
-      indicadores.forEach(indicador => {
-        const dadoMaisRecente = indicador.dados.mensais[0]
-        if (dadoMaisRecente) {
-          switch (dadoMaisRecente.status) {
-            case 'acima':
-              acimaMeta++
-              break
-            case 'abaixo':
-              abaixoMeta++
-              break
-            case 'dentro':
-              dentroMeta++
-              break
-          }
-        }
-      })
-
-      const resposta: RespostaDesempenho = {
-        indicadores,
-        resumo: {
-          totalIndicadores,
-          acimaMeta,
-          abaixoMeta,
-          dentroMeta
-        }
-      }
-
-      return NextResponse.json(resposta)
-
-    } else {
-      // Buscar apenas dados semanais (padrão)
-      const { data: dadosSemanais, error: errorSemanais } = await supabase
-        .from('tabela_desempenho')
-        .select('*')
-        .eq('ativo', true)
-        .eq('tipo_periodo', 'semanal')
-        .order('ordem_exibicao')
-        .order('periodo')
-
-      if (errorSemanais) {
-        console.error('Erro ao buscar dados semanais:', errorSemanais)
-        return NextResponse.json(
-          { error: 'Erro ao buscar dados semanais' },
-          { status: 500 }
-        )
-      }
-
-      // Agrupar dados semanais por indicador
-      const indicadoresMap = new Map<string, any>()
-      
-      dadosSemanais?.forEach(registro => {
-        const key = registro.indicador_id
-        
-        if (!indicadoresMap.has(key)) {
-          indicadoresMap.set(key, {
-            id: registro.indicador_id,
-            categoria: registro.categoria,
-            nome: registro.nome,
-            descricao: registro.descricao,
-            unidade: registro.unidade,
-            meta: registro.meta,
-            dados: {
-              semanais: [],
-              mensais: []
-            }
-          })
-        }
-        
-        const indicador = indicadoresMap.get(key)
-        indicador.dados.semanais.push({
-          semana: registro.periodo,
-          valor: parseFloat(registro.valor),
-          meta: parseFloat(registro.meta),
-          status: registro.status,
-          tendencia: registro.tendencia
-        })
-      })
-
-      // Converter para array e ordenar dados
-      const indicadores: IndicadorDesempenho[] = Array.from(indicadoresMap.values()).map(indicador => ({
-        ...indicador,
-        dados: {
-          semanais: indicador.dados.semanais.sort((a: DadoSemanal, b: DadoSemanal) => 
-            extrairNumeroSemana(b.semana) - extrairNumeroSemana(a.semana)
-          ),
-          mensais: []
-        }
-      }))
-
-      // Calcular resumo
-      const totalIndicadores = indicadores.length
-      let acimaMeta = 0
-      let abaixoMeta = 0
-      let dentroMeta = 0
-
-      indicadores.forEach(indicador => {
-        const dadoMaisRecente = indicador.dados.semanais[0]
-        if (dadoMaisRecente) {
-          switch (dadoMaisRecente.status) {
-            case 'acima':
-              acimaMeta++
-              break
-            case 'abaixo':
-              abaixoMeta++
-              break
-            case 'dentro':
-              dentroMeta++
-              break
-          }
-        }
-      })
-
-      const resposta: RespostaDesempenho = {
-        indicadores,
-        resumo: {
-          totalIndicadores,
-          acimaMeta,
-          abaixoMeta,
-          dentroMeta
-        }
-      }
-
-      return NextResponse.json(resposta)
+    if (!barId) {
+      return NextResponse.json(
+        { success: false, error: 'Bar não selecionado' },
+        { status: 400 }
+      );
     }
-    
+
+    const ano = searchParams.get('ano') || new Date().getFullYear().toString();
+    const mes = searchParams.get('mes');
+
+    const supabase = createRouteHandlerClient({ cookies });
+
+    // Construir query base
+    let query = supabase
+      .from('desempenho_semanal')
+      .select('*')
+      .eq('bar_id', barId)
+      .eq('ano', parseInt(ano))
+      .order('numero_semana', { ascending: false });
+
+    // Filtrar por mês se especificado
+    if (mes && mes !== 'todos') {
+      const mesInt = parseInt(mes);
+      // Aproximação: considerar semanas 1-4 como mês 1, 5-8 como mês 2, etc.
+      const semanaInicio = (mesInt - 1) * 4 + 1;
+      const semanaFim = mesInt * 4 + 4;
+      
+      query = query
+        .gte('numero_semana', semanaInicio)
+        .lte('numero_semana', semanaFim);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Erro ao buscar dados:', error);
+      return NextResponse.json(
+        { success: false, error: 'Erro ao buscar dados de desempenho' },
+        { status: 500 }
+      );
+    }
+
+    // Calcular resumo
+    const resumo = data && data.length > 0 ? {
+      total_semanas: data.length,
+      faturamento_medio: data.reduce((acc, item) => acc + (item.faturamento_total || 0), 0) / data.length,
+      faturamento_total_ano: data.reduce((acc, item) => acc + (item.faturamento_total || 0), 0),
+      clientes_medio: data.reduce((acc, item) => acc + (item.clientes_atendidos || 0), 0) / data.length,
+      clientes_total_ano: data.reduce((acc, item) => acc + (item.clientes_atendidos || 0), 0),
+      ticket_medio_geral: data.reduce((acc, item) => acc + (item.ticket_medio || 0), 0) / data.length,
+      atingimento_medio: data.reduce((acc, item) => {
+        const atingimento = item.meta_semanal > 0 
+          ? (item.faturamento_total / item.meta_semanal) * 100 
+          : 0;
+        return acc + atingimento;
+      }, 0) / data.length,
+      cmv_medio: data.reduce((acc, item) => acc + (item.cmv_limpo || 0), 0) / data.length,
+    } : null;
+
+    return NextResponse.json({ 
+      success: true, 
+      data: data || [],
+      resumo 
+    });
+
   } catch (error) {
-    console.error('Erro interno do servidor:', error)
+    console.error('Erro na API de desempenho:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
-    )
+    );
   }
-} 
+}
+
+// DELETE - Excluir registro de desempenho
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const barId = request.headers.get('x-user-data')
+      ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id
+      : null;
+
+    if (!barId || !id) {
+      return NextResponse.json(
+        { success: false, error: 'Parâmetros inválidos' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createRouteHandlerClient({ cookies });
+
+    const { error } = await supabase
+      .from('desempenho_semanal')
+      .delete()
+      .eq('id', parseInt(id))
+      .eq('bar_id', barId);
+
+    if (error) {
+      console.error('Erro ao excluir:', error);
+      return NextResponse.json(
+        { success: false, error: 'Erro ao excluir registro' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Registro excluído com sucesso' 
+    });
+
+  } catch (error) {
+    console.error('Erro ao excluir:', error);
+    return NextResponse.json(
+      { success: false, error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Atualizar registro de desempenho
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const barId = request.headers.get('x-user-data')
+      ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id
+      : null;
+
+    const { id, ...updateData } = body;
+
+    if (!barId || !id) {
+      return NextResponse.json(
+        { success: false, error: 'Parâmetros inválidos' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createRouteHandlerClient({ cookies });
+
+    // Atualizar o registro
+    const { data, error } = await supabase
+      .from('desempenho_semanal')
+      .update({
+        ...updateData,
+        atualizado_em: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('bar_id', barId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao atualizar:', error);
+      return NextResponse.json(
+        { success: false, error: 'Erro ao atualizar registro' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Registro atualizado com sucesso',
+      data
+    });
+
+  } catch (error) {
+    console.error('Erro ao atualizar:', error);
+    return NextResponse.json(
+      { success: false, error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}

@@ -1,20 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-interface DiscordNotification {
+interface DiscordMessage {
   title: string
-  description: string
-  color?: number
-  fields?: {
-    name: string
-    value: string
-    inline?: boolean
-  }[]
-  footer?: {
-    text: string
-  }
-  bar_id: string // Obrigatório para buscar webhook
-  webhook_type?: 'sistema' | 'meta' | 'checklists' | 'contahub' | 'vendas' | 'reservas' // Tipo do webhook
+  message?: string
+  processed_records?: number
+  bar_id: number
+  execution_time?: string
+  webhook_type: 'nibo' | 'contahub' | 'eventos'
+  custom_message?: string
 }
 
 const corsHeaders = {
@@ -22,97 +15,113 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Função para buscar webhook da tabela
-async function getWebhookUrl(barId: string, webhookType: string = 'sistema') {
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-  )
-
-  // Mapear webhook type para sistema
-  const webhookMapping = {
-    sistema: 'sistema',
-    contaazul: 'contaazul',
-    meta: 'meta',
-    checklists: 'checklists',
-    contahub: 'contahub',
-    sympla: 'sympla',
-    yuzer: 'yuzer',
-    reservas: 'getin'
-  }
-
-  const sistema = webhookMapping[webhookType as keyof typeof webhookMapping] || 'sistema'
-
-  const { data: webhookConfig, error } = await supabaseClient
-    .from('api_credentials')
-    .select('configuracoes')
-    .eq('bar_id', barId)
-    .eq('sistema', sistema)
-    .eq('ambiente', 'producao')
-    .single()
-
-  if (error || !webhookConfig) {
-    console.warn(`⚠️ Webhook config não encontrada para bar ${barId} sistema ${sistema}, usando fallback`)
-    // Fallback para webhook padrão se não encontrar configuração
-    return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
-  }
-
-  const webhook = webhookConfig.configuracoes?.webhook_url
-  
-  if (!webhook || webhook.trim() === '') {
-    console.warn(`⚠️ Webhook ${webhookType} não configurado para bar ${barId}, usando fallback`)
-    // Fallback para webhook padrão
-    return 'https://discord.com/api/webhooks/1391531226246021261/kxCJKKT7h7EnpVvNQj7oeJ3slqJOCAiXxB16SSOpuTn8EkmYDz3wIAAZpjpkUY3bnoWJ'
-  }
-
-  console.log(`✅ Webhook ${webhookType} encontrado para bar ${barId}`)
-  return webhook
-}
-
-serve(async (req: Request): Promise<Response> => {
+serve(async (req) => {
+  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    if (req.method !== 'POST') {
-      throw new Error('Method not allowed')
-    }
+    const { title, message, processed_records, bar_id, execution_time, webhook_type, custom_message }: DiscordMessage = await req.json()
 
-    const notification: DiscordNotification = await req.json()
+    // Buscar webhook baseado no tipo
+    let webhookUrl: string | undefined
     
-    if (!notification.bar_id) {
-      throw new Error('bar_id é obrigatório')
+    switch (webhook_type) {
+      case 'nibo':
+        webhookUrl = Deno.env.get('DISCORD_NIBO_WEBHOOK')
+        break
+      case 'contahub':
+        webhookUrl = Deno.env.get('DISCORD_CONTAHUB_WEBHOOK')
+        break
+      case 'eventos':
+        webhookUrl = Deno.env.get('DISCORD_EVENTOS_WEBHOOK')
+        break
+      default:
+        throw new Error(`Tipo de webhook inválido: ${webhook_type}`)
+    }
+    
+    if (!webhookUrl) {
+      throw new Error(`DISCORD_${webhook_type.toUpperCase()}_WEBHOOK não configurado`)
     }
 
-    console.log(`📢 Enviando notificação para Discord (Bar: ${notification.bar_id}, Tipo: ${notification.webhook_type || 'sistema'}):`, notification.title)
+    // Criar mensagem baseada no tipo
+    let defaultMessage = ''
+    let footerText = ''
+    let color = 3066993 // Verde padrão
 
-    // Buscar webhook da tabela baseado no bar_id e tipo
-    const webhookUrl = await getWebhookUrl(notification.bar_id, notification.webhook_type || 'sistema')
+    switch (webhook_type) {
+      case 'nibo':
+        defaultMessage = `🎉 **Processamento NIBO finalizado com sucesso!**
 
-    // Estrutura do embed do Discord
-    const embed = {
-      title: notification.title,
-      description: notification.description,
-      color: notification.color || 0x00ff00, // Verde por padrão
-      fields: notification.fields || [],
-      footer: notification.footer || {
-        text: `SGB v2 • Bar: ${notification.bar_id} • ${new Date().toLocaleString('pt-BR', {
-          timeZone: 'America/Sao_Paulo'
-        })}`
-      },
-      timestamp: new Date().toISOString()
+📊 **Resumo:**
+• **Total processados:** ${processed_records || 0} agendamentos
+• **Bar ID:** ${bar_id}
+• **Tempo total:** ${execution_time || 'N/A'}
+
+💾 **Dados atualizados:**
+• Agendamentos sincronizados com API NIBO
+• C.Art e C.Prod recalculados
+• Status e valores atualizados
+
+⏰ **Concluído:** ${new Date().toLocaleString('pt-BR')}
+🚀 **Próxima execução:** Automática via pg_cron`
+        footerText = 'SGB NIBO Automation'
+        break
+
+      case 'contahub':
+        defaultMessage = `🎉 **Processamento ContaHub finalizado com sucesso!**
+
+📊 **Resumo:**
+• **Total processados:** ${processed_records || 0} registros
+• **Bar ID:** ${bar_id}
+• **Tempo total:** ${execution_time || 'N/A'}
+
+💾 **Dados atualizados:**
+• Analítico, FatPorHora, Pagamentos, Período e Tempo
+• Métricas e indicadores recalculados
+
+⏰ **Concluído:** ${new Date().toLocaleString('pt-BR')}
+🚀 **Próxima execução:** Automática via pg_cron`
+        footerText = 'SGB ContaHub Automation'
+        color = 3447003 // Azul
+        break
+
+      case 'eventos':
+        defaultMessage = `🎉 **Sincronização de eventos finalizada!**
+
+📊 **Resumo:**
+• **Dados processados:** ${processed_records || 0} registros
+• **Bar ID:** ${bar_id}
+• **Tempo total:** ${execution_time || 'N/A'}
+
+💾 **Atualizações:**
+• Sympla, Yuzer e eventos sincronizados
+• Métricas de vendas e participantes
+• Indicadores de performance
+
+⏰ **Concluído:** ${new Date().toLocaleString('pt-BR')}
+🚀 **Sistema:** Automático`
+        footerText = 'SGB Eventos Automation'
+        color = 15105570 // Laranja
+        break
     }
 
-    // Payload do Discord
+    // Criar payload do Discord
     const discordPayload = {
-      username: `SGB ${notification.webhook_type?.toUpperCase() || 'SISTEMA'} Bot`,
-      avatar_url: 'https://cdn.discordapp.com/icons/YOUR_GUILD_ID/YOUR_ICON.png', // Opcional
-      embeds: [embed]
+      embeds: [{
+        title: title,
+        description: custom_message || message || defaultMessage,
+        color: color,
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: footerText
+        }
+      }]
     }
 
     // Enviar para Discord
-    const response = await fetch(webhookUrl, {
+    const discordResponse = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -120,36 +129,36 @@ serve(async (req: Request): Promise<Response> => {
       body: JSON.stringify(discordPayload)
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ Erro ao enviar para Discord:', errorText)
-      throw new Error(`Discord API erro: ${response.status} - ${errorText}`)
+    if (!discordResponse.ok) {
+      throw new Error(`Discord webhook failed: ${discordResponse.status}`)
     }
 
-    console.log('✅ Notificação enviada para Discord com sucesso!')
-
-    return new Response(JSON.stringify({ 
-      success: true,
-      message: 'Notificação enviada para Discord',
-      webhook_type: notification.webhook_type || 'sistema',
-      bar_id: notification.bar_id
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: 'Notificação Discord enviada com sucesso',
+        webhook_type,
+        processed_records,
+        bar_id
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    )
 
   } catch (error) {
-    console.error('❌ Erro na notificação Discord:', error)
+    console.error('Erro ao enviar Discord:', error)
     
     return new Response(
       JSON.stringify({ 
-        success: false,
-        error: (error as Error).message || 'Erro desconhecido'
+        success: false, 
+        error: error.message 
       }),
-      {
+      { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 500 
       }
     )
   }
-}) 
+})

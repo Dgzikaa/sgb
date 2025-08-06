@@ -80,10 +80,10 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
 // Estrutura base do sidebar
 const defaultSidebarItems: SidebarItem[] = [
     {
-      icon: Home,
-      label: 'Home',
-      href: '/home',
-      color: 'text-blue-600 dark:text-blue-400',
+      icon: TrendingUp,
+      label: 'Visão Geral',
+      href: '/visao-geral',
+      color: 'text-purple-600 dark:text-purple-400',
     permission: 'home',
     },
     {
@@ -131,11 +131,11 @@ const defaultSidebarItems: SidebarItem[] = [
       permission: 'gestao',
       subItems: [
         {
-          icon: Clock,
-          label: 'Tabela de Desempenho',
-          href: '/gestao/tempo',
-          description: 'Gestão de tempo e produtividade',
-          permission: 'tempo',
+          icon: BarChart3,
+          label: 'Desempenho',
+          href: '/gestao/desempenho/tabela',
+          description: 'Tabela de desempenho semanal',
+          permission: 'gestao',
         },
         {
           icon: Calendar,
@@ -205,6 +205,13 @@ const defaultSidebarItems: SidebarItem[] = [
           href: '/configuracoes/metas',
           description: 'Configurar metas',
         permission: 'configuracoes_metas',
+        },
+        {
+          icon: DollarSign,
+          label: 'Orçamentação',
+          href: '/configuracoes/orcamentacao',
+          description: 'Controle de orçamento',
+        permission: 'configuracoes',
         },
         {
           icon: Database,

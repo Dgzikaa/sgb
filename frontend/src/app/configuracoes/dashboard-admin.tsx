@@ -785,7 +785,7 @@ export default function AdminPage() {
 
   return (
     <div className="admin-container">
-      <div className="admin-header">
+      <div className={`admin-header ${showEventModal ? 'hidden' : ''}`}>
         <div>
           <h1>Painel Administrativo</h1>
           <p>Gerencie todas as configurações do sistema SGB</p>
@@ -832,7 +832,7 @@ export default function AdminPage() {
 
       {message && (
         <div
-          className={`message ${message.includes('sucesso') ? 'success' : 'error'}`}
+          className={`message ${message.includes('sucesso') ? 'success' : 'error'} ${showEventModal ? 'hidden' : ''}`}
         >
           {message}
         </div>
@@ -840,7 +840,7 @@ export default function AdminPage() {
 
       {/* Informações do Bar Selecionado */}
       {selectedBarId && (
-        <div className="card" style={{ marginBottom: '24px' }}>
+        <div className={`card ${showEventModal ? 'hidden' : ''}`} style={{ marginBottom: '24px' }}>
           <div className="card-content">
             <div
               style={{
@@ -882,7 +882,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      <div className="tabs">
+      <div className={`tabs ${showEventModal ? 'hidden' : ''}`}>
         <div className="tab-nav">
           <button
             className={`tab-button ${currentTab === 'overview' ? 'active' : ''}`}
@@ -2179,7 +2179,7 @@ export default function AdminPage() {
 
         {/* Planejamento Comercial */}
         {currentTab === 'planejamento' && (
-          <div className="tab-content">
+          <div className={`tab-content ${showEventModal ? 'hidden' : ''}`}>
             <div className="card">
               <div className="card-header">
                 <h3>
