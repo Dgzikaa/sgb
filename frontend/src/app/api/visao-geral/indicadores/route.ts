@@ -169,35 +169,7 @@ export async function GET(request: Request) {
       console.log('Contahub:', contahubData?.length || 0, 'registros');
       console.log('Yuzer:', yuzerData?.length || 0, 'registros');
       console.log('Sympla:', symplaData?.length || 0, 'registros');
-      
-      if (yuzerResult.error) {
-        console.log('❌ ERRO YUZER:', yuzerResult.error);
-      }
-      
-      if (yuzerResult.data?.length === 0) {
-        console.log('🔍 YUZER VAZIO - Testando tabela...');
-        // Testar sem filtros
-        const yuzerTest = await supabase
-          .from('yuzer_pagamento')
-          .select('valor_liquido, data_evento, bar_id')
-          .limit(5);
-        console.log('🔍 YUZER TESTE (5 primeiros):', yuzerTest.data);
-        
-        // Testar com todos os campos para ver a estrutura
-        const yuzerEstrutura = await supabase
-          .from('yuzer_pagamento')
-          .select('*')
-          .limit(1);
-        console.log('🔍 YUZER ESTRUTURA:', yuzerEstrutura.data?.[0]);
-        
-        // Listar tabelas disponíveis
-        const tabelas = await supabase
-          .from('information_schema.tables')
-          .select('table_name')
-          .eq('table_schema', 'public')
-          .ilike('table_name', '%yuzer%');
-        console.log('📋 TABELAS YUZER DISPONÍVEIS:', tabelas.data?.map(t => t.table_name));
-      }
+
 
       
       // Calcular com dados paginados
