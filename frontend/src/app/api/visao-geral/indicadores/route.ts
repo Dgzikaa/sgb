@@ -20,14 +20,10 @@ export async function GET(request: Request) {
     // Converter para número
     const barIdNum = parseInt(barId.toString());
     
-    console.log('=== DEBUG CONSULTA ===');
-    console.log('barId original:', barId);
-    console.log('barIdNum convertido:', barIdNum);
-    console.log('Tipo barIdNum:', typeof barIdNum);
-    
+    // Usar service_role para dados administrativos (bypass RLS)
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     
     // Verificar estado da tabela contahub_pagamentos
@@ -83,23 +79,24 @@ export async function GET(request: Request) {
 
     // Buscar dados anuais
     if (periodo === 'anual') {
-      const currentYear = 2024; // Usar 2024 onde estão os dados reais
+      const currentYear = 2025; // Usar 2025 - dados atuais
       
       // Faturamento 2025 (ContaHub + Yuzer + Sympla)
-      console.log('=== EXECUTANDO CONSULTAS ===');
-      console.log('1. Contahub: SELECT liquido FROM contahub_pagamentos WHERE bar_id =', barIdNum);
-      console.log('2. Yuzer: SELECT valor_liquido FROM yuzer_pagamento WHERE bar_id =', barIdNum);
-      console.log('3. Sympla: SELECT valor_liquido FROM sympla_pedidos (sem filtro bar_id)');
+        // Buscar faturamento anual de todas as fontes
       
       const [contahubResult, yuzerResult, symplaResult] = await Promise.all([
         supabase
           .from('contahub_pagamentos')
           .select('liquido')
+          .gte('dt_gerencial', `${currentYear}-01-01`)
+          .lte('dt_gerencial', `${currentYear}-12-31`)
           .eq('bar_id', barIdNum),
         
         supabase
           .from('yuzer_pagamento')
           .select('valor_liquido')
+          .gte('data_evento', `${currentYear}-01-01`)
+          .lte('data_evento', `${currentYear}-12-31`)
           .eq('bar_id', barIdNum),
         
         supabase
@@ -107,7 +104,7 @@ export async function GET(request: Request) {
           .select('valor_liquido')
       ]);
 
-      console.log('=== RESULTADOS CONSULTAS ===');
+
       console.log('Contahub:', contahubResult.data?.length || 0, 'registros');
       console.log('Yuzer:', yuzerResult.data?.length || 0, 'registros');
       console.log('Sympla:', symplaResult.data?.length || 0, 'registros');
@@ -210,8 +207,8 @@ export async function GET(request: Request) {
 
     // Buscar dados trimestrais
     if (periodo === 'trimestral') {
-      const startDate = '2024-07-01';
-      const endDate = '2024-09-30';
+      const startDate = '2025-07-01';
+      const endDate = '2025-09-30';
 
       // Clientes Ativos (visitaram 2+ vezes no trimestre)
       const { data: clientesData } = await supabase
