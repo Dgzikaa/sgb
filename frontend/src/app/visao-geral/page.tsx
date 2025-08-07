@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
   DollarSign, 
-  Target,
-  RefreshCw
+  Target
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -71,7 +70,7 @@ export default function VisaoGeralPage() {
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+
 
   useEffect(() => {
     setPageTitle('📊 Visão Geral');
@@ -128,10 +127,7 @@ export default function VisaoGeralPage() {
     carregarIndicadores();
   }, [selectedBar]);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    carregarIndicadores();
-  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -149,16 +145,7 @@ export default function VisaoGeralPage() {
               </div>
             </div>
             
-            <Button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Atualizar
-            </Button>
+
           </div>
         </div>
 
@@ -169,7 +156,7 @@ export default function VisaoGeralPage() {
               <DollarSign className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Performance 2025 (Fev-Ago)</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Performance Anual</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">Performance estratégica desde abertura</p>
             </div>
           </div>
@@ -191,7 +178,7 @@ export default function VisaoGeralPage() {
           ) : indicadoresAnuais ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <IndicadorCard
-                titulo="Faturamento Fev-Ago"
+                titulo="Faturamento 2025"
                 valor={indicadoresAnuais.faturamento.valor}
                 meta={indicadoresAnuais.faturamento.meta}
                 formato="moeda"
@@ -218,7 +205,7 @@ export default function VisaoGeralPage() {
               />
               
               <IndicadorCard
-                titulo="EBITDA Fev-Ago"
+                titulo="EBITDA 2025"
                 valor={indicadoresAnuais.ebitda.valor}
                 meta={indicadoresAnuais.ebitda.meta}
                 formato="moeda"

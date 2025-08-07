@@ -1,6 +1,51 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+// Função para buscar dados com paginação (contorna limite de 1000 do Supabase)
+async function fetchAllData(supabase: any, tableName: string, columns: string, filters: any = {}) {
+  let allData: any[] = [];
+  let from = 0;
+  const limit = 1000;
+  
+  while (true) {
+    let query = supabase
+      .from(tableName)
+      .select(columns)
+      .range(from, from + limit - 1);
+    
+    // Aplicar filtros
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key.includes('gte_')) {
+        query = query.gte(key.replace('gte_', ''), value);
+      } else if (key.includes('lte_')) {
+        query = query.lte(key.replace('lte_', ''), value);
+      } else if (key.includes('eq_')) {
+        query = query.eq(key.replace('eq_', ''), value);
+      } else if (key.includes('in_')) {
+        query = query.in(key.replace('in_', ''), value);
+      }
+    });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      break;
+    }
+    
+    if (!data || data.length === 0) break;
+    
+    allData.push(...data);
+    
+    if (data.length < limit) break; // Última página
+    
+    from += limit;
+  }
+  
+  console.log(`📊 ${tableName}: ${allData.length} registros total`);
+  return allData;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -196,16 +241,20 @@ export async function GET(request: Request) {
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
 
       // Reputação (Google Reviews)
+      // Reputação (Google Reviews - Windsor) - Média do período
       const { data: reputacaoData } = await supabase
         .from('windsor_google')
         .select('review_average_rating_total')
-        .eq('bar_id', barIdNum)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .gte('date', startDate)
+        .lte('date', endDate);
 
-      console.log('🌟 Reputação - dados:', reputacaoData);
-      const reputacao = reputacaoData?.review_average_rating_total || 0;
+      console.log('🌟 Reputação - registros encontrados:', reputacaoData?.length);
+      
+      const reputacao = reputacaoData && reputacaoData.length > 0 
+        ? reputacaoData.reduce((sum, item) => sum + (item.review_average_rating_total || 0), 0) / reputacaoData.length
+        : 0;
+        
+      console.log('🌟 Reputação calculada (média):', reputacao);
       console.log('🌟 Reputação calculada:', reputacao);
 
       // EBITDA (será calculado futuramente com DRE)
