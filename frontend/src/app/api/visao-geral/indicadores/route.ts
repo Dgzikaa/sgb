@@ -243,8 +243,13 @@ export async function GET(request: Request) {
       console.log('🌟 Reputação - registros encontrados:', reputacaoData?.length);
       console.log('🌟 Amostra reputação (5 primeiros):', reputacaoData?.slice(0, 5));
       
-      const reputacao = reputacaoData && reputacaoData.length > 0 
-        ? reputacaoData.reduce((sum, item) => sum + (item.review_average_rating_total || 0), 0) / reputacaoData.length
+      // Filtrar apenas registros com valor válido (não null)
+      const reputacaoValida = reputacaoData?.filter(item => item.review_average_rating_total != null && item.review_average_rating_total > 0) || [];
+      console.log('🌟 Registros com valor válido:', reputacaoValida.length);
+      console.log('🌟 Registros null/zero filtrados:', (reputacaoData?.length || 0) - reputacaoValida.length);
+      
+      const reputacao = reputacaoValida.length > 0 
+        ? reputacaoValida.reduce((sum, item) => sum + item.review_average_rating_total, 0) / reputacaoValida.length
         : 0;
         
       console.log('🌟 Reputação calculada (média):', reputacao);
