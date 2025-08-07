@@ -188,14 +188,17 @@ export async function GET(request: Request) {
       console.log('Total:', faturamentoTotal);
 
       // Número de Pessoas (ContaHub + Yuzer + Sympla)
-      const [pessoasContahub, pessoasYuzer, pessoasSympla] = await Promise.all([
-        supabase
-          .from('contahub_periodo')
-          .select('pessoas')
-          .eq('bar_id', barIdNum)
-          .gte('dt_gerencial', startDate)
-          .lte('dt_gerencial', endDate),
-        
+      // Pessoas com PAGINAÇÃO
+      console.log('👥 Buscando pessoas com PAGINAÇÃO COMPLETA...');
+      
+      const pessoasContahubData = await fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': startDate,
+        'lte_dt_gerencial': endDate
+      });
+      
+      // Yuzer e Sympla por enquanto sem paginação (volumes menores)
+      const [pessoasYuzer, pessoasSympla] = await Promise.all([
         supabase
           .from('yuzer_produtos')
           .select('quantidade, produto_nome')
@@ -213,10 +216,20 @@ export async function GET(request: Request) {
           .lte('data_checkin', endDate)
       ]);
 
-      const totalPessoasContahub = pessoasContahub.data?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
+      console.log('👥 ContaHub pessoas:', pessoasContahubData?.length || 0, 'registros');
+      console.log('👥 Yuzer pessoas:', pessoasYuzer.data?.length || 0, 'registros');
+      console.log('👥 Sympla pessoas:', pessoasSympla.data?.length || 0, 'registros');
+      
+      const totalPessoasContahub = pessoasContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
       const totalPessoasYuzer = pessoasYuzer.data?.reduce((sum, item) => sum + (item.quantidade || 0), 0) || 0;
       const totalPessoasSympla = pessoasSympla.data?.length || 0;
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
+      
+      console.log('👥 PESSOAS CALCULADAS:');
+      console.log('ContaHub:', totalPessoasContahub);
+      console.log('Yuzer:', totalPessoasYuzer);
+      console.log('Sympla:', totalPessoasSympla);
+      console.log('Total:', totalPessoas);
 
       // Reputação (Google Reviews)
       // Reputação (Google Reviews - Windsor) - Média do período
@@ -276,22 +289,24 @@ export async function GET(request: Request) {
       const { start: startDate, end: endDate } = getTrimestreDates(trimestre);
       console.log(`📊 ${trimestre}º Trimestre 2025 - Buscando dados de ${startDate} até ${endDate}`);
 
-      // Clientes Ativos (visitaram 2+ vezes no trimestre)
-      const { data: clientesData } = await supabase
-        .from('contahub_periodo')
-        .select('cli_fone, dt_gerencial')
-        .eq('bar_id', barIdNum)
-        .gte('dt_gerencial', startDate)
-        .lte('dt_gerencial', endDate)
-        .not('cli_fone', 'is', null);
+      // Clientes Ativos (visitaram 2+ vezes no trimestre) - COM PAGINAÇÃO
+      console.log('🎯 Buscando clientes ativos com PAGINAÇÃO...');
+      
+      const clientesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': startDate,
+        'lte_dt_gerencial': endDate
+      });
+      
+      // Filtrar apenas clientes com telefone
+      const clientesComTelefone = clientesData?.filter(item => item.cli_fone) || [];
+      console.log('📞 Clientes com telefone:', clientesComTelefone.length);
 
       // Agrupar por telefone e contar visitas
       const clientesMap = new Map();
-      clientesData?.forEach(item => {
-        if (item.cli_fone) {
-          const count = clientesMap.get(item.cli_fone) || 0;
-          clientesMap.set(item.cli_fone, count + 1);
-        }
+      clientesComTelefone.forEach(item => {
+        const count = clientesMap.get(item.cli_fone) || 0;
+        clientesMap.set(item.cli_fone, count + 1);
       });
 
       // Contar clientes com 2+ visitas
@@ -299,6 +314,10 @@ export async function GET(request: Request) {
       clientesMap.forEach(count => {
         if (count >= 2) clientesAtivos++;
       });
+      
+      console.log('🎯 CLIENTES ATIVOS CALCULADOS:');
+      console.log('Total clientes únicos:', clientesMap.size);
+      console.log('Clientes ativos (2+ visitas):', clientesAtivos);
 
       // Número total de clientes no trimestre
       const [clientesContahub, clientesYuzer, clientesSympla] = await Promise.all([
