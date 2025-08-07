@@ -30,6 +30,7 @@ import {
   EditIcon,
   TrashIcon,
   PlusIcon,
+  Calculator,
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -79,6 +80,7 @@ export default function TabelaDesempenhoPage() {
   const [resumo, setResumo] = useState<ResumoDesempenho | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [recalculating, setRecalculating] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
 
   // Modal de edição
@@ -278,6 +280,58 @@ export default function TabelaDesempenhoPage() {
     }
   };
 
+  const recalcularAutomatico = async () => {
+    if (!selectedBar?.id) return;
+
+    if (!confirm('🧮 Deseja recalcular TODOS os dados automaticamente com base nas fontes reais (ContaHub, Yuzer, Sympla)?\n\n⚠️ Esta ação irá sobrescrever os cálculos atuais mantendo apenas os valores manuais (CMV R$, Reservas).')) {
+      return;
+    }
+
+    setRecalculating(true);
+
+    try {
+      const response = await fetch('/api/gestao/desempenho/recalcular', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': JSON.stringify({
+            bar_id: selectedBar.id,
+            permissao: 'admin',
+          }),
+        },
+        body: JSON.stringify({
+          recalcular_todas: true
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: '✅ Recálculo Concluído!',
+          description: `${result.data?.length || 0} semana(s) foram recalculadas automaticamente.`,
+        });
+        await carregarDados();
+      } else {
+        toast({
+          title: '❌ Erro no Recálculo',
+          description: result.error || 'Erro desconhecido',
+          variant: 'destructive'
+        });
+      }
+    } catch (error: unknown) {
+      console.error('❌ Erro ao recalcular:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({
+        title: '❌ Erro no Recálculo',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    } finally {
+      setRecalculating(false);
+    }
+  };
+
   const dadosFiltrados = dados
     .filter(item => {
       const matchTexto =
@@ -444,6 +498,24 @@ export default function TabelaDesempenhoPage() {
                         <>
                           <Upload className="h-4 w-4 mr-2" />
                           Sincronizar
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={recalcularAutomatico}
+                      disabled={recalculating}
+                      className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
+                      size="sm"
+                    >
+                      {recalculating ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Recalculando...
+                        </>
+                      ) : (
+                        <>
+                          <Calculator className="h-4 w-4 mr-2" />
+                          Recalcular
                         </>
                       )}
                     </Button>
