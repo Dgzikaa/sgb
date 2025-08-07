@@ -147,13 +147,6 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Demonstrativo de Resultado',
           permission: 'dashboard_financeiro_mensal',
         },
-        {
-          icon: TrendingUp,
-          label: 'Marketing 360',
-          href: '/marketing/marketing-360',
-          description: 'Análise completa de marketing',
-          permission: 'marketing_360',
-        },
       ],
     },
     {
