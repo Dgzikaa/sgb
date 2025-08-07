@@ -9,7 +9,9 @@ import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
   DollarSign, 
-  Target
+  Target,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -70,12 +72,32 @@ export default function VisaoGeralPage() {
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
+  const [trimestreAtual, setTrimestreAtual] = useState(3); // 2º, 3º ou 4º trimestre
 
 
   useEffect(() => {
     setPageTitle('📊 Visão Geral');
     return () => setPageTitle('');
   }, [setPageTitle]);
+
+  // Informações dos trimestres
+  const getTrimestreInfo = (trimestre: number) => {
+    const info = {
+      2: { nome: '2º Trimestre 2025 (Abr-Jun)', periodo: 'abril-junho' },
+      3: { nome: '3º Trimestre 2025 (Jul-Set)', periodo: 'julho-setembro' },
+      4: { nome: '4º Trimestre 2025 (Out-Dez)', periodo: 'outubro-dezembro' }
+    };
+    return info[trimestre as keyof typeof info];
+  };
+
+  // Navegação entre trimestres
+  const navegarTrimestre = (direcao: 'anterior' | 'proximo') => {
+    if (direcao === 'anterior' && trimestreAtual > 2) {
+      setTrimestreAtual(trimestreAtual - 1);
+    } else if (direcao === 'proximo' && trimestreAtual < 4) {
+      setTrimestreAtual(trimestreAtual + 1);
+    }
+  };
 
   const carregarIndicadores = async () => {
     if (!selectedBar) return;
@@ -91,7 +113,7 @@ export default function VisaoGeralPage() {
             }),
           },
         }),
-        fetch(`/api/visao-geral/indicadores?periodo=trimestral`, {
+        fetch(`/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}`, {
           headers: {
             'x-user-data': JSON.stringify({
               bar_id: selectedBar.id,
@@ -119,13 +141,12 @@ export default function VisaoGeralPage() {
       });
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     carregarIndicadores();
-  }, [selectedBar]);
+  }, [selectedBar, trimestreAtual]);
 
 
 
@@ -221,13 +242,42 @@ export default function VisaoGeralPage() {
 
         {/* Indicadores Trimestrais */}
         <div className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
-              <Target className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                <Target className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{getTrimestreInfo(trimestreAtual)?.nome}</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Performance operacional</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">3º Trimestre 2025 (Jul-Set)</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Performance operacional</p>
+            
+            {/* Navegação de Trimestres */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navegarTrimestre('anterior')}
+                disabled={trimestreAtual <= 2}
+                className="p-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[60px] text-center">
+                {trimestreAtual}º Tri
+              </span>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navegarTrimestre('proximo')}
+                disabled={trimestreAtual >= 4}
+                className="p-2"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
             </div>
           </div>
           

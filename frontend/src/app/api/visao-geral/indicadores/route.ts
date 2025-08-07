@@ -1,6 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+// Função para calcular datas do trimestre
+function getTrimestreDates(trimestre: number) {
+  const year = 2025;
+  const quarters = {
+    2: { start: `${year}-04-01`, end: `${year}-06-30` }, // Abr-Jun
+    3: { start: `${year}-07-01`, end: `${year}-09-30` }, // Jul-Set  
+    4: { start: `${year}-10-01`, end: `${year}-12-31` }  // Out-Dez
+  };
+  
+  return quarters[trimestre as keyof typeof quarters] || quarters[3];
+}
+
 // Função para buscar dados com paginação (contorna limite de 1000 do Supabase)
 async function fetchAllData(supabase: any, tableName: string, columns: string, filters: any = {}) {
   let allData: any[] = [];
@@ -50,6 +62,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const periodo = searchParams.get('periodo') || 'anual';
+    const trimestre = parseInt(searchParams.get('trimestre') || '3'); // 2, 3 ou 4
     const barId = searchParams.get('bar_id') || 
       (request.headers.get('x-user-data') 
         ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id 
@@ -124,14 +137,10 @@ export async function GET(request: Request) {
 
     // Buscar dados anuais
     if (periodo === 'anual') {
-      const currentYear = 2025;
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
-      const endDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
-      
-      // Bar abriu em Fevereiro 2025
-      const startDate = `${currentYear}-02-01`;
-      console.log(`🏪 Bar abriu em FEV/2025 - Buscando dados de ${startDate} até ${endDate}`);
+      // Performance Anual - Ano completo de 2025
+      const startDate = '2025-02-01'; // Bar abriu em Fevereiro
+      const endDate = '2025-12-31'; // Ano completo
+      console.log(`🏪 Performance Anual 2025 - Buscando dados de ${startDate} até ${endDate}`);
       
       // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
       
@@ -294,9 +303,9 @@ export async function GET(request: Request) {
 
     // Buscar dados trimestrais
     if (periodo === 'trimestral') {
-      // 3º Trimestre: Julho, Agosto, Setembro
-      const startDate = '2025-07-01';
-      const endDate = '2025-09-30';
+      // Datas dinâmicas baseadas no trimestre selecionado
+      const { start: startDate, end: endDate } = getTrimestreDates(trimestre);
+      console.log(`📊 ${trimestre}º Trimestre 2025 - Buscando dados de ${startDate} até ${endDate}`);
 
       // Clientes Ativos (visitaram 2+ vezes no trimestre)
       const { data: clientesData } = await supabase
