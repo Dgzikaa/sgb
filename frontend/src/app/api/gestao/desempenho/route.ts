@@ -19,9 +19,10 @@ export async function GET(request: Request) {
     const ano = searchParams.get('ano') || new Date().getFullYear().toString();
     const mes = searchParams.get('mes');
 
+    // Usar service_role para dados administrativos (bypass RLS)
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
     // Construir query base
@@ -102,9 +103,10 @@ export async function DELETE(request: Request) {
       );
     }
 
+    // Usar service_role para dados administrativos (bypass RLS)
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
     const { error } = await supabase
@@ -152,9 +154,10 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Usar service_role para dados administrativos (bypass RLS)
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
     // Atualizar o registro
