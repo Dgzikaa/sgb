@@ -144,31 +144,31 @@ export async function GET(request: Request) {
       
       // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
       
-      const [contahubResult, yuzerResult, symplaResult] = await Promise.all([
-        supabase
-          .from('contahub_pagamentos')
-          .select('liquido')
-          .gte('dt_gerencial', startDate)
-          .lte('dt_gerencial', endDate)
-          .eq('bar_id', barIdNum),
-        
-        supabase
-          .from('yuzer_pagamento')
-          .select('valor_liquido')
-          .gte('data_evento', startDate)
-          .lte('data_evento', endDate)
-          .eq('bar_id', barIdNum),
-        
-        supabase
-          .from('sympla_pedidos')
-          .select('valor_liquido')
-      ]);
+      // IMPLEMENTANDO PAGINAÇÃO REAL para contornar limite de 1000
+      console.log('💰 Buscando faturamento com PAGINAÇÃO COMPLETA...');
+      
+      const contahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+        'gte_dt_gerencial': startDate,
+        'lte_dt_gerencial': endDate,
+        'eq_bar_id': barIdNum
+      });
+      
+      const yuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
+        'gte_data_evento': startDate,
+        'lte_data_evento': endDate,
+        'eq_bar_id': barIdNum
+      });
+      
+      const symplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
+        'gte_data_pedido': startDate,
+        'lte_data_pedido': endDate
+      });
 
 
-      console.log('=== DIAGNÓSTICO FATURAMENTO ===');
-      console.log('Contahub:', contahubResult.data?.length || 0, 'registros');
-      console.log('Yuzer:', yuzerResult.data?.length || 0, 'registros');
-      console.log('Sympla:', symplaResult.data?.length || 0, 'registros');
+      console.log('=== FATURAMENTO COM PAGINAÇÃO ===');
+      console.log('Contahub:', contahubData?.length || 0, 'registros');
+      console.log('Yuzer:', yuzerData?.length || 0, 'registros');
+      console.log('Sympla:', symplaData?.length || 0, 'registros');
       
       if (yuzerResult.error) {
         console.log('❌ ERRO YUZER:', yuzerResult.error);
@@ -198,18 +198,15 @@ export async function GET(request: Request) {
           .ilike('table_name', '%yuzer%');
         console.log('📋 TABELAS YUZER DISPONÍVEIS:', tabelas.data?.map(t => t.table_name));
       }
+
       
-      if (contahubResult.error) console.log('Erro Contahub:', contahubResult.error);
-      if (yuzerResult.error) console.log('Erro Yuzer:', yuzerResult.error);
-      if (symplaResult.error) console.log('Erro Sympla:', symplaResult.error);
+      // Calcular com dados paginados
+      console.log('Amostra Contahub (5 primeiros):', contahubData?.slice(0, 5));
+      console.log('Amostra Yuzer (5 primeiros):', yuzerData?.slice(0, 5));
       
-      // Verificar valores
-      console.log('Amostra Contahub (5 primeiros):', contahubResult.data?.slice(0, 5));
-      console.log('Amostra Yuzer (5 primeiros):', yuzerResult.data?.slice(0, 5));
-      
-      const faturamentoContahub = contahubResult.data?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
-      const faturamentoYuzer = yuzerResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
-      const faturamentoSympla = symplaResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoContahub = contahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+      const faturamentoYuzer = yuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoSympla = symplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
       
       console.log('=== FATURAMENTOS CALCULADOS ===');
