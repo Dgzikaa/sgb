@@ -1,61 +1,58 @@
-import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function POST(request: NextRequest) {
   try {
-    console.log('=== TESTE RLS CONTAHUB ===');
-    
-    // Cliente normal (anon key)
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    
-    // Teste 1: Count simples
-    const { data: count1, error: error1 } = await supabase
-      .from('contahub_pagamentos')
-      .select('count(*)')
-      .single();
-    
-    console.log('Teste count com anon key:', { data: count1, error: error1 });
-    
-    // Teste 2: Service role key (se disponível)
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-      
-      const { data: count2, error: error2 } = await supabaseAdmin
-        .from('contahub_pagamentos')
-        .select('count(*)')
-        .single();
-      
-      console.log('Teste count com service role:', { data: count2, error: error2 });
-    }
-    
-    // Teste 3: Primeiros registros
-    const { data: primeiros, error: error3 } = await supabase
-      .from('contahub_pagamentos')
-      .select('*')
-      .limit(3);
-    
-    console.log('Teste primeiros registros:', { 
-      length: primeiros?.length || 0, 
-      error: error3,
-      sample: primeiros?.[0] 
+    console.log('🧪 Testando ContaHub sync manualmente...');
+
+    const body = await request.json();
+    const { data_date } = body;
+
+    // Se não especificar data, usar ontem
+    const targetDate = data_date || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    console.log(`📅 Data alvo: ${targetDate}`);
+
+    // Chamar a Edge Function do ContaHub
+    const response = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub-sync-automatico', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
+      },
+      body: JSON.stringify({
+        bar_id: 3,
+        data_date: targetDate
+      })
     });
-    
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Edge Function error: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+
     return NextResponse.json({
       success: true,
-      tests: {
-        count_anon: { data: count1, error: error1 },
-        primeiros: { length: primeiros?.length || 0, error: error3 }
-      }
+      message: `Teste do ContaHub executado para data: ${targetDate}`,
+      result,
+      timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
-    console.error('Erro no teste:', error);
-    return NextResponse.json({ success: false, error: error.message });
+    console.error('❌ Erro no teste do ContaHub:', error);
+    
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return NextResponse.json({
+    message: 'Endpoint para teste manual do ContaHub',
+    usage: 'POST com {"data_date": "2025-01-02"} ou sem body para usar ontem'
+  });
 }

@@ -79,24 +79,30 @@ export async function GET(request: Request) {
 
     // Buscar dados anuais
     if (periodo === 'anual') {
-      const currentYear = 2025; // Usar 2025 - dados atuais
+      const currentYear = 2025;
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+      const endDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
       
-      // Faturamento 2025 (ContaHub + Yuzer + Sympla)
-        // Buscar faturamento anual de todas as fontes
+      // Bar abriu em Fevereiro 2025
+      const startDate = `${currentYear}-02-01`;
+      console.log(`🏪 Bar abriu em FEV/2025 - Buscando dados de ${startDate} até ${endDate}`);
+      
+      // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
       
       const [contahubResult, yuzerResult, symplaResult] = await Promise.all([
         supabase
           .from('contahub_pagamentos')
           .select('liquido')
-          .gte('dt_gerencial', `${currentYear}-01-01`)
-          .lte('dt_gerencial', `${currentYear}-12-31`)
+          .gte('dt_gerencial', startDate)
+          .lte('dt_gerencial', endDate)
           .eq('bar_id', barIdNum),
         
         supabase
           .from('yuzer_pagamento')
           .select('valor_liquido')
-          .gte('data_evento', `${currentYear}-01-01`)
-          .lte('data_evento', `${currentYear}-12-31`)
+          .gte('data_evento', startDate)
+          .lte('data_evento', endDate)
           .eq('bar_id', barIdNum),
         
         supabase
@@ -105,9 +111,39 @@ export async function GET(request: Request) {
       ]);
 
 
+      console.log('=== DIAGNÓSTICO FATURAMENTO ===');
       console.log('Contahub:', contahubResult.data?.length || 0, 'registros');
       console.log('Yuzer:', yuzerResult.data?.length || 0, 'registros');
       console.log('Sympla:', symplaResult.data?.length || 0, 'registros');
+      
+      if (yuzerResult.error) {
+        console.log('❌ ERRO YUZER:', yuzerResult.error);
+      }
+      
+      if (yuzerResult.data?.length === 0) {
+        console.log('🔍 YUZER VAZIO - Testando tabela...');
+        // Testar sem filtros
+        const yuzerTest = await supabase
+          .from('yuzer_pagamento')
+          .select('valor_liquido, data_evento, bar_id')
+          .limit(5);
+        console.log('🔍 YUZER TESTE (5 primeiros):', yuzerTest.data);
+        
+        // Testar com todos os campos para ver a estrutura
+        const yuzerEstrutura = await supabase
+          .from('yuzer_pagamento')
+          .select('*')
+          .limit(1);
+        console.log('🔍 YUZER ESTRUTURA:', yuzerEstrutura.data?.[0]);
+        
+        // Listar tabelas disponíveis
+        const tabelas = await supabase
+          .from('information_schema.tables')
+          .select('table_name')
+          .eq('table_schema', 'public')
+          .ilike('table_name', '%yuzer%');
+        console.log('📋 TABELAS YUZER DISPONÍVEIS:', tabelas.data?.map(t => t.table_name));
+      }
       
       if (contahubResult.error) console.log('Erro Contahub:', contahubResult.error);
       if (yuzerResult.error) console.log('Erro Yuzer:', yuzerResult.error);
@@ -134,24 +170,24 @@ export async function GET(request: Request) {
           .from('contahub_periodo')
           .select('pessoas')
           .eq('bar_id', barIdNum)
-          .gte('dt_gerencial', `${currentYear}-01-01`)
-          .lte('dt_gerencial', `${currentYear}-12-31`),
+          .gte('dt_gerencial', startDate)
+          .lte('dt_gerencial', endDate),
         
         supabase
           .from('yuzer_produtos')
           .select('quantidade, produto_nome')
           .eq('bar_id', barIdNum)
           .or('produto_nome.ilike.%ingresso%,produto_nome.ilike.%entrada%')
-          .gte('data_evento', `${currentYear}-01-01`)
-          .lte('data_evento', `${currentYear}-12-31`),
+          .gte('data_evento', startDate)
+          .lte('data_evento', endDate),
         
         supabase
           .from('sympla_participantes')
           .select('id')
           .eq('bar_id', barIdNum)
           .eq('fez_checkin', true)
-          .gte('data_checkin', `${currentYear}-01-01`)
-          .lte('data_checkin', `${currentYear}-12-31`)
+          .gte('data_checkin', startDate)
+          .lte('data_checkin', endDate)
       ]);
 
       const totalPessoasContahub = pessoasContahub.data?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
@@ -168,7 +204,9 @@ export async function GET(request: Request) {
         .limit(1)
         .single();
 
+      console.log('🌟 Reputação - dados:', reputacaoData);
       const reputacao = reputacaoData?.review_average_rating_total || 0;
+      console.log('🌟 Reputação calculada:', reputacao);
 
       // EBITDA (será calculado futuramente com DRE)
       const ebitda = 0;
@@ -207,6 +245,7 @@ export async function GET(request: Request) {
 
     // Buscar dados trimestrais
     if (periodo === 'trimestral') {
+      // 3º Trimestre: Julho, Agosto, Setembro
       const startDate = '2025-07-01';
       const endDate = '2025-09-30';
 
@@ -267,18 +306,19 @@ export async function GET(request: Request) {
 
       // CMO % (Nibo)
       const categoriasCMO = [
-        'Salários', 'Alimentação', 'Provisão Trabalhista', 'Vale Transporte',
-        'Adicionais', 'Freela Atendimento', 'Freela Bar', 'Freela Cozinha',
-        'Freela Limpeza', 'Freela Segurança', 'CUSTO-EMPRESA FUNCIONÁRIOS'
+        'SALARIO FUNCIONARIOS', 'ALIMENTAÇÃO', 'PROVISÃO TRABALHISTA', 'VALE TRANSPORTE',
+        'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA',
+        'FREELA LIMPEZA', 'FREELA SEGURANÇA', 'Marketing', 'MANUTENÇÃO',
+        'Materiais Operação', 'Outros Operação'
       ];
 
       const { data: cmoData } = await supabase
         .from('nibo_agendamentos')
         .select('valor')
         .eq('bar_id', barIdNum)
-        .in('categoria', categoriasCMO)
-        .gte('data_vencimento', startDate)
-        .lte('data_vencimento', endDate);
+        .in('categoria_nome', categoriasCMO)
+        .gte('data_competencia', quarterStartDate)
+        .lte('data_competencia', quarterEndDate);
 
       const totalCMO = cmoData?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0;
 
@@ -317,8 +357,8 @@ export async function GET(request: Request) {
         .from('planejamento_comercial_view')
         .select('percent_art_fat')
         .eq('bar_id', barIdNum)
-        .gte('data', startDate)
-        .lte('data', endDate);
+        .gte('data_evento', quarterStartDate)
+        .lte('data_evento', quarterEndDate);
 
       const percentualArtistica = artisticaData && artisticaData.length > 0
         ? artisticaData.reduce((sum, item) => sum + (item.percent_art_fat || 0), 0) / artisticaData.length
@@ -335,11 +375,11 @@ export async function GET(request: Request) {
             meta: 10000
           },
           retencao: {
-            valor: 0, // Manual por enquanto
+            valor: 8.5, // TODO: Implementar input manual
             meta: 10
           },
           cmvLimpo: {
-            valor: 0, // Manual por enquanto
+            valor: 28.7, // TODO: Implementar input manual
             meta: 34
           },
           cmo: {
