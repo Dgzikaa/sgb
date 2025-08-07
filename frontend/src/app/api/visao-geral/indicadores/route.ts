@@ -317,8 +317,8 @@ export async function GET(request: Request) {
         .select('valor')
         .eq('bar_id', barIdNum)
         .in('categoria_nome', categoriasCMO)
-        .gte('data_competencia', quarterStartDate)
-        .lte('data_competencia', quarterEndDate);
+        .gte('data_competencia', startDate)
+        .lte('data_competencia', endDate);
 
       const totalCMO = cmoData?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0;
 
@@ -357,8 +357,8 @@ export async function GET(request: Request) {
         .from('planejamento_comercial_view')
         .select('percent_art_fat')
         .eq('bar_id', barIdNum)
-        .gte('data_evento', quarterStartDate)
-        .lte('data_evento', quarterEndDate);
+        .gte('data_evento', startDate)
+        .lte('data_evento', endDate);
 
       const percentualArtistica = artisticaData && artisticaData.length > 0
         ? artisticaData.reduce((sum, item) => sum + (item.percent_art_fat || 0), 0) / artisticaData.length
