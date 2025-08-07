@@ -10,12 +10,7 @@ export async function GET(request: Request) {
         ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id 
         : null);
     
-    console.log('=== DEBUG API ===');
-    console.log('barId type:', typeof barId);
-    console.log('barId value:', barId);
-    
     if (!barId) {
-      console.log('barId é falsy');
       return NextResponse.json(
         { success: false, error: 'Bar não selecionado' },
         { status: 400 }
@@ -23,8 +18,7 @@ export async function GET(request: Request) {
     }
     
     // Converter para número
-    const barIdNum = parseInt(barId);
-    console.log('barIdNum:', barIdNum);
+    const barIdNum = parseInt(barId.toString());
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,38 +34,22 @@ export async function GET(request: Request) {
         supabase
           .from('contahub_pagamentos')
           .select('liquido')
-          .eq('bar_id', barIdNumNumber),
+          .eq('bar_id', barIdNum),
         
         supabase
           .from('yuzer_pagamento')
           .select('valor_liquido')
-          .eq('bar_id', barIdNumNumber),
+          .eq('bar_id', barIdNum),
         
         supabase
           .from('sympla_pedidos')
           .select('valor_liquido')
       ]);
 
-      console.log('Contahub result:', contahubResult.data?.length, 'registros');
-      if (contahubResult.error) console.log('Contahub error:', contahubResult.error);
-      
-      console.log('Yuzer result:', yuzerResult.data?.length, 'registros');  
-      if (yuzerResult.error) console.log('Yuzer error:', yuzerResult.error);
-      
-      console.log('Sympla result:', symplaResult.data?.length, 'registros');
-      if (symplaResult.error) console.log('Sympla error:', symplaResult.error);
-      
       const faturamentoContahub = contahubResult.data?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
       const faturamentoYuzer = yuzerResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoSympla = symplaResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
-      
-      console.log('Faturamentos calculados:', {
-        contahub: faturamentoContahub,
-        yuzer: faturamentoYuzer,
-        sympla: faturamentoSympla,
-        total: faturamentoTotal
-      });
 
       // Número de Pessoas (ContaHub + Yuzer + Sympla)
       const [pessoasContahub, pessoasYuzer, pessoasSympla] = await Promise.all([
