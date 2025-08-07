@@ -26,12 +26,23 @@ function getWeekDates(year: number, weekNumber: number) {
   };
 }
 
-// Função para obter o número da semana atual
-function getCurrentWeekNumber() {
-  const now = new Date();
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-  const pastDaysOfYear = (now.getTime() - startOfYear.getTime()) / 86400000;
-  return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+// Função para obter o número da semana atual via banco (mais preciso)
+async function getCurrentWeekNumber(supabase: any, barId: number) {
+  try {
+    const { data: semanaAtual } = await supabase
+      .from('desempenho_semanal')
+      .select('numero_semana')
+      .eq('bar_id', barId)
+      .eq('ano', 2025)
+      .lte('data_inicio::date', 'CURRENT_DATE')
+      .gte('data_fim::date', 'CURRENT_DATE')
+      .single();
+    
+    return semanaAtual?.numero_semana || 31; // fallback para semana 31
+  } catch (error) {
+    console.log('⚠️ Erro ao buscar semana atual, usando fallback 31');
+    return 31;
+  }
 }
 
 // POST - Criar semanas faltantes
@@ -174,7 +185,7 @@ export async function POST(request: Request) {
         semana_inicial: ultimaSemanaCriada + 1,
         semana_final: semanaFinal,
         total_criadas: semanasInseridas?.length || 0,
-        semana_atual: getCurrentWeekNumber()
+        semana_atual: await getCurrentWeekNumber(supabase, barId)
       }
     });
 
