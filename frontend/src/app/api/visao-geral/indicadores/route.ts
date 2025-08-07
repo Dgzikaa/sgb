@@ -19,17 +19,78 @@ export async function GET(request: Request) {
     
     // Converter para número
     const barIdNum = parseInt(barId.toString());
-
+    
+    console.log('=== DEBUG CONSULTA ===');
+    console.log('barId original:', barId);
+    console.log('barIdNum convertido:', barIdNum);
+    console.log('Tipo barIdNum:', typeof barIdNum);
+    
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
+    
+    // Verificar estado da tabela contahub_pagamentos
+    const { data: totalRegistros, count } = await supabase
+      .from('contahub_pagamentos')
+      .select('*', { count: 'exact', head: true });
+    
+    const { data: registrosComBarId } = await supabase
+      .from('contahub_pagamentos')
+      .select('bar_id')
+      .not('bar_id', 'is', null)
+      .limit(10);
+    
+    const { data: primeiros10 } = await supabase
+      .from('contahub_pagamentos')
+      .select('*')
+      .limit(3);
+    
+    console.log('=== DIAGNÓSTICO TABELA ===');
+    console.log('Total de registros na tabela:', count);
+    console.log('Registros com bar_id não nulo:', registrosComBarId?.length || 0);
+    console.log('Amostra primeiros 3 registros:', primeiros10);
+    console.log('Procurando por bar_id:', barIdNum);
+    
+    // Testar se conseguimos acessar outras tabelas para verificar conexão
+    const { data: testeBars, count: countBars } = await supabase
+      .from('bars')
+      .select('*', { count: 'exact', head: true });
+    
+    console.log('=== TESTE OUTRAS TABELAS ===');
+    console.log('Total registros tabela bars:', countBars);
+    
+    // Testar nomes alternativos de tabelas
+    const tabelasParaTestar = [
+      'contahub_pagamentos',
+      'contahub_pagamento', 
+      'contahub_periodo',
+      'contahub_analitico',
+      'contahub_fatporhora'
+    ];
+    
+    console.log('=== TESTANDO TABELAS CONTAHUB ===');
+    for (const nomeTabela of tabelasParaTestar) {
+      try {
+        const { count } = await supabase
+          .from(nomeTabela)
+          .select('*', { count: 'exact', head: true });
+        console.log(`${nomeTabela}: ${count} registros`);
+      } catch (error) {
+        console.log(`${nomeTabela}: ERRO - tabela não existe`);
+      }
+    }
 
     // Buscar dados anuais
     if (periodo === 'anual') {
       const currentYear = 2024; // Usar 2024 onde estão os dados reais
       
       // Faturamento 2025 (ContaHub + Yuzer + Sympla)
+      console.log('=== EXECUTANDO CONSULTAS ===');
+      console.log('1. Contahub: SELECT liquido FROM contahub_pagamentos WHERE bar_id =', barIdNum);
+      console.log('2. Yuzer: SELECT valor_liquido FROM yuzer_pagamento WHERE bar_id =', barIdNum);
+      console.log('3. Sympla: SELECT valor_liquido FROM sympla_pedidos (sem filtro bar_id)');
+      
       const [contahubResult, yuzerResult, symplaResult] = await Promise.all([
         supabase
           .from('contahub_pagamentos')
@@ -46,10 +107,29 @@ export async function GET(request: Request) {
           .select('valor_liquido')
       ]);
 
+      console.log('=== RESULTADOS CONSULTAS ===');
+      console.log('Contahub:', contahubResult.data?.length || 0, 'registros');
+      console.log('Yuzer:', yuzerResult.data?.length || 0, 'registros');
+      console.log('Sympla:', symplaResult.data?.length || 0, 'registros');
+      
+      if (contahubResult.error) console.log('Erro Contahub:', contahubResult.error);
+      if (yuzerResult.error) console.log('Erro Yuzer:', yuzerResult.error);
+      if (symplaResult.error) console.log('Erro Sympla:', symplaResult.error);
+      
+      // Verificar valores
+      console.log('Amostra Contahub (5 primeiros):', contahubResult.data?.slice(0, 5));
+      console.log('Amostra Yuzer (5 primeiros):', yuzerResult.data?.slice(0, 5));
+      
       const faturamentoContahub = contahubResult.data?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
       const faturamentoYuzer = yuzerResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoSympla = symplaResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
+      
+      console.log('=== FATURAMENTOS CALCULADOS ===');
+      console.log('Contahub:', faturamentoContahub);
+      console.log('Yuzer:', faturamentoYuzer);
+      console.log('Sympla:', faturamentoSympla);
+      console.log('Total:', faturamentoTotal);
 
       // Número de Pessoas (ContaHub + Yuzer + Sympla)
       const [pessoasContahub, pessoasYuzer, pessoasSympla] = await Promise.all([
