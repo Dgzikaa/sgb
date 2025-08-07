@@ -179,8 +179,8 @@ export async function POST(request: Request) {
       
       const [contahubPessoas, yuzerProdutos, symplaParticipantes] = await Promise.all([
         fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
-          'gte_data': startDate,
-          'lte_data': endDate,
+          'gte_dt_gerencial': startDate,
+          'lte_dt_gerencial': endDate,
           'eq_bar_id': barId
         }),
         fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
@@ -189,8 +189,8 @@ export async function POST(request: Request) {
           'eq_bar_id': barId
         }),
         fetchAllData(supabase, 'sympla_participantes', '*', {
-          'gte_data_evento': startDate,
-          'lte_data_evento': endDate,
+          'gte_data_checkin': startDate,
+          'lte_data_checkin': endDate,
           'eq_fez_checkin': true
         })
       ]);
@@ -233,7 +233,7 @@ export async function POST(request: Request) {
         clientes_atendidos: clientesAtendidos,
         ticket_medio: ticketMedio,
         custo_atracao_faturamento: atracaoFaturamentoPercent,
-        atualizado_em: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         
         // MANTER VALORES MANUAIS EXISTENTES
         // Reservas (manuais)
