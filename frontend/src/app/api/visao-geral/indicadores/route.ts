@@ -232,21 +232,22 @@ export async function GET(request: Request) {
       console.log('Total:', totalPessoas);
 
       // Reputação (Google Reviews)
-      // Reputação (Google Reviews - Windsor) - Média do período
-      const { data: reputacaoData } = await supabase
-        .from('windsor_google')
-        .select('review_average_rating_total')
-        .gte('date', startDate)
-        .lte('date', endDate);
+      // Reputação (Google Reviews - Windsor) - COM PAGINAÇÃO
+      console.log('🌟 Buscando reputação com PAGINAÇÃO...');
+      
+      const reputacaoData = await fetchAllData(supabase, 'windsor_google', 'review_average_rating_total', {
+        'gte_date': startDate,
+        'lte_date': endDate
+      });
 
       console.log('🌟 Reputação - registros encontrados:', reputacaoData?.length);
+      console.log('🌟 Amostra reputação (5 primeiros):', reputacaoData?.slice(0, 5));
       
       const reputacao = reputacaoData && reputacaoData.length > 0 
         ? reputacaoData.reduce((sum, item) => sum + (item.review_average_rating_total || 0), 0) / reputacaoData.length
         : 0;
         
       console.log('🌟 Reputação calculada (média):', reputacao);
-      console.log('🌟 Reputação calculada:', reputacao);
 
       // EBITDA (será calculado futuramente com DRE)
       const ebitda = 0;
@@ -367,36 +368,48 @@ export async function GET(request: Request) {
         .lte('data_competencia', endDate);
 
       const totalCMO = cmoData?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0;
+      
+      console.log('💼 CMO DADOS:');
+      console.log('Registros CMO:', cmoData?.length);
+      console.log('Total CMO:', totalCMO);
 
-      // Faturamento trimestral para calcular %
-      const [fatContahub, fatYuzer, fatSympla] = await Promise.all([
-        supabase
-          .from('contahub_pagamentos')
-          .select('liquido')
-          .eq('bar_id', barIdNum)
-          .gte('dt_gerencial', startDate)
-          .lte('dt_gerencial', endDate),
-        
-        supabase
-          .from('yuzer_pagamento')
-          .select('valor_liquido')
-          .eq('bar_id', barIdNum)
-          .gte('data_evento', startDate)
-          .lte('data_evento', endDate),
-        
-        supabase
-          .from('sympla_pedidos')
-          .select('valor_liquido')
-          .gte('data_pedido', startDate)
-          .lte('data_pedido', endDate)
-      ]);
+      // Faturamento trimestral COM PAGINAÇÃO para calcular CMO %
+      console.log('💰 Buscando faturamento trimestral com PAGINAÇÃO...');
+      
+      const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': startDate,
+        'lte_dt_gerencial': endDate
+      });
+      
+      const fatYuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
+        'eq_bar_id': barIdNum,
+        'gte_data_evento': startDate,
+        'lte_data_evento': endDate
+      });
+      
+      const fatSymplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
+        'gte_data_pedido': startDate,
+        'lte_data_pedido': endDate
+      });
 
-      const faturamentoTrimestre = 
-        (fatContahub.data?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0) +
-        (fatYuzer.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0) +
-        (fatSympla.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0);
+      const faturamentoContahubTri = fatContahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+      const faturamentoYuzerTri = fatYuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoSymplaTri = fatSymplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
+      
+      console.log('💰 FATURAMENTO TRIMESTRAL:');
+      console.log('ContaHub:', faturamentoContahubTri);
+      console.log('Yuzer:', faturamentoYuzerTri);
+      console.log('Sympla:', faturamentoSymplaTri);
+      console.log('Total:', faturamentoTrimestre);
 
       const percentualCMO = faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0;
+      
+      console.log('💼 CÁLCULO CMO:');
+      console.log('CMO R$:', totalCMO);
+      console.log('Faturamento Trimestre R$:', faturamentoTrimestre);
+      console.log('CMO %:', percentualCMO);
 
       // % Artística (Planejamento Comercial)
       const { data: artisticaData } = await supabase
