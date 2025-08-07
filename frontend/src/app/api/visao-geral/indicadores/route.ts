@@ -112,11 +112,11 @@ export async function GET(request: Request) {
           },
           reputacao: {
             valor: reputacao,
-            meta: 4.5
+            meta: 4.8
           },
           ebitda: {
             valor: ebitda,
-            meta: 3000000
+            meta: 1000000
           }
         }
       });
@@ -246,28 +246,28 @@ export async function GET(request: Request) {
         trimestral: {
           clientesAtivos: {
             valor: clientesAtivos,
-            meta: 5000
+            meta: 3000
           },
           clientesTotais: {
             valor: totalClientesTrimestre,
-            meta: 36000 // 12.000 mensal * 3
+            meta: 10000
           },
           retencao: {
             valor: 0, // Manual por enquanto
-            meta: 65
+            meta: 10
           },
           cmvLimpo: {
             valor: 0, // Manual por enquanto
-            meta: 30
+            meta: 34
           },
           cmo: {
             valor: percentualCMO,
-            meta: 25,
+            meta: 20,
             valorAbsoluto: totalCMO
           },
           artistica: {
             valor: percentualArtistica,
-            meta: 15
+            meta: 17
           }
         }
       });

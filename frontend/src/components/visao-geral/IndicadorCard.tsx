@@ -14,7 +14,7 @@ interface IndicadorCardProps {
   formato?: 'numero' | 'moeda' | 'percentual' | 'decimal';
   tendencia?: number;
   detalhes?: Record<string, number>;
-  cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red';
+  cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
 }
 
 export function IndicadorCard({
@@ -75,6 +75,18 @@ export function IndicadorCard({
           bgLight: 'bg-red-100 dark:bg-red-900/30',
           text: 'text-red-600 dark:text-red-400'
         };
+      case 'orange':
+        return {
+          bg: 'bg-orange-500',
+          bgLight: 'bg-orange-100 dark:bg-orange-900/30',
+          text: 'text-orange-600 dark:text-orange-400'
+        };
+      case 'pink':
+        return {
+          bg: 'bg-pink-500',
+          bgLight: 'bg-pink-100 dark:bg-pink-900/30',
+          text: 'text-pink-600 dark:text-pink-400'
+        };
       case 'blue':
       default:
         return {
@@ -133,7 +145,7 @@ export function IndicadorCard({
           </p>
         </div>
 
-        <Progress value={progresso} className="h-2" />
+        <Progress value={progresso} color={cor} className="h-2" />
 
         {detalhes && (
           <div className="space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
