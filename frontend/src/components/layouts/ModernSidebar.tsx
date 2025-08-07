@@ -101,27 +101,6 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Gestão de pagamentos e recebimentos',
           permission: 'financeiro_agendamento',
         },
-        {
-          icon: CheckSquare,
-          label: 'Gestão de Checklists',
-          href: '/operacoes/checklists',
-          description: 'Controle operacional diário',
-        permission: 'checklists',
-        },
-        {
-          icon: FileText,
-          label: 'Receitas',
-          href: '/operacoes/receitas',
-          description: 'Gestão de receitas operacionais',
-        permission: 'receitas_insumos',
-        },
-        {
-          icon: Zap,
-          label: 'Terminal de Produção',
-          href: '/operacoes/terminal',
-          description: 'Terminal de produção em tempo real',
-        permission: 'terminal_producao',
-        },
       ],
     },
     {
