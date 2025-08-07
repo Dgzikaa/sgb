@@ -5,8 +5,18 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const periodo = searchParams.get('periodo') || 'anual';
-    const barId = searchParams.get('bar_id');
+    const barId = searchParams.get('bar_id') || 
+      (request.headers.get('x-user-data') 
+        ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id 
+        : null);
     
+    if (!barId) {
+      return NextResponse.json(
+        { success: false, error: 'Bar não selecionado' },
+        { status: 400 }
+      );
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -22,15 +32,15 @@ export async function GET(request: Request) {
           .from('contahub_pagamentos')
           .select('liquido')
           .eq('bar_id', barId)
-          .gte('data_pagamento', `${currentYear}-01-01`)
-          .lte('data_pagamento', `${currentYear}-12-31`),
+          .gte('dt_gerencial', `${currentYear}-01-01`)
+          .lte('dt_gerencial', `${currentYear}-12-31`),
         
         supabase
-          .from('yuzer_pagamentos')
+          .from('yuzer_pagamento')
           .select('valor_liquido')
           .eq('bar_id', barId)
-          .gte('data_pagamento', `${currentYear}-01-01`)
-          .lte('data_pagamento', `${currentYear}-12-31`),
+          .gte('data_evento', `${currentYear}-01-01`)
+          .lte('data_evento', `${currentYear}-12-31`),
         
         supabase
           .from('sympla_pedidos')
@@ -51,16 +61,16 @@ export async function GET(request: Request) {
           .from('contahub_periodo')
           .select('pessoas')
           .eq('bar_id', barId)
-          .gte('data', `${currentYear}-01-01`)
-          .lte('data', `${currentYear}-12-31`),
+          .gte('dt_gerencial', `${currentYear}-01-01`)
+          .lte('dt_gerencial', `${currentYear}-12-31`),
         
         supabase
           .from('yuzer_produtos')
           .select('quantidade, produto_nome')
           .eq('bar_id', barId)
           .or('produto_nome.ilike.%ingresso%,produto_nome.ilike.%entrada%')
-          .gte('created_at', `${currentYear}-01-01`)
-          .lte('created_at', `${currentYear}-12-31`),
+          .gte('data_evento', `${currentYear}-01-01`)
+          .lte('data_evento', `${currentYear}-12-31`),
         
         supabase
           .from('sympla_participantes')
@@ -130,18 +140,18 @@ export async function GET(request: Request) {
       // Clientes Ativos (visitaram 2+ vezes no trimestre)
       const { data: clientesData } = await supabase
         .from('contahub_periodo')
-        .select('telefone, data')
+        .select('cli_fone, dt_gerencial')
         .eq('bar_id', barId)
-        .gte('data', startDate)
-        .lte('data', endDate)
-        .not('telefone', 'is', null);
+        .gte('dt_gerencial', startDate)
+        .lte('dt_gerencial', endDate)
+        .not('cli_fone', 'is', null);
 
       // Agrupar por telefone e contar visitas
       const clientesMap = new Map();
       clientesData?.forEach(item => {
-        if (item.telefone) {
-          const count = clientesMap.get(item.telefone) || 0;
-          clientesMap.set(item.telefone, count + 1);
+        if (item.cli_fone) {
+          const count = clientesMap.get(item.cli_fone) || 0;
+          clientesMap.set(item.cli_fone, count + 1);
         }
       });
 
@@ -157,16 +167,16 @@ export async function GET(request: Request) {
           .from('contahub_periodo')
           .select('pessoas')
           .eq('bar_id', barId)
-          .gte('data', startDate)
-          .lte('data', endDate),
+          .gte('dt_gerencial', startDate)
+          .lte('dt_gerencial', endDate),
         
         supabase
           .from('yuzer_produtos')
           .select('quantidade, produto_nome')
           .eq('bar_id', barId)
           .or('produto_nome.ilike.%ingresso%,produto_nome.ilike.%entrada%')
-          .gte('created_at', startDate)
-          .lte('created_at', endDate),
+          .gte('data_evento', startDate)
+          .lte('data_evento', endDate),
         
         supabase
           .from('sympla_participantes')
@@ -205,20 +215,19 @@ export async function GET(request: Request) {
           .from('contahub_pagamentos')
           .select('liquido')
           .eq('bar_id', barId)
-          .gte('data_pagamento', startDate)
-          .lte('data_pagamento', endDate),
+          .gte('dt_gerencial', startDate)
+          .lte('dt_gerencial', endDate),
         
         supabase
-          .from('yuzer_pagamentos')
+          .from('yuzer_pagamento')
           .select('valor_liquido')
           .eq('bar_id', barId)
-          .gte('data_pagamento', startDate)
-          .lte('data_pagamento', endDate),
+          .gte('data_evento', startDate)
+          .lte('data_evento', endDate),
         
         supabase
           .from('sympla_pedidos')
           .select('valor_liquido')
-          .eq('bar_id', barId)
           .gte('data_pedido', startDate)
           .lte('data_pedido', endDate)
       ]);
