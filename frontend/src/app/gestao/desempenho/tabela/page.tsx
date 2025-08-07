@@ -337,7 +337,7 @@ export default function TabelaDesempenhoPage() {
   const criarSemanasFaltantes = async () => {
     if (!selectedBar?.id) return;
 
-    if (!confirm('📅 Deseja criar as semanas faltantes até a semana atual (32)?\n\nIsso criará semanas da 27 até a 32 com dados zerados, prontos para serem recalculados.')) {
+    if (!confirm('📅 Deseja criar TODAS as semanas do ano (52 semanas)?\n\n• Criará semanas faltantes até o final de 2025\n• Exibirá apenas até a semana atual na tabela\n• Dados iniciais zerados, prontos para recálculo')) {
       return;
     }
 
@@ -354,7 +354,7 @@ export default function TabelaDesempenhoPage() {
           }),
         },
         body: JSON.stringify({
-          ate_semana: 32 // Semana atual
+          ate_semana: 52 // Criar ano completo
         })
       });
 
@@ -363,7 +363,7 @@ export default function TabelaDesempenhoPage() {
       if (result.success) {
         toast({
           title: '✅ Semanas Criadas!',
-          description: `${result.detalhes?.total_criadas || 0} semana(s) criada(s). Semanas ${result.detalhes?.semana_inicial}-${result.detalhes?.semana_final}.`,
+          description: `${result.detalhes?.total_criadas || 0} semana(s) criada(s) para o ano completo. Exibindo até semana atual (${result.detalhes?.semana_atual}).`,
         });
         await carregarDados();
       } else {

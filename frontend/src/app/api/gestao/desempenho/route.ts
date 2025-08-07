@@ -25,12 +25,24 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Construir query base
+    // Obter semana atual para filtrar exibição
+    const getCurrentWeekNumber = () => {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const pastDaysOfYear = (now.getTime() - startOfYear.getTime()) / 86400000;
+      return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+    };
+    
+    const semanaAtual = getCurrentWeekNumber();
+    console.log(`📅 Semana atual: ${semanaAtual} - Filtrando exibição até esta semana`);
+
+    // Construir query base - FILTRAR ATÉ SEMANA ATUAL
     let query = supabase
       .from('desempenho_semanal')
       .select('*')
       .eq('bar_id', barId)
       .eq('ano', parseInt(ano))
+      .lte('numero_semana', semanaAtual) // 🎯 MOSTRAR SÓ ATÉ SEMANA ATUAL
       .order('numero_semana', { ascending: false });
 
     // Filtrar por mês se especificado

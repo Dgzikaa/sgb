@@ -79,23 +79,23 @@ export async function POST(request: Request) {
     }
 
     const ultimaSemanaCriada = ultimaSemana?.numero_semana || 0;
-    const semanaAtual = ate_semana || getCurrentWeekNumber();
+    const semanaFinal = 52; // CRIAR TODAS AS 52 SEMANAS DO ANO
     
     console.log(`📊 Última semana criada: ${ultimaSemanaCriada}`);
-    console.log(`📅 Semana atual: ${semanaAtual}`);
+    console.log(`📅 Criando até semana: ${semanaFinal} (ano completo)`);
 
-    if (ultimaSemanaCriada >= semanaAtual) {
+    if (ultimaSemanaCriada >= semanaFinal) {
       return NextResponse.json({
         success: true,
-        message: 'Todas as semanas já estão criadas',
+        message: 'Todas as semanas do ano já estão criadas',
         data: []
       });
     }
 
-    // Criar semanas faltantes
+    // Criar semanas faltantes até o final do ano
     const semanasParaCriar = [];
     
-    for (let semana = ultimaSemanaCriada + 1; semana <= semanaAtual; semana++) {
+    for (let semana = ultimaSemanaCriada + 1; semana <= semanaFinal; semana++) {
       const { start, end } = getWeekDates(2025, semana);
       
       console.log(`📝 Preparando Semana ${semana}: ${start} - ${end}`);
@@ -172,8 +172,9 @@ export async function POST(request: Request) {
       data: semanasInseridas,
       detalhes: {
         semana_inicial: ultimaSemanaCriada + 1,
-        semana_final: semanaAtual,
-        total_criadas: semanasInseridas?.length || 0
+        semana_final: semanaFinal,
+        total_criadas: semanasInseridas?.length || 0,
+        semana_atual: getCurrentWeekNumber()
       }
     });
 
