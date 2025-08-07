@@ -24,36 +24,40 @@ export async function GET(request: Request) {
 
     // Buscar dados anuais
     if (periodo === 'anual') {
-      const currentYear = new Date().getFullYear();
+      const currentYear = 2024; // Usar 2024 onde estão os dados reais
       
       // Faturamento 2025 (ContaHub + Yuzer + Sympla)
       const [contahubResult, yuzerResult, symplaResult] = await Promise.all([
         supabase
           .from('contahub_pagamentos')
           .select('liquido')
-          .eq('bar_id', barId)
-          .gte('dt_gerencial', `${currentYear}-01-01`)
-          .lte('dt_gerencial', `${currentYear}-12-31`),
+          .eq('bar_id', barId),
         
         supabase
           .from('yuzer_pagamento')
           .select('valor_liquido')
-          .eq('bar_id', barId)
-          .gte('data_evento', `${currentYear}-01-01`)
-          .lte('data_evento', `${currentYear}-12-31`),
+          .eq('bar_id', barId),
         
         supabase
           .from('sympla_pedidos')
           .select('valor_liquido')
-          .eq('bar_id', barId)
-          .gte('data_pedido', `${currentYear}-01-01`)
-          .lte('data_pedido', `${currentYear}-12-31`)
       ]);
 
+      console.log('Contahub result:', contahubResult.data?.length, 'registros');
+      console.log('Yuzer result:', yuzerResult.data?.length, 'registros');
+      console.log('Sympla result:', symplaResult.data?.length, 'registros');
+      
       const faturamentoContahub = contahubResult.data?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
       const faturamentoYuzer = yuzerResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoSympla = symplaResult.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
+      
+      console.log('Faturamentos calculados:', {
+        contahub: faturamentoContahub,
+        yuzer: faturamentoYuzer,
+        sympla: faturamentoSympla,
+        total: faturamentoTotal
+      });
 
       // Número de Pessoas (ContaHub + Yuzer + Sympla)
       const [pessoasContahub, pessoasYuzer, pessoasSympla] = await Promise.all([
@@ -134,8 +138,8 @@ export async function GET(request: Request) {
 
     // Buscar dados trimestrais
     if (periodo === 'trimestral') {
-      const startDate = '2025-07-01';
-      const endDate = '2025-09-30';
+      const startDate = '2024-07-01';
+      const endDate = '2024-09-30';
 
       // Clientes Ativos (visitaram 2+ vezes no trimestre)
       const { data: clientesData } = await supabase

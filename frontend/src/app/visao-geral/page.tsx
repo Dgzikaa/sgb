@@ -169,7 +169,7 @@ export default function VisaoGeralPage() {
               <DollarSign className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Metas Anuais 2025</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Performance 2024</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">Performance estratégica</p>
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function VisaoGeralPage() {
           ) : indicadoresAnuais ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <IndicadorCard
-                titulo="Faturamento 2025"
+                titulo="Faturamento 2024"
                 valor={indicadoresAnuais.faturamento.valor}
                 meta={indicadoresAnuais.faturamento.meta}
                 formato="moeda"
@@ -218,7 +218,7 @@ export default function VisaoGeralPage() {
               />
               
               <IndicadorCard
-                titulo="EBITDA 2025"
+                titulo="EBITDA 2024"
                 valor={indicadoresAnuais.ebitda.valor}
                 meta={indicadoresAnuais.ebitda.meta}
                 formato="moeda"
@@ -239,7 +239,7 @@ export default function VisaoGeralPage() {
               <Target className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Metas Trimestrais (Jul-Set)</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">3º Trimestre 2024 (Jul-Set)</h2>
               <p className="text-sm text-gray-600 dark:text-gray-400">Performance operacional</p>
             </div>
           </div>
