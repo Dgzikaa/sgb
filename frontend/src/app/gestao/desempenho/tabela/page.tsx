@@ -31,6 +31,7 @@ import {
   TrashIcon,
   PlusIcon,
   Calculator,
+  Calendar,
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -81,6 +82,7 @@ export default function TabelaDesempenhoPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
+  const [creatingWeeks, setCreatingWeeks] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
 
   // Modal de edição
@@ -332,6 +334,58 @@ export default function TabelaDesempenhoPage() {
     }
   };
 
+  const criarSemanasFaltantes = async () => {
+    if (!selectedBar?.id) return;
+
+    if (!confirm('📅 Deseja criar as semanas faltantes até a semana atual (32)?\n\nIsso criará semanas da 27 até a 32 com dados zerados, prontos para serem recalculados.')) {
+      return;
+    }
+
+    setCreatingWeeks(true);
+
+    try {
+      const response = await fetch('/api/gestao/desempenho/criar-semanas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': JSON.stringify({
+            bar_id: selectedBar.id,
+            permissao: 'admin',
+          }),
+        },
+        body: JSON.stringify({
+          ate_semana: 32 // Semana atual
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: '✅ Semanas Criadas!',
+          description: `${result.detalhes?.total_criadas || 0} semana(s) criada(s). Semanas ${result.detalhes?.semana_inicial}-${result.detalhes?.semana_final}.`,
+        });
+        await carregarDados();
+      } else {
+        toast({
+          title: '❌ Erro ao Criar Semanas',
+          description: result.error || 'Erro desconhecido',
+          variant: 'destructive'
+        });
+      }
+    } catch (error: unknown) {
+      console.error('❌ Erro ao criar semanas:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({
+        title: '❌ Erro ao Criar Semanas',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    } finally {
+      setCreatingWeeks(false);
+    }
+  };
+
   const dadosFiltrados = dados
     .filter(item => {
       const matchTexto =
@@ -529,14 +583,22 @@ export default function TabelaDesempenhoPage() {
                       Limpar Tudo
                     </Button>
                     <Button
-                      onClick={() =>
-                        alert('🚧 Funcionalidade de criação em desenvolvimento')
-                      }
+                      onClick={criarSemanasFaltantes}
+                      disabled={creatingWeeks}
                       className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                       size="sm"
                     >
-                      <PlusIcon className="h-4 w-4 mr-2" />
-                      Nova Semana
+                      {creatingWeeks ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Criando...
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Criar Semanas
+                        </>
+                      )}
                     </Button>
                   </div>
                   {filtrosExpanded ? (
