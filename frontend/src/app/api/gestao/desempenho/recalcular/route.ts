@@ -140,80 +140,39 @@ export async function POST(request: Request) {
       console.log(`  - TOTAL: R$ ${faturamentoTotal.toFixed(2)}`);
 
       // =============================================
-      // 2. FATURAMENTO COUVERT 
+      // 2. ATRAÇÃO/FATURAMENTO % (Custos de Atração)
       // =============================================
       
-      console.log('🎫 Calculando Faturamento Couvert...');
+      console.log('🎭 Calculando Atração/Faturamento...');
       
-      const [contahubCouvert, yuzerIngressos, symplaCheckins] = await Promise.all([
-        fetchAllData(supabase, 'contahub_periodo', 'vr_couvert', {
-          'gte_data': startDate,
-          'lte_data': endDate,
-          'eq_bar_id': barId
-        }),
-        fetchAllData(supabase, 'yuzer_produtos', 'quantidade, valor_unitario', {
-          'gte_data_evento': startDate,
-          'lte_data_evento': endDate,
-          'eq_bar_id': barId
-        }),
-        fetchAllData(supabase, 'sympla_participantes', '*', {
-          'gte_data_evento': startDate,
-          'lte_data_evento': endDate,
-          'eq_fez_checkin': true
-        })
-      ]);
-
-      const couvertContahub = contahubCouvert?.reduce((sum, item) => sum + (parseFloat(item.vr_couvert) || 0), 0) || 0;
-      
-      // Yuzer: produtos que contêm 'ingresso' ou 'entrada'
-      const couvertYuzer = yuzerIngressos?.filter(item => 
-        item.produto_nome && (
-          item.produto_nome.toLowerCase().includes('ingresso') || 
-          item.produto_nome.toLowerCase().includes('entrada')
-        )
-      ).reduce((sum, item) => sum + ((parseFloat(item.quantidade) || 0) * (parseFloat(item.valor_unitario) || 0)), 0) || 0;
-      
-      // Sympla: count de checkins * valor médio (assumindo valor médio de entrada)
-      const checkinsSympla = symplaCheckins?.length || 0;
-      const couvertSympla = checkinsSympla * 20; // Valor médio estimado - pode ser refinado
-      
-      const faturamentoCouvert = couvertContahub + couvertYuzer + couvertSympla;
-
-      console.log(`🎫 Couvert Calculado:`);
-      console.log(`  - ContaHub: R$ ${couvertContahub.toFixed(2)}`);
-      console.log(`  - Yuzer: R$ ${couvertYuzer.toFixed(2)}`);
-      console.log(`  - Sympla: R$ ${couvertSympla.toFixed(2)} (${checkinsSympla} checkins)`);
-      console.log(`  - TOTAL: R$ ${faturamentoCouvert.toFixed(2)}`);
-
-      // =============================================
-      // 3. FATURAMENTO BAR
-      // =============================================
-      
-      const faturamentoBar = faturamentoTotal - faturamentoCouvert;
-      console.log(`🍺 Faturamento Bar: R$ ${faturamentoBar.toFixed(2)}`);
-
-      // =============================================
-      // 4. FATURAMENTO CMOVÍVEL (Bar - Comissões)
-      // =============================================
-      
-      console.log('💼 Calculando Comissões...');
-      
-      const comissoesData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
+      const atracaoData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor, categoria_nome', {
         'gte_data_competencia': startDate,
         'lte_data_competencia': endDate
       });
 
-      const comissoes = comissoesData?.filter(item => 
-        item.categoria_nome && item.categoria_nome.toLowerCase().includes('comissão')
+      const categoriasAtracao = [
+        'Atração',
+        'Atrações',
+        'Programação',
+        'Shows',
+        'Eventos',
+        'Artistas'
+      ];
+
+      const custoAtracao = atracaoData?.filter(item => 
+        item.categoria_nome && categoriasAtracao.some(cat => 
+          item.categoria_nome.toLowerCase().includes(cat.toLowerCase())
+        )
       ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0;
 
-      const faturamentoCMovivel = faturamentoBar - comissoes;
+      const atracaoFaturamentoPercent = faturamentoTotal > 0 ? (custoAtracao / faturamentoTotal) * 100 : 0;
 
-      console.log(`💼 Comissões: R$ ${comissoes.toFixed(2)}`);
-      console.log(`📊 Faturamento CMvível: R$ ${faturamentoCMovivel.toFixed(2)}`);
+      console.log(`🎭 Atração/Faturamento:`);
+      console.log(`  - Custo Atração: R$ ${custoAtracao.toFixed(2)}`);
+      console.log(`  - % Faturamento: ${atracaoFaturamentoPercent.toFixed(1)}%`);
 
       // =============================================
-      // 5. CLIENTES ATENDIDOS
+      // 3. CLIENTES ATENDIDOS
       // =============================================
       
       console.log('👥 Calculando Clientes Atendidos...');
@@ -224,7 +183,7 @@ export async function POST(request: Request) {
           'lte_data': endDate,
           'eq_bar_id': barId
         }),
-        fetchAllData(supabase, 'yuzer_produtos', 'quantidade', {
+        fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
           'gte_data_evento': startDate,
           'lte_data_evento': endDate,
           'eq_bar_id': barId
@@ -256,67 +215,45 @@ export async function POST(request: Request) {
       console.log(`  - TOTAL: ${clientesAtendidos}`);
 
       // =============================================
-      // 6. TICKET MÉDIO
+      // 4. TICKET MÉDIO
       // =============================================
       
       const ticketMedio = clientesAtendidos > 0 ? faturamentoTotal / clientesAtendidos : 0;
       console.log(`🎯 Ticket Médio: R$ ${ticketMedio.toFixed(2)}`);
 
       // =============================================
-      // 7. CMO % (Custo Mão de Obra)
-      // =============================================
-      
-      console.log('👷 Calculando CMO...');
-      
-      const categoriasCMO = [
-        'Alimentação',
-        'Provisão Trabalhista', 
-        'Vale Transporte',
-        'Adicionais',
-        'Freela Atendimento',
-        'Freela Bar',
-        'Freela Cozinha', 
-        'Freela Limpeza',
-        'Freela Segurança',
-        'CUSTO-EMPRESA FUNCIONÁRIOS'
-      ];
-
-      const cmoData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor, categoria_nome', {
-        'gte_data_competencia': startDate,
-        'lte_data_competencia': endDate
-      });
-
-      const custoCMO = cmoData?.filter(item => 
-        item.categoria_nome && categoriasCMO.some(cat => 
-          item.categoria_nome.toLowerCase().includes(cat.toLowerCase())
-        )
-      ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0;
-
-      const cmoPercent = faturamentoTotal > 0 ? (custoCMO / faturamentoTotal) * 100 : 0;
-
-      console.log(`👷 CMO: R$ ${custoCMO.toFixed(2)} (${cmoPercent.toFixed(1)}%)`);
-
-      // =============================================
-      // 8. ATUALIZAR REGISTRO NO BANCO
+      // 5. ATUALIZAR REGISTRO NO BANCO
       // =============================================
       
       console.log('💾 Atualizando registro no banco...');
 
       const dadosAtualizados = {
+        // CAMPOS AUTOMÁTICOS (conforme planilha Excel)
         faturamento_total: faturamentoTotal,
-        faturamento_entrada: faturamentoCouvert,
-        faturamento_bar: faturamentoBar,
-        faturamento_cmovivel: faturamentoCMovivel,
         clientes_atendidos: clientesAtendidos,
         ticket_medio: ticketMedio,
-        cmo: cmoPercent,
+        custo_atracao_faturamento: atracaoFaturamentoPercent,
         atualizado_em: new Date().toISOString(),
-        // Manter valores manuais existentes
-        cmv_rs: semana.cmv_rs,
+        
+        // MANTER VALORES MANUAIS EXISTENTES
+        // Reservas (manuais)
         reservas_totais: semana.reservas_totais,
         reservas_presentes: semana.reservas_presentes,
+        
+        // CMV e CMO (manuais)
+        cmv_limpo: semana.cmv_limpo,
+        cmo: semana.cmo,
+        cmv_rs: semana.cmv_rs,
+        
+        // Meta (manual)
         meta_semanal: semana.meta_semanal,
-        observacoes: `Recalculado automaticamente em ${new Date().toLocaleString('pt-BR')}`
+        
+        // Outros campos existentes
+        faturamento_entrada: semana.faturamento_entrada,
+        faturamento_bar: semana.faturamento_bar,
+        faturamento_cmovivel: semana.faturamento_cmovivel,
+        
+        observacoes: `Recalculado automaticamente em ${new Date().toLocaleString('pt-BR')} - Faturamento, Clientes, Ticket Médio e Atração/Faturamento`
       };
 
       const { data: atualizada, error: updateError } = await supabase
