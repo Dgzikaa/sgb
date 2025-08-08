@@ -211,39 +211,46 @@ export async function PUT(request: NextRequest) {
       membroNome: membro?.nome
     });
 
-    // Usar API Orders conforme documentação mais recente
-    const pixOrder = {
-      type: "online",
-      external_reference: String(membro_id),
-      transactions: {
-        payments: [
-          {
-            amount: Number(valor).toFixed(2),
-            payment_method: {
-              id: "pix",
-              type: "bank_transfer"
-            },
-            expiration_time: "P1D" // 1 dia para expirar
-          }
-        ]
+    // API QR Code In-Store - Mercado Pago
+    const collectorId = process.env.MERCADO_PAGO_COLLECTOR_ID || '2611577977';
+    const externalPosId = 'ASSINANTE_1'; // POS para assinaturas de fidelidade
+    
+    const qrCodeOrder = {
+      external_reference: `fidelidade_${membro_id}_${Date.now()}`,
+      title: "Fidelidade VIP - Ordinário Bar",
+      description: `Assinatura mensal do programa de fidelidade VIP`,
+      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
+      total_amount: Number(valor),
+      items: [
+        {
+          sku_number: "FIDELIDADE_VIP_001",
+          category: "services",
+          title: "Fidelidade VIP - Ordinário Bar",
+          description: "Acesso completo aos benefícios VIP do Ordinário Bar",
+          unit_price: Number(valor),
+          quantity: 1,
+          unit_measure: "unit",
+          total_amount: Number(valor)
+        }
+      ],
+      sponsor: {
+        id: Number(collectorId)
       },
-      payer: {
-        email: membro.email,
-        entity_type: "individual"
-      },
-      total_amount: Number(valor).toFixed(2),
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`
+      cash_out: {
+        amount: 0
+      }
     } as const;
 
-    console.log('🚀 DEBUG PIX - Order payload enviado:', JSON.stringify(pixOrder, null, 2));
+    console.log('🚀 DEBUG PIX - QR Code payload enviado:', JSON.stringify(qrCodeOrder, null, 2));
+    console.log('🔍 DEBUG PIX - URL:', `${MP_BASE_URL}/instore/orders/qr/seller/collectors/${collectorId}/pos/${externalPosId}/qrs`);
 
-    const pixResponse = await fetch(`${MP_BASE_URL}/v1/orders`, {
+    const pixResponse = await fetch(`${MP_BASE_URL}/instore/orders/qr/seller/collectors/${collectorId}/pos/${externalPosId}/qrs`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(pixOrder)
+      body: JSON.stringify(qrCodeOrder)
     });
 
     if (!pixResponse.ok) {
@@ -257,14 +264,14 @@ export async function PUT(request: NextRequest) {
           error: 'Erro ao criar pagamento PIX',
           details: error,
           status: pixResponse.status,
-          debug: process.env.NODE_ENV === 'development' ? pixOrder : undefined
+          debug: process.env.NODE_ENV === 'development' ? qrCodeOrder : undefined
         },
         { status: 500 }
       );
     }
 
-    const orderData = await pixResponse.json();
-    console.log('✅ DEBUG PIX - Resposta do MP Orders:', JSON.stringify(orderData, null, 2));
+    const qrCodeData = await pixResponse.json();
+    console.log('✅ DEBUG PIX - Resposta do QR Code:', JSON.stringify(qrCodeData, null, 2));
 
     // Salvar registro de pagamento
     const { error: errorPagamento } = await supabase
@@ -274,8 +281,8 @@ export async function PUT(request: NextRequest) {
         valor,
         status: 'pendente',
         metodo_pagamento: 'pix',
-        gateway_transaction_id: orderData.id,
-        gateway_response: orderData,
+        gateway_transaction_id: qrCodeData.in_store_order_id,
+        gateway_response: qrCodeData,
         data_vencimento: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h
       });
 
@@ -283,17 +290,13 @@ export async function PUT(request: NextRequest) {
       console.error('Erro ao salvar pagamento PIX:', errorPagamento);
     }
 
-    // Extrair dados do PIX da resposta da Order
-    const pixPayment = orderData.transactions?.payments?.[0];
-    
     return NextResponse.json({
       success: true,
-      order_id: orderData.id,
-      payment_id: pixPayment?.id,
-      status: orderData.status,
-      qr_code: pixPayment?.transaction_details?.verification_code || pixPayment?.qr_code,
-      qr_code_base64: pixPayment?.qr_code_base64,
-      expiration_date: pixPayment?.expiration_time
+      in_store_order_id: qrCodeData.in_store_order_id,
+      qr_code: qrCodeData.qr_data,
+      qr_code_base64: null, // QR Code API não retorna base64, precisa gerar
+      status: 'pending',
+      expiration_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     });
 
   } catch (error) {
