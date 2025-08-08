@@ -214,10 +214,10 @@ export async function PUT(request: NextRequest) {
           }
         ]
       },
-      // Dados do recebedor (Ordinário Bar)
-      collector: {
-        id: process.env.MERCADO_PAGO_COLLECTOR_ID
-      },
+      // Dados do recebedor (Ordinário Bar) - Auto extraído do token
+      // collector: {
+      //   id: process.env.MERCADO_PAGO_COLLECTOR_ID || '2611577977'
+      // },
       external_reference: membro_id,
       notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
       metadata: {
@@ -238,9 +238,17 @@ export async function PUT(request: NextRequest) {
 
     if (!pixResponse.ok) {
       const error = await pixResponse.text();
-      console.error('Erro PIX Mercado Pago:', error);
+      console.error('Erro PIX Mercado Pago Status:', pixResponse.status);
+      console.error('Erro PIX Mercado Pago Response:', error);
+      console.error('Erro PIX Payload enviado:', JSON.stringify(pixPayment, null, 2));
+      
       return NextResponse.json(
-        { error: 'Erro ao criar pagamento PIX' },
+        { 
+          error: 'Erro ao criar pagamento PIX',
+          details: error,
+          status: pixResponse.status,
+          debug: process.env.NODE_ENV === 'development' ? pixPayment : undefined
+        },
         { status: 500 }
       );
     }
