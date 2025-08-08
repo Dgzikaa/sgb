@@ -873,6 +873,7 @@ export default function DrePage() {
                             const Icon = getMacroIcon(macro.nome);
                             const colorClass = getMacroColor(macro.nome);
                             const isCollapsed = collapsedMacros.has(macro.nome);
+                            const totalReceitas = data?.macroCategorias.find(m => m.nome === "Receita")?.total_entradas || 1;
                             // Valor unificado para Investimentos e Sócios
                             const valorUnificadoInvSoc = macro.total_entradas > 0 
                               ? macro.total_entradas 
@@ -946,23 +947,6 @@ export default function DrePage() {
                             );
                           })}
                         </tbody>
-                        <tfoot className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
-                          <tr className="border-t-2 border-gray-300 dark:border-gray-600">
-                            <td className="py-4 px-6 font-bold text-gray-900 dark:text-white">
-                              TOTAIS GERAIS
-                            </td>
-                            <td className="py-4 px-6 text-right">
-                              <span className={`text-xl font-bold ${(data?.saldo || 0) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                                {formatCurrency(data?.saldo || 0)}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-right">
-                              <span className="text-xl font-bold text-gray-600 dark:text-gray-400">
-                                -
-                              </span>
-                            </td>
-                          </tr>
-                        </tfoot>
                       </table>
                     </div>
                   </div>
