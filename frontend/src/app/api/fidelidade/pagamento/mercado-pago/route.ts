@@ -13,7 +13,7 @@ const MP_BASE_URL = 'https://api.mercadopago.com';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { membro_id, payment_method, valor = 100.00 } = body;
+    const { membro_id, payment_method, valor = 100.00, recurring = false } = body;
 
     if (!MP_ACCESS_TOKEN) {
       // Modo demonstração/desenvolvimento
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Criar preferência de pagamento no Mercado Pago
+    // Criar preferência de pagamento (cartão/checkout) no Mercado Pago
     const preference = {
       items: [
         {
@@ -81,10 +81,7 @@ export async function POST(request: NextRequest) {
       auto_return: 'approved',
       external_reference: membro_id,
       notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
-      metadata: {
-        membro_id,
-        tipo: 'fidelidade_mensal'
-      }
+      metadata: { membro_id, tipo: 'fidelidade_mensal', recurring }
     };
 
     // Se for PIX, configurar pagamento específico
@@ -160,7 +157,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { membro_id, valor = 100.00 } = body;
+    const { membro_id, valor = 100.00, recurring = false } = body;
 
     console.log('🔍 DEBUG PIX - Variáveis ENV:', {
       hasAccessToken: !!MP_ACCESS_TOKEN,
@@ -201,39 +198,28 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Criar pagamento PIX direto com chave CNPJ
+    // Criar pagamento PIX direto conforme docs (sem collector/metadata custom)
     const pixPayment = {
-      transaction_amount: valor,
+      transaction_amount: Number(valor),
       description: 'Fidelidade VIP - Ordinário Bar',
       payment_method_id: 'pix',
       payer: {
         email: membro.email,
         first_name: membro.nome?.split(' ')[0] || 'Cliente',
-        last_name: membro.nome?.split(' ').slice(1).join(' ') || 'VIP'
+        last_name: membro.nome?.split(' ').slice(1).join(' ') || 'VIP',
+        identification: {
+          type: 'CPF',
+          number: (membro.cpf || '').replace(/\D/g, '')
+        }
       },
-      // Configuração simplificada para teste
+      external_reference: String(membro_id),
+      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
       additional_info: {
         items: [
-          {
-            id: 'fidelidade_vip',
-            title: 'Fidelidade VIP - Ordinário Bar',
-            quantity: 1,
-            unit_price: valor
-          }
+          { id: 'fidelidade_vip', title: 'Fidelidade VIP - Ordinário Bar', quantity: 1, unit_price: Number(valor) }
         ]
-      },
-      // Dados do recebedor (Ordinário Bar)
-      collector: {
-        id: parseInt(process.env.MERCADO_PAGO_COLLECTOR_ID || '2611577977')
-      },
-      external_reference: membro_id,
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
-      metadata: {
-        pix_key: '57.960.083/0001-88', // CNPJ PIX
-        business_name: 'Ordinário Bar',
-        member_id: membro_id
       }
-    };
+    } as const;
 
     const pixResponse = await fetch(`${MP_BASE_URL}/v1/payments`, {
       method: 'POST',

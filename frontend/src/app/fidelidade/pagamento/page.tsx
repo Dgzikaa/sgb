@@ -22,11 +22,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Switch } from '@/components/ui/switch';
 
 export default function PagamentoPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'card' | null>(null);
+  const [recurring, setRecurring] = useState<boolean>(false);
 
   const handlePayment = async (method: 'pix' | 'card') => {
     setLoading(true);
@@ -56,7 +58,8 @@ export default function PagamentoPage() {
           },
           body: JSON.stringify({
             membro_id: membro.id,
-            valor: 100.00
+            valor: 100.00,
+            recurring
           }),
         });
 
@@ -95,7 +98,8 @@ export default function PagamentoPage() {
           body: JSON.stringify({
             membro_id: membro.id,
             payment_method: 'card',
-            valor: 100.00
+            valor: 100.00,
+            recurring
           }),
         });
 
@@ -221,6 +225,12 @@ export default function PagamentoPage() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Cancelamento a qualquer momento
                   </p>
+                  <div className="mt-4 flex items-center justify-center gap-3">
+                    <Switch checked={recurring} onCheckedChange={(v)=>setRecurring(!!v)} />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Cobrança automática todo mês (assinatura)
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
