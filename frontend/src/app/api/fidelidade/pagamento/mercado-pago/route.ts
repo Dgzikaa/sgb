@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,25 +9,41 @@ const supabase = createClient(
 
 // Configuração do Mercado Pago
 const MP_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN;
-const MP_BASE_URL = 'https://api.mercadopago.com';
+
+// Inicializar SDK do Mercado Pago
+let mercadoPagoClient: MercadoPagoConfig | null = null;
+if (MP_ACCESS_TOKEN) {
+  mercadoPagoClient = new MercadoPagoConfig({
+    accessToken: MP_ACCESS_TOKEN,
+    options: { timeout: 5000 }
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { membro_id, payment_method, valor = 100.00, recurring = false } = body;
 
+    console.log('🔍 DEBUG - Variáveis ENV:', {
+      hasAccessToken: !!MP_ACCESS_TOKEN,
+      hasCollectorId: !!process.env.MERCADO_PAGO_COLLECTOR_ID,
+      hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
+      collectorId: process.env.MERCADO_PAGO_COLLECTOR_ID,
+      appUrl: process.env.NEXT_PUBLIC_APP_URL
+    });
+
     if (!MP_ACCESS_TOKEN) {
-      // Modo demonstração/desenvolvimento
+      // Modo demonstração para cartão de crédito
       console.warn('MERCADO_PAGO_ACCESS_TOKEN não configurado. Usando modo demonstração.');
       
-      // Simular resposta para demonstração
+      // Simular resposta de cartão de crédito para demonstração
       return NextResponse.json({
         success: true,
-        preference_id: `demo_${Date.now()}`,
-        init_point: '#', 
-        sandbox_init_point: '#',
-        qr_code: payment_method === 'pix' ? 'DEMO_PIX_CODE_12345' : null,
-        qr_code_base64: payment_method === 'pix' ? 'data:image/png;base64,demo' : null,
+        payment_id: `demo_card_${Date.now()}`,
+        status: 'approved',
+        status_detail: 'accredited',
+        external_reference: `demo_${membro_id}`,
+        amount: valor,
         demo_mode: true,
         message: 'Modo demonstração - Mercado Pago não configurado'
       });
@@ -35,125 +52,51 @@ export async function POST(request: NextRequest) {
     // Buscar dados do membro
     const { data: membro, error: errorMembro } = await supabase
       .from('fidelidade_membros')
-      .select('id, nome, email, cpf, telefone')
+      .select('id, nome, email, cpf')
       .eq('id', membro_id)
       .single();
 
     if (errorMembro || !membro) {
+      console.error('🚨 DEBUG - Erro ao buscar membro:', errorMembro);
       return NextResponse.json(
         { error: 'Membro não encontrado' },
         { status: 404 }
       );
     }
 
-    // Criar preferência de pagamento (cartão/checkout) no Mercado Pago
-    const preference = {
-      items: [
-        {
-          title: 'Fidelidade VIP - Ordinário Bar',
-          description: 'Assinatura mensal do programa de fidelidade VIP',
-          quantity: 1,
-          unit_price: valor,
-          currency_id: 'BRL'
-        }
-      ],
-      payer: {
-        name: membro.nome,
-        email: membro.email,
-        identification: {
-          type: 'CPF',
-          number: membro.cpf?.replace(/\D/g, '') || ''
-        },
-        phone: {
-          number: membro.telefone?.replace(/\D/g, '') || ''
-        }
-      },
-      payment_methods: {
-        excluded_payment_methods: [],
-        excluded_payment_types: [],
-        installments: payment_method === 'card' ? 12 : 1
-      },
-      back_urls: {
-        success: `${process.env.NEXT_PUBLIC_APP_URL}/fidelidade/pagamento/sucesso`,
-        failure: `${process.env.NEXT_PUBLIC_APP_URL}/fidelidade/pagamento/erro`,
-        pending: `${process.env.NEXT_PUBLIC_APP_URL}/fidelidade/pagamento/pendente`
-      },
-      auto_return: 'approved',
-      external_reference: membro_id,
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
-      metadata: { membro_id, tipo: 'fidelidade_mensal', recurring }
-    };
-
-    // Se for PIX, configurar pagamento específico
-    if (payment_method === 'pix') {
-      preference.payment_methods = {
-        excluded_payment_methods: [],
-        excluded_payment_types: [
-          { id: 'credit_card' } as any,
-          { id: 'debit_card' } as any,
-          { id: 'ticket' } as any
-        ],
-        installments: 1
-      };
-    }
-
-    // Criar preferência no Mercado Pago
-    const mpResponse = await fetch(`${MP_BASE_URL}/checkout/preferences`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(preference)
+    console.log('🔍 DEBUG - Dados do membro:', {
+      membro_id,
+      valor,
+      recurring,
+      payment_method,
+      hasMembroCpf: !!membro?.cpf,
+      membroCpfLength: membro?.cpf?.replace(/\D/g, '').length,
+      membroEmail: membro?.email,
+      membroNome: membro?.nome
     });
 
-    if (!mpResponse.ok) {
-      const error = await mpResponse.text();
-      console.error('Erro Mercado Pago:', error);
+    // Retornar erro se cartão de crédito for solicitado (não implementado ainda)
+    if (payment_method === 'credit_card') {
       return NextResponse.json(
-        { error: 'Erro ao criar preferência de pagamento' },
-        { status: 500 }
+        { error: 'Pagamento com cartão de crédito ainda não implementado' },
+        { status: 501 }
       );
     }
 
-    const mpData = await mpResponse.json();
-
-    // Salvar registro de pagamento pendente
-    const { error: errorPagamento } = await supabase
-      .from('fidelidade_pagamentos')
-      .insert({
-        membro_id,
-        valor,
-        status: 'pendente',
-        metodo_pagamento: payment_method,
-        gateway_transaction_id: mpData.id,
-        gateway_response: mpData,
-        data_vencimento: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 24h
-      });
-
-    if (errorPagamento) {
-      console.error('Erro ao salvar pagamento:', errorPagamento);
-    }
-
-    return NextResponse.json({
-      success: true,
-      preference_id: mpData.id,
-      init_point: mpData.init_point, // URL para redirecionar
-      sandbox_init_point: mpData.sandbox_init_point, // URL de teste
-      qr_code: payment_method === 'pix' ? mpData.qr_code : null,
-      qr_code_base64: payment_method === 'pix' ? mpData.qr_code_base64 : null
-    });
+    return NextResponse.json(
+      { error: 'Método de pagamento não especificado' },
+      { status: 400 }
+    );
 
   } catch (error) {
-    console.error('Erro no pagamento:', error);
+    console.error('🚨 ERRO GERAL:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 }
 
-// Endpoint para pagamento PIX direto
 export async function PUT(request: NextRequest) {
   console.log('🚀 PUT API INICIADA - /api/fidelidade/pagamento/mercado-pago');
   try {
@@ -211,67 +154,48 @@ export async function PUT(request: NextRequest) {
       membroNome: membro?.nome
     });
 
-    // API QR Code In-Store - Mercado Pago
-    const collectorId = process.env.MERCADO_PAGO_COLLECTOR_ID || '2611577977';
-    const externalPosId = 'ASSINANTE_1'; // POS para assinaturas de fidelidade
-    
-    const qrCodeOrder = {
-      external_reference: `fidelidade_${membro_id}_${Date.now()}`,
-      title: "Fidelidade VIP - Ordinário Bar",
-      description: `Assinatura mensal do programa de fidelidade VIP`,
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
-      total_amount: Number(valor),
-      items: [
-        {
-          sku_number: "FIDELIDADE_VIP_001",
-          category: "services",
-          title: "Fidelidade VIP - Ordinário Bar",
-          description: "Acesso completo aos benefícios VIP do Ordinário Bar",
-          unit_price: Number(valor),
-          quantity: 1,
-          unit_measure: "unit",
-          total_amount: Number(valor)
-        }
-      ],
-      sponsor: {
-        id: Number(collectorId)
-      },
-      cash_out: {
-        amount: 0
-      }
-    } as const;
-
-    console.log('🚀 DEBUG PIX - QR Code payload enviado:', JSON.stringify(qrCodeOrder, null, 2));
-    console.log('🔍 DEBUG PIX - URL:', `${MP_BASE_URL}/instore/orders/qr/seller/collectors/${collectorId}/pos/${externalPosId}/qrs`);
-
-    const pixResponse = await fetch(`${MP_BASE_URL}/instore/orders/qr/seller/collectors/${collectorId}/pos/${externalPosId}/qrs`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(qrCodeOrder)
-    });
-
-    if (!pixResponse.ok) {
-      const error = await pixResponse.text();
-      console.error('Erro PIX Mercado Pago Status:', pixResponse.status);
-      console.error('Erro PIX Mercado Pago Response:', error);
-      console.error('Erro PIX Payload enviado:', JSON.stringify(pixPayment, null, 2));
-      
-      return NextResponse.json(
-        { 
-          error: 'Erro ao criar pagamento PIX',
-          details: error,
-          status: pixResponse.status,
-          debug: process.env.NODE_ENV === 'development' ? qrCodeOrder : undefined
-        },
-        { status: 500 }
-      );
+    // Usar SDK oficial para criar pagamento PIX
+    if (!mercadoPagoClient) {
+      throw new Error('Mercado Pago client não inicializado');
     }
 
-    const qrCodeData = await pixResponse.json();
-    console.log('✅ DEBUG PIX - Resposta do QR Code:', JSON.stringify(qrCodeData, null, 2));
+    const payment = new Payment(mercadoPagoClient);
+    
+    const pixPaymentData = {
+      transaction_amount: Number(valor),
+      description: 'Fidelidade VIP - Ordinário Bar',
+      payment_method_id: 'pix',
+      payer: {
+        email: membro.email,
+        first_name: membro.nome?.split(' ')[0] || 'Cliente',
+        last_name: membro.nome?.split(' ').slice(1).join(' ') || 'VIP',
+        identification: {
+          type: 'CPF',
+          number: (membro.cpf || '').replace(/\D/g, '')
+        }
+      },
+      external_reference: `fidelidade_${membro_id}_${Date.now()}`,
+      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
+      additional_info: {
+        items: [
+          {
+            id: 'fidelidade_vip',
+            title: 'Fidelidade VIP - Ordinário Bar',
+            description: 'Assinatura mensal do programa de fidelidade VIP',
+            quantity: 1,
+            unit_price: Number(valor)
+          }
+        ]
+      }
+    };
+
+    console.log('🚀 DEBUG PIX - SDK payload enviado:', JSON.stringify(pixPaymentData, null, 2));
+
+    const pixResult = await payment.create({
+      body: pixPaymentData
+    });
+
+    console.log('✅ DEBUG PIX - Resposta do SDK:', JSON.stringify(pixResult, null, 2));
 
     // Salvar registro de pagamento
     const { error: errorPagamento } = await supabase
@@ -281,8 +205,8 @@ export async function PUT(request: NextRequest) {
         valor,
         status: 'pendente',
         metodo_pagamento: 'pix',
-        gateway_transaction_id: qrCodeData.in_store_order_id,
-        gateway_response: qrCodeData,
+        gateway_transaction_id: pixResult.id,
+        gateway_response: pixResult,
         data_vencimento: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h
       });
 
@@ -292,11 +216,11 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      in_store_order_id: qrCodeData.in_store_order_id,
-      qr_code: qrCodeData.qr_data,
-      qr_code_base64: null, // QR Code API não retorna base64, precisa gerar
-      status: 'pending',
-      expiration_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      payment_id: pixResult.id,
+      status: pixResult.status,
+      qr_code: pixResult.point_of_interaction?.transaction_data?.qr_code,
+      qr_code_base64: pixResult.point_of_interaction?.transaction_data?.qr_code_base64,
+      expiration_date: pixResult.date_of_expiration
     });
 
   } catch (error) {
