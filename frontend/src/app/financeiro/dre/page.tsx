@@ -638,22 +638,22 @@ export default function DrePage() {
 
             <TabsContent value="mes" className="p-8">
               <div className="space-y-6">
-                                {/* Filtros Compactos */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 mb-4 border border-gray-200 dark:border-gray-700 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                                {/* Filtros Compactos - Mobile Responsive */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-2 lg:p-3 mb-3 lg:mb-4 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
+                    <div className="flex items-center gap-2 justify-center lg:justify-start">
                       <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Período:</span>
                     </div>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 justify-center lg:justify-end">
                       <select 
                         value={month} 
                         onChange={(e) => {
                           console.log('Mês selecionado:', e.target.value);
                           setMonth(Number(e.target.value));
                         }}
-                        className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[100px]"
                       >
                         {months.map((monthName, index) => {
                           const monthValue = index + 1;
@@ -668,7 +668,7 @@ export default function DrePage() {
                       <select 
                         value={year} 
                         onChange={(e) => setYear(Number(e.target.value))}
-                        className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-sm font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[100px]"
                       >
                         {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
                           <option key={year} value={year}>
@@ -691,15 +691,15 @@ export default function DrePage() {
                   </div>
                 ) : (
                   <div className="flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900">
-                    {/* Sidebar Lateral com Analytics */}
-                    <aside className="flex flex-col w-80 bg-gray-50 dark:bg-gray-900 p-4">
+                    {/* Sidebar Lateral com Analytics - Mobile First */}
+                    <aside className="flex flex-col lg:w-80 w-full bg-gray-50 dark:bg-gray-900 p-2 lg:p-4">
                       <div className="space-y-6 w-full">
-                        {/* Analytics do Mês */}
+                        {/* Analytics do Mês - Mobile Responsive */}
                         <div>
-                          <label className="text-xs font-medium dark:text-gray-300 text-gray-800 mb-1 block">
+                          <label className="text-xs font-medium dark:text-gray-300 text-gray-800 mb-2 block lg:mb-1">
                             Analytics do Mês
                           </label>
-                          <div className="space-y-1 overflow-hidden">
+                          <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 lg:space-y-1 lg:gap-0 overflow-hidden">
                             {(() => {
                               // Calcular métricas
                               const custoFixo = (
@@ -720,15 +720,17 @@ export default function DrePage() {
                               return (
                                 <>
                                   {/* Custo Fixo */}
-                                  <div className="dark:bg-gray-800 bg-gray-50 rounded-t-[6px] p-2 border dark:border-gray-700 border-gray-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="text-xs dark:text-gray-400 text-gray-700">Custo Fixo</span>
-                                      <span className="text-red-400">📉</span>
+                                  <div className="dark:bg-gray-800 bg-gray-50 lg:rounded-t-[6px] rounded-[6px] p-2 border dark:border-gray-700 border-gray-300">
+                                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-1 lg:mb-2">
+                                      <div className="flex items-center justify-center lg:justify-start gap-1 mb-1 lg:mb-0">
+                                        <span className="text-red-400">📉</span>
+                                        <span className="text-xs dark:text-gray-400 text-gray-700 font-medium">Custo Fixo</span>
+                                      </div>
                                     </div>
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between text-xs">
-                                        <span className="text-red-400">Total:</span>
-                                        <span className="font-bold dark:text-white text-black">
+                                    <div className="text-center lg:text-left">
+                                      <div className="lg:flex lg:justify-between lg:text-xs">
+                                        <span className="text-red-400 text-xs lg:inline hidden">Total:</span>
+                                        <span className="font-bold dark:text-white text-black text-xs">
                                           {formatCurrency(custoFixo)}
                                         </span>
                                       </div>
@@ -736,15 +738,17 @@ export default function DrePage() {
                                   </div>
 
                                   {/* MC % */}
-                                  <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="text-xs dark:text-gray-400 text-gray-700">MC %</span>
-                                      <span className="text-orange-400">📊</span>
+                                  <div className="dark:bg-gray-800 bg-gray-50 lg:rounded-none rounded-[6px] p-2 border dark:border-gray-700 border-gray-300">
+                                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-1 lg:mb-2">
+                                      <div className="flex items-center justify-center lg:justify-start gap-1 mb-1 lg:mb-0">
+                                        <span className="text-orange-400">📊</span>
+                                        <span className="text-xs dark:text-gray-400 text-gray-700 font-medium">MC %</span>
+                                      </div>
                                     </div>
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between text-xs">
-                                        <span className="text-orange-400">Margem:</span>
-                                        <span className="font-bold dark:text-white text-black">
+                                    <div className="text-center lg:text-left">
+                                      <div className="lg:flex lg:justify-between lg:text-xs">
+                                        <span className="text-orange-400 text-xs lg:inline hidden">Margem:</span>
+                                        <span className="font-bold dark:text-white text-black text-xs">
                                           {mc.toFixed(1)}%
                                         </span>
                                       </div>
@@ -752,15 +756,17 @@ export default function DrePage() {
                                   </div>
 
                                   {/* Breakeven */}
-                                  <div className="dark:bg-gray-800 bg-gray-50 p-2 border rounded-b-[6px] dark:border-gray-700 border-gray-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="text-xs dark:text-gray-400 text-gray-700">Breakeven</span>
-                                      <span className="text-blue-400">🎯</span>
+                                  <div className="dark:bg-gray-800 bg-gray-50 lg:rounded-b-[6px] rounded-[6px] p-2 border dark:border-gray-700 border-gray-300">
+                                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-1 lg:mb-2">
+                                      <div className="flex items-center justify-center lg:justify-start gap-1 mb-1 lg:mb-0">
+                                        <span className="text-blue-400">🎯</span>
+                                        <span className="text-xs dark:text-gray-400 text-gray-700 font-medium">Breakeven</span>
+                                      </div>
                                     </div>
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between text-xs">
-                                        <span className="text-blue-400">Ponto Equilíbrio:</span>
-                                        <span className="font-bold dark:text-white text-black">
+                                    <div className="text-center lg:text-left">
+                                      <div className="lg:flex lg:justify-between lg:text-xs">
+                                        <span className="text-blue-400 text-xs lg:inline hidden">Ponto Equilíbrio:</span>
+                                        <span className="font-bold dark:text-white text-black text-xs">
                                           {formatCurrency(breakeven)}
                                         </span>
                                       </div>
@@ -774,20 +780,20 @@ export default function DrePage() {
                       </div>
                     </aside>
 
-                    {/* Área Principal da Tabela */}
-                    <div className="flex-1 overflow-x-visible overflow-y-auto hide-scrollbar">
-                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    {/* Área Principal da Tabela - Mobile Responsive */}
+                    <div className="flex-1 lg:overflow-x-visible overflow-x-auto lg:overflow-y-auto overflow-y-visible hide-scrollbar lg:mt-0 mt-4">
+                      <div className="bg-white dark:bg-gray-800 lg:rounded-xl rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                       <div className="overflow-x-auto">
-                        <table className="w-full">
+                        <table className="w-full min-w-[320px]">
                         <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
                           <tr>
-                            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">
+                            <th className="text-left py-2 lg:py-3 px-2 lg:px-4 font-semibold text-gray-900 dark:text-white text-xs lg:text-sm">
                               Macro-Categoria
                             </th>
-                            <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">
+                            <th className="text-right py-2 lg:py-3 px-2 lg:px-4 font-semibold text-gray-900 dark:text-white text-xs lg:text-sm">
                               Valor
                             </th>
-                            <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">
+                            <th className="text-right py-2 lg:py-3 px-2 lg:px-4 font-semibold text-gray-900 dark:text-white text-xs lg:text-sm">
                               %
                             </th>
                           </tr>
@@ -814,7 +820,7 @@ export default function DrePage() {
                             return (
                               <React.Fragment key={macro.nome}>
                                 <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                  <td className="py-2.5 px-4">
+                                  <td className="py-2 lg:py-2.5 px-2 lg:px-4">
                                     <div className="flex items-center gap-2">
                                       <button
                                         onClick={() => toggleMacroCollapse(macro.nome)}
@@ -834,13 +840,13 @@ export default function DrePage() {
                                       </span>
                                     </div>
                                   </td>
-                                  <td className="py-2.5 px-4 text-right">
-                                    <span className={`text-base font-semibold ${valorUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                  <td className="py-2 lg:py-2.5 px-2 lg:px-4 text-right">
+                                    <span className={`text-sm lg:text-base font-semibold ${valorUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                                       {formatCurrency(valorUnificado)}
                                     </span>
                                   </td>
-                                  <td className="py-2.5 px-4 text-right">
-                                    <span className="text-base font-medium text-gray-600 dark:text-gray-400">
+                                  <td className="py-2 lg:py-2.5 px-2 lg:px-4 text-right">
+                                    <span className="text-sm lg:text-base font-medium text-gray-600 dark:text-gray-400">
                                       {percentualReceita ? `${percentualReceita.toFixed(1)}%` : '-'}
                                     </span>
                                   </td>
@@ -859,16 +865,16 @@ export default function DrePage() {
                                     : (Math.abs(valorCatUnificado) / totalReceitas) * 100;
                                   return (
                                     <tr key={cat.nome} className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-                                      <td className="py-3 px-6 pl-16">
-                                        <span className="text-gray-700 dark:text-gray-300">{cat.nome}</span>
+                                      <td className="py-2 lg:py-3 px-3 lg:px-6 pl-8 lg:pl-16">
+                                        <span className="text-gray-700 dark:text-gray-300 text-sm lg:text-base">{cat.nome}</span>
                                       </td>
-                                      <td className="py-3 px-6 text-right">
-                                        <span className={`${valorCatUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                      <td className="py-2 lg:py-3 px-3 lg:px-6 text-right">
+                                        <span className={`text-sm lg:text-base ${valorCatUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                                           {formatCurrency(valorCatUnificado)}
                                         </span>
                                       </td>
-                                      <td className="py-3 px-6 text-right">
-                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-500">
+                                      <td className="py-2 lg:py-3 px-3 lg:px-6 text-right">
+                                        <span className="text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-500">
                                           {percentualCatReceita.toFixed(1)}%
                                         </span>
                                       </td>
@@ -976,16 +982,16 @@ export default function DrePage() {
                                     : (Math.abs(valorCatUnificado) / totalReceitas) * 100;
                                   return (
                                     <tr key={cat.nome} className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-                                      <td className="py-3 px-6 pl-16">
-                                        <span className="text-gray-700 dark:text-gray-300">{cat.nome}</span>
+                                      <td className="py-2 lg:py-3 px-3 lg:px-6 pl-8 lg:pl-16">
+                                        <span className="text-gray-700 dark:text-gray-300 text-sm lg:text-base">{cat.nome}</span>
                                       </td>
-                                      <td className="py-3 px-6 text-right">
-                                        <span className={`${valorCatUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                      <td className="py-2 lg:py-3 px-3 lg:px-6 text-right">
+                                        <span className={`text-sm lg:text-base ${valorCatUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                                           {formatCurrency(valorCatUnificado)}
                                         </span>
                                       </td>
-                                      <td className="py-3 px-6 text-right">
-                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-500">
+                                      <td className="py-2 lg:py-3 px-3 lg:px-6 text-right">
+                                        <span className="text-xs lg:text-sm font-medium text-gray-500 dark:text-gray-500">
                                           {percentualCatReceita.toFixed(1)}%
                                         </span>
                                       </td>
