@@ -155,8 +155,10 @@ export async function POST(request: NextRequest) {
 
 // Endpoint para pagamento PIX direto
 export async function PUT(request: NextRequest) {
+  console.log('🚀 PUT API INICIADA - /api/fidelidade/pagamento/mercado-pago');
   try {
     const body = await request.json();
+    console.log('📦 BODY RECEBIDO:', body);
     const { membro_id, valor = 100.00, recurring = false } = body;
 
     console.log('🔍 DEBUG PIX - Variáveis ENV:', {
@@ -289,9 +291,9 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro no pagamento PIX:', error);
+    console.error('🚨 ERRO GERAL PIX:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
