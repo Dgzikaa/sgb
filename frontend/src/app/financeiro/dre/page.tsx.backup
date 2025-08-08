@@ -690,93 +690,84 @@ export default function DrePage() {
                     <div className="text-gray-600 dark:text-gray-400">{error}</div>
                   </div>
                 ) : (
-                  <div className="flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900">
-                    {/* Sidebar Lateral com Analytics */}
-                    <aside className="flex flex-col w-80 bg-gray-50 dark:bg-gray-900 p-4">
-                      <div className="space-y-6 w-full">
-                        {/* Analytics do Mês */}
-                        <div>
-                          <label className="text-xs font-medium dark:text-gray-300 text-gray-800 mb-1 block">
-                            Analytics do Mês
-                          </label>
-                          <div className="space-y-1 overflow-hidden">
-                            {(() => {
-                              // Calcular métricas
-                              const custoFixo = (
-                                (data.macroCategorias.find(m => m.nome === "Mão-de-Obra")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas Comerciais")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas Administrativas")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas Operacionais")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas de Ocupação (Contas)")?.total_saidas || 0)
-                              );
-                              
-                              const totalReceitas = data.macroCategorias.find(m => m.nome === "Receita")?.total_entradas || 1;
-                              const custosVariaveis = data.macroCategorias.find(m => m.nome === "Custos Variáveis")?.total_saidas || 0;
-                              const cmv = data.macroCategorias.find(m => m.nome === "Custo insumos (CMV)")?.total_saidas || 0;
-                              
-                              const mc = ((custosVariaveis + cmv) / (totalReceitas + 1)) * 100;
-                              const breakeven = custoFixo / (mc / 100);
-                              
-                              return (
-                                <>
-                                  {/* Custo Fixo */}
-                                  <div className="dark:bg-gray-800 bg-gray-50 rounded-t-[6px] p-2 border dark:border-gray-700 border-gray-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="text-xs dark:text-gray-400 text-gray-700">Custo Fixo</span>
-                                      <span className="text-red-400">📉</span>
-                                    </div>
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between text-xs">
-                                        <span className="text-red-400">Total:</span>
-                                        <span className="font-bold dark:text-white text-black">
-                                          {formatCurrency(custoFixo)}
-                                        </span>
-                                      </div>
-                                    </div>
+                  <>
+                    {/* Cards de Métricas */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      {(() => {
+                        // Calcular métricas
+                        const custoFixo = (
+                          (data.macroCategorias.find(m => m.nome === "Mão-de-Obra")?.total_saidas || 0) +
+                          (data.macroCategorias.find(m => m.nome === "Despesas Comerciais")?.total_saidas || 0) +
+                          (data.macroCategorias.find(m => m.nome === "Despesas Administrativas")?.total_saidas || 0) +
+                          (data.macroCategorias.find(m => m.nome === "Despesas Operacionais")?.total_saidas || 0) +
+                          (data.macroCategorias.find(m => m.nome === "Despesas de Ocupação (Contas)")?.total_saidas || 0)
+                        );
+                        
+                        const totalReceitas = data.macroCategorias.find(m => m.nome === "Receita")?.total_entradas || 1;
+                        const custosVariaveis = data.macroCategorias.find(m => m.nome === "Custos Variáveis")?.total_saidas || 0;
+                        const cmv = data.macroCategorias.find(m => m.nome === "Custo insumos (CMV)")?.total_saidas || 0;
+                        
+                        const mc = ((custosVariaveis + cmv) / (totalReceitas + 1)) * 100;
+                        const breakeven = custoFixo / (mc / 100);
+                        
+                        return (
+                          <>
+                            {/* Custo Fixo */}
+                            <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-700">
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-red-600 dark:text-red-400 text-sm font-medium">Custo Fixo</p>
+                                    <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                                      {formatCurrency(custoFixo)}
+                                    </p>
                                   </div>
-
-                                  {/* MC % */}
-                                  <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="text-xs dark:text-gray-400 text-gray-700">MC %</span>
-                                      <span className="text-orange-400">📊</span>
-                                    </div>
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between text-xs">
-                                        <span className="text-orange-400">Margem:</span>
-                                        <span className="font-bold dark:text-white text-black">
-                                          {mc.toFixed(1)}%
-                                        </span>
-                                      </div>
-                                    </div>
+                                  <div className="p-3 bg-red-200 dark:bg-red-800 rounded-full">
+                                    <TrendingDown className="w-6 h-6 text-red-600 dark:text-red-400" />
                                   </div>
+                                </div>
+                              </CardContent>
+                            </Card>
 
-                                  {/* Breakeven */}
-                                  <div className="dark:bg-gray-800 bg-gray-50 p-2 border rounded-b-[6px] dark:border-gray-700 border-gray-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="text-xs dark:text-gray-400 text-gray-700">Breakeven</span>
-                                      <span className="text-blue-400">🎯</span>
-                                    </div>
-                                    <div className="space-y-1">
-                                      <div className="flex justify-between text-xs">
-                                        <span className="text-blue-400">Ponto Equilíbrio:</span>
-                                        <span className="font-bold dark:text-white text-black">
-                                          {formatCurrency(breakeven)}
-                                        </span>
-                                      </div>
-                                    </div>
+                            {/* MC % */}
+                            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700">
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-orange-600 dark:text-orange-400 text-sm font-medium">MC %</p>
+                                    <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                                      {mc.toFixed(1)}%
+                                    </p>
                                   </div>
-                                </>
-                              );
-                            })()}
-                          </div>
-                        </div>
-                      </div>
-                    </aside>
+                                  <div className="p-3 bg-orange-200 dark:bg-orange-800 rounded-full">
+                                    <BarChart3 className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
 
-                    {/* Área Principal da Tabela */}
-                    <div className="flex-1 overflow-x-visible overflow-y-auto hide-scrollbar">
-                      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            {/* Breakeven */}
+                            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-blue-600 dark:text-blue-400 text-sm font-medium">Breakeven</p>
+                                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                                      {formatCurrency(breakeven)}
+                                    </p>
+                                  </div>
+                                  <div className="p-3 bg-blue-200 dark:bg-blue-800 rounded-full">
+                                    <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="w-full">
                         <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
@@ -999,8 +990,7 @@ export default function DrePage() {
                       </table>
                     </div>
                   </div>
-                    </div>
-                  </div>
+                  </>
                 )}
               </div>
             </TabsContent>

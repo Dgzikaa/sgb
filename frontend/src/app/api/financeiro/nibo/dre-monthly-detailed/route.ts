@@ -191,12 +191,17 @@ export async function GET(request: Request) {
         macro.categorias.includes(item.categoria_nome)
       ) || [];
 
+      // Separar contratos das outras categorias
+      const categoriasContratos = categoriasEncontradas.filter(item => item.categoria_nome === 'Contratos');
+      const categoriasNormais = categoriasEncontradas.filter(item => item.categoria_nome !== 'Contratos');
+      
       const totalEntradas = macro.tipo === 'entrada' 
-        ? categoriasEncontradas.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0)
-        : 0;
+        ? categoriasNormais.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0) + 
+          categoriasContratos.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0) // Contratos sempre como entrada
+        : categoriasContratos.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0); // Só contratos se não for entrada
 
       const totalSaidas = macro.tipo === 'saida'
-        ? categoriasEncontradas.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0)
+        ? categoriasNormais.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0) // Excluir contratos das saídas
         : 0;
 
       // Processar categorias individuais
@@ -204,10 +209,13 @@ export async function GET(request: Request) {
         const dadosCategoria = categoriasEncontradas.filter(item => item.categoria_nome === catNome);
         const total = dadosCategoria.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0);
         
+        // Tratar "Contratos" como receita (entrada) mesmo estando em macro-categoria de saída
+        const isContrato = catNome === 'Contratos';
+        
         return {
           nome: catNome,
-          entradas: macro.tipo === 'entrada' ? total : 0,
-          saidas: macro.tipo === 'saida' ? total : 0
+          entradas: (macro.tipo === 'entrada' || isContrato) ? total : 0,
+          saidas: (macro.tipo === 'saida' && !isContrato) ? total : 0
         };
       }).filter(cat => cat.entradas > 0 || cat.saidas > 0); // Só incluir categorias com valores
 
