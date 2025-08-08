@@ -6,6 +6,49 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// GET: Buscar membro por email (para login)
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    // Buscar membro por email
+    const { data: membro, error } = await supabase
+      .from('fidelidade_membros')
+      .select('*')
+      .eq('email', email)
+      .eq('status', 'ativo')
+      .single();
+
+    if (error || !membro) {
+      return NextResponse.json(
+        { error: 'Membro não encontrado ou inativo' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      membro: membro
+    });
+
+  } catch (error) {
+    console.error('Erro no login:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST: Criar novo membro
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
