@@ -73,6 +73,12 @@ interface PlanejamentoData {
   percentual_atingimento_clientes: number;
   performance_geral: number;
   
+  // Campos de orçamentação
+  c_artistico_plan?: number;
+  c_artistico_real?: number;
+  nps_plan?: number;
+  nps_real?: number;
+  
   // Flags para coloração verde/vermelho
   real_vs_m1_green: boolean;
   ci_real_vs_plan_green: boolean;
@@ -202,6 +208,8 @@ export default function PlanejamentoComercialPage() {
       clientes_plan: evento.clientes_plan || 0,
       te_plan: evento.te_plan || 0,
       tb_plan: evento.tb_plan || 0,
+      c_artistico_plan: evento.c_artistico_plan || 0,
+      nps_plan: evento.nps_plan || 0,
       observacoes: ''
     });
     setModalOpen(true);
@@ -227,6 +235,8 @@ export default function PlanejamentoComercialPage() {
             cl_plan: Number(editData.clientes_plan),
             te_plan: Number(editData.te_plan),
             tb_plan: Number(editData.tb_plan),
+            c_artistico_plan: Number(editData.c_artistico_plan),
+            nps_plan: Number(editData.nps_plan),
             observacoes: editData.observacoes
           })
         }
@@ -594,6 +604,10 @@ export default function PlanejamentoComercialPage() {
               <th className="hidden md:table-cell px-2 py-1 w-16">T.Coz</th>
               <th className="hidden md:table-cell px-2 py-1 w-16">T.Bar</th>
               <th className="hidden md:table-cell px-2 py-1 w-16">Fat.19h</th>
+              <th className="hidden lg:table-cell px-2 py-1 w-16">C.Art.P</th>
+              <th className="hidden lg:table-cell px-2 py-1 w-16">C.Art.R</th>
+              <th className="hidden lg:table-cell px-2 py-1 w-16">NPS.P</th>
+              <th className="hidden lg:table-cell px-2 py-1 w-16">NPS.R</th>
             </tr>
           </thead>
 
@@ -686,8 +700,28 @@ export default function PlanejamentoComercialPage() {
                 </td>
                 
                 {/* Faturamento até 19h */}
-                <td className={`px-1 py-1 text-xs text-center ${getColorClass(item.fat_19h_green)}`}>
+                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.fat_19h_green)}`}>
                   {item.fat_19h > 0 ? `${item.fat_19h.toFixed(1)}%` : '-'}
+                </td>
+                
+                {/* C.Artístico Plan */}
+                <td className="hidden lg:table-cell px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.c_artistico_plan ? formatarMoeda(item.c_artistico_plan) : '-'}
+                </td>
+                
+                {/* C.Artístico Real */}
+                <td className="hidden lg:table-cell px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.c_artistico_real ? formatarMoeda(item.c_artistico_real) : '-'}
+                </td>
+                
+                {/* NPS Plan */}
+                <td className="hidden lg:table-cell px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                  {item.nps_plan ? item.nps_plan.toFixed(1) : '-'}
+                </td>
+                
+                {/* NPS Real */}
+                <td className="hidden lg:table-cell px-1 py-1 text-xs text-center text-gray-900 dark:text-white">
+                  {item.nps_real ? item.nps_real.toFixed(1) : '-'}
                 </td>
               </tr>
               );
@@ -779,6 +813,39 @@ export default function PlanejamentoComercialPage() {
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   placeholder="0.00"
                   step="0.01"
+                />
+              </div>
+            </div>
+
+            {/* Novos campos de orçamentação */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="c_artistico_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  C.Artístico Plan (R$)
+                </Label>
+                <Input
+                  id="c_artistico_plan"
+                  type="number"
+                  value={editData.c_artistico_plan || ''}
+                  onChange={(e) => handleInputChange('c_artistico_plan', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  placeholder="0.00"
+                  step="0.01"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="nps_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  NPS Plan
+                </Label>
+                <Input
+                  id="nps_plan"
+                  type="number"
+                  value={editData.nps_plan || ''}
+                  onChange={(e) => handleInputChange('nps_plan', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  placeholder="0"
+                  step="0.1"
                 />
               </div>
             </div>

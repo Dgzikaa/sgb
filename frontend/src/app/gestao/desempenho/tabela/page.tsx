@@ -291,12 +291,8 @@ export default function TabelaDesempenhoPage() {
   const recalcularAutomatico = async () => {
     if (!selectedBar?.id) return;
 
-    if (!confirm('🧮 Deseja recalcular TODOS os dados automaticamente com base nas fontes reais (ContaHub, Yuzer, Sympla)?\n\n⚠️ Esta ação irá sobrescrever os cálculos atuais mantendo apenas os valores manuais (CMV R$, Reservas).')) {
-      return;
-    }
-
     setRecalculating(true);
-    showLoading('Recalculando dados automaticamente...');
+    showLoading('Atualizando dados automaticamente...');
 
     try {
       const response = await fetch('/api/gestao/desempenho/recalcular', {
@@ -639,7 +635,7 @@ export default function TabelaDesempenhoPage() {
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hidden md:block">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Dados de Desempenho
+                Tabela de Desempenho
               </CardTitle>
             </CardHeader>
             <CardContent>

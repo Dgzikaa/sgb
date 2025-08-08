@@ -88,25 +88,9 @@ const defaultSidebarItems: SidebarItem[] = [
     permission: 'home',
     },
     {
-      icon: Zap,
-      label: 'Operacional',
-      href: '/operacoes',
-      color: 'text-orange-600 dark:text-orange-400',
-    permission: 'operacoes',
-      subItems: [
-        {
-          icon: Calendar,
-          label: 'Agendamento',
-          href: '/financeiro/agendamento',
-          description: 'Gestão de pagamentos e recebimentos',
-          permission: 'financeiro_agendamento',
-        },
-      ],
-    },
-    {
       icon: Target,
       label: 'Estratégico',
-      href: '/gestao',
+      href: '/estrategico',
       color: 'text-blue-600 dark:text-blue-400',
       permission: 'gestao',
       subItems: [
@@ -127,16 +111,32 @@ const defaultSidebarItems: SidebarItem[] = [
         {
           icon: DollarSign,
           label: 'Orçamentação',
-          href: '/configuracoes/orcamentacao',
+          href: '/estrategico/orcamentacao',
           description: 'Gestão orçamentária integrada',
           permission: 'configuracoes',
         },
       ],
     },
     {
+      icon: Zap,
+      label: 'Operacional',
+      href: '/operacional',
+      color: 'text-orange-600 dark:text-orange-400',
+    permission: 'operacoes',
+      subItems: [
+        {
+          icon: Calendar,
+          label: 'Agendamento',
+          href: '/financeiro/agendamento',
+          description: 'Gestão de pagamentos e recebimentos',
+          permission: 'financeiro_agendamento',
+        },
+      ],
+    },
+    {
       icon: BarChart3,
       label: 'Analítico',
-      href: '/relatorios',
+      href: '/analitico',
       color: 'text-indigo-600 dark:text-indigo-400',
       permission: 'relatorios',
       subItems: [

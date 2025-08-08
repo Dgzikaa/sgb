@@ -110,7 +110,7 @@ export default function DrePage() {
   const [data, setData] = useState<DreApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [collapsedMacros, setCollapsedMacros] = useState<Set<string>>(new Set());
+  const [collapsedMacros, setCollapsedMacros] = useState<Set<string>>(new Set(['Receita', 'Custos Variáveis', 'Custo insumos (CMV)', 'Mão-de-Obra', 'Despesas Comerciais', 'Despesas Administrativas', 'Despesas Operacionais', 'Despesas de Ocupação (Contas)', 'Não Operacionais', 'Investimentos', 'Sócios']));
   const [month, setMonth] = useState(() => {
     const currentMonth = new Date().getMonth() + 1;
     console.log('Mês inicial:', currentMonth);
@@ -141,8 +141,8 @@ export default function DrePage() {
     setError(null);
     
     try {
-      // Usar a API yearly detailed que retorna macro-categorias
-      const response = await fetch(`/api/financeiro/nibo/dre-yearly-detailed?year=2025`);
+      // Usar a API monthly detailed que filtra por mês e ano específicos
+      const response = await fetch(`/api/financeiro/nibo/dre-monthly-detailed?year=${year}&month=${month}`);
       if (!response.ok) {
         throw new Error('Erro ao buscar dados');
       }
@@ -155,20 +155,20 @@ export default function DrePage() {
         saidasTotais: result.saidasTotais,
         saldo: result.saldo,
         ebitda: result.ebitda,
-        periodo: { month: 1, year: 2025 }
+        periodo: { month, year }
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [month, year]);
 
 
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, month, year]);
 
 
 
