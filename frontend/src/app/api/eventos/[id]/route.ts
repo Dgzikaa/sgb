@@ -16,7 +16,6 @@ export async function PUT(
       te_plan,
       tb_plan,
       c_artistico_plan,
-      nps_plan,
       observacoes
     } = body;
 
@@ -32,7 +31,6 @@ export async function PUT(
         te_plan: te_plan ? parseFloat(te_plan) : null,
         tb_plan: tb_plan ? parseFloat(tb_plan) : null,
         c_artistico_plan: c_artistico_plan ? parseFloat(c_artistico_plan) : null,
-        nps_plan: nps_plan ? parseFloat(nps_plan) : null,
         observacoes,
         atualizado_em: new Date().toISOString()
       })

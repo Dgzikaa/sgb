@@ -108,7 +108,9 @@ const formatCurrency = (value: number) => {
 
 export default function DrePage() {
   const [data, setData] = useState<DreApiResponse | null>(null);
+  const [yearlyData, setYearlyData] = useState<DreApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingYearly, setLoadingYearly] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [collapsedMacros, setCollapsedMacros] = useState<Set<string>>(new Set(['Receita', 'Custos Variáveis', 'Custo insumos (CMV)', 'Mão-de-Obra', 'Despesas Comerciais', 'Despesas Administrativas', 'Despesas Operacionais', 'Despesas de Ocupação (Contas)', 'Não Operacionais', 'Investimentos', 'Sócios']));
   const [month, setMonth] = useState(() => {
@@ -164,11 +166,43 @@ export default function DrePage() {
     }
   }, [month, year]);
 
+  const fetchYearlyData = useCallback(async () => {
+    setLoadingYearly(true);
+    setError(null);
+    
+    try {
+      // Usar a API yearly detailed que pega dados do ano inteiro
+      const response = await fetch(`/api/financeiro/nibo/dre-yearly-detailed?year=${year}`);
+      if (!response.ok) {
+        throw new Error('Erro ao buscar dados anuais');
+      }
+      const result = await response.json();
+      
+      // Usar os dados completos da API yearly detailed
+      setYearlyData({
+        macroCategorias: result.macroCategorias || [],
+        entradasTotais: result.entradasTotais,
+        saidasTotais: result.saidasTotais,
+        saldo: result.saldo,
+        ebitda: result.ebitda,
+        periodo: { month: 0, year } // 0 indica dados anuais
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoadingYearly(false);
+    }
+  }, [year]);
+
 
 
   useEffect(() => {
     fetchData();
   }, [fetchData, month, year]);
+
+  useEffect(() => {
+    fetchYearlyData();
+  }, [fetchYearlyData, year]);
 
 
 
@@ -259,14 +293,14 @@ export default function DrePage() {
     return macro.nome === "Receita" ? macro.total_entradas : macro.total_saidas;
   };
 
-  // Dados para o gráfico de pizza
-  const pieChartData = (data ? {
-    labels: data.macroCategorias
+  // Dados para o gráfico de pizza (usando dados anuais)
+  const pieChartData = (yearlyData ? {
+    labels: yearlyData.macroCategorias
       .filter(macro => macro.nome !== "Investimentos" && macro.nome !== "Sócios")
       .map(macro => macro.nome),
     datasets: [
       {
-        data: data.macroCategorias
+        data: yearlyData.macroCategorias
           .filter(macro => macro.nome !== "Investimentos" && macro.nome !== "Sócios")
           .map(macro => Math.abs(macro.total_entradas - macro.total_saidas)),
         backgroundColor: [
@@ -401,24 +435,10 @@ export default function DrePage() {
                 <Calendar className="w-5 h-5 mr-2" />
                 DRE Mês
               </TabsTrigger>
-              <TabsTrigger 
-                value="consolidado" 
-                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
-              >
-                <BarChart3 className="w-5 h-5 mr-2" />
-                Consolidado
-              </TabsTrigger>
-              <TabsTrigger 
-                value="detalhada" 
-                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-lg dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
-              >
-                <FileText className="w-5 h-5 mr-2" />
-                DRE Detalhada
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="dashboard" className="p-8">
-              {loading ? (
+              {loadingYearly ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
@@ -427,7 +447,7 @@ export default function DrePage() {
                   <div className="text-red-600 dark:text-red-400 text-lg font-semibold mb-2">Erro ao carregar dados</div>
                   <div className="text-gray-600 dark:text-gray-400">{error}</div>
                 </div>
-              ) : data ? (
+              ) : yearlyData ? (
                 <div className="space-y-8">
                   {/* KPIs Principais */}
                   <div className="mb-4">
@@ -457,10 +477,10 @@ export default function DrePage() {
                         <div>
                           <p className="text-green-100 text-sm font-medium">Total Entradas ({year})</p>
                           <p className="text-2xl font-bold">
-                            {loading ? (
+                            {loadingYearly ? (
                               <div className="animate-pulse bg-green-400 h-8 w-32 rounded"></div>
                             ) : (
-                              new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data?.entradasTotais || 0)
+                              new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(yearlyData?.entradasTotais || 0)
                             )}
                           </p>
                         </div>
@@ -473,10 +493,10 @@ export default function DrePage() {
                         <div>
                           <p className="text-red-100 text-sm font-medium">Total Saídas ({year})</p>
                           <p className="text-2xl font-bold">
-                                                          {loading ? (
+                                                          {loadingYearly ? (
                                 <div className="animate-pulse bg-red-400 h-8 w-32 rounded"></div>
                               ) : (
-                                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data?.saidasTotais || 0)
+                                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(yearlyData?.saidasTotais || 0)
                               )}
                           </p>
                         </div>
@@ -489,10 +509,10 @@ export default function DrePage() {
                         <div>
                           <p className="text-blue-100 text-sm font-medium">EBITDA ({year})</p>
                           <p className="text-2xl font-bold">
-                                                          {loading ? (
+                                                          {loadingYearly ? (
                                 <div className="animate-pulse bg-blue-400 h-8 w-32 rounded"></div>
                               ) : (
-                                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data?.ebitda || 0)
+                                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(yearlyData?.ebitda || 0)
                               )}
                           </p>
                         </div>
@@ -501,7 +521,7 @@ export default function DrePage() {
                     </div>
 
                     <div className={`rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 ${
-                      (data?.saldo || 0) >= 0 
+                      (yearlyData?.saldo || 0) >= 0 
                         ? 'bg-gradient-to-br from-green-500 to-green-600' 
                         : 'bg-gradient-to-br from-red-500 to-red-600'
                     }`}>
@@ -509,10 +529,10 @@ export default function DrePage() {
                         <div>
                           <p className="text-sm font-medium opacity-90">Saldo Geral ({year})</p>
                           <p className="text-2xl font-bold">
-                            {loading ? (
+                            {loadingYearly ? (
                               <div className="animate-pulse bg-white/20 h-8 w-32 rounded"></div>
                             ) : (
-                              new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data?.saldo || 0)
+                              new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(yearlyData?.saldo || 0)
                             )}
                           </p>
                         </div>
@@ -575,7 +595,7 @@ export default function DrePage() {
                       Macro-Categorias
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {data.macroCategorias.map((macro) => {
+                      {yearlyData.macroCategorias.map((macro) => {
                         const Icon = getMacroIcon(macro.nome);
                         const colorClass = getMacroColor(macro.nome);
                         const macroSaldo = macro.total_entradas - macro.total_saidas;
@@ -1010,438 +1030,9 @@ export default function DrePage() {
                 )}
               </div>
             </TabsContent>
-
-            <TabsContent value="consolidado" className="p-8">
-              <div className="space-y-6">
-                {/* Filtros Avançados */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700 shadow-lg">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {/* Título e Descrição */}
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg">
-                        <BarChart3 className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white">Visão Consolidada</h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">Análise comparativa por período</p>
-                      </div>
-                    </div>
-
-                    {/* Controles */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      {/* Seletor de Ano */}
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                        <div className="relative bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                              <Calendar className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="flex-1">
-                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ano</label>
-                              <select 
-                                value={year} 
-                                onChange={(e) => setYear(Number(e.target.value))}
-                                className="w-full bg-transparent text-gray-900 dark:text-white font-semibold text-base focus:outline-none cursor-pointer"
-                              >
-                                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
-                                  <option key={year} value={year} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    {year}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-
-                    </div>
-                  </div>
-                </div>
-
-                {loadingConsolidated ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : error ? (
-                  <div className="text-center py-12">
-                    <div className="text-red-600 dark:text-red-400 text-lg font-semibold mb-2">Erro ao carregar dados</div>
-                    <div className="text-gray-600 dark:text-gray-400">{error}</div>
-                  </div>
-                ) : (
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
-                          <tr>
-                            <th className="text-left py-4 px-6 font-semibold text-gray-900 dark:text-white sticky left-0 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
-                              Macro-Categoria
-                            </th>
-                            {consolidatedData.map((item, index) => (
-                              <th key={item.monthName} className="text-center py-4 px-3 font-semibold text-gray-900 dark:text-white min-w-[120px]">
-                                <div className="text-sm">{item.monthName}</div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">{item.year}</div>
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {/* Receita */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-green-600 text-white">
-                                  <TrendingUp className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Receita</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Receita", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Custos Variáveis */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-red-600 text-white">
-                                  <TrendingDown className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Custos Variáveis</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Custos Variáveis", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Custo insumos (CMV) */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-                                  <ShoppingCart className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Custo insumos (CMV)</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Custo insumos (CMV)", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Mão-de-Obra */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                                  <Users className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Mão-de-Obra</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Mão-de-Obra", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Despesas Comerciais */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-                                  <Building2 className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Despesas Comerciais</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Despesas Comerciais", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Despesas Administrativas */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-                                  <Wrench className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Despesas Administrativas</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Despesas Administrativas", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Despesas Operacionais */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 text-white">
-                                  <Activity className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Despesas Operacionais</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Despesas Operacionais", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Despesas de Ocupação */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 text-white">
-                                  <Home className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Despesas de Ocupação</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Despesas de Ocupação", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Não Operacionais */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
-                                  <FileText className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Não Operacionais</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Não Operacionais", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Linha de separação */}
-                          <tr className="bg-gray-100 dark:bg-gray-700">
-                            <td colSpan={consolidatedData.length + 1} className="py-2"></td>
-                          </tr>
-
-                          {/* EBITDA */}
-                          <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-t-2 border-blue-200 dark:border-blue-700">
-                            <td className="py-4 px-6 sticky left-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-                                  <Target className="w-4 h-4" />
-                                </div>
-                                <span className="font-bold text-lg text-blue-900 dark:text-blue-100">EBITDA</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className={`text-lg font-bold ${(item.ebitda || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                  {formatCurrency(item.ebitda || 0)}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Linha de separação */}
-                          <tr className="bg-gray-100 dark:bg-gray-700">
-                            <td colSpan={consolidatedData.length + 1} className="py-2"></td>
-                          </tr>
-
-                          {/* Investimentos */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 text-white">
-                                  <Zap className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Investimentos</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Investimentos", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-
-                          {/* Sócios */}
-                          <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 sticky left-0 bg-white dark:bg-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500 to-violet-600 text-white">
-                                  <Users className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900 dark:text-white">Sócios</span>
-                              </div>
-                            </td>
-                            {consolidatedData.map((item, index) => (
-                              <td key={item.monthName} className="py-4 px-3 text-center">
-                                <span className="text-red-600 dark:text-red-400 font-semibold">
-                                  {formatCurrency(getConsolidatedValue("Sócios", index))}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="detalhada" className="p-8">
-              <div className="space-y-6">
-                {/* Filtros Avançados */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700 shadow-lg">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {/* Título e Descrição */}
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white">DRE Detalhada</h3>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">Análise granular por transação</p>
-                      </div>
-                    </div>
-
-                    {/* Controles */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      {/* Filtro de Categorias */}
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                        <div className="relative bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-md bg-gradient-to-br from-orange-500 to-red-600 text-white">
-                              <Filter className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="flex-1">
-                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Categoria</label>
-                              <select className="w-full bg-transparent text-gray-900 dark:text-white font-semibold text-base focus:outline-none cursor-pointer">
-                                <option value="" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">Todas as Categorias</option>
-                                <option value="Stone Crédito" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">Stone Crédito</option>
-                                <option value="Stone Débito" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">Stone Débito</option>
-                                <option value="IMPOSTO" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">IMPOSTO</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Filtro de Fornecedores */}
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                        <div className="relative bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 text-white">
-                              <Users className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="flex-1">
-                              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Fornecedor</label>
-                              <select className="w-full bg-transparent text-gray-900 dark:text-white font-semibold text-base focus:outline-none cursor-pointer">
-                                <option value="" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">Todos os Fornecedores</option>
-                                <option value="Fornecedor 1" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">Fornecedor 1</option>
-                                <option value="Fornecedor 2" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white">Fornecedor 2</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
-                        <tr>
-                          <th className="text-left py-4 px-6 font-semibold text-gray-900 dark:text-white">Data</th>
-                          <th className="text-left py-4 px-6 font-semibold text-gray-900 dark:text-white">Categoria</th>
-                          <th className="text-left py-4 px-6 font-semibold text-gray-900 dark:text-white">Fornecedor/Cliente</th>
-                          <th className="text-right py-4 px-6 font-semibold text-gray-900 dark:text-white">Entradas</th>
-                          <th className="text-right py-4 px-6 font-semibold text-gray-900 dark:text-white">Saídas</th>
-                          <th className="text-right py-4 px-6 font-semibold text-gray-900 dark:text-white">Observação</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {[
-                          { data: "2024-05-01", categoria: "Stone Crédito", fornecedor: "Fornecedor 1", entradas: 12000, saidas: 0, obs: "Venda cartão" },
-                          { data: "2024-05-02", categoria: "IMPOSTO", fornecedor: "Prefeitura", entradas: 0, saidas: 3000, obs: "ISS" },
-                          { data: "2024-05-03", categoria: "Stone Débito", fornecedor: "Fornecedor 2", entradas: 8000, saidas: 0, obs: "Venda débito" },
-                          { data: "2024-05-04", categoria: "IMPOSTO", fornecedor: "Receita Federal", entradas: 0, saidas: 2500, obs: "IRPJ" },
-                        ].map((item, idx) => (
-                          <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td className="py-4 px-6 text-gray-900 dark:text-white font-medium">{item.data}</td>
-                            <td className="py-4 px-6 text-gray-900 dark:text-white">{item.categoria}</td>
-                            <td className="py-4 px-6 text-gray-900 dark:text-white">{item.fornecedor}</td>
-                            <td className="py-4 px-6 text-right">
-                              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                                {formatCurrency(item.entradas)}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-right">
-                              <span className="text-red-600 dark:text-red-400 font-semibold">
-                                {formatCurrency(item.saidas)}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-right text-gray-600 dark:text-gray-400">{item.obs}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
       </div>
     </div>
   );
-} 
+}

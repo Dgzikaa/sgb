@@ -126,6 +126,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString());
 
+  console.log('🎯 API DRE YEARLY DETAILED chamada para o ano:', year);
+
   try {
     
     if (!supabaseUrl || !supabaseKey) {
