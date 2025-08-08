@@ -68,36 +68,25 @@ export default function DashboardFidelidadePage() {
     router.push('/fidelidade');
   };
 
-  const addToWallet = () => {
+  const addToWallet = async () => {
     if (!membro) return;
 
-    // Criar dados para o cartão digital
-    const cardData = {
-      name: 'Fidelidade VIP - Ordinário Bar',
-      description: `Membro: ${membro.nome}`,
-      backgroundColor: '#F59E0B', // amber-500
-      foregroundColor: '#FFFFFF',
-      barcode: {
-        message: membro.qr_code_token,
-        format: 'PKBarcodeFormatQR',
-        messageEncoding: 'iso-8859-1'
-      }
-    };
+    try {
+      const { addToWallet: addToWalletUtil } = await import('@/lib/wallet');
+      
+      const cardData = {
+        memberName: membro.nome,
+        memberEmail: membro.email,
+        membershipId: membro.id,
+        qrToken: membro.qr_code_token,
+        balance: saldo,
+        status: membro.status
+      };
 
-    // Para dispositivos iOS (Apple Wallet)
-    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-      // Aqui você implementaria a integração com Apple Wallet
-      alert('Redirecionando para Apple Wallet...');
-    }
-    // Para dispositivos Android (Google Pay)
-    else if (navigator.userAgent.includes('Android')) {
-      // Aqui você implementaria a integração com Google Pay
-      alert('Redirecionando para Google Pay...');
-    }
-    // Para outros dispositivos
-    else {
-      // Gerar QR Code para download
-      alert('QR Code será baixado como imagem');
+      await addToWalletUtil(cardData);
+    } catch (error) {
+      console.error('Erro ao adicionar à wallet:', error);
+      alert('Erro ao adicionar à wallet. Tente novamente.');
     }
   };
 
@@ -195,18 +184,19 @@ export default function DashboardFidelidadePage() {
                     <div className="flex items-center gap-4 pt-4">
                       <Button 
                         onClick={addToWallet}
-                        className="bg-white text-amber-600 hover:bg-amber-50 flex-1"
+                        className="bg-amber-800 hover:bg-amber-900 text-white flex-1 border-0"
                       >
                         <Smartphone className="w-4 h-4 mr-2" />
                         Adicionar à Wallet
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        className="border-white text-white hover:bg-white/10"
-                      >
-                        <QrCode className="w-4 h-4 mr-2" />
-                        Ver QR Code
-                      </Button>
+                      <Link href="/fidelidade/cartao-digital">
+                        <Button 
+                          className="bg-orange-600 hover:bg-orange-700 text-white border-0"
+                        >
+                          <QrCode className="w-4 h-4 mr-2" />
+                          Ver Cartão
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
@@ -264,47 +254,33 @@ export default function DashboardFidelidadePage() {
               </Card>
             </motion.div>
 
-            {/* Histórico Recente */}
+            {/* Botão de Pagamento */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <Card className="bg-white dark:bg-gray-800">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
-                    <History className="w-5 h-5" />
-                    Histórico Recente
-                  </CardTitle>
-                  <Link href="/fidelidade/historico">
-                    <Button variant="outline" size="sm">
-                      Ver Tudo
-                    </Button>
-                  </Link>
-                </CardHeader>
-                <CardContent>
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-700">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CreditCard className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    Renovar Mensalidade
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Mantenha seus benefícios VIP sempre ativos
+                  </p>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Crédito Mensal</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">01/01/2024</p>
-                      </div>
-                      <p className="text-green-600 dark:text-green-400 font-semibold">+R$ 150,00</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Consumo no Bar</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">28/12/2023</p>
-                      </div>
-                      <p className="text-red-600 dark:text-red-400 font-semibold">-R$ 45,00</p>
-                    </div>
-                    
-                    <div className="text-center pt-2">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Últimas transações
-                      </p>
-                    </div>
+                    <Link href="/fidelidade/pagamento">
+                      <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-3">
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Pagar R$ 100,00
+                      </Button>
+                    </Link>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Próxima cobrança: {new Date(membro.proxima_cobranca).toLocaleDateString('pt-BR')}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -332,7 +308,7 @@ export default function DashboardFidelidadePage() {
                   <QRCodeGenerator 
                     value={membro.qr_code_token}
                     size={128}
-                    className="mx-auto mb-4"
+                    className="qr-code-dashboard mx-auto mb-4"
                     errorCorrectionLevel="H"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
@@ -341,7 +317,16 @@ export default function DashboardFidelidadePage() {
                   <Button 
                     size="sm" 
                     className="mt-3 w-full"
-                    onClick={addToWallet}
+                    onClick={() => {
+                      // Fazer download do QR Code como imagem
+                      const qrElement = document.querySelector('.qr-code-dashboard img') as HTMLImageElement;
+                      if (qrElement) {
+                        const link = document.createElement('a');
+                        link.download = `qr-code-fidelidade-${membro.nome.replace(/\s+/g, '-')}.png`;
+                        link.href = qrElement.src;
+                        link.click();
+                      }
+                    }}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Baixar QR Code

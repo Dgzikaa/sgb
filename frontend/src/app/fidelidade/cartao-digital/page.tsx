@@ -62,8 +62,16 @@ export default function CartaoDigitalPage() {
   };
 
   const downloadQRCode = () => {
-    // Em uma implementação real, geraria um QR Code e faria download
-    alert('Download do QR Code será implementado');
+    // Fazer download do QR Code como imagem
+    const qrElement = document.querySelector('.qr-code-cartao img') as HTMLImageElement;
+    if (qrElement) {
+      const link = document.createElement('a');
+      link.download = `cartao-vip-${membro?.nome.replace(/\s+/g, '-')}.png`;
+      link.href = qrElement.src;
+      link.click();
+    } else {
+      alert('QR Code não encontrado. Tente novamente.');
+    }
   };
 
   const handleAddToWallet = async () => {
@@ -201,7 +209,7 @@ export default function CartaoDigitalPage() {
                   <QRCodeGenerator 
                     value={membro.qr_code_token}
                     size={128}
-                    className="mx-auto mb-3"
+                    className="qr-code-cartao mx-auto mb-3"
                     errorCorrectionLevel="H"
                   />
                   <p className="text-xs text-gray-600 font-mono">

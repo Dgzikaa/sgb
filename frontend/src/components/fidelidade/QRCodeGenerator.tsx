@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import QRCode from 'qrcode';
+import * as QRCode from 'qrcode';
 
 interface QRCodeGeneratorProps {
   value: string;

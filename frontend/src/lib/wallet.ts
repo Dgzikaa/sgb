@@ -84,11 +84,19 @@ export const generateAppleWalletPass = async (cardData: WalletCardData) => {
       }
     };
 
-    // Em produção, enviaria para seu backend que geraria o .pkpass
-    console.log('Dados do passe Apple Wallet:', passData);
+    // Simular criação de arquivo .pkpass
+    const passJson = JSON.stringify(passData, null, 2);
+    const blob = new Blob([passJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     
-    // Por enquanto, simular download
-    alert('Apple Wallet: Em produção, o arquivo .pkpass seria baixado automaticamente!');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ordinario-vip-${cardData.membershipId}.json`;
+    link.click();
+    
+    URL.revokeObjectURL(url);
+    
+    alert('📱 Arquivo de configuração baixado!\n\nEm produção, seria um arquivo .pkpass que adicionaria automaticamente ao Apple Wallet.');
     
     return passData;
   } catch (error) {
@@ -147,11 +155,17 @@ export const generateGooglePayPass = async (cardData: WalletCardData) => {
       }
     };
 
-    // Em produção, isso seria feito via Google Wallet API
-    console.log('Dados do passe Google Pay:', objectData);
+    // Simular integração com Google Pay
+    const googlePayUrl = `https://pay.google.com/gp/v/save/${encodeURIComponent(JSON.stringify(objectData))}`;
     
-    // Por enquanto, simular
-    alert('Google Pay: Em produção, seria adicionado automaticamente à carteira!');
+    // Criar um link temporário para simular
+    const tempLink = document.createElement('a');
+    tempLink.href = '#';
+    tempLink.onclick = () => {
+      alert('🤖 Google Pay integração simulada!\n\nEm produção, abriria o Google Pay automaticamente para adicionar o cartão.');
+      return false;
+    };
+    tempLink.click();
     
     return objectData;
   } catch (error) {
@@ -186,13 +200,21 @@ export const addToWallet = async (cardData: WalletCardData) => {
         await generateGooglePayPass(cardData);
         break;
       case 'desktop':
-        // Para desktop, oferecer download do QR Code
-        const qrCodeData = `data:text/plain;charset=utf-8,${encodeURIComponent(cardData.qrToken)}`;
-        const link = document.createElement('a');
-        link.href = qrCodeData;
-        link.download = `cartao-vip-${cardData.membershipId}.txt`;
-        link.click();
-        alert('QR Code salvo! Para dispositivos móveis, acesse este link no seu smartphone.');
+        // Para desktop, mostrar opções
+        const escolha = confirm(
+          '💻 Você está no desktop!\n\n' +
+          'Clique OK para baixar o arquivo de configuração da carteira\n' +
+          'ou Cancelar para copiar o código QR.'
+        );
+        
+        if (escolha) {
+          // Baixar arquivo de configuração
+          await generateAppleWalletPass(cardData);
+        } else {
+          // Copiar QR Code
+          navigator.clipboard.writeText(cardData.qrToken);
+          alert('📋 Código QR copiado!\n\nCole no seu app de pagamento favorito.');
+        }
         break;
     }
   } catch (error) {

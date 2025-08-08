@@ -85,27 +85,21 @@ export default function SuportePage() {
   const canaisContato = [
     {
       icon: MessageCircle,
-      titulo: "Chat Online",
-      descricao: "Resposta imediata durante horário de funcionamento",
+      titulo: "WhatsApp",
+      descricao: "(61) 99999-8888",
       horario: "Seg-Dom: 18h às 2h",
-      acao: "Iniciar Chat",
-      disponivel: true
-    },
-    {
-      icon: Phone,
-      titulo: "Telefone",
-      descricao: "(61) 3456-7890",
-      horario: "Seg-Sex: 14h às 22h",
-      acao: "Ligar Agora",
-      disponivel: true
+      acao: "Abrir WhatsApp",
+      disponivel: true,
+      link: "https://wa.me/5561999998888?text=Olá! Sou membro VIP do Ordinário Bar e preciso de ajuda."
     },
     {
       icon: Mail,
       titulo: "E-mail",
       descricao: "fidelidade@ordinariobar.com",
-      horario: "Resposta em até 24h",
+      horario: "Resposta em até 4h",
       acao: "Enviar E-mail",
-      disponivel: true
+      disponivel: true,
+      link: "mailto:fidelidade@ordinariobar.com?subject=Suporte VIP - Ordinário Bar"
     }
   ];
 
@@ -187,12 +181,20 @@ export default function SuportePage() {
                 Entre em Contato
               </h2>
               
-              <div className="grid md:grid-cols-3 gap-4 mb-8">
+              <div className="grid md:grid-cols-2 gap-6 mb-8 max-w-2xl mx-auto">
                 {canaisContato.map((canal, index) => (
                   <Card key={index} className="bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow">
                     <CardContent className="p-6 text-center">
-                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <canal.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                        canal.titulo === 'WhatsApp' 
+                          ? 'bg-green-100 dark:bg-green-900/30' 
+                          : 'bg-blue-100 dark:bg-blue-900/30'
+                      }`}>
+                        <canal.icon className={`w-6 h-6 ${
+                          canal.titulo === 'WhatsApp' 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : 'text-blue-600 dark:text-blue-400'
+                        }`} />
                       </div>
                       <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                         {canal.titulo}
@@ -203,14 +205,20 @@ export default function SuportePage() {
                       <p className="text-xs text-gray-500 dark:text-gray-500 mb-4">
                         {canal.horario}
                       </p>
-                      <Button 
-                        size="sm" 
-                        className="w-full"
-                        disabled={!canal.disponivel}
-                      >
-                        {canal.acao}
-                        <ExternalLink className="w-3 h-3 ml-1" />
-                      </Button>
+                      <a href={canal.link} target="_blank" rel="noopener noreferrer">
+                        <Button 
+                          size="sm" 
+                          className={`w-full ${
+                            canal.titulo === 'WhatsApp' 
+                              ? 'bg-green-600 hover:bg-green-700' 
+                              : 'bg-blue-600 hover:bg-blue-700'
+                          } text-white`}
+                          disabled={!canal.disponivel}
+                        >
+                          {canal.acao}
+                          <ExternalLink className="w-3 h-3 ml-1" />
+                        </Button>
+                      </a>
                     </CardContent>
                   </Card>
                 ))}
