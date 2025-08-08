@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import QRCodeGenerator from '@/components/fidelidade/QRCodeGenerator';
 
 interface Membro {
   id: string;
@@ -328,9 +329,12 @@ export default function DashboardFidelidadePage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="w-32 h-32 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
-                    <QrCode className="w-16 h-16 text-gray-400" />
-                  </div>
+                  <QRCodeGenerator 
+                    value={membro.qr_code_token}
+                    size={128}
+                    className="mx-auto mb-4"
+                    errorCorrectionLevel="H"
+                  />
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                     {membro.qr_code_token.substring(0, 8)}...
                   </p>

@@ -102,8 +102,10 @@ export async function POST(request: NextRequest) {
         id: novoMembro.id,
         nome: novoMembro.nome,
         email: novoMembro.email,
-        qr_code_token: novoMembro.qr_code_token
-      }
+        qr_code_token: novoMembro.qr_code_token,
+        status: novoMembro.status
+      },
+      redirect_to: '/fidelidade/pagamento'
     });
 
   } catch (error) {

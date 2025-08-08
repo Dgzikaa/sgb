@@ -143,9 +143,15 @@ export default function CadastroFidelidadePage() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        
+        // Salvar dados temporários para o pagamento
+        localStorage.setItem('fidelidade_membro_temp', JSON.stringify(data.membro));
+        
         router.push('/fidelidade/pagamento');
       } else {
-        throw new Error('Erro ao cadastrar');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao cadastrar');
       }
     } catch (error) {
       console.error('Erro:', error);

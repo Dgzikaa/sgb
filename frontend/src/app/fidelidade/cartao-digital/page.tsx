@@ -21,6 +21,8 @@ import {
   Star
 } from 'lucide-react';
 import Link from 'next/link';
+import QRCodeGenerator from '@/components/fidelidade/QRCodeGenerator';
+import { addToWallet, supportsWallet, getDeviceType, generateWalletShareUrl } from '@/lib/wallet';
 
 interface Membro {
   id: string;
@@ -64,22 +66,32 @@ export default function CartaoDigitalPage() {
     alert('Download do QR Code será implementado');
   };
 
-  const addToAppleWallet = () => {
-    // Implementação para Apple Wallet
-    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-      alert('Redirecionando para Apple Wallet...');
-    } else {
-      alert('Apple Wallet disponível apenas em dispositivos iOS');
+  const handleAddToWallet = async () => {
+    if (!membro) return;
+
+    try {
+      const cardData = {
+        memberName: membro.nome,
+        memberEmail: membro.email,
+        membershipId: membro.id,
+        qrToken: membro.qr_code_token,
+        balance: membro.saldo_atual || 0,
+        status: membro.status
+      };
+
+      await addToWallet(cardData);
+    } catch (error) {
+      console.error('Erro ao adicionar à wallet:', error);
+      alert('Erro ao adicionar à wallet. Tente novamente.');
     }
   };
 
-  const addToGooglePay = () => {
-    // Implementação para Google Pay
-    if (navigator.userAgent.includes('Android')) {
-      alert('Redirecionando para Google Pay...');
-    } else {
-      alert('Google Pay disponível apenas em dispositivos Android');
-    }
+  const addToAppleWallet = async () => {
+    await handleAddToWallet();
+  };
+
+  const addToGooglePay = async () => {
+    await handleAddToWallet();
   };
 
   const shareCard = () => {
@@ -186,9 +198,12 @@ export default function CartaoDigitalPage() {
                 
                 {/* QR Code */}
                 <div className="bg-white rounded-lg p-4 text-center">
-                  <div className="w-32 h-32 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-3">
-                    <QrCode className="w-20 h-20 text-gray-600" />
-                  </div>
+                  <QRCodeGenerator 
+                    value={membro.qr_code_token}
+                    size={128}
+                    className="mx-auto mb-3"
+                    errorCorrectionLevel="H"
+                  />
                   <p className="text-xs text-gray-600 font-mono">
                     {membro.qr_code_token.substring(0, 12)}...
                   </p>

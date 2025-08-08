@@ -33,26 +33,77 @@ export default function PagamentoPage() {
     setPaymentMethod(method);
 
     try {
-      // Simular processamento de pagamento
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Em uma implementação real, aqui seria integrado com o gateway de pagamento
-      if (method === 'pix') {
-        // Gerar QR Code PIX
-        alert('QR Code PIX gerado! (Em produção, seria mostrado o código real)');
-      } else {
-        // Processar cartão
-        alert('Redirecionando para pagamento com cartão... (Em produção, seria integrado com gateway)');
+      // Buscar dados do membro (simulando por enquanto)
+      const membroData = localStorage.getItem('fidelidade_membro_temp');
+      if (!membroData) {
+        throw new Error('Dados do membro não encontrados. Faça o cadastro novamente.');
       }
-      
-      // Simular sucesso e redirecionar
-      setTimeout(() => {
-        router.push('/fidelidade/pagamento/sucesso');
-      }, 1000);
+
+      const membro = JSON.parse(membroData);
+
+      if (method === 'pix') {
+        // Criar pagamento PIX direto
+        const response = await fetch('/api/fidelidade/pagamento/mercado-pago', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            membro_id: membro.id,
+            valor: 100.00
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Mostrar QR Code PIX
+          if (data.qr_code) {
+            // Aqui você pode mostrar o QR Code em um modal
+            const pixModal = confirm(`PIX gerado com sucesso!\n\nCódigo PIX: ${data.qr_code}\n\nClique OK para copiar o código PIX ou Cancelar para tentar outro método.`);
+            
+            if (pixModal) {
+              navigator.clipboard.writeText(data.qr_code);
+              alert('Código PIX copiado! Cole no seu app de pagamento.');
+            }
+            
+            // Redirecionar para página de aguardando pagamento
+            router.push(`/fidelidade/pagamento/aguardando?payment_id=${data.payment_id}`);
+          }
+        } else {
+          throw new Error(data.error || 'Erro ao criar pagamento PIX');
+        }
+      } else {
+        // Criar preferência para cartão
+        const response = await fetch('/api/fidelidade/pagamento/mercado-pago', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            membro_id: membro.id,
+            payment_method: 'card',
+            valor: 100.00
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Redirecionar para o checkout do Mercado Pago
+          const checkoutUrl = process.env.NODE_ENV === 'production' 
+            ? data.init_point 
+            : data.sandbox_init_point;
+          
+          window.location.href = checkoutUrl;
+        } else {
+          throw new Error(data.error || 'Erro ao criar pagamento');
+        }
+      }
       
     } catch (error) {
       console.error('Erro no pagamento:', error);
-      alert('Erro ao processar pagamento. Tente novamente.');
+      alert(error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente.');
     } finally {
       setLoading(false);
       setPaymentMethod(null);
