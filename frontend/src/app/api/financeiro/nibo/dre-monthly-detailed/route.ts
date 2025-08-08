@@ -108,20 +108,17 @@ const MACRO_CATEGORIAS = [
     nome: "Investimentos",
     tipo: "saida",
     categorias: [
-      "CDB/CDI",
-      "Outros Investimentos",
       "Despesas Financeiras",
       "Obras",
       "Consultoria",
+      "Outros Investimentos",
       "Equipamentos",
-      "Equipamentos R",
     ],
   },
   {
     nome: "Sócios",
     tipo: "saida", 
     categorias: [
-      "Empréstimos de Sócios",
       "Outros Sócios",
     ],
   },
