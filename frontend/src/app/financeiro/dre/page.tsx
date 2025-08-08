@@ -739,7 +739,7 @@ export default function DrePage() {
                               Valor
                             </th>
                             <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">
-                              %
+                              % EBITDA
                             </th>
                           </tr>
                         </thead>
@@ -756,11 +756,11 @@ export default function DrePage() {
                               ? macro.total_entradas 
                               : -macro.total_saidas;
                             
-                            // Calcular percentual baseado no total de receitas
-                            const totalReceitas = data?.macroCategorias.find(m => m.nome === "Receita")?.total_entradas || 1;
-                            const percentual = macro.nome === "Receita" 
-                              ? 100 
-                              : (macro.total_saidas / totalReceitas) * 100;
+                            // Calcular percentual baseado no EBITDA
+                            const ebitdaValue = data?.ebitda || 1;
+                            const percentualEbitda = macro.nome === "Receita"
+                              ? (valorUnificado / ebitdaValue) * 100
+                              : (Math.abs(valorUnificado) / ebitdaValue) * 100;
                             
                             return (
                               <React.Fragment key={macro.nome}>
@@ -792,7 +792,7 @@ export default function DrePage() {
                                   </td>
                                   <td className="py-2.5 px-4 text-right">
                                     <span className="text-base font-medium text-gray-600 dark:text-gray-400">
-                                      {percentual.toFixed(1)}%
+                                      {percentualEbitda.toFixed(1)}%
                                     </span>
                                   </td>
                                 </tr>
@@ -804,10 +804,10 @@ export default function DrePage() {
                                     ? cat.entradas 
                                     : -cat.saidas;
                                   
-                                  // Percentual da subcategoria baseado no total de receitas
-                                  const percentualCat = macro.nome === "Receita"
-                                    ? (cat.entradas / totalReceitas) * 100
-                                    : (cat.saidas / totalReceitas) * 100;
+                                  // Percentual da subcategoria baseado no EBITDA
+                                  const percentualCatEbitda = macro.nome === "Receita"
+                                    ? (valorCatUnificado / ebitdaValue) * 100
+                                    : (Math.abs(valorCatUnificado) / ebitdaValue) * 100;
                                   return (
                                     <tr key={cat.nome} className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
                                       <td className="py-3 px-6 pl-16">
@@ -820,7 +820,7 @@ export default function DrePage() {
                                       </td>
                                       <td className="py-3 px-6 text-right">
                                         <span className="text-sm font-medium text-gray-500 dark:text-gray-500">
-                                          {percentualCat.toFixed(1)}%
+                                          {percentualCatEbitda.toFixed(1)}%
                                         </span>
                                       </td>
                                     </tr>
@@ -920,10 +920,10 @@ export default function DrePage() {
                                     ? cat.entradas 
                                     : -cat.saidas;
                                   
-                                  // Percentual da subcategoria baseado no total de receitas
-                                  const percentualCat = macro.nome === "Receita"
-                                    ? (cat.entradas / totalReceitas) * 100
-                                    : (cat.saidas / totalReceitas) * 100;
+                                  // Percentual da subcategoria baseado no EBITDA
+                                  const percentualCatEbitda = macro.nome === "Receita"
+                                    ? (valorCatUnificado / ebitdaValue) * 100
+                                    : (Math.abs(valorCatUnificado) / ebitdaValue) * 100;
                                   return (
                                     <tr key={cat.nome} className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
                                       <td className="py-3 px-6 pl-16">
@@ -936,7 +936,7 @@ export default function DrePage() {
                                       </td>
                                       <td className="py-3 px-6 text-right">
                                         <span className="text-sm font-medium text-gray-500 dark:text-gray-500">
-                                          {percentualCat.toFixed(1)}%
+                                          {percentualCatEbitda.toFixed(1)}%
                                         </span>
                                       </td>
                                     </tr>
@@ -958,7 +958,7 @@ export default function DrePage() {
                             </td>
                             <td className="py-4 px-6 text-right">
                               <span className="text-xl font-bold text-gray-600 dark:text-gray-400">
-                                100%
+                                -
                               </span>
                             </td>
                           </tr>
