@@ -35,10 +35,10 @@ export async function GET(request: Request) {
     while (hasMore) {
       const { data: pageData, error } = await supabase
         .from('nibo_agendamentos')
-        .select('id, categoria_nome, valor, data_vencimento')
+        .select('id, categoria_nome, valor, data_competencia')
         .eq('deletado', false)
-        .gte('data_vencimento', '2025-01-01')
-        .lt('data_vencimento', '2026-01-01')
+        .gte('data_competencia', '2025-01-01')
+        .lt('data_competencia', '2026-01-01')
         .range(page * pageSize, (page + 1) * pageSize - 1);
       
       if (error) {
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
 
     // Ordenar todos os dados por data e ID para garantir consistência absoluta
     const sortedData = allData.sort((a, b) => {
-      const dateCompare = a.data_vencimento.localeCompare(b.data_vencimento);
+      const dateCompare = a.data_competencia.localeCompare(b.data_competencia);
       if (dateCompare !== 0) return dateCompare;
       return (a.id || 0) - (b.id || 0);
     });
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
       
       // Filtrar dados do mês usando string comparison (mais preciso)
       const dadosDoMes = sortedData.filter(item => {
-        const itemDate = item.data_vencimento;
+        const itemDate = item.data_competencia;
         return itemDate >= startDate && itemDate < endDate;
       });
       
