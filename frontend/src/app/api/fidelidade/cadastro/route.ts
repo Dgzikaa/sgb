@@ -9,156 +9,61 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    const {
-      nome,
-      email,
-      telefone,
-      cpf,
-      dataNascimento,
-      endereco,
-      aceitaTermos,
-      aceitaLgpd,
-      aceitaMarketing
-    } = body;
+    const { nome, email, cpf, telefone, data_nascimento } = body;
 
     // Validações básicas
-    if (!nome || !email || !telefone || !cpf || !dataNascimento) {
+    if (!nome || !email || !cpf) {
       return NextResponse.json(
-        { error: 'Dados obrigatórios não preenchidos' },
+        { error: 'Nome, email e CPF são obrigatórios' },
         { status: 400 }
       );
     }
 
-    if (!aceitaTermos || !aceitaLgpd) {
-      return NextResponse.json(
-        { error: 'É necessário aceitar os termos e a LGPD' },
-        { status: 400 }
-      );
-    }
-
-    // Verifica se já existe um membro com este email ou CPF
-    const { data: existingMember } = await supabase
+    // Verificar se já existe membro com mesmo email ou CPF
+    const { data: membroExistente } = await supabase
       .from('fidelidade_membros')
-      .select('id')
+      .select('id, email, cpf')
       .or(`email.eq.${email},cpf.eq.${cpf}`)
       .single();
 
-    if (existingMember) {
+    if (membroExistente) {
       return NextResponse.json(
-        { error: 'E-mail ou CPF já cadastrado' },
+        { error: 'Já existe um membro cadastrado com este email ou CPF' },
         { status: 409 }
       );
     }
 
-    // Criar o membro
-    const { data: novoMembro, error: errorMembro } = await supabase
+    // Criar novo membro
+    const { data: novoMembro, error } = await supabase
       .from('fidelidade_membros')
       .insert({
         nome,
         email,
-        telefone,
-        cpf,
-        data_nascimento: dataNascimento,
-        endereco,
-        status: 'pendente', // Aguardando pagamento
+        cpf: cpf.replace(/\D/g, ''), // Remove formatação
+        telefone: telefone?.replace(/\D/g, ''), // Remove formatação
+        data_nascimento,
+        status: 'ativo',
         bar_id: 3 // Ordinário Bar
       })
       .select()
       .single();
 
-    if (errorMembro) {
-      console.error('Erro ao criar membro:', errorMembro);
+    if (error) {
+      console.error('Erro ao criar membro:', error);
       return NextResponse.json(
-        { error: 'Erro interno do servidor' },
+        { error: 'Erro ao criar cadastro' },
         { status: 500 }
       );
     }
 
-    // Criar registro de pagamento pendente
-    const proximaCobranca = new Date();
-    proximaCobranca.setMonth(proximaCobranca.getMonth() + 1);
-
-    const { error: errorPagamento } = await supabase
-      .from('fidelidade_pagamentos')
-      .insert({
-        membro_id: novoMembro.id,
-        valor: 100.00,
-        status: 'pendente',
-        data_vencimento: proximaCobranca.toISOString().split('T')[0]
-      });
-
-    if (errorPagamento) {
-      console.error('Erro ao criar pagamento:', errorPagamento);
-      // Não retorna erro pois o membro já foi criado
-    }
-
-    // Log de auditoria
-    console.log(`Novo membro cadastrado: ${nome} (${email}) - ID: ${novoMembro.id}`);
-
     return NextResponse.json({
       success: true,
-      membro: {
-        id: novoMembro.id,
-        nome: novoMembro.nome,
-        email: novoMembro.email,
-        qr_code_token: novoMembro.qr_code_token,
-        status: novoMembro.status
-      },
-      redirect_to: '/fidelidade/pagamento'
+      membro: novoMembro,
+      message: 'Cadastro realizado com sucesso!'
     });
 
   } catch (error) {
     console.error('Erro no cadastro:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email');
-    
-    if (!email) {
-      return NextResponse.json(
-        { error: 'E-mail é obrigatório' },
-        { status: 400 }
-      );
-    }
-
-    // Buscar membro por email
-    const { data: membro, error } = await supabase
-      .from('fidelidade_membros')
-      .select(`
-        id,
-        nome,
-        email,
-        status,
-        qr_code_token,
-        data_adesao,
-        proxima_cobranca,
-        fidelidade_saldos (
-          saldo_atual,
-          saldo_mes_atual
-        )
-      `)
-      .eq('email', email)
-      .single();
-
-    if (error || !membro) {
-      return NextResponse.json(
-        { error: 'Membro não encontrado' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ membro });
-
-  } catch (error) {
-    console.error('Erro ao buscar membro:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

@@ -63,6 +63,12 @@ export default function PagamentoPage() {
         const data = await response.json();
 
         if (response.ok) {
+          // Verificar se está em modo demonstração
+          if (data.demo_mode) {
+            alert(`🔧 MODO DEMONSTRAÇÃO\n\n${data.message}\n\nPIX Demo: ${data.qr_code}\n\nEm produção, aqui seria exibido o QR Code real do Mercado Pago.`);
+            return;
+          }
+          
           // Mostrar QR Code PIX
           if (data.qr_code) {
             // Aqui você pode mostrar o QR Code em um modal
@@ -96,6 +102,12 @@ export default function PagamentoPage() {
         const data = await response.json();
 
         if (response.ok) {
+          // Verificar se está em modo demonstração
+          if (data.demo_mode) {
+            alert(`🔧 MODO DEMONSTRAÇÃO\n\n${data.message}\n\nEm produção, você seria redirecionado para o checkout do Mercado Pago.`);
+            return;
+          }
+          
           // Redirecionar para o checkout do Mercado Pago
           const checkoutUrl = process.env.NODE_ENV === 'production' 
             ? data.init_point 
@@ -271,12 +283,11 @@ export default function PagamentoPage() {
                       <Button
                         onClick={() => handlePayment('card')}
                         disabled={loading}
-                        variant="outline"
-                        className="w-full h-auto p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-400 justify-start"
+                        className="w-full h-auto p-6 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 border-2 border-gray-300 dark:border-gray-600 hover:border-amber-400 dark:hover:border-amber-400 justify-start text-gray-900 dark:text-white"
                       >
                         <div className="flex items-center gap-4 w-full">
-                          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                            <CreditCard className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                            <CreditCard className="w-6 h-6 text-gray-700 dark:text-gray-300" />
                           </div>
                           <div className="flex-1 text-left">
                             <p className="text-lg font-semibold text-gray-900 dark:text-white">Cartão de Crédito</p>

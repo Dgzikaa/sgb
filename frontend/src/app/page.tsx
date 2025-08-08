@@ -112,53 +112,20 @@ export default function LandingPage() {
           >
             <div className="flex items-center justify-center mb-8">
               <div className="relative">
-                {/* Logo Container com estilo "glow" inspirado */}
-                <div className="relative w-32 h-32 mb-4">
-                  {/* Background blob orgânico como na inspiração */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 rounded-[2rem] transform rotate-12 opacity-90 shadow-2xl"></div>
-                  <div className="absolute inset-2 bg-gradient-to-l from-blue-400 via-purple-400 to-indigo-400 rounded-[1.5rem] transform -rotate-6 opacity-80"></div>
-                  
-                  {/* Logo SGB */}
-                  <div className="relative z-10 w-full h-full flex items-center justify-center">
-                    <div className="text-white font-bold text-3xl tracking-wider transform -rotate-3">
-                      SGB
-                    </div>
-                  </div>
-                  
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-[2rem] blur-xl opacity-30 -z-10 scale-110"></div>
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                  <span className="text-3xl text-white">🏪</span>
                 </div>
-                
-                {/* Status indicator */}
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
-                
-                {/* Pequenos elementos decorativos */}
-                <div className="absolute -top-4 left-4 w-3 h-3 bg-yellow-400 rounded-full opacity-70 animate-bounce"></div>
-                <div className="absolute -bottom-2 -left-3 w-2 h-2 bg-pink-400 rounded-full opacity-60 animate-pulse"></div>
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full animate-pulse"></div>
               </div>
             </div>
             
-            <div className="relative">
-              <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent mb-2">
-                SGB
-              </h1>
-              
-              {/* Pequeno efeito glow no título */}
-              <div className="absolute inset-0 text-6xl md:text-8xl font-bold text-blue-400 opacity-20 blur-sm -z-10">
-                SGB
-              </div>
-            </div>
+            <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent mb-6">
+              SGB
+            </h1>
             
             <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300 mb-4">
               Sistema de Gestão de Bares
             </p>
-            
-            {/* Linha decorativa */}
-            <div className="flex items-center justify-center mb-6">
-              <div className="h-1 w-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-              <div className="mx-4 w-2 h-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></div>
-              <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></div>
-            </div>
             
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-12 leading-relaxed max-w-4xl mx-auto">
               A plataforma completa para gerenciar seu bar ou restaurante com 
@@ -299,65 +266,6 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Ordinário Bar Showcase */}
-      <section className="py-20 bg-gradient-to-br from-amber-600 via-orange-600 to-red-600 dark:from-amber-700 dark:via-orange-700 dark:to-red-700 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="container mx-auto px-4 relative">
-          <motion.div
-            className="text-center text-white"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex items-center justify-center mb-6">
-              <div className="relative">
-                {/* Logo inspirada no "glow" mas com cores do Ordinário */}
-                <div className="relative w-24 h-24">
-                  <div className="absolute inset-0 bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 rounded-[1.5rem] transform rotate-12 opacity-90 shadow-2xl"></div>
-                  <div className="relative z-10 w-full h-full flex items-center justify-center">
-                    <div className="text-white font-bold text-xl tracking-wider transform -rotate-3">
-                      ORDI
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-amber-300 to-orange-300 rounded-[1.5rem] blur-xl opacity-40 -z-10 scale-110"></div>
-                </div>
-              </div>
-            </div>
-            
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Caso de Sucesso: Ordinário Bar
-            </h2>
-            <p className="text-xl text-amber-100 mb-8 max-w-3xl mx-auto">
-              O Ordinário Bar revolucionou sua gestão com o SGB. Desde controle de estoque até 
-              programa de fidelidade, tudo integrado em uma plataforma única.
-            </p>
-            
-            <div className="grid md:grid-cols-3 gap-8 mb-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold mb-2">+150%</div>
-                <div className="text-amber-200">Aumento na Fidelização</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold mb-2">-60%</div>
-                <div className="text-amber-200">Redução de Custos</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold mb-2">24/7</div>
-                <div className="text-amber-200">Operação Digital</div>
-              </div>
-            </div>
-            
-            <Link href="/fidelidade">
-              <Button size="lg" className="bg-white text-orange-600 hover:bg-amber-50 px-8 py-4 text-lg font-semibold shadow-xl">
-                Ver Sistema de Fidelidade
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-          </motion.div>
         </div>
       </section>
 

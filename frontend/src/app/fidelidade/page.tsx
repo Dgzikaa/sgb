@@ -72,7 +72,11 @@ export default function FidelidadePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-amber-900">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-amber-900 relative overflow-hidden">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute top-20 left-10 w-20 h-20 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full opacity-20 blur-xl animate-pulse"></div>
+      <div className="absolute top-40 right-20 w-16 h-16 bg-gradient-to-r from-orange-400 to-red-400 rounded-full opacity-15 blur-lg animate-bounce"></div>
+      <div className="absolute bottom-32 left-16 w-24 h-24 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-full opacity-10 blur-2xl animate-pulse"></div>
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-amber-600/10 to-orange-600/10 dark:from-amber-400/5 dark:to-orange-400/5" />
@@ -83,15 +87,66 @@ export default function FidelidadePage() {
             animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 30 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="flex items-center justify-center mb-6">
-              <Crown className="w-16 h-16 text-amber-600 dark:text-amber-400 mr-4" />
-              <div>
-                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent">
+            <div className="flex flex-col items-center justify-center mb-6">
+              {/* Logo Container inspirado no estilo "glow" */}
+              <div className="relative mb-8">
+                <div className="relative w-48 h-32 mb-4">
+                  {/* Forma orgânica inspirada no "glow" original */}
+                  <div className="absolute inset-0 transform rotate-6">
+                    {/* Blob orgânico principal */}
+                    <div className="w-full h-full bg-gradient-to-br from-orange-500 via-red-500 to-orange-600 shadow-2xl"
+                         style={{
+                           clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
+                           borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%'
+                         }}>
+                    </div>
+                    
+                    {/* Blob secundário para criar profundidade */}
+                    <div className="absolute inset-2 bg-gradient-to-tl from-orange-400 via-red-400 to-orange-500 transform -rotate-12"
+                         style={{
+                           clipPath: 'polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)',
+                           borderRadius: '40% 60% 60% 40% / 40% 40% 60% 60%'
+                         }}>
+                    </div>
+                  </div>
+                  
+                  {/* Texto "ordinário" estilizado como no glow */}
+                  <div className="relative z-10 w-full h-full flex items-center justify-center">
+                    <div className="text-white font-bold text-3xl tracking-wide transform -rotate-3 relative">
+                      <span className="drop-shadow-lg" style={{ 
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        fontWeight: '800',
+                        letterSpacing: '0.05em'
+                      }}>
+                        ordinário
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Glow effect difuso */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 blur-2xl opacity-40 -z-10 scale-125 animate-pulse transform rotate-6"></div>
+                  
+                  {/* Pequenos elementos decorativos flutuantes */}
+                  <div className="absolute -top-3 right-8 w-3 h-3 bg-yellow-300 rounded-full opacity-80 animate-bounce"></div>
+                  <div className="absolute -bottom-2 -left-4 w-2 h-2 bg-orange-300 rounded-full opacity-70 animate-pulse"></div>
+                  <div className="absolute top-4 -right-3 w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-ping"></div>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent mb-2">
                   FIDELIDADE
                 </h1>
-                <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300 mt-2">
+                <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300">
                   Ordinário Bar
                 </p>
+                
+                {/* Linha decorativa */}
+                <div className="flex items-center justify-center mt-4">
+                  <div className="h-1 w-16 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
+                  <Crown className="w-6 h-6 text-amber-600 dark:text-amber-400 mx-3" />
+                  <div className="h-1 w-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
+                </div>
               </div>
             </div>
             
@@ -105,13 +160,13 @@ export default function FidelidadePage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link href="/fidelidade/cadastro">
-                <Button size="lg" className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                <Button size="lg" className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                   Quero Ser Membro VIP
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link href="/fidelidade/login">
-                <Button variant="outline" size="lg" className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:border-amber-400 dark:text-amber-400 dark:hover:bg-amber-900/20 px-8 py-4 text-lg">
+                <Button size="lg" className="bg-white text-amber-600 border-2 border-amber-600 hover:bg-amber-600 hover:text-white dark:bg-gray-800 dark:text-amber-400 dark:border-amber-400 dark:hover:bg-amber-600 dark:hover:text-white px-8 py-4 text-lg font-semibold shadow-lg transition-all duration-300">
                   Já sou Membro
                 </Button>
               </Link>
@@ -250,8 +305,9 @@ export default function FidelidadePage() {
               Cartão 100% digital na sua wallet. Sem plástico, sem complicação.
             </p>
             <Link href="/fidelidade/cadastro">
-              <Button size="lg" className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-12 py-4 text-lg font-semibold">
+              <Button size="lg" className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-12 py-4 text-lg font-semibold shadow-xl transition-all duration-300 transform hover:scale-105">
                 Começar Agora
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </motion.div>
@@ -276,13 +332,13 @@ export default function FidelidadePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/fidelidade/cadastro">
-                <Button size="lg" className="bg-white text-amber-600 hover:bg-amber-50 px-12 py-4 text-lg font-semibold">
+                <Button size="lg" className="bg-white text-amber-600 hover:bg-amber-50 border-2 border-white px-12 py-4 text-lg font-semibold shadow-xl transition-all duration-300 transform hover:scale-105">
                   Garantir Minha Vaga
                   <Crown className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link href="/fidelidade/beneficios">
-                <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10 px-8 py-4 text-lg">
+                <Button size="lg" className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-amber-600 px-8 py-4 text-lg font-semibold transition-all duration-300">
                   Ver Todos os Benefícios
                 </Button>
               </Link>
