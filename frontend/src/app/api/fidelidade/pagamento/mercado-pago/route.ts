@@ -211,38 +211,39 @@ export async function PUT(request: NextRequest) {
       membroNome: membro?.nome
     });
 
-    // Criar pagamento PIX direto conforme docs (sem collector/metadata custom)
-    const pixPayment = {
-      transaction_amount: Number(valor),
-      description: 'Fidelidade VIP - Ordinário Bar',
-      payment_method_id: 'pix',
+    // Usar API Orders conforme documentação mais recente
+    const pixOrder = {
+      type: "online",
+      external_reference: String(membro_id),
+      transactions: {
+        payments: [
+          {
+            amount: Number(valor).toFixed(2),
+            payment_method: {
+              id: "pix",
+              type: "bank_transfer"
+            },
+            expiration_time: "P1D" // 1 dia para expirar
+          }
+        ]
+      },
       payer: {
         email: membro.email,
-        first_name: membro.nome?.split(' ')[0] || 'Cliente',
-        last_name: membro.nome?.split(' ').slice(1).join(' ') || 'VIP',
-        identification: {
-          type: 'CPF',
-          number: (membro.cpf || '').replace(/\D/g, '')
-        }
+        entity_type: "individual"
       },
-      external_reference: String(membro_id),
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
-      additional_info: {
-        items: [
-          { id: 'fidelidade_vip', title: 'Fidelidade VIP - Ordinário Bar', quantity: 1, unit_price: Number(valor) }
-        ]
-      }
+      total_amount: Number(valor).toFixed(2),
+      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`
     } as const;
 
-    console.log('🚀 DEBUG PIX - Payload final enviado:', JSON.stringify(pixPayment, null, 2));
+    console.log('🚀 DEBUG PIX - Order payload enviado:', JSON.stringify(pixOrder, null, 2));
 
-    const pixResponse = await fetch(`${MP_BASE_URL}/v1/payments`, {
+    const pixResponse = await fetch(`${MP_BASE_URL}/v1/orders`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${MP_ACCESS_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(pixPayment)
+      body: JSON.stringify(pixOrder)
     });
 
     if (!pixResponse.ok) {
@@ -256,13 +257,14 @@ export async function PUT(request: NextRequest) {
           error: 'Erro ao criar pagamento PIX',
           details: error,
           status: pixResponse.status,
-          debug: process.env.NODE_ENV === 'development' ? pixPayment : undefined
+          debug: process.env.NODE_ENV === 'development' ? pixOrder : undefined
         },
         { status: 500 }
       );
     }
 
-    const pixData = await pixResponse.json();
+    const orderData = await pixResponse.json();
+    console.log('✅ DEBUG PIX - Resposta do MP Orders:', JSON.stringify(orderData, null, 2));
 
     // Salvar registro de pagamento
     const { error: errorPagamento } = await supabase
@@ -272,22 +274,26 @@ export async function PUT(request: NextRequest) {
         valor,
         status: 'pendente',
         metodo_pagamento: 'pix',
-        gateway_transaction_id: pixData.id,
-        gateway_response: pixData,
-        data_vencimento: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 min
+        gateway_transaction_id: orderData.id,
+        gateway_response: orderData,
+        data_vencimento: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h
       });
 
     if (errorPagamento) {
       console.error('Erro ao salvar pagamento PIX:', errorPagamento);
     }
 
+    // Extrair dados do PIX da resposta da Order
+    const pixPayment = orderData.transactions?.payments?.[0];
+    
     return NextResponse.json({
       success: true,
-      payment_id: pixData.id,
-      status: pixData.status,
-      qr_code: pixData.point_of_interaction?.transaction_data?.qr_code,
-      qr_code_base64: pixData.point_of_interaction?.transaction_data?.qr_code_base64,
-      expiration_date: pixData.date_of_expiration
+      order_id: orderData.id,
+      payment_id: pixPayment?.id,
+      status: orderData.status,
+      qr_code: pixPayment?.transaction_details?.verification_code || pixPayment?.qr_code,
+      qr_code_base64: pixPayment?.qr_code_base64,
+      expiration_date: pixPayment?.expiration_time
     });
 
   } catch (error) {
