@@ -92,9 +92,9 @@ export async function POST(request: NextRequest) {
       preference.payment_methods = {
         excluded_payment_methods: [],
         excluded_payment_types: [
-          { id: 'credit_card' },
-          { id: 'debit_card' },
-          { id: 'ticket' }
+          { id: 'credit_card' } as any,
+          { id: 'debit_card' } as any,
+          { id: 'ticket' } as any
         ],
         installments: 1
       };

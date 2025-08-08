@@ -19,6 +19,7 @@ import {
   Star,
   Shield
 } from 'lucide-react';
+import { AlertDialogCustom } from '@/components/ui/alert-dialog-custom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -46,6 +47,18 @@ export default function CadastroFidelidadePage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error' | 'warning' | 'info';
+    title: string;
+    message: string;
+    action?: { label: string; onClick: () => void };
+  }>({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: ''
+  });
   const [formData, setFormData] = useState<FormData>({
     nome: '',
     email: '',
@@ -128,6 +141,20 @@ export default function CadastroFidelidadePage() {
     return formData.aceitaTermos && formData.aceitaLgpd;
   };
 
+  const showAlert = (type: 'success' | 'error' | 'warning' | 'info', title: string, message: string, action?: { label: string; onClick: () => void }) => {
+    setAlert({
+      isOpen: true,
+      type,
+      title,
+      message,
+      action
+    });
+  };
+
+  const closeAlert = () => {
+    setAlert(prev => ({ ...prev, isOpen: false }));
+  };
+
   const handleSubmit = async () => {
     if (!validateStep3()) return;
     
@@ -142,20 +169,73 @@ export default function CadastroFidelidadePage() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        
         // Salvar dados temporários para o pagamento
         localStorage.setItem('fidelidade_membro_temp', JSON.stringify(data.membro));
         
-        router.push('/fidelidade/pagamento');
+        showAlert(
+          'success',
+          'Cadastro realizado com sucesso! 🎉',
+          'Seus dados foram salvos. Agora vamos para o pagamento da sua primeira mensalidade.',
+          {
+            label: 'Ir para Pagamento',
+            onClick: () => {
+              closeAlert();
+              router.push('/fidelidade/pagamento');
+            }
+          }
+        );
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao cadastrar');
+        // Tratar diferentes tipos de erro
+        if (data.type === 'email_exists') {
+          showAlert(
+            'warning',
+            '📧 Email já cadastrado',
+            data.message,
+            {
+              label: 'Fazer Login',
+              onClick: () => {
+                closeAlert();
+                router.push('/fidelidade/login');
+              }
+            }
+          );
+        } else if (data.type === 'cpf_exists') {
+          showAlert(
+            'warning',
+            '🆔 CPF já cadastrado',
+            data.message,
+            {
+              label: 'Verificar Dados',
+              onClick: () => {
+                closeAlert();
+                setStep(1); // Volta para dados pessoais
+              }
+            }
+          );
+        } else if (data.type === 'server_error') {
+          showAlert(
+            'error',
+            '⚠️ Erro no servidor',
+            data.message
+          );
+        } else {
+          showAlert(
+            'error',
+            '❌ Erro ao cadastrar',
+            data.message || 'Ocorreu um erro inesperado. Tente novamente.'
+          );
+        }
       }
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao realizar cadastro. Tente novamente.');
+      showAlert(
+        'error',
+        '🚫 Erro de conexão',
+        'Não foi possível conectar com o servidor. Verifique sua internet e tente novamente.'
+      );
     } finally {
       setLoading(false);
     }
@@ -442,7 +522,6 @@ export default function CadastroFidelidadePage() {
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3">
                         <Checkbox
-                          id="termos"
                           checked={formData.aceitaTermos}
                           onCheckedChange={(checked) => handleCheckboxChange('aceitaTermos', checked as boolean)}
                         />
@@ -460,7 +539,6 @@ export default function CadastroFidelidadePage() {
                       
                       <div className="flex items-start space-x-3">
                         <Checkbox
-                          id="lgpd"
                           checked={formData.aceitaLgpd}
                           onCheckedChange={(checked) => handleCheckboxChange('aceitaLgpd', checked as boolean)}
                         />
@@ -471,7 +549,6 @@ export default function CadastroFidelidadePage() {
                       
                       <div className="flex items-start space-x-3">
                         <Checkbox
-                          id="marketing"
                           checked={formData.aceitaMarketing}
                           onCheckedChange={(checked) => handleCheckboxChange('aceitaMarketing', checked as boolean)}
                         />
@@ -526,6 +603,16 @@ export default function CadastroFidelidadePage() {
           </div>
         </div>
       </div>
+
+      {/* Alert Dialog */}
+      <AlertDialogCustom
+        isOpen={alert.isOpen}
+        onClose={closeAlert}
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+        action={alert.action}
+      />
     </div>
   );
 }
