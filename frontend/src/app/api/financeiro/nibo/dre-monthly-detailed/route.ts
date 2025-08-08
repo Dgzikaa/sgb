@@ -162,10 +162,10 @@ export async function GET(request: Request) {
     while (hasMore) {
       const { data: pageData, error } = await supabase
         .from('nibo_agendamentos')
-        .select('categoria_nome, valor, data_vencimento')
+        .select('categoria_nome, valor, data_competencia')
         .eq('deletado', false)
-        .gte('data_vencimento', startDate)
-        .lt('data_vencimento', endDate)
+        .gte('data_competencia', startDate)
+        .lt('data_competencia', endDate)
         .range(page * pageSize, (page + 1) * pageSize - 1);
       
       if (error) {
