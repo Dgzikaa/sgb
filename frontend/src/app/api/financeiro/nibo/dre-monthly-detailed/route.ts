@@ -16,8 +16,15 @@ const MACRO_CATEGORIAS = [
       "Stone Pix",
       "Pix Direto na Conta",
       "Dinheiro",
+    ],
+  },
+  {
+    nome: "Receitas Não Operacionais",
+    tipo: "entrada",
+    categorias: [
       "Receita de Eventos",
       "Outras Receitas",
+      "Contratos",
     ],
   },
   {
@@ -100,7 +107,7 @@ const MACRO_CATEGORIAS = [
     nome: "Não Operacionais",
     tipo: "saida",
     categorias: [
-      "Contratos",
+      "Despesas Não Operacionais",
     ],
   },
   // NOVAS MACRO-CATEGORIAS (FORA DO EBITDA)
