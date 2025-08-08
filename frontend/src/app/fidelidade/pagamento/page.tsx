@@ -33,10 +33,16 @@ export default function PagamentoPage() {
     setPaymentMethod(method);
 
     try {
-      // Buscar dados do membro (simulando por enquanto)
-      const membroData = localStorage.getItem('fidelidade_membro_temp');
+      // Buscar dados do membro (primeiro tenta temporários, depois logado)
+      let membroData = localStorage.getItem('fidelidade_membro_temp');
+      
       if (!membroData) {
-        throw new Error('Dados do membro não encontrados. Faça o cadastro novamente.');
+        // Se não tem dados temporários, buscar dados do usuário logado
+        membroData = localStorage.getItem('fidelidade_membro');
+      }
+      
+      if (!membroData) {
+        throw new Error('Dados do membro não encontrados. Faça o login ou cadastro novamente.');
       }
 
       const membro = JSON.parse(membroData);

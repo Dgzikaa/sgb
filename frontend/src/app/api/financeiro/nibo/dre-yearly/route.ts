@@ -55,7 +55,6 @@ const MACRO_CATEGORIAS = [
       "FREELA SEGURANÇA",
       "PRO LABORE",
       "PROVISÃO TRABALHISTA",
-      "Recursos Humanos",
     ],
   },
   {
@@ -73,8 +72,6 @@ const MACRO_CATEGORIAS = [
     categorias: [
       "Administrativo Ordinário",
       "Escritório Central",
-      "Recursos Humanos",
-      "Consultoria",
     ],
   },
   {
@@ -116,7 +113,6 @@ const MACRO_CATEGORIAS = [
       "Outros Investimentos",
       "Despesas Financeiras",
       "Obras",
-      "Consultoria",
       "Equipamentos",
       "Equipamentos R",
     ],

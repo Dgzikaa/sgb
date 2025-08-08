@@ -173,7 +173,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Criar pagamento PIX direto
+    // Criar pagamento PIX direto com chave CNPJ
     const pixPayment = {
       transaction_amount: valor,
       description: 'Fidelidade VIP - Ordinário Bar',
@@ -187,8 +187,37 @@ export async function PUT(request: NextRequest) {
           number: membro.cpf?.replace(/\D/g, '') || ''
         }
       },
+      // Configuração do recebedor (Ordinário Bar)
+      additional_info: {
+        items: [
+          {
+            id: 'fidelidade_vip',
+            title: 'Fidelidade VIP - Ordinário Bar',
+            description: 'Assinatura mensal programa VIP',
+            quantity: 1,
+            unit_price: valor
+          }
+        ],
+        payer: {
+          first_name: membro.nome.split(' ')[0],
+          last_name: membro.nome.split(' ').slice(1).join(' '),
+          phone: {
+            area_code: '61',
+            number: membro.telefone?.replace(/\D/g, '').slice(-9) || ''
+          }
+        }
+      },
+      // Dados do recebedor (Ordinário Bar)
+      collector: {
+        id: process.env.MERCADO_PAGO_COLLECTOR_ID
+      },
       external_reference: membro_id,
-      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`
+      notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
+      metadata: {
+        pix_key: '57.960.083/0001-88', // CNPJ PIX
+        business_name: 'Ordinário Bar',
+        member_id: membro_id
+      }
     };
 
     const pixResponse = await fetch(`${MP_BASE_URL}/v1/payments`, {

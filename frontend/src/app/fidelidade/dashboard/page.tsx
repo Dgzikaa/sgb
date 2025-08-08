@@ -368,14 +368,20 @@ export default function DashboardFidelidadePage() {
                   
                   <div className="space-y-2">
                     <Link href="/fidelidade/configuracoes">
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button 
+                        size="sm" 
+                        className="w-full bg-gray-600 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white border-0"
+                      >
                         <Settings className="w-4 h-4 mr-2" />
                         Configurações
                       </Button>
                     </Link>
                     
                     <Link href="/fidelidade/suporte">
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button 
+                        size="sm" 
+                        className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0"
+                      >
                         Suporte
                       </Button>
                     </Link>

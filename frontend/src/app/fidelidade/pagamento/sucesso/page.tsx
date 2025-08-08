@@ -24,14 +24,35 @@ import { useRouter } from 'next/navigation';
 export default function PagamentoSucessoPage() {
   const router = useRouter();
   const [showConfetti, setShowConfetti] = useState(true);
+  const [windowSize, setWindowSize] = useState({
+    width: 1200, // valor padrão para SSR
+    height: 800  // valor padrão para SSR
+  });
 
   useEffect(() => {
+    // Definir tamanho da janela após hidratação
+    const updateWindowSize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    // Definir tamanho inicial
+    updateWindowSize();
+
+    // Listener para redimensionamento
+    window.addEventListener('resize', updateWindowSize);
+
     // Esconder confetti após 3 segundos
     const timer = setTimeout(() => {
       setShowConfetti(false);
     }, 3000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateWindowSize);
+    };
   }, []);
 
   const proximosPassos = [
@@ -68,13 +89,13 @@ export default function PagamentoSucessoPage() {
               key={i}
               className="absolute w-3 h-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
               initial={{
-                x: Math.random() * window.innerWidth,
+                x: Math.random() * windowSize.width,
                 y: -10,
                 rotate: 0,
                 scale: Math.random() * 0.5 + 0.5
               }}
               animate={{
-                y: window.innerHeight + 10,
+                y: windowSize.height + 10,
                 rotate: 360,
                 transition: {
                   duration: Math.random() * 3 + 2,
@@ -291,7 +312,11 @@ export default function PagamentoSucessoPage() {
 
             <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400 mt-8">
               <button 
-                onClick={() => window.print()}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.print();
+                  }
+                }}
                 className="flex items-center gap-2 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 <Download className="w-4 h-4" />
@@ -299,7 +324,7 @@ export default function PagamentoSucessoPage() {
               </button>
               <button 
                 onClick={() => {
-                  if (navigator.share) {
+                  if (typeof window !== 'undefined' && navigator.share) {
                     navigator.share({
                       title: 'Agora sou VIP do Ordinário Bar!',
                       text: 'Acabei de me tornar membro VIP do Ordinário Bar! 🍻👑',

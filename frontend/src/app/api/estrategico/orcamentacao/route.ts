@@ -74,7 +74,6 @@ export async function GET(request: NextRequest) {
       // ===== DESPESAS ADMINISTRATIVAS =====
       'Escritório Central': categoriasAgrupadas['ESCRITÓRIO CENTRAL'] || categoriasAgrupadas['ADMINISTRATIVO'] || 0,
       'Administrativo Ordinário': categoriasAgrupadas['ADMINISTRATIVO ORDINÁRIO'] || categoriasAgrupadas['DESPESAS ADMINISTRATIVAS'] || 0,
-      'RECURSOS HUMANOS': categoriasAgrupadas['RECURSOS HUMANOS'] || 0,
       
       // ===== DESPESAS COMERCIAIS =====
       'Marketing': categoriasAgrupadas['MARKETING'] || categoriasAgrupadas['PUBLICIDADE'] || 0,

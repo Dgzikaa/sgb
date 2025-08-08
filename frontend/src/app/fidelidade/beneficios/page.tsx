@@ -401,7 +401,10 @@ export default function BeneficiosPage() {
                     </Button>
                   </Link>
                   <Link href="/fidelidade/termos">
-                    <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10 px-8 py-4 text-lg">
+                    <Button 
+                      size="lg" 
+                      className="bg-white/20 hover:bg-white/30 text-white border-white border-2 px-8 py-4 text-lg backdrop-blur-sm"
+                    >
                       Ver Termos
                     </Button>
                   </Link>

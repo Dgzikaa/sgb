@@ -97,8 +97,7 @@ export default function OrcamentacaoPage() {
       cor: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
       subcategorias: [
         { nome: 'Escritório Central', planejado: 24000, projecao: 31500, realizado: 0, editavel: true },
-        { nome: 'Administrativo Ordinário', planejado: 4000, projecao: 9500, realizado: 0, editavel: true },
-        { nome: 'RECURSOS HUMANOS', planejado: 1000, projecao: 2000, realizado: 2000.00, editavel: true }
+        { nome: 'Administrativo Ordinário', planejado: 4000, projecao: 9500, realizado: 0, editavel: true }
       ]
     },
     {

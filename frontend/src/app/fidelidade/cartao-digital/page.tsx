@@ -159,7 +159,10 @@ export default function CartaoDigitalPage() {
             </Button>
           </Link>
           
-          <Button variant="outline" onClick={shareCard}>
+          <Button 
+            onClick={shareCard}
+            className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0"
+          >
             <Share className="w-4 h-4 mr-2" />
             Compartilhar
           </Button>
@@ -280,8 +283,7 @@ export default function CartaoDigitalPage() {
               <CardContent className="space-y-3">
                 <Button 
                   onClick={downloadQRCode}
-                  variant="outline" 
-                  className="w-full"
+                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Baixar QR Code
@@ -289,8 +291,7 @@ export default function CartaoDigitalPage() {
                 
                 <Button 
                   onClick={copyQRCode}
-                  variant="outline" 
-                  className="w-full"
+                  className="w-full bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-700 text-white border-0"
                   disabled={copied}
                 >
                   {copied ? (

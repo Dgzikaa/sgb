@@ -734,9 +734,8 @@ export default function TabelaDesempenhoPage() {
                             <div className="flex gap-2">
                               <Button
                                 onClick={() => handleEdit(item)}
-                                variant="outline"
                                 size="sm"
-                                className="text-gray-700 dark:text-gray-300 h-8"
+                                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-8 px-3"
                               >
                                 <EditIcon className="h-4 w-4" />
                               </Button>
@@ -746,7 +745,7 @@ export default function TabelaDesempenhoPage() {
                                 }
                                 variant="destructive"
                                 size="sm"
-                                className="h-8"
+                                className="h-8 px-3"
                               >
                                 <TrashIcon className="h-4 w-4" />
                               </Button>
@@ -830,9 +829,8 @@ export default function TabelaDesempenhoPage() {
                       <div className="flex gap-2">
                         <Button
                           onClick={() => handleEdit(item)}
-                          variant="outline"
                           size="sm"
-                          className="text-gray-700 dark:text-gray-300"
+                          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                         >
                           <EditIcon className="h-4 w-4 mr-1" />
                           Editar

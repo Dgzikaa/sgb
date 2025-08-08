@@ -167,7 +167,7 @@ export default function LoginFidelidadePage() {
                     Ainda não é membro VIP?
                   </p>
                   <Link href="/fidelidade/cadastro">
-                    <Button variant="outline" className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:border-amber-400 dark:text-amber-400 dark:hover:bg-amber-900/20">
+                    <Button className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-700 text-white border-0">
                       Quero me Cadastrar
                     </Button>
                   </Link>

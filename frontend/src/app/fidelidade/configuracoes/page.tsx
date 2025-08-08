@@ -415,25 +415,37 @@ export default function ConfiguracoesFidelidadePage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Link href="/fidelidade/beneficios">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button 
+                      size="sm" 
+                      className="w-full justify-start bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-700 text-white border-0"
+                    >
                       Ver Benefícios
                     </Button>
                   </Link>
                   
                   <Link href="/fidelidade/historico">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button 
+                      size="sm" 
+                      className="w-full justify-start bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0"
+                    >
                       Histórico de Transações
                     </Button>
                   </Link>
                   
                   <Link href="/fidelidade/suporte">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button 
+                      size="sm" 
+                      className="w-full justify-start bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0"
+                    >
                       Suporte
                     </Button>
                   </Link>
                   
                   <Link href="/fidelidade/termos">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
+                    <Button 
+                      size="sm" 
+                      className="w-full justify-start bg-gray-600 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white border-0"
+                    >
                       Termos de Uso
                     </Button>
                   </Link>
