@@ -37,6 +37,7 @@ import { useBar } from '@/contexts/BarContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { EditarDesempenhoModal } from '@/components/gestao/EditarDesempenhoModal';
 import { useToast } from '@/hooks/use-toast';
+import { useGlobalLoading } from '@/components/ui/global-loading';
 
 interface DadosDesempenho {
   id: number;
@@ -76,6 +77,7 @@ export default function TabelaDesempenhoPage() {
   const { selectedBar } = useBar();
   const { setPageTitle } = usePageTitle();
   const { toast } = useToast();
+  const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
 
   const [dados, setDados] = useState<DadosDesempenho[]>([]);
   const [resumo, setResumo] = useState<ResumoDesempenho | null>(null);
@@ -113,6 +115,7 @@ export default function TabelaDesempenhoPage() {
     if (!selectedBar?.id) return;
 
     setLoading(true);
+    showLoading('Carregando dados de desempenho...');
     console.log('🔄 Carregando dados de desempenho...');
 
     try {
@@ -150,12 +153,15 @@ export default function TabelaDesempenhoPage() {
       setResumo(null);
     } finally {
       setLoading(false);
+      hideLoading();
     }
   }, [selectedBar?.id, anoFiltro, mesFiltro]);
 
   useEffect(() => {
     if (selectedBar?.id) {
       carregarDados();
+      // Recálculo automático ao carregar página
+      recalcularAutomatico();
     }
   }, [carregarDados, selectedBar?.id]);
 
@@ -290,6 +296,7 @@ export default function TabelaDesempenhoPage() {
     }
 
     setRecalculating(true);
+    showLoading('Recalculando dados automaticamente...');
 
     try {
       const response = await fetch('/api/gestao/desempenho/recalcular', {
@@ -331,6 +338,7 @@ export default function TabelaDesempenhoPage() {
       });
     } finally {
       setRecalculating(false);
+      hideLoading();
     }
   };
 
@@ -342,6 +350,7 @@ export default function TabelaDesempenhoPage() {
     }
 
     setCreatingWeeks(true);
+    showLoading('Criando semanas do ano...');
 
     try {
       const response = await fetch('/api/gestao/desempenho/criar-semanas', {
@@ -383,6 +392,7 @@ export default function TabelaDesempenhoPage() {
       });
     } finally {
       setCreatingWeeks(false);
+      hideLoading();
     }
   };
 
@@ -500,6 +510,7 @@ export default function TabelaDesempenhoPage() {
 
   return (
     <ProtectedRoute requiredModule="gestao">
+      <GlobalLoadingComponent />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6 space-y-6">
           {/* Filtros Expandir/Minimizar */}
@@ -525,63 +536,6 @@ export default function TabelaDesempenhoPage() {
                     {dadosFiltrados.length} registros
                   </Badge>
                   <div className="flex gap-2">
-                    <Button
-                      onClick={carregarDados}
-                      disabled={loading}
-                      variant="outline"
-                      size="sm"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600"
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
-                      />
-                      Atualizar
-                    </Button>
-                    <Button
-                      onClick={sincronizarComGoogleSheets}
-                      disabled={syncing}
-                      className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
-                      size="sm"
-                    >
-                      {syncing ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                          Sincronizando...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="h-4 w-4 mr-2" />
-                          Sincronizar
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={recalcularAutomatico}
-                      disabled={recalculating}
-                      className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
-                      size="sm"
-                    >
-                      {recalculating ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                          Recalculando...
-                        </>
-                      ) : (
-                        <>
-                          <Calculator className="h-4 w-4 mr-2" />
-                          Recalcular
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={limparTodosDados}
-                      variant="destructive"
-                      size="sm"
-                      className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white"
-                    >
-                      <TrashIcon className="h-4 w-4 mr-2" />
-                      Limpar Tudo
-                    </Button>
                     <Button
                       onClick={criarSemanasFaltantes}
                       disabled={creatingWeeks}
@@ -681,7 +635,8 @@ export default function TabelaDesempenhoPage() {
           </Card>
 
           {/* Tabela com Ações */}
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+          {/* DESKTOP - Tabela */}
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hidden md:block">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                 Dados de Desempenho
@@ -692,31 +647,31 @@ export default function TabelaDesempenhoPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Semana
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm hidden sm:table-cell">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Período
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Faturamento
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm hidden lg:table-cell">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Clientes
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm hidden lg:table-cell">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Ticket Médio
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm hidden xl:table-cell">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Reservas
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm hidden md:table-cell">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Meta
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Atingimento
                       </th>
-                      <th className="text-left py-3 px-2 sm:px-4 font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Ações
                       </th>
                     </tr>
@@ -733,15 +688,12 @@ export default function TabelaDesempenhoPage() {
                           key={item.id}
                           className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900"
                         >
-                          <td className="py-3 px-2 sm:px-4 text-gray-800 dark:text-gray-200">
-                            <div className="font-medium text-sm sm:text-base">
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
+                            <div className="font-medium text-base">
                               Semana {item.numero_semana}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-500 sm:hidden">
-                              {item.data_inicio} - {item.data_fim}
-                            </div>
                           </td>
-                          <td className="py-3 px-2 sm:px-4 text-gray-800 dark:text-gray-200 hidden sm:table-cell">
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
                             <div className="text-sm">
                               <div>{item.data_inicio}</div>
                               <div className="text-gray-500 dark:text-gray-500">
@@ -749,21 +701,18 @@ export default function TabelaDesempenhoPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="py-3 px-2 sm:px-4 text-gray-800 dark:text-gray-200">
-                            <div className="font-semibold text-sm sm:text-base">
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
+                            <div className="font-semibold text-base">
                               {formatarMoeda(item.faturamento_total)}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-500 lg:hidden">
-                              {item.clientes_atendidos} clientes
-                            </div>
                           </td>
-                          <td className="py-3 px-2 sm:px-4 text-gray-800 dark:text-gray-200 hidden lg:table-cell">
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
                             {item.clientes_atendidos}
                           </td>
-                          <td className="py-3 px-2 sm:px-4 text-gray-800 dark:text-gray-200 hidden lg:table-cell">
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
                             {formatarMoeda(item.ticket_medio)}
                           </td>
-                          <td className="py-3 px-2 sm:px-4 text-gray-800 dark:text-gray-200 hidden xl:table-cell">
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
                             <div className="text-sm">
                               <div>
                                 {item.reservas_presentes}/{item.reservas_totais}
@@ -775,26 +724,25 @@ export default function TabelaDesempenhoPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="py-3 px-2 sm:px-4 text-gray-800 dark:text-gray-200 hidden md:table-cell">
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
                             {formatarMoeda(item.meta_semanal)}
                           </td>
-                          <td className="py-3 px-2 sm:px-4">
+                          <td className="py-3 px-4">
                             <Badge
                               className={`${getAtingimentoColor(atingimento)} text-xs`}
                             >
                               {atingimento.toFixed(1)}%
                             </Badge>
                           </td>
-                          <td className="py-3 px-2 sm:px-4">
-                            <div className="flex flex-col gap-1 sm:flex-row sm:gap-2">
+                          <td className="py-3 px-4">
+                            <div className="flex gap-2">
                               <Button
                                 onClick={() => handleEdit(item)}
                                 variant="outline"
                                 size="sm"
                                 className="text-gray-700 dark:text-gray-300 h-8"
                               >
-                                <EditIcon className="h-4 w-4 sm:mr-0 mr-2" />
-                                <span className="sm:hidden">Editar</span>
+                                <EditIcon className="h-4 w-4" />
                               </Button>
                               <Button
                                 onClick={() =>
@@ -804,8 +752,7 @@ export default function TabelaDesempenhoPage() {
                                 size="sm"
                                 className="h-8"
                               >
-                                <TrashIcon className="h-4 w-4 sm:mr-0 mr-2" />
-                                <span className="sm:hidden">Excluir</span>
+                                <TrashIcon className="h-4 w-4" />
                               </Button>
                             </div>
                           </td>
@@ -817,6 +764,98 @@ export default function TabelaDesempenhoPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* MOBILE - Cards */}
+          <div className="block md:hidden space-y-4">
+            {dadosFiltrados.map(item => {
+              const atingimento =
+                item.meta_semanal > 0
+                  ? (item.faturamento_total / item.meta_semanal) * 100
+                  : 0;
+
+              return (
+                <Card key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          Semana {item.numero_semana}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {item.data_inicio} - {item.data_fim}
+                        </p>
+                      </div>
+                      <Badge className={`${getAtingimentoColor(atingimento)} text-xs`}>
+                        {atingimento.toFixed(1)}%
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Faturamento
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {formatarMoeda(item.faturamento_total)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Clientes
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {item.clientes_atendidos}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Ticket Médio
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {formatarMoeda(item.ticket_medio)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Reservas
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {item.reservas_presentes}/{item.reservas_totais}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Meta: {formatarMoeda(item.meta_semanal)}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleEdit(item)}
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-700 dark:text-gray-300"
+                        >
+                          <EditIcon className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                        <Button
+                          onClick={() => excluirSemana(item.id, item.numero_semana)}
+                          variant="destructive"
+                          size="sm"
+                        >
+                          <TrashIcon className="h-4 w-4 mr-1" />
+                          Excluir
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </div>
 
