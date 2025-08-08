@@ -217,7 +217,7 @@ export async function GET(request: Request) {
           entradas: (macro.tipo === 'entrada' || isContrato) ? total : 0,
           saidas: (macro.tipo === 'saida' && !isContrato) ? total : 0
         };
-      }).filter(cat => cat.entradas > 0 || cat.saidas > 0); // Só incluir categorias com valores
+      }); // Incluir TODAS as categorias, mesmo com valor 0
 
       return {
         nome: macro.nome,
