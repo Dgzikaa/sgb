@@ -714,7 +714,7 @@ export default function DrePage() {
                               const custosVariaveis = data.macroCategorias.find(m => m.nome === "Custos Variáveis")?.total_saidas || 0;
                               const cmv = data.macroCategorias.find(m => m.nome === "Custo insumos (CMV)")?.total_saidas || 0;
                               
-                              const mc = ((custosVariaveis + cmv) / (totalReceitas + 1)) * 100;
+                              const mc = (1 - ((custosVariaveis + cmv) / totalReceitas)) * 100;
                               const breakeven = custoFixo / (mc / 100);
                               
                               return (
