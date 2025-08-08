@@ -192,11 +192,22 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (errorMembro || !membro) {
+      console.error('🚨 DEBUG PIX - Erro ao buscar membro:', errorMembro);
       return NextResponse.json(
         { error: 'Membro não encontrado' },
         { status: 404 }
       );
     }
+
+    console.log('🔍 DEBUG PIX - Dados do membro:', {
+      membro_id,
+      valor,
+      recurring,
+      hasMembroCpf: !!membro?.cpf,
+      membroCpfLength: membro?.cpf?.replace(/\D/g, '').length,
+      membroEmail: membro?.email,
+      membroNome: membro?.nome
+    });
 
     // Criar pagamento PIX direto conforme docs (sem collector/metadata custom)
     const pixPayment = {
@@ -220,6 +231,8 @@ export async function PUT(request: NextRequest) {
         ]
       }
     } as const;
+
+    console.log('🚀 DEBUG PIX - Payload final enviado:', JSON.stringify(pixPayment, null, 2));
 
     const pixResponse = await fetch(`${MP_BASE_URL}/v1/payments`, {
       method: 'POST',
