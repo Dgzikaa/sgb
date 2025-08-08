@@ -736,13 +736,10 @@ export default function DrePage() {
                               Macro-Categoria
                             </th>
                             <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">
-                              Entradas
+                              Valor
                             </th>
                             <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">
-                              Saídas
-                            </th>
-                            <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">
-                              Saldo
+                              %
                             </th>
                           </tr>
                         </thead>
@@ -754,7 +751,16 @@ export default function DrePage() {
                             const Icon = getMacroIcon(macro.nome);
                             const colorClass = getMacroColor(macro.nome);
                             const isCollapsed = collapsedMacros.has(macro.nome);
-                            const macroSaldo = macro.total_entradas - macro.total_saidas;
+                            // Calcular valor unificado: receitas positivas, custos negativos
+                            const valorUnificado = macro.nome === "Receita" 
+                              ? macro.total_entradas 
+                              : -macro.total_saidas;
+                            
+                            // Calcular percentual baseado no total de receitas
+                            const totalReceitas = data?.macroCategorias.find(m => m.nome === "Receita")?.total_entradas || 1;
+                            const percentual = macro.nome === "Receita" 
+                              ? 100 
+                              : (macro.total_saidas / totalReceitas) * 100;
                             
                             return (
                               <React.Fragment key={macro.nome}>
@@ -780,43 +786,41 @@ export default function DrePage() {
                                     </div>
                                   </td>
                                   <td className="py-2.5 px-4 text-right">
-                                    <span className="text-base font-semibold text-emerald-600 dark:text-emerald-400">
-                                      {formatCurrency(macro.total_entradas)}
+                                    <span className={`text-base font-semibold ${valorUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                      {formatCurrency(valorUnificado)}
                                     </span>
                                   </td>
                                   <td className="py-2.5 px-4 text-right">
-                                    <span className="text-base font-semibold text-red-600 dark:text-red-400">
-                                      {formatCurrency(macro.total_saidas)}
-                                    </span>
-                                  </td>
-                                  <td className="py-2.5 px-4 text-right">
-                                    <span className={`text-base font-semibold ${macroSaldo >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                                      {formatCurrency(macroSaldo)}
+                                    <span className="text-base font-medium text-gray-600 dark:text-gray-400">
+                                      {percentual.toFixed(1)}%
                                     </span>
                                   </td>
                                 </tr>
                                 
                                 {/* Categorias Expandidas */}
                                 {!isCollapsed && macro.categorias.map((cat) => {
-                                  const catSaldo = cat.entradas - cat.saidas;
+                                  // Valor unificado para subcategorias
+                                  const valorCatUnificado = macro.nome === "Receita" 
+                                    ? cat.entradas 
+                                    : -cat.saidas;
+                                  
+                                  // Percentual da subcategoria baseado no total de receitas
+                                  const percentualCat = macro.nome === "Receita"
+                                    ? (cat.entradas / totalReceitas) * 100
+                                    : (cat.saidas / totalReceitas) * 100;
                                   return (
                                     <tr key={cat.nome} className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
                                       <td className="py-3 px-6 pl-16">
                                         <span className="text-gray-700 dark:text-gray-300">{cat.nome}</span>
                                       </td>
                                       <td className="py-3 px-6 text-right">
-                                        <span className="text-emerald-600 dark:text-emerald-400">
-                                          {formatCurrency(cat.entradas)}
+                                        <span className={`${valorCatUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                          {formatCurrency(valorCatUnificado)}
                                         </span>
                                       </td>
                                       <td className="py-3 px-6 text-right">
-                                        <span className="text-red-600 dark:text-red-400">
-                                          {formatCurrency(cat.saidas)}
-                                        </span>
-                                      </td>
-                                      <td className="py-3 px-6 text-right">
-                                        <span className={`${catSaldo >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                                          {formatCurrency(catSaldo)}
+                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-500">
+                                          {percentualCat.toFixed(1)}%
                                         </span>
                                       </td>
                                     </tr>
@@ -828,7 +832,7 @@ export default function DrePage() {
 
                           {/* Linha de separação antes do EBITDA */}
                           <tr className="bg-gray-100 dark:bg-gray-700">
-                            <td colSpan={4} className="py-2"></td>
+                            <td colSpan={3} className="py-2"></td>
                           </tr>
 
                           {/* EBITDA - Linha especial */}
@@ -844,25 +848,20 @@ export default function DrePage() {
                               </div>
                             </td>
                             <td className="py-3 px-4 text-right">
-                              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                                {formatCurrency(data?.entradasTotais || 0)}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-right">
-                              <span className="text-base font-bold text-red-600 dark:text-red-400">
-                                {formatCurrency(data?.saidasTotais || 0)}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-right">
                               <span className={`text-lg font-bold ${(data?.ebitda || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                 {formatCurrency(data?.ebitda || 0)}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <span className="text-base font-bold text-gray-600 dark:text-gray-400">
+                                -
                               </span>
                             </td>
                           </tr>
 
                           {/* Linha de separação após EBITDA */}
                           <tr className="bg-gray-100 dark:bg-gray-700">
-                            <td colSpan={4} className="py-2"></td>
+                            <td colSpan={3} className="py-2"></td>
                           </tr>
 
                           {/* Macro-categorias fora do EBITDA (Investimentos e Sócios) */}
@@ -916,25 +915,28 @@ export default function DrePage() {
                                 
                                 {/* Categorias Expandidas */}
                                 {!isCollapsed && macro.categorias.map((cat) => {
-                                  const catSaldo = cat.entradas - cat.saidas;
+                                  // Valor unificado para subcategorias
+                                  const valorCatUnificado = macro.nome === "Receita" 
+                                    ? cat.entradas 
+                                    : -cat.saidas;
+                                  
+                                  // Percentual da subcategoria baseado no total de receitas
+                                  const percentualCat = macro.nome === "Receita"
+                                    ? (cat.entradas / totalReceitas) * 100
+                                    : (cat.saidas / totalReceitas) * 100;
                                   return (
                                     <tr key={cat.nome} className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
                                       <td className="py-3 px-6 pl-16">
                                         <span className="text-gray-700 dark:text-gray-300">{cat.nome}</span>
                                       </td>
                                       <td className="py-3 px-6 text-right">
-                                        <span className="text-emerald-600 dark:text-emerald-400">
-                                          {formatCurrency(cat.entradas)}
+                                        <span className={`${valorCatUnificado >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                          {formatCurrency(valorCatUnificado)}
                                         </span>
                                       </td>
                                       <td className="py-3 px-6 text-right">
-                                        <span className="text-red-600 dark:text-red-400">
-                                          {formatCurrency(cat.saidas)}
-                                        </span>
-                                      </td>
-                                      <td className="py-3 px-6 text-right">
-                                        <span className={`${catSaldo >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                                          {formatCurrency(catSaldo)}
+                                        <span className="text-sm font-medium text-gray-500 dark:text-gray-500">
+                                          {percentualCat.toFixed(1)}%
                                         </span>
                                       </td>
                                     </tr>
@@ -950,18 +952,13 @@ export default function DrePage() {
                               TOTAIS GERAIS
                             </td>
                             <td className="py-4 px-6 text-right">
-                              <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                                {formatCurrency(data?.entradasTotais || 0)}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-right">
-                              <span className="text-xl font-bold text-red-600 dark:text-red-400">
-                                {formatCurrency(data?.saidasTotais || 0)}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-right">
                               <span className={`text-xl font-bold ${(data?.saldo || 0) >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
                                 {formatCurrency(data?.saldo || 0)}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-right">
+                              <span className="text-xl font-bold text-gray-600 dark:text-gray-400">
+                                100%
                               </span>
                             </td>
                           </tr>
