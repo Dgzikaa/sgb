@@ -162,6 +162,14 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { membro_id, valor = 100.00 } = body;
 
+    console.log('🔍 DEBUG PIX - Variáveis ENV:', {
+      hasAccessToken: !!MP_ACCESS_TOKEN,
+      hasCollectorId: !!process.env.MERCADO_PAGO_COLLECTOR_ID,
+      hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
+      collectorId: process.env.MERCADO_PAGO_COLLECTOR_ID,
+      appUrl: process.env.NEXT_PUBLIC_APP_URL
+    });
+
     if (!MP_ACCESS_TOKEN) {
       // Modo demonstração/desenvolvimento para PIX
       console.warn('MERCADO_PAGO_ACCESS_TOKEN não configurado. Usando modo demonstração PIX.');
@@ -199,9 +207,9 @@ export async function PUT(request: NextRequest) {
       description: 'Fidelidade VIP - Ordinário Bar',
       payment_method_id: 'pix',
       payer: {
-        email: membro.email || 'test@test.com',
-        first_name: membro.nome?.split(' ')[0] || 'Test',
-        last_name: membro.nome?.split(' ').slice(1).join(' ') || 'User'
+        email: membro.email,
+        first_name: membro.nome?.split(' ')[0] || 'Cliente',
+        last_name: membro.nome?.split(' ').slice(1).join(' ') || 'VIP'
       },
       // Configuração simplificada para teste
       additional_info: {
@@ -214,10 +222,10 @@ export async function PUT(request: NextRequest) {
           }
         ]
       },
-      // Dados do recebedor (Ordinário Bar) - Auto extraído do token
-      // collector: {
-      //   id: process.env.MERCADO_PAGO_COLLECTOR_ID || '2611577977'
-      // },
+      // Dados do recebedor (Ordinário Bar)
+      collector: {
+        id: parseInt(process.env.MERCADO_PAGO_COLLECTOR_ID || '2611577977')
+      },
       external_reference: membro_id,
       notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/fidelidade/pagamento/webhook`,
       metadata: {
