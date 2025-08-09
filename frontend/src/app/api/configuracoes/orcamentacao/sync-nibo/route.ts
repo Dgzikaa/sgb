@@ -65,13 +65,15 @@ export async function POST(request: Request) {
       ['CONDOMÍNIO', 'ALUGUEL/CONDOMÍNIO/IPTU'],
       ['IPTU', 'ALUGUEL/CONDOMÍNIO/IPTU'],
       
-      // ✅ CONTRATOS -> Mapeamento para categorias específicas que existem
-      ['CONTRATOS', 'CONTRATOS_AGRUPADO'], // Será tratado especialmente
-      ['INTERNET', 'INTERNET'], // Existe no banco
-      ['LUZ', 'LUZ'], // Existe no banco
-      ['ÁGUA', 'ÁGUA'], // Existe no banco
-      ['GÁS', 'GÁS'], // Existe no banco
-      ['MANUTENÇÃO', 'MANUTENÇÃO'] // Existe no banco
+      // ✅ Utilidades - MANTER SEPARADAS (não agrupar)
+      // Estas são categorias INDIVIDUAIS conforme DRE
+      ['INTERNET', 'INTERNET'], // Categoria separada
+      ['LUZ', 'LUZ'], // Categoria separada
+      ['ÁGUA', 'ÁGUA'], // Categoria separada
+      ['GÁS', 'GÁS'], // Categoria separada
+      ['MANUTENÇÃO', 'MANUTENÇÃO'], // Categoria separada
+      
+      // ❌ CONTRATOS não é uma categoria real - remover agrupamento
     ]);
     
     // Função para encontrar categoria normalizada
@@ -99,11 +101,8 @@ export async function POST(request: Request) {
         return 'CMV'; // Agrupa todos os custos como CMV
       }
       
-      // Casos especiais para CONTRATOS (utilitários)
-      const utilitarios = ['INTERNET', 'LUZ', 'ÁGUA', 'GÁS', 'MANUTENÇÃO'];
-      if (utilitarios.some(util => nomeOriginal.toUpperCase().includes(util))) {
-        return 'CONTRATOS';
-      }
+      // ❌ REMOVIDO: Agrupamento incorreto de utilitários
+      // INTERNET, LUZ, ÁGUA, GÁS, MANUTENÇÃO são categorias SEPARADAS
       
       return nomeOriginal; // Retorna original se não encontrar
     };
@@ -127,11 +126,8 @@ export async function POST(request: Request) {
         subcategoriaFinal = item.categoria_nome; // Manter subcategoria como categoria original
       }
       
-      // Agrupar CONTRATOS
-      if (categoriaNormalizada === 'CONTRATOS') {
-        categoriaFinal = 'CONTRATOS';
-        subcategoriaFinal = item.categoria_nome; // Manter subcategoria como categoria original
-      }
+      // ❌ REMOVIDO: Agrupamento CONTRATOS incorreto
+      // Mantendo categorias individuais conforme DRE
       
       const key = `${categoriaFinal}-${subcategoriaFinal || ''}-${mes}`;
       

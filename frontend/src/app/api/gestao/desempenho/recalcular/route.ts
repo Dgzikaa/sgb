@@ -172,7 +172,57 @@ export async function POST(request: Request) {
       console.log(`  - % Faturamento: ${atracaoFaturamentoPercent.toFixed(1)}%`);
 
       // =============================================
-      // 3. CLIENTES ATENDIDOS
+      // 3. CMO (CUSTO DE MÃO DE OBRA) - AUTOMÁTICO
+      // =============================================
+      
+      console.log('👷 Calculando CMO (Custo de Mão de Obra)...');
+      
+      const cmoData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor, categoria_nome', {
+        'gte_data_competencia': startDate,
+        'lte_data_competencia': endDate,
+        'eq_bar_id': barId
+      });
+
+      const categoriasCMO = [
+        'SALARIO FUNCIONARIOS',
+        'VALE TRANSPORTE', 
+        'ALIMENTAÇÃO',
+        'ADICIONAIS',
+        'FREELA ATENDIMENTO',
+        'FREELA BAR',
+        'FREELA COZINHA', 
+        'FREELA LIMPEZA',
+        'FREELA SEGURANÇA',
+        'PRO LABORE',
+        'PROVISÃO TRABALHISTA'
+      ];
+
+      const custosCMODetalhados = categoriasCMO.map(categoria => {
+        const itens = cmoData?.filter(item => 
+          item.categoria_nome && item.categoria_nome.trim() === categoria
+        ) || [];
+        
+        const total = itens.reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+        
+        return {
+          categoria,
+          quantidade: itens.length,
+          total
+        };
+      });
+
+      const custoTotalCMO = custosCMODetalhados.reduce((sum, item) => sum + item.total, 0);
+
+      console.log(`👷 CMO Calculado por categoria:`);
+      custosCMODetalhados.forEach(item => {
+        if (item.quantidade > 0) {
+          console.log(`  - ${item.categoria}: ${item.quantidade} itens = R$ ${item.total.toFixed(2)}`);
+        }
+      });
+      console.log(`  - TOTAL CMO: R$ ${custoTotalCMO.toFixed(2)}`);
+
+      // =============================================
+      // 4. CLIENTES ATENDIDOS
       // =============================================
       
       console.log('👥 Calculando Clientes Atendidos...');
@@ -215,14 +265,14 @@ export async function POST(request: Request) {
       console.log(`  - TOTAL: ${clientesAtendidos}`);
 
       // =============================================
-      // 4. TICKET MÉDIO
+      // 5. TICKET MÉDIO
       // =============================================
       
       const ticketMedio = clientesAtendidos > 0 ? faturamentoTotal / clientesAtendidos : 0;
       console.log(`🎯 Ticket Médio: R$ ${ticketMedio.toFixed(2)}`);
 
       // =============================================
-      // 5. ATUALIZAR REGISTRO NO BANCO
+      // 6. ATUALIZAR REGISTRO NO BANCO
       // =============================================
       
       console.log('💾 Atualizando registro no banco...');
@@ -233,6 +283,7 @@ export async function POST(request: Request) {
         clientes_atendidos: clientesAtendidos,
         ticket_medio: ticketMedio,
         custo_atracao_faturamento: atracaoFaturamentoPercent,
+        cmo: custoTotalCMO, // CMO AUTOMÁTICO
         updated_at: new Date().toISOString(),
         
         // MANTER VALORES MANUAIS EXISTENTES
@@ -240,9 +291,9 @@ export async function POST(request: Request) {
         reservas_totais: semana.reservas_totais,
         reservas_presentes: semana.reservas_presentes,
         
-        // CMV e CMO (manuais)
+        // CMV (manual)
         cmv_limpo: semana.cmv_limpo,
-        cmo: semana.cmo,
+        cmv: semana.cmv,
         cmv_rs: semana.cmv_rs,
         
         // Meta (manual)
@@ -253,7 +304,7 @@ export async function POST(request: Request) {
         faturamento_bar: semana.faturamento_bar,
         faturamento_cmovivel: semana.faturamento_cmovivel,
         
-        observacoes: `Recalculado automaticamente em ${new Date().toLocaleString('pt-BR')} - Faturamento, Clientes, Ticket Médio e Atração/Faturamento`
+        observacoes: `Recalculado automaticamente em ${new Date().toLocaleString('pt-BR')} - Faturamento, Clientes, Ticket Médio, CMO e Atração/Faturamento`
       };
 
       const { data: atualizada, error: updateError } = await supabase
