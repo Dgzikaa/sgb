@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
+import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -111,6 +112,7 @@ export default function VisaoGeralPage() {
     setLoading(true);
     showLoading('Carregando indicadores...');
     try {
+      // Carregar apenas anual e trimestral, retenção é independente
       const [anualResponse, trimestralResponse] = await Promise.all([
         fetch(`/api/visao-geral/indicadores?periodo=anual`, {
           headers: {
@@ -138,7 +140,11 @@ export default function VisaoGeralPage() {
       const trimestralData = await trimestralResponse.json();
 
       setIndicadoresAnuais(anualData.anual);
-      setIndicadoresTrimestrais(trimestralData.trimestral);
+      // Não incluir retenção aqui, será carregada independentemente
+      setIndicadoresTrimestrais({
+        ...trimestralData.trimestral,
+        retencao: { valor: 0, meta: 10 } // Placeholder
+      });
     } catch (error) {
       console.error('Erro ao carregar indicadores:', error);
       toast({
@@ -162,22 +168,6 @@ export default function VisaoGeralPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <GlobalLoadingComponent />
       <div className="container mx-auto px-4 py-4 space-y-4">
-        {/* Header compacto */}
-        <div className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Visão Geral</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Dashboard executivo</p>
-              </div>
-            </div>
-            
-
-          </div>
-        </div>
 
         {/* Indicadores Anuais */}
         <div className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
@@ -187,11 +177,11 @@ export default function VisaoGeralPage() {
           >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
-                <DollarSign className="w-5 h-5 text-white" />
+                <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Performance Anual</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Performance estratégica desde abertura</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Visão Geral • Performance Anual</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Dashboard executivo • Performance estratégica desde abertura</p>
               </div>
             </div>
             <Button
@@ -354,7 +344,7 @@ export default function VisaoGeralPage() {
               ) : indicadoresTrimestrais ? (
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                   <IndicadorCard
-                    titulo="Clientes Ativos"
+                    titulo="Clientes Ativos (90d)"
                     valor={indicadoresTrimestrais.clientesAtivos.valor}
                     meta={indicadoresTrimestrais.clientesAtivos.meta}
                     formato="numero"
@@ -369,12 +359,8 @@ export default function VisaoGeralPage() {
                     cor="blue"
                   />
                   
-                  <IndicadorCard
-                    titulo="Retenção"
-                    valor={indicadoresTrimestrais.retencao.valor}
-                    meta={indicadoresTrimestrais.retencao.meta}
-                    formato="percentual"
-                    cor="purple"
+                  <IndicadorRetencao
+                    meta={indicadoresTrimestrais?.retencao?.meta || 10}
                   />
                   
                   <IndicadorCard
@@ -383,6 +369,7 @@ export default function VisaoGeralPage() {
                     meta={indicadoresTrimestrais.cmvLimpo.meta}
                     formato="percentual"
                     cor="yellow"
+                    inverterProgresso={true}
                   />
                   
                   <IndicadorCard
@@ -391,6 +378,7 @@ export default function VisaoGeralPage() {
                     meta={indicadoresTrimestrais.cmo.meta}
                     formato="percentual"
                     cor="orange"
+                    inverterProgresso={true}
                   />
                   
                   <IndicadorCard
@@ -399,6 +387,7 @@ export default function VisaoGeralPage() {
                     meta={indicadoresTrimestrais.artistica.meta}
                     formato="percentual"
                     cor="pink"
+                    inverterProgresso={true}
                   />
                 </div>
               ) : (

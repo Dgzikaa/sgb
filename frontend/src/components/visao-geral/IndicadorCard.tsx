@@ -15,6 +15,7 @@ interface IndicadorCardProps {
   tendencia?: number;
   detalhes?: Record<string, number>;
   cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
+  inverterProgresso?: boolean; // Para indicadores onde "menos é melhor"
 }
 
 export function IndicadorCard({
@@ -26,7 +27,8 @@ export function IndicadorCard({
   formato = 'numero',
   tendencia,
   detalhes,
-  cor = 'blue'
+  cor = 'blue',
+  inverterProgresso = false
 }: IndicadorCardProps) {
   const formatarValor = (val: number) => {
     switch (formato) {
@@ -47,7 +49,7 @@ export function IndicadorCard({
     }
   };
 
-  const progresso = meta > 0 ? (valor / meta) * 100 : 0;
+  const progresso = meta > 0 ? (inverterProgresso ? Math.max(0, 100 - (valor / meta) * 100) : (valor / meta) * 100) : 0;
   
   const getCorClasse = () => {
     switch (cor) {

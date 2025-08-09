@@ -31,6 +31,9 @@ interface DadosDesempenho {
   ticket_medio: number;
   cmv_teorico: number;
   cmv_limpo: number;
+  cmv: number;
+  cmo: number;
+  custo_atracao_faturamento: number;
   meta_semanal: number;
   observacoes?: string;
 }
@@ -62,6 +65,9 @@ export function EditarDesempenhoModal({
         reservas_presentes: dados.reservas_presentes,
         cmv_teorico: dados.cmv_teorico,
         cmv_limpo: dados.cmv_limpo,
+        cmv: dados.cmv,
+        cmo: dados.cmo,
+        custo_atracao_faturamento: dados.custo_atracao_faturamento,
         meta_semanal: dados.meta_semanal,
         observacoes: dados.observacoes || '',
       });
@@ -229,7 +235,7 @@ export function EditarDesempenhoModal({
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Custos e Metas
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="cmv_teorico" className="text-gray-700 dark:text-gray-300">
                   CMV Teórico (%)
@@ -256,6 +262,45 @@ export function EditarDesempenhoModal({
                   onChange={(e) => handleChange('cmv_limpo', e.target.value)}
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   required
+                />
+              </div>
+              <div>
+                <Label htmlFor="cmv" className="text-gray-700 dark:text-gray-300">
+                  CMV (R$)
+                </Label>
+                <Input
+                  id="cmv"
+                  type="number"
+                  step="0.01"
+                  value={formData.cmv || 0}
+                  onChange={(e) => handleChange('cmv', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="cmo" className="text-gray-700 dark:text-gray-300">
+                  CMO (R$)
+                </Label>
+                <Input
+                  id="cmo"
+                  type="number"
+                  step="0.01"
+                  value={formData.cmo || 0}
+                  onChange={(e) => handleChange('cmo', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="custo_atracao_faturamento" className="text-gray-700 dark:text-gray-300">
+                  Atração/Faturamento (%)
+                </Label>
+                <Input
+                  id="custo_atracao_faturamento"
+                  type="number"
+                  step="0.01"
+                  value={formData.custo_atracao_faturamento || 0}
+                  onChange={(e) => handleChange('custo_atracao_faturamento', e.target.value)}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
@@ -293,24 +338,44 @@ export function EditarDesempenhoModal({
           {/* Resumo */}
           <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Resumo
+              Resumo Calculado
             </h4>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Ticket Médio:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {formData.clientes_atendidos && formData.faturamento_total
-                    ? formatarMoeda(formData.faturamento_total / formData.clientes_atendidos)
-                    : 'R$ 0,00'}
-                </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Ticket Médio:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {formData.clientes_atendidos && formData.faturamento_total
+                      ? formatarMoeda(formData.faturamento_total / formData.clientes_atendidos)
+                      : 'R$ 0,00'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Atingimento da Meta:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {formData.meta_semanal && formData.faturamento_total
+                      ? `${((formData.faturamento_total / formData.meta_semanal) * 100).toFixed(1)}%`
+                      : '0%'}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Atingimento da Meta:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {formData.meta_semanal && formData.faturamento_total
-                    ? `${((formData.faturamento_total / formData.meta_semanal) * 100).toFixed(1)}%`
-                    : '0%'}
-                </span>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">CMV %:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {formData.faturamento_total && formData.cmv
+                      ? `${((formData.cmv / formData.faturamento_total) * 100).toFixed(1)}%`
+                      : '0%'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">CMO %:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {formData.faturamento_total && formData.cmo
+                      ? `${((formData.cmo / formData.faturamento_total) * 100).toFixed(1)}%`
+                      : '0%'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

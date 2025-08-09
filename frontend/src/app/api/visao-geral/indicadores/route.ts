@@ -13,6 +13,87 @@ function getTrimestreDates(trimestre: number) {
   return quarters[trimestre as keyof typeof quarters] || quarters[3];
 }
 
+// Função para calcular retenção dinâmica (mês específico vs últimos 2 meses)
+async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?: string) {
+  try {
+    let dataReferencia: Date;
+    
+    if (mesEspecifico) {
+      // Se foi passado um mês específico (formato YYYY-MM)
+      const [ano, mes] = mesEspecifico.split('-').map(Number);
+      dataReferencia = new Date(ano, mes - 1, 1); // mes - 1 porque Date usa 0-11
+    } else {
+      // Se não foi passado, usa o mês atual
+      dataReferencia = new Date();
+    }
+    
+    // Calcular primeiro dia do mês de referência
+    const inicioMesAtual = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth(), 1);
+    const fimMesAtual = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth() + 1, 0);
+    
+    // Calcular últimos 2 meses (mês anterior e anterior ao anterior)
+    const inicioUltimos2Meses = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth() - 2, 1);
+    const fimUltimos2Meses = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth(), 0);
+    
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    
+    const mesAtualInicio = formatDate(inicioMesAtual);
+    const mesAtualFim = formatDate(fimMesAtual);
+    const ultimos2MesesInicio = formatDate(inicioUltimos2Meses);
+    const ultimos2MesesFim = formatDate(fimUltimos2Meses);
+    
+    console.log('🔄 CALCULANDO RETENÇÃO:');
+    console.log(`Mês de referência${mesEspecifico ? ` (${mesEspecifico})` : ' (atual)'}: ${mesAtualInicio} até ${mesAtualFim}`);
+    console.log(`Últimos 2 meses: ${ultimos2MesesInicio} até ${ultimos2MesesFim}`);
+    
+    // Buscar clientes do mês atual
+    const clientesMesAtualData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+      'eq_bar_id': barIdNum,
+      'gte_dt_gerencial': mesAtualInicio,
+      'lte_dt_gerencial': mesAtualFim
+    });
+    
+    // Buscar clientes dos últimos 2 meses
+    const clientesUltimos2MesesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+      'eq_bar_id': barIdNum,
+      'gte_dt_gerencial': ultimos2MesesInicio,
+      'lte_dt_gerencial': ultimos2MesesFim
+    });
+    
+    // Filtrar apenas clientes com telefone
+    const clientesMesAtual = new Set(
+      clientesMesAtualData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
+    );
+    
+    const clientesUltimos2Meses = new Set(
+      clientesUltimos2MesesData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
+    );
+    
+    // Calcular intersecção (clientes que vieram no mês atual E nos últimos 2 meses)
+    const clientesRetidos = [...clientesMesAtual].filter(cliente => 
+      clientesUltimos2Meses.has(cliente)
+    );
+    
+    const totalClientesMesAtual = clientesMesAtual.size;
+    const totalClientesRetidos = clientesRetidos.length;
+    const percentualRetencao = totalClientesMesAtual > 0 
+      ? (totalClientesRetidos / totalClientesMesAtual) * 100 
+      : 0;
+    
+    console.log('🔄 RETENÇÃO CALCULADA:');
+    console.log(`Clientes únicos mês atual: ${totalClientesMesAtual}`);
+    console.log(`Clientes únicos últimos 2 meses: ${clientesUltimos2Meses.size}`);
+    console.log(`Clientes retidos (intersecção): ${totalClientesRetidos}`);
+    console.log(`Taxa de retenção: ${percentualRetencao.toFixed(1)}%`);
+    
+    return parseFloat(percentualRetencao.toFixed(1));
+    
+  } catch (error) {
+    console.error('❌ Erro ao calcular retenção:', error);
+    return 0;
+  }
+}
+
 // Função para buscar dados com paginação (contorna limite de 1000 do Supabase)
 async function fetchAllData(supabase: any, tableName: string, columns: string, filters: any = {}) {
   let allData: any[] = [];
@@ -63,6 +144,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const periodo = searchParams.get('periodo') || 'anual';
     const trimestre = parseInt(searchParams.get('trimestre') || '3'); // 2, 3 ou 4
+    const mesRetencao = searchParams.get('mes_retencao'); // formato YYYY-MM
     const barId = searchParams.get('bar_id') || 
       (request.headers.get('x-user-data') 
         ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id 
@@ -295,13 +377,22 @@ export async function GET(request: Request) {
       const { start: startDate, end: endDate } = getTrimestreDates(trimestre);
       console.log(`📊 ${trimestre}º Trimestre 2025 - Buscando dados de ${startDate} até ${endDate}`);
 
-      // Clientes Ativos (visitaram 2+ vezes no trimestre) - COM PAGINAÇÃO
-      console.log('🎯 Buscando clientes ativos com PAGINAÇÃO...');
+      // Clientes Ativos (visitaram 2+ vezes nos últimos 90 dias) - COM PAGINAÇÃO
+      console.log('🎯 Buscando clientes ativos com PAGINAÇÃO (últimos 90 dias)...');
+      
+      // Calcular data de 90 dias atrás
+      const hoje = new Date();
+      const dataInicio90Dias = new Date(hoje);
+      dataInicio90Dias.setDate(hoje.getDate() - 90);
+      const startDate90Dias = dataInicio90Dias.toISOString().split('T')[0];
+      const endDate90Dias = hoje.toISOString().split('T')[0];
+      
+      console.log(`📅 Período de análise: ${startDate90Dias} até ${endDate90Dias} (últimos 90 dias)`);
       
       const clientesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate,
-        'lte_dt_gerencial': endDate
+        'gte_dt_gerencial': startDate90Dias,
+        'lte_dt_gerencial': endDate90Dias
       });
       
       // Filtrar apenas clientes com telefone
@@ -321,40 +412,57 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivos++;
       });
       
-      console.log('🎯 CLIENTES ATIVOS CALCULADOS:');
+      console.log('🎯 CLIENTES ATIVOS CALCULADOS (ÚLTIMOS 90 DIAS):');
       console.log('Total clientes únicos:', clientesMap.size);
-      console.log('Clientes ativos (2+ visitas):', clientesAtivos);
+      console.log('Clientes ativos (2+ visitas nos últimos 90 dias):', clientesAtivos);
 
-      // Número total de clientes no trimestre
-      const [clientesContahub, clientesYuzer, clientesSympla] = await Promise.all([
-        supabase
-          .from('contahub_periodo')
-          .select('pessoas')
-          .eq('bar_id', barIdNum)
-          .gte('dt_gerencial', startDate)
-          .lte('dt_gerencial', endDate),
-        
-        supabase
-          .from('yuzer_produtos')
-          .select('quantidade, produto_nome')
-          .eq('bar_id', barIdNum)
-          .or('produto_nome.ilike.%ingresso%,produto_nome.ilike.%entrada%')
-          .gte('data_evento', startDate)
-          .lte('data_evento', endDate),
-        
-        supabase
-          .from('sympla_participantes')
-          .select('id')
-          .eq('bar_id', barIdNum)
-          .eq('fez_checkin', true)
-          .gte('data_checkin', startDate)
-          .lte('data_checkin', endDate)
-      ]);
+      // Número total de clientes no trimestre - COM PAGINAÇÃO
+      console.log('👥 Buscando clientes totais do trimestre com PAGINAÇÃO...');
+      
+      const clientesTotaisContahubData = await fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': startDate,
+        'lte_dt_gerencial': endDate
+      });
+      
+      const clientesTotaisYuzerData = await fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
+        'eq_bar_id': barIdNum,
+        'gte_data_evento': startDate,
+        'lte_data_evento': endDate
+      });
+      
+      const clientesTotaisSymplaData = await fetchAllData(supabase, 'sympla_participantes', 'id', {
+        'eq_bar_id': barIdNum,
+        'eq_fez_checkin': true,
+        'gte_data_checkin': startDate,
+        'lte_data_checkin': endDate
+      });
 
-      const totalClientesTrimestre = 
-        (clientesContahub.data?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0) +
-        (clientesYuzer.data?.reduce((sum, item) => sum + (item.quantidade || 0), 0) || 0) +
-        (clientesSympla.data?.length || 0);
+      console.log('👥 CLIENTES TOTAIS - REGISTROS ENCONTRADOS:');
+      console.log('ContaHub:', clientesTotaisContahubData?.length || 0, 'registros');
+      console.log('Yuzer:', clientesTotaisYuzerData?.length || 0, 'registros');
+      console.log('Sympla:', clientesTotaisSymplaData?.length || 0, 'registros');
+      
+      // Filtrar produtos Yuzer que são ingressos/entradas
+      const ingressosYuzer = clientesTotaisYuzerData?.filter(item => 
+        item.produto_nome && (
+          item.produto_nome.toLowerCase().includes('ingresso') ||
+          item.produto_nome.toLowerCase().includes('entrada')
+        )
+      ) || [];
+      
+      console.log('Yuzer (filtrado para ingressos):', ingressosYuzer.length, 'registros');
+      
+      const totalClientesContahub = clientesTotaisContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
+      const totalClientesYuzer = ingressosYuzer.reduce((sum, item) => sum + (item.quantidade || 0), 0);
+      const totalClientesSympla = clientesTotaisSymplaData?.length || 0;
+      const totalClientesTrimestre = totalClientesContahub + totalClientesYuzer + totalClientesSympla;
+      
+      console.log('👥 CLIENTES TOTAIS CALCULADOS:');
+      console.log('ContaHub:', totalClientesContahub, 'pessoas');
+      console.log('Yuzer:', totalClientesYuzer, 'pessoas');
+      console.log('Sympla:', totalClientesSympla, 'pessoas');
+      console.log('TOTAL TRIMESTRE:', totalClientesTrimestre, 'pessoas');
 
       // CMO % (Nibo)
       const categoriasCMO = [
@@ -436,10 +544,10 @@ export async function GET(request: Request) {
           },
           clientesTotais: {
             valor: totalClientesTrimestre,
-            meta: 10000
+            meta: 30000
           },
           retencao: {
-            valor: 8.5, // TODO: Implementar input manual
+            valor: await calcularRetencao(supabase, barIdNum, mesRetencao || undefined),
             meta: 10
           },
           cmvLimpo: {

@@ -55,6 +55,9 @@ interface DadosDesempenho {
   ticket_medio: number;
   cmv_teorico: number;
   cmv_limpo: number;
+  cmv: number;
+  cmo: number;
+  custo_atracao_faturamento: number;
   meta_semanal: number;
   atingimento?: number;
   observacoes?: string;
@@ -659,6 +662,15 @@ export default function TabelaDesempenhoPage() {
                         Ticket Médio
                       </th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
+                        CMV
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
+                        CMO
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
+                        %ART/FAT
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
                         Reservas
                       </th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 text-sm">
@@ -678,6 +690,19 @@ export default function TabelaDesempenhoPage() {
                         item.meta_semanal > 0
                           ? (item.faturamento_total / item.meta_semanal) * 100
                           : 0;
+
+                      // Calcular CMV em percentual
+                      const cmvPercent = item.faturamento_total > 0 
+                        ? ((item.cmv || 0) / item.faturamento_total) * 100 
+                        : 0;
+
+                      // Calcular CMO em percentual  
+                      const cmoPercent = item.faturamento_total > 0 
+                        ? ((item.cmo || 0) / item.faturamento_total) * 100 
+                        : 0;
+
+                      // %ART/FAT já está como percentual
+                      const artFatPercent = item.custo_atracao_faturamento || 0;
 
                       return (
                         <tr
@@ -710,6 +735,27 @@ export default function TabelaDesempenhoPage() {
                           </td>
                           <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
                             <div className="text-sm">
+                              <div className="font-medium">{cmvPercent.toFixed(1)}%</div>
+                              <div className="text-gray-500 dark:text-gray-500">
+                                {formatarMoeda(item.cmv || 0)}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
+                            <div className="text-sm">
+                              <div className="font-medium">{cmoPercent.toFixed(1)}%</div>
+                              <div className="text-gray-500 dark:text-gray-500">
+                                {formatarMoeda(item.cmo || 0)}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
+                            <div className="font-medium text-sm">
+                              {artFatPercent.toFixed(1)}%
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
+                            <div className="text-sm">
                               <div>
                                 {item.reservas_presentes}/{item.reservas_totais}
                               </div>
@@ -731,11 +777,12 @@ export default function TabelaDesempenhoPage() {
                             </Badge>
                           </td>
                           <td className="py-3 px-4">
-                            <div className="flex gap-2">
+                            <div className="flex gap-1">
                               <Button
                                 onClick={() => handleEdit(item)}
                                 size="sm"
-                                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-8 px-3"
+                                variant="ghost"
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 transition-colors"
                               >
                                 <EditIcon className="h-4 w-4" />
                               </Button>
@@ -743,9 +790,9 @@ export default function TabelaDesempenhoPage() {
                                 onClick={() =>
                                   excluirSemana(item.id, item.numero_semana)
                                 }
-                                variant="destructive"
                                 size="sm"
-                                className="h-8 px-3"
+                                variant="ghost"
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors"
                               >
                                 <TrashIcon className="h-4 w-4" />
                               </Button>
@@ -767,6 +814,15 @@ export default function TabelaDesempenhoPage() {
                 item.meta_semanal > 0
                   ? (item.faturamento_total / item.meta_semanal) * 100
                   : 0;
+
+              // Calcular percentuais para mobile
+              const cmvPercent = item.faturamento_total > 0 
+                ? ((item.cmv || 0) / item.faturamento_total) * 100 
+                : 0;
+              const cmoPercent = item.faturamento_total > 0 
+                ? ((item.cmo || 0) / item.faturamento_total) * 100 
+                : 0;
+              const artFatPercent = item.custo_atracao_faturamento || 0;
 
               return (
                 <Card key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
@@ -812,33 +868,62 @@ export default function TabelaDesempenhoPage() {
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          CMV
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {cmvPercent.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          CMO
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {cmoPercent.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          %ART/FAT
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {artFatPercent.toFixed(1)}%
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Reservas
                         </p>
                         <p className="text-lg font-semibold text-gray-900 dark:text-white">
                           {item.reservas_presentes}/{item.reservas_totais}
                         </p>
                       </div>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Meta
+                        </p>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {formatarMoeda(item.meta_semanal)}
+                        </p>
+                      </div>
                     </div>
 
                     <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Meta: {formatarMoeda(item.meta_semanal)}
-                        </p>
-                      </div>
                       <div className="flex gap-2">
                         <Button
                           onClick={() => handleEdit(item)}
                           size="sm"
-                          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                          variant="ghost"
+                          className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 transition-colors"
                         >
                           <EditIcon className="h-4 w-4 mr-1" />
                           Editar
                         </Button>
                         <Button
                           onClick={() => excluirSemana(item.id, item.numero_semana)}
-                          variant="destructive"
                           size="sm"
+                          variant="ghost"
+                          className="text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors"
                         >
                           <TrashIcon className="h-4 w-4 mr-1" />
                           Excluir
