@@ -16,6 +16,7 @@ interface IndicadorCardProps {
   detalhes?: Record<string, number>;
   cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
   inverterProgresso?: boolean; // Para indicadores onde "menos é melhor"
+  periodoAnalisado?: string; // Período que está sendo analisado
 }
 
 export function IndicadorCard({
@@ -28,7 +29,8 @@ export function IndicadorCard({
   tendencia,
   detalhes,
   cor = 'blue',
-  inverterProgresso = false
+  inverterProgresso = false,
+  periodoAnalisado
 }: IndicadorCardProps) {
   const formatarValor = (val: number) => {
     switch (formato) {
@@ -49,7 +51,7 @@ export function IndicadorCard({
     }
   };
 
-  const progresso = meta > 0 ? (inverterProgresso ? Math.max(0, 100 - (valor / meta) * 100) : (valor / meta) * 100) : 0;
+  const progresso = meta > 0 ? (inverterProgresso ? Math.max(0, (2 * meta - valor) / meta * 100) : (valor / meta) * 100) : 0;
   
   const getCorClasse = () => {
     switch (cor) {
@@ -149,21 +151,36 @@ export function IndicadorCard({
 
         <Progress value={progresso} color={cor} className="h-2" />
 
-        {detalhes && (
+        {(detalhes || periodoAnalisado) && (
           <div className="space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-2">
-              Detalhamento
-            </p>
-            {Object.entries(detalhes).map(([key, value]) => (
-              <div key={key} className="flex items-center justify-between">
-                <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">
-                  {key}:
-                </span>
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  {formatarValor(value)}
-                </span>
+            {detalhes && (
+              <>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-2">
+                  Detalhamento
+                </p>
+                {Object.entries(detalhes).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">
+                      {key}:
+                    </span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {formatarValor(value)}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+            
+            {periodoAnalisado && (
+              <div className={detalhes ? "mt-3" : ""}>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1">
+                  Período Analisado
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  {periodoAnalisado}
+                </p>
               </div>
-            ))}
+            )}
           </div>
         )}
       </CardContent>

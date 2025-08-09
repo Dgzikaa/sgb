@@ -112,7 +112,10 @@ export default function VisaoGeralPage() {
     setLoading(true);
     showLoading('Carregando indicadores...');
     try {
-      // Carregar apenas anual e trimestral, retenção é independente
+      // Carregar tudo junto na primeira carga
+      const hoje = new Date();
+      const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
+      
       const [anualResponse, trimestralResponse] = await Promise.all([
         fetch(`/api/visao-geral/indicadores?periodo=anual`, {
           headers: {
@@ -122,7 +125,7 @@ export default function VisaoGeralPage() {
             }),
           },
         }),
-        fetch(`/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}`, {
+        fetch(`/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}`, {
           headers: {
             'x-user-data': JSON.stringify({
               bar_id: selectedBar.id,
@@ -140,11 +143,7 @@ export default function VisaoGeralPage() {
       const trimestralData = await trimestralResponse.json();
 
       setIndicadoresAnuais(anualData.anual);
-      // Não incluir retenção aqui, será carregada independentemente
-      setIndicadoresTrimestrais({
-        ...trimestralData.trimestral,
-        retencao: { valor: 0, meta: 10 } // Placeholder
-      });
+      setIndicadoresTrimestrais(trimestralData.trimestral);
     } catch (error) {
       console.error('Erro ao carregar indicadores:', error);
       toast({
@@ -349,6 +348,7 @@ export default function VisaoGeralPage() {
                     meta={indicadoresTrimestrais.clientesAtivos.meta}
                     formato="numero"
                     cor="green"
+                    periodoAnalisado="Últimos 90 dias (2+ visitas)"
                   />
                   
                   <IndicadorCard
@@ -357,6 +357,7 @@ export default function VisaoGeralPage() {
                     meta={indicadoresTrimestrais.clientesTotais.meta}
                     formato="numero"
                     cor="blue"
+                    periodoAnalisado={`${getTrimestreInfo(trimestreAtual)?.periodo} 2025`}
                   />
                   
                   <IndicadorRetencao

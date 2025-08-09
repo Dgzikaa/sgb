@@ -135,18 +135,18 @@ export function IndicadorRetencao({ meta }: IndicadorRetencaoProps) {
           </CardTitle>
           <div className="flex items-center gap-2">
             {/* Navegador de mês estilo < AGOSTO > */}
-            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-gray-200 dark:bg-gray-600 rounded-lg p-1 border border-gray-300 dark:border-gray-500">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navegarMes('anterior')}
                 disabled={!podeNavegar('anterior') || loading}
-                className="p-1 h-6 w-6 hover:bg-gray-200 dark:hover:bg-gray-600"
+                className="p-1 h-7 w-7 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200"
               >
-                <ChevronLeft className="w-3 h-3" />
+                <ChevronLeft className="w-4 h-4" />
               </Button>
               
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 min-w-[60px] text-center px-2">
+              <span className="text-xs font-medium text-gray-800 dark:text-gray-100 min-w-[70px] text-center px-2">
                 {loading ? '...' : getNomeMesAbreviado(mesSelected)}
               </span>
               
@@ -155,9 +155,9 @@ export function IndicadorRetencao({ meta }: IndicadorRetencaoProps) {
                 size="sm"
                 onClick={() => navegarMes('proximo')}
                 disabled={!podeNavegar('proximo') || loading}
-                className="p-1 h-6 w-6 hover:bg-gray-200 dark:hover:bg-gray-600"
+                className="p-1 h-7 w-7 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200"
               >
-                <ChevronRight className="w-3 h-3" />
+                <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
