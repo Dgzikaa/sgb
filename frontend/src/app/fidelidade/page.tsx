@@ -124,29 +124,29 @@ export default function FidelidadePage() {
                           transition={{ delay: 0.4, duration: 0.8 }}
                           className="relative mb-12"
                         >
-                          <div className="relative w-32 h-32 mx-auto mb-6">
+                          <div className="relative w-40 h-32 mx-auto mb-6">
                             {/* Background com efeito de glow */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 rounded-3xl blur-lg opacity-75 animate-pulse"></div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-red-400 to-orange-500 rounded-3xl blur-xl opacity-60 animate-pulse"></div>
                             
-                            {/* Logo container com tema de bar */}
-                            <div className="relative w-full h-full bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-700 rounded-3xl flex items-center justify-center shadow-2xl overflow-hidden">
-                              {/* Efeito de vidro/bebida no fundo */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-amber-800/30 via-transparent to-yellow-300/20"></div>
+                            {/* Logo Ordinário Real */}
+                            <div className="relative w-full h-full flex items-center justify-center">
+                              <img 
+                                src="/logos/Artboard 1 copy 2 (1).png" 
+                                alt="Ordinário Bar" 
+                                className="w-full h-full object-contain filter drop-shadow-2xl"
+                                onError={(e) => {
+                                  // Fallback se imagem não carregar
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.parentElement!.innerHTML = `
+                                    <div class="w-full h-full bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl flex items-center justify-center shadow-2xl">
+                                      <span class="text-white text-2xl font-black">ORDINÁRIO</span>
+                                    </div>
+                                  `;
+                                }}
+                              />
                               
-                              {/* Logo Ordinário */}
-                              <div className="relative z-10 text-center">
-                                <div className="text-black text-3xl font-black mb-1 drop-shadow-lg">O</div>
-                                <div className="text-black text-xs font-bold opacity-80 tracking-wider">BAR</div>
-                              </div>
-                              
-                              {/* Detalhes visuais de bar */}
-                              <div className="absolute bottom-2 left-2 w-2 h-2 bg-yellow-200 rounded-full opacity-60"></div>
-                              <div className="absolute top-3 right-3 w-1.5 h-1.5 bg-amber-200 rounded-full opacity-70"></div>
-                              <div className="absolute bottom-4 right-2 w-1 h-1 bg-orange-200 rounded-full opacity-50"></div>
-                              
-                              {/* Efeito de bolhas (como cerveja) */}
-                              <div className="absolute top-4 left-3 w-1 h-1 bg-white/40 rounded-full animate-pulse"></div>
-                              <div className="absolute top-6 left-4 w-0.5 h-0.5 bg-white/30 rounded-full animate-pulse delay-500"></div>
+                              {/* Efeito de brilho adicional */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/20 rounded-3xl pointer-events-none"></div>
                             </div>
                           </div>
                           <div className="text-center">
