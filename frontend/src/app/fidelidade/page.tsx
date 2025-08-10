@@ -151,7 +151,7 @@ export default function FidelidadePage() {
                               FIDELIDADE
                             </h1>
                             <p className="text-xl sm:text-2xl text-amber-200 font-light mb-2">
-                              Ordinário Bar
+                              Ordinário Bar e Música
                             </p>
                           </div>
                         </motion.div>
