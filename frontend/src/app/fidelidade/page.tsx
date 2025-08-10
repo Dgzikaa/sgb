@@ -188,33 +188,7 @@ export default function FidelidadePage() {
                           </div>
                         </motion.div>
 
-            {/* CTAs Modernos */}
-                                    <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.8, duration: 0.6 }}
-                          className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-                        >
-                          <Link href="/fidelidade/cadastro">
-                            <Button 
-                              size="lg" 
-                              className="w-full sm:w-auto bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-black px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105 border-0 rounded-2xl"
-                            >
-                              <Zap className="mr-2 w-5 h-5" />
-                              Quero Ser Membro VIP
-                              <ArrowRight className="ml-2 w-5 h-5" />
-                            </Button>
-                          </Link>
-                          <Link href="/fidelidade/login">
-                            <Button 
-                              size="lg" 
-                              className="w-full sm:w-auto bg-amber-500/20 backdrop-blur-md border border-amber-400/30 text-amber-100 hover:bg-amber-500/30 px-8 py-4 text-lg font-semibold transition-all duration-300 rounded-2xl"
-                            >
-                              <Heart className="mr-2 w-5 h-5" />
-                              Já sou Membro
-                            </Button>
-                          </Link>
-                        </motion.div>
+            {/* CTAs removidos - acesso apenas via código de convite */}
 
             {/* Trust Indicators */}
                                     <motion.div
