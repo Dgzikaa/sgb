@@ -125,31 +125,25 @@ export default function FidelidadePage() {
                           className="relative mb-12"
                         >
                           <div className="relative w-40 h-32 mx-auto mb-6">
-                            {/* Background com efeito de glow laranja/vermelho */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 rounded-3xl blur-2xl opacity-60 animate-pulse"></div>
-                            
-                            {/* Logo Ordinário com fundo transparente */}
+                            {/* Logo Ordinário limpa - sem backgrounds */}
                             <div className="relative w-full h-full flex items-center justify-center">
                               <img 
                                 src="/logos/ordinario-transparente.png" 
                                 alt="Ordinário Bar" 
-                                className="w-full h-full object-contain filter drop-shadow-2xl"
+                                className="w-full h-full object-contain"
                                 style={{
-                                  filter: 'drop-shadow(0 15px 35px rgba(255, 87, 34, 0.6)) drop-shadow(0 5px 15px rgba(255, 87, 34, 0.5)) drop-shadow(0 0 30px rgba(255, 87, 34, 0.4))'
+                                  filter: 'drop-shadow(0 10px 25px rgba(255, 87, 34, 0.4)) drop-shadow(0 0 20px rgba(255, 87, 34, 0.3))'
                                 }}
                                 onError={(e) => {
                                   // Fallback se imagem não carregar
                                   e.currentTarget.style.display = 'none';
                                   e.currentTarget.parentElement!.innerHTML = `
-                                    <div class="w-full h-full bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl flex items-center justify-center shadow-2xl">
-                                      <span class="text-white text-2xl font-black">ORDINÁRIO</span>
+                                    <div class="w-full h-full flex items-center justify-center">
+                                      <span class="text-orange-500 text-2xl font-black drop-shadow-lg">ORDINÁRIO</span>
                                     </div>
                                   `;
                                 }}
                               />
-                              
-                              {/* Efeito de brilho sutil que realça a logo transparente */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-orange-600/10 via-transparent to-orange-400/20 rounded-3xl pointer-events-none"></div>
                             </div>
                           </div>
                           <div className="text-center">
