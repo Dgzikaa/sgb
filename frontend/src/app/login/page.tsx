@@ -273,25 +273,27 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-md" suppressHydrationWarning>
         {/* Logo e Header */}
-        <div className="text-center mb-8" suppressHydrationWarning>
+        <div className="text-center" suppressHydrationWarning>
           <div
-            className="inline-flex items-center justify-center w-52 h-32:w-72 lg:h-32 mb-4"
+            className="inline-flex items-center justify-center w-80 h-32 lg:w-96 lg:h-36"
             suppressHydrationWarning
           >
             {!logoError ? (
               <Image
-                src="/logos/processed_logoSGB.png"
-                alt="SGB Logo"
-                width={288}
-                height={128}
+                src="/logos/zycor-logo.png"
+                alt="ZYCOR Logo"
+                width={400}
+                height={180}
                 onError={() => setLogoError(true)}
+                className="logo-zycor favicon-improved"
               />
             ) : (
               <div
-                className="w-52 h-52 lg:w-72 lg:h-32 bg-indigo-600 flex items-center justify-center"
+                className="w-80 h-40 lg:w-96 lg:h-44 flex items-center justify-center rounded-2xl"
+                style={{background: 'var(--zycor-gradient)'}}
                 suppressHydrationWarning
               >
-                <span className="text-8xl lg:text-9xl text-white">🏪</span>
+                <span className="text-6xl lg:text-7xl text-white">Z</span>
               </div>
             )}
           </div>
@@ -418,7 +420,7 @@ export default function LoginPage() {
 
         {/* Seletor de Método de Login */}
         {!showBiometricRegistration && (
-          <div className="mb-6">
+          <div className="mb-2">
             {isMobileDevice ? (
               <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
                 <button
@@ -518,7 +520,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full btn-zycor py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
                   >
                     {isLoading ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -584,7 +586,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center mt-12 text-slate-400 dark:text-gray-500 text-sm">
           <p>
-            © 2025 Sistema de Gestão de Bares - Todos os direitos reservados
+            © 2025 ZYCOR - O núcleo da gestão de bares
           </p>
         </div>
       </div>

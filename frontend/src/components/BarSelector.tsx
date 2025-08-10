@@ -44,14 +44,14 @@ export default function BarSelector() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <MapPinIcon className="w-4 h-4 text-slate-400" />
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <MapPinIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
+            <span className="text-xs font-medium text-gray-600 dark:text-slate-400 uppercase tracking-wide">
               Estabelecimento
             </span>
           </div>
           <Badge
             variant="outline"
-            className="text-xs px-2 py-1 bg-slate-700/50 text-slate-300 border-slate-600"
+            className="text-xs px-2 py-1 bg-gray-100 dark:bg-slate-700/50 text-gray-600 dark:text-slate-300 border-gray-300 dark:border-slate-600"
           >
             {availableBars.length}
           </Badge>
@@ -66,53 +66,29 @@ export default function BarSelector() {
               if (bar) setSelectedBar(bar);
             }}
           >
-            <SelectTrigger className="w-full bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700/70 transition-all duration-200 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800">
-              <div className="flex items-center space-x-3 overflow-hidden">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                  <span className="text-white text-sm font-bold">
-                    {selectedBar?.nome?.charAt(0)?.toUpperCase() || 'B'}
+            <SelectTrigger className="w-full bg-white dark:bg-slate-700/50 border-gray-200 dark:border-slate-600 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-slate-700/70 transition-all duration-200">
+              <SelectValue placeholder="Selecione um estabelecimento">
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">
+                    {selectedBar?.nome || 'Selecione um estabelecimento'}
                   </span>
                 </div>
-                <div className="flex-1 overflow-hidden">
-                  <SelectValue placeholder="Selecione um bar">
-                    <div className="text-left">
-                      <div className="font-medium text-white truncate">
-                        {selectedBar?.nome || 'Selecione um bar'}
-                      </div>
-                      <div className="text-xs text-slate-400 truncate">
-                        ID: {selectedBar?.id || 'N/A'}
-                      </div>
-                    </div>
-                  </SelectValue>
-                </div>
-              </div>
+              </SelectValue>
             </SelectTrigger>
-            <SelectContent className="w-full bg-slate-800 border-slate-700 max-h-60 overflow-y-auto">
+            <SelectContent className="w-full bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 max-h-60 overflow-y-auto">
               {availableBars.map(bar => (
                 <SelectItem
                   key={bar.id}
                   value={bar.id.toString()}
-                  className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
+                  className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-700 focus:bg-gray-100 dark:focus:bg-slate-700 cursor-pointer"
                 >
-                  <div className="flex items-center space-x-3 w-full">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                      <span className="text-white text-sm font-bold">
-                        {bar.nome?.charAt(0)?.toUpperCase() || 'B'}
-                      </span>
+                  <div className="flex items-center space-x-2 w-full">
+                    <div className="font-medium truncate">
+                      {bar.nome}
                     </div>
-                    <div className="flex-1 overflow-hidden">
-                      <div className="flex items-center space-x-2">
-                        <div className="font-medium text-white truncate">
-                          {bar.nome}
-                        </div>
-                        {selectedBar?.id === bar.id && (
-                          <CheckCircle2Icon className="w-4 h-4 text-green-400 flex-shrink-0" />
-                        )}
-                      </div>
-                      <div className="text-xs text-slate-400 truncate">
-                        ID: {bar.id}
-                      </div>
-                    </div>
+                    {selectedBar?.id === bar.id && (
+                      <CheckCircle2Icon className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    )}
                   </div>
                 </SelectItem>
               ))}

@@ -79,7 +79,7 @@ function generateBreadcrumbs(pathname: string) {
 
   // Add home always
   breadcrumbs.push({
-    name: 'SGB',
+    name: 'ZYCOR',
     href: '/home',
     icon: Home,
   });
@@ -112,9 +112,21 @@ export function DarkHeader() {
   const { user, logout } = useUser();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const srcImage = theme === 'light'
-    ? '/logos/logoSGBBlack.png'
-    : '/logos/processed_logoSGB.png'
+  // Logo principal ZYCOR
+  const zykorLogo = '/logos/zycor-logo.png';
+  
+  // Logos específicos dos bares (quando implementados)
+  const getBarLogo = (barName: string) => {
+    const barLogos: Record<string, string> = {
+      'ordinario': '/logos/ordinario-logo.png',
+      'deboche': '/logos/deboche-logo.png',
+    };
+    
+    const normalizedName = barName?.toLowerCase().replace(/[^a-z]/g, '');
+    return barLogos[normalizedName] || zykorLogo;
+  };
+  
+  const srcImage = zykorLogo; // Por enquanto, sempre ZYCOR principal
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showBarMenu, setShowBarMenu] = useState(false);
@@ -191,33 +203,53 @@ export function DarkHeader() {
   return (
     <header className="sticky inset-x-0 top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
       <div className="flex items-center h-12 px-2 sm:px-4 justify-between">
-        <div className='flex flex-row'>
-          <div className="flex items-center mr-4">
-            <Link href="/home" className="flex items-center">
-              <Image
-                src={srcImage}
-                alt="Logo SGB"
-                width={64}
-                height={64}
-                className="mr-2"
-              />
-            </Link>
+        {/* Esquerda - Logo ZYCOR */}
+        <div className="flex items-center">
+          <Link href="/home" className="flex items-center">
+            <Image
+              src={srcImage}
+              alt="Logo ZYCOR"
+              width={64}
+              height={64}
+              className="logo-zycor favicon-improved"
+            />
+          </Link>
+        </div>
+
+        {/* Centro - Busca */}
+        <div className="flex-1 max-w-xs lg:max-w-md mx-4 hidden md:block">
+          <CommandPaletteSearchPlaceholder
+            placeholder="Buscar..."
+            className="w-full"
+          />
+        </div>
+
+        {/* Direita - Controles */}
+        <div className="flex items-center gap-2">
+          {/* Busca mobile */}
+          <div className="md:hidden">
+            <CommandPaletteIconTrigger />
           </div>
 
+          {/* Seletor de Bar */}
           <div className="relative" ref={barMenuRef}>
             <button
               onClick={() => setShowBarMenu(!showBarMenu)}
-              className="flex items-center gap-2 px-2 py-2 rounded-[6px] text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors max-w-32"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              <span className="truncate mb-0.5">{selectedBar?.nome}</span>
-              <ChevronDown className="w-3 h-3" />
+              <div className="w-6 h-6 rounded-full avatar-zycor text-xs font-bold">
+                {selectedBar?.nome?.charAt(0)?.toUpperCase() || 'B'}
+              </div>
+              <span className="hidden sm:block truncate max-w-24">
+                {selectedBar?.nome || 'Selecionar Bar'}
+              </span>
+              <ChevronDown className="w-4 h-4" />
             </button>
 
             {/* Dropdown de Bares */}
             {showBarMenu && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-[8px] shadow-lg border border-gray-200 dark:border-gray-700 py-2 animate-slide-in-from-top">
-                <div className="px-3 pb-1 border-b border-gray-100 dark:border-gray-700">
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                <div className="px-3 pb-2 mb-2 border-b border-gray-100 dark:border-gray-700">
                   <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Estabelecimentos
                   </span>
@@ -228,50 +260,31 @@ export function DarkHeader() {
                     onClick={() => handleBarSelect(bar)}
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    {/* Building2 className="w-4 h-4 text-gray-400 dark:text-gray-500" /> */}
+                    <div className="w-6 h-6 rounded-full avatar-zycor text-xs font-bold">
+                      {bar.nome?.charAt(0)?.toUpperCase()}
+                    </div>
                     <span className="flex-1 text-left">{bar.nome}</span>
                     {selectedBar?.id === bar.id && (
-                      <span className="w-4 h-4 text-green-500"><Check className='w-4 h-4'/></span>
+                      <Check className="w-4 h-4 text-green-500" />
                     )}
                   </button>
                 ))}
               </div>
             )}
           </div>
-        </div>
 
-        <div className='flex flex-row items-center'>
-          {/* Centro - Busca */}
-          <div className="flex-1 max-w-xs lg:max-w-md mx-2 lg:mx-4 hidden md:block ">
-            <CommandPaletteSearchPlaceholder
-              placeholder="Buscar..."
-              className="w-80"
-            />
+          {/* Notificações */}
+          <div className="relative">
+            <NotificationCenter />
           </div>
 
-          {/* Direita - User info e controles */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            
-            {/* Busca mobile */}
-            <div className="md:hidden">
-              <CommandPaletteIconTrigger className="mr-1" />
-            </div>
-
-            {/* Notificações */}
-            <div className="relative">
-              <NotificationCenter />
-            </div>
-
-            {/* Seletor de Bar */}
-            
-
-            {/* Menu do Usuário */}
-            <div className="relative" ref={userMenuRef}>
+          {/* Menu do Usuário */}
+          <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 px-2 py-1 rounded-[6px] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs font-semibold text-white">
+                <div className="w-6 h-6 rounded-full avatar-zycor text-xs font-semibold">
                   {user?.nome?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <span className="hidden sm:block text-xs text-gray-600 dark:text-gray-300 truncate max-w-24">
@@ -286,7 +299,7 @@ export function DarkHeader() {
                   {/* User Info */}
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-sm font-semibold text-white">
+                      <div className="w-8 h-8 rounded-full avatar-zycor text-sm font-semibold">
                         {user?.nome?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                       <div>
@@ -342,7 +355,6 @@ export function DarkHeader() {
                   </button>
                 </div>
               )}
-            </div>
           </div>
         </div>
       </div>

@@ -18,47 +18,35 @@ import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
 export const metadata: Metadata = {
-  title: 'SGB - Sistema de Gestão de Bares',
-  description: 'Sistema de Gestão de Bares - Grupo Menos é Mais',
+  title: 'ZYCOR - Sistema de Gestão de Bares',
+  description: 'ZYCOR - O núcleo da gestão de bares',
   manifest: '/site.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'SGB Dashboard',
+    title: 'ZYCOR Dashboard',
   },
   icons: {
     icon: [
       {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+      {
         url: '/favicon.ico',
         sizes: '48x48',
       },
-      {
-        url: '/favicon-16x16.png',
-        sizes: '16x16',
-        type: 'image/png',
-      },
-      {
-        url: '/favicon-32x32.png',
-        sizes: '32x32',
-        type: 'image/png',
-      },
-      {
-        url: '/android-chrome-192x192.png',
-        sizes: '192x192',
-        type: 'image/png',
-      },
     ],
     apple: {
-      url: '/apple-touch-icon.png',
-      sizes: '180x180',
-      type: 'image/png',
+      url: '/favicon.svg',
+      type: 'image/svg+xml',
     },
-    shortcut: '/favicon.ico',
+    shortcut: '/favicon.svg',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#6366f1',
+  themeColor: '#4A90E2',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -72,16 +60,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#6366f1" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="SGB Dashboard" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#6366f1" />
-        <meta name="msapplication-tap-highlight" content="no" />
-      </head>
+        <head>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#4A90E2" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ZYCOR Dashboard" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#4A90E2" />
+    <meta name="msapplication-tap-highlight" content="no" />
+  </head>
       <body className="font-sans">
         <LGPDProvider>
           <ThemeProvider>

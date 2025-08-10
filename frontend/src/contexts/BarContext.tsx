@@ -255,12 +255,23 @@ export function BarProvider({ children }: { children: ReactNode }) {
   const updateFavicon = (barName?: string) => {
     if (typeof window === 'undefined') return;
 
-    const faviconPath = barName
-      ? `/favicons/${barName.toLowerCase()}/favicon-32x32.png`
-      : '/favicons/default/favicon-32x32.png';
+    // Mapeamento de nomes de bares para favicons
+    const getFaviconPath = (name?: string) => {
+      if (!name) return '/logos/zycor-favicon-white.png';
+      
+      const normalizedName = name.toLowerCase().replace(/[^a-z]/g, '');
+      const barFavicons: Record<string, string> = {
+        'ordinario': '/logos/zycor-favicon-white.png', // Temporariamente usando ZYCOR
+        'deboche': '/logos/zycor-favicon-white.png',   // Temporariamente usando ZYCOR
+      };
+      
+      return barFavicons[normalizedName] || '/logos/zycor-favicon-white.png';
+    };
+
+    const faviconPath = getFaviconPath(barName);
     const appleTouchPath = barName
-      ? `/favicons/${barName.toLowerCase()}/apple-touch-icon.png`
-      : '/favicons/default/apple-touch-icon.png';
+      ? `/favicons/${barName.toLowerCase().replace(/[^a-z]/g, '')}/apple-touch-icon.png`
+      : '/favicons/zycor/apple-touch-icon.png';
 
     // Atualizar favicon principal
     let favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
