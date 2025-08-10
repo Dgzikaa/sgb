@@ -124,16 +124,19 @@ export default function FidelidadePage() {
                           transition={{ delay: 0.4, duration: 0.8 }}
                           className="relative mb-12"
                         >
-                          <div className="relative w-40 h-32 mx-auto mb-6">
-                            {/* Background com efeito de glow */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-red-400 to-orange-500 rounded-3xl blur-xl opacity-60 animate-pulse"></div>
+                          <div className="relative w-32 h-32 mx-auto mb-6">
+                            {/* Background com efeito de glow laranja */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 rounded-3xl blur-xl opacity-50 animate-pulse"></div>
                             
-                            {/* Logo Ordinário Real */}
+                            {/* Logo Ordinário AVATAR.png */}
                             <div className="relative w-full h-full flex items-center justify-center">
                               <img 
-                                src="/logos/Artboard 1 copy 2 (1).png" 
+                                src="/logos/AVATAR.png" 
                                 alt="Ordinário Bar" 
                                 className="w-full h-full object-contain filter drop-shadow-2xl"
+                                style={{
+                                  filter: 'drop-shadow(0 10px 30px rgba(255, 87, 34, 0.4)) drop-shadow(0 0 25px rgba(255, 87, 34, 0.3))'
+                                }}
                                 onError={(e) => {
                                   // Fallback se imagem não carregar
                                   e.currentTarget.style.display = 'none';
@@ -145,8 +148,8 @@ export default function FidelidadePage() {
                                 }}
                               />
                               
-                              {/* Efeito de brilho adicional */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/5 to-white/20 rounded-3xl pointer-events-none"></div>
+                              {/* Efeito de brilho adicional para destacar a logo */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-transparent via-orange-400/5 to-white/10 rounded-3xl pointer-events-none"></div>
                             </div>
                           </div>
                           <div className="text-center">
