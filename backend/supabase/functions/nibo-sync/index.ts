@@ -37,7 +37,7 @@ class NiboSyncService {
       // Buscar credenciais do banco de dados na tabela api_credentials
       const { data: credencial, error } = await this.supabase
         .from('api_credentials')
-        .select('api_token, organization_id')
+        .select('api_token, empresa_id')
         .eq('sistema', 'nibo')
         .eq('bar_id', barId)
         .eq('ativo', true)
@@ -55,7 +55,7 @@ class NiboSyncService {
 
       this.credentials = {
         api_token: credencial.api_token,
-        organization_id: credencial.organization_id || '',
+        organization_id: credencial.empresa_id || '',
         bar_id: barId.toString()
       }
 
