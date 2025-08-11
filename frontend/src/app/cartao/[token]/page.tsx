@@ -279,50 +279,45 @@ export default function CartaoDigital() {
 
         {/* Botões Ultra Modernos */}
         <div className="space-y-4">
-          {/* Detecção automática de dispositivo */}
+          {/* Botão Oficial Apple Wallet */}
           {device?.isIOS && (
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-black rounded-2xl blur-sm opacity-30 group-hover:opacity-50 transition-opacity"></div>
-              <Button
-                onClick={() => adicionarWallet('apple')}
-                className="w-full relative bg-black/60 backdrop-blur-md border border-white/20 hover:border-white/40 text-white py-5 rounded-2xl font-semibold transition-all duration-300 hover:scale-[1.02]"
+            <div className="flex justify-center">
+              <a
+                href={`/api/fidelidade/wallet/apple/${params.token}`}
+                className="inline-block"
+                style={{ lineHeight: 0 }}
               >
-                <div className="flex items-center justify-center">
-                  <Apple className="w-6 h-6 mr-3" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-lg">Adicionar à Apple Wallet</span>
-                    <span className="text-xs text-white/60">Para iPhone/iPad</span>
-                  </div>
-                  <div className="ml-auto">
-                    <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
-                      <Plus className="w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
-              </Button>
+                <img
+                  src="https://developer.apple.com/wallet/Add_to_Apple_Wallet_badge_-_PT.svg"
+                  alt="Adicionar à Apple Wallet"
+                  style={{
+                    height: '60px',
+                    width: 'auto',
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+                  }}
+                />
+              </a>
             </div>
           )}
 
+          {/* Botão Oficial Google Pay */}
           {device?.isAndroid && !device?.isSamsung && (
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl blur-sm opacity-30 group-hover:opacity-50 transition-opacity"></div>
-              <Button
-                onClick={() => adicionarWallet('google')}
-                className="w-full relative bg-green-600/60 backdrop-blur-md border border-green-400/30 hover:border-green-400/60 text-white py-5 rounded-2xl font-semibold transition-all duration-300 hover:scale-[1.02]"
+            <div className="flex justify-center">
+              <a
+                href={`/api/fidelidade/wallet/google/${params.token}`}
+                className="inline-block"
+                style={{ lineHeight: 0 }}
               >
-                <div className="flex items-center justify-center">
-                  <Wallet className="w-6 h-6 mr-3" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-lg">Adicionar ao Google Pay</span>
-                    <span className="text-xs text-white/60">Para Android</span>
-                  </div>
-                  <div className="ml-auto">
-                    <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
-                      <Plus className="w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
-              </Button>
+                <img
+                  src="https://developers.google.com/static/pay/images/wallet/gw_add_to_wallet_@2x.png"
+                  alt="Adicionar ao Google Pay"
+                  style={{
+                    height: '60px',
+                    width: 'auto',
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+                  }}
+                />
+              </a>
             </div>
           )}
 
