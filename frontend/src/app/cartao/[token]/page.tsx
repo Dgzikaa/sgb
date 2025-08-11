@@ -14,8 +14,7 @@ import {
   Apple,
   Wallet,
   Home,
-  Chrome,
-  Heart
+  Chrome
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import Image from 'next/image'
