@@ -40,6 +40,10 @@ const routeMapping: Record<
   // Relatórios
   '/relatorios': { name: 'Relatórios' },
   '/relatorios/visao-geral': { name: 'Visão Geral' },
+  
+  // Analítico
+  '/analitico': { name: 'Analítico' },
+  '/analitico/clientes': { name: 'Clientes' },
 
   // Marketing
   '/marketing': { name: 'Marketing' },

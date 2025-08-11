@@ -20,8 +20,10 @@ try {
   const envPaths = [
     '../../frontend/.env.local',  // Pasta frontend (desde exemplo_teste/sympla)
     '../frontend/.env.local',     // Pasta frontend (desde exemplo_teste)
-    '../.env.local',              // Raiz do projeto
-    '.env.local'                  // Diretório atual
+    '../../.env.local',           // Raiz do projeto  
+    '../.env.local',              // Um nível acima
+    '.env.local',                 // Diretório atual
+    '.env'                        // Arquivo .env padrão
   ];
   
   let loaded = false;
@@ -48,9 +50,9 @@ const { createClient } = require('@supabase/supabase-js');
 // Função para obter configuração da API Sympla
 function getSymplaConfig() {
   // CHAVES DISPONÍVEIS - DESCOMENTE APENAS 1 POR VEZ:
-  const token = '3085e782ebcccbbc75b26f6a5057f170e4dfa4aeabe4c19974fc2639fbfc0a77'; // CHAVE_ORIGINAL
+  //const token = '3085e782ebcccbbc75b26f6a5057f170e4dfa4aeabe4c19974fc2639fbfc0a77'; // CHAVE_ORIGINAL
   //const token = 'e96a8233fd5acc27c65b166bf424dd8e1874f4d48b16ee2029c93b6f80fd6a06'; // CHAVE_1
-  //const token = '24a8cb785b622adeb3239928dd2ac79ec3f1a076558b0159ee9d4d27c8099022'; // CHAVE_2
+  const token = '24a8cb785b622adeb3239928dd2ac79ec3f1a076558b0159ee9d4d27c8099022'; // CHAVE_2
   
   if (!token) {
     throw new Error('SYMPLA_API_TOKEN não encontrado nos secrets - configure a variável de ambiente');
@@ -193,6 +195,7 @@ async function inserirEventos(supabase, eventos) {
   console.log(`\n📊 Inserindo ${eventos.length} eventos no banco...`);
   
   const eventosParaInserir = eventos.map(evento => ({
+    bar_id: 3, // Adicionar bar_id
     evento_sympla_id: evento.id,
     reference_id: evento.reference_id,
     nome_evento: evento.name,
@@ -230,6 +233,7 @@ async function inserirParticipantes(supabase, eventoId, participantes) {
   console.log(`\n👥 Inserindo ${participantes.length} participantes do evento ${eventoId}...`);
   
   const participantesParaInserir = participantes.map(participante => ({
+    bar_id: 3, // Adicionar bar_id
     participante_sympla_id: participante.id,
     evento_sympla_id: participante.event_id,
     pedido_id: participante.order_id,
@@ -259,7 +263,7 @@ async function inserirParticipantes(supabase, eventoId, participantes) {
     const { data, error } = await supabase
       .from('sympla_participantes')
       .upsert(lote, {
-        onConflict: 'participante_sympla_id,evento_sympla_id',
+        onConflict: 'participante_sympla_id',
         ignoreDuplicates: false
       })
       .select('id');
@@ -281,6 +285,7 @@ async function inserirPedidos(supabase, eventoId, pedidos) {
   console.log(`\n💰 Inserindo ${pedidos.length} pedidos do evento ${eventoId}...`);
   
   const pedidosParaInserir = pedidos.map(pedido => ({
+    bar_id: 3, // Adicionar bar_id
     pedido_sympla_id: pedido.id,
     evento_sympla_id: pedido.event_id,
     data_pedido: pedido.order_date ? new Date(pedido.order_date).toISOString() : null,
@@ -290,6 +295,7 @@ async function inserirPedidos(supabase, eventoId, pedidos) {
     email_comprador: pedido.buyer_email,
     valor_bruto: pedido.order_total_sale_price || 0,
     valor_liquido: pedido.order_total_net_value || 0,
+    taxa_sympla: pedido.order_total_sale_price && pedido.order_total_net_value ? (pedido.order_total_sale_price - pedido.order_total_net_value) : 0,
     dados_utm: pedido.utm,
     dados_comprador: {
       buyer_first_name: pedido.buyer_first_name,

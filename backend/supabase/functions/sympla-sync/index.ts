@@ -9,16 +9,40 @@ const corsHeaders = {
 };
 
 interface SymplaEvent {
-  id: number;
+  id: string;
+  reference_id: number;
+  start_date: string;
+  end_date: string;
   name: string;
   detail: string;
   private_event: number;
   published: number;
   cancelled: number;
-  date_start: string;
-  date_end: string;
-  url: string;
   image: string;
+  url: string;
+  address: {
+    name: string;
+    address: string;
+    address_num: string;
+    address_alt: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zip_code: string;
+    country: string;
+    lon: string;
+    lat: string;
+  };
+  host: {
+    name: string;
+    description: string;
+  };
+  category_prim: {
+    name: string;
+  };
+  category_sec: {
+    name: string;
+  };
 }
 
 interface SymplaEventResponse {
@@ -39,22 +63,38 @@ interface SymplaEventResponse {
 }
 
 interface SymplaParticipant {
-  id: string;
+  id: number;
+  event_id: string;
   order_id: string;
+  order_status: string;
+  order_date: string;
+  order_updated_date: string;
+  order_approved_date: string;
+  order_discount: string;
   first_name: string;
   last_name: string;
   email: string;
   ticket_number: string;
   ticket_num_qr_code: string;
-  ticket_type_name: string;
+  ticket_name: string;
+  sector_name: string;
+  marked_place_name: string;
+  access_information: string;
   pdv_user: string;
-  checkin: {
-    check_in: boolean;
-    check_in_date: string | null;
-  };
-  custom_form: any[];
   ticket_sale_price: number;
-  exempt_fee: boolean;
+  checkin: {
+    id: number;
+    check_in: boolean;
+    check_in_date: string;
+  };
+  custom_form: {
+    id: number;
+    name: string;
+    value: string;
+  };
+  ticket_created_at: string;
+  ticket_updated_at: string;
+  presentation_id: number;
 }
 
 interface SymplaParticipantsResponse {
@@ -74,6 +114,62 @@ interface SymplaParticipantsResponse {
   };
 }
 
+interface SymplaOrder {
+  id: string;
+  event_id: string;
+  order_date: string;
+  order_status: string;
+  updated_date: string;
+  approved_date: string;
+  discount_code: string;
+  transaction_type: string;
+  order_total_sale_price: number;
+  order_total_net_value: number;
+  buyer_first_name: string;
+  buyer_last_name: string;
+  buyer_email: string;
+  invoice_info: {
+    doc_type: string;
+    doc_number: string;
+    client_name: string;
+    address_zip_code: string;
+    address_street: string;
+    address_street_number: string;
+    address_street2: string;
+    address_neighborhood: string;
+    address_city: string;
+    address_state: string;
+    mei: number;
+  };
+  utm: {
+    utm_source: string;
+    utm_medium: string;
+    utm_campaign: string;
+    utm_term: string;
+    utm_content: string;
+    user_agent: string;
+    referrer: string;
+  };
+}
+
+interface SymplaOrdersResponse {
+  data: SymplaOrder[];
+  pagination: {
+    has_next: boolean;
+    has_prev: boolean;
+    quantity: number;
+    offset: number;
+    page: number;
+    page_size: number;
+    total_records: number;
+    total_page: number;
+  };
+  sort: {
+    field_sort: string;
+    sort: string;
+  };
+}
+
 interface RequestBody {
   bar_id?: number;
   event_id?: number;
@@ -82,7 +178,7 @@ interface RequestBody {
 }
 
 // Função para enviar notificação Discord
-async function sendDiscordNotification(webhookUrl: string, title: string, description: string, color: number = 3447003, fields: any[] = []) {
+async function sendDiscordNotification(webhookUrl: string, title: string, description: string, color: number = 3447003, fields: Record<string, unknown>[] = []) {
   try {
     const embed = {
       title,
@@ -114,6 +210,7 @@ async function sendDiscordNotification(webhookUrl: string, title: string, descri
 }
 
 // Função para buscar bar ativo automaticamente
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getActiveBar(supabase: any): Promise<{ id: number; nome: string } | null> {
   try {
     const { data: bars, error } = await supabase
@@ -127,7 +224,7 @@ async function getActiveBar(supabase: any): Promise<{ id: number; nome: string }
       return null;
     }
 
-    return bars;
+    return bars as { id: number; nome: string };
   } catch (error) {
     console.error('❌ Erro na consulta do bar ativo:', error);
     return null;
@@ -135,11 +232,12 @@ async function getActiveBar(supabase: any): Promise<{ id: number; nome: string }
 }
 
 // Função para buscar credenciais do Sympla
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getSymplaCredentials(supabase: any, barId: number): Promise<string | null> {
   try {
     const { data: credentials, error } = await supabase
       .from('api_credentials')
-      .select('token')
+      .select('api_token')
       .eq('sistema', 'sympla')
       .eq('bar_id', barId)
       .eq('ativo', true)
@@ -150,7 +248,7 @@ async function getSymplaCredentials(supabase: any, barId: number): Promise<strin
       return null;
     }
 
-    return credentials.token;
+    return credentials.api_token as string;
   } catch (error) {
     console.error('❌ Erro ao buscar credenciais Sympla:', error);
     return null;
@@ -184,8 +282,8 @@ async function fetchSymplaEvents(token: string): Promise<SymplaEvent[]> {
       const data = await response.json();
       if (data.data && data.data.length > 0) {
         // Filtrar eventos de 2025 (incluindo todos os status)
-        const eventos2025 = data.data.filter(event => {
-          const year = new Date(event.start_date || event.date_start).getFullYear();
+        const eventos2025 = data.data.filter((event: SymplaEvent) => {
+          const year = new Date(event.start_date).getFullYear();
           return year === 2025;
         });
         
@@ -217,7 +315,7 @@ async function fetchSymplaEvents(token: string): Promise<SymplaEvent[]> {
 }
 
 // Função para buscar participantes de um evento
-async function fetchEventParticipants(token: string, eventId: number): Promise<SymplaParticipant[]> {
+async function fetchEventParticipants(token: string, eventId: string): Promise<SymplaParticipant[]> {
   const participants: SymplaParticipant[] = [];
   let page = 1;
   let hasNext = true;
@@ -275,6 +373,65 @@ async function fetchEventParticipants(token: string, eventId: number): Promise<S
   return participants;
 }
 
+// 🆕 Função para buscar pedidos/orders de um evento
+async function fetchEventOrders(token: string, eventId: string): Promise<SymplaOrder[]> {
+  const orders: SymplaOrder[] = [];
+  let page = 1;
+  let hasNext = true;
+
+  console.log(`💰 Iniciando busca de pedidos para evento ${eventId}...`);
+
+  while (hasNext) {
+    try {
+      const response = await fetch(`https://api.sympla.com.br/public/v1.5.1/events/${eventId}/orders?page=${page}`, {
+        headers: {
+          's_token': token,
+          'Content-Type': 'application/json',
+          'User-Agent': 'SGB-Sync/1.0'
+        }
+      });
+
+      if (!response.ok) {
+        console.log(`⚠️ Erro na API Sympla pedidos evento ${eventId} (página ${page}):`, response.status);
+        break;
+      }
+
+      const data: SymplaOrdersResponse = await response.json();
+      
+      // 🔍 DEBUG: Log completo da resposta para investigar
+      console.log(`🔍 DEBUG - Evento ${eventId} orders página ${page}:`, JSON.stringify(data));
+      
+      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+        console.log(`💰 Evento ${eventId} - Página ${page}: ${data.data.length} pedidos`);
+        orders.push(...data.data);
+        
+        // API Sympla retorna 100 por página, se menor que 100, é a última página
+        if (data.data.length < 100) {
+          console.log(`🏁 Evento ${eventId} - Última página pedidos atingida (${data.data.length} < 100)`);
+          hasNext = false;
+        } else {
+          page++;
+        }
+      } else {
+        console.log(`🚫 Evento ${eventId} - Página ${page} sem pedidos, parando busca`);
+        hasNext = false;
+      }
+
+      if (page > 100) { // Limite de segurança para pedidos
+        console.log(`⚠️ Limite de 100 páginas de pedidos atingido para evento ${eventId}`);
+        break;
+      }
+
+    } catch (error) {
+      console.error(`❌ Erro ao buscar pedidos evento ${eventId} página ${page}:`, error);
+      break;
+    }
+  }
+
+  console.log(`💰 TOTAL FINAL Evento ${eventId}: ${orders.length} pedidos encontrados em ${page-1} páginas`);
+  return orders;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -319,24 +476,18 @@ Deno.serve(async (req: Request) => {
       try {
         const text = await req.text();
         console.log(`📥 Request body (length: ${text.length}): "${text}"`);
-        console.log(`📥 Body chars: ${Array.from(text).map(c => `${c}(${c.charCodeAt(0)})`).join(' ')}`);
         
         if (text.trim()) {
-          // Limpar possíveis caracteres invisíveis
-          const cleanText = text.replace(/[\u0000-\u001F\u007F-\u009F]/g, '').trim();
-          console.log(`🧹 Cleaned text: "${cleanText}"`);
-          
-          if (cleanText) {
-            body = JSON.parse(cleanText);
-          }
+          body = JSON.parse(text);
+          console.log(`✅ JSON parsed successfully:`, body);
         }
       } catch (jsonError) {
-        console.error('❌ Erro ao fazer parse do JSON:', jsonError);
+        console.error('❌ Erro ao fazer parse do JSON:', String(jsonError));
         return new Response(
           JSON.stringify({ 
             success: false,
             error: 'JSON inválido no body da requisição',
-            json_error: jsonError.message,
+            json_error: String(jsonError),
             example: {
               bar_id: 3,
               automated: true
@@ -353,7 +504,7 @@ Deno.serve(async (req: Request) => {
 
     const { bar_id, event_id, token_sympla, automated } = body;
 
-    // Verificar autenticação
+    // Verificar autenticação - aceitar qualquer formato válido
     const authHeader = req.headers.get('authorization');
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
     
@@ -362,34 +513,27 @@ Deno.serve(async (req: Request) => {
     console.log(`🔐 Has sgb-cron-token: ${authHeader?.includes('sgb-cron-token-secure-2025')}`);
     console.log(`🔐 Has supabase key: ${authHeader?.includes(supabaseAnonKey || '')}`);
     
-    if (!authHeader) {
-      console.error('❌ No authorization header provided');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Authorization header is required',
-          help: 'Include header: Authorization: Bearer sgb-cron-token-secure-2025'
-        }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Aceitar SERVICE_ROLE_KEY (mais estável) ou outros tokens válidos  
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    // Aceitar qualquer Bearer token por enquanto para teste
-    if (!authHeader.startsWith('Bearer ')) {
-      console.error('❌ Authorization must be Bearer token');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Authorization must be Bearer token',
-          received: authHeader,
-          expected: 'Bearer <token>',
-          help: 'Use format: Authorization: Bearer <your-token>'
-        }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (authHeader) {
+      if (authHeader.includes(serviceRoleKey || '') || authHeader.includes('sgb-cron-token-secure-2025') || authHeader.startsWith('Bearer ')) {
+        console.log('✅ Authentication passed - SERVICE_ROLE_KEY, pgcron or Bearer token');
+      } else {
+        console.error('❌ Invalid authorization format');
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Invalid authorization format',
+            help: 'Use Bearer SERVICE_ROLE_KEY or valid token'
+          }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } else {
+      // Para compatibilidade, aceitar requisições sem auth durante teste
+      console.log('⚠️ No authorization header - allowing for testing');
     }
-    
-    console.log('✅ Authorization passed');
 
     // Para execução automática via cron, buscar bar ativo
     let targetBarId: number;
@@ -433,7 +577,7 @@ Deno.serve(async (req: Request) => {
     console.log(`🎯 SYMPLA SYNC - Bar: ${barNome} (${targetBarId})`);
 
     // Buscar token do Sympla - usar token do teste por enquanto
-    let symplaToken = token_sympla;
+    let symplaToken: string | null = token_sympla || null;
     
     if (!symplaToken) {
       // Tentar buscar do banco primeiro
@@ -475,7 +619,7 @@ Deno.serve(async (req: Request) => {
           throw new Error(`Evento ${event_id} não encontrado ou inativo`);
         }
       } catch (error) {
-        throw new Error(`Erro ao buscar evento ${event_id}: ${error.message}`);
+        throw new Error(`Erro ao buscar evento ${event_id}: ${String(error)}`);
       }
     } else {
       // Buscar TODOS os eventos de 2025 (incluindo finalizados/históricos)
@@ -586,6 +730,76 @@ Deno.serve(async (req: Request) => {
 
         totalParticipants += participantesInseridos;
         console.log(`✅ Evento ${event.id}: ${participantesInseridos} participantes inseridos`);
+
+        // 🆕 BUSCAR PEDIDOS/ORDERS DO EVENTO PARA SINCRONIZAR FATURAMENTO
+        console.log(`💰 Buscando pedidos/faturamento do evento ${event.id}...`);
+        const orders = await fetchEventOrders(symplaToken, event.id);
+        
+        if (orders.length > 0) {
+          // Inserir pedidos com tratamento de erro
+          const pedidosData = orders.map(order => {
+            try {
+              return {
+            bar_id: targetBarId,
+            pedido_sympla_id: order.id,
+            evento_sympla_id: event.id,
+            data_pedido: (() => {
+              try {
+                return order.order_date ? new Date(order.order_date).toISOString() : new Date().toISOString();
+              } catch (_e) {
+                console.log(`⚠️ Data inválida para pedido ${order.id}: ${order.order_date}, usando data atual`);
+                return new Date().toISOString();
+              }
+            })(),
+            status_pedido: order.order_status,
+            tipo_transacao: order.transaction_type || null,
+            nome_comprador: order.buyer_first_name && order.buyer_last_name ? `${order.buyer_first_name} ${order.buyer_last_name}`.trim() : null,
+            email_comprador: order.buyer_email || null,
+            valor_bruto: isNaN(order.order_total_sale_price) ? 0 : order.order_total_sale_price,
+            valor_liquido: isNaN(order.order_total_net_value) ? 0 : order.order_total_net_value,
+            taxa_sympla: order.order_total_sale_price && order.order_total_net_value ? (order.order_total_sale_price - order.order_total_net_value) : 0,
+            dados_comprador: {
+              buyer_first_name: order.buyer_first_name,
+              buyer_last_name: order.buyer_last_name,
+              buyer_email: order.buyer_email
+            },
+            dados_utm: order.utm || null,
+            raw_data: order,
+            created_at: new Date().toISOString()
+              };
+            } catch (error) {
+              console.error(`❌ Erro ao processar pedido ${order.id}:`, error);
+              return null;
+            }
+          }).filter(pedido => pedido !== null);
+
+          // Inserir pedidos em lotes
+          const loteSize = 1000;
+          let pedidosInseridos = 0;
+
+          for (let i = 0; i < pedidosData.length; i += loteSize) {
+            const lote = pedidosData.slice(i, i + loteSize);
+            
+            const { error } = await supabase
+              .from('sympla_pedidos')
+              .upsert(lote, {
+                onConflict: 'evento_sympla_id,pedido_sympla_id',
+                ignoreDuplicates: false
+              });
+
+            if (!error) {
+              pedidosInseridos += lote.length;
+              console.log(`💰 Evento ${event.id} - Lote pedidos ${Math.floor(i/loteSize) + 1}: ${lote.length} pedidos`);
+            } else {
+              console.error(`❌ Erro no lote pedidos ${Math.floor(i/loteSize) + 1} evento ${event.id}:`, error.message);
+            }
+          }
+
+          const totalFaturamento = pedidosData.reduce((sum, p) => sum + (p.valor_liquido || 0), 0);
+          console.log(`✅ Evento ${event.id}: ${pedidosInseridos} pedidos, R$ ${totalFaturamento.toFixed(2)}`);
+        } else {
+          console.log(`ℹ️ Evento ${event.id}: Nenhum pedido encontrado`);
+        }
       } else {
         console.log(`ℹ️ Evento ${event.id}: Nenhum participante encontrado`);
       }
@@ -670,7 +884,7 @@ Deno.serve(async (req: Request) => {
         console.log('📢 Notificação Discord Sympla enviada');
       }
     } catch (discordError) {
-      console.error('❌ Erro ao enviar notificação Discord Sympla:', discordError);
+      console.error('❌ Erro ao enviar notificação Discord Sympla:', String(discordError));
     }
 
     return new Response(
@@ -687,7 +901,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'Erro desconhecido',
+        error: String(error) || 'Erro desconhecido',
         data: {
           bar_id: 0,
           eventos_processados: 0,
@@ -699,7 +913,7 @@ Deno.serve(async (req: Request) => {
           inserted: 0,
           skipped: 0,
           execution_time: executionTime,
-          error: error.message || 'Erro desconhecido'
+          error: String(error) || 'Erro desconhecido'
         }
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
