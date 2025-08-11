@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.br.com.zykor.fidelidade",
+  "teamIdentifier": "7GK85K6Q2Q",
+  "organizationName": "ZYKOR",
+  "description": "Cartão de Fidelidade",
+  "logoText": "ZYKOR",
+  "foregroundColor": "rgb(255, 255, 255)",
+  "backgroundColor": "rgb(234, 88, 12)",
+  "labelColor": "rgb(254, 215, 170)",
+  "storeCard": {
+    "primaryFields": [
+      {
+        "key": "balance",
+        "label": "SALDO DISPONÍVEL",
+        "value": "R$ 0,00"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "name",
+        "label": "MEMBRO",
+        "value": "Nome do Membro"
+      },
+      {
+        "key": "tier",
+        "label": "PLANO",
+        "value": "VIP"
+      }
+    ],
+    "auxiliaryFields": [
+      {
+        "key": "location",
+        "label": "ESTABELECIMENTO",
+        "value": "Ordinário Bar"
+      }
+    ],
+    "backFields": [
+      {
+        "key": "terms",
+        "label": "COMO USAR",
+        "value": "Mostre este cartão no estabelecimento para acumular pontos e resgatar benefícios."
+      }
+    ]
+  },
+  "barcodes": [
+    {
+      "format": "PKBarcodeFormatQR",
+      "message": "https://sgbv2.vercel.app/cartao/token",
+      "messageEncoding": "iso-8859-1"
+    }
+  ]
+}

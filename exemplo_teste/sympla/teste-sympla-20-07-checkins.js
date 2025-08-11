@@ -6,33 +6,60 @@
 
 const fs = require('fs');
 
-// Tentar carregar .env.local
-try {
+// Função para carregar .env.local manualmente (sem dotenv)
+function loadEnvManually() {
   const path = require('path');
   
+  // Caminhos possíveis para o .env.local
   const envPaths = [
-    '../../frontend/.env.local',
-    '../frontend/.env.local', 
-    '../.env.local',
-    '.env.local'
+    path.resolve(__dirname, '../../frontend/.env.local'),
+    path.resolve(process.cwd(), 'frontend/.env.local'),
+    path.resolve(process.cwd(), '.env.local')
   ];
   
-  let loaded = false;
+  console.log('🔍 Procurando .env.local...');
+  
   for (const envPath of envPaths) {
+    console.log(`   Testando: ${envPath}`);
+    
     if (fs.existsSync(envPath)) {
-      require('dotenv').config({ path: envPath });
-      console.log(`🔧 Carregando .env.local de: ${envPath}`);
-      loaded = true;
-      break;
+      console.log(`   ✅ Encontrado!`);
+      
+      try {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        const lines = envContent.split('\n');
+        
+        let loaded = 0;
+        for (const line of lines) {
+          // Ignorar comentários e linhas vazias
+          if (line.trim() && !line.trim().startsWith('#')) {
+            const [key, ...valueParts] = line.split('=');
+            if (key && valueParts.length > 0) {
+              const value = valueParts.join('=').trim();
+              // Remover aspas se existirem
+              const cleanValue = value.replace(/^["']|["']$/g, '');
+              process.env[key.trim()] = cleanValue;
+              loaded++;
+            }
+          }
+        }
+        
+        console.log(`🔧 Carregadas ${loaded} variáveis de: ${envPath}`);
+        return true;
+      } catch (error) {
+        console.log(`   ❌ Erro ao ler arquivo: ${error.message}`);
+      }
+    } else {
+      console.log(`   ❌ Não encontrado`);
     }
   }
   
-  if (!loaded) {
-    console.log('⚠️  Arquivo .env.local não encontrado, usando variáveis manuais');
-  }
-} catch (error) {
-  console.log('⚠️  dotenv não instalado, usando variáveis manuais');
+  console.log('⚠️  Nenhum .env.local encontrado nos caminhos testados');
+  return false;
 }
+
+// Carregar variáveis de ambiente
+loadEnvManually();
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -349,6 +376,11 @@ async function testarCheckins2007() {
 // Verificar configurações
 console.log('🔧 Verificando configuração...');
 
+// Debug das variáveis carregadas
+console.log('\n🔍 DEBUG - Variáveis carregadas:');
+console.log(`   NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Definida' : '❌ Não encontrada'}`);
+console.log(`   SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Definida' : '❌ Não encontrada'}`);
+
 const requiredVars = ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
 const missingVars = requiredVars.filter(varName => !process.env[varName]);
 
@@ -357,8 +389,22 @@ if (missingVars.length > 0) {
   missingVars.forEach(varName => {
     console.log(`   - ${varName}`);
   });
-  console.log('\n📋 Configure no arquivo .env.local e tente novamente');
-  process.exit(1);
+  console.log('\n📋 Soluções possíveis:');
+  console.log('1. Verifique se o arquivo frontend/.env.local existe');
+  console.log('2. Instale dotenv: npm install dotenv');
+  console.log('3. Ou defina as variáveis manualmente no sistema');
+  
+  // Tentar usar valores padrão do env.example se disponível
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://uqtgsvujwcbymjmvkjhy.supabase.co';
+    console.log('\n🔧 Usando URL padrão do Supabase do env.example');
+  }
+  
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.log('\n❌ SUPABASE_SERVICE_ROLE_KEY é obrigatória e não pode ser inferida');
+    console.log('   Configure no arquivo .env.local do frontend');
+    process.exit(1);
+  }
 }
 
 // Executar teste
