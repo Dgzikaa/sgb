@@ -318,12 +318,12 @@ class NiboSyncService {
       const batchId = crypto.randomUUID()
       console.log(`📋 Batch ID: ${batchId}`)
 
-      // Buscar agendamentos dos últimos 30 dias
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-      const filterDate = thirtyDaysAgo.toISOString().split('T')[0]
+      // Buscar agendamentos dos últimos 10 dias
+      const tenDaysAgo = new Date()
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
+      const filterDate = tenDaysAgo.toISOString().split('T')[0]
       
-      console.log(`📅 Buscando agendamentos EDITADOS nos últimos 30 dias (desde ${filterDate})...`)
+      console.log(`📅 Buscando agendamentos EDITADOS nos últimos 10 dias (desde ${filterDate})...`)
       
       // Buscar todas as páginas da API NIBO
       const allAgendamentos = []
