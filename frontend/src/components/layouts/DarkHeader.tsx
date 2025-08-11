@@ -79,7 +79,7 @@ function generateBreadcrumbs(pathname: string) {
 
   // Add home always
   breadcrumbs.push({
-    name: 'ZYCOR',
+    name: 'ZYKOR',
     href: '/home',
     icon: Home,
   });
@@ -112,8 +112,8 @@ export function DarkHeader() {
   const { user, logout } = useUser();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  // Logo principal ZYCOR
-  const zykorLogo = '/logos/zycor-logo.png';
+  // Logo principal ZYKOR
+  const zykorLogo = '/logos/zykor-logo.png';
   
   // Logos específicos dos bares (quando implementados)
   const getBarLogo = (barName: string) => {
@@ -126,7 +126,7 @@ export function DarkHeader() {
     return barLogos[normalizedName] || zykorLogo;
   };
   
-  const srcImage = zykorLogo; // Por enquanto, sempre ZYCOR principal
+  const srcImage = zykorLogo; // Por enquanto, sempre ZYKOR principal
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showBarMenu, setShowBarMenu] = useState(false);
@@ -203,15 +203,15 @@ export function DarkHeader() {
   return (
     <header className="sticky inset-x-0 top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
       <div className="flex items-center h-12 px-2 sm:px-4 justify-between">
-        {/* Esquerda - Logo ZYCOR */}
+        {/* Esquerda - Logo ZYKOR */}
         <div className="flex items-center">
           <Link href="/home" className="flex items-center">
             <Image
               src={srcImage}
-              alt="Logo ZYCOR"
+              alt="Logo ZYKOR"
               width={64}
               height={64}
-              className="logo-zycor favicon-improved"
+              className="logo-zykor favicon-improved"
             />
           </Link>
         </div>
@@ -237,7 +237,7 @@ export function DarkHeader() {
               onClick={() => setShowBarMenu(!showBarMenu)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
             >
-              <div className="w-6 h-6 rounded-full avatar-zycor text-xs font-bold">
+              <div className="w-6 h-6 rounded-full avatar-zykor text-xs font-bold">
                 {selectedBar?.nome?.charAt(0)?.toUpperCase() || 'B'}
               </div>
               <span className="hidden sm:block truncate max-w-24">
@@ -260,7 +260,7 @@ export function DarkHeader() {
                     onClick={() => handleBarSelect(bar)}
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <div className="w-6 h-6 rounded-full avatar-zycor text-xs font-bold">
+                    <div className="w-6 h-6 rounded-full avatar-zykor text-xs font-bold">
                       {bar.nome?.charAt(0)?.toUpperCase()}
                     </div>
                     <span className="flex-1 text-left">{bar.nome}</span>
@@ -284,7 +284,7 @@ export function DarkHeader() {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 px-2 py-1 rounded-[6px] hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <div className="w-6 h-6 rounded-full avatar-zycor text-xs font-semibold">
+                <div className="w-6 h-6 rounded-full avatar-zykor text-xs font-semibold">
                   {user?.nome?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <span className="hidden sm:block text-xs text-gray-600 dark:text-gray-300 truncate max-w-24">
@@ -299,7 +299,7 @@ export function DarkHeader() {
                   {/* User Info */}
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full avatar-zycor text-sm font-semibold">
+                      <div className="w-8 h-8 rounded-full avatar-zykor text-sm font-semibold">
                         {user?.nome?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                       <div>

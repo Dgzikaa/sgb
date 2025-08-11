@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import CodigoConviteValidator from '@/components/forms/CodigoConviteValidator';
+
 import { 
   Crown, 
   Star, 
@@ -21,16 +21,56 @@ import {
   Zap,
   Clock,
   Heart,
-  Wallet
+  Wallet,
+  Instagram,
+  Globe,
+  Play,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function FidelidadePage() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Imagens do carousel (placeholder - substituir por fotos reais do bar)
+  const barImages = [
+    {
+      src: "/logos/ordinario-transparente.png",
+      alt: "Ordinário Bar - Ambiente interno",
+      caption: "Ambiente aconchegante e moderno"
+    },
+    {
+      src: "/logos/deboche-transparente.png",
+      alt: "Shows ao vivo no Ordinário",
+      caption: "Música ao vivo toda semana"
+    },
+    {
+      src: "/logos/ordinario-transparente.png",
+      alt: "Drinks especiais do Ordinário",
+      caption: "Drinks autorais e clássicos"
+    }
+  ];
 
   useEffect(() => {
     setIsLoaded(true);
-  }, []);
+    
+    // Auto-play carousel
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % barImages.length);
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [barImages.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % barImages.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + barImages.length) % barImages.length);
+  };
 
   const beneficios = [
     {
@@ -117,7 +157,7 @@ export default function FidelidadePage() {
                           <Crown className="w-4 h-4 text-amber-300" />
                         </motion.div>
 
-            {/* Logo Moderno ZYCOR */}
+            {/* Logo Moderno ZYKOR */}
                                     <motion.div
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -150,7 +190,7 @@ export default function FidelidadePage() {
                             <h1 className="text-6xl sm:text-7xl md:text-8xl font-black bg-gradient-to-r from-white via-amber-200 to-yellow-200 bg-clip-text text-transparent mb-4 leading-none">
                               FIDELIDADE
                             </h1>
-                            <p className="text-xl sm:text-2xl text-amber-200 font-light mb-2">
+                            <p className="text-xl sm:text-2xl text-white font-normal mb-2">
                               Ordinário Bar e Música
                             </p>
                           </div>
@@ -182,7 +222,33 @@ export default function FidelidadePage() {
                           </div>
                         </motion.div>
 
-            {/* CTAs removidos - acesso apenas via código de convite */}
+            {/* CTAs Principais */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+            >
+              <Link href="/fidelidade/lista-espera">
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-black px-8 py-4 text-lg font-semibold shadow-2xl hover:shadow-amber-500/25 transition-all duration-300 transform hover:scale-105 border-0 rounded-2xl"
+                >
+                  <Zap className="mr-2 w-5 h-5" />
+                  Lista de Espera
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <Link href="/fidelidade/login">
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto bg-amber-500/20 backdrop-blur-md border border-amber-400/30 text-amber-100 hover:bg-amber-500/30 px-8 py-4 text-lg font-semibold transition-all duration-300 rounded-2xl"
+                >
+                  <Heart className="mr-2 w-5 h-5" />
+                  Já sou Membro
+                </Button>
+              </Link>
+            </motion.div>
 
             {/* Trust Indicators */}
                                     <motion.div
@@ -276,155 +342,179 @@ export default function FidelidadePage() {
         </div>
       </section>
 
-      {/* CTA Final Ultra Moderno com Código de Convite */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        {/* Background Premium */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-900 via-black to-amber-800"></div>
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.1),transparent_50%)]"></div>
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-        
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
+      {/* Carousel de Fotos do Bar */}
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/40 to-black/60 backdrop-blur-sm"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            {/* Badge VIP Exclusivo */}
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 backdrop-blur-xl border border-amber-400/30 rounded-full px-8 py-4 mb-8 shadow-2xl">
-              <Crown className="w-6 h-6 text-amber-300 animate-pulse" />
-              <span className="text-amber-100 font-bold text-lg">ACESSO VIP EXCLUSIVO</span>
-              <Sparkles className="w-6 h-6 text-yellow-300 animate-pulse" />
-            </div>
-
-            {/* Título Principal */}
-            <h2 className="text-4xl sm:text-6xl lg:text-8xl font-black text-white mb-6 leading-none">
-              Você foi
-              <br />
-              <span className="bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-400 bg-clip-text text-transparent animate-pulse">
-                CONVIDADO
-              </span>
+            <h2 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-white to-amber-200 bg-clip-text text-transparent mb-4">
+              Conheça o Ordinário
             </h2>
-            
-            {/* Subtítulo */}
-            <p className="text-lg sm:text-xl lg:text-2xl text-amber-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Para fazer parte do círculo exclusivo de apenas 
-              <span className="font-black text-amber-300 text-2xl lg:text-3xl"> 100 PESSOAS </span>
-              <br className="hidden sm:block" />
-              no programa VIP do Ordinário Bar
+            <p className="text-xl text-amber-200 max-w-2xl mx-auto">
+              Um ambiente único para momentos especiais
             </p>
+          </motion.div>
 
-            {/* Explicação do Fluxo */}
-            <div className="bg-amber-500/10 backdrop-blur-md border border-amber-400/20 rounded-2xl p-6 mb-8 max-w-2xl mx-auto">
-              <h3 className="text-amber-200 text-lg font-bold mb-3 text-center">Como funciona:</h3>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-amber-100">
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-500 text-black rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">1</span>
-                  <span>Validar código</span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-amber-400 transform rotate-90 sm:rotate-0" />
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-500 text-black rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">2</span>
-                  <span>Fazer cadastro</span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-amber-400 transform rotate-90 sm:rotate-0" />
-                <div className="flex items-center gap-2">
-                  <span className="bg-amber-500 text-black rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">3</span>
-                  <span>Pagar R$ 100</span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-amber-400 transform rotate-90 sm:rotate-0" />
-                <div className="flex items-center gap-2">
-                  <span className="bg-green-500 text-black rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">✓</span>
-                  <span className="font-bold text-amber-300">R$ 150 de crédito!</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card Central - Oferta */}
-            <div className="relative max-w-2xl mx-auto mb-12">
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-yellow-500/30 rounded-3xl blur-2xl"></div>
-              <div className="relative bg-black/40 backdrop-blur-xl border border-amber-400/30 rounded-3xl p-8 lg:p-12 shadow-2xl">
-                
-                {/* Preço Especial */}
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <div className="text-center">
-                    <div className="text-2xl lg:text-3xl font-bold text-white">Investimento</div>
-                    <div className="text-4xl lg:text-6xl font-black text-red-400">R$ 100</div>
-                    <div className="text-sm text-red-300 opacity-80">uma única vez</div>
+          {/* Carousel */}
+          <div className="relative max-w-4xl mx-auto">
+            <div className="relative h-80 md:h-96 overflow-hidden rounded-3xl">
+              {/* Imagens */}
+              {barImages.map((image, index) => (
+                <motion.div
+                  key={index}
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  initial={false}
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback para quando as imagens não existirem
+                      (e.target as HTMLImageElement).src = '/logos/ordinario-transparente.png'
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  
+                  {/* Caption */}
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <p className="text-white text-lg font-semibold">
+                      {image.caption}
+                    </p>
                   </div>
-                  <ArrowRight className="w-8 h-8 text-amber-400" />
-                  <div className="text-center">
-                    <div className="text-2xl lg:text-3xl font-bold text-white">Créditos</div>
-                    <div className="text-4xl lg:text-6xl font-black bg-gradient-to-r from-amber-300 to-yellow-300 bg-clip-text text-transparent">R$ 150</div>
-                    <div className="text-sm text-amber-300 opacity-80">todo mês</div>
-                  </div>
-                </div>
-                
-                {/* Alerta importante */}
-                <div className="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 mb-6">
-                  <p className="text-blue-100 text-sm text-center">
-                    💡 <strong>Importante:</strong> Seus créditos são ativados automaticamente após a confirmação do pagamento
-                  </p>
-                </div>
-                
-                {/* Benefícios Rápidos */}
-                <div className="grid grid-cols-3 gap-4 lg:gap-8 mb-8">
-                  <div className="text-center">
-                    <div className="text-2xl lg:text-3xl font-bold text-green-400">50%</div>
-                    <div className="text-amber-200/80 text-sm lg:text-base">Retorno garantido</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl lg:text-3xl font-bold text-amber-300">VIP</div>
-                    <div className="text-amber-200/80 text-sm lg:text-base">Acesso exclusivo</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl lg:text-3xl font-bold text-blue-400">100</div>
-                    <div className="text-amber-200/80 text-sm lg:text-base">Vagas limitadas</div>
-                  </div>
-                </div>
-
-                {/* Validador de Código de Convite */}
-                <CodigoConviteValidator 
-                  onValidacaoSucesso={(dados) => {
-                    // Redirecionar para cadastro com dados validados
-                    const params = new URLSearchParams({
-                      codigo: dados.codigo,
-                      cpf: dados.cpf,
-                      validation_token: dados.validation_token
-                    });
-                    window.location.href = `/fidelidade/cadastro?${params.toString()}`;
-                  }}
-                  className="mb-6"
-                />
-              </div>
-            </div>
-
-            {/* Urgência e Trust Signals */}
-            <div className="space-y-4">
-              <p className="text-amber-200 text-lg font-semibold">
-                ⚡ Apenas para convidados especiais • Cadastro liberado com código válido
-              </p>
-              <div className="flex flex-wrap justify-center gap-6 text-sm text-amber-300/80">
-                <span>🔒 Pagamento 100% seguro</span>
-                <span>📱 Créditos ativados após pagamento</span>
-                <span>💳 Cartão digital imediato</span>
-              </div>
+                </motion.div>
+              ))}
               
-              {/* Informação adicional sobre o fluxo */}
-              <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-400/20">
-                <p className="text-amber-200 text-xs text-center">
-                  O código de convite é usado apenas para validar seu acesso ao cadastro.<br/>
-                  Os R$ 150 em créditos são liberados automaticamente após a confirmação do seu pagamento.
-                </p>
+              {/* Controles */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 backdrop-blur-sm"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Dots */}
+            <div className="flex justify-center mt-6 space-x-2">
+              {barImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentSlide 
+                      ? 'bg-amber-400 scale-125' 
+                      : 'bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Links Sociais e Contato */}
+      <section className="relative py-16 border-t border-amber-400/20">
+        <div className="absolute inset-0 bg-gradient-to-br from-black to-amber-900/30"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          
+          {/* Links Sociais */}
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-8">
+              Siga o Ordinário
+            </h3>
+            
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/ordinariobar/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+              >
+                <Instagram className="w-6 h-6" />
+                <span>@ordinariobar</span>
+                <ArrowRight className="w-4 h-4 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+              </a>
+              
+              {/* Site */}
+              <a
+                href="https://www.ordinariobar.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+              >
+                <Globe className="w-6 h-6" />
+                <span>Site Oficial</span>
+                <ArrowRight className="w-4 h-4 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+              </a>
+            </div>
+          </motion.div>
+
+          {/* Ações Finais */}
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <div className="bg-black/30 backdrop-blur-md border border-amber-400/30 rounded-3xl p-8 max-w-md mx-auto">
+              <Crown className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+              <h4 className="text-xl font-bold text-white mb-4">
+                Clube VIP Limitado
+              </h4>
+              <p className="text-amber-200 mb-6">
+                Apenas 100 vagas disponíveis para garantir exclusividade
+              </p>
+              
+              <div className="space-y-3">
+                <Link href="/fidelidade/lista-espera">
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+                  >
+                    <Heart className="w-5 h-5 mr-2" />
+                    Lista de Espera
+                  </Button>
+                </Link>
+                
+                <Link href="/fidelidade/convite">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="w-full border-2 border-amber-400 text-amber-300 hover:bg-amber-400 hover:text-black font-semibold py-4 rounded-xl transition-all duration-300"
+                  >
+                    <Gift className="w-5 h-5 mr-2" />
+                    Tenho um Convite
+                  </Button>
+                </Link>
               </div>
             </div>
-
           </motion.div>
         </div>
       </section>
+
     </div>
   );
 }

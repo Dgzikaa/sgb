@@ -280,17 +280,17 @@ export default function LoginPage() {
           >
             {!logoError ? (
               <Image
-                src="/logos/zycor-logo.png"
-                alt="ZYCOR Logo"
+                src="/logos/zykor-logo.png"
+                alt="ZYKOR Logo"
                 width={400}
                 height={180}
                 onError={() => setLogoError(true)}
-                className="logo-zycor favicon-improved"
+                className="logo-zykor favicon-improved"
               />
             ) : (
               <div
                 className="w-80 h-40 lg:w-96 lg:h-44 flex items-center justify-center rounded-2xl"
-                style={{background: 'var(--zycor-gradient)'}}
+                style={{background: 'var(--zykor-gradient)'}}
                 suppressHydrationWarning
               >
                 <span className="text-6xl lg:text-7xl text-white">Z</span>
@@ -520,7 +520,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full btn-zycor py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full btn-zykor py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
                   >
                     {isLoading ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -586,7 +586,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center mt-12 text-slate-400 dark:text-gray-500 text-sm">
           <p>
-            © 2025 ZYCOR - O núcleo da gestão de bares
+            © 2025 ZYKOR - O núcleo da gestão de bares
           </p>
         </div>
       </div>

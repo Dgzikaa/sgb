@@ -1,0 +1,42 @@
+{
+  "name": "Ordinário Bar - Cartão Fidelidade",
+  "short_name": "Ordinário Card",
+  "description": "Cartão de fidelidade digital do Ordinário Bar e Música",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f97316",
+  "theme_color": "#ea580c",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logos/ordinario-transparente.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logos/ordinario-transparente.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Meu Cartão",
+      "short_name": "Cartão",
+      "description": "Acessar meu cartão de fidelidade",
+      "url": "/fidelidade",
+      "icons": [
+        {
+          "src": "/logos/ordinario-transparente.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "categories": ["lifestyle", "food", "entertainment"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}

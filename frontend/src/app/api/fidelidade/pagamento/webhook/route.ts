@@ -1,212 +1,207 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+)
 
-const MP_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN;
-const MP_BASE_URL = 'https://api.mercadopago.com';
+// SEGURANÇA: Verificar assinatura do Mercado Pago
+function verifyMercadoPagoSignature(body: string, signature: string): boolean {
+  if (!process.env.MERCADO_PAGO_WEBHOOK_SECRET) {
+    console.warn('⚠️ MERCADO_PAGO_WEBHOOK_SECRET não configurado')
+    return true // Em desenvolvimento, aceitar sem verificação
+  }
+  
+  const expectedSignature = crypto
+    .createHmac('sha256', process.env.MERCADO_PAGO_WEBHOOK_SECRET)
+    .update(body)
+    .digest('hex')
+    
+  return crypto.timingSafeEqual(
+    Buffer.from(signature, 'hex'),
+    Buffer.from(expectedSignature, 'hex')
+  )
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    console.log('Webhook Mercado Pago recebido:', body);
+    const body = await request.text()
+    const signature = request.headers.get('x-signature') || ''
+    
+    // SEGURANÇA: Verificar assinatura
+    if (!verifyMercadoPagoSignature(body, signature)) {
+      console.error('🚨 WEBHOOK: Assinatura inválida')
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
+    
+    const webhookData = JSON.parse(body)
+    console.log('📨 WEBHOOK Mercado Pago recebido:', webhookData)
 
-    // Validar se é uma notificação de pagamento
-    if (body.type !== 'payment') {
-      return NextResponse.json({ status: 'ignored' });
+    // Extrair dados do webhook
+    const { action, data, id: webhookId } = webhookData
+    
+    if (action !== 'payment.updated' && action !== 'payment.created') {
+      console.log('📋 WEBHOOK ignorado - ação não relevante:', action)
+      return NextResponse.json({ status: 'ignored' })
     }
 
-    const paymentId = body.data?.id;
+    const paymentId = data?.id
     if (!paymentId) {
-      return NextResponse.json({ error: 'Payment ID not found' }, { status: 400 });
+      console.error('🚨 WEBHOOK: Payment ID não encontrado')
+      return NextResponse.json({ error: 'Payment ID missing' }, { status: 400 })
     }
 
-    // Buscar detalhes do pagamento no Mercado Pago
-    const paymentResponse = await fetch(`${MP_BASE_URL}/v1/payments/${paymentId}`, {
+    // Buscar dados do pagamento no nosso banco
+    const { data: pagamento, error: errorPagamento } = await supabase
+      .from('fidelidade_pagamentos')
+      .select('*')
+      .eq('gateway_transaction_id', paymentId)
+      .single()
+
+    if (errorPagamento || !pagamento) {
+      console.error('🚨 WEBHOOK: Pagamento não encontrado no banco:', paymentId)
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
+    }
+
+    // Buscar dados do pagamento no Mercado Pago
+    if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
+      console.error('🚨 WEBHOOK: MERCADO_PAGO_ACCESS_TOKEN não configurado')
+      return NextResponse.json({ error: 'MP token missing' }, { status: 500 })
+    }
+
+    const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
       headers: {
-        'Authorization': `Bearer ${MP_ACCESS_TOKEN}`
+        'Authorization': `Bearer ${process.env.MERCADO_PAGO_ACCESS_TOKEN}`
       }
-    });
+    })
 
-    if (!paymentResponse.ok) {
-      console.error('Erro ao buscar pagamento no MP:', await paymentResponse.text());
-      return NextResponse.json({ error: 'Failed to fetch payment' }, { status: 500 });
+    if (!mpResponse.ok) {
+      console.error('🚨 WEBHOOK: Erro ao consultar Mercado Pago:', mpResponse.status)
+      return NextResponse.json({ error: 'MP API error' }, { status: 500 })
     }
 
-    const paymentData = await paymentResponse.json();
-    const membroId = paymentData.external_reference;
-    const status = paymentData.status;
-
-    console.log(`Pagamento ${paymentId} - Status: ${status} - Membro: ${membroId}`);
+    const mpPayment = await mpResponse.json()
+    console.log('💳 WEBHOOK: Dados do pagamento MP:', {
+      id: mpPayment.id,
+      status: mpPayment.status,
+      status_detail: mpPayment.status_detail,
+      external_reference: mpPayment.external_reference
+    })
 
     // Atualizar status do pagamento no banco
     const { error: errorUpdate } = await supabase
       .from('fidelidade_pagamentos')
       .update({
-        status: mapMercadoPagoStatus(status),
-        gateway_response: paymentData,
-        data_pagamento: status === 'approved' ? new Date().toISOString() : null,
+        status: mpPayment.status,
+        gateway_response: mpPayment,
+        data_confirmacao: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .eq('gateway_transaction_id', paymentId);
+      .eq('id', pagamento.id)
 
     if (errorUpdate) {
-      console.error('Erro ao atualizar pagamento:', errorUpdate);
+      console.error('🚨 WEBHOOK: Erro ao atualizar pagamento:', errorUpdate)
     }
 
-    // Se pagamento aprovado, ativar membro e adicionar créditos
-    if (status === 'approved' && membroId) {
-      await processApprovedPayment(membroId, paymentData.transaction_amount);
+    // CRÍTICO: Processar pagamento aprovado
+    if (mpPayment.status === 'approved' && pagamento.status !== 'aprovado') {
+      console.log('✅ WEBHOOK: Processando pagamento aprovado:', paymentId)
+      await processApprovedPayment(pagamento.membro_id, mpPayment.transaction_amount)
+      
+      // Log de auditoria
+      await supabase.from('fidelidade_pagamentos_logs').insert({
+        pagamento_id: pagamento.id,
+        acao: 'aprovado_via_webhook',
+        dados_webhook: webhookData,
+        dados_mp: mpPayment,
+        ip_origem: request.headers.get('x-forwarded-for') || request.ip
+      })
     }
 
-    return NextResponse.json({ status: 'processed' });
+    return NextResponse.json({ status: 'processed' })
 
   } catch (error) {
-    console.error('Erro no webhook:', error);
+    console.error('🚨 WEBHOOK: Erro geral:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Webhook processing error' },
       { status: 500 }
-    );
+    )
   }
 }
 
+// FUNÇÃO SEGURA: Processar pagamento aprovado
 async function processApprovedPayment(membroId: string, valor: number) {
   try {
-    // Ativar membro
-    const { error: errorMembro } = await supabase
-      .from('fidelidade_membros')
-      .update({
-        status: 'ativo',
-        ultimo_pagamento: new Date().toISOString(),
-        proxima_cobranca: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +30 dias
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', membroId);
+    console.log(`🎯 WEBHOOK: Ativando membro ${membroId} com valor R$ ${valor}`)
 
-    if (errorMembro) {
-      console.error('Erro ao ativar membro:', errorMembro);
-      return;
+    // SEGURANÇA: Usar transação para operações críticas
+    const { data, error } = await supabase.rpc('processar_pagamento_aprovado', {
+      p_membro_id: membroId,
+      p_valor_pagamento: valor,
+      p_credito_mensal: 150.00 // R$ 150 de crédito
+    })
+
+    if (error) {
+      console.error('🚨 WEBHOOK: Erro na função RPC:', error)
+      throw error
     }
 
-    // Adicionar créditos mensais (R$ 150)
-    const { error: errorTransacao } = await supabase
-      .from('fidelidade_transacoes')
-      .insert({
-        membro_id: membroId,
-        tipo: 'credito',
-        valor: 150.00,
-        descricao: 'Crédito mensal - Pagamento aprovado'
-      });
+    console.log('✅ WEBHOOK: Membro ativado com sucesso:', data)
 
-    if (errorTransacao) {
-      console.error('Erro ao adicionar créditos:', errorTransacao);
-      return;
-    }
-
-    console.log(`Membro ${membroId} ativado com sucesso! Créditos: R$ 150,00`);
-
-    // Enviar notificação de boas-vindas (opcional)
-    await sendWelcomeNotification(membroId);
+    // Enviar email de confirmação
+    await sendPaymentConfirmationEmail(membroId, valor)
 
   } catch (error) {
-    console.error('Erro ao processar pagamento aprovado:', error);
+    console.error('🚨 WEBHOOK: Erro ao processar pagamento:', error)
+    
+    // Log crítico para monitoramento
+    await supabase.from('fidelidade_pagamentos_erros').insert({
+      membro_id: membroId,
+      valor_pagamento: valor,
+      erro: error instanceof Error ? error.message : 'Unknown error',
+      stack_trace: error instanceof Error ? error.stack : null,
+      timestamp: new Date().toISOString()
+    })
+    
+    throw error
   }
 }
 
-async function sendWelcomeNotification(membroId: string) {
+// FUNÇÃO: Enviar email de confirmação
+async function sendPaymentConfirmationEmail(membroId: string, valor: number) {
   try {
-    // Buscar dados do membro para envio de notificação
+    // Buscar dados do membro
     const { data: membro } = await supabase
       .from('fidelidade_membros')
-      .select('nome, email')
+      .select('nome, email, qr_token')
       .eq('id', membroId)
-      .single();
+      .single()
 
-    if (membro) {
-      // Aqui você pode integrar com serviços de e-mail/SMS
-      console.log(`Notificação de boas-vindas para ${membro.nome} (${membro.email})`);
-      
-      // Exemplo de integração com Discord (se configurado)
-      const discordWebhook = process.env.DISCORD_WEBHOOK_URL;
-      if (discordWebhook) {
-        await fetch(discordWebhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `🎉 **Novo Membro VIP!**\n👑 ${membro.nome} acabou de se tornar membro VIP do Ordinário Bar!\n💳 R$ 150 em créditos liberados`
-          })
-        });
-      }
-    }
-  } catch (error) {
-    console.error('Erro ao enviar notificação:', error);
-  }
-}
-
-function mapMercadoPagoStatus(mpStatus: string): string {
-  const statusMap: { [key: string]: string } = {
-    'pending': 'pendente',
-    'approved': 'pago',
-    'authorized': 'pago',
-    'in_process': 'pendente',
-    'in_mediation': 'pendente',
-    'rejected': 'falhado',
-    'cancelled': 'cancelado',
-    'refunded': 'cancelado',
-    'charged_back': 'cancelado'
-  };
-
-  return statusMap[mpStatus] || 'pendente';
-}
-
-// Endpoint GET para verificar status de pagamento
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const paymentId = searchParams.get('payment_id');
-    const membroId = searchParams.get('membro_id');
-
-    if (!paymentId && !membroId) {
-      return NextResponse.json(
-        { error: 'Payment ID ou Membro ID é obrigatório' },
-        { status: 400 }
-      );
+    if (!membro) {
+      console.error('🚨 EMAIL: Membro não encontrado:', membroId)
+      return
     }
 
-    let query = supabase.from('fidelidade_pagamentos').select('*');
-    
-    if (paymentId) {
-      query = query.eq('gateway_transaction_id', paymentId);
-    } else if (membroId) {
-      query = query.eq('membro_id', membroId).order('created_at', { ascending: false }).limit(1);
-    }
+    // Gerar link do cartão
+    const cartaoUrl = `${process.env.NEXT_PUBLIC_APP_URL}/cartao/${membro.qr_token}`
 
-    const { data: pagamento, error } = await query.single();
+    // Enviar email via API
+    await fetch('/api/emails/payment-confirmation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: membro.email,
+        memberName: membro.nome,
+        amount: valor,
+        cardUrl: cartaoUrl
+      })
+    })
 
-    if (error || !pagamento) {
-      return NextResponse.json(
-        { error: 'Pagamento não encontrado' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      id: pagamento.id,
-      status: pagamento.status,
-      valor: pagamento.valor,
-      metodo_pagamento: pagamento.metodo_pagamento,
-      data_pagamento: pagamento.data_pagamento,
-      gateway_transaction_id: pagamento.gateway_transaction_id
-    });
+    console.log('📧 EMAIL: Confirmação enviada para:', membro.email)
 
   } catch (error) {
-    console.error('Erro ao verificar pagamento:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    console.error('🚨 EMAIL: Erro ao enviar confirmação:', error)
   }
 }

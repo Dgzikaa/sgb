@@ -2,49 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== PALETA DE CORES ZYCOR ===== */
+/* ===== PALETA DE CORES ZYKOR ===== */
 :root {
-  /* Cores Primárias ZYCOR */
-  --zycor-blue: #4A90E2;      /* Azul do Z */
-  --zycor-purple: #8B5FBF;    /* Roxo do texto */
-  --zycor-gradient: linear-gradient(135deg, #4A90E2 0%, #8B5FBF 100%);
+  /* Cores Primárias ZYKOR */
+  --zykor-blue: #4A90E2;      /* Azul do Z */
+  --zykor-purple: #8B5FBF;    /* Roxo do texto */
+  --zykor-gradient: linear-gradient(135deg, #4A90E2 0%, #8B5FBF 100%);
   
   /* Cores adaptativas para temas */
-  --zycor-text-on-light: #1f2937;     /* Texto escuro para fundo claro */
-  --zycor-text-on-dark: #f9fafb;      /* Texto claro para fundo escuro */
-  --zycor-bg-light: #ffffff;          /* Fundo claro */
-  --zycor-bg-dark: #111827;           /* Fundo escuro */
+  --zykor-text-on-light: #1f2937;     /* Texto escuro para fundo claro */
+  --zykor-text-on-dark: #f9fafb;      /* Texto claro para fundo escuro */
+  --zykor-bg-light: #ffffff;          /* Fundo claro */
+  --zykor-bg-dark: #111827;           /* Fundo escuro */
   
   /* Variações Azul */
-  --zycor-blue-50: #EBF4FD;
-  --zycor-blue-100: #D1E7FB;
-  --zycor-blue-200: #A8D1F7;
-  --zycor-blue-300: #6BA6E8;
-  --zycor-blue-400: #4A90E2;   /* Principal */
-  --zycor-blue-500: #3A7BD5;
-  --zycor-blue-600: #2F6AC4;
-  --zycor-blue-700: #285AAF;
-  --zycor-blue-800: #1F4788;
-  --zycor-blue-900: #1A3A6B;
+  --zykor-blue-50: #EBF4FD;
+  --zykor-blue-100: #D1E7FB;
+  --zykor-blue-200: #A8D1F7;
+  --zykor-blue-300: #6BA6E8;
+  --zykor-blue-400: #4A90E2;   /* Principal */
+  --zykor-blue-500: #3A7BD5;
+  --zykor-blue-600: #2F6AC4;
+  --zykor-blue-700: #285AAF;
+  --zykor-blue-800: #1F4788;
+  --zykor-blue-900: #1A3A6B;
   
   /* Variações Roxo */
-  --zycor-purple-50: #F3EDFA;
-  --zycor-purple-100: #E3D2F2;
-  --zycor-purple-200: #CDB0E6;
-  --zycor-purple-300: #A478D4;
-  --zycor-purple-400: #8B5FBF;  /* Principal */
-  --zycor-purple-500: #7548A8;
-  --zycor-purple-600: #653A94;
-  --zycor-purple-700: #562F7F;
-  --zycor-purple-800: #452565;
-  --zycor-purple-900: #371D52;
+  --zykor-purple-50: #F3EDFA;
+  --zykor-purple-100: #E3D2F2;
+  --zykor-purple-200: #CDB0E6;
+  --zykor-purple-300: #A478D4;
+  --zykor-purple-400: #8B5FBF;  /* Principal */
+  --zykor-purple-500: #7548A8;
+  --zykor-purple-600: #653A94;
+  --zykor-purple-700: #562F7F;
+  --zykor-purple-800: #452565;
+  --zykor-purple-900: #371D52;
   
   /* Aplicações do Sistema */
-  --primary: var(--zycor-blue);
+  --primary: var(--zykor-blue);
   --primary-foreground: white;
-  --secondary: var(--zycor-purple);
+  --secondary: var(--zykor-purple);
   --secondary-foreground: white;
-  --accent: var(--zycor-purple);
+  --accent: var(--zykor-purple);
   --accent-foreground: white;
   --muted: #64748b;
   --muted-foreground: #475569;
@@ -52,20 +52,20 @@
 
 /* Variáveis específicas para dark mode */
 [data-theme="dark"], .dark {
-  --zycor-card-bg: #1f2937;
-  --zycor-card-border: #374151;
-  --zycor-text-primary: #f9fafb;
-  --zycor-text-secondary: #d1d5db;
-  --zycor-text-muted: #9ca3af;
+  --zykor-card-bg: #1f2937;
+  --zykor-card-border: #374151;
+  --zykor-text-primary: #f9fafb;
+  --zykor-text-secondary: #d1d5db;
+  --zykor-text-muted: #9ca3af;
 }
 
 /* Variáveis específicas para light mode */
 [data-theme="light"], .light {
-  --zycor-card-bg: #ffffff;
-  --zycor-card-border: #e5e7eb;
-  --zycor-text-primary: #111827;
-  --zycor-text-secondary: #4b5563;
-  --zycor-text-muted: #6b7280;
+  --zykor-card-bg: #ffffff;
+  --zykor-card-border: #e5e7eb;
+  --zykor-text-primary: #111827;
+  --zykor-text-secondary: #4b5563;
+  --zykor-text-muted: #6b7280;
 }
 
 /* ===== SISTEMA DE BOTÕES MODERNOS - SGB_V2 ===== */
@@ -88,45 +88,45 @@
   -ms-overflow-style: none;
 }
 
-/* Botão Primário - ZYCOR Blue */
+/* Botão Primário - ZYKOR Blue */
 .btn-primary {
   @apply btn-modern;
-  background: var(--zycor-blue);
+  background: var(--zykor-blue);
   @apply hover:opacity-90;
   @apply text-white shadow-lg;
   @apply focus:ring-2;
-  focus-ring-color: var(--zycor-blue-300);
+  focus-ring-color: var(--zykor-blue-300);
 }
 
 .btn-primary:hover {
-  background: var(--zycor-blue-500);
+  background: var(--zykor-blue-500);
 }
 
-/* Botão Primário com Gradiente ZYCOR */
+/* Botão Primário com Gradiente ZYKOR */
 .btn-primary-gradient {
   @apply btn-modern;
-  background: var(--zycor-gradient);
+  background: var(--zykor-gradient);
   @apply text-white shadow-lg;
   @apply focus:ring-2;
-  focus-ring-color: var(--zycor-blue-300);
+  focus-ring-color: var(--zykor-blue-300);
 }
 
 .btn-primary-gradient:hover {
-  background: linear-gradient(135deg, var(--zycor-blue-500) 0%, var(--zycor-purple-500) 100%);
+  background: linear-gradient(135deg, var(--zykor-blue-500) 0%, var(--zykor-purple-500) 100%);
 }
 
-/* ===== CLASSES UTILITÁRIAS ZYCOR ===== */
+/* ===== CLASSES UTILITÁRIAS ZYKOR ===== */
 
-/* Botão com gradiente ZYCOR que funciona em ambos os temas */
-.btn-zycor {
-  background: var(--zycor-gradient);
+/* Botão com gradiente ZYKOR que funciona em ambos os temas */
+.btn-zykor {
+  background: var(--zykor-gradient);
   @apply text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
   @apply hover:opacity-90 focus:ring-2 focus:ring-offset-2;
-  focus-ring-color: var(--zycor-blue-300);
+  focus-ring-color: var(--zykor-blue-300);
 }
 
 /* Logo adaptativo para temas */
-.logo-zycor {
+.logo-zykor {
   @apply transition-all duration-200;
 }
 
@@ -142,31 +142,31 @@
   }
 }
 
-/* Card com cores ZYCOR adaptativo */
-.card-zycor {
-  background-color: var(--zycor-card-bg);
-  border: 1px solid var(--zycor-card-border);
+/* Card com cores ZYKOR adaptativo */
+.card-zykor {
+  background-color: var(--zykor-card-bg);
+  border: 1px solid var(--zykor-card-border);
   @apply rounded-xl shadow-sm transition-colors duration-200;
 }
 
-/* Texto primário ZYCOR */
-.text-zycor-primary {
-  color: var(--zycor-blue);
+/* Texto primário ZYKOR */
+.text-zykor-primary {
+  color: var(--zykor-blue);
 }
 
-/* Texto secundário ZYCOR */
-.text-zycor-secondary {
-  color: var(--zycor-purple);
+/* Texto secundário ZYKOR */
+.text-zykor-secondary {
+  color: var(--zykor-purple);
 }
 
-/* Background gradiente ZYCOR */
-.bg-zycor-gradient {
-  background: var(--zycor-gradient);
+/* Background gradiente ZYKOR */
+.bg-zykor-gradient {
+  background: var(--zykor-gradient);
 }
 
-/* Avatar com gradiente ZYCOR */
-.avatar-zycor {
-  background: var(--zycor-gradient);
+/* Avatar com gradiente ZYKOR */
+.avatar-zykor {
+  background: var(--zykor-gradient);
   @apply text-white flex items-center justify-center font-semibold;
 }
 

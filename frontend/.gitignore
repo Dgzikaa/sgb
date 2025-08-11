@@ -1,1 +1,7 @@
 .vercel
+# Certificados Apple Wallet (NÃO commitar)
+certificates/
+*.p12
+*.cer
+*.key
+*.csr

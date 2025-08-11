@@ -4,6 +4,7 @@ import './globals.css';
 import { ToastProvider, GlobalToastListener } from '@/components/ui/toast';
 import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper';
 import { PWAInstallBanner } from '@/components/PWAInstallBanner';
+import { PWAManager } from '@/components/PWAManager';
 import {
   ConfirmDialogProvider,
   GlobalConfirmListener,
@@ -18,13 +19,13 @@ import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
 export const metadata: Metadata = {
-  title: 'ZYCOR - Sistema de Gestão de Bares',
-  description: 'ZYCOR - O núcleo da gestão de bares',
+  title: 'ZYKOR - Sistema de Gestão de Bares',
+  description: 'ZYKOR - O núcleo da gestão de bares',
   manifest: '/site.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'ZYCOR Dashboard',
+    title: 'ZYKOR Dashboard',
   },
   icons: {
     icon: [
@@ -63,11 +64,11 @@ export default function RootLayout({
         <head>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#4A90E2" />
+    {/* Manifest será carregado dinamicamente pelo PWAManager */}
+    <meta name="theme-color" content="#ea580c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="ZYCOR Dashboard" />
+    <meta name="apple-mobile-web-app-title" content="Ordinário Card" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="msapplication-TileColor" content="#4A90E2" />
     <meta name="msapplication-tap-highlight" content="no" />
@@ -81,6 +82,7 @@ export default function RootLayout({
                   <ToastProvider>
                     <ConfirmDialogProvider>
                       <AuthSync />
+                      <PWAManager />
                       <div className="min-h-screen">
                         {children}
                         <GlobalToastListener />
