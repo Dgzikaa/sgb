@@ -150,32 +150,22 @@ export async function GET(
     } catch (passError) {
       console.error('🚨 Erro ao gerar .pkpass:', passError)
       
-      // Fallback: Retornar instruções
-      return NextResponse.json({
-        success: false,
-        error: 'Erro ao gerar Apple Wallet pass',
-        message: 'Funcionalidade temporariamente indisponível',
-        fallback: {
-          cartao_url: `${process.env.NEXT_PUBLIC_APP_URL}/cartao/${token}`,
-          instrucoes: [
-            '1. Salve esta página como favorito no Safari',
-            '2. Adicione à tela inicial para acesso rápido',
-            '3. Use o QR Code diretamente no estabelecimento'
-          ]
-        }
-      }, {
-        status: 500,
+      // Em caso de erro, retornar status 503 sem JSON visível
+      return new NextResponse('Apple Wallet temporariamente indisponível', {
+        status: 503,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'text/plain'
         }
       })
     }
 
   } catch (error) {
     console.error('🚨 Erro ao gerar Apple Wallet pass:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return new NextResponse('Serviço temporariamente indisponível', {
+      status: 500,
+      headers: {
+        'Content-Type': 'text/plain'
+      }
+    })
   }
 }

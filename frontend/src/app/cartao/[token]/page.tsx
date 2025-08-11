@@ -98,15 +98,21 @@ export default function CartaoDigital() {
       case 'apple':
         if (device?.isIOS) {
           try {
-            // Usar link direto para trigger do iOS mostrar popup "Adicionar à Wallet"
-            const link = document.createElement('a')
-            link.href = `/api/fidelidade/wallet/apple/${params.token}`
-            link.rel = 'noopener'
-            link.target = '_self'
-            link.click()
+            // Primeiro verificar se a API está funcionando
+            const response = await fetch(`/api/fidelidade/wallet/apple/${params.token}`, {
+              method: 'HEAD' // Só verificar headers
+            })
+            
+            if (response.ok && response.headers.get('content-type')?.includes('vnd.apple.pkpass')) {
+              // Se OK, navegar para download
+              window.location.href = `/api/fidelidade/wallet/apple/${params.token}`
+            } else {
+              // Se erro, mostrar fallback amigável
+              alert('📱 Apple Wallet temporariamente indisponível.\n\n💡 Alternativa: Salve esta página nos favoritos do Safari para acesso rápido ao seu cartão!')
+            }
           } catch (error) {
-            // Fallback para navegação direta
-            window.open(`/api/fidelidade/wallet/apple/${params.token}`, '_self')
+            // Erro de rede ou outro
+            alert('📱 Não foi possível conectar ao Apple Wallet no momento.\n\n💡 Salve esta página nos favoritos para usar o QR Code diretamente!')
           }
         } else {
           alert('📱 Apple Wallet está disponível apenas no iPhone/iPad.\n\nAcesse este link no seu iPhone para adicionar à wallet.')
