@@ -323,7 +323,7 @@ class NiboSyncService {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
       const filterDate = thirtyDaysAgo.toISOString().split('T')[0]
       
-      console.log(`📅 Buscando agendamentos dos últimos 30 dias (desde ${filterDate})...`)
+      console.log(`📅 Buscando agendamentos EDITADOS nos últimos 30 dias (desde ${filterDate})...`)
       
       // Buscar todas as páginas da API NIBO
       const allAgendamentos = []
@@ -335,8 +335,8 @@ class NiboSyncService {
       while (hasMore) {
         pageCount++
         const pageParams = {
-          $filter: `createDate ge ${filterDate}`,
-          $orderby: "createDate desc",
+          $filter: `updateDate ge ${filterDate}`,
+          $orderby: "updateDate desc",
           $top: top,
           $skip: skip
         }
