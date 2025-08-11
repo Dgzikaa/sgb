@@ -318,12 +318,12 @@ class NiboSyncService {
       const batchId = crypto.randomUUID()
       console.log(`📋 Batch ID: ${batchId}`)
 
-      // Buscar agendamentos dos últimos 10 dias
-      const tenDaysAgo = new Date()
-      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
-      const filterDate = tenDaysAgo.toISOString().split('T')[0]
+      // Buscar agendamentos dos últimos 7 dias
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      const filterDate = sevenDaysAgo.toISOString().split('T')[0]
       
-      console.log(`📅 Buscando agendamentos EDITADOS nos últimos 10 dias (desde ${filterDate})...`)
+      console.log(`📅 Buscando agendamentos EDITADOS nos últimos 7 dias (desde ${filterDate})...`)
       
       // Buscar todas as páginas da API NIBO
       const allAgendamentos = []
@@ -372,7 +372,69 @@ class NiboSyncService {
         return { success: true, count: 0, message: 'Nenhum agendamento encontrado' }
       }
 
-      console.log(`📊 Total de agendamentos encontrados: ${allAgendamentos.length}`)
+      console.log(`📊 Total de agendamentos encontrados na API: ${allAgendamentos.length}`)
+
+      // 🧠 FILTRO INTELIGENTE - Verificar quais realmente precisam processamento
+      console.log('🔍 Verificando quais agendamentos precisam ser processados...')
+      
+      const niboIds = allAgendamentos.map(a => a.scheduleId).filter(Boolean)
+      
+      if (niboIds.length === 0) {
+        console.log('⚠️ Nenhum scheduleId válido encontrado')
+        return { success: true, count: 0, message: 'Nenhum ID válido encontrado' }
+      }
+
+      // Buscar registros existentes no banco
+      const { data: existingRecords, error: existingError } = await this.supabase
+        .from('nibo_agendamentos')
+        .select('nibo_id, data_atualizacao')
+        .eq('bar_id', this.credentials.bar_id)
+        .in('nibo_id', niboIds)
+
+      if (existingError) {
+        console.error('❌ Erro ao buscar registros existentes:', existingError)
+      }
+
+      const existingMap = new Map(
+        (existingRecords || []).map(record => [record.nibo_id, new Date(record.data_atualizacao)])
+      )
+
+      // Filtrar apenas novos ou realmente alterados
+      const agendamentosParaProcessar = allAgendamentos.filter(agendamento => {
+        const niboId = agendamento.scheduleId
+        if (!niboId) return false
+
+        const existingUpdateTime = existingMap.get(niboId)
+        
+        // Se não existe, é novo
+        if (!existingUpdateTime) {
+          return true
+        }
+
+        // Se existe, verificar se foi alterado
+        const niboUpdateTime = new Date(agendamento.updateDate)
+        return niboUpdateTime > existingUpdateTime
+      })
+
+      const novos = agendamentosParaProcessar.filter(a => !existingMap.has(a.scheduleId)).length
+      const alterados = agendamentosParaProcessar.length - novos
+      const ignorados = allAgendamentos.length - agendamentosParaProcessar.length
+
+      console.log(`📊 Análise de processamento:`)
+      console.log(`  • Novos: ${novos}`)
+      console.log(`  • Alterados: ${alterados}`)
+      console.log(`  • Ignorados (iguais): ${ignorados}`)
+      console.log(`  • Total para processar: ${agendamentosParaProcessar.length}`)
+
+      if (agendamentosParaProcessar.length === 0) {
+        console.log('✅ Nenhum agendamento novo ou alterado - nada para processar')
+        return { 
+          success: true, 
+          count: 0, 
+          message: `Verificados ${allAgendamentos.length} agendamentos - todos iguais, nada para processar`,
+          stats: { total: allAgendamentos.length, novos: 0, alterados: 0, ignorados: allAgendamentos.length }
+        }
+      }
 
       // Criar job de controle
       await this.supabase
@@ -382,12 +444,12 @@ class NiboSyncService {
           bar_id: this.credentials.bar_id,
           job_type: 'agendamentos',
           status: 'pending',
-          total_records: allAgendamentos.length
+          total_records: agendamentosParaProcessar.length
         })
 
       // Inserir dados brutos na tabela temporária (bulk insert)
       console.log('💾 Inserindo dados na tabela temporária...')
-      const tempData = allAgendamentos.map(agendamento => ({
+      const tempData = agendamentosParaProcessar.map(agendamento => ({
         batch_id: batchId,
         bar_id: this.credentials.bar_id,
         raw_data: agendamento
@@ -414,13 +476,20 @@ class NiboSyncService {
           console.error('❌ Erro ao iniciar background job:', error)
         })
 
-      console.log(`✅ Agendamentos enviados para processamento background: ${allAgendamentos.length} registros`)
+      console.log(`✅ Agendamentos enviados para processamento background: ${agendamentosParaProcessar.length} registros`)
       return { 
         success: true, 
-        count: allAgendamentos.length, 
-        message: `${allAgendamentos.length} agendamentos enviados para processamento em background`,
+        count: agendamentosParaProcessar.length, 
+        message: `${agendamentosParaProcessar.length} agendamentos enviados para processamento em background (${novos} novos, ${alterados} alterados)`,
         batch_id: batchId,
-        processing_mode: 'background'
+        processing_mode: 'background',
+        stats: { 
+          total_found: allAgendamentos.length, 
+          novos, 
+          alterados, 
+          ignorados, 
+          processed: agendamentosParaProcessar.length 
+        }
       }
 
     } catch (error: unknown) {
