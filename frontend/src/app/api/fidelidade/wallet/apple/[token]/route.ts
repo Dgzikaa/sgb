@@ -138,12 +138,12 @@ export async function GET(
       // Gerar o buffer do .pkpass
       const buffer = pass.getAsBuffer()
 
-      // Retornar o arquivo .pkpass
+      // Retornar o arquivo .pkpass para abrir diretamente na Wallet
       return new NextResponse(buffer, {
         status: 200,
         headers: {
           'Content-Type': 'application/vnd.apple.pkpass',
-          'Content-Disposition': `attachment; filename="${membro.bars.nome.replace(/\s+/g, '_')}_Fidelidade.pkpass"`
+          'Content-Disposition': `inline; filename="${membro.bars?.nome?.replace(/\s+/g, '_') || 'Ordinario'}_Fidelidade.pkpass"`
         }
       })
 

@@ -98,17 +98,15 @@ export default function CartaoDigital() {
       case 'apple':
         if (device?.isIOS) {
           try {
-            const response = await fetch(`/api/fidelidade/wallet/apple/${params.token}`)
-            const blob = await response.blob()
-            
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `cartao-fidelidade-${cartao.membro?.nome || 'membro'}.pkpass`
-            a.click()
-            window.URL.revokeObjectURL(url)
+            // Usar link direto para trigger do iOS mostrar popup "Adicionar à Wallet"
+            const link = document.createElement('a')
+            link.href = `/api/fidelidade/wallet/apple/${params.token}`
+            link.rel = 'noopener'
+            link.target = '_self'
+            link.click()
           } catch (error) {
-            alert('📱 Erro ao baixar. Salve esta página nos favoritos para acesso rápido ao seu cartão!')
+            // Fallback para navegação direta
+            window.open(`/api/fidelidade/wallet/apple/${params.token}`, '_self')
           }
         } else {
           alert('📱 Apple Wallet está disponível apenas no iPhone/iPad.\n\nAcesse este link no seu iPhone para adicionar à wallet.')
