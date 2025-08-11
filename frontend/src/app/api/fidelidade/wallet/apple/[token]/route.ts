@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { PKPass } from 'passkit-generator'
 import path from 'path'
-import fs from 'fs'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -47,23 +46,24 @@ export async function GET(
       .single()
 
     try {
-      // Verificar se certificados existem
-      const certificatesPath = path.join(process.cwd(), 'certificates')
-      const passP12Path = path.join(certificatesPath, 'pass.p12')
-      const wwdrPemPath = path.join(certificatesPath, 'WWDR.pem')
-
-      if (!fs.existsSync(passP12Path) || !fs.existsSync(wwdrPemPath)) {
-        throw new Error('Certificados Apple Wallet não encontrados')
+      // Verificar se variáveis de ambiente dos certificados existem
+      if (!process.env.APPLE_PASS_CERT || !process.env.APPLE_PASS_KEY || !process.env.APPLE_WWDR_CERT) {
+        throw new Error('Certificados Apple Wallet não configurados nas variáveis de ambiente')
       }
+
+      // Decodificar certificados base64
+      const signerCert = Buffer.from(process.env.APPLE_PASS_CERT, 'base64')
+      const signerKey = Buffer.from(process.env.APPLE_PASS_KEY, 'base64') 
+      const wwdrCert = Buffer.from(process.env.APPLE_WWDR_CERT, 'base64')
 
       // Criar o pass
       const pass = await PKPass.from({
         model: path.join(process.cwd(), 'apple-wallet-template'),
         certificates: {
-          wwdr: wwdrPemPath,
-          signerCert: passP12Path,
-          signerKey: passP12Path,
-          signerKeyPassphrase: process.env.APPLE_PASS_CERT_PASSWORD!
+          wwdr: wwdrCert,
+          signerCert: signerCert,
+          signerKey: signerKey,
+          signerKeyPassphrase: process.env.APPLE_PASS_CERT_PASSWORD || ''
         }
       }, {
         // Dados do pass
