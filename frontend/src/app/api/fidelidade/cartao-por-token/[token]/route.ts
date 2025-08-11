@@ -59,7 +59,7 @@ export async function GET(
     const { data: saldoData } = await supabase
       .rpc('consultar_qr_fidelidade', { qr_token_input: token })
 
-    const saldoAtual = saldoData?.saldo_atual || 0
+    const saldoAtual = saldoData?.consultar_qr_fidelidade?.saldo_atual || 0
 
     // Gerar URL do QR Code para o cartão
     const qrCodeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/cartao/${token}`
