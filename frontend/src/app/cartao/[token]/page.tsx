@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useCustomerAuth } from '@/hooks/useCustomerAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -51,6 +52,9 @@ export default function CartaoDigital() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [device, setDevice] = useState<DeviceInfo | null>(null)
+  
+  // Verificar autenticação obrigatória
+  const { customer, loading: authLoading, isAuthenticated } = useCustomerAuth(true)
 
   // Detectar dispositivo
   useEffect(() => {
@@ -72,8 +76,19 @@ export default function CartaoDigital() {
 
   useEffect(() => {
     async function fetchCartao() {
+      // Só carregar dados se autenticado
+      if (!isAuthenticated || authLoading) {
+        return
+      }
+
       try {
-        const response = await fetch(`/api/fidelidade/cartao-por-token/${params.token}`)
+        const sessionToken = localStorage.getItem('customer_session_token')
+        const response = await fetch(`/api/fidelidade/cartao-por-token/${params.token}`, {
+          headers: {
+            'Authorization': `Bearer ${sessionToken}`
+          }
+        })
+        
         if (!response.ok) {
           throw new Error('Cartão não encontrado')
         }
@@ -86,10 +101,10 @@ export default function CartaoDigital() {
       }
     }
 
-    if (params.token) {
+    if (params.token && isAuthenticated && !authLoading) {
       fetchCartao()
     }
-  }, [params.token])
+  }, [params.token, isAuthenticated, authLoading])
 
   const adicionarWallet = async (tipo: 'apple' | 'google' | 'samsung') => {
     if (!cartao) return
@@ -177,12 +192,14 @@ export default function CartaoDigital() {
     }
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-amber-900/20 to-orange-900/30 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-amber-400/30 border-t-amber-400 rounded-full animate-spin mb-4 mx-auto"></div>
-          <p className="text-amber-200">Carregando seu cartão...</p>
+          <p className="text-amber-200">
+            {authLoading ? 'Verificando autenticação...' : 'Carregando seu cartão...'}
+          </p>
         </div>
       </div>
     )
@@ -288,10 +305,10 @@ export default function CartaoDigital() {
                 style={{ lineHeight: 0 }}
               >
                 <img
-                  src="https://developer.apple.com/wallet/Add_to_Apple_Wallet_badge_-_PT.svg"
+                  src="/apple-wallet-badge.svg"
                   alt="Adicionar à Apple Wallet"
                   style={{
-                    height: '60px',
+                    height: '50px',
                     width: 'auto',
                     filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
                   }}

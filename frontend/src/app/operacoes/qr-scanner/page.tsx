@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useStaffAuth } from '@/hooks/useStaffAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -52,6 +53,8 @@ interface DescontoResult {
 }
 
 export default function QRScannerPage() {
+  // Verificar autenticação obrigatória
+  const { staff, loading: authLoading, isAuthenticated } = useStaffAuth(true)
   // Estados principais
   const [qrToken, setQrToken] = useState('')
   const [valorDesconto, setValorDesconto] = useState('')
@@ -71,14 +74,20 @@ export default function QRScannerPage() {
     setMembroData(null)
 
     try {
+      const sessionToken = localStorage.getItem('staff_session_token')
+      if (!sessionToken) {
+        setError('Sessão expirada. Faça login novamente.')
+        return
+      }
+
       const response = await fetch('/api/operacoes/qr-scanner/consultar', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
-          qr_token: token,
-          bar_id: 3 // TODO: pegar do contexto
+          qr_token: token
         })
       })
 
@@ -120,15 +129,21 @@ export default function QRScannerPage() {
     setError('')
 
     try {
+      const sessionToken = localStorage.getItem('staff_session_token')
+      if (!sessionToken) {
+        setError('Sessão expirada. Faça login novamente.')
+        return
+      }
+
       const response = await fetch('/api/operacoes/qr-scanner/aplicar-desconto', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
           qr_token: qrToken,
-          valor_desconto: valor,
-          bar_id: 3 // TODO: pegar do contexto
+          valor_desconto: valor
         })
       })
 

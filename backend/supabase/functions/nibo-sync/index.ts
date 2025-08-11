@@ -34,11 +34,11 @@ class NiboSyncService {
 
   async loadCredentials(barId: number): Promise<boolean> {
     try {
-      // Buscar credenciais do banco de dados
-      const { data: integracao, error } = await this.supabase
-        .from('integracoes_config')
-        .select('credenciais')
-        .eq('tipo', 'nibo')
+      // Buscar credenciais do banco de dados na tabela api_credentials
+      const { data: credencial, error } = await this.supabase
+        .from('api_credentials')
+        .select('api_token, organization_id')
+        .eq('sistema', 'nibo')
         .eq('bar_id', barId)
         .eq('ativo', true)
         .single()
@@ -48,15 +48,15 @@ class NiboSyncService {
         return false
       }
 
-      if (!integracao?.credenciais) {
+      if (!credencial?.api_token) {
         console.error('❌ Credenciais NIBO não encontradas para o bar', barId)
         return false
       }
 
       this.credentials = {
-        api_token: integracao.credenciais.api_token,
-        organization_id: integracao.credenciais.organization_id,
-        bar_id: integracao.credenciais.bar_id || barId.toString()
+        api_token: credencial.api_token,
+        organization_id: credencial.organization_id || '',
+        bar_id: barId.toString()
       }
 
       console.log('✅ Credenciais NIBO carregadas do banco de dados')
@@ -430,12 +430,24 @@ class NiboSyncService {
   }
 
   async sendDiscordNotification(title: string, description: string, color: number = 0x00ff00) {
-    if (!DISCORD_CONFIG.webhookUrl) {
-      console.warn('⚠️ Discord webhook não configurado')
-      return
-    }
-
     try {
+      // Buscar webhook do banco em vez de env var
+      const { data: webhookConfig, error: webhookError } = await this.supabase
+        .from('api_credentials')
+        .select('configuracoes')
+        .eq('sistema', 'nibo')
+        .eq('bar_id', this.credentials?.bar_id || '3')
+        .eq('ativo', true)
+        .single()
+
+      if (webhookError || !webhookConfig?.configuracoes?.webhook_url) {
+        console.warn('⚠️ Discord webhook não configurado no banco:', webhookError?.message)
+        return
+      }
+
+      const webhookUrl = webhookConfig.configuracoes.webhook_url
+      console.log('🔗 Webhook Discord encontrado no banco')
+
       const embed = {
         title: title,
         description: description,
@@ -446,7 +458,7 @@ class NiboSyncService {
         }
       }
 
-      await fetch(DISCORD_CONFIG.webhookUrl, {
+      await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -544,7 +556,7 @@ serve(async (req) => {
     // Permitir acesso do pgcron sem verificação rigorosa
     if (cronSecret === 'pgcron_nibo') {
       console.log('✅ Acesso autorizado via pgcron')
-    } else if (cronSecret && cronSecret !== DISCORD_CONFIG.cronSecret) {
+    } else if (cronSecret && !['pgcron_nibo', 'manual_test'].includes(cronSecret)) {
       return new Response(
         JSON.stringify({ error: 'CRON_SECRET inválido' }),
         { 

@@ -46,7 +46,7 @@
   "barcodes": [
     {
       "format": "PKBarcodeFormatQR",
-      "message": "https://sgbv2.vercel.app/cartao/token",
+      "message": "https://zykor.com.br/cartao/token",
       "messageEncoding": "iso-8859-1"
     }
   ]
