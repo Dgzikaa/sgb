@@ -33,11 +33,10 @@ export async function GET(
         data_adesao,
         proxima_cobranca,
         bar_id,
-        saldo_atual,
         valor_mensalidade,
         credito_mensal
       `)
-      .eq('qr_token', token)
+      .eq('qr_code_token', token)
       .eq('status', 'ativo')
       .single()
 
@@ -56,6 +55,12 @@ export async function GET(
       .order('data_transacao', { ascending: false })
       .limit(5)
 
+    // Calcular saldo atual baseado nas transações
+    const { data: saldoData } = await supabase
+      .rpc('consultar_qr_fidelidade', { qr_token_input: token })
+
+    const saldoAtual = saldoData?.[0]?.saldo_atual || 0
+
     // Gerar URL do QR Code para o cartão
     const qrCodeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/cartao/${token}`
 
@@ -69,7 +74,7 @@ export async function GET(
         credito_mensal: membro.credito_mensal || 150.00,
         proxima_cobranca: membro.proxima_cobranca
       },
-      saldo: membro.saldo_atual || 0,
+      saldo: saldoAtual,
       qr_code_url: qrCodeUrl,
       transacoes: transacoes || []
     })
