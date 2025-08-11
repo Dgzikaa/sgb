@@ -13,7 +13,7 @@ const NIBO_CONFIG = {
 }
 
 // Configuração Discord
-const DISCORD_CONFIG = {
+const _DISCORD_CONFIG = {
   webhookUrl: Deno.env.get('DISCORD_NIBO_WEBHOOK')!,
   cronSecret: Deno.env.get('CRON_SECRET')!
 }
@@ -54,8 +54,8 @@ class NiboSyncService {
       }
 
       this.credentials = {
-        api_token: credencial.api_token,
-        organization_id: credencial.empresa_id || '',
+        api_token: String(credencial.api_token),
+        organization_id: String(credencial.empresa_id || ''),
         bar_id: barId.toString()
       }
 
@@ -67,7 +67,7 @@ class NiboSyncService {
     }
   }
 
-  async fetchNiboData(endpoint: string, params: Record<string, any> = {}) {
+  async fetchNiboData(endpoint: string, params: Record<string, string | number> = {}) {
     if (!this.credentials) {
       throw new Error('Credenciais NIBO não carregadas')
     }
@@ -77,7 +77,7 @@ class NiboSyncService {
     
     // Adicionar parâmetros OData
     Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.set(key, value)
+      url.searchParams.set(key, String(value))
     })
 
         try {
@@ -104,7 +104,7 @@ class NiboSyncService {
     }
   }
 
-  async fetchNiboDataPaginated(endpoint: string, params: Record<string, any> = {}) {
+  async fetchNiboDataPaginated(endpoint: string, params: Record<string, string | number> = {}) {
     const allItems = []
     let skip = 0
     const top = 100
@@ -162,7 +162,7 @@ class NiboSyncService {
           console.log('⚠️ Retornou exatamente 500 - pode estar limitado, usando paginação...')
           stakeholders = await this.fetchNiboDataPaginated('stakeholders')
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('❌ Erro na busca simples, usando paginação...')
         stakeholders = await this.fetchNiboDataPaginated('stakeholders')
       }
@@ -396,7 +396,7 @@ class NiboSyncService {
       }
 
       const existingMap = new Map(
-        (existingRecords || []).map(record => [record.nibo_id, new Date(record.data_atualizacao)])
+        (existingRecords || []).map(record => [record.nibo_id, new Date(String(record.data_atualizacao))])
       )
 
       // Filtrar apenas novos ou realmente alterados
@@ -451,7 +451,7 @@ class NiboSyncService {
       console.log('💾 Inserindo dados na tabela temporária...')
       const tempData = agendamentosParaProcessar.map(agendamento => ({
         batch_id: batchId,
-        bar_id: this.credentials.bar_id,
+        bar_id: this.credentials!.bar_id,
         raw_data: agendamento
       }))
 
@@ -468,13 +468,12 @@ class NiboSyncService {
 
       // Iniciar processamento em background (assíncrono)
       console.log('🚀 Iniciando processamento em background...')
-      this.supabase.rpc('process_nibo_agendamentos_background', { p_batch_id: batchId })
-        .then(() => {
-          console.log('✅ Background job iniciado com sucesso')
-        })
-        .catch((error) => {
-          console.error('❌ Erro ao iniciar background job:', error)
-        })
+      try {
+        await this.supabase.rpc('process_nibo_agendamentos_background', { p_batch_id: batchId })
+        console.log('✅ Background job iniciado com sucesso')
+      } catch (error: unknown) {
+        console.error('❌ Erro ao iniciar background job:', error)
+      }
 
       console.log(`✅ Agendamentos enviados para processamento background: ${agendamentosParaProcessar.length} registros`)
       return { 
@@ -509,12 +508,12 @@ class NiboSyncService {
         .eq('ativo', true)
         .single()
 
-      if (webhookError || !webhookConfig?.configuracoes?.webhook_url) {
+      if (webhookError || !webhookConfig?.configuracoes || typeof webhookConfig.configuracoes !== 'object' || !('webhook_url' in webhookConfig.configuracoes)) {
         console.warn('⚠️ Discord webhook não configurado no banco:', webhookError?.message)
         return
       }
 
-      const webhookUrl = webhookConfig.configuracoes.webhook_url
+      const webhookUrl = (webhookConfig.configuracoes as { webhook_url: string }).webhook_url
       console.log('🔗 Webhook Discord encontrado no banco')
 
       const embed = {
@@ -576,17 +575,17 @@ class NiboSyncService {
     // Calcular estatísticas
     const totalStakeholders = (results.stakeholders.count || 0) + (results.stakeholders.updated || 0)
     const totalCategories = (results.categories.count || 0) + (results.categories.updated || 0)
-    const totalAgendamentos = (results.agendamentos.count || 0) + (results.agendamentos.updated || 0)
-    const totalErrors = (results.stakeholders.errors || 0) + (results.categories.errors || 0) + (results.agendamentos.errors || 0)
+    const totalAgendamentos = (results.agendamentos.count || 0)
+    const totalErrors = (results.stakeholders.errors || 0) + (results.categories.errors || 0)
 
     // Notificar conclusão
     const color = totalErrors > 0 ? 0xff9900 : 0x00ff00
     const status = totalErrors > 0 ? '⚠️ Concluída com erros' : '✅ Concluída com sucesso'
     
-    // Determinar mensagem baseada no modo de processamento
+    // Determinar mensagem baseada no modo de processamento  
     const agendamentosMsg = results.agendamentos.processing_mode === 'background' 
       ? `**Agendamentos:** ${results.agendamentos.count} enviados para processamento em background 🚀`
-      : `**Agendamentos:** ${totalAgendamentos} (${results.agendamentos.count} novos, ${results.agendamentos.updated} atualizados)`
+      : `**Agendamentos:** ${totalAgendamentos} processados`
     
     await this.sendDiscordNotification(
       `${status} - Sincronização NIBO`,
