@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados da VIEW
     const { data: dados, error: viewError } = await supabase
-      .from('planejamento_comercial_view')
+      .from('view_eventos')
       .select('*')
       .in('bar_id', barIds)
       .eq('mes', mes)

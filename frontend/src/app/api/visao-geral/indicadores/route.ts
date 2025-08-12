@@ -526,7 +526,7 @@ export async function GET(request: Request) {
 
       // % Artística (Planejamento Comercial)
       const { data: artisticaData } = await supabase
-        .from('planejamento_comercial_view')
+        .from('view_eventos')
         .select('percent_art_fat')
         .eq('bar_id', barIdNum)
         .gte('data_evento', startDate)
