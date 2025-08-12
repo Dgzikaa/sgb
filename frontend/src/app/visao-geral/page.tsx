@@ -6,6 +6,7 @@ import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import PageHeader from '@/components/layouts/PageHeader';
 import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
@@ -167,9 +168,10 @@ export default function VisaoGeralPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <GlobalLoadingComponent />
       <div className="container mx-auto px-4 py-4 space-y-4">
+        <PageHeader title="Visão Geral" description="Resumo executivo do bar" />
 
         {/* Indicadores Anuais */}
-        <div className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
+        <div className="card-dark p-4">
           <div 
             className="flex items-center justify-between mb-4 cursor-pointer"
             onClick={() => setAnualExpanded(!anualExpanded)}
@@ -259,7 +261,7 @@ export default function VisaoGeralPage() {
         </div>
 
         {/* Indicadores Trimestrais */}
-        <div className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-4">
+        <div className="card-dark p-4">
           <div className="flex items-center justify-between mb-4">
             <div 
               className="flex items-center gap-3 cursor-pointer flex-1"
