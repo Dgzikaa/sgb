@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import PageHeader from '@/components/layouts/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import {
   DollarSign,
@@ -31,26 +32,11 @@ export default function FinanceiroPage() {
   return (
     <ProtectedRoute requiredModule="financeiro">
       <div className="space-y-6 p-4">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-xl">
-              <DollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Gestão Financeira
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Gerencie pagamentos, receitas e controle financeiro
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader title="Gestão Financeira" description="Gerencie pagamentos, receitas e controle financeiro" />
 
           {/* Métricas Rápidas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -68,7 +54,7 @@ export default function FinanceiroPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -86,7 +72,7 @@ export default function FinanceiroPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -104,7 +90,7 @@ export default function FinanceiroPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -126,7 +112,7 @@ export default function FinanceiroPage() {
           {/* Módulos Financeiros */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Agendamento de Pagamentos */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <Card className="card-dark hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -172,7 +158,7 @@ export default function FinanceiroPage() {
             </Card>
 
             {/* DRE - Demonstrativo de Resultado */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <Card className="card-dark hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -218,7 +204,7 @@ export default function FinanceiroPage() {
             </Card>
 
             {/* Em Desenvolvimento */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg opacity-60">
+            <Card className="card-dark opacity-60">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -251,7 +237,7 @@ export default function FinanceiroPage() {
             </Card>
 
             {/* Em Desenvolvimento */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg opacity-60">
+            <Card className="card-dark opacity-60">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -284,7 +270,7 @@ export default function FinanceiroPage() {
             </Card>
 
             {/* Em Desenvolvimento */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg opacity-60">
+            <Card className="card-dark opacity-60">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -317,7 +303,7 @@ export default function FinanceiroPage() {
             </Card>
 
             {/* Em Desenvolvimento */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg opacity-60">
+            <Card className="card-dark opacity-60">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">

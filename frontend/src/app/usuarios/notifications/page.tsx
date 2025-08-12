@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import PageHeader from '@/components/layouts/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -265,40 +266,23 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto p-6 space-y-8">
-        {/* Header Moderno */}
-        <div className="relative">
-          <div className="bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-700 rounded-2xl p-8 text-white shadow-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-                    <Bell className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold">
-                      Central de Notificações
-                    </h1>
-                    <p className="text-blue-100 mt-1">
-                      Gerencie todas as suas notificações e alertas
-                    </p>
-                  </div>
+        <PageHeader
+          title="Central de Notificações"
+          description="Gerencie todas as suas notificações e alertas"
+          actions={
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-sm text-gray-600 dark:text-gray-400">Não Lidas</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {estatisticas?.nao_lidas || 0}
                 </div>
               </div>
-
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-sm text-blue-200">Não Lidas</div>
-                  <div className="text-2xl font-bold">
-                    {estatisticas?.nao_lidas || 0}
-                  </div>
-                </div>
-                <div className="p-3 bg-white/10 rounded-xl">
-                  <BellRing className="w-8 h-8" />
-                </div>
+              <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                <BellRing className="w-6 h-6 text-gray-600 dark:text-gray-300" />
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -388,7 +372,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Controles e Filtros */}
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+        <Card className="card-dark shadow-lg">
           <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
@@ -529,7 +513,7 @@ export default function NotificationsPage() {
 
         {/* Lista de Notificações */}
         {error ? (
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="card-dark shadow-lg">
             <CardContent className="p-12 text-center">
               <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                 <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -545,7 +529,7 @@ export default function NotificationsPage() {
             </CardContent>
           </Card>
         ) : notificacoesFiltradas.length === 0 ? (
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="card-dark shadow-lg">
             <CardContent className="p-12 text-center">
               <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                 <Bell className="w-8 h-8 text-gray-600 dark:text-gray-400" />
@@ -570,7 +554,7 @@ export default function NotificationsPage() {
             {notificacoesFiltradas.map(notificacao => (
               <Card
                 key={notificacao.id}
-                className={`bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group ${
+                className={`card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300 group ${
                   notificacao.status === 'pendente'
                     ? 'ring-2 ring-blue-200 dark:ring-blue-800'
                     : ''

@@ -717,7 +717,7 @@ export default function TerminalProducao() {
         <div className="container mx-auto px-4 py-6">
           <div className="space-y-6 mt-8">
             {/* Seletor de Tipo e Receita */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+            <Card className="card-dark rounded-xl shadow-sm">
               <CardHeader>
                 <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                   🏭 Terminal de Produção
@@ -817,7 +817,7 @@ export default function TerminalProducao() {
 
             {/* Abas das Produções Ativas */}
             {producoesAtivas.length > 0 && (
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+               <Card className="card-dark rounded-xl shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                     🔄 Produções Ativas ({producoesAtivas.length})
@@ -857,7 +857,7 @@ export default function TerminalProducao() {
                         <div className="flex flex-col space-y-6">
                           {/* Dados da Produção */}
                           <div className="space-y-6">
-                            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                             <Card className="card-dark">
                               <CardHeader>
                                 <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
                                   📋 {producao.receita.receita_nome}
@@ -924,7 +924,7 @@ export default function TerminalProducao() {
                             </Card>
 
                             {/* Timer e Controles */}
-                            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                             <Card className="card-dark">
                               <CardHeader>
                                 <div className="flex items-center justify-between">
                                   <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
@@ -972,7 +972,7 @@ export default function TerminalProducao() {
                             </Card>
 
                             {/* Controles de Produção */}
-                            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                             <Card className="card-dark">
                               <CardHeader>
                                 <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
                                   ⚖️ Controles de Produção
@@ -1164,7 +1164,7 @@ export default function TerminalProducao() {
                           </div>
 
                           {/* Insumos da Receita */}
-                          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                           <Card className="card-dark">
                             <CardHeader>
                               <div className="flex items-center justify-between">
                                 <CardTitle className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
@@ -1480,7 +1480,7 @@ export default function TerminalProducao() {
             )}
 
             {producoesAtivas.length === 0 && (
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+               <Card className="card-dark rounded-xl shadow-sm">
                 <CardContent className="py-12">
                   <div className="text-center text-gray-500 dark:text-gray-400">
                     <p className="text-lg font-medium">

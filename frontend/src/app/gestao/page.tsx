@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import PageHeader from '@/components/layouts/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -83,17 +84,10 @@ export default function GestaoPage() {
   return (
     <ProtectedRoute requiredModule="gestao">
       <div className="container mx-auto px-6 py-8 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Gestão
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Centralize o controle e acompanhamento dos principais indicadores do seu negócio
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Gestão"
+          description="Centralize o controle e acompanhamento dos principais indicadores do seu negócio"
+        />
 
         {/* Busca */}
         <div className="flex items-center gap-4">
@@ -104,7 +98,7 @@ export default function GestaoPage() {
               placeholder="Buscar funcionalidades de gestão..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              className="pl-10 input-dark"
             />
           </div>
         </div>
@@ -114,7 +108,7 @@ export default function GestaoPage() {
           {filteredCards.map((card, index) => (
             <Card 
               key={index} 
-              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1"
+              className="card-dark hover:shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1"
             >
               <CardHeader className="border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between">

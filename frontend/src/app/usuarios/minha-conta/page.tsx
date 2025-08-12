@@ -574,7 +574,7 @@ export default function MinhaContaPage() {
 
       {/* Cards de estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+        <Card className="card-dark hover:shadow-lg transition-all duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -598,7 +598,7 @@ export default function MinhaContaPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+        <Card className="card-dark hover:shadow-lg transition-all duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -616,7 +616,7 @@ export default function MinhaContaPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+        <Card className="card-dark hover:shadow-lg transition-all duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -636,7 +636,7 @@ export default function MinhaContaPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200">
+        <Card className="card-dark hover:shadow-lg transition-all duration-200">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -686,7 +686,7 @@ export default function MinhaContaPage() {
 
         {/* Tab do Perfil */}
         <TabsContent value="perfil" className="space-y-6">
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="card-dark">
             <CardHeader className="border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
@@ -1048,7 +1048,7 @@ export default function MinhaContaPage() {
 
         {/* Tab de Segurança */}
         <TabsContent value="seguranca" className="space-y-6">
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="card-dark">
             <CardHeader className="border-b border-gray-200 dark:border-gray-700">
               <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
