@@ -379,7 +379,10 @@ export default function ClientesPage() {
                       </div>
                     </TableHead>
                     <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
-                      Última Visita
+                      <div className="flex items-center gap-2 justify-center">
+                        <span className="text-lg">📅</span>
+                        Última Visita
+                      </div>
                     </TableHead>
                     <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
                       <div className="flex items-center gap-2 justify-center">
