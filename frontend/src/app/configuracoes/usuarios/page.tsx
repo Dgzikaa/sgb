@@ -35,6 +35,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import PageHeader from '@/components/layouts/PageHeader';
 import { usePermissions } from '@/hooks/usePermissions';
 import { safeLocalStorage } from '@/lib/client-utils';
 
@@ -328,13 +329,9 @@ function UsuariosPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <div className="card-dark p-6">
+          <PageHeader title="Gestão de Usuários" description="Gerencie usuários do sistema e suas permissões" />
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-white mb-2">Gestão de Usuários</h1>
-              <p className="text-gray-300">
-                Gerencie usuários do sistema e suas permissões
-              </p>
-            </div>
+            <div />
             <Button 
               onClick={() => {
                 resetForm();
