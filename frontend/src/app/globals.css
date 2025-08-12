@@ -68,6 +68,92 @@
   --zykor-text-muted: #6b7280;
 }
 
+/* ===== UTILITÁRIOS E PADRÕES SGB_V2 (dark mode + componentes) ===== */
+@layer components {
+  /* Cards padrão com dark mode */
+  .card-dark {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm;
+  }
+
+  .card-title-dark {
+    @apply text-lg font-semibold text-gray-900 dark:text-white;
+  }
+
+  .card-description-dark {
+    @apply text-sm text-gray-600 dark:text-gray-400;
+  }
+
+  /* Botões padrão dark */
+  .btn-primary-dark {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors;
+  }
+
+  .btn-secondary-dark {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium bg-gray-100 hover:bg-gray-200 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 transition-colors;
+  }
+
+  .btn-success-dark {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-white bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition-colors;
+  }
+
+  .btn-danger-dark {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 transition-colors;
+  }
+
+  .btn-outline-dark {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium border border-gray-300 text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800 transition-colors;
+  }
+
+  /* Inputs padrão dark */
+  .input-dark {
+    @apply bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg;
+  }
+
+  .textarea-dark {
+    @apply bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg;
+  }
+
+  .select-dark {
+    @apply bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg;
+  }
+
+  /* Status */
+  .status-success { @apply text-green-600 dark:text-green-400; }
+  .status-error { @apply text-red-600 dark:text-red-400; }
+  .status-warning { @apply text-yellow-600 dark:text-yellow-400; }
+  .status-info { @apply text-blue-600 dark:text-blue-400; }
+
+  /* Ícones */
+  .icon-primary { @apply text-gray-600 dark:text-gray-400; }
+  .icon-secondary { @apply text-gray-500 dark:text-gray-500; }
+  .icon-muted { @apply text-gray-400 dark:text-gray-600; }
+
+  /* Tabs */
+  .tabs-list-dark { @apply bg-gray-100 dark:bg-gray-700 rounded-lg p-1 border border-gray-200 dark:border-gray-700; }
+  .tabs-trigger-dark { @apply dark:text-gray-300 text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white rounded-md px-3 py-2 transition-colors; }
+
+  /* Modais */
+  .modal-dark { @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700; }
+  .modal-overlay-dark { @apply bg-black/40 backdrop-blur-sm; }
+  .modal-button-primary { @apply btn-primary-dark; }
+  .modal-button-secondary { @apply btn-outline-dark; }
+  .modal-form-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-4; }
+  .modal-form-group { @apply space-y-2; }
+  .modal-form-group-full { @apply space-y-2 md:col-span-2; }
+  .modal-label { @apply text-gray-700 dark:text-gray-300 font-medium; }
+  .modal-input { @apply input-dark; }
+  .modal-textarea { @apply textarea-dark; }
+  .modal-select-trigger { @apply select-dark; }
+  .modal-select-content { @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700; }
+  .modal-select-item { @apply text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700; }
+
+  /* Tabelas */
+  .table-dark { @apply w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden; }
+  .table-header-dark { @apply bg-gray-50 dark:bg-gray-700; }
+  .table-row-dark { @apply border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700; }
+  .table-cell-dark { @apply text-gray-900 dark:text-gray-100; }
+}
+
 /* ===== SISTEMA DE BOTÕES MODERNOS - SGB_V2 ===== */
 
 /* Botão Base */

@@ -1,6 +1,7 @@
 'use client';
 
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { DarkSidebarLayout } from '@/components/layouts';
 
 export default function OperacionalLayout({
   children,
@@ -9,7 +10,7 @@ export default function OperacionalLayout({
 }) {
   return (
     <ProtectedRoute requiredModule="operacoes">
-      {children}
+      <DarkSidebarLayout>{children}</DarkSidebarLayout>
     </ProtectedRoute>
   );
 }

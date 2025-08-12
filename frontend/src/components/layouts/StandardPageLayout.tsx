@@ -21,7 +21,7 @@ export function StandardPageLayout({
     loose: 'space-y-8',
   };
 
-  // Force dark mode classes on all elements
+  // Force dark mode classes on legacy elements (fallback). Novas páginas devem usar classes utilitárias.
   useEffect(() => {
     const applyDarkModeForce = () => {
       // Find all cards without dark mode

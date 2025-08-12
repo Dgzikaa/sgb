@@ -25,7 +25,7 @@ export function PageBase({ children, className }: PageBaseProps) {
     <div
       className={cn(
         'p-6 max-w-7xl mx-auto',
-        'text-black', // Força texto preto por padrão
+        'text-gray-900 dark:text-white',
         className
       )}
     >
@@ -45,10 +45,14 @@ export function PageHeader({
   return (
     <div className={cn('mb-6', className)}>
       <div className="flex items-center justify-between mb-2">
-        <h1 className="text-3xl font-bold text-black">{title}</h1>
-        {badge && <span className="text-sm text-gray-600">{badge}</span>}
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h1>
+        {badge && (
+          <span className="text-sm text-gray-700 dark:text-gray-300">{badge}</span>
+        )}
       </div>
-      {description && <p className="text-gray-700">{description}</p>}
+      {description && (
+        <p className="text-gray-700 dark:text-gray-400">{description}</p>
+      )}
       {children}
     </div>
   );
@@ -60,7 +64,7 @@ export function PageContent({ children, className }: PageContentProps) {
     <div
       className={cn(
         'space-y-6',
-        'text-black', // Força texto preto por padrão
+        'text-gray-900 dark:text-white',
         className
       )}
     >
@@ -86,21 +90,21 @@ export function PageCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-200 shadow-sm',
+        'card-dark',
         className
       )}
     >
       {title && (
         <div
-          className={cn('px-6 py-4 border-b border-gray-200', headerClassName)}
+          className={cn('px-6 py-4 border-b border-gray-200 dark:border-gray-700', headerClassName)}
         >
-          <h3 className="text-lg font-semibold text-black">{title}</h3>
+          <h3 className="card-title-dark">{title}</h3>
         </div>
       )}
       <div
         className={cn(
           'p-6',
-          'text-black', // Força texto preto
+          'text-gray-900 dark:text-white',
           contentClassName
         )}
       >
@@ -134,11 +138,11 @@ export function PageText({
   className?: string;
 }) {
   const variants = {
-    title: 'text-xl font-bold text-black',
-    subtitle: 'text-lg font-semibold text-black',
-    body: 'text-sm text-black',
-    caption: 'text-xs text-gray-600',
-    muted: 'text-sm text-gray-500',
+    title: 'text-xl font-bold text-gray-900 dark:text-white',
+    subtitle: 'text-lg font-semibold text-gray-900 dark:text-white',
+    body: 'text-sm text-gray-900 dark:text-white',
+    caption: 'text-xs text-gray-600 dark:text-gray-400',
+    muted: 'text-sm text-gray-500 dark:text-gray-500',
   };
 
   return <span className={cn(variants[variant], className)}>{children}</span>;

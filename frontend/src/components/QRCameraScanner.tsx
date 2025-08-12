@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Camera, X, FlashlightOff, FlashlightOn } from 'lucide-react'
+import { Camera, X, FlashlightOff, Flashlight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
@@ -209,7 +209,7 @@ export default function QRCameraScanner({ onScan, onClose, isOpen }: QRCameraSca
                 className="p-2"
               >
                 {flashOn ? (
-                  <FlashlightOn className="w-4 h-4" />
+                  <Flashlight className="w-4 h-4" />
                 ) : (
                   <FlashlightOff className="w-4 h-4" />
                 )}

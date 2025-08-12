@@ -22,27 +22,6 @@ export default function OperacionalPage() {
       icon: Calendar,
       color: 'text-blue-600 dark:text-blue-400',
     },
-    {
-      title: 'Checklists',
-      description: 'Checklists operacionais e de funcionários',
-      href: '/operacoes/checklists',
-      icon: CheckSquare,
-      color: 'text-green-600 dark:text-green-400',
-    },
-    {
-      title: 'Terminal Produção',
-      description: 'Terminal de produção e operações',
-      href: '/operacoes/terminal',
-      icon: Clock,
-      color: 'text-orange-600 dark:text-orange-400',
-    },
-    {
-      title: 'Receitas',
-      description: 'Gestão de receitas e insumos',
-      href: '/operacoes/receitas',
-      icon: ChefHat,
-      color: 'text-purple-600 dark:text-purple-400',
-    },
   ];
 
   return (

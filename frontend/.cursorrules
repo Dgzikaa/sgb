@@ -1,3 +1,21 @@
+rules:
+  # SGB_V2: páginas novas devem seguir layout padrão
+  - match: "src/app/**/page.tsx"
+    message: |
+      Use StandardPageWrapper + PageBase + PageHeader + PageCard.
+      - Importar: StandardPageWrapper de `@/components/layouts/StandardPageWrapper`
+      - Importar: PageBase, PageHeader, PageCard de `@/components/ui/page-base`
+      - Para botões/inputs/tabs/tabelas, usar classes utilitárias: 
+        btn-*-dark, input-dark, textarea-dark, select-dark, tabs-list-dark, table-*
+      - Modais: usar `ModernModal` (ou `Dialog` + classes modal-*)
+    severity: warning
+  # SGB_V2: dark mode obrigatório
+  - match: "src/app/**/*.tsx"
+    message: |
+      Dark mode: verifique textos (text-gray-* com dark:), backgrounds (bg-white/gray com dark:), bordas (border-gray-* com dark:).
+      Prefira utilitários `card-dark`, `btn-*-dark`, `input-dark`, `tabs-list-dark`, `modal-dark`, `table-dark`.
+    severity: info
+
 # REGRAS DE ORGANIZAÇÃO - SGB_V2
 
 ## ESTRUTURA OBRIGATÓRIA

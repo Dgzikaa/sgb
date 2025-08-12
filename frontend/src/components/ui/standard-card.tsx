@@ -12,8 +12,7 @@ interface StandardCardProps {
 
 const StandardCard = forwardRef<HTMLDivElement, StandardCardProps>(
   ({ children, className, variant = 'default' }, ref) => {
-    const baseClasses =
-      'bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg rounded-xl';
+    const baseClasses = 'card-dark backdrop-blur-sm shadow-lg';
 
     const variantClasses = {
       default: baseClasses,
@@ -39,7 +38,7 @@ interface StandardCardHeaderProps {
 
 const StandardCardHeader = forwardRef<HTMLDivElement, StandardCardHeaderProps>(
   ({ children, className }, ref) => (
-    <div ref={ref} className={cn('p-6 pb-3', className)}>
+    <div ref={ref} className={cn('p-6 pb-3 border-b border-gray-200 dark:border-gray-700', className)}>
       {children}
     </div>
   )
@@ -59,10 +58,7 @@ const StandardCardTitle = forwardRef<
 >(({ children, className, icon }, ref) => (
   <h3
     ref={ref}
-    className={cn(
-      'text-lg font-semibold text-slate-800 flex items-center gap-2',
-      className
-    )}
+    className={cn('text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2', className)}
   >
     {icon}
     {children}
@@ -80,7 +76,7 @@ const StandardCardDescription = forwardRef<
   HTMLParagraphElement,
   StandardCardDescriptionProps
 >(({ children, className }, ref) => (
-  <p ref={ref} className={cn('text-sm text-slate-600 mt-1', className)}>
+  <p ref={ref} className={cn('text-sm text-gray-600 dark:text-gray-400 mt-1', className)}>
     {children}
   </p>
 ));
@@ -132,7 +128,7 @@ const StatsCard = forwardRef<HTMLDivElement, StatsCardProps>(
           </StandardCardTitle>
         </StandardCardHeader>
         <StandardCardContent>
-          <div className="text-2xl font-bold text-slate-800 mb-1">{value}</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{value}</div>
           {(subtitle || trend) && (
             <div
               className={cn(
