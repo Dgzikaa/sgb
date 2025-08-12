@@ -418,7 +418,7 @@ export default function DrePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-6">
         {/* Tabs Avançados */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="card-dark rounded-2xl shadow-xl overflow-hidden">
           <Tabs defaultValue="dashboard" className="w-full">
             <TabsList className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 p-2 rounded-none border-b border-gray-200 dark:border-gray-700">
               <TabsTrigger 

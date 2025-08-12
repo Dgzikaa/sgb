@@ -1346,7 +1346,7 @@ export default function AgendamentoPage() {
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
               {/* Sidebar com Métricas */}
               <div className="w-full lg:w-80 flex-shrink-0">
-                <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg lg:sticky lg:top-6">
+                <Card className="card-dark border-0 shadow-lg lg:sticky lg:top-6">
                   <CardHeader>
                     <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
                       Resumo
@@ -1482,7 +1482,7 @@ export default function AgendamentoPage() {
 
                   {/* Tab: Adicionar Manual */}
                   <TabsContent value="manual">
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+                    <Card className="card-dark border-0 shadow-lg">
                       <CardHeader>
                         <CardTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
                           Adicionar Pagamento Manual
@@ -1716,7 +1716,7 @@ export default function AgendamentoPage() {
 
                   {/* Tab: Lista de Pagamentos */}
                   <TabsContent value="lista">
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+                    <Card className="card-dark border-0 shadow-lg">
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div>

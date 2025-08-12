@@ -707,7 +707,7 @@ export default function PlanejamentoComercialPage() {
       
       {/* Modal de Edição do Evento */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <DialogContent className="max-w-2xl modal-dark">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <Edit className="h-5 w-5" />

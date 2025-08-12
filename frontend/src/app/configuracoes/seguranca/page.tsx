@@ -192,7 +192,7 @@ export default function SecurityPage() {
       <div className="container mx-auto p-6 space-y-8">
         {/* Header Moderno */}
         <div className="relative">
-          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 rounded-2xl p-8 text-white shadow-xl">
+          <div className="rounded-2xl p-8 text-white shadow-xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
                 <Button
@@ -252,7 +252,7 @@ export default function SecurityPage() {
 
         {/* Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -274,7 +274,7 @@ export default function SecurityPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+          <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -348,7 +348,7 @@ export default function SecurityPage() {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Eventos por Categoria */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="card-dark border-0 shadow-lg">
             <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
               <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -423,7 +423,7 @@ export default function SecurityPage() {
           </Card>
 
           {/* Estatísticas de Segurança */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="card-dark border-0 shadow-lg">
             <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
               <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">

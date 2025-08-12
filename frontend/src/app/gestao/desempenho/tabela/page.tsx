@@ -513,7 +513,7 @@ export default function TabelaDesempenhoPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6 space-y-6">
           {/* Filtros Expandir/Minimizar */}
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+          <Card className="card-dark shadow-lg">
             <CardHeader
               className="cursor-pointer"
               onClick={() => setFiltrosExpanded(!filtrosExpanded)}
@@ -635,7 +635,7 @@ export default function TabelaDesempenhoPage() {
 
           {/* Tabela com Ações */}
           {/* DESKTOP - Tabela */}
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hidden md:block">
+          <Card className="card-dark shadow-lg hidden md:block">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
                 Tabela de Desempenho
@@ -825,7 +825,7 @@ export default function TabelaDesempenhoPage() {
               const artFatPercent = item.custo_atracao_faturamento || 0;
 
               return (
-                <Card key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+                <Card key={item.id} className="card-dark shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>

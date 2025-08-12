@@ -2,7 +2,7 @@ export default function PoliticaPrivacidadePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="max-w-4xl mx-auto card-dark rounded-xl shadow-sm">
           <div className="p-8 space-y-8">
             {/* Header */}
             <div className="text-center border-b border-gray-200 dark:border-gray-700 pb-8">

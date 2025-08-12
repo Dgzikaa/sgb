@@ -117,7 +117,7 @@ export default function ContaHubAnaliticoPage() {
 
         {/* Métricas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -135,7 +135,7 @@ export default function ContaHubAnaliticoPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -153,7 +153,7 @@ export default function ContaHubAnaliticoPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -171,7 +171,7 @@ export default function ContaHubAnaliticoPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -191,7 +191,7 @@ export default function ContaHubAnaliticoPage() {
         </div>
 
         {/* Tabela de Dados */}
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+        <Card className="card-dark shadow-sm">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
               Dados Analíticos

@@ -53,7 +53,7 @@ export default function EstrategicoPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {estrategicoItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 h-full cursor-pointer group">
+              <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 h-full cursor-pointer group">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:scale-110 transition-transform duration-200`}>
