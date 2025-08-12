@@ -31,6 +31,7 @@ import {
   UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
+import PageHeader from '@/components/layouts/PageHeader';
 
 export default function ConfiguracoesPage() {
   const router = useRouter();
@@ -38,26 +39,11 @@ export default function ConfiguracoesPage() {
   return (
     <ProtectedRoute requiredModule="configuracoes">
       <div className="space-y-6 p-4">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl w-fit">
-              <Settings className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 dark:text-gray-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                Configurações do Sistema
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                Gerencie todas as configurações e integrações do sistema
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader title="Configurações do Sistema" description="Gerencie todas as configurações e integrações do sistema" />
 
         {/* Métricas Rápidas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -75,7 +61,7 @@ export default function ConfiguracoesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -93,7 +79,7 @@ export default function ConfiguracoesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -111,7 +97,7 @@ export default function ConfiguracoesPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+          <Card className="card-dark shadow-sm">
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -133,7 +119,7 @@ export default function ConfiguracoesPage() {
         {/* Cards de Configuração */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Checklists */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -179,7 +165,7 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* Metas */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -225,7 +211,7 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* Integrações */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -271,7 +257,7 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* Segurança */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -312,7 +298,7 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* WhatsApp */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
