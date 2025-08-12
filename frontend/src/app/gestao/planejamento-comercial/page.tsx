@@ -600,8 +600,7 @@ export default function PlanejamentoComercialPage() {
               <th className="hidden md:table-cell px-2 py-1 w-16">T.Coz</th>
               <th className="hidden md:table-cell px-2 py-1 w-16">T.Bar</th>
               <th className="hidden md:table-cell px-2 py-1 w-16">Fat.19h</th>
-              <th className="hidden lg:table-cell px-2 py-1 w-16">C.Art.P</th>
-              <th className="hidden lg:table-cell px-2 py-1 w-16">C.Art.R</th>
+
             </tr>
           </thead>
 
@@ -698,15 +697,7 @@ export default function PlanejamentoComercialPage() {
                   {item.fat_19h > 0 ? `${item.fat_19h.toFixed(1)}%` : '-'}
                 </td>
                 
-                {/* C.Artístico Plan */}
-                <td className="hidden lg:table-cell px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.c_artistico_plan ? formatarMoeda(item.c_artistico_plan) : '-'}
-                </td>
-                
-                {/* C.Artístico Real */}
-                <td className="hidden lg:table-cell px-1 py-1 text-xs text-center text-gray-900 dark:text-white">
-                  {item.c_artistico_real ? formatarMoeda(item.c_artistico_real) : '-'}
-                </td>
+
               </tr>
               );
             })}
