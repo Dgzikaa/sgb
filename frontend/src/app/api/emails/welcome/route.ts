@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Verificar se a chave da API está disponível
+const RESEND_API_KEY = process.env.RESEND_API_KEY || 'dummy-key'
+const resend = new Resend(RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar se a API está configurada
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'dummy-key') {
+      return NextResponse.json(
+        { error: 'Serviço de email não configurado' },
+        { status: 503 }
+      )
+    }
+
     const { to, memberName, cardUrl, inviteCode } = await request.json()
 
     // Validações

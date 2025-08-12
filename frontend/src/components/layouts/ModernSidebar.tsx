@@ -141,6 +141,13 @@ const defaultSidebarItems: SidebarItem[] = [
       permission: 'relatorios',
       subItems: [
         {
+          icon: Users,
+          label: 'Clientes',
+          href: '/analitico/clientes',
+          description: 'Análise de clientes mais recorrentes',
+          permission: 'relatorios',
+        },
+        {
           icon: BarChart3,
           label: 'DRE',
           href: '/financeiro/dre',
