@@ -31,6 +31,7 @@ import {
   Clock,
   Smartphone,
 } from 'lucide-react';
+import PageHeader from '@/components/layouts/PageHeader';
 
 interface Integration {
   id: string;
@@ -324,24 +325,7 @@ export default function IntegracoesPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container-modern py-6">
-        {/* Header da Seção */}
-        <div className="section-header">
-          <div>
-            <h1 className="section-title">Integrações</h1>
-            <p className="section-subtitle">
-              Gerencie as integrações com serviços externos e APIs
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Badge className="badge-status active">
-              {integrations.filter(i => i.status === 'active').length} Ativas
-            </Badge>
-            <Badge className="badge-status warning">
-              {integrations.filter(i => i.status === 'not-configured').length}{' '}
-              Pendentes
-            </Badge>
-          </div>
-        </div>
+        <PageHeader title="Integrações" description="Gerencie as integrações com serviços externos e APIs" actions={<div className="flex items-center gap-2"><Badge className="badge-status active">{integrations.filter(i => i.status === 'active').length} Ativas</Badge><Badge className="badge-status warning">{integrations.filter(i => i.status === 'not-configured').length} Pendentes</Badge></div>} />
 
         {/* Grid de Integrações */}
         <div className="grid-integrations">
