@@ -12,6 +12,7 @@ import {
 import { BarProvider } from '@/contexts/BarContext';
 import { UserProvider } from '@/contexts/UserContext';
 import AuthSync from '@/components/AuthSync';
+import ErrorBoundary from '@/components/ui/error-boundary';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LGPDProvider } from '@/hooks/useLGPD';
 import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
@@ -84,7 +85,9 @@ export default function RootLayout({
                       <AuthSync />
                       <PWAManager />
                       <div className="min-h-screen">
-                        {children}
+                        <ErrorBoundary>
+                          {children}
+                        </ErrorBoundary>
                         <GlobalToastListener />
                         <GlobalConfirmListener />
                         <CommandPaletteWrapper />
