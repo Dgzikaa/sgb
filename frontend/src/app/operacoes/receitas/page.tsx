@@ -29,6 +29,7 @@ import {
 import { toast } from '@/components/ui/toast';
 import { useGlobalConfirm } from '@/components/ui/confirm-dialog';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import PageHeader from '@/components/layouts/PageHeader';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Plus,
@@ -865,6 +866,7 @@ export default function ReceitasPage() {
   return (
     <ProtectedRoute requiredModule="operacoes">
       <div className="space-y-6 p-4">
+        <PageHeader title="Receitas e Insumos" description="Gestão de receitas, insumos e produções" />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
