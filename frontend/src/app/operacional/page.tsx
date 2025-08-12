@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/layouts/PageHeader';
 import Link from 'next/link';
 import { Calendar, CheckSquare, Clock, ChefHat } from 'lucide-react';
 
@@ -27,19 +28,12 @@ export default function OperacionalPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            ⚡ Operacional
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Ferramentas para gestão operacional, processos e atividades diárias
-          </p>
-        </div>
+        <PageHeader title="⚡ Operacional" description="Ferramentas para gestão operacional, processos e atividades diárias" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {operacionalItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 h-full cursor-pointer group">
+              <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 h-full cursor-pointer group">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:scale-110 transition-transform duration-200`}>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import PageHeader from '@/components/layouts/PageHeader'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -185,22 +186,7 @@ export default function ClientesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
-        {/* Header da Página */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-blue-500 rounded-xl shadow-lg">
-              <Users className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Análise de Clientes
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mt-1">
-                Insights detalhados dos seus clientes mais valiosos
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader title="Análise de Clientes" description="Insights detalhados dos seus clientes mais valiosos" />
 
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
@@ -313,7 +299,7 @@ export default function ClientesPage() {
         </div>
 
         {/* Tabela de Clientes */}
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg overflow-hidden">
+          <Card className="card-dark shadow-lg overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800">
             <CardTitle className="text-white flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -503,7 +489,7 @@ export default function ClientesPage() {
         </Card>
 
         {clientes.length === 0 && (
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg mt-6">
+          <Card className="card-dark shadow-lg mt-6">
             <CardContent className="text-center py-16">
               <div className="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="h-10 w-10 text-slate-400" />
