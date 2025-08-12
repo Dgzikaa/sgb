@@ -21,6 +21,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import PageHeader from '@/components/layouts/PageHeader';
 
 export default function ChecklistsPage() {
   const router = useRouter();
@@ -30,26 +31,11 @@ export default function ChecklistsPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
           <div className="space-y-6 mt-8">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                  <CheckSquare className="w-8 h-8 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    Gestão de Checklists
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Gerencie todos os checklists operacionais do sistema
-                  </p>
-                </div>
-              </div>
-            </div>
+            <PageHeader title="Gestão de Checklists" description="Gerencie todos os checklists operacionais do sistema" />
 
             {/* Métricas Rápidas */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+              <Card className="card-dark">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -67,7 +53,7 @@ export default function ChecklistsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+              <Card className="card-dark">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -85,7 +71,7 @@ export default function ChecklistsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+              <Card className="card-dark">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -103,7 +89,7 @@ export default function ChecklistsPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+              <Card className="card-dark">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -125,7 +111,7 @@ export default function ChecklistsPage() {
             {/* Módulos de Checklist */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Checklist de Abertura */}
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -169,7 +155,7 @@ export default function ChecklistsPage() {
               </Card>
 
               {/* Meus Checklists */}
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -215,7 +201,7 @@ export default function ChecklistsPage() {
               </Card>
 
               {/* Configurações */}
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

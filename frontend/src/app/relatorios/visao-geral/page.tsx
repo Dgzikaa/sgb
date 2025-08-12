@@ -27,6 +27,7 @@ import {
   Clock,
 } from 'lucide-react';
 import Link from 'next/link';
+import PageHeader from '@/components/layouts/PageHeader';
 
 interface VisaoGeralItem {
   id: string;
@@ -187,27 +188,11 @@ export default function VisaoGeralPage() {
   return (
     <ProtectedRoute requiredModule="relatorios">
       <div className="space-y-6 p-4">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-              <Eye className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Visão Geral
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Acesse relatórios detalhados, análises comparativas e insights
-                estratégicos
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader title="Visão Geral" description="Acesse relatórios detalhados, análises comparativas e insights estratégicos" />
 
           {/* Métricas Rápidas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -225,7 +210,7 @@ export default function VisaoGeralPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -243,7 +228,7 @@ export default function VisaoGeralPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -261,7 +246,7 @@ export default function VisaoGeralPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -287,7 +272,7 @@ export default function VisaoGeralPage() {
               return (
                 <Card
                   key={item.id}
-                  className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                  className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -346,7 +331,7 @@ export default function VisaoGeralPage() {
           </div>
 
           {/* Footer Info */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm mt-8">
+          <Card className="card-dark mt-8">
             <CardContent className="p-6">
               <div className="text-center">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
