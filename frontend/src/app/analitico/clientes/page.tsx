@@ -330,7 +330,7 @@ export default function ClientesPage() {
                   <TableRow className="border-b border-slate-200 dark:border-slate-700">
                     <TableHead className="text-slate-900 dark:text-white font-semibold py-4">
                       <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">
+                        <Badge variant="secondary" className="w-7 h-7 rounded-full p-0 flex items-center justify-center bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold">
                           #
                         </Badge>
                         Posição
@@ -348,11 +348,9 @@ export default function ClientesPage() {
                         Contato
                       </div>
                     </TableHead>
-                    <TableHead className="text-slate-900 dark:text-white font-semibold">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          Origem
-                        </Badge>
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
+                        <span className="text-lg">🏢</span>
                         Sistema
                       </div>
                     </TableHead>
@@ -362,18 +360,20 @@ export default function ClientesPage() {
                         Visitas
                       </div>
                     </TableHead>
-                    <TableHead className="text-slate-900 dark:text-white font-semibold text-right">
-                      <div className="flex items-center gap-2 justify-end">
-                        🎫 Entrada
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
+                        <span className="text-lg">🎫</span>
+                        Entrada
                       </div>
                     </TableHead>
-                    <TableHead className="text-slate-900 dark:text-white font-semibold text-right">
-                      <div className="flex items-center gap-2 justify-end">
-                        🍺 Consumo
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
+                        <span className="text-lg">🍺</span>
+                        Consumo
                       </div>
                     </TableHead>
-                    <TableHead className="text-slate-900 dark:text-white font-semibold text-right">
-                      <div className="flex items-center gap-2 justify-end">
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
                         <Target className="h-4 w-4" />
                         Ticket Médio
                       </div>
@@ -446,23 +446,23 @@ export default function ClientesPage() {
                       {cliente.total_visitas}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right text-gray-900 dark:text-white font-medium">
+                  <TableCell className="text-center text-gray-900 dark:text-white font-medium">
                     <div className="text-sm">
                       {formatCurrency(cliente.valor_total_entrada)}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right text-gray-900 dark:text-white font-medium">
+                  <TableCell className="text-center text-gray-900 dark:text-white font-medium">
                     <div className="text-sm">
                       {formatCurrency(cliente.valor_total_consumo)}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex flex-col gap-1">
+                  <TableCell className="text-center">
+                    <div className="flex flex-col gap-1 items-center">
                       <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs">
                         Total: {formatCurrency(cliente.ticket_medio_geral)}
                       </Badge>
                       {cliente.sistema === 'ContaHub' && (
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1 items-center">
                           <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800 text-xs">
                             🎫 {formatCurrency(cliente.ticket_medio_entrada)}
                           </Badge>
