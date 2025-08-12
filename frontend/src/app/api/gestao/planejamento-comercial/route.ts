@@ -95,9 +95,9 @@ export async function GET(request: NextRequest) {
       .from('view_eventos')
       .select('*')
       .in('bar_id', barIds)
-      .eq('mes', mes)
-      .eq('ano', ano)
-      .order('data_evento', { ascending: true }); // CORRIGIDO: ascending: true
+      .gte('data_evento', `${ano}-${mes.toString().padStart(2, '0')}-01`)
+      .lt('data_evento', `${ano}-${(mes + 1).toString().padStart(2, '0')}-01`)
+      .order('data_evento', { ascending: true });
 
     console.log('🔍 Parâmetros da consulta:', { barIds, mes, ano });
     console.log('🔍 Dados brutos da VIEW:', dados);
@@ -112,49 +112,49 @@ export async function GET(request: NextRequest) {
 
     // Transformar dados para o formato esperado pela página
     const resultado: PlanejamentoData[] = dados?.map(item => ({
-      evento_id: item.evento_id || null,
+      evento_id: item.id || null,
       data_evento: item.data_evento,
-      dia_semana: item.dia_semana_nome, // ✅ CORRIGIDO: Usar dia_semana_nome da view
-      evento_nome: item.nome_evento,
+      dia_semana: item.dia_semana, // ✅ CORRIGIDO: Usar dia_semana da view
+      evento_nome: item.nome,
       bar_id: item.bar_id,
-      bar_nome: item.bar_nome || 'Ordinário Bar',
+      bar_nome: 'Ordinário Bar',
       dia: parseInt(item.data_evento.split('-')[2]), // Extrair dia da string YYYY-MM-DD
-      mes: item.mes,
-      ano: item.ano,
+      mes: parseInt(item.data_evento.split('-')[1]),
+      ano: parseInt(item.data_evento.split('-')[0]),
       dia_formatado: item.data_evento.split('-')[2], // Usar dia da string YYYY-MM-DD
       data_curta: `${item.data_evento.split('-')[2]}/${item.data_evento.split('-')[1]}`, // Formato DD/MM direto da string
-      real_receita: parseFloat(item.receita_real_total) || 0,
-      m1_receita: parseFloat(item.m1_meta) || 0,
+      real_receita: parseFloat(item.real_r) || 0,
+      m1_receita: parseFloat(item.m1_r) || 0,
       
       // Flags para coloração verde/vermelho
-      real_vs_m1_green: parseFloat(item.receita_real_total) > parseFloat(item.m1_meta),
-      ci_real_vs_plan_green: parseFloat(item.cl_real_total) > parseFloat(item.cl_plan), 
+      real_vs_m1_green: parseFloat(item.real_r) > parseFloat(item.m1_r),
+      ci_real_vs_plan_green: parseFloat(item.cl_real) > parseFloat(item.cl_plan), 
       te_real_vs_plan_green: parseFloat(item.te_real) > parseFloat(item.te_plan),
-      tb_real_vs_plan_green: parseFloat(item.tb_real) > parseFloat(item.tb_plan),
-      t_medio_green: parseFloat(item.t_medio) > 93.00,
-      percent_art_fat_green: parseFloat(item.percent_art_fat) < 15, 
+      tb_real_vs_plan_green: parseFloat(item.tb_real_contahub) > parseFloat(item.tb_plan),
+      t_medio_green: (parseFloat(item.real_r) / parseFloat(item.cl_real)) > 93.00,
+      percent_art_fat_green: parseFloat(item.c_art) < 15, 
       t_coz_green: parseFloat(item.t_coz) < 12,
       t_bar_green: parseFloat(item.t_bar) < 4,
-      fat_19h_green: parseFloat(item.fat_19h_percent) > 15,
-      clientes_plan: parseInt(item.cl_plan) || 0, // ✅ CORRIGIDO: cl_plan da view
-      clientes_real: parseInt(item.cl_real_total) || 0, // ✅ CORRIGIDO: cl_real_total da view
-      res_total: parseInt(item.res_tot) || 0, // ✅ CORRIGIDO: res_tot da view
-      res_presente: parseInt(item.res_p) || 0, // ✅ CORRIGIDO: res_p da view
+      fat_19h_green: parseFloat(item.fat_19h_percent_contahub) > 15,
+      clientes_plan: parseInt(item.cl_plan) || 0,
+      clientes_real: parseInt(item.cl_real) || 0,
+      res_total: parseInt(item.res_p) || 0, // res_p é o único disponível
+      res_presente: parseInt(item.res_p) || 0,
       lot_max: parseInt(item.lot_max) || 0,
       te_plan: parseFloat(item.te_plan) || 0,
       te_real: parseFloat(item.te_real) || 0,
       tb_plan: parseFloat(item.tb_plan) || 0,
-      tb_real: parseFloat(item.tb_real) || 0,
-      t_medio: parseFloat(item.t_medio) || 0,
+      tb_real: parseFloat(item.tb_real_contahub) || 0,
+      t_medio: item.cl_real ? (parseFloat(item.real_r) / parseFloat(item.cl_real)) : 0,
       c_art: parseFloat(item.c_art) || 0, // TODO: implementar campo na view
       c_prod: parseFloat(item.c_prod) || 0, // TODO: implementar campo na view  
       percent_art_fat: parseFloat(item.percent_art_fat) || 0, // TODO: implementar campo na view
-      percent_b: parseFloat(item.percent_bebidas) || 0,
-      percent_d: parseFloat(item.percent_drinks) || 0,
-      percent_c: parseFloat(item.percent_comidas) || 0,
+      percent_b: parseFloat(item.percent_bebidas_contahub) || 0,
+      percent_d: parseFloat(item.percent_drinks_contahub) || 0,
+      percent_c: parseFloat(item.percent_comidas_contahub) || 0,
       t_coz: parseFloat(item.t_coz) || 0,
       t_bar: parseFloat(item.t_bar) || 0,
-      fat_19h: parseFloat(item.fat_19h_percent) || 0,
+      fat_19h: parseFloat(item.fat_19h_percent_contahub) || 0,
       pagamentos_liquido: 0, // Campo não existe na VIEW
       total_vendas: 0, // Campo não existe na VIEW
       vendas_bebida: 0, // Campo não existe na VIEW
