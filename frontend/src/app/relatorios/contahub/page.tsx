@@ -23,6 +23,7 @@ import {
   Activity,
 } from 'lucide-react';
 import Link from 'next/link';
+import PageHeader from '@/components/layouts/PageHeader';
 
 export default function ContaHubPage() {
   const router = useRouter();
@@ -30,25 +31,10 @@ export default function ContaHubPage() {
   return (
     <ProtectedRoute requiredModule="relatorios">
       <div className="space-y-6 mt-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-xl">
-              <Database className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-4">
-                Relatórios ContaHub
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Dados sincronizados do sistema ContaHub
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader title="Relatórios ContaHub" description="Dados sincronizados do sistema ContaHub" />
 
         {/* Status de Sincronização */}
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+        <Card className="card-dark">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -73,7 +59,7 @@ export default function ContaHubPage() {
         {/* Módulos de Relatórios */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Analítico */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -114,7 +100,7 @@ export default function ContaHubPage() {
           </Card>
 
           {/* Pagamentos */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -155,7 +141,7 @@ export default function ContaHubPage() {
           </Card>
 
           {/* Período */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -196,7 +182,7 @@ export default function ContaHubPage() {
           </Card>
 
           {/* Tempo */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
