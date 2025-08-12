@@ -17,7 +17,11 @@ interface Cliente {
   sistema: string
   total_visitas: number
   valor_total_gasto: number
-  ticket_medio: number
+  valor_total_entrada: number
+  valor_total_consumo: number
+  ticket_medio_geral: number
+  ticket_medio_entrada: number
+  ticket_medio_consumo: number
   ultima_visita: string
 }
 
@@ -25,6 +29,10 @@ interface Estatisticas {
   total_clientes_unicos: number
   total_visitas_geral: number
   ticket_medio_geral: number
+  ticket_medio_entrada: number
+  ticket_medio_consumo: number
+  valor_total_entrada: number
+  valor_total_consumo: number
 }
 
 interface ApiResponse {
@@ -195,7 +203,7 @@ export default function ClientesPage() {
         </div>
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
 
 
           <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
@@ -262,6 +270,46 @@ export default function ClientesPage() {
               </p>
             </CardContent>
           </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <CardHeader className="pb-3 bg-gradient-to-r from-orange-500 to-orange-600">
+              <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                🎫 Ticket Entrada
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {loading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  formatCurrency(Number(estatisticas?.ticket_medio_entrada) || 0)
+                )}
+              </div>
+              <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                Couvert médio
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <CardHeader className="pb-3 bg-gradient-to-r from-green-500 to-green-600">
+              <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                🍺 Ticket Consumo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {loading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  formatCurrency(Number(estatisticas?.ticket_medio_consumo) || 0)
+                )}
+              </div>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                Consumação média
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Tabela de Clientes */}
@@ -316,8 +364,12 @@ export default function ClientesPage() {
                     </TableHead>
                     <TableHead className="text-slate-900 dark:text-white font-semibold text-right">
                       <div className="flex items-center gap-2 justify-end">
-                        <DollarSign className="h-4 w-4" />
-                        Valor Gasto
+                        🎫 Entrada
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-right">
+                      <div className="flex items-center gap-2 justify-end">
+                        🍺 Consumo
                       </div>
                     </TableHead>
                     <TableHead className="text-slate-900 dark:text-white font-semibold text-right">
@@ -395,12 +447,31 @@ export default function ClientesPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right text-gray-900 dark:text-white font-medium">
-                    {formatCurrency(cliente.valor_total_gasto)}
+                    <div className="text-sm">
+                      {formatCurrency(cliente.valor_total_entrada)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right text-gray-900 dark:text-white font-medium">
+                    <div className="text-sm">
+                      {formatCurrency(cliente.valor_total_consumo)}
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
-                      {formatCurrency(cliente.ticket_medio)}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs">
+                        Total: {formatCurrency(cliente.ticket_medio_geral)}
+                      </Badge>
+                      {cliente.sistema === 'ContaHub' && (
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800 text-xs">
+                            🎫 {formatCurrency(cliente.ticket_medio_entrada)}
+                          </Badge>
+                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 text-xs">
+                            🍺 {formatCurrency(cliente.ticket_medio_consumo)}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="text-center text-gray-600 dark:text-gray-400">
                     {formatDate(cliente.ultima_visita)}

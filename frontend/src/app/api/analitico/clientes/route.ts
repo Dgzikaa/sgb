@@ -72,7 +72,11 @@ export async function GET(request: NextRequest) {
       estatisticas: estatisticas?.[0] || {
         total_clientes_unicos: 0,
         total_visitas_geral: 0,
-        ticket_medio_geral: 0
+        ticket_medio_geral: 0,
+        ticket_medio_entrada: 0,
+        ticket_medio_consumo: 0,
+        valor_total_entrada: 0,
+        valor_total_consumo: 0
       }
     })
   } catch (error) {
