@@ -25,6 +25,7 @@ import {
   PieChart,
 } from 'lucide-react';
 import Link from 'next/link';
+import PageHeader from '@/components/layouts/PageHeader';
 
 export default function RelatoriosPage() {
   const router = useRouter();
@@ -32,26 +33,11 @@ export default function RelatoriosPage() {
   return (
     <ProtectedRoute requiredModule="relatorios">
       <div className="space-y-6 p-4">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-              <BarChart3 className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Relatórios e Análises
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Acesse todos os relatórios e análises do sistema
-              </p>
-            </div>
-          </div>
-        </div>
+        <PageHeader title="Relatórios e Análises" description="Acesse todos os relatórios e análises do sistema" />
 
           {/* Métricas Rápidas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -69,7 +55,7 @@ export default function RelatoriosPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -87,7 +73,7 @@ export default function RelatoriosPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -105,7 +91,7 @@ export default function RelatoriosPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+            <Card className="card-dark shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -127,7 +113,7 @@ export default function RelatoriosPage() {
           {/* Módulos de Relatórios */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Visão Geral */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -168,7 +154,7 @@ export default function RelatoriosPage() {
             </Card>
 
             {/* Gestão de Tempo */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -214,7 +200,7 @@ export default function RelatoriosPage() {
             </Card>
 
             {/* Recorrência */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -260,7 +246,7 @@ export default function RelatoriosPage() {
             </Card>
 
             {/* Analítico */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -306,7 +292,7 @@ export default function RelatoriosPage() {
             </Card>
 
             {/* ContaHub */}
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
