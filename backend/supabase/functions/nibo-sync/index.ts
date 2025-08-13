@@ -470,7 +470,7 @@ class NiboSyncService {
       console.log('🚀 Iniciando processamento em background...')
       try {
         const response = await fetch(
-          `${Deno.env.get('SUPABASE_URL')}/functions/v1/nibo-orchestrator`,
+          `${Deno.env.get('SUPABASE_URL')}/functions/v1/nibo-orchestrator-v2`,
           {
             method: 'POST',
             headers: {
@@ -479,7 +479,7 @@ class NiboSyncService {
             },
             body: JSON.stringify({
               batch_id: batchId,
-              batch_size: 50
+              batch_size: 20
             })
           }
         )

@@ -312,12 +312,59 @@ Deno.serve(async (req: Request): Promise<Response> => {
       console.error('❌ Erro ao enviar notificação Discord ContaHub:', discordError);
     }
     
+    // 2. DISPARAR ORCHESTRATOR PARA PROCESSAR OS DADOS
+    console.log('\n🚀 FASE 2: Disparando orchestrator para processar dados...');
+    
+    try {
+      // Chamar o orchestrator para processar todos os dados coletados
+      const orchestratorUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub-orchestrator';
+      
+      const orchestratorResponse = await fetch(orchestratorUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': req.headers.get('Authorization') || '' // Usar a mesma auth
+        },
+        body: JSON.stringify({
+          action: 'process_date',
+          date: data_date,
+          bar_id: bar_id,
+          data_types: dataTypes,
+          triggered_by: 'sync-automatico'
+        })
+      });
+      
+      const orchestratorResult = await orchestratorResponse.json();
+      
+      if (orchestratorResponse.ok) {
+        console.log('✅ Orchestrator disparado com sucesso:', orchestratorResult);
+        results.processed = orchestratorResult.jobs || [];
+        
+        // Notificar sucesso completo
+        const processMessage = `✅ **Processamento ContaHub iniciado**\n\n📊 Jobs criados: ${orchestratorResult.jobs?.length || 0}\n⏰ ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`;
+        await sendDiscordNotification(processMessage);
+      } else {
+        console.error('❌ Erro ao disparar orchestrator:', orchestratorResult);
+        results.errors.push({
+          type: 'orchestrator',
+          error: orchestratorResult.error || 'Erro ao disparar processamento'
+        });
+      }
+    } catch (orchError) {
+      console.error('❌ Erro ao chamar orchestrator:', orchError);
+      results.errors.push({
+        type: 'orchestrator',
+        error: orchError instanceof Error ? orchError.message : String(orchError)
+      });
+    }
+    
     return new Response(JSON.stringify({
       success: true,
-      message: 'ContaHub coleta concluída - processamento via pg_cron',
+      message: 'ContaHub coleta concluída - processamento iniciado',
       summary,
       details: {
         collected: results.collected,
+        processed: results.processed,
         errors: results.errors
       }
     }), {

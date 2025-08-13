@@ -19,44 +19,19 @@ export function PWAManager() {
       if (isGestaoArea) {
         // Registrar PWA apenas para gestão
         registerGestaoPWA()
-      } else {
-        // Para fidelidade, usar apenas web + wallet nativa
-        // Sem PWA para clientes
-        clearFidelidadePWA()
       }
     }
   }, [pathname])
 
-  const clearFidelidadePWA = async () => {
-    try {
-      // Limpar qualquer service worker de fidelidade anterior
-      const registrations = await navigator.serviceWorker.getRegistrations()
-      for (const registration of registrations) {
-        if (registration.scope.includes('fidelidade') || registration.scope.includes('ordinario')) {
-          await registration.unregister()
-        }
-      }
 
-      // Remover manifest de fidelidade se existir
-      const existingManifests = document.querySelectorAll('link[rel="manifest"]')
-      existingManifests.forEach(manifest => {
-        if (manifest.getAttribute('href')?.includes('fidelidade')) {
-          manifest.remove()
-        }
-      })
-
-      console.log('PWA Fidelidade removido - usando apenas web + wallet nativa')
-    } catch (error) {
-      console.error('Erro ao limpar PWA Fidelidade:', error)
-    }
-  }
 
   const registerGestaoPWA = async () => {
     try {
-      // Limpar service workers antigos
+      // Limpar service workers antigos se necessário
       const registrations = await navigator.serviceWorker.getRegistrations()
       for (const registration of registrations) {
-        if (registration.scope.includes('fidelidade') || registration.scope.includes('ordinario')) {
+        // Limpar registros antigos se necessário
+        if (registration.scope !== '/') {
           await registration.unregister()
         }
       }
@@ -95,32 +70,16 @@ export function usePWAInstall() {
   const pathname = usePathname()
 
   const promptInstall = async () => {
-    const isFidelidadeArea = pathname.startsWith('/fidelidade') || pathname.startsWith('/cartao')
+    // Instruções para gestores
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const isAndroid = /Android/.test(navigator.userAgent)
     
-    if (isFidelidadeArea) {
-      // Instruções específicas para clientes
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      const isAndroid = /Android/.test(navigator.userAgent)
-      
-      if (isIOS) {
-        alert(`📱 Para instalar o Ordinário Card:\n\n1. Toque no botão compartilhar (⬆️)\n2. Selecione "Adicionar à Tela de Início"\n3. Toque em "Adicionar"\n\nSeu cartão ficará como um app!`)
-      } else if (isAndroid) {
-        alert(`📱 Para instalar o Ordinário Card:\n\n1. Toque no menu do Chrome (⋮)\n2. Selecione "Adicionar à tela inicial"\n3. Confirme "Adicionar"\n\nSeu cartão ficará como um app!`)
-      } else {
-        alert(`💻 Para acesso rápido:\n\nSalve esta página nos favoritos do seu navegador para acessar rapidamente seu cartão de fidelidade.`)
-      }
+    if (isIOS) {
+      alert(`📱 Para instalar o SGB:\n\n1. Toque no botão compartilhar (⬆️)\n2. Selecione "Adicionar à Tela de Início"\n3. Toque em "Adicionar"\n\nO sistema ficará como um app para acesso rápido!`)
+    } else if (isAndroid) {
+      alert(`📱 Para instalar o SGB:\n\n1. Toque no menu do navegador (⋮)\n2. Selecione "Adicionar à tela inicial"\n3. Confirme "Adicionar"\n\nO sistema ficará como um app!`)
     } else {
-      // Instruções para gestores
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      const isAndroid = /Android/.test(navigator.userAgent)
-      
-      if (isIOS) {
-        alert(`📱 Para instalar o SGB:\n\n1. Toque no botão compartilhar (⬆️)\n2. Selecione "Adicionar à Tela de Início"\n3. Toque em "Adicionar"\n\nO sistema ficará como um app para acesso rápido!`)
-      } else if (isAndroid) {
-        alert(`📱 Para instalar o SGB:\n\n1. Toque no menu do navegador (⋮)\n2. Selecione "Adicionar à tela inicial"\n3. Confirme "Adicionar"\n\nO sistema ficará como um app!`)
-      } else {
-        alert(`💻 Para acesso rápido:\n\nSalve esta página nos favoritos para acessar rapidamente o sistema de gestão.`)
-      }
+      alert(`💻 Para acesso rápido:\n\nSalve esta página nos favoritos para acessar rapidamente o sistema de gestão.`)
     }
   }
 

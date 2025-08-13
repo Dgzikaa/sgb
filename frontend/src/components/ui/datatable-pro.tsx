@@ -138,6 +138,7 @@ export function DataTablePro<T extends Record<string, any>>({
           {searchable && (
             <input
               placeholder="Pesquisar..."
+              aria-label="Pesquisar na tabela"
               className="input-dark px-3 py-2 text-sm"
               value={query}
               onChange={e => setQuery(e.target.value)}

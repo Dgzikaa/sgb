@@ -471,6 +471,7 @@ export default function ClientesPage() {
                         onClick={() => handleWhatsAppClick(cliente.nome_principal, cliente.telefone)}
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full"
+                        aria-label={`Enviar WhatsApp para ${cliente.nome_principal}`}
                       >
                         <MessageCircle className="h-4 w-4" />
                       </Button>

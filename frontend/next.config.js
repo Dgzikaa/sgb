@@ -6,6 +6,28 @@ const nextConfig = {
     // ⚠️ Warnings não bloqueiam build
     ignoreBuildErrors: true,
   },
+  // Bundle Analyzer opcional
+  webpack(config) {
+    // mantém fallbacks
+    config.resolve = config.resolve || {};
+    config.resolve.fallback = {
+      ...(config.resolve.fallback || {}),
+      fs: false,
+      net: false,
+      tls: false,
+    };
+
+    if (process.env.NEXT_PUBLIC_ANALYZE_BUNDLE === 'true') {
+      // Pequena estatística básica (sem plugin) usando built-in stats
+      config.stats = {
+        preset: 'minimal',
+        modules: false,
+        chunkModules: false,
+      };
+    }
+
+    return config;
+  },
   eslint: {
     // ✅ Manter validação ESLint
     // ⚠️ Warnings não bloqueiam build
@@ -26,20 +48,6 @@ const nextConfig = {
   images: {
     domains: ['localhost', '127.0.0.1'],
     unoptimized: true,
-  },
-  // Configurações de webpack para resolver problemas de hidratação
-  webpack: (config, { isServer }) => {
-    // Resolver problemas de hidratação
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
-    }
-
-    return config;
   },
   // Configurações de PWA
   async headers() {

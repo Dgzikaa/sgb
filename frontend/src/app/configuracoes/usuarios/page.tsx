@@ -6,14 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
@@ -38,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import PageHeader from '@/components/layouts/PageHeader';
 import { usePermissions } from '@/hooks/usePermissions';
 import { safeLocalStorage } from '@/lib/client-utils';
+import { DataTablePro } from '@/components/ui/datatable-pro';
 
 interface Usuario {
   id: number;
@@ -618,7 +612,7 @@ function UsuariosPage() {
             </Select>
           </div>
 
-          {/* Lista de Usuários */}
+          {/* Lista de Usuários - DataTablePro v2 */}
           <div className="grid gap-4">
             {filteredUsuarios.length === 0 ? (
               <div className="text-center py-8">
@@ -628,68 +622,71 @@ function UsuariosPage() {
                 </p>
               </div>
             ) : (
-              filteredUsuarios.map(usuario => (
-                <Card key={usuario.id} className="card-dark hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                          <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                              {usuario.nome}
-                            </h3>
-                            {usuario.ativo ? (
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <XCircle className="w-4 h-4 text-red-500" />
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <Mail className="w-4 h-4" />
-                            {usuario.email}
-                          </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            {getRoleBadge(usuario.role)}
-                            <Badge variant="outline" className="text-xs">
-                              {usuario.modulos_permitidos?.length || 0} módulos
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(usuario)}
-                          className="bg-blue-500/10 border-blue-500 text-blue-400 hover:bg-blue-500/20"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleResetPassword(usuario.id)}
-                          className="bg-yellow-500/10 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20"
-                          title="Redefinir senha"
-                        >
-                          <Key className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(usuario.id)}
-                          className="bg-red-500/10 border-red-500 text-red-400 hover:bg-red-500/20"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+              <DataTablePro
+                toolbarTitle="Colunas"
+                data={filteredUsuarios}
+                selectableRows
+                actions={(
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        resetForm();
+                        setIsDialogOpen(true);
+                      }}
+                      className="bg-blue-500/10 border-blue-500 text-blue-400 hover:bg-blue-500/20"
+                    >
+                      <Plus className="w-4 h-4 mr-1" /> Novo
+                    </Button>
+                  </div>
+                )}
+                columns={[
+                  { key: 'nome', header: 'Nome', sortable: true },
+                  { key: 'email', header: 'Email', sortable: true },
+                  { key: 'role', header: 'Função', render: (u: Usuario) => getRoleBadge(u.role) },
+                  { key: 'modulos', header: 'Módulos', render: (u: Usuario) => (
+                    <Badge variant="outline" className="text-xs">{u.modulos_permitidos?.length || 0} módulos</Badge>
+                  ) },
+                  { key: 'ativo', header: 'Status', render: (u: Usuario) => (
+                    u.ativo ? <CheckCircle className="w-4 h-4 text-green-500" /> : <XCircle className="w-4 h-4 text-red-500" />
+                  ) },
+                  { key: 'acoes', header: 'Ações', align: 'right', render: (u: Usuario) => (
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(u)}
+                        className="bg-blue-500/10 border-blue-500 text-blue-400 hover:bg-blue-500/20"
+                        aria-label={`Editar usuário ${u.nome}`}
+                        title={`Editar usuário ${u.nome}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleResetPassword(u.id)}
+                        className="bg-yellow-500/10 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20"
+                        aria-label={`Redefinir senha do usuário ${u.nome}`}
+                        title="Redefinir senha"
+                      >
+                        <Key className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(u.id)}
+                        className="bg-red-500/10 border-red-500 text-red-400 hover:bg-red-500/20"
+                        aria-label={`Excluir usuário ${u.nome}`}
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
+                  ) },
+                ]}
+              />
             )}
           </div>
         </div>
