@@ -281,7 +281,7 @@ export default function CadastroFidelidadePage() {
                   </div>
                 </div>
                 
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-amber-200 dark:border-amber-700">
+                <div className="card-dark rounded-lg p-4 border-amber-200 dark:border-amber-700">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                       R$ 100/mês
@@ -317,7 +317,7 @@ export default function CadastroFidelidadePage() {
 
           {/* Formulário principal */}
           <div className="lg:col-span-2">
-            <Card className="bg-white dark:bg-gray-800 shadow-xl">
+            <Card className="card-dark shadow-xl">
               <CardHeader>
                 <CardTitle className="text-2xl text-gray-900 dark:text-white">
                   {step === 1 && "Dados Pessoais"}
@@ -347,7 +347,7 @@ export default function CadastroFidelidadePage() {
                         value={formData.nome}
                         onChange={(e) => handleInputChange('nome', e.target.value)}
                         placeholder="Seu nome completo"
-                        className="bg-white dark:bg-gray-700"
+                        className="input-dark"
                       />
                     </div>
                     
@@ -359,7 +359,7 @@ export default function CadastroFidelidadePage() {
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         placeholder="seu@email.com"
-                        className="bg-white dark:bg-gray-700"
+                        className="input-dark"
                       />
                     </div>
                     
@@ -371,7 +371,7 @@ export default function CadastroFidelidadePage() {
                           value={formData.telefone}
                           onChange={(e) => handleInputChange('telefone', e.target.value)}
                           placeholder="(61) 99999-9999"
-                          className="bg-white dark:bg-gray-700"
+                          className="input-dark"
                         />
                       </div>
                       
@@ -382,7 +382,7 @@ export default function CadastroFidelidadePage() {
                           value={formData.cpf}
                           onChange={(e) => handleInputChange('cpf', e.target.value)}
                           placeholder="000.000.000-00"
-                          className="bg-white dark:bg-gray-700"
+                          className="input-dark"
                         />
                       </div>
                     </div>
@@ -394,7 +394,7 @@ export default function CadastroFidelidadePage() {
                         type="date"
                         value={formData.dataNascimento}
                         onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
-                        className="bg-white dark:bg-gray-700"
+                        className="input-dark"
                       />
                     </div>
                   </motion.div>
@@ -422,7 +422,7 @@ export default function CadastroFidelidadePage() {
                         }}
                         placeholder="00000-000"
                         maxLength={8}
-                        className="bg-white dark:bg-gray-700"
+                        className="input-dark"
                       />
                     </div>
                     
@@ -434,7 +434,7 @@ export default function CadastroFidelidadePage() {
                           value={formData.endereco.logradouro}
                           onChange={(e) => handleInputChange('endereco.logradouro', e.target.value)}
                           placeholder="Rua, Avenida..."
-                          className="bg-white dark:bg-gray-700"
+                          className="input-dark"
                         />
                       </div>
                       
@@ -445,7 +445,7 @@ export default function CadastroFidelidadePage() {
                           value={formData.endereco.numero}
                           onChange={(e) => handleInputChange('endereco.numero', e.target.value)}
                           placeholder="123"
-                          className="bg-white dark:bg-gray-700"
+                          className="input-dark"
                         />
                       </div>
                     </div>
@@ -457,7 +457,7 @@ export default function CadastroFidelidadePage() {
                         value={formData.endereco.complemento}
                         onChange={(e) => handleInputChange('endereco.complemento', e.target.value)}
                         placeholder="Apto, Casa..."
-                        className="bg-white dark:bg-gray-700"
+                        className="input-dark"
                       />
                     </div>
                     
@@ -469,7 +469,7 @@ export default function CadastroFidelidadePage() {
                           value={formData.endereco.bairro}
                           onChange={(e) => handleInputChange('endereco.bairro', e.target.value)}
                           placeholder="Bairro"
-                          className="bg-white dark:bg-gray-700"
+                          className="input-dark"
                         />
                       </div>
                       
@@ -480,7 +480,7 @@ export default function CadastroFidelidadePage() {
                           value={formData.endereco.cidade}
                           onChange={(e) => handleInputChange('endereco.cidade', e.target.value)}
                           placeholder="Cidade"
-                          className="bg-white dark:bg-gray-700"
+                          className="input-dark"
                         />
                       </div>
                       
@@ -492,7 +492,7 @@ export default function CadastroFidelidadePage() {
                           onChange={(e) => handleInputChange('endereco.estado', e.target.value)}
                           placeholder="UF"
                           maxLength={2}
-                          className="bg-white dark:bg-gray-700"
+                          className="input-dark"
                         />
                       </div>
                     </div>

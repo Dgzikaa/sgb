@@ -244,7 +244,7 @@ export default function CartaoDigitalPage() {
             className="mt-8 space-y-4"
           >
             {/* Adicionar à Wallet */}
-            <Card className="bg-white dark:bg-gray-800">
+            <Card className="card-dark">
               <CardHeader>
                 <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center gap-2">
                   <Wallet className="w-5 h-5" />
@@ -274,7 +274,7 @@ export default function CartaoDigitalPage() {
             </Card>
 
             {/* Outras Ações */}
-            <Card className="bg-white dark:bg-gray-800">
+            <Card className="card-dark">
               <CardHeader>
                 <CardTitle className="text-lg text-gray-900 dark:text-white">
                   Outras Opções

@@ -177,7 +177,7 @@ export default function ConfiguracoesFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <Card className="bg-white dark:bg-gray-800">
+              <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
                     <User className="w-5 h-5" />
@@ -194,7 +194,7 @@ export default function ConfiguracoesFidelidadePage() {
                       id="nome"
                       value={formData.nome}
                       onChange={(e) => setFormData({...formData, nome: e.target.value})}
-                      className="bg-white dark:bg-gray-700"
+                      className="input-dark"
                     />
                   </div>
                   
@@ -204,7 +204,7 @@ export default function ConfiguracoesFidelidadePage() {
                       id="email"
                       value={membro.email}
                       disabled
-                      className="bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400"
+                      className="input-dark opacity-70"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       O e-mail não pode ser alterado
@@ -218,7 +218,7 @@ export default function ConfiguracoesFidelidadePage() {
                       value={formData.telefone}
                       onChange={(e) => setFormData({...formData, telefone: e.target.value})}
                       placeholder="(61) 99999-9999"
-                      className="bg-white dark:bg-gray-700"
+                      className="input-dark"
                     />
                   </div>
                 </CardContent>
@@ -231,7 +231,7 @@ export default function ConfiguracoesFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white dark:bg-gray-800">
+              <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
                     <Bell className="w-5 h-5" />
@@ -294,7 +294,7 @@ export default function ConfiguracoesFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <Card className="bg-white dark:bg-gray-800 border-red-200 dark:border-red-800">
+              <Card className="card-dark border-red-200 dark:border-red-800">
                 <CardHeader>
                   <CardTitle className="text-xl text-red-600 dark:text-red-400 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5" />
@@ -337,7 +337,7 @@ export default function ConfiguracoesFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-700">
+              <Card className="card-dark border-amber-200 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
                 <CardHeader>
                   <CardTitle className="text-lg text-gray-900 dark:text-white">
                     Status da Conta
@@ -407,7 +407,7 @@ export default function ConfiguracoesFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <Card className="bg-white dark:bg-gray-800">
+              <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="text-lg text-gray-900 dark:text-white">
                     Links Úteis

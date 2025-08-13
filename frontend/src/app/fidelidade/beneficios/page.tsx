@@ -187,7 +187,7 @@ export default function BeneficiosPage() {
                 <Card className={`h-full transition-all duration-300 hover:shadow-2xl hover:-translate-y-3 ${
                   beneficio.destaque 
                     ? 'ring-2 ring-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20' 
-                    : 'bg-white dark:bg-gray-800'
+                    : 'card-dark'
                 }`}>
                   <CardHeader className="text-center pb-6">
                     <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-r ${beneficio.color} flex items-center justify-center mb-6 shadow-lg`}>
@@ -239,7 +239,7 @@ export default function BeneficiosPage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="h-full bg-white dark:bg-gray-800 hover:shadow-lg transition-all duration-300">
+                <Card className="h-full card-dark hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center">
@@ -285,7 +285,7 @@ export default function BeneficiosPage() {
             viewport={{ once: true }}
             className="max-w-4xl mx-auto"
           >
-            <Card className="bg-white dark:bg-gray-800 shadow-xl">
+            <Card className="card-dark shadow-xl">
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">

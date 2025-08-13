@@ -19,7 +19,7 @@ export default function FuncionarioChecklistsPage() {
     <ProtectedRoute requiredModule="operacoes">
       <div className="space-y-6 mt-8">
         <div className="flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-8 text-center transition-colors duration-300">
+          <div className="max-w-md w-full card-dark rounded-lg shadow-lg p-8 text-center transition-colors duration-300">
             {/* Ícone Principal */}
             <div className="flex justify-center mb-6">
               <div className="bg-orange-100 dark:bg-orange-900/30 p-4 rounded-full transition-colors duration-300">

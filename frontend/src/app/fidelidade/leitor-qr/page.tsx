@@ -178,7 +178,7 @@ export default function LeitorQRPage() {
 
         <div className="max-w-4xl mx-auto">
           {/* Card Principal */}
-          <Card className="bg-white dark:bg-gray-800 shadow-xl mb-6">
+          <Card className="card-dark shadow-xl mb-6">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl text-gray-900 dark:text-white">
                 Scanner de Check-in
@@ -307,12 +307,12 @@ export default function LeitorQRPage() {
                   Código Manual
                 </h3>
                 <div className="flex gap-3 max-w-md mx-auto">
-                  <input
+                     <input
                     type="text"
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value)}
                     placeholder="Digite o código do QR"
-                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                       className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg input-dark"
                     disabled={loading}
                   />
                   <Button
@@ -345,7 +345,7 @@ export default function LeitorQRPage() {
 
           {/* Estatísticas Rápidas */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-white dark:bg-gray-800">
+            <Card className="card-dark">
               <CardContent className="p-4 text-center">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
@@ -353,7 +353,7 @@ export default function LeitorQRPage() {
               </CardContent>
             </Card>
             
-            <Card className="bg-white dark:bg-gray-800">
+            <Card className="card-dark">
               <CardContent className="p-4 text-center">
                 <User className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">2</p>
