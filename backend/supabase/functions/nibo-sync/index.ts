@@ -469,8 +469,28 @@ class NiboSyncService {
       // Iniciar processamento em background (assíncrono)
       console.log('🚀 Iniciando processamento em background...')
       try {
-        await this.supabase.rpc('process_nibo_agendamentos_background', { p_batch_id: batchId })
-        console.log('✅ Background job iniciado com sucesso')
+        const response = await fetch(
+          `${Deno.env.get('SUPABASE_URL')}/functions/v1/nibo-orchestrator`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+            },
+            body: JSON.stringify({
+              batch_id: batchId,
+              batch_size: 50
+            })
+          }
+        )
+
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('❌ Erro do orchestrator:', errorText)
+          throw new Error(`Orchestrator falhou: ${response.status}`)
+        } else {
+          console.log('✅ Background job iniciado com sucesso via orchestrator')
+        }
       } catch (error: unknown) {
         console.error('❌ Erro ao iniciar background job:', error)
       }
