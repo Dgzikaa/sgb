@@ -144,7 +144,7 @@ export function UpdatePixKeyModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <DialogContent className="modal-dark">
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">
             Atualizar Chave PIX

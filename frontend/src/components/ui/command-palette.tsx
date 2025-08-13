@@ -423,7 +423,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl sm:max-w-lg md:max-w-2xl p-0 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mx-4 sm:mx-0">
+      <DialogContent className="modal-dark max-w-2xl sm:max-w-lg md:max-w-2xl p-0 mx-4 sm:mx-0">
         <div className="command-palette">
           {/* Header com busca */}
           <div className="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-700">

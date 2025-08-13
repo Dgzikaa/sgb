@@ -35,7 +35,7 @@ export default function ChecklistsFuncionarioPage() {
             </p>
           </div>
 
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <Card className="card-dark">
             <CardHeader>
               <CardTitle className="text-xl text-gray-900 dark:text-white">
                 📋 Checklists Disponíveis

@@ -145,7 +145,7 @@ const MetaCard = ({
   };
 
   return (
-    <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+    <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300">
       <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -637,7 +637,7 @@ export default function MetasPage() {
         </div>
 
         {/* Tabs de Categorias */}
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <Card className="card-dark border-0 shadow-lg">
           <Tabs defaultValue="indicadores_estrategicos" className="w-full">
             <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
               <div className="flex items-center justify-between">

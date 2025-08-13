@@ -361,7 +361,7 @@ export default function LeitorQRPage() {
               </CardContent>
             </Card>
             
-            <Card className="bg-white dark:bg-gray-800">
+            <Card className="card-dark">
               <CardContent className="p-4 text-center">
                 <Smartphone className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">100%</p>

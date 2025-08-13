@@ -104,7 +104,7 @@ export function IndicadorCard({
   const cores = getCorClasse();
 
   return (
-    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-shadow">
+    <Card className="card-dark shadow-sm hover:shadow-lg transition-shadow">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-medium text-gray-700 dark:text-gray-300">

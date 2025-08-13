@@ -115,7 +115,7 @@ export function EditarDesempenhoModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <DialogContent className="modal-dark max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
             Editar Semana {dados.numero_semana}

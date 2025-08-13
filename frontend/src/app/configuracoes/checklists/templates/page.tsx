@@ -338,7 +338,7 @@ export default function TemplatesPage() {
 
           {/* Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -359,7 +359,7 @@ export default function TemplatesPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -380,7 +380,7 @@ export default function TemplatesPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -401,7 +401,7 @@ export default function TemplatesPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -424,7 +424,7 @@ export default function TemplatesPage() {
           </div>
 
           {/* Controles e Filtros */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+        <Card className="card-dark border-0 shadow-lg">
             <CardHeader className="border-b border-gray-100 dark:border-gray-700 pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
@@ -576,7 +576,7 @@ export default function TemplatesPage() {
 
           {/* Lista de Templates */}
           {error ? (
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <Card className="card-dark border-0 shadow-lg">
               <CardContent className="p-12 text-center">
                 <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                   <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -592,7 +592,7 @@ export default function TemplatesPage() {
               </CardContent>
             </Card>
           ) : templates.length === 0 ? (
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+            <Card className="card-dark border-0 shadow-lg">
               <CardContent className="p-12 text-center">
                 <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                   <FileText className="w-8 h-8 text-gray-600 dark:text-gray-400" />

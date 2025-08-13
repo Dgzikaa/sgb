@@ -134,7 +134,7 @@ export default function FidelidadeWhatsAppPage() {
           
           {/* Lista de Membros - Mais espaçosa */}
           <div className="xl:col-span-2">
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-xl rounded-2xl overflow-hidden">
+            <Card className="card-dark border-0 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl font-bold flex items-center gap-3">
@@ -232,7 +232,7 @@ export default function FidelidadeWhatsAppPage() {
 
           {/* Painel de Envio - Redesenhado */}
           <div className="xl:col-span-1">
-            <Card className="bg-white dark:bg-gray-800 border-0 shadow-xl rounded-2xl overflow-hidden sticky top-8">
+            <Card className="card-dark border-0 shadow-xl rounded-2xl overflow-hidden sticky top-8">
               <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white p-6">
                 <CardTitle className="text-xl font-bold flex items-center gap-3">
                   <Send className="w-6 h-6" />
@@ -360,7 +360,7 @@ export default function FidelidadeWhatsAppPage() {
         </div>
 
         {/* Instruções Melhoradas */}
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-xl rounded-2xl mt-8 overflow-hidden">
+        <Card className="card-dark border-0 shadow-xl rounded-2xl mt-8 overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6">
             <CardTitle className="text-xl font-bold">Como funciona o envio?</CardTitle>
           </CardHeader>
