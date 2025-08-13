@@ -61,7 +61,7 @@ export default function StaffLoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-amber-900/20 to-orange-900/30 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <Card className="w-full max-w-md card-dark">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
             Acesso de Funcionário
@@ -83,7 +83,7 @@ export default function StaffLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                className="input-dark"
                 disabled={loading}
               />
             </div>
@@ -99,7 +99,7 @@ export default function StaffLoginPage() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="Sua senha"
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white pr-10"
+                  className="input-dark pr-10"
                   disabled={loading}
                 />
                 <Button

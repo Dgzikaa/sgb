@@ -165,7 +165,7 @@ export default function UsuarioCelularForm({
   const isValid = validateCelular(celular);
 
   return (
-    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+    <Card className="card-dark">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
           <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -189,7 +189,7 @@ export default function UsuarioCelularForm({
               value={celular}
               onChange={e => setCelular(formatCelular(e.target.value))}
               placeholder="+55 (61) 99999-9999"
-              className={`bg-white dark:bg-gray-700 border ${
+              className={`input-dark border ${
                 celular && !isValid
                   ? 'border-red-300 dark:border-red-600'
                   : 'border-gray-300 dark:border-gray-600'

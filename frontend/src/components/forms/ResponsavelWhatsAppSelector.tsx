@@ -97,7 +97,7 @@ export default function ResponsavelWhatsAppSelector({
 
   return (
     <div className="space-y-6">
-      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <Card className="card-dark">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />

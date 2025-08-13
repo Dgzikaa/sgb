@@ -177,7 +177,7 @@ export default function PagamentoPage() {
               
               <CardContent className="space-y-6">
                 {/* Preço */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-amber-200 dark:border-amber-700">
+                <div className="card-dark rounded-lg p-4 border-amber-200 dark:border-amber-700">
                   <div className="text-center">
                     <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
                       R$ 100,00
@@ -238,7 +238,7 @@ export default function PagamentoPage() {
 
           {/* Área de Pagamento */}
           <div className="lg:col-span-2">
-            <Card className="bg-white dark:bg-gray-800 shadow-xl">
+            <Card className="card-dark shadow-xl">
               <CardHeader>
                 <CardTitle className="text-2xl text-gray-900 dark:text-white flex items-center gap-2">
                   <Lock className="w-6 h-6 text-green-600 dark:text-green-400" />

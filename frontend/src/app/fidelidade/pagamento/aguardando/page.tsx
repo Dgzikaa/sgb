@@ -214,7 +214,7 @@ export default function AguardandoPagamentoPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card className="bg-white dark:bg-gray-800 shadow-xl">
+            <Card className="card-dark shadow-xl">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl text-gray-900 dark:text-white">
                   Pagar com PIX

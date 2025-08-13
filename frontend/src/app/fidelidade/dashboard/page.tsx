@@ -209,7 +209,7 @@ export default function DashboardFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-white dark:bg-gray-800">
+              <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
                     <Star className="w-5 h-5 text-amber-500" />
@@ -295,7 +295,7 @@ export default function DashboardFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <Card className="bg-white dark:bg-gray-800 text-center">
+              <Card className="card-dark text-center">
                 <CardHeader>
                   <CardTitle className="text-lg text-gray-900 dark:text-white">
                     Seu QR Code
@@ -341,7 +341,7 @@ export default function DashboardFidelidadePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <Card className="bg-white dark:bg-gray-800">
+              <Card className="card-dark">
                 <CardHeader>
                   <CardTitle className="text-lg text-gray-900 dark:text-white">
                     Minha Conta

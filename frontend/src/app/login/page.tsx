@@ -302,7 +302,7 @@ export default function LoginPage() {
         {/* Configuração de biometria pós-login */}
         {showBiometricRegistration && lastLoginData && (
           <div
-            className="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg"
+            className="mb-6 card-dark rounded-xl p-6 shadow-lg"
             suppressHydrationWarning
           >
             <div className="text-center mb-4" suppressHydrationWarning>
@@ -459,7 +459,7 @@ export default function LoginPage() {
 
         {/* Conteúdo baseado no método escolhido */}
         {!showBiometricRegistration && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="card-dark rounded-2xl p-8 shadow-lg">
             {loginMethod === 'traditional' ? (
               /* Formulário de Login Tradicional */
               <>
@@ -478,7 +478,7 @@ export default function LoginPage() {
                         type="email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
-                        className="elegant-input w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded-[4px]"
+                        className="elegant-input w-full input-dark px-2 py-1 rounded-[4px]"
                         placeholder="seu@email.com"
                         required
                       />
@@ -499,7 +499,7 @@ export default function LoginPage() {
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={e => setPassword(e.target.value)}
-                        className="elegant-input w-full px-2 py-1 rounded-[4px] bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                        className="elegant-input w-full px-2 py-1 rounded-[4px] input-dark"
                         placeholder="••••••••"
                         required
                       />

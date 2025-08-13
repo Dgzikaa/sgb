@@ -106,7 +106,7 @@ const DialogContent: React.FC<
   return (
     <div
       className={cn(
-        'bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700',
+        'modal-dark',
         'w-full max-w-6xl max-h-[90vh]',
         'flex flex-col',
         'animate-in fade-in-0 zoom-in-95 duration-300',

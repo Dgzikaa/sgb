@@ -120,7 +120,7 @@ const PopoverContent: React.FC<PopoverContentProps> = ({
     <div
       ref={contentRef}
       className={cn(
-        'absolute z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg',
+        'absolute z-50 card-dark rounded-md shadow-lg',
         alignmentClasses[align],
         sideClasses[side],
         className

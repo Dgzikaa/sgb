@@ -19,7 +19,7 @@ export default function TermosPage() {
           </Link>
         </div>
 
-        <Card className="max-w-4xl mx-auto bg-white dark:bg-gray-800">
+        <Card className="max-w-4xl mx-auto card-dark">
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white text-center">
               Termos de Uso - Fidelidade VIP

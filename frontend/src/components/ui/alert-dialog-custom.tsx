@@ -87,7 +87,7 @@ export function AlertDialogCustom({
         transition={{ duration: 0.2 }}
         className="relative w-full max-w-md mx-auto"
       >
-        <Card className={`bg-white dark:bg-gray-800 shadow-2xl ${colors.border}`}>
+        <Card className={`card-dark shadow-2xl ${colors.border}`}>
           <CardContent className="p-6">
             {/* Close Button */}
             <Button
