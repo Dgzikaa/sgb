@@ -1874,7 +1874,7 @@ export default function AgendamentoPage() {
 
         {/* Modal de Cadastro de Stakeholder */}
         <Dialog open={modalStakeholder} onOpenChange={setModalStakeholder}>
-          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-sm sm:max-w-md">
+          <DialogContent className="modal-dark max-w-sm sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
                 Cadastrar Novo Stakeholder
@@ -1938,7 +1938,7 @@ export default function AgendamentoPage() {
 
         {/* Modal de Atualização de Chave PIX */}
         <Dialog open={modalPixKey} onOpenChange={setModalPixKey}>
-          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-sm sm:max-w-md">
+          <DialogContent className="modal-dark max-w-sm sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
                 Atualizar Chave PIX
@@ -2051,7 +2051,7 @@ export default function AgendamentoPage() {
 
         {/* Modal de Edição de Pagamento */}
         <Dialog open={modalEdicao} onOpenChange={setModalEdicao}>
-          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-2xl w-full">
+          <DialogContent className="modal-dark max-w-2xl w-full">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white text-base sm:text-lg">
                 Editar Pagamento

@@ -339,7 +339,7 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* Usuários */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -385,7 +385,7 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* Permissões */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -431,7 +431,7 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* Templates */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
+          <Card className="card-dark border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
