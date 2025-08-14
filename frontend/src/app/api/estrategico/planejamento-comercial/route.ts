@@ -131,8 +131,8 @@ export async function GET(request: NextRequest) {
       ci_real_vs_plan_green: parseFloat(item.cl_real) > parseFloat(item.cl_plan), 
       te_real_vs_plan_green: parseFloat(item.te_real) > parseFloat(item.te_plan),
       tb_real_vs_plan_green: parseFloat(item.tb_real_contahub) > parseFloat(item.tb_plan),
-      t_medio_green: (parseFloat(item.real_r) / parseFloat(item.cl_real)) > 93.00,
-      percent_art_fat_green: parseFloat(item.c_art) < 15, 
+      t_medio_green: (parseFloat(item.te_real) + parseFloat(item.tb_real_contahub)) > 93.00,
+      percent_art_fat_green: parseFloat(item.percent_art_fat) < 15,
       t_coz_green: parseFloat(item.t_coz) < 12,
       t_bar_green: parseFloat(item.t_bar) < 4,
       fat_19h_green: parseFloat(item.fat_19h_percent_contahub) > 15,
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
       te_real: parseFloat(item.te_real) || 0,
       tb_plan: parseFloat(item.tb_plan) || 0,
       tb_real: parseFloat(item.tb_real_contahub) || 0,
-      t_medio: item.cl_real ? (parseFloat(item.real_r) / parseFloat(item.cl_real)) : 0,
+      t_medio: (parseFloat(item.te_real) + parseFloat(item.tb_real_contahub)) || 0,
       c_art: parseFloat(item.c_art) || 0, // TODO: implementar campo na view
       c_prod: parseFloat(item.c_prod) || 0, // TODO: implementar campo na view  
       percent_art_fat: parseFloat(item.percent_art_fat) || 0, // TODO: implementar campo na view

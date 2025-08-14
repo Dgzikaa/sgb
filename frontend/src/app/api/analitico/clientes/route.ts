@@ -17,68 +17,115 @@ export async function GET(request: NextRequest) {
     
     const supabase = await getAdminClient()
     console.log('✅ API Clientes: Cliente administrativo Supabase obtido')
-    
-    // Buscar dados dos clientes
-    console.log('📊 API Clientes: Buscando dados dos clientes...')
-    
-    // Tentar query direta primeiro
-    const { data: testData, error: testError } = await supabase
-      .from('contahub_periodo')
-      .select('cli_nome, cli_fone, bar_id, dt_gerencial')
-      .not('cli_nome', 'is', null)
-      .not('cli_fone', 'is', null)
-      .limit(5)
 
-    console.log('🧪 Teste query direta:', { 
-      count: testData?.length, 
-      error: testError,
-      amostra: testData?.slice(0, 2)
-    })
+		// Buscar dados dos clientes com paginação completa
+		console.log('📊 API Clientes: Buscando dados dos clientes (paginaçao completa)...')
+		const barIdHeader = request.headers.get('x-user-data')
+		let barIdFilter: number | null = null
+		if (barIdHeader) {
+			try {
+				const parsed = JSON.parse(barIdHeader)
+				if (parsed?.bar_id) barIdFilter = parseInt(String(parsed.bar_id))
+			} catch {}
+		}
 
-    const { data: clientes, error: clientesError } = await supabase
-      .rpc('get_clientes_unificados_top', { limite: 100 })
+		const pageSize = 1000
+		let from = 0
+		let totalLinhas = 0
+		const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
-    console.log('🎯 Resultado RPC get_clientes_unificados_top:', {
-      count: clientes?.length,
-      error: clientesError,
-      amostra: clientes?.slice(0, 2)
-    })
+		while (true) {
+			let query = supabase
+				.from('contahub_periodo')
+				.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
+				.not('cli_fone', 'is', null)
+				.neq('cli_fone', '')
+				.range(from, from + pageSize - 1)
+				.order('dt_gerencial', { ascending: false })
+			if (barIdFilter) query = query.eq('bar_id', barIdFilter)
+			const { data, error } = await query
+			if (error) {
+				console.error('❌ Erro ao buscar contahub_periodo:', error)
+				break
+			}
+			if (!data || data.length === 0) break
 
-    if (clientesError) {
-      console.error('❌ Erro ao buscar clientes:', clientesError)
-      return NextResponse.json(
-        { error: 'Erro ao buscar dados dos clientes' },
-        { status: 500 }
-      )
-    }
+			totalLinhas += data.length
 
-    console.log(`✅ API Clientes: ${clientes?.length || 0} clientes encontrados`)
+			for (const r of data) {
+				const rawFone = (r.cli_fone || '').toString().trim()
+				if (!rawFone) continue
+				const fone = rawFone.replace(/\D/g, '')
+				if (!fone) continue
+				const nome = (r.cli_nome || '').toString().trim() || 'Sem nome'
+				const ultima = r.dt_gerencial as string
+				const vrCouvert = parseFloat(r.vr_couvert || '0') || 0
+				const vrPagamentos = parseFloat(r.vr_pagamentos || '0') || 0
+				const vrConsumo = vrPagamentos - vrCouvert
 
-    // Buscar estatísticas unificadas
-    console.log('📈 API Clientes: Buscando estatísticas unificadas...')
-    const { data: estatisticas, error: estatisticasError } = await supabase
-      .rpc('get_estatisticas_unificadas')
+				const prev = map.get(fone)
+				if (!prev) {
+					map.set(fone, { 
+						nome, 
+						fone, 
+						visitas: 1, 
+						ultima,
+						totalEntrada: vrCouvert,
+						totalConsumo: vrConsumo,
+						totalGasto: vrPagamentos
+					})
+				} else {
+					prev.visitas += 1
+					prev.totalEntrada += vrCouvert
+					prev.totalConsumo += vrConsumo
+					prev.totalGasto += vrPagamentos
+					if (ultima > prev.ultima) prev.ultima = ultima
+					if (nome && nome !== 'Sem nome') prev.nome = nome
+				}
+			}
 
-    if (estatisticasError) {
-      console.error('Erro ao buscar estatísticas:', estatisticasError)
-      return NextResponse.json(
-        { error: 'Erro ao buscar estatísticas dos clientes' },
-        { status: 500 }
-      )
-    }
+			if (data.length < pageSize) break
+			from += pageSize
+		}
 
-    return NextResponse.json({
-      clientes: clientes || [],
-      estatisticas: estatisticas?.[0] || {
-        total_clientes_unicos: 0,
-        total_visitas_geral: 0,
-        ticket_medio_geral: 0,
-        ticket_medio_entrada: 0,
-        ticket_medio_consumo: 0,
-        valor_total_entrada: 0,
-        valor_total_consumo: 0
-      }
-    })
+		const clientes = Array.from(map.values())
+			.sort((a, b) => b.visitas - a.visitas)
+			.slice(0, 100)
+			.map((c) => ({
+				identificador_principal: c.fone,
+				nome_principal: c.nome,
+				telefone: c.fone,
+				email: null,
+				sistema: 'ContaHub',
+				total_visitas: c.visitas,
+				valor_total_gasto: c.totalGasto,
+				valor_total_entrada: c.totalEntrada,
+				valor_total_consumo: c.totalConsumo,
+				ticket_medio_geral: c.visitas > 0 ? c.totalGasto / c.visitas : 0,
+				ticket_medio_entrada: c.visitas > 0 ? c.totalEntrada / c.visitas : 0,
+				ticket_medio_consumo: c.visitas > 0 ? c.totalConsumo / c.visitas : 0,
+				ultima_visita: c.ultima,
+			}))
+
+		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas`)
+
+		// Calcular estatísticas globais
+		const totalEntradaGlobal = Array.from(map.values()).reduce((sum, c) => sum + c.totalEntrada, 0)
+		const totalConsumoGlobal = Array.from(map.values()).reduce((sum, c) => sum + c.totalConsumo, 0)
+		const totalGastoGlobal = Array.from(map.values()).reduce((sum, c) => sum + c.totalGasto, 0)
+
+		return NextResponse.json({
+			clientes,
+			estatisticas: {
+				total_clientes_unicos: map.size,
+				total_visitas_geral: totalLinhas,
+				ticket_medio_geral: totalLinhas > 0 ? totalGastoGlobal / totalLinhas : 0,
+				ticket_medio_entrada: totalLinhas > 0 ? totalEntradaGlobal / totalLinhas : 0,
+				ticket_medio_consumo: totalLinhas > 0 ? totalConsumoGlobal / totalLinhas : 0,
+				valor_total_entrada: totalEntradaGlobal,
+				valor_total_consumo: totalConsumoGlobal,
+			},
+		})
   } catch (error) {
     console.error('Erro na API de clientes:', error)
     return NextResponse.json(

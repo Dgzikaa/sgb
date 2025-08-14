@@ -19,7 +19,7 @@ export default function OperacionalPage() {
     {
       title: 'Agendamento',
       description: 'Gestão de pagamentos e recebimentos financeiros',
-      href: '/financeiro/agendamento',
+      href: '/operacional/agendamentos',
       icon: Calendar,
       color: 'text-blue-600 dark:text-blue-400',
     },

@@ -96,15 +96,15 @@ const defaultSidebarItems: SidebarItem[] = [
       subItems: [
         {
           icon: BarChart3,
-          label: 'Tabela de Desempenho',
-          href: '/gestao/desempenho/tabela',
+          label: 'Desempenho',
+          href: '/estrategico/desempenho',
           description: 'Análise semanal de performance',
           permission: 'gestao',
         },
         {
           icon: Calendar,
           label: 'Planejamento Comercial',
-          href: '/gestao/planejamento-comercial',
+          href: '/estrategico/planejamento-comercial',
           description: 'Estratégia comercial e metas',
           permission: 'planejamento',
         },
@@ -126,9 +126,9 @@ const defaultSidebarItems: SidebarItem[] = [
       subItems: [
         {
           icon: Calendar,
-          label: 'Agendamento',
-          href: '/financeiro/agendamento',
-          description: 'Gestão de pagamentos e recebimentos',
+          label: 'Agendamentos',
+          href: '/operacional/agendamentos',
+          description: 'Gestão de agendamentos operacionais',
           permission: 'financeiro_agendamento',
         },
       ],
@@ -150,7 +150,7 @@ const defaultSidebarItems: SidebarItem[] = [
         {
           icon: BarChart3,
           label: 'DRE',
-          href: '/financeiro/dre',
+          href: '/analitico/dre',
           description: 'Demonstrativo de Resultado',
           permission: 'dashboard_financeiro_mensal',
         },
@@ -400,8 +400,8 @@ export function ModernSidebar() {
 
   // 6. Effects
   useEffect(() => {
-    if (pathname?.includes('/financeiro/dre') && !expandedItems.includes('Financeiro')) {
-      setExpandedItems(prev => [...prev, 'Financeiro']);
+    if (pathname?.includes('/analitico/dre') && !expandedItems.includes('Analítico')) {
+      setExpandedItems(prev => [...prev, 'Analítico']);
     }
   }, [pathname, expandedItems]);
 

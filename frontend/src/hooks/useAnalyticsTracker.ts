@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+﻿import { useEffect, useRef, useCallback } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { useBar } from '@/contexts/BarContext';
 import { usePathname } from 'next/navigation';
@@ -30,14 +30,14 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   const eventQueue = useRef<Record<string, unknown>[]>([]);
   const isFlushingQueue = useRef<boolean>(false);
 
-  // Gerar session ID único
+  // Gerar session ID Ãºnico
   useEffect(() => {
     if (!sessionId.current) {
       sessionId.current = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
   }, []);
 
-  // Detectar informações do dispositivo
+  // Detectar informaÃ§Ãµes do dispositivo
   const getDeviceInfo = useCallback(() => {
     if (typeof window === 'undefined' || !navigator) {
       return { deviceType: 'desktop', browser: 'Unknown', userAgent: 'Server' };
@@ -60,7 +60,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return { deviceType, browser, userAgent };
   }, []);
 
-  // Função para enviar eventos em lote
+  // FunÃ§Ã£o para enviar eventos em lote
   const flushEventQueue = useCallback(async () => {
     if (isFlushingQueue.current || eventQueue.current.length === 0) return;
 
@@ -69,7 +69,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     eventQueue.current = [];
 
     try {
-      await fetch('/api/configuracoes/analytics/eventos', {
+      await fetch('/api/analitico/analytics/eventos', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventos: eventsToSend }),
@@ -94,7 +94,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return () => clearInterval(interval);
   }, [flushEventQueue]);
 
-  // Flush na saída da página
+  // Flush na saÃ­da da pÃ¡gina
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (
@@ -103,9 +103,9 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
         navigator &&
         navigator.sendBeacon
       ) {
-        // Usar sendBeacon para envio garantido na saída
+        // Usar sendBeacon para envio garantido na saÃ­da
         navigator.sendBeacon(
-          '/api/configuracoes/analytics/eventos',
+          '/api/analitico/analytics/eventos',
           JSON.stringify({ eventos: eventQueue.current })
         );
       }
@@ -115,7 +115,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
-  // Função principal para tracking
+  // FunÃ§Ã£o principal para tracking
   const trackEvent = useCallback(
     (eventData: EventData) => {
       if (!selectedBar) return;
@@ -134,7 +134,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
         user_agent: deviceInfo.userAgent,
       };
 
-      // Adicionar à fila
+      // Adicionar Ã  fila
       eventQueue.current.push(evento);
 
       // Flush imediato se a fila estiver cheia
@@ -145,10 +145,10 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     [user, selectedBar, pathname, getDeviceInfo, flushEventQueue]
   );
 
-  // Tracking automático de page view
+  // Tracking automÃ¡tico de page view
   const trackPageView = useCallback(
     (pagina?: string) => {
-      // Calcular tempo na página anterior
+      // Calcular tempo na pÃ¡gina anterior
       const tempoGasto = Math.round(
         (Date.now() - pageStartTime.current) / 1000
       );
@@ -163,7 +163,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
         },
       });
 
-      // Reset timer para nova página
+      // Reset timer para nova pÃ¡gina
       pageStartTime.current = Date.now();
     },
     [pathname, trackEvent]
@@ -182,7 +182,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
     [trackEvent]
   );
 
-  // Tracking de ações
+  // Tracking de aÃ§Ãµes
   const trackAction = useCallback(
     (acao: string, dados?: Record<string, unknown>) => {
       trackEvent({
@@ -240,24 +240,24 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
   };
 }
 
-// Hook simplificado para uso rápido
+// Hook simplificado para uso rÃ¡pido
 export function useQuickTracker() {
   const { trackClick, trackAction } = useAnalyticsTracker();
 
   return {
-    // Tracking rápido de botões
+    // Tracking rÃ¡pido de botÃµes
     onButtonClick: (buttonName: string, data?: Record<string, unknown>) =>
       trackClick(`button:${buttonName}`, data),
 
-    // Tracking rápido de links
+    // Tracking rÃ¡pido de links
     onLinkClick: (linkName: string, href?: string) =>
       trackClick(`link:${linkName}`, { href }),
 
-    // Tracking rápido de formulários
+    // Tracking rÃ¡pido de formulÃ¡rios
     onFormSubmit: (formName: string, data?: Record<string, unknown>) =>
       trackAction(`form_submit:${formName}`, data),
 
-    // Tracking rápido de modais
+    // Tracking rÃ¡pido de modais
     onModalOpen: (modalName: string) => trackAction(`modal_open:${modalName}`),
 
     onModalClose: (modalName: string) =>

@@ -256,7 +256,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       setLoading(true);
       setError(null);
 
-      const response = await api.get(`/api/operacoes/execucoes/${execucaoId}`);
+      const response = await api.get(`/api/operacional/execucoes/${execucaoId}`);
 
       if (response.success) {
         const execucaoCarregada = response.data;
@@ -281,7 +281,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     try {
       setSaving(true);
 
-      const response = await api.put(`/api/operacoes/execucoes/${execucao.id}`, {
+      const response = await api.put(`/api/operacional/execucoes/${execucao.id}`, {
         respostas: execucao.respostas,
         observacoes: execucao.observacoes,
         auto_save: autoSave,
@@ -353,7 +353,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
 
     try {
       const response = await api.delete(
-        `/api/operacoes/execucoes/${execucao.id}?motivo=${encodeURIComponent(motivo || 'Cancelado pelo usuário')}`
+        `/api/operacional/execucoes/${execucao.id}?motivo=${encodeURIComponent(motivo || 'Cancelado pelo usuário')}`
       );
 
       if (response.success) {
@@ -688,7 +688,7 @@ export function useChecklistExecutions() {
       setError(null);
 
       const params = new URLSearchParams(filtros || {});
-      const response = await api.get(`/api/operacoes/execucoes?${params.toString()}`);
+      const response = await api.get(`/api/operacional/execucoes?${params.toString()}`);
 
       if (response.success) {
         setExecucoes(response.data.execucoes || []);

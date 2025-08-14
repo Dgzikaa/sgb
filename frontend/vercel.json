@@ -3,10 +3,17 @@
     {
       "path": "/api/configuracoes/credenciais/nibo-sync-simple",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/configuracoes/desempenho/automacao-semanal",
+      "schedule": "0 9 * * 1"
     }
   ],
   "functions": {
     "src/app/api/configuracoes/credenciais/nibo-sync/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/configuracoes/desempenho/automacao-semanal/route.ts": {
       "maxDuration": 300
     }
   },

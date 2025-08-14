@@ -18,14 +18,14 @@ export default function EstrategicoPage() {
     {
       title: 'Tabela de Desempenho',
       description: 'Análise semanal de performance e indicadores',
-      href: '/gestao/desempenho/tabela',
+      href: '/estrategico/desempenho',
       icon: BarChart3,
       color: 'text-blue-600 dark:text-blue-400',
     },
     {
       title: 'Planejamento Comercial',
       description: 'Estratégia comercial e definição de metas',
-      href: '/gestao/planejamento-comercial',
+      href: '/estrategico/planejamento-comercial',
       icon: Calendar,
       color: 'text-green-600 dark:text-green-400',
     },

@@ -110,30 +110,76 @@ export default function VisaoGeralPage() {
   const carregarIndicadores = async () => {
     if (!selectedBar) return;
 
+    const hoje = new Date();
+    const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
+    const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}`;
+    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}`;
+
+    // Cache por sessão: evita recarregar tudo ao voltar para a página
+    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
+    const anualCacheKey = `vg:anual:${selectedBar.id}`;
+    const triCacheKey = `vg:tri:${selectedBar.id}:${trimestreAtual}:${mesAtual}`;
+
+    const readCache = (key: string) => {
+      try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.data || !parsed.ts) return null;
+        const isFresh = Date.now() - parsed.ts < CACHE_TTL_MS;
+        return isFresh ? parsed.data : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const writeCache = (key: string, data: unknown) => {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+      } catch {}
+    };
+
+    const anualCached = readCache(anualCacheKey);
+    const triCached = readCache(triCacheKey);
+
+    const requestHeaders = {
+      'x-user-data': JSON.stringify({ bar_id: selectedBar.id, permissao: 'admin' })
+    } as Record<string, string>;
+
+    // Se há cache, mostra imediatamente e revalida em background
+    if (anualCached && triCached) {
+      setIndicadoresAnuais(anualCached.anual);
+      setIndicadoresTrimestrais(triCached.trimestral);
+
+      // Revalidação silenciosa (sem spinner)
+      try {
+        const [anualResponse, trimestralResponse] = await Promise.all([
+          fetch(anualUrl, { headers: requestHeaders }),
+          fetch(trimestralUrl, { headers: requestHeaders })
+        ]);
+        if (anualResponse.ok) {
+          const data = await anualResponse.json();
+          setIndicadoresAnuais(data.anual);
+          writeCache(anualCacheKey, data);
+        }
+        if (trimestralResponse.ok) {
+          const data = await trimestralResponse.json();
+          setIndicadoresTrimestrais(data.trimestral);
+          writeCache(triCacheKey, data);
+        }
+      } catch {
+        // ignora falhas silenciosamente
+      }
+      return;
+    }
+
+    // Sem cache: exibe spinner e busca
     setLoading(true);
     showLoading('Carregando indicadores...');
     try {
-      // Carregar tudo junto na primeira carga
-      const hoje = new Date();
-      const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
-      
       const [anualResponse, trimestralResponse] = await Promise.all([
-        fetch(`/api/visao-geral/indicadores?periodo=anual`, {
-          headers: {
-            'x-user-data': JSON.stringify({
-              bar_id: selectedBar.id,
-              permissao: 'admin',
-            }),
-          },
-        }),
-        fetch(`/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}`, {
-          headers: {
-            'x-user-data': JSON.stringify({
-              bar_id: selectedBar.id,
-              permissao: 'admin',
-            }),
-          },
-        })
+        fetch(anualUrl, { headers: requestHeaders }),
+        fetch(trimestralUrl, { headers: requestHeaders })
       ]);
 
       if (!anualResponse.ok || !trimestralResponse.ok) {
@@ -145,6 +191,8 @@ export default function VisaoGeralPage() {
 
       setIndicadoresAnuais(anualData.anual);
       setIndicadoresTrimestrais(trimestralData.trimestral);
+      writeCache(anualCacheKey, anualData);
+      writeCache(triCacheKey, trimestralData);
     } catch (error) {
       console.error('Erro ao carregar indicadores:', error);
       toast({

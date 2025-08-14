@@ -57,7 +57,11 @@ export async function apiCall(endpoint: string, options: ApiOptions = {}) {
 
     // Retornar dados JSON
     const data = await response.json();
-    console.log(`✅ API Response from ${endpoint}:`, data);
+    // Evitar logs de sucesso em produção para reduzir overhead
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log(`API Response from ${endpoint}`);
+    }
     return data;
   } catch (error) {
     console.error(`Erro na API ${endpoint}:`, error);

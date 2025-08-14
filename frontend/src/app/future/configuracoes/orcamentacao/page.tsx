@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
@@ -65,7 +65,7 @@ export default function OrcamentacaoPage() {
   const [editedValues, setEditedValues] = useState<Record<number, number>>({});
 
   useEffect(() => {
-    setPageTitle('💰 Orçamentação');
+    setPageTitle('ðŸ’° OrÃ§amentaÃ§Ã£o');
     return () => setPageTitle('');
   }, [setPageTitle]);
 
@@ -88,7 +88,7 @@ export default function OrcamentacaoPage() {
         params.append('mes', mesSelecionado);
       }
 
-      const response = await fetch(`/api/configuracoes/orcamentacao?${params}`);
+      const response = await fetch(`/api/estrategico/orcamentacao?${params}`);
       const result = await response.json();
 
       if (result.success) {
@@ -101,7 +101,7 @@ export default function OrcamentacaoPage() {
       console.error('Erro ao carregar dados:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível carregar os dados do orçamento',
+        description: 'NÃ£o foi possÃ­vel carregar os dados do orÃ§amento',
         variant: 'destructive',
       });
     } finally {
@@ -114,7 +114,7 @@ export default function OrcamentacaoPage() {
 
     setSyncing(true);
     try {
-      const response = await fetch('/api/configuracoes/orcamentacao/sync-nibo', {
+      const response = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ export default function OrcamentacaoPage() {
 
       if (result.success) {
         toast({
-          title: 'Sincronização concluída',
+          title: 'SincronizaÃ§Ã£o concluÃ­da',
           description: `${result.importados} registros importados, ${result.atualizados} atualizados`,
         });
         await carregarDados();
@@ -137,10 +137,10 @@ export default function OrcamentacaoPage() {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error('Erro na sincronização:', error);
+      console.error('Erro na sincronizaÃ§Ã£o:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível sincronizar com o Nibo',
+        description: 'NÃ£o foi possÃ­vel sincronizar com o Nibo',
         variant: 'destructive',
       });
     } finally {
@@ -186,7 +186,7 @@ export default function OrcamentacaoPage() {
     if (novoValor === undefined) return;
 
     try {
-      const response = await fetch('/api/configuracoes/orcamentacao', {
+      const response = await fetch('/api/estrategico/orcamentacao', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -213,7 +213,7 @@ export default function OrcamentacaoPage() {
       console.error('Erro ao salvar:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível salvar a alteração',
+        description: 'NÃ£o foi possÃ­vel salvar a alteraÃ§Ã£o',
         variant: 'destructive',
       });
     }
@@ -239,7 +239,7 @@ export default function OrcamentacaoPage() {
     { value: 'todos', label: 'Todos os meses' },
     { value: '1', label: 'Janeiro' },
     { value: '2', label: 'Fevereiro' },
-    { value: '3', label: 'Março' },
+    { value: '3', label: 'MarÃ§o' },
     { value: '4', label: 'Abril' },
     { value: '5', label: 'Maio' },
     { value: '6', label: 'Junho' },
@@ -251,7 +251,7 @@ export default function OrcamentacaoPage() {
     { value: '12', label: 'Dezembro' },
   ];
 
-  // Se não tiver ano selecionado, mostrar cards de seleção
+  // Se nÃ£o tiver ano selecionado, mostrar cards de seleÃ§Ã£o
   if (!anoSelecionado) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -263,10 +263,10 @@ export default function OrcamentacaoPage() {
                 </div>
                 <div>
                   <h1 className="card-title-dark text-3xl font-bold">
-                    Orçamentação
+                    OrÃ§amentaÃ§Ã£o
                   </h1>
                   <p className="card-description-dark text-lg">
-                    Sistema integrado de gestão orçamentária com dados do Nibo em tempo real
+                    Sistema integrado de gestÃ£o orÃ§amentÃ¡ria com dados do Nibo em tempo real
                   </p>
                 </div>
               </div>
@@ -277,7 +277,7 @@ export default function OrcamentacaoPage() {
                     <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     <div>
                       <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Planejamento</p>
-                      <p className="text-xs text-blue-500 dark:text-blue-300">Orçamento estratégico</p>
+                      <p className="text-xs text-blue-500 dark:text-blue-300">OrÃ§amento estratÃ©gico</p>
                     </div>
                   </div>
                 </div>
@@ -286,7 +286,7 @@ export default function OrcamentacaoPage() {
                   <div className="flex items-center gap-3">
                     <RefreshCw className="w-6 h-6 text-green-600 dark:text-green-400" />
                     <div>
-                      <p className="text-sm text-green-600 dark:text-green-400 font-medium">Sincronização</p>
+                      <p className="text-sm text-green-600 dark:text-green-400 font-medium">SincronizaÃ§Ã£o</p>
                       <p className="text-xs text-green-500 dark:text-green-300">Dados do Nibo</p>
                     </div>
                   </div>
@@ -296,8 +296,8 @@ export default function OrcamentacaoPage() {
                   <div className="flex items-center gap-3">
                     <TrendingUp className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     <div>
-                      <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">Análise</p>
-                      <p className="text-xs text-purple-500 dark:text-purple-300">Variações orçamentárias</p>
+                      <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">AnÃ¡lise</p>
+                      <p className="text-xs text-purple-500 dark:text-purple-300">VariaÃ§Ãµes orÃ§amentÃ¡rias</p>
                     </div>
                   </div>
                 </div>
@@ -314,16 +314,16 @@ export default function OrcamentacaoPage() {
                     <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                   </div>
                   <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                    Histórico
+                    HistÃ³rico
                   </Badge>
                 </div>
                 
                 <div className="mb-6">
                   <h3 className="card-title-dark text-2xl mb-2">
-                    Orçamento 2024
+                    OrÃ§amento 2024
                   </h3>
                   <p className="card-description-dark">
-                    Visualize e analise o orçamento realizado em 2024
+                    Visualize e analise o orÃ§amento realizado em 2024
                   </p>
                 </div>
 
@@ -348,10 +348,10 @@ export default function OrcamentacaoPage() {
                 
                 <div className="mb-6">
                   <h3 className="card-title-dark text-2xl mb-2">
-                    Orçamento 2025
+                    OrÃ§amento 2025
                   </h3>
                   <p className="card-description-dark">
-                    Planeje e acompanhe o orçamento do ano atual
+                    Planeje e acompanhe o orÃ§amento do ano atual
                   </p>
                 </div>
 
@@ -366,7 +366,7 @@ export default function OrcamentacaoPage() {
     );
   }
 
-  // Página principal com dados
+  // PÃ¡gina principal com dados
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6 space-y-6">
@@ -379,17 +379,17 @@ export default function OrcamentacaoPage() {
                   onClick={() => setAnoSelecionado('')}
                   className="mr-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 >
-                  ← Voltar
+                  â† Voltar
                 </Button>
                 <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg">
                   <DollarSign className="w-8 h-8 text-white" />
                 </div>
                 <div>
                   <h1 className="card-title-dark text-3xl font-bold">
-                    Orçamento {anoSelecionado}
+                    OrÃ§amento {anoSelecionado}
                   </h1>
                   <p className="card-description-dark text-lg">
-                    Gestão orçamentária integrada com Nibo em tempo real
+                    GestÃ£o orÃ§amentÃ¡ria integrada com Nibo em tempo real
                   </p>
                 </div>
               </div>
@@ -470,7 +470,7 @@ export default function OrcamentacaoPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Mês
+                  MÃªs
                 </label>
                 <Select value={mesSelecionado} onValueChange={setMesSelecionado}>
                   <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
@@ -496,7 +496,7 @@ export default function OrcamentacaoPage() {
               </div>
               <div>
                 <h2 className="card-title-dark text-2xl">Resumo por Categoria</h2>
-                <p className="card-description-dark">Visão consolidada do orçamento</p>
+                <p className="card-description-dark">VisÃ£o consolidada do orÃ§amento</p>
               </div>
             </div>
             
@@ -546,8 +546,8 @@ export default function OrcamentacaoPage() {
                 <FileText className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="card-title-dark text-2xl">Detalhamento do Orçamento</h2>
-                <p className="card-description-dark">Análise completa por categoria e subcategoria</p>
+                <h2 className="card-title-dark text-2xl">Detalhamento do OrÃ§amento</h2>
+                <p className="card-description-dark">AnÃ¡lise completa por categoria e subcategoria</p>
               </div>
             </div>
               <div className="overflow-x-auto">
@@ -570,7 +570,7 @@ export default function OrcamentacaoPage() {
                         %
                       </th>
                       <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">
-                        Ações
+                        AÃ§Ãµes
                       </th>
                     </tr>
                   </thead>

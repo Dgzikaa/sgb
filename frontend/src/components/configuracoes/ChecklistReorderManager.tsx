@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -73,7 +73,7 @@ export function ChecklistReorderManager({
   // Save to server
   const handleSave = async () => {
     try {
-      const response = await fetch('/api/operacoes/checklists/reorder', {
+      const response = await fetch('/api/operacional/checklists/reorder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export function ChecklistReorderManager({
     } catch (error) {
       toast({
         title: 'Erro ao salvar',
-        description: 'Não foi possível salvar a nova ordem. Tente novamente.',
+        description: 'NÃ£o foi possÃ­vel salvar a nova ordem. Tente novamente.',
         variant: 'destructive',
       });
     }
@@ -114,7 +114,7 @@ export function ChecklistReorderManager({
 
     toast({
       title: 'Ordem resetada',
-      description: 'A ordem foi restaurada para o padrão original.',
+      description: 'A ordem foi restaurada para o padrÃ£o original.',
     });
   };
 
@@ -180,10 +180,10 @@ export function ChecklistReorderManager({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="card-title-dark">
-              🔄 Reordenar Checklists
+              ðŸ”„ Reordenar Checklists
             </CardTitle>
             <p className="card-description-dark mt-2">
-              Arraste os checklists para reorganizar a ordem de execução.
+              Arraste os checklists para reorganizar a ordem de execuÃ§Ã£o.
             </p>
           </div>
 
@@ -193,7 +193,7 @@ export function ChecklistReorderManager({
                 variant="secondary"
                 className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
               >
-                Alterações pendentes
+                AlteraÃ§Ãµes pendentes
               </Badge>
             )}
 
@@ -213,7 +213,7 @@ export function ChecklistReorderManager({
             <strong>Como usar:</strong> Arraste os checklists para reorganizar a
             ordem. No desktop, use{' '}
             <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">
-              Ctrl + ↑/↓
+              Ctrl + â†‘/â†“
             </kbd>{' '}
             para mover via teclado.
           </AlertDescription>
@@ -288,7 +288,7 @@ export function ChecklistReorderManager({
               disabled={!hasChanges || disabled}
               className="btn-primary-dark"
             >
-              💾 Salvar Ordem
+              ðŸ’¾ Salvar Ordem
             </Button>
 
             <Button
@@ -297,7 +297,7 @@ export function ChecklistReorderManager({
               disabled={!hasChanges || disabled}
               className="btn-secondary-dark"
             >
-              🔄 Resetar
+              ðŸ”„ Resetar
             </Button>
           </div>
 

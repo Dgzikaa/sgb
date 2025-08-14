@@ -702,7 +702,7 @@ export function useSchedules() {
     setError(null);
 
     try {
-      const response = await fetch('/api/operacoes/checklists/schedules', {
+      const response = await fetch('/api/operacional/checklists/schedules', {
         method: schedule.id ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',

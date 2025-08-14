@@ -11,7 +11,7 @@ export default function DesempenhoPage() {
   useEffect(() => {
     setPageTitle('📈 Redirecionando...');
     // Redirecionar para a Tabela de Desempenho
-    router.replace('/gestao/desempenho/tabela');
+  router.replace('/estrategico/desempenho/tabela');
   }, [router, setPageTitle]);
 
   return (

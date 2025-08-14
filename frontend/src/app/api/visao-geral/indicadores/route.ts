@@ -165,69 +165,67 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
+
+    // Headers de cache HTTP para CDN (Vercel) e navegador
+    //  - s-maxage: cache em edge por 60s
+    //  - stale-while-revalidate: serve cache enquanto revalida por 5min
+    //  Obs: a resposta final mais abaixo inclui estes headers via NextResponse
     
-    // Verificar estado da tabela contahub_pagamentos
-    const { data: totalRegistros, count } = await supabase
-      .from('contahub_pagamentos')
-      .select('*', { count: 'exact', head: true });
-    
-    const { data: registrosComBarId } = await supabase
-      .from('contahub_pagamentos')
-      .select('bar_id')
-      .not('bar_id', 'is', null)
-      .limit(10);
-    
-    const { data: primeiros10 } = await supabase
-      .from('contahub_pagamentos')
-      .select('*')
-      .limit(3);
-    
-    console.log('=== DIAGNÓSTICO TABELA ===');
-    console.log('Total de registros na tabela:', count);
-    console.log('Registros com bar_id não nulo:', registrosComBarId?.length || 0);
-    console.log('Amostra primeiros 3 registros:', primeiros10);
-    console.log('Procurando por bar_id:', barIdNum);
-    
-    // Testar se conseguimos acessar outras tabelas para verificar conexão
-    const { data: testeBars, count: countBars } = await supabase
-      .from('bars')
-      .select('*', { count: 'exact', head: true });
-    
-    console.log('=== TESTE OUTRAS TABELAS ===');
-    console.log('Total registros tabela bars:', countBars);
-    
-    // Testar nomes alternativos de tabelas
-    const tabelasParaTestar = [
-      'contahub_pagamentos',
-      'contahub_pagamento', 
-      'contahub_periodo',
-      'contahub_analitico',
-      'contahub_fatporhora'
-    ];
-    
-    console.log('=== TESTANDO TABELAS CONTAHUB ===');
-    for (const nomeTabela of tabelasParaTestar) {
-      try {
-        const { count } = await supabase
-          .from(nomeTabela)
-          .select('*', { count: 'exact', head: true });
-        console.log(`${nomeTabela}: ${count} registros`);
-      } catch (error) {
-        console.log(`${nomeTabela}: ERRO - tabela não existe`);
-      }
-    }
+    // Logs de diagnóstico antigos removidos para reduzir IO/overhead
 
     // Buscar dados anuais
     if (periodo === 'anual') {
       // Performance Anual - Ano completo de 2025
       const startDate = '2025-02-01'; // Bar abriu em Fevereiro
       const endDate = '2025-12-31'; // Ano completo
-      console.log(`🏪 Performance Anual 2025 - Buscando dados de ${startDate} até ${endDate}`);
-      
+      // Tenta usar a view materializada se existir
+      try {
+        const { data: anualView, error: anualViewErr } = await supabase
+          .from('view_visao_geral_anual')
+          .select('faturamento_total, faturamento_contahub, faturamento_yuzer, faturamento_sympla, pessoas_total, pessoas_contahub, pessoas_yuzer, pessoas_sympla, reputacao_media')
+          .eq('bar_id', barIdNum)
+          .eq('ano', 2025)
+          .limit(1);
+        if (!anualViewErr && anualView && anualView.length > 0) {
+          const row = anualView[0] as any;
+          const resp = NextResponse.json({
+            anual: {
+              faturamento: {
+                valor: row.faturamento_total || 0,
+                meta: 10000000,
+                detalhes: {
+                  contahub: row.faturamento_contahub || 0,
+                  yuzer: row.faturamento_yuzer || 0,
+                  sympla: row.faturamento_sympla || 0,
+                },
+              },
+              pessoas: {
+                valor: row.pessoas_total || 0,
+                meta: 144000,
+                detalhes: {
+                  contahub: row.pessoas_contahub || 0,
+                  yuzer: row.pessoas_yuzer || 0,
+                  sympla: row.pessoas_sympla || 0,
+                },
+              },
+              reputacao: {
+                valor: row.reputacao_media || 0,
+                meta: 4.8,
+              },
+              ebitda: {
+                valor: 0,
+                meta: 1000000,
+              },
+            },
+          });
+          resp.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+          resp.headers.set('X-View-Used', 'view_visao_geral_anual');
+          return resp;
+        }
+      } catch (_) {
+        // segue com fallback abaixo
+      }
       // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
-      
-      // IMPLEMENTANDO PAGINAÇÃO REAL para contornar limite de 1000
-      console.log('💰 Buscando faturamento com PAGINAÇÃO COMPLETA...');
       
       const contahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
         'gte_dt_gerencial': startDate,
@@ -247,31 +245,18 @@ export async function GET(request: Request) {
       });
 
 
-      console.log('=== FATURAMENTO COM PAGINAÇÃO ===');
-      console.log('Contahub:', contahubData?.length || 0, 'registros');
-      console.log('Yuzer:', yuzerData?.length || 0, 'registros');
-      console.log('Sympla:', symplaData?.length || 0, 'registros');
-
-
-      
       // Calcular com dados paginados
-      console.log('Amostra Contahub (5 primeiros):', contahubData?.slice(0, 5));
-      console.log('Amostra Yuzer (5 primeiros):', yuzerData?.slice(0, 5));
       
       const faturamentoContahub = contahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
       const faturamentoYuzer = yuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoSympla = symplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
       
-      console.log('=== FATURAMENTOS CALCULADOS ===');
-      console.log('Contahub:', faturamentoContahub);
-      console.log('Yuzer:', faturamentoYuzer);
-      console.log('Sympla:', faturamentoSympla);
-      console.log('Total:', faturamentoTotal);
+      // Logs detalhados removidos
 
       // Número de Pessoas (ContaHub + Yuzer + Sympla)
       // Pessoas com PAGINAÇÃO
-      console.log('👥 Buscando pessoas com PAGINAÇÃO COMPLETA...');
+      // Pessoas com paginação
       
       const pessoasContahubData = await fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
         'eq_bar_id': barIdNum,
@@ -298,43 +283,29 @@ export async function GET(request: Request) {
           .lte('data_checkin', endDate)
       ]);
 
-      console.log('👥 ContaHub pessoas:', pessoasContahubData?.length || 0, 'registros');
-      console.log('👥 Yuzer pessoas:', pessoasYuzer.data?.length || 0, 'registros');
-      console.log('👥 Sympla pessoas:', pessoasSympla.data?.length || 0, 'registros');
-      
       const totalPessoasContahub = pessoasContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
       const totalPessoasYuzer = pessoasYuzer.data?.reduce((sum, item) => sum + (item.quantidade || 0), 0) || 0;
       const totalPessoasSympla = pessoasSympla.data?.length || 0;
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
       
-      console.log('👥 PESSOAS CALCULADAS:');
-      console.log('ContaHub:', totalPessoasContahub);
-      console.log('Yuzer:', totalPessoasYuzer);
-      console.log('Sympla:', totalPessoasSympla);
-      console.log('Total:', totalPessoas);
+      // Logs detalhados removidos
 
       // Reputação (Google Reviews)
       // Reputação (Google Reviews - Windsor) - COM PAGINAÇÃO
-      console.log('🌟 Buscando reputação com PAGINAÇÃO...');
+      // Reputação com paginação
       
       const reputacaoData = await fetchAllData(supabase, 'windsor_google', 'review_average_rating_total', {
         'gte_date': startDate,
         'lte_date': endDate
       });
 
-      console.log('🌟 Reputação - registros encontrados:', reputacaoData?.length);
-      console.log('🌟 Amostra reputação (5 primeiros):', reputacaoData?.slice(0, 5));
-      
       // Filtrar apenas registros com valor válido (não null)
       const reputacaoValida = reputacaoData?.filter(item => item.review_average_rating_total != null && item.review_average_rating_total > 0) || [];
-      console.log('🌟 Registros com valor válido:', reputacaoValida.length);
-      console.log('🌟 Registros null/zero filtrados:', (reputacaoData?.length || 0) - reputacaoValida.length);
-      
       const reputacao = reputacaoValida.length > 0 
         ? reputacaoValida.reduce((sum, item) => sum + item.review_average_rating_total, 0) / reputacaoValida.length
         : 0;
         
-      console.log('🌟 Reputação calculada (média):', reputacao);
+      // Logs detalhados removidos
 
       // EBITDA (será calculado futuramente com DRE)
       const ebitda = 0;
@@ -375,10 +346,10 @@ export async function GET(request: Request) {
     if (periodo === 'trimestral') {
       // Datas dinâmicas baseadas no trimestre selecionado
       const { start: startDate, end: endDate } = getTrimestreDates(trimestre);
-      console.log(`📊 ${trimestre}º Trimestre 2025 - Buscando dados de ${startDate} até ${endDate}`);
+      // Trimestre selecionado
 
       // Clientes Ativos (visitaram 2+ vezes nos últimos 90 dias) - COM PAGINAÇÃO
-      console.log('🎯 Buscando clientes ativos com PAGINAÇÃO (últimos 90 dias)...');
+      // Clientes ativos últimos 90 dias
       
       // Calcular data de 90 dias atrás
       const hoje = new Date();
@@ -387,7 +358,7 @@ export async function GET(request: Request) {
       const startDate90Dias = dataInicio90Dias.toISOString().split('T')[0];
       const endDate90Dias = hoje.toISOString().split('T')[0];
       
-      console.log(`📅 Período de análise: ${startDate90Dias} até ${endDate90Dias} (últimos 90 dias)`);
+      // Período de 90 dias
       
       const clientesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
@@ -397,7 +368,7 @@ export async function GET(request: Request) {
       
       // Filtrar apenas clientes com telefone
       const clientesComTelefone = clientesData?.filter(item => item.cli_fone) || [];
-      console.log('📞 Clientes com telefone:', clientesComTelefone.length);
+      // Logs detalhados removidos
 
       // Agrupar por telefone e contar visitas
       const clientesMap = new Map();
@@ -412,57 +383,64 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivos++;
       });
       
-      console.log('🎯 CLIENTES ATIVOS CALCULADOS (ÚLTIMOS 90 DIAS):');
-      console.log('Total clientes únicos:', clientesMap.size);
-      console.log('Clientes ativos (2+ visitas nos últimos 90 dias):', clientesAtivos);
+      // Logs detalhados removidos
 
+      // Tenta usar a view materializada trimestral se existir
+      let viewTri: any | null = null;
+      try {
+        const { data: triView, error: triViewErr } = await supabase
+          .from('view_visao_geral_trimestral')
+          .select('clientes_totais, cmo_total, faturamento_trimestre, cmo_percent, artistica_percent')
+          .eq('bar_id', barIdNum)
+          .eq('ano', 2025)
+          .eq('trimestre', trimestre)
+          .limit(1);
+        if (!triViewErr && triView && triView.length > 0) {
+          viewTri = triView[0];
+        }
+      } catch (_) {
+        // ignora
+      }
       // Número total de clientes no trimestre - COM PAGINAÇÃO
-      console.log('👥 Buscando clientes totais do trimestre com PAGINAÇÃO...');
+      // Clientes totais com paginação
       
-      const clientesTotaisContahubData = await fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
+      const clientesTotaisContahubData = viewTri ? null : await fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
         'eq_bar_id': barIdNum,
         'gte_dt_gerencial': startDate,
         'lte_dt_gerencial': endDate
       });
       
-      const clientesTotaisYuzerData = await fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
+      const clientesTotaisYuzerData = viewTri ? null : await fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
         'eq_bar_id': barIdNum,
         'gte_data_evento': startDate,
         'lte_data_evento': endDate
       });
       
-      const clientesTotaisSymplaData = await fetchAllData(supabase, 'sympla_participantes', 'id', {
+      const clientesTotaisSymplaData = viewTri ? null : await fetchAllData(supabase, 'sympla_participantes', 'id', {
         'eq_bar_id': barIdNum,
         'eq_fez_checkin': true,
         'gte_data_checkin': startDate,
         'lte_data_checkin': endDate
       });
 
-      console.log('👥 CLIENTES TOTAIS - REGISTROS ENCONTRADOS:');
-      console.log('ContaHub:', clientesTotaisContahubData?.length || 0, 'registros');
-      console.log('Yuzer:', clientesTotaisYuzerData?.length || 0, 'registros');
-      console.log('Sympla:', clientesTotaisSymplaData?.length || 0, 'registros');
+      // Logs detalhados removidos
       
       // Filtrar produtos Yuzer que são ingressos/entradas
-      const ingressosYuzer = clientesTotaisYuzerData?.filter(item => 
+      const ingressosYuzer = viewTri ? [] : clientesTotaisYuzerData?.filter(item => 
         item.produto_nome && (
           item.produto_nome.toLowerCase().includes('ingresso') ||
           item.produto_nome.toLowerCase().includes('entrada')
         )
       ) || [];
       
-      console.log('Yuzer (filtrado para ingressos):', ingressosYuzer.length, 'registros');
+      // Logs detalhados removidos
       
-      const totalClientesContahub = clientesTotaisContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
-      const totalClientesYuzer = ingressosYuzer.reduce((sum, item) => sum + (item.quantidade || 0), 0);
-      const totalClientesSympla = clientesTotaisSymplaData?.length || 0;
-      const totalClientesTrimestre = totalClientesContahub + totalClientesYuzer + totalClientesSympla;
+      const totalClientesContahub = viewTri ? 0 : (clientesTotaisContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0);
+      const totalClientesYuzer = viewTri ? 0 : ingressosYuzer.reduce((sum, item) => sum + (item.quantidade || 0), 0);
+      const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.length || 0);
+      const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
-      console.log('👥 CLIENTES TOTAIS CALCULADOS:');
-      console.log('ContaHub:', totalClientesContahub, 'pessoas');
-      console.log('Yuzer:', totalClientesYuzer, 'pessoas');
-      console.log('Sympla:', totalClientesSympla, 'pessoas');
-      console.log('TOTAL TRIMESTRE:', totalClientesTrimestre, 'pessoas');
+      // Logs detalhados removidos
 
       // CMO % (Nibo)
       const categoriasCMO = [
@@ -472,71 +450,67 @@ export async function GET(request: Request) {
         'Materiais Operação', 'Outros Operação'
       ];
 
-      const { data: cmoData } = await supabase
-        .from('nibo_agendamentos')
-        .select('valor')
-        .eq('bar_id', barIdNum)
-        .in('categoria_nome', categoriasCMO)
-        .gte('data_competencia', startDate)
-        .lte('data_competencia', endDate);
-
-      const totalCMO = cmoData?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0;
+      let totalCMO = viewTri ? (viewTri.cmo_total || 0) : 0;
+      if (!viewTri) {
+        const { data: cmoData } = await supabase
+          .from('nibo_agendamentos')
+          .select('valor')
+          .eq('bar_id', barIdNum)
+          .in('categoria_nome', categoriasCMO)
+          .gte('data_competencia', startDate)
+          .lte('data_competencia', endDate);
+        totalCMO = cmoData?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0;
+      }
       
-      console.log('💼 CMO DADOS:');
-      console.log('Registros CMO:', cmoData?.length);
-      console.log('Total CMO:', totalCMO);
+      // Logs detalhados removidos
 
       // Faturamento trimestral COM PAGINAÇÃO para calcular CMO %
-      console.log('💰 Buscando faturamento trimestral com PAGINAÇÃO...');
+      // Faturamento trimestral com paginação
       
-      const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
-        'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate,
-        'lte_dt_gerencial': endDate
-      });
+      let faturamentoTrimestre = viewTri ? (viewTri.faturamento_trimestre || 0) : 0;
+      if (!viewTri) {
+        const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+          'eq_bar_id': barIdNum,
+          'gte_dt_gerencial': startDate,
+          'lte_dt_gerencial': endDate
+        });
+        const fatYuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
+          'eq_bar_id': barIdNum,
+          'gte_data_evento': startDate,
+          'lte_data_evento': endDate
+        });
+        const fatSymplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
+          'gte_data_pedido': startDate,
+          'lte_data_pedido': endDate
+        });
+        const faturamentoContahubTri = fatContahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+        const faturamentoYuzerTri = fatYuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+        const faturamentoSymplaTri = fatSymplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+        faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
+      }
       
-      const fatYuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
-        'eq_bar_id': barIdNum,
-        'gte_data_evento': startDate,
-        'lte_data_evento': endDate
-      });
-      
-      const fatSymplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
-        'gte_data_pedido': startDate,
-        'lte_data_pedido': endDate
-      });
+      // Logs detalhados removidos
 
-      const faturamentoContahubTri = fatContahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
-      const faturamentoYuzerTri = fatYuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
-      const faturamentoSymplaTri = fatSymplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
-      const faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
+      const percentualCMO = viewTri ? (viewTri.cmo_percent || 0) : (faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0);
       
-      console.log('💰 FATURAMENTO TRIMESTRAL:');
-      console.log('ContaHub:', faturamentoContahubTri);
-      console.log('Yuzer:', faturamentoYuzerTri);
-      console.log('Sympla:', faturamentoSymplaTri);
-      console.log('Total:', faturamentoTrimestre);
-
-      const percentualCMO = faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0;
-      
-      console.log('💼 CÁLCULO CMO:');
-      console.log('CMO R$:', totalCMO);
-      console.log('Faturamento Trimestre R$:', faturamentoTrimestre);
-      console.log('CMO %:', percentualCMO);
+      // Logs detalhados removidos
 
       // % Artística (Planejamento Comercial)
-      const { data: artisticaData } = await supabase
-        .from('view_eventos')
-        .select('percent_art_fat')
-        .eq('bar_id', barIdNum)
-        .gte('data_evento', startDate)
-        .lte('data_evento', endDate);
+      let viewOk = true;
+      const percentualArtistica = viewTri ? (viewTri.artistica_percent || 0) : (async () => {
+        const { data: artisticaData, error: artisticaErr } = await supabase
+          .from('view_eventos')
+          .select('percent_art_fat')
+          .eq('bar_id', barIdNum)
+          .gte('data_evento', startDate)
+          .lte('data_evento', endDate);
+        viewOk = !artisticaErr;
+        return (artisticaData && artisticaData.length > 0)
+          ? artisticaData.reduce((sum, item) => sum + (item.percent_art_fat || 0), 0) / artisticaData.length
+          : 0;
+      })();
 
-      const percentualArtistica = artisticaData && artisticaData.length > 0
-        ? artisticaData.reduce((sum, item) => sum + (item.percent_art_fat || 0), 0) / artisticaData.length
-        : 0;
-
-      return NextResponse.json({
+      const resp = NextResponse.json({
         trimestral: {
           clientesAtivos: {
             valor: clientesAtivos,
@@ -557,23 +531,31 @@ export async function GET(request: Request) {
           cmo: {
             valor: percentualCMO,
             meta: 20,
-            valorAbsoluto: totalCMO
+            valorAbsoluto: viewTri ? (viewTri.cmo_total || 0) : totalCMO
           },
           artistica: {
-            valor: percentualArtistica,
+            valor: await percentualArtistica,
             meta: 17
           }
         }
       });
+      resp.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+      if (!viewOk) resp.headers.set('X-Artistica-View', 'missing:view_eventos');
+      if (viewTri) resp.headers.set('X-View-Used', 'view_visao_geral_trimestral');
+      return resp;
     }
 
-    return NextResponse.json({ error: 'Período inválido' }, { status: 400 });
+    const resp = NextResponse.json({ error: 'Período inválido' }, { status: 400 });
+    resp.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    return resp;
 
   } catch (error) {
     console.error('Erro ao buscar indicadores:', error);
-    return NextResponse.json(
+    const resp = NextResponse.json(
       { error: 'Erro ao buscar indicadores' },
       { status: 500 }
     );
+    resp.headers.set('Cache-Control', 's-maxage=10');
+    return resp;
   }
 }

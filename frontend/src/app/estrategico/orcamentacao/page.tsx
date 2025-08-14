@@ -14,6 +14,8 @@ import {
   Edit,
   Check,
   X,
+  RefreshCw,
+  Calendar,
 } from 'lucide-react';
 
 interface CategoriaOrcamento {
@@ -46,6 +48,8 @@ export default function OrcamentacaoPage() {
   const [despesasVariaveis, setDespesasVariaveis] = useState({ planejado: 11.5, projecao: 11.5, realizado: 0 });
   const [cmv, setCmv] = useState({ planejado: 27, projecao: 27, realizado: 0 });
   const [lucroMeta, setLucroMeta] = useState(45000);
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
+  const [sincronizando, setSincronizando] = useState(false);
 
   useEffect(() => {
     setPageTitle('💰 Orçamentação');
@@ -149,40 +153,107 @@ export default function OrcamentacaoPage() {
     showLoading('Carregando dados orçamentários...');
     
     try {
-      // Buscar dados reais do NIBO
-      const response = await fetch(`/api/estrategico/orcamentacao?mes=${mesSelecionado}`);
+      const anoAtual = new Date().getFullYear();
+      
+      // 1. Primeiro sincronizar com NIBO para o ano atual
+      console.log('🔄 Sincronizando com NIBO...');
+      const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          ano: anoAtual,
+        }),
+      });
+      
+      const syncResult = await syncResponse.json();
+      if (syncResult.success) {
+        console.log('✅ Sincronização NIBO concluída:', {
+          importados: syncResult.importados,
+          atualizados: syncResult.atualizados,
+          total: syncResult.total
+        });
+      }
+
+      // 2. Buscar dados orçamentários da tabela
+      // Usar dados disponíveis: julho/2025 para bar_id=3
+      const anoDisponivel = 2025;
+      const mesDisponivel = 7;
+      const response = await fetch(
+        `/api/estrategico/orcamentacao?bar_id=${selectedBar.id}&ano=${anoDisponivel}&mes=${mesDisponivel}`
+      );
       const result = await response.json();
       
-      if (result.success && result.dados) {
-        console.log('📊 Dados NIBO recebidos:', result.dados);
+      if (result.success && result.data) {
+        console.log('📊 Dados orçamentários recebidos:', result.data);
         
-        // Pegar estrutura base e atualizar com dados reais
+        // Criar mapa de dados realizados por subcategoria
+        const dadosRealizados = new Map();
+        result.data.forEach(item => {
+          const key = item.subcategoria || item.categoria;
+          if (!dadosRealizados.has(key)) {
+            dadosRealizados.set(key, {
+              realizado: 0,
+              planejado: 0,
+              projecao: 0
+            });
+          }
+          const existing = dadosRealizados.get(key);
+          existing.realizado += item.valor_realizado || 0;
+          existing.planejado += item.valor_previsto || 0;
+          existing.projecao += item.valor_previsto || 0;
+        });
+        
+        // Atualizar estrutura base com dados reais
         const categoriasBase = getCategoriasEstruturadas();
         const categoriasAtualizadas = categoriasBase.map(categoria => ({
           ...categoria,
-          subcategorias: categoria.subcategorias.map(sub => ({
-            ...sub,
-            realizado: result.dados[sub.nome] || sub.realizado
-          }))
+          subcategorias: categoria.subcategorias.map(sub => {
+            const dadosReais = dadosRealizados.get(sub.nome);
+            
+            // Para CMV, agrupar todos os custos
+            let realizadoCMV = 0;
+            if (sub.nome === 'CMV') {
+              for (const [key, data] of dadosRealizados) {
+                if (key.includes('Custo ') || key.includes('CMV')) {
+                  realizadoCMV += data.realizado;
+                }
+              }
+            }
+            
+            return {
+              ...sub,
+              realizado: sub.nome === 'CMV' ? realizadoCMV : (dadosReais?.realizado || sub.realizado),
+              // Manter planejado e projeção do estado local (editáveis)
+            };
+          })
         }));
         
         setCategorias(categoriasAtualizadas);
+        setUltimaAtualizacao(new Date());
         
         toast({
-          title: 'Dados carregados',
-          description: `${result.totalCategorias} categorias encontradas no NIBO`,
+          title: 'Dados atualizados',
+          description: `${result.data.length} registros carregados (Julho/2025)`,
         });
       } else {
-        // Fallback para dados mockados se API falhar
+        // Fallback para dados base se API não retornar dados
         setCategorias(getCategoriasEstruturadas());
+        toast({
+          title: 'Dados base carregados',
+          description: 'Usando estrutura padrão. Valores realizados podem estar desatualizados.',
+          variant: 'default',
+        });
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      // Fallback para dados mockados
+      // Fallback para dados base
       setCategorias(getCategoriasEstruturadas());
       toast({
-        title: 'Aviso',
-        description: 'Carregados dados base. Verifique conexão com NIBO.',
+        title: 'Erro ao carregar',
+        description: 'Usando dados base. Verifique conexão.',
         variant: 'destructive',
       });
     } finally {
@@ -191,7 +262,51 @@ export default function OrcamentacaoPage() {
     }
   };
 
+  const sincronizarManualmente = async () => {
+    if (!selectedBar) return;
 
+    setSincronizando(true);
+    showLoading('Sincronizando com NIBO...');
+    
+    try {
+      const anoAtual = new Date().getFullYear();
+      
+      const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          ano: anoAtual,
+        }),
+      });
+      
+      const syncResult = await syncResponse.json();
+      
+      if (syncResult.success) {
+        // Recarregar dados após sincronização
+        await carregarDados();
+        
+        toast({
+          title: 'Sincronização concluída',
+          description: `${syncResult.total} registros processados (${syncResult.importados} novos, ${syncResult.atualizados} atualizados)`,
+        });
+      } else {
+        throw new Error(syncResult.error || 'Erro na sincronização');
+      }
+    } catch (error) {
+      console.error('Erro na sincronização manual:', error);
+      toast({
+        title: 'Erro na sincronização',
+        description: 'Não foi possível sincronizar com o NIBO',
+        variant: 'destructive',
+      });
+    } finally {
+      setSincronizando(false);
+      hideLoading();
+    }
+  };
 
     const handleEdit = (categoriaIndex: number, subIndex: number) => {
     const key = `${categoriaIndex}-${subIndex}`;
@@ -366,12 +481,26 @@ export default function OrcamentacaoPage() {
       {/* Sidebar Lateral de Controles (similar ao planejamento comercial) */}
       <aside className="flex flex-col w-80 bg-gray-50 dark:bg-gray-900 p-4">
         <div className="space-y-4 w-full">
-          {/* Filtro de Mês */}
+          {/* Controles e Filtros */}
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-              📅 Filtros
+              📅 Controles
             </h3>
-            <div>
+            
+            {/* Informação sobre dados disponíveis */}
+            <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                📊 Dados disponíveis: <strong>Julho/2025</strong>
+              </p>
+              {ultimaAtualizacao && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  Última atualização: {ultimaAtualizacao.toLocaleTimeString()}
+                </p>
+              )}
+            </div>
+            
+            {/* Filtro de Mês */}
+            <div className="mb-3">
               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mês
               </label>
@@ -388,6 +517,31 @@ export default function OrcamentacaoPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Botão de Sincronização */}
+            <div className="mb-3">
+              <Button
+                onClick={sincronizarManualmente}
+                disabled={sincronizando || !selectedBar}
+                size="sm"
+                className="w-full h-8 text-xs"
+                variant="outline"
+              >
+                <RefreshCw className={`h-3 w-3 mr-1 ${sincronizando ? 'animate-spin' : ''}`} />
+                {sincronizando ? 'Sincronizando...' : 'Atualizar NIBO'}
+              </Button>
+            </div>
+
+            {/* Última Atualização */}
+            {ultimaAtualizacao && (
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                <Calendar className="h-3 w-3 inline mr-1" />
+                Atualizado às {ultimaAtualizacao.toLocaleTimeString('pt-BR', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </div>
+            )}
           </div>
 
           {/* Resumo */}

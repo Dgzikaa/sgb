@@ -113,22 +113,34 @@ async function processPeriodo(supabase: any, rawData: any, batchSize: number) {
       ...record
     }));
     
-    // Usar upsert para idempotência
-    const { data, error } = await supabase
-      .from('contahub_periodo')
-      .upsert(insertData, {
-        onConflict: 'idempotency_key',
-        ignoreDuplicates: false
-      })
-      .select();
+    // IMPORTANTE: Supabase tem limite de 1000 registros por operação
+    let batchInserted = 0;
     
-    if (error) {
-      console.error(`❌ Erro ao inserir batch:`, error);
-    } else {
-      const inserted = data?.length || 0;
-      totalInserted += inserted;
-      console.log(`✅ Batch inserido: ${inserted} registros`);
+    for (let subBatchStart = 0; subBatchStart < insertData.length; subBatchStart += 1000) {
+      const subBatch = insertData.slice(subBatchStart, subBatchStart + 1000);
+      
+      const { data, error } = await supabase
+        .from('contahub_periodo')
+        .upsert(subBatch, {
+          onConflict: 'idempotency_key',
+          ignoreDuplicates: false
+        })
+        .select();
+      
+      if (error) {
+        console.error(`❌ Erro ao inserir sub-batch:`, error);
+      } else {
+        const inserted = data?.length || 0;
+        batchInserted += inserted;
+        console.log(`✅ Sub-batch inserido: ${inserted} registros`);
+      }
+      
+      if (subBatchStart + 1000 < insertData.length) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
     }
+    
+    totalInserted += batchInserted;
     
     processedCount += batch.length;
     

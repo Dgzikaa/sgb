@@ -88,6 +88,7 @@ export default function TabelaDesempenhoPage() {
   const [syncing, setSyncing] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
   const [creatingWeeks, setCreatingWeeks] = useState(false);
+  const [testingAutoUpdate, setTestingAutoUpdate] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
 
   // Modal de edição
@@ -395,6 +396,55 @@ export default function TabelaDesempenhoPage() {
     }
   };
 
+  const testarAutomacaoSemanal = async () => {
+    if (!confirm('🧪 Deseja testar a automação semanal?\n\n• Irá processar a semana atual\n• Criar semana se não existir\n• Recalcular todos os dados automaticamente\n• Este é um teste da automação que roda toda segunda-feira')) {
+      return;
+    }
+
+    setTestingAutoUpdate(true);
+    showLoading('Testando automação semanal...');
+
+    try {
+      const response = await fetch('/api/configuracoes/desempenho/automacao-semanal', {
+        method: 'PUT', // PUT para teste manual
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        const resultados = result.result?.resultados || [];
+        const sucessos = resultados.filter((r: any) => r.sucesso).length;
+        const erros = resultados.filter((r: any) => !r.sucesso).length;
+
+        toast({
+          title: '✅ Teste da Automação Concluído!',
+          description: `Processados: ${resultados.length} bar(es) • Sucessos: ${sucessos} • Erros: ${erros}`,
+        });
+        await carregarDados();
+      } else {
+        toast({
+          title: '❌ Erro no Teste da Automação',
+          description: result.error || 'Erro desconhecido',
+          variant: 'destructive'
+        });
+      }
+    } catch (error: unknown) {
+      console.error('❌ Erro no teste da automação:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({
+        title: '❌ Erro no Teste da Automação',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    } finally {
+      setTestingAutoUpdate(false);
+      hideLoading();
+    }
+  };
+
   const dadosFiltrados = dados
     .filter(item => {
       const matchTexto =
@@ -550,6 +600,25 @@ export default function TabelaDesempenhoPage() {
                         <>
                           <Calendar className="h-4 w-4 mr-2" />
                           Criar Semanas
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button
+                      onClick={testarAutomacaoSemanal}
+                      disabled={testingAutoUpdate}
+                      className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                      size="sm"
+                    >
+                      {testingAutoUpdate ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Testando...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Testar Automação
                         </>
                       )}
                     </Button>

@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useBar } from '@/contexts/BarContext'
 
 interface Cliente {
   identificador_principal: string
@@ -47,15 +48,20 @@ export default function ClientesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+  const { selectedBar } = useBar()
 
   useEffect(() => {
     fetchClientes()
-  }, [])
+  }, [selectedBar])
 
   const fetchClientes = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/analitico/clientes')
+      const response = await fetch('/api/analitico/clientes', {
+        headers: selectedBar ? {
+          'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+        } : undefined
+      })
       if (!response.ok) {
         throw new Error('Erro ao carregar dados dos clientes')
       }
