@@ -131,7 +131,7 @@ export function DarkHeader() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   // Logo principal ZYKOR
-  const zykorLogo = '/logos/zykor-logo.png';
+  const zykorLogo = '/logos/logo_zykor.png';
   
   // Logos específicos dos bares (quando implementados)
   const getBarLogo = (barName: string) => {

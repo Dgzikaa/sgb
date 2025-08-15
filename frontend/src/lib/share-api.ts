@@ -420,7 +420,7 @@ export class ZykorShareAPI {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('Zykor', {
         body: message,
-        icon: '/logos/zykor-logo.png'
+        icon: '/logos/logo_zykor.png'
       });
     } else {
       // Fallback: alert ou toast

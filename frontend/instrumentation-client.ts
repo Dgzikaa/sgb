@@ -4,28 +4,27 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   
   // Performance Monitoring (FREE TIER: reduzir para economizar quota)
-  tracesSampleRate: 0.1, // 10% das transações (era 1.0)
+  tracesSampleRate: 0.1, // 10% das transações
   
   // Session Replay (FREE TIER: reduzir para economizar)
-  replaysSessionSampleRate: 0.01, // 1% das sessões (era 0.1)
-  replaysOnErrorSampleRate: 0.5, // 50% dos erros (era 1.0)
+  replaysSessionSampleRate: 0.01, // 1% das sessões
+  replaysOnErrorSampleRate: 0.5, // 50% dos erros
   
   // Environment
   environment: process.env.NODE_ENV,
   
-  // Integration específicas
+  // Integrations corretas para Sentry v10+
   integrations: [
-    // Browser integrations
-    new Sentry.BrowserTracing({
-      // Trace navigation and interactions
+    // Usar browserTracingIntegration em vez de BrowserTracing
+    Sentry.browserTracingIntegration({
       tracePropagationTargets: [
         "localhost",
         "zykor.com.br",
         /^https:\/\/zykor\.com\.br\/api/,
       ],
     }),
-    new Sentry.Replay({
-      // Mask all text content and images
+    // Usar replayIntegration em vez de Replay
+    Sentry.replayIntegration({
       maskAllText: false,
       blockAllMedia: false,
     }),
@@ -50,7 +49,7 @@ Sentry.init({
   initialScope: {
     tags: {
       component: "frontend",
-      version: process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0",
+      version: process.env.NEXT_PUBLIC_APP_VERSION || "2.0.0",
       platform: "zykor"
     },
   },

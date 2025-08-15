@@ -124,7 +124,7 @@ class AlertManager {
           webhookUrl: process.env.DISCORD_WEBHOOK_URL || '',
           channel: '#zykor-alerts',
           username: 'Zykor Monitor',
-          avatar: 'https://zykor.com.br/logos/zykor-logo.png'
+          avatar: 'https://zykor.com.br/logos/logo_zykor.png'
         },
         enabled: !!process.env.DISCORD_WEBHOOK_URL
       },

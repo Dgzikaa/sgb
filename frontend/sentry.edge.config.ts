@@ -6,14 +6,24 @@
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "https://4bdabf40b2606eb07b628cf93932b21d@o4509849360203776.ingest.us.sentry.io/4509849361317888",
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+  // Performance Monitoring (FREE TIER: reduzir para economizar quota)
+  tracesSampleRate: 0.05, // 5% para edge (menor que outros)
 
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // Environment
+  environment: process.env.NODE_ENV,
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
+  // Edge optimizations (menor overhead)
+  enableLogs: false, // Desabilitado para edge
   debug: false,
+  
+  // Tags adicionais
+  initialScope: {
+    tags: {
+      component: "edge",
+      version: process.env.NEXT_PUBLIC_APP_VERSION || "2.0.0",
+      platform: "zykor"
+    },
+  },
 });

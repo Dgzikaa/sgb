@@ -98,7 +98,7 @@ export class ZykorPushNotifications {
 
     // Configuração padrão para Zykor
     const defaultConfig: Partial<PushNotificationConfig> = {
-      icon: '/logos/zykor-logo.png',
+      icon: '/logos/logo_zykor.png',
       badge: '/favicons/zykor/favicon.ico',
       requireInteraction: false,
       tag: 'zykor-notification'

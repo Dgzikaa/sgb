@@ -280,7 +280,7 @@ export default function LoginPage() {
           >
             {!logoError ? (
               <Image
-                src="/logos/zykor-logo.png"
+                src="/logos/logo_zykor.png"
                 alt="ZYKOR Logo"
                 width={400}
                 height={180}
