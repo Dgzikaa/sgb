@@ -49,10 +49,24 @@ const routeMapping: Record<
   '/marketing': { name: 'Marketing' },
   '/marketing/marketing-360': { name: 'Marketing 360' },
 
+  // Estratégico
+  '/estrategico': { name: 'Estratégico' },
+  '/estrategico/visao-geral': { name: 'Visão Geral' },
+  '/estrategico/desempenho': { name: 'Desempenho' },
+  '/estrategico/planejamento-comercial': { name: 'Planejamento Comercial' },
+  '/estrategico/orcamentacao': { name: 'Orçamentação' },
+
+  // Operacional
+  '/operacional': { name: 'Operacional' },
+  '/operacional/dre': { name: 'DRE' },
+  '/operacional/agendamentos': { name: 'Agendamentos' },
+
+  // Ferramentas
+  '/ferramentas': { name: 'Ferramentas' },
+  '/ferramentas/agendamento': { name: 'Agendamento' },
+
   // Financeiro
   '/financeiro': { name: 'Financeiro' },
-  '/operacional/agendamentos': { name: 'Agendamentos' },
-  '/analitico/dre': { name: 'DRE' },
 
   // Configurações
   '/configuracoes': { name: 'Configurações' },

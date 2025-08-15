@@ -255,18 +255,41 @@ async function getSymplaCredentials(supabase: any, barId: number): Promise<strin
   }
 }
 
-// Função para buscar TODOS os eventos do Sympla (incluindo históricos de 2025)
-async function fetchSymplaEvents(token: string): Promise<SymplaEvent[]> {
+// Função para buscar eventos do Sympla com período 10h-10h (para automação)
+async function fetchSymplaEvents(token: string, automated: boolean = false): Promise<SymplaEvent[]> {
   const events: SymplaEvent[] = [];
   let page = 1;
   let hasNext = true;
 
-  console.log('🎪 Buscando TODOS os eventos de 2025 (incluindo finalizados/históricos)...');
+  // Se for automação, usar período 10h-10h do dia anterior
+  let filtroData = '';
+  if (automated) {
+    const agora = new Date();
+    
+    // Data de ontem 10h até hoje 10h (Brasil)
+    const dataFim = new Date();
+    dataFim.setUTCHours(13, 0, 0, 0); // 10h Brasil = 13h UTC (hoje)
+    
+    const dataInicio = new Date(dataFim);
+    dataInicio.setDate(dataInicio.getDate() - 1); // Ontem 10h
+    
+    const fromDate = dataInicio.toISOString().split('T')[0];
+    const toDate = dataFim.toISOString().split('T')[0];
+    
+    filtroData = `&start_date=${fromDate}&end_date=${toDate}`;
+    
+    console.log(`🎪 Buscando eventos Sympla período 10h-10h (automação)...`);
+    console.log(`   📅 Período: ${dataInicio.toLocaleString('pt-BR')} até ${dataFim.toLocaleString('pt-BR')}`);
+  } else {
+    console.log('🎪 Buscando TODOS os eventos de 2025 (incluindo finalizados/históricos)...');
+  }
 
   while (hasNext) {
     try {
-      // Buscar todos os eventos, não filtrar por status
-      const response = await fetch(`https://api.sympla.com.br/public/v1.5.1/events?page=${page}`, {
+      // URL com ou sem filtro de data dependendo se é automação
+      const url = `https://api.sympla.com.br/public/v1.5.1/events?page=${page}${filtroData}`;
+      
+      const response = await fetch(url, {
         headers: {
           's_token': token,
           'Content-Type': 'application/json',
@@ -281,14 +304,35 @@ async function fetchSymplaEvents(token: string): Promise<SymplaEvent[]> {
 
       const data = await response.json();
       if (data.data && data.data.length > 0) {
-        // Filtrar eventos de 2025 (incluindo todos os status)
-        const eventos2025 = data.data.filter((event: SymplaEvent) => {
-          const year = new Date(event.start_date).getFullYear();
-          return year === 2025;
-        });
+        let eventosFiltrados = data.data;
         
-        events.push(...eventos2025);
-        console.log(`✅ Página ${page}: ${data.data.length} eventos total, ${eventos2025.length} de 2025 (Total 2025: ${events.length})`);
+        if (automated) {
+          // Para automação, filtrar eventos no período específico 10h-10h
+          const dataInicio = new Date();
+          dataInicio.setDate(dataInicio.getDate() - 1);
+          dataInicio.setUTCHours(13, 0, 0, 0);
+          
+          const dataFim = new Date();
+          dataFim.setUTCHours(13, 0, 0, 0);
+          
+          eventosFiltrados = data.data.filter((event: SymplaEvent) => {
+            const dataEvento = new Date(event.start_date);
+            return dataEvento >= dataInicio && dataEvento <= dataFim;
+          });
+          
+          console.log(`✅ Página ${page}: ${data.data.length} eventos total, ${eventosFiltrados.length} no período 10h-10h`);
+        } else {
+          // Para busca completa, filtrar eventos de 2025
+          eventosFiltrados = data.data.filter((event: SymplaEvent) => {
+            const year = new Date(event.start_date).getFullYear();
+            return year === 2025;
+          });
+          
+          console.log(`✅ Página ${page}: ${data.data.length} eventos total, ${eventosFiltrados.length} de 2025`);
+        }
+        
+        events.push(...eventosFiltrados);
+        console.log(`   📊 Total acumulado: ${events.length} eventos`);
         
         // API Sympla retorna 100 por página, se menor que 100, é a última página
         if (data.data.length < 100) {
@@ -622,10 +666,16 @@ Deno.serve(async (req: Request) => {
         throw new Error(`Erro ao buscar evento ${event_id}: ${String(error)}`);
       }
     } else {
-      // Buscar TODOS os eventos de 2025 (incluindo finalizados/históricos)
-      console.log(`🎪 1/2 - Buscando TODOS os eventos de 2025...`);
-      eventsToProcess = await fetchSymplaEvents(symplaToken);
-      console.log(`✅ Total de eventos de 2025 encontrados: ${eventsToProcess.length}`);
+      // Buscar eventos baseado no tipo de execução
+      if (automated) {
+        console.log(`🎪 1/2 - Buscando eventos período 10h-10h (automação)...`);
+        eventsToProcess = await fetchSymplaEvents(symplaToken, true);
+        console.log(`✅ Total de eventos encontrados no período: ${eventsToProcess.length}`);
+      } else {
+        console.log(`🎪 1/2 - Buscando TODOS os eventos de 2025...`);
+        eventsToProcess = await fetchSymplaEvents(symplaToken, false);
+        console.log(`✅ Total de eventos de 2025 encontrados: ${eventsToProcess.length}`);
+      }
     }
 
     // NÃO deletar dados antigos - usar UPSERT para preservar dados existentes

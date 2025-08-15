@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useRouter } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
@@ -72,6 +73,12 @@ interface IndicadoresTrimestrais {
 export default function VisaoGeralPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
+  const router = useRouter();
+
+  // Redirecionar para nova estrutura
+  useEffect(() => {
+    router.replace('/estrategico/visao-geral');
+  }, [router]);
   const { toast } = useToast();
   const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
 

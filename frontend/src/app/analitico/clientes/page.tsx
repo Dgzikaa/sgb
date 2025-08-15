@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target, Download, CalendarDays } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
 
@@ -47,12 +48,39 @@ export default function ClientesPage() {
   const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
+  const [clientesFiltrados, setClientesFiltrados] = useState<Cliente[]>([])
   const { toast } = useToast()
   const { selectedBar } = useBar()
+
+  const diasSemana = [
+    { value: 'todos', label: 'Todos os dias' },
+    { value: '0', label: 'Domingo' },
+    { value: '1', label: 'Segunda-feira' },
+    { value: '2', label: 'Terça-feira' },
+    { value: '3', label: 'Quarta-feira' },
+    { value: '4', label: 'Quinta-feira' },
+    { value: '5', label: 'Sexta-feira' },
+    { value: '6', label: 'Sábado' },
+  ]
 
   useEffect(() => {
     fetchClientes()
   }, [selectedBar])
+
+  // Filtrar clientes baseado no dia da semana da última visita
+  useEffect(() => {
+    if (diaSemanaFiltro === 'todos') {
+      setClientesFiltrados(clientes)
+    } else {
+      const clientesFiltrados = clientes.filter(cliente => {
+        const dataUltimaVisita = new Date(cliente.ultima_visita)
+        const diaSemanaVisita = dataUltimaVisita.getDay().toString()
+        return diaSemanaVisita === diaSemanaFiltro
+      })
+      setClientesFiltrados(clientesFiltrados)
+    }
+  }, [clientes, diaSemanaFiltro])
 
   const fetchClientes = async () => {
     try {
@@ -67,6 +95,7 @@ export default function ClientesPage() {
       }
       const data: ApiResponse = await response.json()
       setClientes(data.clientes)
+      setClientesFiltrados(data.clientes) // Inicializar filtrados
       setEstatisticas(data.estatisticas)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
@@ -120,6 +149,56 @@ export default function ClientesPage() {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR')
+  }
+
+  const exportarCSV = () => {
+    try {
+      const dadosCSV = clientesFiltrados.map((cliente, index) => ({
+        'Posição': index + 1,
+        'Nome': cliente.nome_principal,
+        'Telefone': cliente.telefone || '',
+        'Email': cliente.email || '',
+        'Sistema': cliente.sistema,
+        'Total Visitas': cliente.total_visitas,
+        'Valor Total Entrada': cliente.valor_total_entrada,
+        'Valor Total Consumo': cliente.valor_total_consumo,
+        'Ticket Médio Geral': cliente.ticket_medio_geral,
+        'Ticket Médio Entrada': cliente.ticket_medio_entrada,
+        'Ticket Médio Consumo': cliente.ticket_medio_consumo,
+        'Última Visita': formatDate(cliente.ultima_visita),
+      }))
+
+      const csvContent = [
+        Object.keys(dadosCSV[0]).join(','),
+        ...dadosCSV.map(row => Object.values(row).join(','))
+      ].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      
+      const nomeArquivo = diaSemanaFiltro === 'todos' 
+        ? 'clientes_todos_os_dias.csv'
+        : `clientes_${diasSemana.find(d => d.value === diaSemanaFiltro)?.label.toLowerCase().replace('-feira', '').replace(' ', '_')}.csv`
+      
+      link.setAttribute('download', nomeArquivo)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: "Exportação concluída",
+        description: `${clientesFiltrados.length} clientes exportados para CSV`,
+      })
+    } catch (err) {
+      toast({
+        title: "Erro na exportação",
+        description: "Não foi possível exportar os dados",
+        variant: "destructive"
+      })
+    }
   }
 
   if (loading) {
@@ -307,13 +386,49 @@ export default function ClientesPage() {
         {/* Tabela de Clientes */}
           <Card className="card-dark shadow-lg overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800">
-            <CardTitle className="text-white flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Top 100 Clientes Unificados
-            </CardTitle>
-            <CardDescription className="text-slate-200">
-              Dados integrados do ContaHub e Sympla ordenados por visitas
-            </CardDescription>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-white" />
+                <div>
+                  <CardTitle className="text-white">
+                    Top 100 Clientes Unificados
+                  </CardTitle>
+                  <CardDescription className="text-slate-200">
+                    Dados integrados do ContaHub e Sympla ordenados por visitas
+                    {diaSemanaFiltro !== 'todos' && (
+                      <span className="ml-2 text-yellow-300">
+                        • Filtrado por {diasSemana.find(d => d.value === diaSemanaFiltro)?.label}
+                      </span>
+                    )}
+                  </CardDescription>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Select value={diaSemanaFiltro} onValueChange={setDiaSemanaFiltro}>
+                  <SelectTrigger className="w-full sm:w-[200px] bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                    <CalendarDays className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {diasSemana.map((dia) => (
+                      <SelectItem key={dia.value} value={dia.value}>
+                        {dia.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Button
+                  onClick={exportarCSV}
+                  disabled={clientesFiltrados.length === 0}
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar ({clientesFiltrados.length})
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -385,7 +500,7 @@ export default function ClientesPage() {
                   </TableRow>
                 </TableHeader>
             <TableBody>
-              {clientes.map((cliente, index) => (
+              {clientesFiltrados.map((cliente, index) => (
                 <TableRow 
                   key={`${cliente.identificador_principal}-${index}`}
                   className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200"
@@ -495,17 +610,20 @@ export default function ClientesPage() {
           </CardContent>
         </Card>
 
-        {clientes.length === 0 && (
+        {clientesFiltrados.length === 0 && !loading && (
           <Card className="card-dark shadow-lg mt-6">
             <CardContent className="text-center py-16">
               <div className="w-20 h-20 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="h-10 w-10 text-slate-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                Nenhum cliente encontrado
+                {diaSemanaFiltro === 'todos' ? 'Nenhum cliente encontrado' : 'Nenhum cliente neste dia da semana'}
               </h3>
               <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-                Não há dados de clientes disponíveis no momento. Verifique se os dados foram sincronizados corretamente.
+                {diaSemanaFiltro === 'todos' 
+                  ? 'Não há dados de clientes disponíveis no momento. Verifique se os dados foram sincronizados corretamente.'
+                  : `Não há clientes com última visita em ${diasSemana.find(d => d.value === diaSemanaFiltro)?.label}. Tente outro dia da semana.`
+                }
               </p>
             </CardContent>
           </Card>

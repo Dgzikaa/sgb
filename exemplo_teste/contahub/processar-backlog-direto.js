@@ -596,12 +596,126 @@ async function processarTempoAgosto(ano = 2025) {
   return processarTempoMes(ano, 8);
 }
 
+// Nova função: processar MÊS COMPLETO (todos os relatórios)
+async function processarMesCompleto(ano, mes) {
+  console.log(`🚀 PROCESSANDO MÊS COMPLETO: ${String(mes).padStart(2, '0')}/${ano}`);
+  const datas = listarDatasDoMes(ano, mes);
+  console.log(`📊 Total de dias: ${datas.length}`);
+  
+  // Fazer login
+  const sessionToken = await loginContaHub();
+  
+  const relatorios = ['periodo', 'analitico', 'pagamentos', 'tempo', 'fatporhora'];
+  const resultados = [];
+  
+  for (const data of datas) {
+    console.log(`\n${'='.repeat(50)}`);
+    console.log(`📅 PROCESSANDO ${data}`);
+    console.log(`${'='.repeat(50)}`);
+    
+    const inicioData = Date.now();
+    const resultadoData = { data, relatorios: {} };
+    
+    for (const relatorio of relatorios) {
+      console.log(`🔄 Processando ${relatorio}...`);
+      
+      try {
+        // Buscar dados do ContaHub
+        const rawData = await buscarDadosContaHub(relatorio, data, sessionToken);
+        
+        if (!rawData?.list || rawData.list.length === 0) {
+          console.log(`⚠️ Sem dados para ${relatorio} em ${data}`);
+          resultadoData.relatorios[relatorio] = { inseridos: 0, erros: 0 };
+          continue;
+        }
+        
+        // Processar dados
+        let dadosProcessados = [];
+        switch (relatorio) {
+          case 'analitico':
+            dadosProcessados = processarAnalitico(rawData, data);
+            break;
+          case 'periodo':
+            dadosProcessados = processarPeriodo(rawData, data);
+            break;
+          case 'pagamentos':
+            dadosProcessados = processarPagamentos(rawData, data);
+            break;
+          case 'tempo':
+            dadosProcessados = processarTempo(rawData, data);
+            break;
+          case 'fatporhora':
+            dadosProcessados = processarFatPorHora(rawData, data);
+            break;
+        }
+        
+        // Inserir no Supabase
+        const resultado = await inserirDados(`contahub_${relatorio}`, dadosProcessados);
+        resultadoData.relatorios[relatorio] = resultado;
+        
+        console.log(`✅ ${relatorio}: ${resultado.inseridos}/${dadosProcessados.length} inseridos`);
+        
+      } catch (error) {
+        console.error(`❌ Erro em ${relatorio}:`, error.message);
+        resultadoData.relatorios[relatorio] = { inseridos: 0, erros: 1 };
+      }
+      
+      // Pausa entre relatórios
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    const tempoData = Math.round((Date.now() - inicioData) / 1000);
+    console.log(`⏱️ ${data} processado em ${tempoData}s`);
+    
+    resultados.push(resultadoData);
+    
+    // Pausa entre dias
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+  
+  // Resumo final
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`📊 RESUMO MÊS ${mes}/${ano}`);
+  console.log(`${'='.repeat(60)}`);
+  
+  const totais = {};
+  relatorios.forEach(rel => totais[rel] = { inseridos: 0, erros: 0 });
+  
+  resultados.forEach(r => {
+    relatorios.forEach(rel => {
+      totais[rel].inseridos += r.relatorios[rel]?.inseridos || 0;
+      totais[rel].erros += r.relatorios[rel]?.erros || 0;
+    });
+  });
+  
+  console.log('\n📋 Totais por relatório:');
+  relatorios.forEach(rel => {
+    console.log(`${rel}: ${totais[rel].inseridos} inseridos, ${totais[rel].erros} erros`);
+  });
+  
+  console.log(`\n🎉 MÊS ${mes}/${ano} PROCESSADO!`);
+}
+
+// Atalho para julho
+async function processarJulhoCompleto(ano = 2025) {
+  return processarMesCompleto(ano, 7);
+}
+
 // Execução por linha de comando
 // Exemplos:
+//  node exemplo_teste/contahub/processar-backlog-direto.js julho 2025
+//  node exemplo_teste/contahub/processar-backlog-direto.js mes 2025 7
 //  node exemplo_teste/contahub/processar-backlog-direto.js tempo:agosto 2025
 //  node exemplo_teste/contahub/processar-backlog-direto.js tempo:mes 2025 8
 const mode = process.argv[2];
-if (mode === 'tempo:agosto') {
+if (mode === 'julho') {
+  const ano = parseInt(process.argv[3] || '2025', 10);
+  processarJulhoCompleto(ano).catch(console.error);
+} else if (mode === 'mes') {
+  const ano = parseInt(process.argv[3] || '2025', 10);
+  const mes = parseInt(process.argv[4] || '7', 10);
+  processarMesCompleto(ano, mes).catch(console.error);
+} else if (mode === 'tempo:agosto') {
   const ano = parseInt(process.argv[3] || '2025', 10);
   processarTempoAgosto(ano).catch(console.error);
 } else if (mode === 'tempo:mes') {

@@ -355,10 +355,11 @@ function extrairDataDoNomeEvento(nomeEvento: string): string {
 // Inserir produtos por evento específico (como no teste que funcionava)
 async function insertYuzerProdutosPorEvento(supabase: any, eventoId: number, nomeEvento: string, barId: number, yuzerToken: string): Promise<number> {
   try {
-    // Extrair data do evento e criar período
+    // Extrair data do evento e criar período (10h do dia até 10h do dia seguinte)
     const dataEvento = extrairDataDoNomeEvento(nomeEvento);
-    const dataInicio = new Date(`${dataEvento}T00:00:00.000Z`);
-    const dataFim = new Date(`${dataEvento}T23:59:59.999Z`);
+    const dataInicio = new Date(`${dataEvento}T13:00:00.000Z`); // 10h Brasil = 13h UTC
+    const dataFim = new Date(dataInicio);
+    dataFim.setDate(dataFim.getDate() + 1); // Dia seguinte 10h
     
     const bodyPeriodo = {
       from: dataInicio.toISOString(),
@@ -458,8 +459,11 @@ async function insertYuzerPagamentoEFaturamento(supabase: any, statsData: any, _
         ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
       }
       const dataEvento = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-      const dataInicio = `${dataEvento}T00:00:00.000Z`;
-      const dataFim = `${dataEvento}T23:59:59.999Z`;
+      // Período 10h do dia até 10h do dia seguinte (10h Brasil = 13h UTC)
+      const dataInicio = `${dataEvento}T13:00:00.000Z`;
+      const dataFimDate = new Date(`${dataEvento}T13:00:00.000Z`);
+      dataFimDate.setDate(dataFimDate.getDate() + 1); // Dia seguinte
+      const dataFim = dataFimDate.toISOString();
 
       // 1. FATURAMENTO POR HORA
       try {

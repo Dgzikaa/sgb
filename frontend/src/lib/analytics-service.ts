@@ -308,46 +308,39 @@ export async function getTempoProducao(
 // ========================================
 
 export async function getScoreSaudeGeral(bar_id: number) {
+  // Score simplificado baseado em dados disponíveis
   const hoje = new Date().toISOString().split('T')[0];
+  const ontem = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-  const [metricas, anomalias, insights] = await Promise.all([
+  const [vendas, checklists] = await Promise.all([
     supabase
-      .from('ai_metrics')
-      .select('valor, meta_valor, nome_metrica')
+      .from('contahub_pagamentos')
+      .select('valor_liquido')
       .eq('bar_id', bar_id)
-      .eq('data_referencia', hoje),
-
-    supabase
-      .from('ai_anomalies')
-      .select('severidade')
-      .eq('bar_id', bar_id)
-      .eq('ainda_ativa', true),
+      .gte('dt_gerencial', ontem)
+      .lte('dt_gerencial', hoje),
 
     supabase
-      .from('ai_insights')
-      .select('impacto, urgencia')
+      .from('checklist_execucoes')
+      .select('status, pontuacao_final')
       .eq('bar_id', bar_id)
-      .gte('created_at', `${hoje}T00:00:00Z`),
+      .gte('created_at', `${ontem}T00:00:00Z`),
   ]);
 
-  let score = 100;
+  let score = 85; // Score base
 
-  // Penalizar por anomalias ativas
-  const anomaliasCriticas =
-    anomalias.data?.filter(a => a.severidade === 'critica').length || 0;
-  const anomaliasAltas =
-    anomalias.data?.filter(a => a.severidade === 'alta').length || 0;
-  score -= anomaliasCriticas * 15 + anomaliasAltas * 8;
+  // Ajustar baseado em vendas
+  const vendaTotal = vendas.data?.reduce((acc, v) => acc + (v.valor_liquido || 0), 0) || 0;
+  if (vendaTotal > 1000) score += 10;
+  else if (vendaTotal < 100) score -= 15;
 
-  // Ajustar por métricas vs metas
-  const metricasAbaixoMeta =
-    metricas.data?.filter(m => m.valor < m.meta_valor * 0.9).length || 0;
-  score -= metricasAbaixoMeta * 5;
-
-  // Bonificar insights positivos
-  const insightsPositivos =
-    insights.data?.filter(i => i.impacto === 'positivo').length || 0;
-  score += insightsPositivos * 2;
+  // Ajustar baseado em checklists
+  const checklistsConcluidos = checklists.data?.filter(c => c.status === 'concluido').length || 0;
+  const checklistsTotal = checklists.data?.length || 1;
+  const percentualConcluido = (checklistsConcluidos / checklistsTotal) * 100;
+  
+  if (percentualConcluido > 80) score += 5;
+  else if (percentualConcluido < 50) score -= 10;
 
   score = Math.max(0, Math.min(100, score));
 
@@ -361,10 +354,10 @@ export async function getScoreSaudeGeral(bar_id: number) {
     score_saude: score,
     status,
     fatores: {
-      anomalias_criticas: anomaliasCriticas,
-      anomalias_altas: anomaliasAltas,
-      metricas_abaixo_meta: metricasAbaixoMeta,
-      insights_positivos: insightsPositivos,
+      vendas_24h: vendaTotal,
+      checklists_concluidos: checklistsConcluidos,
+      checklists_total: checklistsTotal,
+      percentual_checklists: Math.round(percentualConcluido),
     },
     mensagem: `Score de saúde: ${score}% - Status: ${status.toUpperCase()}`,
   };

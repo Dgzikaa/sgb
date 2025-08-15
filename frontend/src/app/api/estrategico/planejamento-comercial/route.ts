@@ -130,12 +130,12 @@ export async function GET(request: NextRequest) {
       real_vs_m1_green: parseFloat(item.real_r) > parseFloat(item.m1_r),
       ci_real_vs_plan_green: parseFloat(item.cl_real) > parseFloat(item.cl_plan), 
       te_real_vs_plan_green: parseFloat(item.te_real) > parseFloat(item.te_plan),
-      tb_real_vs_plan_green: parseFloat(item.tb_real_contahub) > parseFloat(item.tb_plan),
-      t_medio_green: (parseFloat(item.te_real) + parseFloat(item.tb_real_contahub)) > 93.00,
+      tb_real_vs_plan_green: parseFloat(item.tb_real) > parseFloat(item.tb_plan),
+      t_medio_green: (parseFloat(item.te_real) + parseFloat(item.tb_real)) > 93.00,
       percent_art_fat_green: parseFloat(item.percent_art_fat) < 15,
       t_coz_green: parseFloat(item.t_coz) < 12,
       t_bar_green: parseFloat(item.t_bar) < 4,
-      fat_19h_green: parseFloat(item.fat_19h_percent_contahub) > 15,
+      fat_19h_green: parseFloat(item.fat_19h_percent) > 15,
       clientes_plan: parseInt(item.cl_plan) || 0,
       clientes_real: parseInt(item.cl_real) || 0,
       res_total: parseInt(item.res_p) || 0, // res_p é o único disponível
@@ -144,24 +144,24 @@ export async function GET(request: NextRequest) {
       te_plan: parseFloat(item.te_plan) || 0,
       te_real: parseFloat(item.te_real) || 0,
       tb_plan: parseFloat(item.tb_plan) || 0,
-      tb_real: parseFloat(item.tb_real_contahub) || 0,
-      t_medio: (parseFloat(item.te_real) + parseFloat(item.tb_real_contahub)) || 0,
-      c_art: parseFloat(item.c_art) || 0, // TODO: implementar campo na view
-      c_prod: parseFloat(item.c_prod) || 0, // TODO: implementar campo na view  
-      percent_art_fat: parseFloat(item.percent_art_fat) || 0, // TODO: implementar campo na view
-      percent_b: parseFloat(item.percent_bebidas_contahub) || 0,
-      percent_d: parseFloat(item.percent_drinks_contahub) || 0,
-      percent_c: parseFloat(item.percent_comidas_contahub) || 0,
+      tb_real: parseFloat(item.tb_real) || 0,
+      t_medio: (parseFloat(item.te_real) + parseFloat(item.tb_real)) || 0,
+      c_art: parseFloat(item.c_art_real) || 0,
+      c_prod: parseFloat(item.c_prod) || 0,
+      percent_art_fat: parseFloat(item.percent_art_fat) || 0,
+      percent_b: parseFloat(item.percent_b) || 0,
+      percent_d: parseFloat(item.percent_d) || 0,
+      percent_c: parseFloat(item.percent_c) || 0,
       t_coz: parseFloat(item.t_coz) || 0,
       t_bar: parseFloat(item.t_bar) || 0,
-      fat_19h: parseFloat(item.fat_19h_percent_contahub) || 0,
+      fat_19h: parseFloat(item.fat_19h_percent) || 0,
       pagamentos_liquido: 0, // Campo não existe na VIEW
       total_vendas: 0, // Campo não existe na VIEW
       vendas_bebida: 0, // Campo não existe na VIEW
       vendas_drink: 0, // Campo não existe na VIEW
       vendas_comida: 0, // Campo não existe na VIEW
-      percentual_atingimento_receita: parseFloat(item.percentual_atingimento_m1) || 0,
-      percentual_atingimento_clientes: item.cl_real_total > 0 && item.cl_plan > 0 ? ((parseInt(item.cl_real_total) / parseInt(item.cl_plan)) * 100) : 0,
+      percentual_atingimento_receita: item.real_r > 0 && item.m1_r > 0 ? ((parseFloat(item.real_r) / parseFloat(item.m1_r)) * 100) : 0,
+      percentual_atingimento_clientes: item.cl_real > 0 && item.cl_plan > 0 ? ((parseInt(item.cl_real) / parseInt(item.cl_plan)) * 100) : 0,
       performance_geral: 85 // Campo calculado como número
     })) || [];
 

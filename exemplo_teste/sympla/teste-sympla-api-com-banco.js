@@ -50,9 +50,9 @@ const { createClient } = require('@supabase/supabase-js');
 // Função para obter configuração da API Sympla
 function getSymplaConfig() {
   // CHAVES DISPONÍVEIS - DESCOMENTE APENAS 1 POR VEZ:
-  //const token = '3085e782ebcccbbc75b26f6a5057f170e4dfa4aeabe4c19974fc2639fbfc0a77'; // CHAVE_ORIGINAL
+  const token = '97d7b77e99d40dc8fb5583f590f9b7db3072afe7969c167c493077d9c5a862a6'; // CHAVE_ORIGINAL
   //const token = 'e96a8233fd5acc27c65b166bf424dd8e1874f4d48b16ee2029c93b6f80fd6a06'; // CHAVE_1
-  const token = '24a8cb785b622adeb3239928dd2ac79ec3f1a076558b0159ee9d4d27c8099022'; // CHAVE_2
+  //const token = '24a8cb785b622adeb3239928dd2ac79ec3f1a076558b0159ee9d4d27c8099022'; // CHAVE_2
   
   if (!token) {
     throw new Error('SYMPLA_API_TOKEN não encontrado nos secrets - configure a variável de ambiente');
@@ -100,21 +100,44 @@ async function makeSymplaRequest(path) {
   return await response.json();
 }
 
-// Função para buscar TODOS os eventos (com paginação completa)
+// Função para buscar TODOS os eventos (com paginação completa e período 10h-10h)
 async function buscarTodosEventos() {
   let todosEventos = [];
   let pagina = 1;
   let temProximaPagina = true;
 
+  // Período completo (últimos 7 dias para capturar eventos recentes)
+  const agora = new Date();
+  const dataFim = new Date();
+  dataFim.setUTCHours(23, 59, 59, 999); // Final do dia
+
+  const dataInicio = new Date(dataFim);
+  dataInicio.setDate(dataInicio.getDate() - 7); // Últimos 7 dias
+  dataInicio.setUTCHours(0, 0, 0, 0); // Início do dia
+
   console.log(`🔄 Buscando eventos com paginação...`);
+  console.log(`   📅 Período: ${dataInicio.toLocaleString('pt-BR')} até ${dataFim.toLocaleString('pt-BR')} (período completo)`);
 
   while (temProximaPagina) {
     console.log(`   📄 Página ${pagina}...`);
-    const path = `/public/v1.5.1/events?page=${pagina}`;
+    
+    // Adicionar filtros de data na query string
+    const fromDate = dataInicio.toISOString().split('T')[0];
+    const toDate = dataFim.toISOString().split('T')[0];
+    const path = `/public/v1.5.1/events?page=${pagina}&start_date=${fromDate}&end_date=${toDate}`;
+    
     const response = await makeSymplaRequest(path);
 
     if (response.data && response.data.length > 0) {
-      todosEventos = todosEventos.concat(response.data);
+      // Filtrar eventos no período específico (completo)
+      const eventosFiltrados = response.data.filter(evento => {
+        if (!evento.start_date) return false;
+        
+        const dataEvento = new Date(evento.start_date);
+        return dataEvento >= dataInicio && dataEvento <= dataFim;
+      });
+      
+      todosEventos = todosEventos.concat(eventosFiltrados);
       pagina++;
       
       // Verificar se há próxima página (API Sympla retorna 100 por página)
@@ -126,7 +149,7 @@ async function buscarTodosEventos() {
     }
   }
 
-  console.log(`   ✅ ${todosEventos.length} eventos encontrados em ${pagina - 1} páginas`);
+  console.log(`   ✅ ${todosEventos.length} eventos encontrados em ${pagina - 1} páginas (período completo)`);
   return todosEventos;
 }
 
@@ -335,6 +358,130 @@ async function inserirPedidos(supabase, eventoId, pedidos) {
   return totalInserido;
 }
 
+// Função para processar eventos de uma data específica (período 10h-10h)
+async function processarEventosDataEspecifica(dataEvento) {
+  console.log(`🎪 PROCESSANDO SYMPLA PARA DATA ESPECÍFICA: ${dataEvento}\n`);
+
+  try {
+    // Verificar configurações
+    console.log('🔧 Verificando configurações...');
+    const symplaConfig = getSymplaConfig();
+    const supabaseConfig = getSupabaseConfig();
+    console.log('✅ Configurações OK');
+    
+    // Conectar ao Supabase
+    const supabase = createClient(supabaseConfig.supabaseUrl, supabaseConfig.serviceRoleKey);
+    console.log('✅ Conectado ao Supabase');
+    
+    // Buscar TODOS os eventos da data específica (sem filtro de horário)
+    const data = new Date(dataEvento + 'T00:00:00-03:00'); // Forçar fuso Brasil
+    const dataInicio = new Date(data);
+    dataInicio.setHours(0, 0, 0, 0); // Início do dia no fuso local
+    
+    const dataFim = new Date(data);
+    dataFim.setHours(23, 59, 59, 999); // Final do dia no fuso local
+    
+    console.log(`📅 Período: ${dataInicio.toLocaleString('pt-BR')} até ${dataFim.toLocaleString('pt-BR')} (dia completo - Brasil)`);
+    
+    // Buscar eventos no período específico
+    const fromDate = dataInicio.toISOString().split('T')[0];
+    const toDate = dataFim.toISOString().split('T')[0];
+    
+    let todosEventos = [];
+    let pagina = 1;
+    let temProximaPagina = true;
+
+    console.log(`🔄 Buscando eventos para ${dataEvento}...`);
+
+    while (temProximaPagina) {
+      console.log(`   📄 Página ${pagina}...`);
+      const path = `/public/v1.5.1/events?page=${pagina}&start_date=${fromDate}&end_date=${toDate}`;
+      const response = await makeSymplaRequest(path);
+
+      if (response.data && response.data.length > 0) {
+        // Filtrar eventos no período específico (dia completo)
+        const eventosFiltrados = response.data.filter(evento => {
+          if (!evento.start_date) return false;
+          
+          const dataEventoStart = new Date(evento.start_date);
+          const dataEventoPeriodo = new Date(dataInicio);
+          
+          // Verificar se o evento está no dia específico
+          return dataEventoStart.toDateString() === dataEventoPeriodo.toDateString();
+        });
+        
+        todosEventos = todosEventos.concat(eventosFiltrados);
+        pagina++;
+        
+        if (response.data.length < 100) {
+          temProximaPagina = false;
+        }
+      } else {
+        temProximaPagina = false;
+      }
+    }
+    
+    console.log(`✅ ${todosEventos.length} eventos encontrados para ${dataEvento}`);
+    
+    // Filtrar eventos com 'ordi'
+    const eventosOrdi = todosEventos.filter(evento => {
+      return evento.name && evento.name.toLowerCase().includes('ordi');
+    });
+    
+    console.log(`🎯 Eventos com "ordi" encontrados: ${eventosOrdi.length}`);
+    
+    if (eventosOrdi.length === 0) {
+      console.log('❌ Nenhum evento do Ordi encontrado para esta data');
+      return { eventos: 0, participantes: 0, pedidos: 0 };
+    }
+    
+    // Inserir eventos no banco
+    const eventosInseridos = await inserirEventos(supabase, eventosOrdi);
+    
+    // Processar participantes e pedidos
+    let totalParticipantes = 0;
+    let totalPedidos = 0;
+    
+    for (let i = 0; i < eventosOrdi.length; i++) {
+      const evento = eventosOrdi[i];
+      console.log(`\n📅 [${i + 1}/${eventosOrdi.length}] Processando: "${evento.name}" (${evento.id})`);
+      
+      // Buscar participantes
+      const participantesEvento = await buscarTodosParticipantes(evento.id);
+      console.log(`   👥 Participantes encontrados: ${participantesEvento.length}`);
+      totalParticipantes += participantesEvento.length;
+      
+      if (participantesEvento.length > 0) {
+        await inserirParticipantes(supabase, evento.id, participantesEvento);
+      }
+      
+      // Buscar pedidos
+      const pedidosEvento = await buscarTodosPedidos(evento.id);
+      console.log(`   💰 Pedidos encontrados: ${pedidosEvento.length}`);
+      totalPedidos += pedidosEvento.length;
+      
+      if (pedidosEvento.length > 0) {
+        await inserirPedidos(supabase, evento.id, pedidosEvento);
+      }
+    }
+    
+    console.log(`\n📊 RESUMO PARA ${dataEvento}:`);
+    console.log(`   🎪 Eventos processados: ${eventosOrdi.length}`);
+    console.log(`   👥 Total participantes: ${totalParticipantes}`);
+    console.log(`   💰 Total pedidos: ${totalPedidos}`);
+    
+    return { 
+      eventos: eventosOrdi.length, 
+      participantes: totalParticipantes, 
+      pedidos: totalPedidos 
+    };
+    
+  } catch (error) {
+    console.error(`\n❌ ERRO AO PROCESSAR ${dataEvento}:`, error.message);
+    return { eventos: 0, participantes: 0, pedidos: 0 };
+  }
+}
+
 // Função principal de teste
 async function testarSymplaAPIComBanco() {
   console.log('🎪 TESTE DA API SYMPLA + BANCO SUPABASE\n');
@@ -470,7 +617,27 @@ if (missingVars.length > 0) {
   process.exit(1);
 }
 
-// Executar teste
-console.log('✅ Configurações OK!');
-console.log('🎪 Iniciando teste em 2 segundos...\n');
-setTimeout(testarSymplaAPIComBanco, 2000); 
+// Verificar argumentos da linha de comando
+const args = process.argv.slice(2);
+
+if (args.length > 0) {
+  const dataEvento = args[0];
+  
+  // Validar formato da data (YYYY-MM-DD)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dataEvento)) {
+    console.log('❌ Formato de data inválido. Use: YYYY-MM-DD');
+    console.log('💡 Exemplo: node teste-sympla-api-com-banco.js 2025-08-03');
+    process.exit(1);
+  }
+  
+  console.log('✅ Configurações OK!');
+  console.log(`🎪 Iniciando processamento para data específica: ${dataEvento}\n`);
+  setTimeout(() => processarEventosDataEspecifica(dataEvento), 2000);
+  
+} else {
+  // Executar teste completo (padrão)
+  console.log('✅ Configurações OK!');
+  console.log('🎪 Iniciando teste completo em 2 segundos...\n');
+  console.log('💡 Para processar data específica use: node teste-sympla-api-com-banco.js YYYY-MM-DD');
+  setTimeout(testarSymplaAPIComBanco, 2000);
+} 

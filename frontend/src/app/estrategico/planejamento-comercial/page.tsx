@@ -191,9 +191,18 @@ export default function PlanejamentoComercialPage() {
     return new Intl.NumberFormat('pt-BR').format(valor);
   };
 
-  // Função para aplicar cor verde/vermelho baseado na condição
+  // Função para aplicar cor verde/vermelho baseado na condição (com suporte a daltonismo)
   const getColorClass = (isGreen: boolean): string => {
-    return isGreen ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+    if (isGreen) {
+      return 'text-green-600 dark:text-green-400 border-l-4 border-green-500 pl-1 bg-green-50 dark:bg-green-900/20';
+    } else {
+      return 'text-red-600 dark:text-red-400 border-l-4 border-red-500 pl-1 bg-red-50 dark:bg-red-900/20';
+    }
+  };
+
+  // Função para obter ícone baseado na performance (acessibilidade para daltonismo)
+  const getPerformanceIcon = (isGreen: boolean): string => {
+    return isGreen ? '✅' : '❌';
   };
 
   // Funções do Modal de Edição
@@ -503,16 +512,16 @@ export default function PlanejamentoComercialPage() {
                 </div>
               </div>
 
-              {/* Fat até 19h */}
+              {/* % Artístico sobre Faturamento */}
               <div className="dark:bg-gray-800 bg-gray-50 p-2 border rounded-b-[6px] dark:border-gray-700 border-gray-300">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs dark:text-gray-400 text-gray-700">Fat até 19h</span>
+                  <span className="text-xs dark:text-gray-400 text-gray-700">% Art. sobre Fat.</span>
                   <div className="flex items-center space-x-1">
                     {(() => {
-                      const mediaFat = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.fat_19h) || 0), 0) / dados.filter(item => Number(item.fat_19h) > 0).length : 0;
+                      const mediaPercent = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.percent_art_fat) || 0), 0) / dados.filter(item => Number(item.percent_art_fat) > 0).length : 0;
                       const meta = 15;
                       
-                      if (mediaFat >= meta) {
+                      if (mediaPercent <= meta) {
                         return <span className="text-green-400">🚀</span>;
                       } else {
                         return <span className="text-red-400">⬇️</span>;
@@ -522,14 +531,14 @@ export default function PlanejamentoComercialPage() {
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-blue-400">Planejado:</span>
-                    <span className="font-medium dark:text-white text-black">≥ 15%</span>
+                    <span className="text-blue-400">Meta:</span>
+                    <span className="font-medium dark:text-white text-black">≤ 15%</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-green-400">Realizado:</span>
                     <span className="font-bold dark:text-white text-black">
                       {(() => {
-                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.fat_19h) || 0), 0) / dados.filter(item => Number(item.fat_19h) > 0).length : 0;
+                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.percent_art_fat) || 0), 0) / dados.filter(item => Number(item.percent_art_fat) > 0).length : 0;
                         return media.toFixed(1);
                       })()}%
                     </span>
@@ -601,7 +610,6 @@ export default function PlanejamentoComercialPage() {
               <th className="hidden md:table-cell px-2 py-1 w-16">%C</th>
               <th className="hidden md:table-cell px-2 py-1 w-16">T.Coz</th>
               <th className="hidden md:table-cell px-2 py-1 w-16">T.Bar</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">Fat.19h</th>
 
             </tr>
           </thead>
@@ -623,7 +631,10 @@ export default function PlanejamentoComercialPage() {
                 </td>
                 {/* Faturamento */}
                 <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.real_vs_m1_green)}`}>
-                  {(item.real_receita && Number(item.real_receita) > 0) ? formatarMoeda(Number(item.real_receita)) : '-'}
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-[10px]">{getPerformanceIcon(item.real_vs_m1_green)}</span>
+                    <span>{(item.real_receita && Number(item.real_receita) > 0) ? formatarMoeda(Number(item.real_receita)) : '-'}</span>
+                  </div>
                 </td>
                 <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                   {(item.m1_receita && Number(item.m1_receita) > 0) ? formatarMoeda(Number(item.m1_receita)) : '-'}
@@ -633,7 +644,10 @@ export default function PlanejamentoComercialPage() {
                   {item.clientes_plan || '-'}
                 </td>
                 <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.ci_real_vs_plan_green)}`}>
-                  {item.clientes_real || '-'}
+                  <div className="flex items-center justify-center gap-1">
+                    <span className="text-[10px]">{getPerformanceIcon(item.ci_real_vs_plan_green)}</span>
+                    <span>{item.clientes_real || '-'}</span>
+                  </div>
                 </td>
                 <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
                   {item.res_total || '-'}
@@ -692,11 +706,6 @@ export default function PlanejamentoComercialPage() {
                 </td>
                 <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_bar_green)}`}>
                   {item.t_bar > 0 ? item.t_bar.toFixed(1) : '-'}
-                </td>
-                
-                {/* Faturamento até 19h */}
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.fat_19h_green)}`}>
-                  {item.fat_19h > 0 ? `${item.fat_19h.toFixed(1)}%` : '-'}
                 </td>
                 
 

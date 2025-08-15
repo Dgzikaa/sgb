@@ -20,9 +20,31 @@ const YUZER_CONFIG = {
 };
 
 // CONSTANTES PARA CÁLCULO VALOR LÍQUIDO
-const TAXA_CREDITO = 0.035;        // 3.5%
-const TAXA_DEBITO_PIX = 0.015;     // 1.5%
-const ALUGUEL_EQUIPAMENTOS = 500;  // R$ 500 fixos
+  const TAXA_CREDITO = 0.035;        // 3.5%
+  const TAXA_DEBITO_PIX = 0.015;     // 1.5%
+  
+  // SISTEMA DE TAXA POR MÁQUINAS YUZER
+  const TAXAS_MAQUINAS = {
+    3: 255,   // 3 máquinas = R$ 255 (Reconvexa)
+    6: 510,   // 6 máquinas = R$ 510
+    7: 595,   // 7 máquinas = R$ 595 (Domingo)
+    8: 680,   // 8 máquinas = R$ 680
+    10: 1600  // 10 máquinas = R$ 1.600
+  };
+  
+  // Função para calcular taxa baseada na quantidade de máquinas
+  function calcularTaxaMaquinas(qtdMaquinas) {
+    if (TAXAS_MAQUINAS[qtdMaquinas]) {
+      return TAXAS_MAQUINAS[qtdMaquinas];
+    }
+    
+    // Se não tiver valor exato, calcular baseado no padrão
+    // Análise dos valores: parece ser ~85 por máquina com variações
+    console.log(`⚠️ Quantidade de máquinas ${qtdMaquinas} não mapeada. Usando cálculo estimado.`);
+    return Math.round(qtdMaquinas * 85); // Estimativa baseada nos valores conhecidos
+  }
+  
+
 
 // Configuração teste
 const BAR_ID = 3; // ID do bar no sistema
@@ -58,35 +80,47 @@ async function yuzerFetch(endpoint, method = 'GET', body = null) {
 
 // 1. BUSCAR SALES PANELS (para encontrar eventos)
 async function buscarEventos() {
-  console.log('\n🎯 1. BUSCANDO EVENTOS...');
+  console.log('\n🎯 1. BUSCANDO EVENTO RECONVEXA (09/08 17h-04h)...');
   
-  // Período: sempre de 01/01/2025 até hoje
-  const dataInicio = new Date('2025-01-01T00:00:00.000Z');
-  const dataHoje = new Date();
-  dataHoje.setHours(23, 59, 59, 999); // Fim do dia atual
+  // PERÍODO ESTENDIDO RECONVEXA: 09/08 12h até 10/08 07h (Brasil)
+  const dataEspecifica = new Date('2025-08-09T15:00:00.000Z'); // 09/08 12h Brasil = 15h UTC
+  const dataFim = new Date('2025-08-10T10:00:00.000Z'); // 10/08 07h Brasil = 10h UTC
   
-  console.log(`📅 Período de busca: ${dataInicio.toLocaleDateString('pt-BR')} até ${dataHoje.toLocaleDateString('pt-BR')}`);
+  console.log(`📅 Período de busca: 09/08 12h até 10/08 07h`);
   
   // Usar apenas o método que funcionou
   const response = await yuzerFetch('/api/dashboards/salesPanels/statistics', 'POST', {
-    from: dataInicio.toISOString(),
-    to: new Date('2025-12-31T23:59:59.999Z').toISOString()
+    from: dataEspecifica.toISOString(),
+    to: dataFim.toISOString()
   });
   
   if (!response || !response.data) {
-    console.log('❌ Nenhum evento encontrado');
+    console.log('❌ Nenhum evento encontrado para 09/08/2025');
     return [];
   }
   
   const salesPanels = response.data;
-  console.log(`✅ Encontrados ${salesPanels.length} eventos`);
+  console.log(`✅ Encontrados ${salesPanels.length} eventos no período RECONVEXA`);
   
-  // Filtrar apenas eventos que têm dados (total > 0 ou count > 0)
-  const eventosComDados = salesPanels.filter(evento => 
-    (evento.total && evento.total > 0) || (evento.count && evento.count > 0)
-  );
+  // Filtrar apenas RECONVEXA (09/08) - excluir ORDINÁRIO (10/08)
+  const eventosComDados = salesPanels.filter(evento => {
+    const temDados = (evento.total && evento.total > 0) || (evento.count && evento.count > 0);
+    const nomeEvento = evento.name || evento.title || '';
+    const ehReconvexa = nomeEvento.toLowerCase().includes('reconvexa') || 
+                       (nomeEvento.includes('09/08') || nomeEvento.includes('09/8') || nomeEvento.includes('9/8'));
+    // Excluir explicitamente ORDINÁRIO
+    const naoEhOrdinario = !nomeEvento.toLowerCase().includes('ordinário') && !nomeEvento.toLowerCase().includes('ordinario');
+    
+    return temDados && ehReconvexa && naoEhOrdinario;
+  });
   
-  console.log(`📊 Eventos com dados: ${eventosComDados.length} de ${salesPanels.length}`);
+  console.log(`📊 Eventos RECONVEXA encontrados: ${eventosComDados.length} de ${salesPanels.length}`);
+  
+  // Log dos eventos encontrados
+  eventosComDados.forEach(evento => {
+    console.log(`   🎪 ${evento.name || evento.title} (ID: ${evento.id || evento.salesPanelId})`);
+  });
+  
   return eventosComDados;
 }
 
@@ -140,12 +174,11 @@ async function salvarEventos(eventos) {
 async function salvarFaturamentoPorHora(eventoId, nomeEvento) {
   console.log(`\n🎯 3. SALVANDO FATURAMENTO POR HORA - ${nomeEvento}...`);
   
-  // Extrair data do evento e criar período
-  const dataEvento = extrairDataDoNomeEvento(nomeEvento);
-  const dataInicio = new Date(`${dataEvento}T00:00:00.000Z`);
-  const dataFim = new Date(`${dataEvento}T23:59:59.999Z`);
+  // Usar período estendido do evento RECONVEXA (12h-07h)
+  const dataInicio = new Date('2025-08-09T15:00:00.000Z'); // 09/08 12h Brasil
+  const dataFim = new Date('2025-08-10T10:00:00.000Z'); // 10/08 07h Brasil
   
-  console.log(`   📅 Período: ${dataEvento} (${dataInicio.toLocaleDateString('pt-BR')})`);
+      console.log(`   📅 Período: 09/08 12h-07h (${dataInicio.toLocaleDateString('pt-BR')})`);
   
   const bodyPeriodo = {
     from: dataInicio.toISOString(),
@@ -255,10 +288,9 @@ async function salvarFaturamentoPorHora(eventoId, nomeEvento) {
 async function salvarDadosPagamento(eventoId, nomeEvento) {
   console.log(`\n🎯 4. SALVANDO DADOS DE PAGAMENTO - ${nomeEvento}...`);
   
-  // Extrair data do evento e criar período
-  const dataEvento = extrairDataDoNomeEvento(nomeEvento);
-  const dataInicio = new Date(`${dataEvento}T00:00:00.000Z`);
-  const dataFim = new Date(`${dataEvento}T23:59:59.999Z`);
+  // Usar período estendido do evento RECONVEXA (12h-07h)
+  const dataInicio = new Date('2025-08-09T15:00:00.000Z'); // 09/08 12h Brasil
+  const dataFim = new Date('2025-08-10T10:00:00.000Z'); // 10/08 07h Brasil
   
   const bodyPeriodo = {
     from: dataInicio.toISOString(),
@@ -291,13 +323,18 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
     const dinheiro = methods.find(m => m.name === 'CASH')?.total || 0;
     const producao = methods.find(m => m.name === 'PRODUCTION')?.total || 0;
     const cancelado = methods.find(m => m.name === 'CANCELLED')?.total || 0;
-    
+
     // CALCULAR VALOR LÍQUIDO (apenas descontos de pagamento, aluguel agora é produto)
     const descontoCredito = credito * TAXA_CREDITO;
     const descontoDebitoPix = (debito + pix) * TAXA_DEBITO_PIX;
     const totalDescontos = descontoCredito + descontoDebitoPix;
     const faturamentoBruto = response.total || 0;
     const valorLiquido = faturamentoBruto - totalDescontos; // Sem aluguel aqui
+    
+    // SISTEMA DE MÁQUINAS E REPASSE
+    // Quantidade de máquinas será preenchida manualmente no banco
+    // Taxa será calculada automaticamente por coluna calculada
+    const qtdMaquinas = 0; // Padrão 0 até preenchimento manual
     
     const dataEvento = extrairDataDoNomeEvento(nomeEvento);
     
@@ -316,6 +353,12 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
       total_descontos: totalDescontos,
       aluguel_equipamentos: 0, // Agora é produto, não desconto
       valor_liquido: valorLiquido,
+      
+      // NOVAS COLUNAS - SISTEMA DE MÁQUINAS E REPASSE
+      qtd_maquinas: qtdMaquinas,
+      // taxa_maquinas_calculada: Calculado automaticamente pelo banco
+      // repasse_liquido: Calculado automaticamente pelo banco
+      
       total_cancelado: cancelado,
       quantidade_pedidos: response.count || 0,
       raw_data: response,
@@ -331,13 +374,16 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
     
     console.log(`✅ Dados de pagamento salvos:`);
     console.log(`   💰 Faturamento Bruto: R$ ${faturamentoBruto.toFixed(2)}`);
+    console.log(`   🎟️ Quantidade Pedidos: ${response.count || 0}`);
     console.log(`   💳 Crédito: R$ ${credito.toFixed(2)} (desc: R$ ${descontoCredito.toFixed(2)})`);
     console.log(`   💰 Débito: R$ ${debito.toFixed(2)} + PIX: R$ ${pix.toFixed(2)} (desc: R$ ${descontoDebitoPix.toFixed(2)})`);
     console.log(`   💵 Dinheiro: R$ ${dinheiro.toFixed(2)}`);
     console.log(`   📦 Produção: R$ ${producao.toFixed(2)}`);
     console.log(`   ❌ Cancelado: R$ ${cancelado.toFixed(2)}`);
     console.log(`   📊 Total Descontos: R$ ${totalDescontos.toFixed(2)}`);
-    console.log(`   ✅ VALOR LÍQUIDO (sem aluguel): R$ ${valorLiquido.toFixed(2)}`);
+    console.log(`   ✅ VALOR LÍQUIDO: R$ ${valorLiquido.toFixed(2)}`);
+    console.log(`   🔧 Máquinas: A preencher manualmente no banco`);
+    console.log(`   💸 REPASSE: Será calculado automaticamente (Líquido - Dinheiro - Taxa Máquinas)`);
     
   } catch (error) {
     console.error(`❌ Erro ao salvar dados de pagamento:`, error.message);
@@ -348,10 +394,9 @@ async function salvarDadosPagamento(eventoId, nomeEvento) {
 async function salvarProdutos(eventoId, nomeEvento) {
   console.log(`\n🎯 5. SALVANDO PRODUTOS - ${nomeEvento}...`);
   
-  // Extrair data do evento e criar período
-  const dataEvento = extrairDataDoNomeEvento(nomeEvento);
-  const dataInicio = new Date(`${dataEvento}T00:00:00.000Z`);
-  const dataFim = new Date(`${dataEvento}T23:59:59.999Z`);
+  // Usar período estendido do evento RECONVEXA (12h-07h)
+  const dataInicio = new Date('2025-08-09T15:00:00.000Z'); // 09/08 12h Brasil
+  const dataFim = new Date('2025-08-10T10:00:00.000Z'); // 10/08 07h Brasil
   
   const bodyPeriodo = {
     from: dataInicio.toISOString(),
@@ -440,7 +485,7 @@ async function salvarProdutos(eventoId, nomeEvento) {
       raw_data: {
         tipo: 'aluguel_equipamentos',
         descricao: 'Taxa fixa de aluguel de equipamentos Yuzer',
-        valor: -500,
+        valor: -250,
         evento_referencia: eventoId
       },
       updated_at: new Date().toISOString()
@@ -515,14 +560,14 @@ async function insertBatch(tabela, dados, conflictColumn = null) {
         query = query.insert(lote);
       }
       
-      const { data, error } = await query.select('id');
+      const { data, error } = await query;
       
       if (error) {
         console.error(`   ❌ Erro no lote ${loteNum}:`, error.message);
         continue;
       }
       
-      const inseridos = data?.length || 0;
+      const inseridos = lote.length; // Assumir que todos foram inseridos se não há erro
       totalInseridos += inseridos;
       console.log(`   ✅ Lote ${loteNum}: ${inseridos} registros inseridos`);
       

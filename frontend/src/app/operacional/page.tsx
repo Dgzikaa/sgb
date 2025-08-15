@@ -17,11 +17,18 @@ export default function OperacionalPage() {
 
   const operacionalItems = [
     {
-      title: 'Agendamento',
-      description: 'Gestão de pagamentos e recebimentos financeiros',
+      title: 'DRE',
+      description: 'Demonstrativo de Resultado do Exercício - Visão Operacional',
+      href: '/operacional/dre',
+      icon: CheckSquare,
+      color: 'text-blue-600 dark:text-blue-400',
+    },
+    {
+      title: 'Agendamentos',
+      description: 'Gestão de agendamentos operacionais',
       href: '/operacional/agendamentos',
       icon: Calendar,
-      color: 'text-blue-600 dark:text-blue-400',
+      color: 'text-green-600 dark:text-green-400',
     },
   ];
 

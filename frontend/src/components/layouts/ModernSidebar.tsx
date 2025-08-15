@@ -25,6 +25,7 @@ import {
   MessageSquare,
   TrendingUp,
   Briefcase,
+  Wrench,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -81,19 +82,19 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
 // Estrutura base do sidebar
 const defaultSidebarItems: SidebarItem[] = [
     {
-      icon: TrendingUp,
-      label: 'Visão Geral',
-      href: '/visao-geral',
-      color: 'text-purple-600 dark:text-purple-400',
-    permission: 'home',
-    },
-    {
       icon: Target,
       label: 'Estratégico',
       href: '/estrategico',
       color: 'text-blue-600 dark:text-blue-400',
       permission: 'gestao',
       subItems: [
+        {
+          icon: TrendingUp,
+          label: 'Visão Geral',
+          href: '/estrategico/visao-geral',
+          description: 'Visão estratégica completa do negócio',
+          permission: 'home',
+        },
         {
           icon: BarChart3,
           label: 'Desempenho',
@@ -122,13 +123,36 @@ const defaultSidebarItems: SidebarItem[] = [
       label: 'Operacional',
       href: '/operacional',
       color: 'text-orange-600 dark:text-orange-400',
-    permission: 'operacoes',
+      permission: 'operacoes',
       subItems: [
+        {
+          icon: BarChart3,
+          label: 'DRE',
+          href: '/operacional/dre',
+          description: 'Demonstrativo de Resultado Operacional',
+          permission: 'dashboard_financeiro_mensal',
+        },
         {
           icon: Calendar,
           label: 'Agendamentos',
           href: '/operacional/agendamentos',
           description: 'Gestão de agendamentos operacionais',
+          permission: 'financeiro_agendamento',
+        },
+      ],
+    },
+    {
+      icon: Wrench,
+      label: 'Ferramentas',
+      href: '/ferramentas',
+      color: 'text-green-600 dark:text-green-400',
+      permission: 'operacoes',
+      subItems: [
+        {
+          icon: Calendar,
+          label: 'Agendamento',
+          href: '/ferramentas/agendamento',
+          description: 'Ferramenta de agendamento avançado',
           permission: 'financeiro_agendamento',
         },
       ],
@@ -146,13 +170,6 @@ const defaultSidebarItems: SidebarItem[] = [
           href: '/analitico/clientes',
           description: 'Análise de clientes mais recorrentes',
           permission: 'relatorios',
-        },
-        {
-          icon: BarChart3,
-          label: 'DRE',
-          href: '/analitico/dre',
-          description: 'Demonstrativo de Resultado',
-          permission: 'dashboard_financeiro_mensal',
         },
       ],
     },

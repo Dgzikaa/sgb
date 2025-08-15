@@ -417,6 +417,16 @@ export default function DrePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            DRE Operacional
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Demonstrativo de Resultado do Exercício - Visão Operacional
+          </p>
+        </div>
+
         {/* Tabs Avançados */}
           <div className="card-dark rounded-2xl shadow-xl overflow-hidden">
           <Tabs defaultValue="dashboard" className="w-full">

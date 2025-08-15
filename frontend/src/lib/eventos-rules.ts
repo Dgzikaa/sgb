@@ -97,8 +97,9 @@ export function extrairDataDaDescricao(descricao: string): Date | null {
 export function calcularPercentArtFat(custoArtistico: number, custoProducao: number, faturamentoReal: number): number {
   if (faturamentoReal <= 0) return 0
   
-  const custoTotal = custoArtistico + custoProducao
-  return (custoTotal / faturamentoReal) * 100
+  // CORREÇÃO: Considerar apenas custo artístico (não produção) para o percentual
+  // A produção faz parte dos custos operacionais, não do custo do artista sobre faturamento
+  return (custoArtistico / faturamentoReal) * 100
 }
 
 // Interface para dados de custos do Nibo
