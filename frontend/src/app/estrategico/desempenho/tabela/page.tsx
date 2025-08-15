@@ -635,10 +635,11 @@ export default function TabelaDesempenhoPage() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="busca-geral-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Busca Geral
                     </label>
                     <Input
+                      id="busca-geral-input"
                       placeholder="Pesquisar..."
                       value={filtroTexto}
                       onChange={e => setFiltroTexto(e.target.value)}

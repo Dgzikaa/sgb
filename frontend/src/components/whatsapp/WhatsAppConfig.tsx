@@ -224,10 +224,11 @@ export default function WhatsAppConfig({
         return (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="url-da-api-evolution-input" className="text-sm font-medium mb-2 block">
                 URL da API Evolution
               </label>
-              <Input
+                    <Input
+                      id="url-da-api-evolution-input"
                 value={config.api_url || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, api_url: e.target.value }))
@@ -241,8 +242,9 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">API Key</label>
-              <Input
+              <label htmlFor="api-key-input" className="text-sm font-medium mb-2 block">API Key</label>
+                    <Input
+                      id="api-key-input"
                 type="password"
                 value={config.api_key || ''}
                 onChange={e =>
@@ -254,10 +256,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="nome-da-inst-ncia-input" className="text-sm font-medium mb-2 block">
                 Nome da Instância
               </label>
-              <Input
+                    <Input
+                      id="nome-da-inst-ncia-input"
                 value={config.instance_id || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, instance_id: e.target.value }))
@@ -276,10 +279,11 @@ export default function WhatsAppConfig({
         return (
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="account-sid-input" className="text-sm font-medium mb-2 block">
                 Account SID
               </label>
-              <Input
+                    <Input
+                      id="account-sid-input"
                 value={config.api_key || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, api_key: e.target.value }))
@@ -290,10 +294,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="auth-token-input" className="text-sm font-medium mb-2 block">
                 Auth Token
               </label>
-              <Input
+                    <Input
+                      id="auth-token-input"
                 type="password"
                 value={config.session_name || ''}
                 onChange={e =>
@@ -305,10 +310,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="whatsapp-number-twilio-input" className="text-sm font-medium mb-2 block">
                 WhatsApp Number (Twilio)
               </label>
-              <Input
+                    <Input
+                      id="whatsapp-number-twilio-input"
                 value={config.api_url || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, api_url: e.target.value }))
@@ -337,10 +343,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="business-account-id-input" className="text-sm font-medium mb-2 block">
                 Business Account ID
               </label>
-              <Input
+                    <Input
+                      id="business-account-id-input"
                 value={config.api_key || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, api_key: e.target.value }))
@@ -351,10 +358,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="access-token-input" className="text-sm font-medium mb-2 block">
                 Access Token
               </label>
-              <Input
+                    <Input
+                      id="access-token-input"
                 type="password"
                 value={config.session_name || ''}
                 onChange={e =>
@@ -366,10 +374,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="phone-number-id-input" className="text-sm font-medium mb-2 block">
                 Phone Number ID
               </label>
-              <Input
+                    <Input
+                      id="phone-number-id-input"
                 value={config.instance_id || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, instance_id: e.target.value }))
@@ -395,10 +404,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="url-do-servidor-baileys-input" className="text-sm font-medium mb-2 block">
                 URL do Servidor Baileys
               </label>
-              <Input
+                    <Input
+                      id="url-do-servidor-baileys-input"
                 value={config.api_url || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, api_url: e.target.value }))
@@ -409,10 +419,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="senha-token-se-configurado-input" className="text-sm font-medium mb-2 block">
                 Senha/Token (se configurado)
               </label>
-              <Input
+                    <Input
+                      id="senha-token-se-configurado-input"
                 type="password"
                 value={config.api_key || ''}
                 onChange={e =>
@@ -424,10 +435,11 @@ export default function WhatsAppConfig({
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label htmlFor="nome-da-sess-o-input" className="text-sm font-medium mb-2 block">
                 Nome da Sessão
               </label>
-              <Input
+                    <Input
+                      id="nome-da-sess-o-input"
                 value={config.session_name || ''}
                 onChange={e =>
                   setConfig(prev => ({ ...prev, session_name: e.target.value }))
@@ -612,10 +624,11 @@ export default function WhatsAppConfig({
                     <>
                       {/* Número de Telefone */}
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
+                        <label htmlFor="n-mero-de-telefone-com-c-digo--input" className="text-sm font-medium mb-2 block">
                           Número de Telefone (com código do país)
                         </label>
-                        <Input
+                    <Input
+                      id="n-mero-de-telefone-com-c-digo--input"
                           value={config.phone_number}
                           onChange={e =>
                             setConfig(prev => ({
@@ -636,10 +649,11 @@ export default function WhatsAppConfig({
 
                       {/* Webhook URL (opcional) */}
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
+                        <label htmlFor="webhook-url-opcional-input" className="text-sm font-medium mb-2 block">
                           Webhook URL (opcional)
                         </label>
-                        <Input
+                    <Input
+                      id="webhook-url-opcional-input"
                           value={config.webhook_url || ''}
                           onChange={e =>
                             setConfig(prev => ({
@@ -866,10 +880,11 @@ export default function WhatsAppConfig({
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label htmlFor="mensagem-de-lembrete-input" className="text-sm font-medium mb-2 block">
                   Mensagem de Lembrete
                 </label>
-                <Textarea
+                    <Textarea
+                      id="mensagem-de-lembrete-input"
                   placeholder={`🔔 *Lembrete SGB*
 
 Olá! Você tem um checklist pendente:
@@ -891,10 +906,11 @@ _Sistema de Gestão de Bares_`}
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label htmlFor="mensagem-de-alerta-atraso-input" className="text-sm font-medium mb-2 block">
                   Mensagem de Alerta (Atraso)
                 </label>
-                <Textarea
+                    <Textarea
+                      id="mensagem-de-alerta-atraso-input"
                   placeholder={`🚨 *ALERTA - Checklist Atrasado*
 
 ⚠️ O checklist está atrasado!
@@ -915,10 +931,11 @@ _Sistema de Gestão de Bares_`}
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label htmlFor="mensagem-de-compartilhamento-input" className="text-sm font-medium mb-2 block">
                   Mensagem de Compartilhamento
                 </label>
-                <Textarea
+                    <Textarea
+                      id="mensagem-de-compartilhamento-input"
                   placeholder={`✅ *Checklist Concluído*
 
 📋 *{CHECKLIST_NOME}*

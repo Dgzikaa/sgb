@@ -547,8 +547,9 @@ export default function LandingPageModern() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white font-semibold mb-3 text-lg">Nome Completo *</label>
+                    <label htmlFor="nome" className="block text-white font-semibold mb-3 text-lg">Nome Completo *</label>
                     <Input
+                      id="nome"
                       name="nome"
                       value={formData.nome}
                       onChange={handleInputChange}
@@ -558,8 +559,9 @@ export default function LandingPageModern() {
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-3 text-lg">Email *</label>
+                    <label htmlFor="email" className="block text-white font-semibold mb-3 text-lg">Email *</label>
                     <Input
+                      id="email"
                       name="email"
                       type="email"
                       value={formData.email}
@@ -573,8 +575,9 @@ export default function LandingPageModern() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white font-semibold mb-3 text-lg">Telefone</label>
+                    <label htmlFor="telefone" className="block text-white font-semibold mb-3 text-lg">Telefone</label>
                     <Input
+                      id="telefone"
                       name="telefone"
                       value={formData.telefone}
                       onChange={handleInputChange}
@@ -583,8 +586,9 @@ export default function LandingPageModern() {
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-3 text-lg">Nome do Estabelecimento</label>
+                    <label htmlFor="estabelecimento" className="block text-white font-semibold mb-3 text-lg">Nome do Estabelecimento</label>
                     <Input
+                      id="estabelecimento"
                       name="empresa"
                       value={formData.empresa}
                       onChange={handleInputChange}
@@ -595,8 +599,9 @@ export default function LandingPageModern() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-3 text-lg">Mensagem *</label>
-                  <Textarea
+                  <label htmlFor="mensagem" className="block text-white font-semibold mb-3 text-lg">Mensagem *</label>
+                    <Textarea
+                    id="mensagem"
                     name="mensagem"
                     value={formData.mensagem}
                     onChange={handleInputChange}

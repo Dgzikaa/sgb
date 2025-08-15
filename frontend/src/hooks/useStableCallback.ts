@@ -26,13 +26,7 @@ export function useStableEffect(
   const effectRef = useRef(effect);
   effectRef.current = effect;
   
-  const stableDeps = deps.map(dep => {
-    if (typeof dep === 'function') {
-      // Para funções, usar uma versão estável
-      return useStableCallback(dep);
-    }
-    return dep;
-  });
+  const stableDeps = deps;
   
   return { effectRef, stableDeps };
 }

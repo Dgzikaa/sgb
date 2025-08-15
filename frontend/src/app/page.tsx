@@ -398,8 +398,9 @@ export default function LandingPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white font-semibold mb-2">Nome *</label>
+                    <label htmlFor="nome-input" className="block text-white font-semibold mb-2">Nome *</label>
                     <Input
+                      id="nome-input"
                       name="nome"
                       value={formData.nome}
                       onChange={handleInputChange}
@@ -409,8 +410,9 @@ export default function LandingPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">Email *</label>
+                    <label htmlFor="email-input" className="block text-white font-semibold mb-2">Email *</label>
                     <Input
+                      id="email-input"
                       name="email"
                       type="email"
                       value={formData.email}
@@ -424,8 +426,9 @@ export default function LandingPage() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-white font-semibold mb-2">Telefone</label>
+                    <label htmlFor="telefone-input" className="block text-white font-semibold mb-2">Telefone</label>
                     <Input
+                      id="telefone-input"
                       name="telefone"
                       value={formData.telefone}
                       onChange={handleInputChange}
@@ -434,8 +437,9 @@ export default function LandingPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">Nome do Bar/Restaurante</label>
+                    <label htmlFor="nome-do-bar-restaurante-input" className="block text-white font-semibold mb-2">Nome do Bar/Restaurante</label>
                     <Input
+                      id="nome-do-bar-restaurante-input"
                       name="empresa"
                       value={formData.empresa}
                       onChange={handleInputChange}
@@ -446,8 +450,9 @@ export default function LandingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">Mensagem *</label>
-                  <Textarea
+                  <label htmlFor="mensagem-input" className="block text-white font-semibold mb-2">Mensagem *</label>
+                    <Textarea
+                      id="mensagem-input"
                     name="mensagem"
                     value={formData.mensagem}
                     onChange={handleInputChange}
