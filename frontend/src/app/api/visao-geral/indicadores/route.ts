@@ -495,19 +495,29 @@ export async function GET(request: Request) {
       
       // Logs detalhados removidos
 
-      // % Artística (Planejamento Comercial)
+      // % Artística (Planejamento Comercial) - CÁLCULO CORRIGIDO
       let viewOk = true;
       const percentualArtistica = viewTri ? (viewTri.artistica_percent || 0) : (async () => {
         const { data: artisticaData, error: artisticaErr } = await supabase
           .from('view_eventos')
-          .select('percent_art_fat')
+          .select('c_art_real, c_prod, real_r')
           .eq('bar_id', barIdNum)
           .gte('data_evento', startDate)
-          .lte('data_evento', endDate);
+          .lte('data_evento', endDate)
+          .gt('real_r', 0); // Apenas eventos com faturamento
+        
         viewOk = !artisticaErr;
-        return (artisticaData && artisticaData.length > 0)
-          ? artisticaData.reduce((sum, item) => sum + (item.percent_art_fat || 0), 0) / artisticaData.length
-          : 0;
+        
+        if (!artisticaData || artisticaData.length === 0) return 0;
+        
+        // Calcular percentual agregado (CORRETO): (Custo Artístico + Custo Produção) / Total faturamento * 100
+        const totalCustoArtistico = artisticaData.reduce((sum, item) => sum + (item.c_art_real || 0), 0);
+        const totalCustoProducao = artisticaData.reduce((sum, item) => sum + (item.c_prod || 0), 0);
+        const totalFaturamento = artisticaData.reduce((sum, item) => sum + (item.real_r || 0), 0);
+        
+        const totalCustoCompleto = totalCustoArtistico + totalCustoProducao;
+        
+        return totalFaturamento > 0 ? (totalCustoCompleto / totalFaturamento) * 100 : 0;
       })();
 
       const resp = NextResponse.json({

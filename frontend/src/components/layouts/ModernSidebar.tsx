@@ -155,6 +155,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Ferramenta de agendamento avançado',
           permission: 'financeiro_agendamento',
         },
+        {
+          icon: MessageSquare,
+          label: 'Agente',
+          href: '/ferramentas/agente',
+          description: 'Assistente AI integrado com análise de dados',
+          permission: 'operacoes',
+        },
       ],
     },
     {

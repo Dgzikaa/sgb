@@ -6,9 +6,16 @@ import { useRouter } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import PageHeader from '@/components/layouts/PageHeader';
+import { 
+  ModernPageLayout, 
+  ModernCard, 
+  ModernGrid, 
+  ModernStat 
+} from '@/components/layouts/ModernPageLayout';
 import { Button } from '@/components/ui/button';
+import { useZykorToast } from '@/components/ui/toast-modern';
+import { usePushNotifications } from '@/lib/push-notifications';
+import { useBackgroundSync } from '@/lib/background-sync';
 import { 
   TrendingUp, 
   DollarSign, 
@@ -16,11 +23,15 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Users,
+  Star,
+  Activity,
+  BarChart3,
+  Filter,
+  Settings,
+  Maximize2
 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import { useGlobalLoading } from '@/components/ui/global-loading';
 
 interface IndicadoresAnuais {
   faturamento: {

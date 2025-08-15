@@ -5,6 +5,7 @@ import { ToastProvider, GlobalToastListener } from '@/components/ui/toast';
 import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper';
 import { PWAInstallBanner } from '@/components/PWAInstallBanner';
 import { PWAManager } from '@/components/PWAManager';
+import AssistantWrapper from '@/components/AssistantWrapper';
 import {
   ConfirmDialogProvider,
   GlobalConfirmListener,
@@ -24,13 +25,13 @@ import Script from 'next/script';
 // Using system fonts instead of Google Fonts to avoid build connectivity issues
 
 export const metadata: Metadata = {
-  title: 'ZYKOR - Sistema de Gestão de Bares',
-  description: 'ZYKOR - O núcleo da gestão de bares',
+  title: 'Zykor - O núcleo da gestão de bares',
+  description: 'Zykor - Plataforma completa de gestão para bares e casas noturnas. Analytics, automação e inteligência artificial.',
   manifest: '/site.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'ZYKOR Dashboard',
+    title: 'Zykor Dashboard',
   },
   icons: {
     icon: [
@@ -66,18 +67,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-        <head>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon.ico" sizes="48x48" />
-    {/* Manifest será carregado dinamicamente pelo PWAManager */}
-    <meta name="theme-color" content="#ea580c" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Ordinário Card" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="msapplication-TileColor" content="#4A90E2" />
-    <meta name="msapplication-tap-highlight" content="no" />
-  </head>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        {/* Manifest será carregado dinamicamente pelo PWAManager */}
+        <meta name="theme-color" content="#ea580c" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Zykor" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="msapplication-TileColor" content="#4A90E2" />
+        <meta name="msapplication-tap-highlight" content="no" />
+      </head>
       <body className="font-sans">
         <LGPDProvider>
           <ThemeProvider>
@@ -90,25 +91,29 @@ export default function RootLayout({
                       <PWAManager />
                       <AxeA11y />
                       {process.env.NEXT_PUBLIC_SENTRY_DSN ? (
-                        <Script id="sentry-init" strategy="afterInteractive">
-{`
-  (function(){
-    try {
-      // Sentry Web SDK via CDN somente se DSN existir
-      var dsn = '${process.env.NEXT_PUBLIC_SENTRY_DSN}';
-      if(!dsn) return;
-      var s = document.createElement('script');
-      s.src = 'https://browser.sentry-cdn.com/7.120.0/bundle.min.js';
-      s.crossOrigin = 'anonymous';
-      s.onload = function(){
-        // @ts-ignore
-        Sentry.init({ dsn: dsn, tracesSampleRate: 0.1 });
-      };
-      document.head.appendChild(s);
-    } catch(e) {}
-  })();
-`}
-                        </Script>
+                        <Script 
+                          id="sentry-init" 
+                          strategy="afterInteractive"
+                          dangerouslySetInnerHTML={{
+                            __html: `
+                              (function(){
+                                try {
+                                  var dsn = '${process.env.NEXT_PUBLIC_SENTRY_DSN || ''}';
+                                  if(!dsn) return;
+                                  var s = document.createElement('script');
+                                  s.src = 'https://browser.sentry-cdn.com/7.120.0/bundle.min.js';
+                                  s.crossOrigin = 'anonymous';
+                                  s.onload = function(){
+                                    if(window.Sentry) {
+                                      window.Sentry.init({ dsn: dsn, tracesSampleRate: 0.1 });
+                                    }
+                                  };
+                                  document.head.appendChild(s);
+                                } catch(e) {}
+                              })();
+                            `
+                          }}
+                        />
                       ) : null}
                       <div className="min-h-screen">
                         <ErrorBoundary>
@@ -117,6 +122,7 @@ export default function RootLayout({
                         <GlobalToastListener />
                         <GlobalConfirmListener />
                         <CommandPaletteWrapper />
+                        <AssistantWrapper />
                         <PWAInstallBanner variant="floating" />
                       </div>
                     </ConfirmDialogProvider>

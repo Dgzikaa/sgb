@@ -37,16 +37,16 @@ export function PWAManager() {
       }
 
       // Registrar service worker de gestão
-      const registration = await navigator.serviceWorker.register('/sw-sgb.js', {
+      const registration = await navigator.serviceWorker.register('/sw-zykor.js', {
         scope: '/'
       })
 
       // Atualizar manifest
-      updateManifest('/manifest-sgb.json')
+      updateManifest('/manifest-zykor.json')
 
-      console.log('PWA SGB registrado:', registration)
+      console.log('PWA Zykor registrado:', registration)
     } catch (error) {
-      console.error('Erro ao registrar PWA SGB:', error)
+      console.error('Erro ao registrar PWA Zykor:', error)
     }
   }
 

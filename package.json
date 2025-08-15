@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.60.0",
     "@supabase/supabase-js": "^2.54.0",
     "dotenv": "^17.2.1"
   }

@@ -1,12 +1,12 @@
-const CACHE_NAME = 'sgb-gestao-v1'
-const STATIC_CACHE = 'sgb-static-v1'
+const CACHE_NAME = 'zykor-gestao-v1'
+const STATIC_CACHE = 'zykor-static-v1'
 
 // Arquivos essenciais para gestão offline
 const STATIC_FILES = [
   '/dashboard',
   '/operacoes/qr-scanner',
-  '/logos/logo_640x640.png',
-  '/manifest-sgb.json'
+  '/logos/zykor-logo.png',
+  '/manifest-zykor.json'
 ]
 
 // Install event

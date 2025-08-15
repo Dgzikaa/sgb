@@ -92,11 +92,6 @@ export default function DesempenhoPage() {
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
 
-  useEffect(() => {
-    setPageTitle('📈 Desempenho');
-    carregarDados();
-  }, [setPageTitle, mesAtual, selectedBar]);
-
   // Carregar dados da API
   const carregarDados = useCallback(async () => {
     try {
@@ -315,7 +310,17 @@ export default function DesempenhoPage() {
     }));
   };
 
-    if (loading) {
+  useEffect(() => {
+    setPageTitle('📈 Desempenho');
+  }, [setPageTitle]);
+
+  useEffect(() => {
+    if (selectedBar) {
+      carregarDados();
+    }
+  }, [selectedBar, mesAtual]); // Removido carregarDados para evitar loop
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">

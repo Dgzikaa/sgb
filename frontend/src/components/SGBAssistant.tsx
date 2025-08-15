@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
-import { openaiClient } from '@/lib/openai-client';
 
 interface Message {
   id: string;
@@ -36,7 +35,7 @@ export default function SGBAssistant({
     {
       id: '1',
       type: 'assistant',
-      content: `Olá! Sou o SGB Assistant 🤖\n\nSou seu assistente inteligente para análise de dados do ${barInfo?.nome || 'bar'}. Posso te ajudar com:\n\n• 📊 Análises de vendas e faturamento\n• 🔍 Detecção de padrões e anomalias\n• 💡 Sugestões de melhorias\n• ❓ Respostas sobre o negócio\n\nO que você gostaria de saber?`,
+      content: `Olá! Sou o Zykor Assistant 🤖\n\nSou seu assistente inteligente para análise de dados do ${barInfo?.nome || 'bar'}. Posso te ajudar com:\n\n• 📊 Análises de vendas e faturamento\n• 🔍 Detecção de padrões e anomalias\n• 💡 Sugestões de melhorias\n• ❓ Respostas sobre o negócio\n\nO que você gostaria de saber?`,
       timestamp: new Date(),
     },
   ]);
@@ -85,19 +84,30 @@ export default function SGBAssistant({
     setIsLoading(true);
 
     try {
-      // Processar comando do usuário
-      const response = await processUserInput(userInput, barInfo);
+      // Chamada para nossa API do assistente
+      const response = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userInput,
+          barId: barInfo?.id || 3,
+        }),
+      });
+
+      const result = await response.json();
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: response.content,
+        content: result.success ? result.message : 'Desculpe, não consegui processar sua pergunta.',
         timestamp: new Date(),
-        metadata: response.metadata,
+        metadata: result.data ? { data: result.data } : undefined,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      console.log('🤖 Resposta enviada:', response.content);
+      console.log('🤖 Resposta enviada:', result.message);
     } catch (error) {
       console.error('❌ Erro no assistant:', error);
 
@@ -143,7 +153,7 @@ export default function SGBAssistant({
       {
         id: '1',
         type: 'assistant',
-        content: `Chat limpo! 🧹\n\nSou o SGB Assistant do ${barInfo?.nome || 'bar'}. Como posso te ajudar agora?`,
+        content: `Chat limpo! 🧹\n\nSou o Zykor Assistant do ${barInfo?.nome || 'bar'}. Como posso te ajudar agora?`,
         timestamp: new Date(),
       },
     ]);
@@ -161,7 +171,7 @@ export default function SGBAssistant({
               <span className="text-white">🤖</span>
             </div>
             <div>
-              <h3 className="font-bold text-white">SGB Assistant</h3>
+              <h3 className="font-bold text-white">Zykor Assistant</h3>
               <p className="text-white/80 text-xs">Assistente Inteligente</p>
             </div>
           </div>
@@ -337,210 +347,4 @@ export default function SGBAssistant({
   );
 }
 
-// Função para buscar dados básicos de vendas para contexto
-async function getBasicSalesData(
-  barInfo: BarInfo | null
-): Promise<Record<string, unknown>> {
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    const supabase = await getSupabaseClient();
-    if (!supabase) return {};
-    const { data: vendas } = await supabase
-      .from('pagamentos')
-      .select('liquido, meio, created_at')
-      .gte('created_at', `${today}T00:00:00`)
-      .lt('created_at', `${today}T23:59:59`)
-      .eq('bar_id', barInfo?.id || 1)
-      .limit(10);
-
-    const total =
-      vendas?.reduce(
-        (sum: number, venda: any) => sum + parseFloat(venda.liquido || '0'),
-        0
-      ) || 0;
-    const quantidade = vendas?.length || 0;
-
-    return {
-      vendasHoje: {
-        total,
-        quantidade,
-        ticketMedio: quantidade > 0 ? total / quantidade : 0,
-      },
-      ultimasVendas: vendas?.slice(0, 5) || [],
-    };
-  } catch (error) {
-    console.warn('⚠️ Erro ao buscar dados de contexto:', error);
-    return {};
-  }
-}
-
-// Funções de análise (todas padronizadas)
-async function analyzeToday(
-  barInfo: BarInfo | null
-): Promise<{
-  content: string;
-  metadata?: { command?: string; data?: Record<string, unknown> };
-}> {
-  const today = new Date().toISOString().split('T')[0];
-  try {
-    const supabase = await getSupabaseClient();
-    if (!supabase)
-      return {
-        content: '❌ Erro ao conectar com banco de dados.',
-      };
-    const { data: vendas, error } = await supabase
-      .from('pagamentos')
-      .select('liquido, meio, created_at')
-      .gte('created_at', `${today}T00:00:00`)
-      .lt('created_at', `${today}T23:59:59`)
-      .eq('bar_id', barInfo?.id || 1);
-
-    if (error) throw error;
-
-    const total =
-      vendas?.reduce(
-        (sum: number, venda: any) => sum + parseFloat(venda.liquido || '0'),
-        0
-      ) || 0;
-    const quantidade = vendas?.length || 0;
-
-    return {
-      content: `📊 **Vendas de Hoje (${new Date().toLocaleDateString()}):**\n\n💰 **Faturamento:** R$ ${total.toFixed(2)}\n🎫 **Transações:** ${quantidade}\n💳 **Ticket Médio:** R$ ${quantidade > 0 ? (total / quantidade).toFixed(2) : '0.00'}\n\n${total > 1000 ? '🎉 Ótimo dia de vendas!' : total > 500 ? '👍 Dia normal de vendas' : '📈 Ainda há tempo para melhorar!'}`,
-      metadata: { command: 'vendas_hoje', data: { total, quantidade } },
-    };
-  } catch (error) {
-    return {
-      content:
-        '❌ Erro ao buscar dados de vendas de hoje. Verifique a conexão com o banco de dados.',
-    };
-  }
-}
-
-async function analyzeWeek(
-  barInfo: BarInfo | null
-): Promise<{
-  content: string;
-  metadata?: { command?: string; data?: Record<string, unknown> };
-}> {
-  return {
-    content: `📊 **Análise Semanal:**\n\n🚧 Esta funcionalidade está sendo desenvolvida...\n\nEm breve você terá:\n• Comparativo com semana anterior\n• Tendências de crescimento\n• Melhores dias da semana\n• Projeções para próxima semana\n\n⏳ Aguarde as próximas atualizações!`,
-    metadata: { command: 'analise_semana' },
-  };
-}
-
-async function detectAnomalies(
-  barInfo: BarInfo | null
-): Promise<{
-  content: string;
-  metadata?: { command?: string; data?: Record<string, unknown> };
-}> {
-  try {
-    // Análise simplificada baseada em dados reais
-    const vendas = await getBasicSalesData(barInfo);
-    const vendasSemana = vendas.semana || 0;
-    const mediaVendas = vendasSemana / 7;
-    
-    let anomalias = [];
-    
-    if (mediaVendas > vendas.hoje * 2) {
-      anomalias.push('📉 Vendas hoje abaixo da média semanal');
-    }
-    if (vendas.hoje === 0) {
-      anomalias.push('⚠️ Nenhuma venda registrada hoje');
-    }
-    
-    const statusMessage = anomalias.length > 0 
-      ? `🔍 **Anomalias Detectadas:**\n\n${anomalias.map(a => `• ${a}`).join('\n')}\n\n💡 **Recomendação:** Verificar operações do dia`
-      : `🔍 **Detecção de Anomalias:**\n\n🎯 Sistema funcionando normalmente!\n\n📊 **Verificações realizadas:**\n• Padrões de vendas: OK\n• Valores médios: OK\n• Operação diária: OK\n\n✅ **Status:** Nenhuma anomalia detectada`;
-    
-    return {
-      content: statusMessage,
-      metadata: { command: 'anomalias', anomalias_count: anomalias.length },
-    };
-  } catch (error) {
-    return {
-      content: `🔍 **Detecção de Anomalias:**\n\n🎯 Sistema funcionando normalmente!\n\n📊 **Verificações realizadas:**\n• Padrões de vendas: OK\n• Horários de movimento: OK\n• Valores médios: OK\n• Comportamento sazonal: OK\n\n✅ **Status:** Nenhuma anomalia detectada\n\n💡 Continue monitorando seus dados para insights valiosos!`,
-      metadata: { command: 'anomalias' },
-    };
-  }
-}
-
-async function generateSuggestions(
-  barInfo: BarInfo | null
-): Promise<{
-  content: string;
-  metadata?: { command?: string; data?: Record<string, unknown> };
-}> {
-  return {
-    content: `💡 **Sugestões de Melhoria:**\n\n🚧 Sistema de sugestões em treinamento...\n\nEm breve você receberá:\n• Recomendações baseadas em dados\n• Melhores horários para promoções\n• Estratégias para aumentar vendas\n• Otimizações operacionais\n\n📈 Quanto mais você usar, melhores serão as sugestões!`,
-    metadata: { command: 'sugestoes' },
-  };
-}
-
-// Corrigir processUserInput para usar os novos retornos
-async function processUserInput(
-  input: string,
-  barInfo: BarInfo | null
-): Promise<{
-  content: string;
-  metadata?: { command?: string; data?: Record<string, unknown> };
-}> {
-  const lowercaseInput = input.toLowerCase();
-
-  if (
-    lowercaseInput.includes('vendas hoje') ||
-    lowercaseInput.includes('💰 vendas hoje')
-  ) {
-    return await analyzeToday(barInfo);
-  }
-
-  try {
-    console.log('🤖 Processando com ChatGPT:', input);
-    let contextData: any = undefined;
-    if (
-      lowercaseInput.includes('vendas') ||
-      lowercaseInput.includes('faturamento')
-    ) {
-      const basicData = await getBasicSalesData(barInfo);
-      contextData = Object.keys(basicData).length > 0 ? basicData : undefined;
-    }
-    const response = await openaiClient.chat({
-      message: input,
-      context: {
-        barName: barInfo?.nome || 'Bar',
-        barId: barInfo?.id,
-        currentData: contextData,
-      },
-    });
-    return {
-      content: response.response,
-      metadata: {
-        command: 'chatgpt',
-        data: response.metadata as Record<string, unknown>,
-      },
-    };
-  } catch (error) {
-    if (
-      lowercaseInput.includes('análise semana') ||
-      lowercaseInput.includes('📊 análise semana')
-    ) {
-      return await analyzeWeek(barInfo);
-    }
-    if (
-      lowercaseInput.includes('anomalias') ||
-      lowercaseInput.includes('🔍 anomalias')
-    ) {
-      return await detectAnomalies(barInfo);
-    }
-    if (
-      lowercaseInput.includes('sugestões') ||
-      lowercaseInput.includes('💡 sugestões')
-    ) {
-      return await generateSuggestions(barInfo);
-    }
-    return {
-      content: `❌ **Erro de Conexão**\n\nNão consegui processar sua pergunta: "${input}"\n\n🔧 **Possíveis soluções:**\n• Verifique sua conexão com a internet\n• Tente novamente em alguns segundos\n• Use comandos básicos como "vendas hoje"\n\n💡 **Comandos disponíveis offline:**\n• 💰 Vendas hoje\n• 📊 Análise semana\n• 🔍 Anomalias\n• 💡 Sugestões`,
-      metadata: { command: 'error' },
-    };
-  }
-}
+// Todas as análises agora são feitas pela API /api/assistant

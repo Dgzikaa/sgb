@@ -4,8 +4,6 @@ const STATIC_CACHE = 'static-v1'
 // Arquivos para cache offline
 const STATIC_FILES = [
   '/',
-  '/fidelidade',
-  '/logos/ordinario-transparente.png',
   '/manifest.json'
 ]
 
@@ -53,7 +51,7 @@ self.addEventListener('fetch', (event) => {
         }
         return fetch(event.request)
           .then((response) => {
-            if (response.status === 200) {
+            if (response.status === 200 && event.request.method === 'GET') {
               const responseClone = response.clone()
               caches.open(CACHE_NAME)
                 .then((cache) => cache.put(event.request, responseClone))

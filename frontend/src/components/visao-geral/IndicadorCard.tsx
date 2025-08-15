@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Construction } from 'lucide-react';
 
 interface IndicadorCardProps {
   titulo: string;
@@ -17,6 +17,7 @@ interface IndicadorCardProps {
   cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
   inverterProgresso?: boolean; // Para indicadores onde "menos é melhor"
   periodoAnalisado?: string; // Período que está sendo analisado
+  emDesenvolvimento?: boolean; // Para indicadores em desenvolvimento
 }
 
 export function IndicadorCard({
@@ -30,7 +31,8 @@ export function IndicadorCard({
   detalhes,
   cor = 'blue',
   inverterProgresso = false,
-  periodoAnalisado
+  periodoAnalisado,
+  emDesenvolvimento = false
 }: IndicadorCardProps) {
   const formatarValor = (val: number) => {
     switch (formato) {
@@ -104,13 +106,21 @@ export function IndicadorCard({
   const cores = getCorClasse();
 
   return (
-    <Card className="card-dark shadow-sm hover:shadow-lg transition-shadow">
+    <Card className={`card-dark shadow-sm hover:shadow-lg transition-shadow ${emDesenvolvimento ? 'opacity-70' : ''}`}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-medium text-gray-700 dark:text-gray-300">
-            {titulo}
-          </CardTitle>
-          {tendencia !== undefined && (
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-medium text-gray-700 dark:text-gray-300">
+              {titulo}
+            </CardTitle>
+            {emDesenvolvimento && (
+              <Badge variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs">
+                <Construction className="h-3 w-3 mr-1" />
+                Em Desenvolvimento
+              </Badge>
+            )}
+          </div>
+          {!emDesenvolvimento && tendencia !== undefined && (
             <div className={`flex items-center gap-1 ${tendencia > 0 ? 'text-green-600 dark:text-green-400' : tendencia < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>
               {tendencia > 0 ? (
                 <>
@@ -135,23 +145,25 @@ export function IndicadorCard({
       <CardContent className="space-y-4">
         <div>
           <div className="flex items-baseline justify-between mb-1">
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {prefixo}{formatarValor(valor)}{sufixo}
+            <p className={`text-2xl font-bold ${emDesenvolvimento ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}>
+              {emDesenvolvimento ? 'Disponível em breve' : `${prefixo}${formatarValor(valor)}${sufixo}`}
             </p>
-            <Badge variant="secondary" className={cores.bgLight}>
-              <span className={cores.text}>
-                {progresso.toFixed(0)}%
-              </span>
-            </Badge>
+            {!emDesenvolvimento && (
+              <Badge variant="secondary" className={cores.bgLight}>
+                <span className={cores.text}>
+                  {progresso.toFixed(0)}%
+                </span>
+              </Badge>
+            )}
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Meta: {prefixo}{formatarValor(meta)}{sufixo}
+          <p className={`text-sm ${emDesenvolvimento ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'}`}>
+            {emDesenvolvimento ? 'Indicador sendo desenvolvido' : `Meta: ${prefixo}${formatarValor(meta)}${sufixo}`}
           </p>
         </div>
 
-        <Progress value={progresso} color={cor} className="h-2" />
+        {!emDesenvolvimento && <Progress value={progresso} color={cor} className="h-2" />}
 
-        {(detalhes || periodoAnalisado) && (
+        {!emDesenvolvimento && (detalhes || periodoAnalisado) && (
           <div className="space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
             {detalhes && (
               <>

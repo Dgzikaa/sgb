@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Bar ID não encontrado' }, { status: 400 });
     }
 
-    // Buscar eventos do mês específico
+    // Buscar eventos do mês específico da tabela eventos (mais rápido)
     const { data: eventos, error: eventosError } = await supabase
       .from('eventos')
       .select(`
@@ -33,15 +33,12 @@ export async function GET(request: NextRequest) {
         data_evento,
         nome,
         dia_semana,
-        real_r,
         m1_r,
-        cl_real,
         cl_plan,
-        t_medio,
-        percent_art_fat,
-        t_bar,
-        t_coz,
-        performance_geral
+        te_plan,
+        tb_plan,
+        c_art,
+        receita_total
       `)
       .eq('bar_id', barId)
       .gte('data_evento', `${ano}-${mes.toString().padStart(2, '0')}-01`)
@@ -60,10 +57,17 @@ export async function GET(request: NextRequest) {
       const diferencaDias = Math.floor((dataEvento.getTime() - primeiroDiaMes.getTime()) / (1000 * 60 * 60 * 24));
       const semana = Math.floor(diferencaDias / 7) + 1;
 
-      // Calcular performance geral (simplificado)
-      const performanceReceita = evento.m1_r > 0 ? (evento.real_r / evento.m1_r) * 100 : 0;
-      const performanceClientes = evento.cl_plan > 0 ? (evento.cl_real / evento.cl_plan) * 100 : 0;
-      const performanceGeral = (performanceReceita + performanceClientes) / 2;
+      // Usar dados que existem na tabela eventos
+      const faturamentoReal = evento.receita_total || 0;
+      const metaFaturamento = evento.m1_r || 0;
+      const clientesPlan = evento.cl_plan || 0;
+      
+      // Calcular performance simplificada
+      const performanceReceita = metaFaturamento > 0 ? (faturamentoReal / metaFaturamento) * 100 : 0;
+      const performanceGeral = Math.min(performanceReceita, 150); // Cap em 150%
+
+      // Calcular percentual artístico simples
+      const percentualArtistico = faturamentoReal > 0 ? ((evento.c_art || 0) / faturamentoReal) * 100 : 0;
 
       return {
         id: evento.id,
@@ -73,15 +77,17 @@ export async function GET(request: NextRequest) {
         mes: Number(mes),
         ano: Number(ano),
         dia_semana: evento.dia_semana || '',
-        faturamento_real: evento.real_r || 0,
-        meta_faturamento: evento.m1_r || 0,
-        clientes_real: evento.cl_real || 0,
-        clientes_plan: evento.cl_plan || 0,
-        ticket_medio: evento.t_medio || 0,
-        percentual_artistico: evento.percent_art_fat || 0,
-        tempo_bar: evento.t_bar || 0,
-        tempo_cozinha: evento.t_coz || 0,
-        performance_geral: performanceGeral
+        faturamento_real: faturamentoReal,
+        meta_faturamento: metaFaturamento,
+        clientes_real: 0, // Será calculado via ContaHub se necessário
+        clientes_plan: clientesPlan,
+        ticket_medio: 0, // Será calculado se necessário
+        te_plan: evento.te_plan || 0,
+        tb_plan: evento.tb_plan || 0,
+        percentual_artistico: Math.round(percentualArtistico * 100) / 100,
+        tempo_bar: 0,
+        tempo_cozinha: 0,
+        performance_geral: Math.round(performanceGeral * 100) / 100
       };
     }) || [];
 

@@ -144,6 +144,10 @@ export default function PlanejamentoComercialPage() {
         console.log('📊 Quantidade de registros:', data.data.length);
         console.log('📊 Primeiro registro (dia):', data.data[0]?.dia);
         console.log('📊 Todos os dias:', data.data.map(item => item.dia));
+        
+        // Debug limpo
+        console.log('✅ Dados carregados com sucesso!');
+        
         setDados(data.data);
         setTotalEventos(data.data.length || 0);
         setError(null);
@@ -633,7 +637,7 @@ export default function PlanejamentoComercialPage() {
                 <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.real_vs_m1_green)}`}>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-[10px]">{getPerformanceIcon(item.real_vs_m1_green)}</span>
-                    <span>{(item.real_receita && Number(item.real_receita) > 0) ? formatarMoeda(Number(item.real_receita)) : '-'}</span>
+                    <span>{(item.real_receita !== null && item.real_receita !== undefined && Number(item.real_receita) !== 0) ? formatarMoeda(Number(item.real_receita)) : '-'}</span>
                   </div>
                 </td>
                 <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
@@ -646,7 +650,7 @@ export default function PlanejamentoComercialPage() {
                 <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.ci_real_vs_plan_green)}`}>
                   <div className="flex items-center justify-center gap-1">
                     <span className="text-[10px]">{getPerformanceIcon(item.ci_real_vs_plan_green)}</span>
-                    <span>{item.clientes_real || '-'}</span>
+                    <span>{(item.clientes_real !== null && item.clientes_real !== undefined) ? item.clientes_real : '-'}</span>
                   </div>
                 </td>
                 <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
@@ -691,13 +695,13 @@ export default function PlanejamentoComercialPage() {
                 
                 {/* Cesta */}
                 <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {(item.percent_b && Number(item.percent_b) > 0) ? `${Number(item.percent_b).toFixed(1)}%` : '-'}
+                  {(item.percent_b !== null && item.percent_b !== undefined && Number(item.percent_b) !== 0) ? `${Number(item.percent_b).toFixed(1)}%` : '-'}
                 </td>
                 <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {(item.percent_d && Number(item.percent_d) > 0) ? `${Number(item.percent_d).toFixed(1)}%` : '-'}
+                  {(item.percent_d !== null && item.percent_d !== undefined && Number(item.percent_d) !== 0) ? `${Number(item.percent_d).toFixed(1)}%` : '-'}
                 </td>
                 <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {(item.percent_c && Number(item.percent_c) > 0) ? `${Number(item.percent_c).toFixed(1)}%` : '-'}
+                  {(item.percent_c !== null && item.percent_c !== undefined && Number(item.percent_c) !== 0) ? `${Number(item.percent_c).toFixed(1)}%` : '-'}
                 </td>
                 
                 {/* Tempo */}
