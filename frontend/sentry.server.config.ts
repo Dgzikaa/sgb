@@ -1,44 +1,18 @@
+// This file configures the initialization of Sentry on the server.
+// The config you add here will be used whenever the server handles a request.
+// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  
-  // Performance Monitoring
-  tracesSampleRate: 1.0,
-  
-  // Environment
-  environment: process.env.NODE_ENV,
-  
-  // Server-specific integrations
-  integrations: [
-    new Sentry.Http({ tracing: true }),
-    new Sentry.Express({ app: undefined }),
-  ],
-  
-  // Error Filtering
-  beforeSend(event) {
-    // Filter server-side errors
-    if (event.exception) {
-      const error = event.exception.values?.[0];
-      
-      // Filter out known harmless server errors
-      if (error?.value?.includes('ECONNRESET')) {
-        return null;
-      }
-      if (error?.value?.includes('ENOTFOUND')) {
-        return null;
-      }
-    }
-    
-    return event;
-  },
-  
-  // Context adicional
-  initialScope: {
-    tags: {
-      component: "backend",
-      version: process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0",
-      platform: "zykor"
-    },
-  },
+  dsn: "https://4bdabf40b2606eb07b628cf93932b21d@o4509849360203776.ingest.us.sentry.io/4509849361317888",
+
+  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+  tracesSampleRate: 1,
+
+  // Enable logs to be sent to Sentry
+  enableLogs: true,
+
+  // Setting this option to true will print useful information to the console while you're setting up Sentry.
+  debug: false,
 });

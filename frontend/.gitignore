@@ -5,3 +5,5 @@ certificates/
 *.cer
 *.key
 *.csr
+# Sentry Config File
+.env.sentry-build-plugin
