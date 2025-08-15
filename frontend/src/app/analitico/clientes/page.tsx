@@ -66,7 +66,7 @@ export default function ClientesPage() {
 
   useEffect(() => {
     fetchClientes()
-  }, [selectedBar])
+  }, [selectedBar, fetchClientes])
 
   // Filtrar clientes baseado no dia da semana da última visita
   useEffect(() => {

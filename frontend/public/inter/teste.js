@@ -47,7 +47,7 @@ async function testInterAuth() {
   })
 }
 
-;(async () => {
+(async () => {
   try {
     console.log('Iniciando teste da autenticação Inter...')
     const response = await testInterAuth()

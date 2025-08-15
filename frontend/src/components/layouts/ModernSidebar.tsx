@@ -344,7 +344,7 @@ export function ModernSidebar() {
     const hasAccess = permissionResults.some(result => result.hasAccess);
     
     return hasAccess;
-  }, [hasPermission, user]);
+  }, [hasPermission]);
 
   // 4. Items do sidebar filtrados por permissão
   const sidebarItems = useMemo(() => {

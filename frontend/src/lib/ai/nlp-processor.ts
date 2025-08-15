@@ -341,16 +341,18 @@ export class NLPProcessor {
         start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
         return { start, end, period: 'day', relative: true };
 
-      case 'this_week':
+      case 'this_week': {
         const dayOfWeek = now.getDay();
         start = new Date(now.getTime() - dayOfWeek * 24 * 60 * 60 * 1000);
         end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
         return { start, end, period: 'week', relative: true };
+      }
 
-      case 'last_week':
+      case 'last_week': {
         const lastWeekEnd = new Date(now.getTime() - now.getDay() * 24 * 60 * 60 * 1000);
         const lastWeekStart = new Date(lastWeekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
         return { start: lastWeekStart, end: lastWeekEnd, period: 'week', relative: true };
+      }
 
       case 'this_month':
         start = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -168,7 +168,7 @@ export function AccessibleText({
 }: AccessibleTextProps) {
   const { isHighContrast, fontSize } = useAccessibility();
   
-  const Tag = level ? (`h${level}` as keyof JSX.IntrinsicElements) : 'p';
+  const Tag = level ? (`h${level}` as keyof React.JSX.IntrinsicElements) : 'p';
   
   const fontSizeClasses = {
     small: level ? 'text-lg' : 'text-sm',

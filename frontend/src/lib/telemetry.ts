@@ -277,7 +277,7 @@ export const useTelemetry = () => {
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch;
   
-  window.fetch = async function(input: RequestInfo | URL, init?: RequestInit) {
+  window.fetch = async function(input: string | URL | Request, init?: RequestInit) {
     const url = typeof input === 'string' ? input : input.toString();
     const method = init?.method || 'GET';
     

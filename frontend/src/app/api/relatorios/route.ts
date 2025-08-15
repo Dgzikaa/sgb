@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
         result = await query;
         break;
 
-      case 'resumo':
+      case 'resumo': {
         // Resumo geral de todas as tabelas
         const [analitico, pagamentos, periodo, tempo, fatporhora] = await Promise.all([
           supabase
@@ -165,6 +165,7 @@ export async function GET(request: NextRequest) {
           error: null
         };
         break;
+      }
 
       default:
         return NextResponse.json(

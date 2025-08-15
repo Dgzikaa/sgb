@@ -60,6 +60,8 @@ export function RechartsBar({ data, xKey, yKey, color = '#8B5FBF', height = 260 
   );
 }
 
-export default { RechartsLine, RechartsBar };
+const chartComponents = { RechartsLine, RechartsBar };
+
+export default chartComponents;
 
 

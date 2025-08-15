@@ -307,7 +307,7 @@ A API key do Anthropic foi rejeitada pelo servidor.
 async function executeTool(toolName: string, input: any) {
   try {
     switch (toolName) {
-      case 'execute_sql_query':
+      case 'execute_sql_query': {
         const { data, error } = await supabase
           .from('contahub_periodo') // Usar uma tabela como base
           .select('*')
@@ -317,6 +317,7 @@ async function executeTool(toolName: string, input: any) {
         
         // Executar query real baseada no input
         return await executeCustomQuery(input.query);
+      }
 
       case 'create_chart':
         return {

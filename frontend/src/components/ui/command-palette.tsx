@@ -433,7 +433,6 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               value={query}
               onChange={e => setQuery(e.target.value)}
               className="border-0 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 text-base sm:text-lg flex-1"
-              autoFocus
             />
             <div className="hidden sm:flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
               <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">

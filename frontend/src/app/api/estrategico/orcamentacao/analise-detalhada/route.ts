@@ -7,7 +7,10 @@ async function fetchAllData(supabase: any, tableName: string, columns: string, f
   let from = 0;
   const limit = 1000;
   
-  while (true) {
+  const MAX_ITERATIONS = 1000;
+  let iterations = 0;
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
     let query = supabase
       .from(tableName)
       .select(columns)

@@ -124,7 +124,7 @@ self.addEventListener('notificationclick', (event) => {
   
   if (event.action === 'open-dashboard') {
     event.waitUntil(
-      clients.openWindow('/dashboard')
+      self.clients.openWindow('/dashboard')
     )
   } else if (event.action === 'dismiss') {
     // Apenas fecha a notificação
@@ -132,7 +132,7 @@ self.addEventListener('notificationclick', (event) => {
     // Click na notificação (sem action específica)
     const url = event.notification.data?.url || '/dashboard'
     event.waitUntil(
-      clients.openWindow(url)
+      self.clients.openWindow(url)
     )
   }
 })

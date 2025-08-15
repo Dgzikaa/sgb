@@ -134,7 +134,7 @@ export function useAnalyticsTracker(): UseAnalyticsTrackerReturn {
         user_agent: deviceInfo.userAgent,
       };
 
-      // Adicionar Ã  fila
+      // Adicionar à fila
       eventQueue.current.push(evento);
 
       // Flush imediato se a fila estiver cheia

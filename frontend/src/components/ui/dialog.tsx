@@ -114,9 +114,9 @@ const DialogContent: React.FC<
         'backdrop-blur-xl',
         className
       )}
-      onClick={e => e.stopPropagation()}
       data-modal-content="true"
-      role="document"
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="modal-title"
       {...props}
     >

@@ -1,4 +1,5 @@
 // Sistema RBAC (Role-Based Access Control) para Zykor
+import React from 'react';
 export interface Permission {
   id: string;
   name: string;
@@ -599,6 +600,8 @@ export const useRBAC = () => {
     canAccess: rbacManager.canAccess.bind(rbacManager)
   };
 };
+
+// Hook já definido acima - remover duplicata
 
 // Componente HOC para proteção de rotas
 export const withPermission = (resource: string, action: string) => {

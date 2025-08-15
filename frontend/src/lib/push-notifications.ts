@@ -13,7 +13,11 @@ export interface PushNotificationConfig {
   image?: string;
   tag?: string;
   requireInteraction?: boolean;
-  actions?: NotificationAction[];
+  actions?: Array<{
+    action: string;
+    title: string;
+    icon?: string;
+  }>;
   data?: any;
 }
 
@@ -269,8 +273,8 @@ export class ZykorPushNotifications {
   /**
    * Retorna ações padrão baseadas no tipo de notificação
    */
-  private getDefaultActions(type: ZykorNotificationData['type']): NotificationAction[] {
-    const actions: Record<string, NotificationAction[]> = {
+  private getDefaultActions(type: ZykorNotificationData['type']): Array<{action: string; title: string; icon?: string}> {
+    const actions: Record<string, Array<{action: string; title: string; icon?: string}>> = {
       evento: [
         { action: 'view', title: '👁️ Ver Evento', icon: '/icons/eye.png' },
         { action: 'dismiss', title: '❌ Dispensar', icon: '/icons/dismiss.png' }

@@ -22,6 +22,8 @@ export function SkeletonCard({ lines = 3 }: { lines?: number }) {
   );
 }
 
-export default { SkeletonLine, SkeletonCard };
+const skeletonBlocks = { SkeletonLine, SkeletonCard };
+
+export default skeletonBlocks;
 
 

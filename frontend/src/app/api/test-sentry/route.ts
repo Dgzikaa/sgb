@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
           type: 'error'
         });
 
-      case 'performance':
+      case 'performance': {
         // Teste de performance
         const transaction = Sentry.startTransaction({
           name: 'test-performance',
@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
           message: 'Teste de performance enviado',
           type: 'performance'
         });
+      }
 
       case 'user':
         // Teste com contexto de usuário

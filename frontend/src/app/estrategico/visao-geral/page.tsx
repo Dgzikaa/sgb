@@ -136,7 +136,9 @@ export default function VisaoGeralEstrategica() {
     const writeCache = (key: string, data: unknown) => {
       try {
         sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-      } catch {}
+      } catch (error) {
+        console.warn('Erro ao salvar cache:', error);
+      }
     };
 
     const anualCached = readCache(anualCacheKey);

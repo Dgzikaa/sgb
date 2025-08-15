@@ -26,7 +26,9 @@ export async function GET(request: NextRequest) {
 			try {
 				const parsed = JSON.parse(barIdHeader)
 				if (parsed?.bar_id) barIdFilter = parseInt(String(parsed.bar_id))
-			} catch {}
+			} catch (error) {
+				console.warn('Erro ao parsear barIdHeader:', error);
+			}
 		}
 
 		const pageSize = 1000
@@ -34,7 +36,10 @@ export async function GET(request: NextRequest) {
 		let totalLinhas = 0
 		const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
-		while (true) {
+		const MAX_ITERATIONS = 100; // Prevenir loop infinito
+		let iterations = 0;
+		while (iterations < MAX_ITERATIONS) {
+			iterations++;
 			let query = supabase
 				.from('contahub_periodo')
 				.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')

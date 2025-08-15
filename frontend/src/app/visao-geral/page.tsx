@@ -16,6 +16,11 @@ import { Button } from '@/components/ui/button';
 import { useZykorToast } from '@/components/ui/toast-modern';
 import { usePushNotifications } from '@/lib/push-notifications';
 import { useBackgroundSync } from '@/lib/background-sync';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/ui/page-header';
+import { useGlobalLoading } from '@/hooks/useGlobalLoading';
+import { useToast } from '@/components/ui/toast';
 import { 
   TrendingUp, 
   DollarSign, 
@@ -154,7 +159,9 @@ export default function VisaoGeralPage() {
     const writeCache = (key: string, data: unknown) => {
       try {
         sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-      } catch {}
+      } catch (error) {
+        console.warn('Erro ao salvar cache:', error);
+      }
     };
 
     const anualCached = readCache(anualCacheKey);
