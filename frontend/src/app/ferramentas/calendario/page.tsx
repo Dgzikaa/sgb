@@ -552,7 +552,7 @@ export default function CalendarioPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-2 py-4 max-w-7xl">
+      <div className="container mx-auto px-3 py-4 max-w-full">
         {/* Header com filtros */}
         <div className="card-dark p-4 mb-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -568,9 +568,9 @@ export default function CalendarioPage() {
             
             {/* Filtros de período */}
             <div className="flex items-center gap-3">
-              <Filter className="h-5 w-5 text-gray-500" />
+              <Filter className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               <Select value={currentMonth.toString()} onValueChange={(value) => alterarPeriodo(parseInt(value), currentYear)}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-32 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -583,7 +583,7 @@ export default function CalendarioPage() {
               </Select>
               
               <Select value={currentYear.toString()} onValueChange={(value) => alterarPeriodo(currentMonth, parseInt(value))}>
-                <SelectTrigger className="w-24">
+                <SelectTrigger className="w-24 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -645,15 +645,15 @@ export default function CalendarioPage() {
               <div className="flex items-center gap-2 text-xs flex-wrap">
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span>{totais.confirmadas} confirmadas</span>
+                  <span>{totais.confirmadas} realmente foram</span>
                 </div>
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
                   <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  <span>{totais.pendentes} pendentes</span>
+                  <span>{totais.pendentes} confirmadas</span>
                 </div>
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
                   <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <span>{totais.canceladas} canceladas</span>
+                  <span>{totais.canceladas - totais.noshow} canceladas</span>
                 </div>
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
                   <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
@@ -679,7 +679,7 @@ export default function CalendarioPage() {
             </div>
 
             {/* Grid dos dias */}
-            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, 100px)' }}>
+            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, 110px)' }}>
               {generateCalendarDays().map((day, index) => {
                 if (!day.isCurrentMonth) {
                   return (
@@ -712,47 +712,18 @@ export default function CalendarioPage() {
                         {day.date.getDate()}
                       </span>
                       
-                      {/* Badge de reservas */}
+                      {/* Badge de reservas - Simplificado */}
                       {hasReservas && (
-                        <div className="flex items-center gap-1 flex-wrap">
-                          {day.isPast ? (
-                            // Para datas passadas, mostrar status finais
-                            <>
-                              {confirmadas > 0 && (
-                                <Badge variant="default" className="text-xs px-1 py-0.5 bg-green-500">
-                                  ✓{confirmadas}
-                                </Badge>
-                              )}
-                              {canceladas > 0 && (
-                                <Badge variant="destructive" className="text-xs px-1 py-0.5">
-                                  ✗{canceladas}
-                                </Badge>
-                              )}
-                              {noshow > 0 && (
-                                <Badge variant="secondary" className="text-xs px-1 py-0.5 bg-gray-500">
-                                  ⚠{noshow}
-                                </Badge>
-                              )}
-                            </>
-                          ) : (
-                            // Para datas futuras, mostrar status atuais
-                            <>
-                              {confirmadas > 0 && (
-                                <Badge variant="default" className="text-xs px-1 py-0.5 bg-green-500">
-                                  ✓{confirmadas}
-                                </Badge>
-                              )}
-                              {pendentes > 0 && (
-                                <Badge variant="secondary" className="text-xs px-1 py-0.5 bg-yellow-500">
-                                  ⏳{pendentes}
-                                </Badge>
-                              )}
-                              {canceladas > 0 && (
-                                <Badge variant="destructive" className="text-xs px-1 py-0.5">
-                                  ✗{canceladas}
-                                </Badge>
-                              )}
-                            </>
+                        <div className="flex items-center gap-1">
+                          {/* Total de reservas ativas (pending + confirmed + seated) */}
+                          <Badge variant="default" className="text-xs px-1.5 py-0.5 bg-blue-500">
+                            {day.reservasCount - canceladas}
+                          </Badge>
+                          {/* Canceladas (canceled-user + no-show) */}
+                          {canceladas > 0 && (
+                            <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
+                              -{canceladas}
+                            </Badge>
                           )}
                         </div>
                       )}
@@ -797,58 +768,20 @@ export default function CalendarioPage() {
                         </button>
                       )}
 
-                      {/* Informações de reserva */}
+                      {/* Informações de reserva - Simplificado */}
                       <div className="mt-auto">
                         {hasReservas ? (
                           <div className="bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 text-xs">
                             <div className="text-center text-gray-700 dark:text-gray-300 font-medium text-xs leading-tight">
-                              {day.isPast ? (
-                                // Para datas passadas, mostrar resultado final
+                              {/* Total de reservas ativas */}
+                              <span className="text-blue-600 font-bold">{day.reservasCount - canceladas} reservas</span>
+                              <span className="text-blue-700 dark:text-blue-400 ml-1">({day.totalPessoas - day.pessoasCanceladas} pax)</span>
+                              
+                              {/* Canceladas */}
+                              {canceladas > 0 && (
                                 <>
-                                  {confirmadas > 0 && (
-                                    <>
-                                      <span className="text-green-600 font-bold">✓ {confirmadas}</span>
-                                      <span className="text-green-700 dark:text-green-400 ml-1">({day.pessoasConfirmadas} pax)</span>
-                                    </>
-                                  )}
-                                  {canceladas > 0 && (
-                                    <>
-                                      {confirmadas > 0 && <span className="mx-1">•</span>}
-                                      <span className="text-red-600 font-bold">✗ {canceladas}</span>
-                                      <span className="text-red-700 dark:text-red-400 ml-1">({day.pessoasCanceladas} pax)</span>
-                                    </>
-                                  )}
-                                  {noshow > 0 && (
-                                    <>
-                                      {(confirmadas > 0 || canceladas > 0) && <span className="mx-1">•</span>}
-                                      <span className="text-gray-600 font-bold">⚠ {noshow}</span>
-                                      <span className="text-gray-700 dark:text-gray-400 ml-1">({day.pessoasNoshow} pax)</span>
-                                    </>
-                                  )}
-                                </>
-                              ) : (
-                                // Para datas futuras, mostrar status atual
-                                <>
-                                  {confirmadas > 0 && (
-                                    <>
-                                      <span className="text-green-600 font-bold">✓ {confirmadas}</span>
-                                      <span className="text-green-700 dark:text-green-400 ml-1">({day.pessoasConfirmadas} pax)</span>
-                                    </>
-                                  )}
-                                  {pendentes > 0 && (
-                                    <>
-                                      {confirmadas > 0 && <span className="mx-1">•</span>}
-                                      <span className="text-yellow-600 font-bold">⏳ {pendentes}</span>
-                                      <span className="text-yellow-700 dark:text-yellow-400 ml-1">({day.pessoasPendentes} pax)</span>
-                                    </>
-                                  )}
-                                  {canceladas > 0 && (
-                                    <>
-                                      {(confirmadas > 0 || pendentes > 0) && <span className="mx-1">•</span>}
-                                      <span className="text-red-600 font-bold">✗ {canceladas}</span>
-                                      <span className="text-red-700 dark:text-red-400 ml-1">({day.pessoasCanceladas} pax)</span>
-                                    </>
-                                  )}
+                                  <span className="mx-1">•</span>
+                                  <span className="text-red-600 font-bold">{canceladas} não foram</span>
                                 </>
                               )}
                             </div>
@@ -897,6 +830,23 @@ export default function CalendarioPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Legenda */}
+        <div className="mt-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+          <div className="flex items-center justify-center gap-6 text-xs text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded text-white flex items-center justify-center text-xs font-bold">R</div>
+              <span>Total de reservas ativas</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded text-white flex items-center justify-center text-xs font-bold">-</div>
+              <span>Canceladas + No-show</span>
+            </div>
+            <div className="text-gray-500">
+              <span className="font-medium">pax</span> = pessoas
+            </div>
+          </div>
+        </div>
 
         {/* Modal de Edição de Evento */}
         {modalOpen && eventoSelecionado && (

@@ -153,24 +153,41 @@ export async function GET(request: NextRequest) {
       dadosPorData[dataStr].reservas++;
       dadosPorData[dataStr].pessoas += pessoas;
 
-      // Contabilizar por status
-      if (reserva.status === 'confirmed') {
+      // Contabilizar por status baseado na lógica do Getin
+      if (reserva.status === 'seated') {
+        // Realmente foram - contar como confirmadas efetivas
         dadosPorData[dataStr].confirmadas++;
         dadosPorData[dataStr].pessoasConfirmadas += pessoas;
         totais.confirmadas++;
         totais.pessoasConfirmadas += pessoas;
-      } else if (reserva.status === 'cancelled') {
+      } else if (reserva.status === 'confirmed') {
+        // Confirmadas mas ainda não sentaram - contar como pendentes
+        dadosPorData[dataStr].pendentes++;
+        dadosPorData[dataStr].pessoasPendentes += pessoas;
+        totais.pendentes++;
+        totais.pessoasPendentes += pessoas;
+      } else if (reserva.status === 'pending') {
+        // Pendentes de confirmação
+        dadosPorData[dataStr].pendentes++;
+        dadosPorData[dataStr].pessoasPendentes += pessoas;
+        totais.pendentes++;
+        totais.pessoasPendentes += pessoas;
+      } else if (reserva.status === 'canceled-user' || reserva.status === 'no-show') {
+        // Canceladas pelo usuário ou no-show - agrupar como canceladas
         dadosPorData[dataStr].canceladas++;
         dadosPorData[dataStr].pessoasCanceladas += pessoas;
         totais.canceladas++;
         totais.pessoasCanceladas += pessoas;
-      } else if (reserva.status === 'no_show') {
-        dadosPorData[dataStr].noshow++;
-        dadosPorData[dataStr].pessoasNoshow += pessoas;
-        totais.noshow++;
-        totais.pessoasNoshow += pessoas;
+        
+        // Separar no-show para estatísticas detalhadas no header
+        if (reserva.status === 'no-show') {
+          dadosPorData[dataStr].noshow++;
+          dadosPorData[dataStr].pessoasNoshow += pessoas;
+          totais.noshow++;
+          totais.pessoasNoshow += pessoas;
+        }
       } else {
-        // Status pendente (pending, waiting, etc.)
+        // Outros status - tratar como pendente
         dadosPorData[dataStr].pendentes++;
         dadosPorData[dataStr].pessoasPendentes += pessoas;
         totais.pendentes++;
