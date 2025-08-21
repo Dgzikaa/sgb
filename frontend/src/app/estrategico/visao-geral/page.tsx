@@ -310,7 +310,7 @@ export default function VisaoGeralEstrategica() {
         </div>
 
         {/* Indicadores Anuais */}
-        <div className="card-dark p-1 -mt-1">
+        <div className="card-dark p-1 -mt-2">
           <div 
             className="flex items-center justify-between mb-1 cursor-pointer"
             onClick={() => setAnualExpanded(!anualExpanded)}
@@ -409,7 +409,7 @@ export default function VisaoGeralEstrategica() {
         </div>
 
         {/* Indicadores Trimestrais */}
-        <div className="card-dark p-1 -mt-1">
+        <div className="card-dark p-1 -mt-2">
           <div className="flex items-center justify-between mb-1">
             <div 
               className="flex items-center gap-3 cursor-pointer flex-1"
