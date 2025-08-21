@@ -495,12 +495,25 @@ export async function GET(request: Request) {
       if (!viewTri) {
         const { data: cmoData } = await supabase
           .from('nibo_agendamentos')
-          .select('valor')
+          .select('valor, categoria_nome')
           .eq('bar_id', barIdNum)
           .in('categoria_nome', categoriasCMO)
           .gte('data_competencia', startDate)
           .lte('data_competencia', endDate);
         totalCMO = cmoData?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0;
+        
+        // 🔍 DEBUG: Detalhes do CMO
+        console.log('💰 CMO DETALHADO:');
+        console.log(`Registros Nibo: ${cmoData?.length || 0}`);
+        console.log(`Categorias CMO: ${categoriasCMO.join(', ')}`);
+        console.log(`Total CMO: R$ ${totalCMO}`);
+        if (cmoData && cmoData.length > 0) {
+          const categoriasSoma = {};
+          cmoData.forEach(item => {
+            categoriasSoma[item.categoria_nome] = (categoriasSoma[item.categoria_nome] || 0) + (item.valor || 0);
+          });
+          console.log('Por categoria:', categoriasSoma);
+        }
       }
       
       // Logs detalhados removidos
@@ -528,11 +541,22 @@ export async function GET(request: Request) {
         const faturamentoYuzerTri = fatYuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
         const faturamentoSymplaTri = fatSymplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
         faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
+        
+        // 🔍 DEBUG: Faturamento trimestral para CMO
+        console.log('📊 FATURAMENTO TRIMESTRE (para CMO):');
+        console.log(`ContaHub: R$ ${faturamentoContahubTri}`);
+        console.log(`Yuzer: R$ ${faturamentoYuzerTri}`);
+        console.log(`Sympla: R$ ${faturamentoSymplaTri}`);
+        console.log(`TOTAL: R$ ${faturamentoTrimestre}`);
       }
       
-      // Logs detalhados removidos
-
       const percentualCMO = viewTri ? (viewTri.cmo_percent || 0) : (faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0);
+      
+      // 🔍 DEBUG: Cálculo final CMO
+      console.log('🧮 CÁLCULO CMO FINAL:');
+      console.log(`CMO Total: R$ ${totalCMO}`);
+      console.log(`Faturamento Trimestre: R$ ${faturamentoTrimestre}`);
+      console.log(`Percentual CMO: ${percentualCMO.toFixed(2)}%`);
       
       // Logs detalhados removidos
 
