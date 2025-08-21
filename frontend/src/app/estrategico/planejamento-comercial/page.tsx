@@ -409,7 +409,7 @@ export default function PlanejamentoComercialPage() {
           </div>
         </div>
 
-        {/* Tabela de eventos */}
+        {/* Tabela horizontal completa */}
         {dados.length === 0 ? (
           <Card className="card-dark p-8">
             <div className="text-center">
@@ -422,115 +422,132 @@ export default function PlanejamentoComercialPage() {
           </Card>
         ) : (
           <Card className="card-dark">
-            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-              <CardTitle className="card-title-dark">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <CardTitle className="card-title-dark text-lg">
                 {meses.find(m => m.value === filtroMes)?.label} {filtroAno} - {dados.length} eventos
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-800">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Data/Evento
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Receita
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Público
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Tickets
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Performance
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Ações
-                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Data</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Dia</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Real (R$)</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">M1 (R$)</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Cl.Plan</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Cl.Real</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Lot.Max</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.E.Plan</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.E.Real</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.B.Plan</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.B.Real</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.Médio</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">C.Art</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">C.Prod</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">%Art/Fat</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">%B</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">%D</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">%C</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.Coz</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.Bar</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Fat.19h</th>
+                      <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {dados.map((evento) => (
-                      <tr key={evento.evento_id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td className="px-4 py-4">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">
-                              {evento.dia_formatado}/{filtroMes} - {evento.dia_semana}
-                            </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {evento.evento_nome}
-                            </div>
-                          </div>
+                      <tr key={evento.evento_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <td className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
+                          {evento.dia_formatado}/{filtroMes.toString().padStart(2, '0')}
                         </td>
-                        <td className="px-4 py-4">
-                          <div className="space-y-1">
-                            <StatusBadge 
-                              isGreen={evento.real_vs_m1_green} 
-                              value={formatarMoeda(evento.real_receita)} 
-                            />
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              Meta: {formatarMoeda(evento.m1_receita)}
-                            </div>
-                          </div>
+                        <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.dia_semana?.substring(0, 3).toUpperCase()}
                         </td>
-                        <td className="px-4 py-4">
-                          <div className="space-y-1">
-                            <StatusBadge 
-                              isGreen={evento.ci_real_vs_plan_green} 
-                              value={evento.clientes_real} 
-                            />
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              Plan: {evento.clientes_plan} | Max: {evento.lot_max}
-                            </div>
-                          </div>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.real_vs_m1_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.real_receita > 0 ? formatarMoeda(evento.real_receita) : '-'}
+                          </span>
                         </td>
-                        <td className="px-4 py-4">
-                          <div className="space-y-1">
-                            <div className="flex gap-2">
-                              <StatusBadge 
-                                isGreen={evento.te_real_vs_plan_green} 
-                                value={formatarMoeda(evento.te_real)} 
-                              />
-                              <StatusBadge 
-                                isGreen={evento.tb_real_vs_plan_green} 
-                                value={formatarMoeda(evento.tb_real)} 
-                              />
-                            </div>
-                            <StatusBadge 
-                              isGreen={evento.t_medio_green} 
-                              value={formatarMoeda(evento.t_medio)} 
-                            />
-                          </div>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.m1_receita > 0 ? formatarMoeda(evento.m1_receita) : '-'}
                         </td>
-                        <td className="px-4 py-4">
-                          <div className="space-y-1">
-                            {evento.percent_b > 0 && (
-                              <div className="text-xs">
-                                B: {formatarPercentual(evento.percent_b)} | 
-                                D: {formatarPercentual(evento.percent_d)} | 
-                                C: {formatarPercentual(evento.percent_c)}
-                              </div>
-                            )}
-                            {evento.c_art > 0 && (
-                              <StatusBadge 
-                                isGreen={evento.percent_art_fat_green} 
-                                value={formatarPercentual(evento.percent_art_fat)} 
-                                suffix=" Art/Fat"
-                              />
-                            )}
-                          </div>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.clientes_plan || '-'}
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.ci_real_vs_plan_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.clientes_real || '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.lot_max || '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.te_plan > 0 ? formatarMoeda(evento.te_plan) : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.te_real_vs_plan_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.te_real > 0 ? formatarMoeda(evento.te_real) : '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.tb_plan > 0 ? formatarMoeda(evento.tb_plan) : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.tb_real_vs_plan_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.tb_real > 0 ? formatarMoeda(evento.tb_real) : '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.t_medio_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.t_medio > 0 ? formatarMoeda(evento.t_medio) : '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.c_art > 0 ? formatarMoeda(evento.c_art) : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.c_prod > 0 ? formatarMoeda(evento.c_prod) : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.percent_art_fat_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.percent_art_fat > 0 ? formatarPercentual(evento.percent_art_fat) : '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.percent_b > 0 ? formatarPercentual(evento.percent_b) : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.percent_d > 0 ? formatarPercentual(evento.percent_d) : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.percent_c > 0 ? formatarPercentual(evento.percent_c) : '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.t_coz_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.t_coz > 0 ? `${evento.t_coz}min` : '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.t_bar_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.t_bar > 0 ? `${evento.t_bar}min` : '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${evento.fat_19h_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {evento.fat_19h > 0 ? formatarPercentual(evento.fat_19h) : '-'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-center">
                           <Button
                             onClick={() => abrirModal(evento)}
                             size="sm"
                             variant="outline"
-                            className="btn-outline-dark"
+                            className="h-7 w-7 p-0 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-3 w-3" />
                           </Button>
                         </td>
                       </tr>
