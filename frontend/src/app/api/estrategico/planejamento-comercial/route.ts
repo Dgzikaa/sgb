@@ -80,13 +80,11 @@ export async function GET(request: NextRequest) {
 
     console.log(`📅 Buscando dados para ${mes}/${ano} - Bar ID: ${user.bar_id}`);
 
-    // Calcular período
+    // Calcular período - ser mais específico para evitar dados de outros meses
     const dataInicio = `${ano}-${mes.toString().padStart(2, '0')}-01`;
-    const ultimoDia = new Date(ano, mes, 0).getDate();
-    const dataFim = `${ano}-${mes.toString().padStart(2, '0')}-${ultimoDia}`;
-    
     const dataFinalConsulta = mes === 12 ? `${ano + 1}-01-01` : `${ano}-${(mes + 1).toString().padStart(2, '0')}-01`;
-    console.log(`🔍 Período calculado: ${dataInicio} até < ${dataFinalConsulta} (excluindo próximo mês)`);
+    console.log(`🔍 Período calculado: ${dataInicio} (>=) até ${dataFinalConsulta} (<) - Mês ${mes}/${ano}`);
+    console.log(`🔍 Query Supabase: data_evento >= '${dataInicio}' AND data_evento < '${dataFinalConsulta}'`);
 
     // Buscar dados APENAS da tabela eventos_base (com todos os cálculos)
     const { data: eventos, error } = await supabase
@@ -129,7 +127,7 @@ export async function GET(request: NextRequest) {
       `)
       .eq('bar_id', user.bar_id)
       .gte('data_evento', dataInicio)
-      .lt('data_evento', mes === 12 ? `${ano + 1}-01-01` : `${ano}-${(mes + 1).toString().padStart(2, '0')}-01`)
+      .lt('data_evento', dataFinalConsulta)
       .eq('ativo', true)
       .order('data_evento', { ascending: true });
 
@@ -143,15 +141,34 @@ export async function GET(request: NextRequest) {
       console.log(`🔍 Primeira data: ${eventos[0].data_evento}, Última data: ${eventos[eventos.length - 1].data_evento}`);
     }
 
-    if (!eventos || eventos.length === 0) {
-      console.log('⚠️ Nenhum evento encontrado para o período');
+    // Filtro adicional para garantir apenas eventos do mês correto (evitar problemas de timezone)
+    const eventosFiltrados = eventos?.filter(evento => {
+      const dataEvento = new Date(evento.data_evento + 'T00:00:00Z');
+      const mesEvento = dataEvento.getUTCMonth() + 1;
+      const anoEvento = dataEvento.getUTCFullYear();
+      const isCorrectMonth = mesEvento === mes && anoEvento === ano;
+      
+      if (!isCorrectMonth) {
+        console.log(`⚠️ Evento fora do período: ${evento.data_evento} (${evento.nome}) - Mês: ${mesEvento}, Ano: ${anoEvento}`);
+      }
+      
+      return isCorrectMonth;
+    }) || [];
+
+    console.log(`📊 Eventos após filtro adicional: ${eventosFiltrados.length}`);
+    if (eventosFiltrados.length > 0) {
+      console.log(`🔍 Primeira data filtrada: ${eventosFiltrados[0].data_evento}, Última data filtrada: ${eventosFiltrados[eventosFiltrados.length - 1].data_evento}`);
+    }
+
+    if (eventosFiltrados.length === 0) {
+      console.log('⚠️ Nenhum evento encontrado para o período após filtro');
       return NextResponse.json({ data: [] });
     }
 
-    console.log(`✅ ${eventos.length} eventos encontrados`);
+    console.log(`✅ ${eventosFiltrados.length} eventos encontrados após filtro`);
 
     // Verificar se há eventos que precisam de recálculo
-    const eventosParaRecalcular = eventos.filter(e => e.precisa_recalculo);
+    const eventosParaRecalcular = eventosFiltrados.filter(e => e.precisa_recalculo);
     if (eventosParaRecalcular.length > 0) {
       console.log(`🔄 ${eventosParaRecalcular.length} eventos precisam de recálculo`);
       
@@ -164,8 +181,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Processar dados para o formato esperado pelo frontend
-    const dadosProcessados: PlanejamentoDataFinal[] = eventos.map(evento => {
-      const dataEvento = new Date(evento.data_evento);
+    const dadosProcessados: PlanejamentoDataFinal[] = eventosFiltrados.map(evento => {
+      // Forçar timezone UTC para evitar problemas de fuso horário
+      const dataEvento = new Date(evento.data_evento + 'T00:00:00Z');
       
       // Flags de performance (verde/vermelho)
       const realVsM1Green = (evento.real_r || 0) >= (evento.m1_r || 0);
@@ -183,11 +201,11 @@ export async function GET(request: NextRequest) {
         data_evento: evento.data_evento,
         dia_semana: evento.dia_semana || '',
         evento_nome: evento.nome || '',
-        dia: dataEvento.getDate(),
-        mes: dataEvento.getMonth() + 1,
-        ano: dataEvento.getFullYear(),
-        dia_formatado: dataEvento.getDate().toString().padStart(2, '0'),
-        data_curta: `${dataEvento.getDate().toString().padStart(2, '0')}/${(dataEvento.getMonth() + 1).toString().padStart(2, '0')}`,
+        dia: dataEvento.getUTCDate(),
+        mes: dataEvento.getUTCMonth() + 1,
+        ano: dataEvento.getUTCFullYear(),
+        dia_formatado: dataEvento.getUTCDate().toString().padStart(2, '0'),
+        data_curta: `${dataEvento.getUTCDate().toString().padStart(2, '0')}/${(dataEvento.getUTCMonth() + 1).toString().padStart(2, '0')}`,
         
         // Dados financeiros
         real_receita: evento.real_r || 0,

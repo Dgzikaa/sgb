@@ -133,7 +133,9 @@ export default function PlanejamentoComercialPage() {
       const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mesParam}&ano=${anoParam}&_t=${timestamp}`, {
         headers: {
           'x-user-data': encodeURIComponent(JSON.stringify(user)),
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       
@@ -159,20 +161,15 @@ export default function PlanejamentoComercialPage() {
       }
 
       if (data.success && data.data) {
-        // Filtrar apenas eventos do mês correto e ordenar por data crescente
-        const dadosFiltrados = data.data.filter(evento => {
-          const dataEvento = new Date(evento.data_evento);
-          return dataEvento.getMonth() + 1 === mesParam && dataEvento.getFullYear() === anoParam;
-        });
-        
-        const dadosOrdenados = dadosFiltrados.sort((a, b) => {
+        // A API já retorna os dados filtrados por mês/ano, apenas ordenar por data crescente
+        const dadosOrdenados = data.data.sort((a, b) => {
           const dataA = new Date(a.data_evento);
           const dataB = new Date(b.data_evento);
           return dataA.getTime() - dataB.getTime();
         });
         
         setDados(dadosOrdenados);
-        console.log(`✅ ${dadosOrdenados.length} eventos carregados para ${mesParam}/${anoParam} (filtrados e ordenados)`);
+        console.log(`✅ ${dadosOrdenados.length} eventos carregados para ${mesParam}/${anoParam} (ordenados por data)`);
         
         // Debug: mostrar as primeiras datas
         if (dadosOrdenados.length > 0) {

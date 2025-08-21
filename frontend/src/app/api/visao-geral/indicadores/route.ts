@@ -330,18 +330,19 @@ export async function GET(request: Request) {
           .gte('data_evento', startDate)
           .lte('data_evento', endDate),
         
+        // ✅ USAR SYMPLA_RESUMO PARA MELHOR PERFORMANCE
         supabase
-          .from('sympla_participantes')
-          .select('id')
+          .from('sympla_resumo')
+          .select('checkins')
           .eq('bar_id', barIdNum)
-          .eq('fez_checkin', true)
-          .gte('data_checkin', startDate)
-          .lte('data_checkin', endDate)
+          .gte('data_evento', startDate)
+          .lte('data_evento', endDate)
       ]);
 
       const totalPessoasContahub = pessoasContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
       const totalPessoasYuzer = pessoasYuzer.data?.reduce((sum, item) => sum + (item.quantidade || 0), 0) || 0;
-      const totalPessoasSympla = pessoasSympla.data?.length || 0;
+      // ✅ SOMAR CHECKINS DO SYMPLA_RESUMO
+      const totalPessoasSympla = pessoasSympla.data?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0;
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
       
       // 🔍 DEBUG: Logs detalhados das pessoas
@@ -489,11 +490,11 @@ export async function GET(request: Request) {
         'lte_data_evento': endDate
       });
       
-      const clientesTotaisSymplaData = viewTri ? null : await fetchAllData(supabase, 'sympla_participantes', 'id', {
+      // ✅ USAR SYMPLA_RESUMO PARA MELHOR PERFORMANCE NO TRIMESTRAL
+      const clientesTotaisSymplaData = viewTri ? null : await fetchAllData(supabase, 'sympla_resumo', 'checkins', {
         'eq_bar_id': barIdNum,
-        'eq_fez_checkin': true,
-        'gte_data_checkin': startDate,
-        'lte_data_checkin': endDate
+        'gte_data_evento': startDate,
+        'lte_data_evento': endDate
       });
 
       // Logs detalhados removidos
@@ -523,7 +524,8 @@ export async function GET(request: Request) {
       // ✅ CORREÇÃO: Somar unidades de ingressos = pessoas que foram ao evento
       // Cada ingresso vendido representa uma pessoa
       const totalClientesYuzer = viewTri ? 0 : ingressosYuzer.reduce((sum, item) => sum + (item.quantidade || 0), 0);
-      const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.length || 0);
+      // ✅ SOMAR CHECKINS DO SYMPLA_RESUMO NO TRIMESTRAL
+      const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0);
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
       // 🔍 DEBUG: Logs detalhados dos clientes totais
