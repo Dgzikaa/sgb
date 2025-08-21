@@ -584,41 +584,22 @@ class ContaHubProcessor {
 
   private async insertBatch(records: Record<string, unknown>[], tableName: string): Promise<number> {
     try {
-      console.log(`🔍 [DEBUG] Tentando inserir ${records.length} registros na tabela ${tableName}`)
+      console.log(`💾 [PROCESSOR] Inserindo ${records.length} registros na tabela ${tableName}`)
       
-      // Processar em sub-batches menores (50 registros por vez para evitar timeout)
-      let totalInserted = 0
-      const subBatchSize = 50
-      
-      for (let i = 0; i < records.length; i += subBatchSize) {
-        const subBatch = records.slice(i, i + subBatchSize)
-        
-        console.log(`🔍 [DEBUG] Inserindo sub-batch ${Math.floor(i/subBatchSize) + 1}/${Math.ceil(records.length/subBatchSize)} com ${subBatch.length} registros`)
-        
-        const { data, error } = await this.supabase
-          .from(tableName)
-          .upsert(subBatch, { 
-            onConflict: 'idempotency_key',
-            ignoreDuplicates: true 
-          })
-          .select('id')
+      const { data, error } = await this.supabase
+        .from(tableName)
+        .insert(records)
+        .select('id')
 
-        if (error) {
-          console.error(`❌ [PROCESSOR] Erro ao inserir batch em ${tableName}:`, JSON.stringify(error, null, 2))
-          console.error(`❌ [PROCESSOR] Dados que causaram erro:`, JSON.stringify(subBatch[0], null, 2))
-          continue
-        }
-
-        const inserted = data ? data.length : 0
-        totalInserted += inserted
-        
-        // Pausa entre sub-batches
-        if (i + subBatchSize < records.length) {
-          await new Promise(resolve => setTimeout(resolve, 50))
-        }
+      if (error) {
+        console.error(`❌ [PROCESSOR] Erro ao inserir em ${tableName}:`, error)
+        return 0
       }
+
+      const inserted = data ? data.length : 0
+      console.log(`✅ [PROCESSOR] Inseridos: ${inserted}/${records.length} registros`)
       
-      return totalInserted
+      return inserted
       
     } catch (error) {
       console.error(`❌ [PROCESSOR] Erro ao inserir batch em ${tableName}:`, error)

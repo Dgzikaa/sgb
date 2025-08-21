@@ -27,11 +27,13 @@ export function useNavigationGuard(options: NavigationGuardOptions = {}) {
         });
       }
 
-      // Aguardar um frame para permitir que o React complete operações DOM
-      requestAnimationFrame(() => {
+      // Aguardar múltiplos frames para permitir que o React complete operações DOM
+      const timeoutId = setTimeout(() => {
         isNavigatingRef.current = false;
         lastPathnameRef.current = pathname;
-      });
+      }, 100); // Aumentar delay para 100ms
+
+      return () => clearTimeout(timeoutId);
     }
   }, [pathname, enableDebugMode]);
 
@@ -39,18 +41,25 @@ export function useNavigationGuard(options: NavigationGuardOptions = {}) {
     // Interceptar erros DOM relacionados à navegação
     const handleError = (event: ErrorEvent) => {
       const error = event.error;
-      const isNavigationError = error?.message?.includes('removeChild') ||
-                               error?.message?.includes('appendChild') ||
-                               error?.message?.includes('Cannot read properties of null') ||
-                               error?.message?.includes('Cannot read properties of undefined');
+      const errorMessage = error?.message || '';
+      
+      // Detectar erros específicos de navegação/DOM
+      const isNavigationError = errorMessage.includes('removeChild') ||
+                               errorMessage.includes('appendChild') ||
+                               errorMessage.includes('Cannot read properties of null') ||
+                               errorMessage.includes('Cannot read properties of undefined') ||
+                               errorMessage.includes("reading 'call'") ||
+                               errorMessage.includes('options.factory') ||
+                               errorMessage.includes('webpack');
 
-      if (isNavigationError) {
+      if (isNavigationError && isNavigatingRef.current) {
         event.preventDefault();
+        event.stopPropagation();
         
         if (enableDebugMode) {
           console.warn('🚨 Erro de navegação interceptado:', {
-            message: error.message,
-            stack: error.stack,
+            message: errorMessage,
+            stack: error?.stack,
             isNavigating: isNavigatingRef.current,
             currentPath: pathname,
           });
@@ -60,13 +69,22 @@ export function useNavigationGuard(options: NavigationGuardOptions = {}) {
         if (onNavigationError) {
           onNavigationError(error);
         } else {
-          // Comportamento padrão: recarregar a página após um delay
+          // Comportamento padrão: aguardar um pouco mais antes de recarregar
           setTimeout(() => {
             if (enableDebugMode) {
-              console.log('🔄 Recarregando página devido a erro de navegação...');
+              console.log('🔄 Tentando recuperar navegação...');
             }
-            window.location.reload();
-          }, 100);
+            // Em vez de recarregar, tentar navegar novamente
+            try {
+              window.history.pushState({}, '', pathname);
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            } catch (navError) {
+              if (enableDebugMode) {
+                console.log('🔄 Recarregando página devido a erro de navegação...');
+              }
+              window.location.reload();
+            }
+          }, 200);
         }
       }
     };
