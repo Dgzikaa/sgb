@@ -672,7 +672,7 @@ export default function CalendarioPage() {
             </div>
 
             {/* Grid dos dias */}
-            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, minmax(100px, auto))' }}>
+            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, minmax(110px, auto))' }}>
               {generateCalendarDays().map((day, index) => {
                 if (!day.isCurrentMonth) {
                   return (
@@ -743,12 +743,14 @@ export default function CalendarioPage() {
 
                     {/* Indicador de reservas - canto inferior direito */}
                     {hasReservas && (
-                      <div className="absolute bottom-1 right-1 text-xs font-medium">
-                        <span className="text-green-600 dark:text-green-400">
-                          {day.reservasCount - canceladas}
-                        </span>
+                      <div className="absolute bottom-1 right-1 text-xs font-medium leading-tight">
+                        <div className="text-green-600 dark:text-green-400">
+                          {day.reservasCount - canceladas} ({day.totalPessoas - day.pessoasCanceladas} pax)
+                        </div>
                         {canceladas > 0 && (
-                          <span className="text-red-500 dark:text-red-400 ml-1">-{canceladas}</span>
+                          <div className="text-red-500 dark:text-red-400">
+                            -{canceladas} ({day.pessoasCanceladas} pax)
+                          </div>
                         )}
                       </div>
                     )}
