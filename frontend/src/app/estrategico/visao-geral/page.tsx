@@ -45,6 +45,7 @@ interface IndicadoresTrimestrais {
   clientesAtivos: {
     valor: number;
     meta: number;
+    variacao?: number;
   };
   clientesTotais: {
     valor: number;
@@ -61,10 +62,12 @@ interface IndicadoresTrimestrais {
   cmo: {
     valor: number;
     meta: number;
+    variacao?: number;
   };
   artistica: {
     valor: number;
     meta: number;
+    variacao?: number;
   };
 }
 
@@ -499,7 +502,7 @@ export default function VisaoGeralEstrategica() {
                     cor="green"
                     periodoAnalisado="Últimos 90 dias (2+ visitas)"
                     comparacao={{
-                      valor: 0.0,
+                      valor: indicadoresTrimestrais?.clientesAtivos?.variacao || 0,
                       label: "vs trimestre anterior"
                     }}
                   />
@@ -518,7 +521,9 @@ export default function VisaoGeralEstrategica() {
                   />
                   
                   <IndicadorRetencao
+                    valor={indicadoresTrimestrais?.retencao?.valor || 0}
                     meta={indicadoresTrimestrais?.retencao?.meta || 10}
+                    mesSelected={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`}
                   />
                   
                   <IndicadorCard
@@ -533,13 +538,13 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorCard
                     titulo="CMO"
-                    valor={cmoCalculado || 0}
+                    valor={indicadoresTrimestrais?.cmo?.valor || 0}
                     meta={indicadoresTrimestrais?.cmo?.meta || 20}
                     formato="percentual"
                     cor="orange"
                     inverterProgresso={true}
                     comparacao={{
-                      valor: 0.0,
+                      valor: indicadoresTrimestrais?.cmo?.variacao || 0,
                       label: "vs mês anterior"
                     }}
                   />
@@ -552,7 +557,7 @@ export default function VisaoGeralEstrategica() {
                     cor="pink"
                     inverterProgresso={true}
                     comparacao={{
-                      valor: 0.0,
+                      valor: indicadoresTrimestrais?.artistica?.variacao || 0,
                       label: "vs mês anterior"
                     }}
                   />
