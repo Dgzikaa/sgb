@@ -431,9 +431,9 @@ export default function ClientesPage() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
               <Table>
-                <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
+                <TableHeader className="bg-slate-50 dark:bg-slate-800/50 sticky top-0 z-10">
                   <TableRow className="border-b border-slate-200 dark:border-slate-700">
                     <TableHead className="text-slate-900 dark:text-white font-semibold py-4">
                       <div className="flex items-center gap-2">
