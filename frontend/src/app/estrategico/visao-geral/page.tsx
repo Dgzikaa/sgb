@@ -507,6 +507,10 @@ export default function VisaoGeralEstrategica() {
                     formato="numero"
                     cor="green"
                     periodoAnalisado="Últimos 90 dias (2+ visitas)"
+                    comparacao={{
+                      valor: 0.0,
+                      label: "vs trimestre anterior"
+                    }}
                   />
                   
                   <IndicadorCard
@@ -516,6 +520,10 @@ export default function VisaoGeralEstrategica() {
                     formato="numero"
                     cor="blue"
                     periodoAnalisado={`${getTrimestreInfo(trimestreAtual)?.periodo} 2025`}
+                    comparacao={{
+                      valor: 0.0,
+                      label: "vs trimestre anterior"
+                    }}
                   />
                   
                   <IndicadorRetencao
@@ -539,6 +547,10 @@ export default function VisaoGeralEstrategica() {
                     formato="percentual"
                     cor="orange"
                     inverterProgresso={true}
+                    comparacao={{
+                      valor: 0.0,
+                      label: "vs mês anterior"
+                    }}
                   />
                   
                   <IndicadorCard
@@ -548,6 +560,10 @@ export default function VisaoGeralEstrategica() {
                     formato="percentual"
                     cor="pink"
                     inverterProgresso={true}
+                    comparacao={{
+                      valor: 0.0,
+                      label: "vs mês anterior"
+                    }}
                   />
                 </div>
               )}

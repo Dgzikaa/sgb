@@ -18,6 +18,10 @@ interface IndicadorCardProps {
   inverterProgresso?: boolean; // Para indicadores onde "menos é melhor"
   periodoAnalisado?: string; // Período que está sendo analisado
   emDesenvolvimento?: boolean; // Para indicadores em desenvolvimento
+  comparacao?: {
+    valor: number;
+    label: string; // "vs mês anterior" ou "vs trimestre anterior"
+  };
 }
 
 export function IndicadorCard({
@@ -32,7 +36,8 @@ export function IndicadorCard({
   cor = 'blue',
   inverterProgresso = false,
   periodoAnalisado,
-  emDesenvolvimento = false
+  emDesenvolvimento = false,
+  comparacao
 }: IndicadorCardProps) {
   const formatarValor = (val: number) => {
     switch (formato) {
@@ -143,6 +148,30 @@ export function IndicadorCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Seção de comparação - ACIMA do valor principal */}
+        {!emDesenvolvimento && comparacao && (
+          <div className="flex items-center justify-center mb-2">
+            <div className="flex items-center gap-1">
+              {comparacao.valor > 0 ? (
+                <TrendingUp className="w-3 h-3 text-green-600 dark:text-green-400" />
+              ) : comparacao.valor < 0 ? (
+                <TrendingDown className="w-3 h-3 text-red-600 dark:text-red-400" />
+              ) : (
+                <Minus className="w-3 h-3 text-gray-500 dark:text-gray-500" />
+              )}
+              <span className={`text-xs font-medium ${
+                comparacao.valor > 0 
+                  ? 'text-green-600 dark:text-green-400' 
+                  : comparacao.valor < 0 
+                    ? 'text-red-600 dark:text-red-400' 
+                    : 'text-gray-500 dark:text-gray-500'
+              }`}>
+                {comparacao.label} {comparacao.valor > 0 ? '+' : ''}{comparacao.valor.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        )}
+        
         <div>
           <div className="flex items-baseline justify-between mb-1">
             <p className={`text-2xl font-bold ${emDesenvolvimento ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}>
