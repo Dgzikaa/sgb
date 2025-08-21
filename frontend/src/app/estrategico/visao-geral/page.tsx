@@ -74,7 +74,7 @@ export default function VisaoGeralEstrategica() {
   const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
 
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
-  const [indicadoresTrimessstrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
+  const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
   const [trimestreAtual, setTrimestreAtual] = useState(3); // 2º, 3º ou 4º trimestre
   const [anualExpanded, setAnualExpanded] = useState(true);
