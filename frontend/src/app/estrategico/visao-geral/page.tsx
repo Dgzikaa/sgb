@@ -254,7 +254,7 @@ export default function VisaoGeralEstrategica() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <GlobalLoadingComponent />
-      <div className="container mx-auto px-4 py-4 space-y-4">
+      <div className="container mx-auto px-4 pt-0 pb-1 space-y-1">
         <div className="flex items-center justify-between">
           <PageHeader title="Visão Geral" description="Resumo executivo do bar" />
           <div className="flex items-center gap-2">
@@ -275,9 +275,9 @@ export default function VisaoGeralEstrategica() {
         </div>
 
         {/* Indicadores Anuais */}
-        <div className="card-dark p-4">
+        <div className="card-dark p-1">
           <div 
-            className="flex items-center justify-between mb-4 cursor-pointer"
+            className="flex items-center justify-between mb-1 cursor-pointer"
             onClick={() => setAnualExpanded(!anualExpanded)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -313,7 +313,7 @@ export default function VisaoGeralEstrategica() {
           {anualExpanded && (
             <>
               {loading ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-1">
                   {[...Array(4)].map((_, i) => (
                     <Card key={i} className="bg-gray-50 dark:bg-gray-900">
                       <CardHeader className="pb-2">
@@ -327,7 +327,7 @@ export default function VisaoGeralEstrategica() {
                   ))}
                 </div>
               ) : indicadoresAnuais ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-1">
                   <IndicadorCard
                     titulo="Faturamento 2025"
                     valor={indicadoresAnuais.faturamento.valor}
@@ -374,8 +374,8 @@ export default function VisaoGeralEstrategica() {
         </div>
 
         {/* Indicadores Trimestrais */}
-        <div className="card-dark p-4">
-          <div className="flex items-center justify-between mb-4">
+        <div className="card-dark p-1">
+          <div className="flex items-center justify-between mb-1">
             <div 
               className="flex items-center gap-3 cursor-pointer flex-1"
               onClick={() => setTrimestralExpanded(!trimestralExpanded)}
@@ -450,7 +450,7 @@ export default function VisaoGeralEstrategica() {
           {trimestralExpanded && (
             <>
               {loading ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-1">
                   {[...Array(6)].map((_, i) => (
                     <Card key={i} className="bg-gray-50 dark:bg-gray-900">
                       <CardHeader className="pb-2">
@@ -464,7 +464,7 @@ export default function VisaoGeralEstrategica() {
                   ))}
                 </div>
               ) : indicadoresTrimestrais ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-1">
                   <IndicadorCard
                     titulo="Clientes Ativos (90d)"
                     valor={indicadoresTrimestrais.clientesAtivos.valor}
