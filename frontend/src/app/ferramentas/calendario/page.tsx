@@ -670,9 +670,9 @@ export default function CalendarioPage() {
 
           <CardContent className="p-0">
             {/* Cabeçalho dos dias da semana */}
-            <div className="grid grid-cols-7 border-b bg-gray-50 dark:bg-gray-800">
+            <div className="grid grid-cols-7 border-b bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
               {weekDays.map((day) => (
-                <div key={day} className="py-3 text-center text-sm font-bold text-gray-700 dark:text-gray-300 border-r last:border-r-0">
+                <div key={day} className="py-3 text-center text-sm font-bold text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 last:border-r-0">
                   {day}
                 </div>
               ))}

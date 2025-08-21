@@ -174,11 +174,11 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
     <AuthGuard>
       <ErrorBoundary>
         <PageTitleProvider>
-          <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+          <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             <DarkHeader />
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1">
               <ModernSidebar />
-              <main className="flex-1 transition-all duration-300 ease-in-out overflow-hidden">
+              <main className="flex-1 transition-all duration-300 ease-in-out overflow-y-auto">
                 <ErrorBoundary>
                   <GlobalPageWrapper>{children}</GlobalPageWrapper>
                 </ErrorBoundary>
