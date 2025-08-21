@@ -438,6 +438,8 @@ export default function PlanejamentoComercialPage() {
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">M1 (R$)</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Cl.Plan</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Cl.Real</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Res.Tot</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Res.P</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">Lot.Max</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.E.Plan</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-r border-gray-200 dark:border-gray-700">T.E.Real</th>
@@ -480,6 +482,12 @@ export default function PlanejamentoComercialPage() {
                           <span className={`font-medium ${evento.ci_real_vs_plan_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                             {evento.clientes_real || '-'}
                           </span>
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.res_tot || '-'}
+                        </td>
+                        <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                          {evento.res_p || '-'}
                         </td>
                         <td className="px-3 py-2 text-right text-sm text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
                           {evento.lot_max || '-'}

@@ -25,6 +25,8 @@ interface PlanejamentoDataFinal {
   // Dados de público
   clientes_plan: number;
   clientes_real: number;
+  res_tot: number;
+  res_p: number;
   lot_max: number;
   
   // Tickets
@@ -117,6 +119,8 @@ export async function GET(request: NextRequest) {
         sympla_checkins,
         yuzer_liquido,
         yuzer_ingressos,
+        res_tot,
+        res_p,
         calculado_em,
         precisa_recalculo
       `)
@@ -184,6 +188,8 @@ export async function GET(request: NextRequest) {
         // Dados de público
         clientes_plan: evento.cl_plan || 0,
         clientes_real: evento.cl_real || 0,
+        res_tot: evento.res_tot || 0,
+        res_p: evento.res_p || 0,
         lot_max: evento.lot_max || 0,
         
         // Tickets
