@@ -768,11 +768,11 @@ export async function GET(request: Request) {
       const cmoTrimestreAnteriorEnd = trimestreAnteriorEnd.toISOString().split('T')[0];
       
       // Buscar CMO do trimestre anterior
-      const cmoAnteriorData = await fetchAllData(supabase, 'nibo_lancamentos', 'valor', {
+      const cmoAnteriorData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
         'eq_bar_id': barIdNum,
         'gte_data_competencia': cmoTrimestreAnteriorStart,
         'lte_data_competencia': cmoTrimestreAnteriorEnd,
-        'in_categoria': categoriasCMO
+        'in_categoria_nome': categoriasCMO
       });
       
       // Buscar faturamento do trimestre anterior (já calculado acima)
@@ -785,8 +785,8 @@ export async function GET(request: Request) {
       const [faturamentoYuzerTriAnterior, faturamentoSymplaTriAnterior] = await Promise.all([
         supabase.from('yuzer_pagamento').select('valor_liquido').eq('bar_id', barIdNum)
           .gte('data_evento', cmoTrimestreAnteriorStart).lte('data_evento', cmoTrimestreAnteriorEnd),
-        supabase.from('sympla_pedidos').select('valor_liquido').eq('bar_id', barIdNum)
-          .gte('data_evento', cmoTrimestreAnteriorStart).lte('data_evento', cmoTrimestreAnteriorEnd)
+        supabase.from('sympla_pedidos').select('valor_liquido')
+          .gte('data_pedido', cmoTrimestreAnteriorStart).lte('data_pedido', cmoTrimestreAnteriorEnd)
       ]);
       
       const totalCMOAnterior = cmoAnteriorData?.reduce((sum, item) => sum + Math.abs(item.valor || 0), 0) || 0;
@@ -798,6 +798,18 @@ export async function GET(request: Request) {
       const percentualCMOAnterior = faturamentoTrimestreAnteriorTotal > 0 ? (totalCMOAnterior / faturamentoTrimestreAnteriorTotal) * 100 : 0;
       const variacaoCMO = percentualCMOAnterior > 0 ? ((percentualCMO - percentualCMOAnterior) / percentualCMOAnterior * 100) : 0;
       
+      // 🔍 DEBUG: Comparação CMO detalhada
+      console.log('🔄 COMPARAÇÃO CMO TRIMESTRE ANTERIOR:');
+      console.log(`Período anterior: ${cmoTrimestreAnteriorStart} até ${cmoTrimestreAnteriorEnd}`);
+      console.log(`CMO Anterior: R$ ${totalCMOAnterior.toLocaleString('pt-BR')}`);
+      console.log(`Faturamento Anterior - ContaHub: R$ ${faturamentoAnteriorContahub.toLocaleString('pt-BR')}`);
+      console.log(`Faturamento Anterior - Yuzer: R$ ${faturamentoAnteriorYuzer.toLocaleString('pt-BR')}`);
+      console.log(`Faturamento Anterior - Sympla: R$ ${faturamentoAnteriorSympla.toLocaleString('pt-BR')}`);
+      console.log(`Faturamento Anterior TOTAL: R$ ${faturamentoTrimestreAnteriorTotal.toLocaleString('pt-BR')}`);
+      console.log(`CMO% Anterior: ${percentualCMOAnterior.toFixed(2)}%`);
+      console.log(`CMO% Atual: ${percentualCMO.toFixed(2)}%`);
+      console.log(`Variação CMO: ${variacaoCMO.toFixed(1)}%`);
+      
       console.log('🧮 COMPARAÇÃO CMO (TRIMESTRE):');
       console.log(`CMO Atual: ${percentualCMO.toFixed(2)}%`);
       console.log(`CMO Trimestre Anterior (${cmoTrimestreAnteriorStart} a ${cmoTrimestreAnteriorEnd}): ${percentualCMOAnterior.toFixed(2)}%`);
@@ -805,30 +817,37 @@ export async function GET(request: Request) {
       
       // Logs detalhados removidos
 
-      // % Artística (Planejamento Comercial) - CÁLCULO CORRIGIDO USANDO EVENTOS_BASE
+      // % Artística (Planejamento Comercial) - CÁLCULO CORRIGIDO USANDO NIBO_AGENDAMENTOS
       let viewOk = true;
       let variacaoArtistica = 0;
       const percentualArtistica = viewTri ? (viewTri.artistica_percent || 0) : (async () => {
-        const { data: artisticaData, error: artisticaErr } = await supabase
-          .from('eventos_base')
-          .select('c_art, c_prod, real_r, percent_art_fat')
-          .eq('bar_id', barIdNum)
-          .gte('data_evento', startDate)
-          .lte('data_evento', endDate)
-          .gt('real_r', 0); // Apenas eventos com faturamento
+        // Buscar custos artísticos e de produção na nibo_agendamentos
+        const [custoArtisticoData, custoProducaoData] = await Promise.all([
+          fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
+            'eq_bar_id': barIdNum,
+            'gte_data_competencia': startDate,
+            'lte_data_competencia': endDate,
+            'eq_categoria_nome': 'Atrações Programação'
+          }),
+          fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
+            'eq_bar_id': barIdNum,
+            'gte_data_competencia': startDate,
+            'lte_data_competencia': endDate,
+            'eq_categoria_nome': 'Produção Eventos'
+          })
+        ]);
         
-        viewOk = !artisticaErr;
+        // Calcular totais
+        const totalCustoArtistico = custoArtisticoData?.reduce((sum, item) => sum + Math.abs(item.valor || 0), 0) || 0;
+        const totalCustoProducao = custoProducaoData?.reduce((sum, item) => sum + Math.abs(item.valor || 0), 0) || 0;
         
-        if (!artisticaData || artisticaData.length === 0) return 0;
-        
-        // Calcular percentual agregado (CORRETO): (Custo Artístico + Custo Produção) / Total faturamento * 100
-        const totalCustoArtistico = artisticaData.reduce((sum, item) => sum + (item.c_art || 0), 0);
-        const totalCustoProducao = artisticaData.reduce((sum, item) => sum + (item.c_prod || 0), 0);
-        const totalFaturamento = artisticaData.reduce((sum, item) => sum + (item.real_r || 0), 0);
+        // Usar o faturamento já calculado acima
+        const totalFaturamento = faturamentoTrimestre;
         
         // 🔍 DEBUG: Logs do cálculo artística
-        console.log('🎭 CÁLCULO % ARTÍSTICA:');
-        console.log(`Eventos encontrados: ${artisticaData.length}`);
+        console.log('🎭 CÁLCULO % ARTÍSTICA (NIBO_AGENDAMENTOS):');
+        console.log(`Registros Atrações: ${custoArtisticoData?.length || 0}`);
+        console.log(`Registros Produção: ${custoProducaoData?.length || 0}`);
         console.log(`Total Custo Artístico: R$ ${totalCustoArtistico.toLocaleString('pt-BR')}`);
         console.log(`Total Custo Produção: R$ ${totalCustoProducao.toLocaleString('pt-BR')}`);
         console.log(`Total Faturamento: R$ ${totalFaturamento.toLocaleString('pt-BR')}`);
@@ -837,31 +856,42 @@ export async function GET(request: Request) {
         
         const percentualCalculado = totalFaturamento > 0 ? (totalCustoCompleto / totalFaturamento) * 100 : 0;
         
-        // ✅ COMPARAÇÃO % ARTÍSTICA COM TRIMESTRE ANTERIOR
-        const { data: artisticaDataAnterior, error: artisticaErrAnterior } = await supabase
-          .from('eventos_base')
-          .select('c_art, c_prod, real_r')
-          .eq('bar_id', barIdNum)
-          .gte('data_evento', cmoTrimestreAnteriorStart)
-          .lte('data_evento', cmoTrimestreAnteriorEnd)
-          .gt('real_r', 0);
+        // ✅ COMPARAÇÃO % ARTÍSTICA COM TRIMESTRE ANTERIOR (NIBO_AGENDAMENTOS)
+        const [custoArtisticoAnterior, custoProducaoAnterior] = await Promise.all([
+          fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
+            'eq_bar_id': barIdNum,
+            'gte_data_competencia': cmoTrimestreAnteriorStart,
+            'lte_data_competencia': cmoTrimestreAnteriorEnd,
+            'eq_categoria_nome': 'Atrações Programação'
+          }),
+          fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
+            'eq_bar_id': barIdNum,
+            'gte_data_competencia': cmoTrimestreAnteriorStart,
+            'lte_data_competencia': cmoTrimestreAnteriorEnd,
+            'eq_categoria_nome': 'Produção Eventos'
+          })
+        ]);
         
-        let variacaoArtistica = 0;
-        if (!artisticaErrAnterior && artisticaDataAnterior && artisticaDataAnterior.length > 0) {
-          const totalCustoArtisticoAnterior = artisticaDataAnterior.reduce((sum, item) => sum + (item.c_art || 0), 0);
-          const totalCustoProducaoAnterior = artisticaDataAnterior.reduce((sum, item) => sum + (item.c_prod || 0), 0);
-          const totalFaturamentoAnterior = artisticaDataAnterior.reduce((sum, item) => sum + (item.real_r || 0), 0);
-          const totalCustoCompletoAnterior = totalCustoArtisticoAnterior + totalCustoProducaoAnterior;
-          
-          const percentualAnterior = totalFaturamentoAnterior > 0 ? (totalCustoCompletoAnterior / totalFaturamentoAnterior) * 100 : 0;
-          const variacaoCalculada = percentualAnterior > 0 ? ((percentualCalculado - percentualAnterior) / percentualAnterior * 100) : 0;
-          variacaoArtistica = variacaoCalculada;
-          
-          console.log('🎭 COMPARAÇÃO % ARTÍSTICA (TRIMESTRE):');
-          console.log(`% Artística Atual: ${percentualCalculado.toFixed(2)}%`);
-          console.log(`% Artística Trimestre Anterior: ${percentualAnterior.toFixed(2)}%`);
-          console.log(`Variação: ${variacaoArtistica.toFixed(1)}%`);
-        }
+        const totalCustoArtisticoAnterior = custoArtisticoAnterior?.reduce((sum, item) => sum + Math.abs(item.valor || 0), 0) || 0;
+        const totalCustoProducaoAnterior = custoProducaoAnterior?.reduce((sum, item) => sum + Math.abs(item.valor || 0), 0) || 0;
+        const totalCustoCompletoAnterior = totalCustoArtisticoAnterior + totalCustoProducaoAnterior;
+        
+        // Usar faturamento do trimestre anterior já calculado
+        const totalFaturamentoAnterior = faturamentoTrimestreAnteriorTotal;
+        
+        const percentualAnterior = totalFaturamentoAnterior > 0 ? (totalCustoCompletoAnterior / totalFaturamentoAnterior) * 100 : 0;
+        variacaoArtistica = percentualAnterior > 0 ? ((percentualCalculado - percentualAnterior) / percentualAnterior * 100) : 0;
+        
+        console.log('🎭 COMPARAÇÃO % ARTÍSTICA (TRIMESTRE - NIBO):');
+        console.log(`Período anterior: ${cmoTrimestreAnteriorStart} até ${cmoTrimestreAnteriorEnd}`);
+        console.log(`Registros Atrações Anterior: ${custoArtisticoAnterior?.length || 0}`);
+        console.log(`Registros Produção Anterior: ${custoProducaoAnterior?.length || 0}`);
+        console.log(`Custo Artístico Anterior: R$ ${totalCustoArtisticoAnterior.toLocaleString('pt-BR')}`);
+        console.log(`Custo Produção Anterior: R$ ${totalCustoProducaoAnterior.toLocaleString('pt-BR')}`);
+        console.log(`Faturamento Anterior: R$ ${totalFaturamentoAnterior.toLocaleString('pt-BR')}`);
+        console.log(`% Artística Atual: ${percentualCalculado.toFixed(2)}%`);
+        console.log(`% Artística Anterior: ${percentualAnterior.toFixed(2)}%`);
+        console.log(`Variação: ${variacaoArtistica.toFixed(1)}%`);
         
         // Variação será usada no retorno da função
         
