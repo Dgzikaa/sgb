@@ -464,10 +464,9 @@ export async function GET(request: Request) {
       }
       
       const totalClientesContahub = viewTri ? 0 : (clientesTotaisContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0);
-      // ⚠️ CORREÇÃO TEMPORÁRIA: Yuzer não tem dados confiáveis de clientes únicos
-      // A tabela yuzer_produtos tem quantidade de ingressos, não pessoas únicas
-      // TODO: Implementar lógica correta quando tivermos dados de clientes únicos
-      const totalClientesYuzer = 0; // Desabilitado até correção
+      // ✅ CORREÇÃO: Somar unidades de ingressos = pessoas que foram ao evento
+      // Cada ingresso vendido representa uma pessoa
+      const totalClientesYuzer = viewTri ? 0 : ingressosYuzer.reduce((sum, item) => sum + (item.quantidade || 0), 0);
       const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.length || 0);
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
