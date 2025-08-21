@@ -560,13 +560,20 @@ export async function GET(request: Request) {
         console.log(`TOTAL: R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
       }
       
-      const percentualCMO = viewTri ? (viewTri.cmo_percent || 0) : (faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0);
+      // FORÇAR RECÁLCULO DO CMO % (não usar VIEW para garantir valor correto)
+      const percentualCMO = faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0;
       
       // 🔍 DEBUG: Cálculo final CMO
-      console.log('🧮 CÁLCULO CMO FINAL:');
-      console.log(`CMO Total: R$ ${totalCMO}`);
-      console.log(`Faturamento Trimestre: R$ ${faturamentoTrimestre}`);
+      console.log('🧮 CÁLCULO CMO FINAL (FORÇADO):');
+      console.log(`CMO Total: R$ ${totalCMO.toLocaleString('pt-BR')}`);
+      console.log(`Faturamento Trimestre: R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
+      console.log(`Divisão: ${totalCMO} ÷ ${faturamentoTrimestre} = ${(totalCMO / faturamentoTrimestre).toFixed(4)}`);
       console.log(`Percentual CMO: ${percentualCMO.toFixed(2)}%`);
+      console.log(`Usando VIEW? ${viewTri ? 'SIM' : 'NÃO - RECÁLCULO MANUAL'}`);
+      
+      if (viewTri) {
+        console.log(`⚠️  VIEW tinha: ${viewTri.cmo_percent}% (IGNORADO)`);
+      }
       
       // Logs detalhados removidos
 
