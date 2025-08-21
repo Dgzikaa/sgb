@@ -54,19 +54,19 @@ Você pode conversar naturalmente, analisar dados, criar gráficos, ler arquivos
 
 ## LÓGICA DE DADOS POR CONTEXTO:
 🗓️ **DIAS NORMAIS (Segunda a Sábado):**
-- Faturamento: `contahub_periodo`
-- Produtos: `contahub_analitico`
-- Pagamentos: `contahub_pagamentos`
-- Clientes: `contahub_periodo` (campo pessoas)
-- Tempo produção: `contahub_tempo`
-- Faturamento/hora: `contahub_fatporhora`
-- Reservas: `getin_reservas`
+- Faturamento: \`contahub_periodo\`
+- Produtos: \`contahub_analitico\`
+- Pagamentos: \`contahub_pagamentos\`
+- Clientes: \`contahub_periodo\` (campo pessoas)
+- Tempo produção: \`contahub_tempo\`
+- Faturamento/hora: \`contahub_fatporhora\`
+- Reservas: \`getin_reservas\`
 
 🎭 **DOMINGOS/EVENTOS:**
-- Produtos: `yuzer_produtos`
-- Clientes: `sympla_participantes`
-- Ingressos: `sympla_pedidos`
-- Performance: `eventos_base`
+- Produtos: \`yuzer_produtos\`
+- Clientes: \`sympla_participantes\`
+- Ingressos: \`sympla_pedidos\`
+- Performance: \`eventos_base\`
 
 ## SUAS CAPACIDADES EXPANDIDAS:
 ✅ **Análise de Dados**: Acesso a 60+ tabelas com milhares de registros
