@@ -84,6 +84,9 @@ export async function GET(request: NextRequest) {
     const dataInicio = `${ano}-${mes.toString().padStart(2, '0')}-01`;
     const ultimoDia = new Date(ano, mes, 0).getDate();
     const dataFim = `${ano}-${mes.toString().padStart(2, '0')}-${ultimoDia}`;
+    
+    const dataFinalConsulta = mes === 12 ? `${ano + 1}-01-01` : `${ano}-${(mes + 1).toString().padStart(2, '0')}-01`;
+    console.log(`🔍 Período calculado: ${dataInicio} até < ${dataFinalConsulta} (excluindo próximo mês)`);
 
     // Buscar dados APENAS da tabela eventos_base (com todos os cálculos)
     const { data: eventos, error } = await supabase
@@ -126,13 +129,18 @@ export async function GET(request: NextRequest) {
       `)
       .eq('bar_id', user.bar_id)
       .gte('data_evento', dataInicio)
-      .lte('data_evento', dataFim)
+      .lt('data_evento', mes === 12 ? `${ano + 1}-01-01` : `${ano}-${(mes + 1).toString().padStart(2, '0')}-01`)
       .eq('ativo', true)
       .order('data_evento', { ascending: true });
 
     if (error) {
       console.error('❌ Erro ao buscar eventos:', error);
       return NextResponse.json({ error: 'Erro ao buscar dados' }, { status: 500 });
+    }
+
+    console.log(`📊 Eventos encontrados: ${eventos?.length || 0}`);
+    if (eventos && eventos.length > 0) {
+      console.log(`🔍 Primeira data: ${eventos[0].data_evento}, Última data: ${eventos[eventos.length - 1].data_evento}`);
     }
 
     if (!eventos || eventos.length === 0) {

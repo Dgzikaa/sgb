@@ -318,7 +318,7 @@ export default function DesempenhoPage() {
     if (selectedBar) {
       carregarDados();
     }
-  }, [selectedBar, mesAtual, carregarDados]);
+  }, [selectedBar, mesAtual]);
 
   if (loading) {
     return (
