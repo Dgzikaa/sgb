@@ -138,17 +138,21 @@ export default function CalendarioPage() {
         ano: anoParam.toString()
       });
 
-      const response = await fetch(`/api/dashboard/planejamento/reservas?${params}`);
-      const result: ApiResponse = await response.json();
+      const response = await apiCall(`/api/ferramentas/calendario?${params}`, {
+        headers: {
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        }
+      });
       
       console.log('📊 Dados recebidos:', {
-        total: Object.keys(result.data || {}).length,
-        totais: result.totais
+        total: Object.keys(response.data || {}).length,
+        totais: response.totais,
+        meta: response.meta
       });
 
-      if (result.success && result.data) {
-        setDados(result.data);
-        setTotais(result.totais || { 
+      if (response.success && response.data) {
+        setDados(response.data);
+        setTotais(response.totais || { 
           reservas: 0, 
           pessoas: 0, 
           confirmadas: 0, 
@@ -156,7 +160,7 @@ export default function CalendarioPage() {
           canceladas: 0, 
           pessoasCanceladas: 0 
         });
-        console.log(`✅ ${Object.keys(result.data).length} dias carregados para ${mesParam}/${anoParam}`);
+        console.log(`✅ ${Object.keys(response.data).length} dias carregados para ${mesParam}/${anoParam}`);
       } else {
         setError('Erro ao carregar dados');
       }
@@ -258,13 +262,13 @@ export default function CalendarioPage() {
         console.log('🔄 Atualizando evento existente ID:', eventoId);
         const updateData = {
           id: eventoId,
-          nome_evento: dadosEvento.nome_evento,
-          nome_artista: dadosEvento.nome_artista || null,
-          genero_musical: dadosEvento.genero_musical,
+          nome: dadosEvento.nome_evento,
+          artista: dadosEvento.nome_artista || null,
+          genero: dadosEvento.genero_musical,
           observacoes: dadosEvento.observacoes || null
         };
         
-        const response = await apiCall('/api/eventos', {
+        const response = await apiCall('/api/ferramentas/calendario/eventos', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -282,29 +286,20 @@ export default function CalendarioPage() {
         // Criar novo evento usando POST
         console.log('➕ Criando novo evento');
         const novoEvento = {
-          bar_id: user.bar_id || 3,
-          nome_evento: dadosEvento.nome_evento,
-          nome_artista: dadosEvento.nome_artista || null,
-          genero_musical: dadosEvento.genero_musical,
-          observacoes: dadosEvento.observacoes || null,
           data_evento: eventoSelecionado.data,
-          horario_inicio: '19:00:00',
-          horario_fim: '23:59:00',
-          status: 'ativo',
-          categoria: 'música',
-          tipo_evento: 'show',
-          divulgacao_ativa: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          nome: dadosEvento.nome_evento,
+          artista: dadosEvento.nome_artista || null,
+          genero: dadosEvento.genero_musical,
+          observacoes: dadosEvento.observacoes || null
         };
 
-        const response = await apiCall('/api/eventos', {
+        const response = await apiCall('/api/ferramentas/calendario/eventos', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'x-user-data': encodeURIComponent(JSON.stringify(user))
           },
-          body: JSON.stringify([novoEvento])
+          body: JSON.stringify(novoEvento)
         });
         
         if (!response.success) {
@@ -320,9 +315,11 @@ export default function CalendarioPage() {
         [eventoSelecionado.data]: {
           ...prev[eventoSelecionado.data],
           evento: {
+            id: eventoId || response.data?.id,
             nome: dadosEvento.nome_evento,
             artista: dadosEvento.nome_artista,
-            genero: dadosEvento.genero_musical
+            genero: dadosEvento.genero_musical,
+            observacoes: dadosEvento.observacoes
           }
         }
       }));
@@ -358,7 +355,7 @@ export default function CalendarioPage() {
     try {
       console.log('🗑️ Excluindo evento ID:', eventoCompleto.id);
       
-      const response = await apiCall(`/api/eventos/${eventoCompleto.id}`, {
+      const response = await apiCall(`/api/ferramentas/calendario/eventos?id=${eventoCompleto.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -400,8 +397,7 @@ export default function CalendarioPage() {
     console.log('🔍 Carregando dados do evento para:', data);
     setCarregandoEvento(true);
     try {
-      const [ano, mes, dia] = data.split('-');
-      const response = await apiCall(`/api/eventos?bar_id=${user.bar_id || 3}&ano=${ano}&mes=${parseInt(mes)}`, {
+      const response = await apiCall(`/api/ferramentas/calendario/eventos?data=${data}`, {
         headers: {
           'x-user-data': encodeURIComponent(JSON.stringify(user))
         }
@@ -409,22 +405,14 @@ export default function CalendarioPage() {
       
       console.log('📋 Dados recebidos da API:', response);
       
-      if (response.success) {
-        // Buscar evento específico da data
-        const eventoEncontrado = response.data.find((evento: any) => {
-          const dataEvento = new Date(evento.data_evento).toISOString().split('T')[0];
-          console.log('🔍 Comparando:', dataEvento, 'com', data);
-          return dataEvento === data;
-        });
-        
-        if (eventoEncontrado) {
-          console.log('✅ Evento encontrado:', eventoEncontrado);
-          const eventoCompleto = {
-            id: eventoEncontrado.id,
-            nome: eventoEncontrado.nome_evento || '',
-            artista: eventoEncontrado.nome_artista || '',
-            genero: eventoEncontrado.genero_musical || '',
-            observacoes: eventoEncontrado.observacoes || ''
+      if (response.success && response.data) {
+        console.log('✅ Evento encontrado:', response.data);
+        const eventoCompleto = {
+            id: response.data.id,
+            nome: response.data.nome || '',
+            artista: response.data.artista || '',
+            genero: response.data.genero || '',
+            observacoes: response.data.observacoes || ''
           };
           console.log('📋 Evento formatado:', eventoCompleto);
           return eventoCompleto;
@@ -728,11 +716,6 @@ export default function CalendarioPage() {
                               <div className="text-xs text-blue-600 dark:text-blue-300 truncate flex items-center gap-1" title={day.evento?.artista}>
                                 <User className="w-3 h-3" />
                                 {day.evento?.artista}
-                              </div>
-                            )}
-                            {day.evento?.genero && (
-                              <div className="text-xs text-blue-500 dark:text-blue-400 truncate">
-                                {day.evento?.genero}
                               </div>
                             )}
                           </div>

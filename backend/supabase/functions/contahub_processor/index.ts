@@ -575,11 +575,20 @@ class ContaHubProcessor {
   }
 
   private enrichRecords(records: Record<string, unknown>[], rawDataRecord: any, dataType: string): Record<string, unknown>[] {
-    return records.map((record, index) => ({
-      ...record,
-      bar_id: rawDataRecord.bar_id,
-      idempotency_key: `${dataType}_${rawDataRecord.id}_${index}_${Date.now()}`
-    }))
+    const crypto = require('crypto')
+    
+    return records.map((record, index) => {
+      // Criar chave única baseada no conteúdo do registro + timestamp
+      const recordContent = JSON.stringify(record)
+      const uniqueString = `${dataType}_${rawDataRecord.bar_id}_${recordContent}_${Date.now()}_${Math.random()}`
+      const idempotencyKey = crypto.createHash('md5').update(uniqueString).digest('hex')
+      
+      return {
+        ...record,
+        bar_id: rawDataRecord.bar_id,
+        idempotency_key: idempotencyKey
+      }
+    })
   }
 
   private async insertBatch(records: Record<string, unknown>[], tableName: string): Promise<number> {
