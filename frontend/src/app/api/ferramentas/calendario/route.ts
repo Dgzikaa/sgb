@@ -95,7 +95,11 @@ export async function GET(request: NextRequest) {
       confirmadas: 0,
       pessoasConfirmadas: 0,
       canceladas: 0,
-      pessoasCanceladas: 0
+      pessoasCanceladas: 0,
+      noshow: 0,
+      pessoasNoshow: 0,
+      pendentes: 0,
+      pessoasPendentes: 0
     };
 
     // Adicionar eventos
@@ -109,6 +113,10 @@ export async function GET(request: NextRequest) {
           pessoasConfirmadas: 0,
           canceladas: 0,
           pessoasCanceladas: 0,
+          noshow: 0,
+          pessoasNoshow: 0,
+          pendentes: 0,
+          pessoasPendentes: 0,
           evento: null
         };
       }
@@ -133,6 +141,10 @@ export async function GET(request: NextRequest) {
           pessoasConfirmadas: 0,
           canceladas: 0,
           pessoasCanceladas: 0,
+          noshow: 0,
+          pessoasNoshow: 0,
+          pendentes: 0,
+          pessoasPendentes: 0,
           evento: null
         };
       }
@@ -152,6 +164,17 @@ export async function GET(request: NextRequest) {
         dadosPorData[dataStr].pessoasCanceladas += pessoas;
         totais.canceladas++;
         totais.pessoasCanceladas += pessoas;
+      } else if (reserva.status === 'no_show') {
+        dadosPorData[dataStr].noshow++;
+        dadosPorData[dataStr].pessoasNoshow += pessoas;
+        totais.noshow++;
+        totais.pessoasNoshow += pessoas;
+      } else {
+        // Status pendente (pending, waiting, etc.)
+        dadosPorData[dataStr].pendentes++;
+        dadosPorData[dataStr].pessoasPendentes += pessoas;
+        totais.pendentes++;
+        totais.pessoasPendentes += pessoas;
       }
 
       // Totais gerais

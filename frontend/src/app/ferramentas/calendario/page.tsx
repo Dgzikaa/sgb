@@ -47,6 +47,10 @@ interface DiaData {
   pessoasConfirmadas: number;
   canceladas: number;
   pessoasCanceladas: number;
+  noshow: number;
+  pessoasNoshow: number;
+  pendentes: number;
+  pessoasPendentes: number;
   evento: EventoInfo | null;
 }
 
@@ -60,6 +64,10 @@ interface ApiResponse {
     pessoasConfirmadas: number;
     canceladas: number;
     pessoasCanceladas: number;
+    noshow: number;
+    pessoasNoshow: number;
+    pendentes: number;
+    pessoasPendentes: number;
   };
 }
 
@@ -67,12 +75,17 @@ interface CalendarDay {
   date: Date;
   isCurrentMonth: boolean;
   isToday: boolean;
+  isPast: boolean;
   reservasCount: number;
   totalPessoas: number;
   confirmadasCount: number;
   pessoasConfirmadas: number;
   canceladasCount: number;
   pessoasCanceladas: number;
+  noshowCount: number;
+  pessoasNoshow: number;
+  pendentesCount: number;
+  pessoasPendentes: number;
   evento: EventoInfo | null;
 }
 
@@ -93,7 +106,11 @@ export default function CalendarioPage() {
     confirmadas: 0, 
     pessoasConfirmadas: 0,
     canceladas: 0,
-    pessoasCanceladas: 0
+    pessoasCanceladas: 0,
+    noshow: 0,
+    pessoasNoshow: 0,
+    pendentes: 0,
+    pessoasPendentes: 0
   });
   
   // Estados do modal
@@ -408,17 +425,16 @@ export default function CalendarioPage() {
       if (response.success && response.data) {
         console.log('✅ Evento encontrado:', response.data);
         const eventoCompleto = {
-            id: response.data.id,
-            nome: response.data.nome || '',
-            artista: response.data.artista || '',
-            genero: response.data.genero || '',
-            observacoes: response.data.observacoes || ''
-          };
-          console.log('📋 Evento formatado:', eventoCompleto);
-          return eventoCompleto;
-        } else {
-          console.log('❌ Nenhum evento encontrado para a data:', data);
-        }
+          id: response.data.id,
+          nome: response.data.nome || '',
+          artista: response.data.artista || '',
+          genero: response.data.genero || '',
+          observacoes: response.data.observacoes || ''
+        };
+        console.log('📋 Evento formatado:', eventoCompleto);
+        return eventoCompleto;
+      } else {
+        console.log('❌ Nenhum evento encontrado para a data:', data);
       }
       return null;
     } catch (error) {
@@ -445,16 +461,25 @@ export default function CalendarioPage() {
       const dateString = date.toISOString().split('T')[0];
       const dayData = dados[dateString];
       
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const isPast = date < today;
+      
       days.push({
         date,
         isCurrentMonth: date.getMonth() === currentMonth,
         isToday: date.toDateString() === new Date().toDateString(),
+        isPast,
         reservasCount: dayData?.reservas || 0,
         totalPessoas: dayData?.pessoas || 0,
         confirmadasCount: dayData?.confirmadas || 0,
         pessoasConfirmadas: dayData?.pessoasConfirmadas || 0,
         canceladasCount: dayData?.canceladas || 0,
         pessoasCanceladas: dayData?.pessoasCanceladas || 0,
+        noshowCount: dayData?.noshow || 0,
+        pessoasNoshow: dayData?.pessoasNoshow || 0,
+        pendentesCount: dayData?.pendentes || 0,
+        pessoasPendentes: dayData?.pessoasPendentes || 0,
         evento: dayData?.evento || null
       });
     }
@@ -527,9 +552,9 @@ export default function CalendarioPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-2 py-4 max-w-7xl">
         {/* Header com filtros */}
-        <div className="card-dark p-6 mb-6">
+        <div className="card-dark p-4 mb-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h1 className="card-title-dark mb-2 flex items-center gap-3">
@@ -617,18 +642,22 @@ export default function CalendarioPage() {
               <CardTitle className="text-xl font-bold">
                 {monthNames[currentMonth]} {currentYear}
               </CardTitle>
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-xs flex-wrap">
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                   <span>{totais.confirmadas} confirmadas</span>
+                </div>
+                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                  <span>{totais.pendentes} pendentes</span>
                 </div>
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
                   <div className="w-2 h-2 bg-red-400 rounded-full"></div>
                   <span>{totais.canceladas} canceladas</span>
                 </div>
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                  <span>{totais.reservas} total</span>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <span>{totais.noshow} no-show</span>
                 </div>
                 <div className="w-px h-4 bg-white/20"></div>
                 <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
@@ -650,7 +679,7 @@ export default function CalendarioPage() {
             </div>
 
             {/* Grid dos dias */}
-            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, 120px)' }}>
+            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, 100px)' }}>
               {generateCalendarDays().map((day, index) => {
                 if (!day.isCurrentMonth) {
                   return (
@@ -662,6 +691,8 @@ export default function CalendarioPage() {
                 const hasEvento = day.evento;
                 const confirmadas = day.confirmadasCount;
                 const canceladas = day.canceladasCount;
+                const noshow = day.noshowCount;
+                const pendentes = day.pendentesCount;
 
                 return (
                   <div
@@ -683,14 +714,45 @@ export default function CalendarioPage() {
                       
                       {/* Badge de reservas */}
                       {hasReservas && (
-                        <div className="flex items-center gap-1">
-                          <Badge variant="default" className="text-xs px-1 py-0.5 bg-green-500">
-                            {confirmadas}
-                          </Badge>
-                          {canceladas > 0 && (
-                            <Badge variant="destructive" className="text-xs px-1 py-0.5">
-                              {canceladas}
-                            </Badge>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {day.isPast ? (
+                            // Para datas passadas, mostrar status finais
+                            <>
+                              {confirmadas > 0 && (
+                                <Badge variant="default" className="text-xs px-1 py-0.5 bg-green-500">
+                                  ✓{confirmadas}
+                                </Badge>
+                              )}
+                              {canceladas > 0 && (
+                                <Badge variant="destructive" className="text-xs px-1 py-0.5">
+                                  ✗{canceladas}
+                                </Badge>
+                              )}
+                              {noshow > 0 && (
+                                <Badge variant="secondary" className="text-xs px-1 py-0.5 bg-gray-500">
+                                  ⚠{noshow}
+                                </Badge>
+                              )}
+                            </>
+                          ) : (
+                            // Para datas futuras, mostrar status atuais
+                            <>
+                              {confirmadas > 0 && (
+                                <Badge variant="default" className="text-xs px-1 py-0.5 bg-green-500">
+                                  ✓{confirmadas}
+                                </Badge>
+                              )}
+                              {pendentes > 0 && (
+                                <Badge variant="secondary" className="text-xs px-1 py-0.5 bg-yellow-500">
+                                  ⏳{pendentes}
+                                </Badge>
+                              )}
+                              {canceladas > 0 && (
+                                <Badge variant="destructive" className="text-xs px-1 py-0.5">
+                                  ✗{canceladas}
+                                </Badge>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
@@ -740,23 +802,53 @@ export default function CalendarioPage() {
                         {hasReservas ? (
                           <div className="bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 text-xs">
                             <div className="text-center text-gray-700 dark:text-gray-300 font-medium text-xs leading-tight">
-                              {confirmadas > 0 && (
+                              {day.isPast ? (
+                                // Para datas passadas, mostrar resultado final
                                 <>
-                                  <span className="text-green-600 font-bold">✓ {confirmadas}</span>
-                                  <span className="text-green-700 dark:text-green-400 ml-1">({day.pessoasConfirmadas} pax)</span>
+                                  {confirmadas > 0 && (
+                                    <>
+                                      <span className="text-green-600 font-bold">✓ {confirmadas}</span>
+                                      <span className="text-green-700 dark:text-green-400 ml-1">({day.pessoasConfirmadas} pax)</span>
+                                    </>
+                                  )}
+                                  {canceladas > 0 && (
+                                    <>
+                                      {confirmadas > 0 && <span className="mx-1">•</span>}
+                                      <span className="text-red-600 font-bold">✗ {canceladas}</span>
+                                      <span className="text-red-700 dark:text-red-400 ml-1">({day.pessoasCanceladas} pax)</span>
+                                    </>
+                                  )}
+                                  {noshow > 0 && (
+                                    <>
+                                      {(confirmadas > 0 || canceladas > 0) && <span className="mx-1">•</span>}
+                                      <span className="text-gray-600 font-bold">⚠ {noshow}</span>
+                                      <span className="text-gray-700 dark:text-gray-400 ml-1">({day.pessoasNoshow} pax)</span>
+                                    </>
+                                  )}
                                 </>
-                              )}
-                              {(day.reservasCount - confirmadas - canceladas) > 0 && (
+                              ) : (
+                                // Para datas futuras, mostrar status atual
                                 <>
-                                  {confirmadas > 0 && <span className="mx-1">•</span>}
-                                  <span className="text-blue-600 font-bold">⏳ {day.reservasCount - confirmadas - canceladas}</span>
-                                  <span className="text-blue-700 dark:text-blue-400 ml-1">({day.totalPessoas - day.pessoasConfirmadas - day.pessoasCanceladas} pax)</span>
-                                </>
-                              )}
-                              {canceladas > 0 && (
-                                <>
-                                  {(confirmadas > 0 || (day.reservasCount - confirmadas - canceladas) > 0) && <span className="mx-1">•</span>}
-                                  <span className="text-red-600 font-bold">✗ {canceladas}</span>
+                                  {confirmadas > 0 && (
+                                    <>
+                                      <span className="text-green-600 font-bold">✓ {confirmadas}</span>
+                                      <span className="text-green-700 dark:text-green-400 ml-1">({day.pessoasConfirmadas} pax)</span>
+                                    </>
+                                  )}
+                                  {pendentes > 0 && (
+                                    <>
+                                      {confirmadas > 0 && <span className="mx-1">•</span>}
+                                      <span className="text-yellow-600 font-bold">⏳ {pendentes}</span>
+                                      <span className="text-yellow-700 dark:text-yellow-400 ml-1">({day.pessoasPendentes} pax)</span>
+                                    </>
+                                  )}
+                                  {canceladas > 0 && (
+                                    <>
+                                      {(confirmadas > 0 || pendentes > 0) && <span className="mx-1">•</span>}
+                                      <span className="text-red-600 font-bold">✗ {canceladas}</span>
+                                      <span className="text-red-700 dark:text-red-400 ml-1">({day.pessoasCanceladas} pax)</span>
+                                    </>
+                                  )}
                                 </>
                               )}
                             </div>
