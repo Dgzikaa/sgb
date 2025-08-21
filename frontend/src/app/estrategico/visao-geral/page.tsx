@@ -50,10 +50,12 @@ interface IndicadoresTrimestrais {
   clientesTotais: {
     valor: number;
     meta: number;
+    variacao?: number;
   };
   retencao: {
     valor: number;
     meta: number;
+    variacao?: number;
   };
   cmvLimpo: {
     valor: number;
@@ -515,7 +517,7 @@ export default function VisaoGeralEstrategica() {
                     cor="blue"
                     periodoAnalisado={`${getTrimestreInfo(trimestreAtual)?.periodo} 2025`}
                     comparacao={{
-                      valor: 0.0,
+                      valor: indicadoresTrimestrais?.clientesTotais?.variacao || 0,
                       label: "vs trimestre anterior"
                     }}
                   />
@@ -523,6 +525,7 @@ export default function VisaoGeralEstrategica() {
                   <IndicadorRetencao
                     valor={indicadoresTrimestrais?.retencao?.valor || 0}
                     meta={indicadoresTrimestrais?.retencao?.meta || 10}
+                    variacao={indicadoresTrimestrais?.retencao?.variacao || 0}
                     mesSelected={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`}
                   />
                   
@@ -545,7 +548,7 @@ export default function VisaoGeralEstrategica() {
                     inverterProgresso={true}
                     comparacao={{
                       valor: indicadoresTrimestrais?.cmo?.variacao || 0,
-                      label: "vs mês anterior"
+                      label: "vs trimestre anterior"
                     }}
                   />
                   
@@ -558,7 +561,7 @@ export default function VisaoGeralEstrategica() {
                     inverterProgresso={true}
                     comparacao={{
                       valor: indicadoresTrimestrais?.artistica?.variacao || 0,
-                      label: "vs mês anterior"
+                      label: "vs trimestre anterior"
                     }}
                   />
                 </div>

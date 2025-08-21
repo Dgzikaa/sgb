@@ -82,17 +82,72 @@ async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?:
       ? (totalClientesRetidos / totalClientesMesAtual) * 100 
       : 0;
     
+    // ✅ COMPARAÇÃO COM MÊS ANTERIOR
+    const mesAnteriorReferencia = new Date(dataReferencia);
+    mesAnteriorReferencia.setMonth(mesAnteriorReferencia.getMonth() - 1);
+    
+    const inicioMesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth(), 1);
+    const fimMesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth() + 1, 0);
+    const inicioUltimos2MesesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth() - 2, 1);
+    const fimUltimos2MesesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth(), 0);
+    
+    const mesAnteriorInicioStr = formatDate(inicioMesAnterior);
+    const mesAnteriorFimStr = formatDate(fimMesAnterior);
+    const ultimos2MesesAnteriorInicioStr = formatDate(inicioUltimos2MesesAnterior);
+    const ultimos2MesesAnteriorFimStr = formatDate(fimUltimos2MesesAnterior);
+    
+    // Buscar dados do mês anterior
+    const [clientesMesAnteriorData, clientesUltimos2MesesAnteriorData] = await Promise.all([
+      fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': mesAnteriorInicioStr,
+        'lte_dt_gerencial': mesAnteriorFimStr
+      }),
+      fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': ultimos2MesesAnteriorInicioStr,
+        'lte_dt_gerencial': ultimos2MesesAnteriorFimStr
+      })
+    ]);
+    
+    const clientesMesAnterior = new Set(
+      clientesMesAnteriorData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
+    );
+    
+    const clientesUltimos2MesesAnterior = new Set(
+      clientesUltimos2MesesAnteriorData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
+    );
+    
+    const clientesRetidosAnterior = [...clientesMesAnterior].filter(cliente => 
+      clientesUltimos2MesesAnterior.has(cliente)
+    );
+    
+    const totalClientesMesAnterior = clientesMesAnterior.size;
+    const totalClientesRetidosAnterior = clientesRetidosAnterior.length;
+    const percentualRetencaoAnterior = totalClientesMesAnterior > 0 
+      ? (totalClientesRetidosAnterior / totalClientesMesAnterior) * 100 
+      : 0;
+    
+    const variacaoRetencao = percentualRetencaoAnterior > 0 
+      ? ((percentualRetencao - percentualRetencaoAnterior) / percentualRetencaoAnterior * 100)
+      : 0;
+    
     console.log('🔄 RETENÇÃO CALCULADA:');
     console.log(`Clientes únicos mês atual: ${totalClientesMesAtual}`);
     console.log(`Clientes únicos últimos 2 meses: ${clientesUltimos2Meses.size}`);
     console.log(`Clientes retidos (intersecção): ${totalClientesRetidos}`);
     console.log(`Taxa de retenção: ${percentualRetencao.toFixed(1)}%`);
+    console.log(`Taxa de retenção mês anterior: ${percentualRetencaoAnterior.toFixed(1)}%`);
+    console.log(`Variação retenção: ${variacaoRetencao.toFixed(1)}%`);
     
-    return parseFloat(percentualRetencao.toFixed(1));
+    return {
+      valor: parseFloat(percentualRetencao.toFixed(1)),
+      variacao: parseFloat(variacaoRetencao.toFixed(1))
+    };
     
   } catch (error) {
     console.error('❌ Erro ao calcular retenção:', error);
-    return 0;
+    return { valor: 0, variacao: 0 };
   }
 }
 
@@ -564,6 +619,43 @@ export async function GET(request: Request) {
       const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0);
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
+      // ✅ COMPARAÇÃO CLIENTES TOTAIS COM TRIMESTRE ANTERIOR
+      const trimestreAnteriorStart = new Date(startDate);
+      trimestreAnteriorStart.setMonth(trimestreAnteriorStart.getMonth() - 3);
+      const trimestreAnteriorEnd = new Date(endDate);
+      trimestreAnteriorEnd.setMonth(trimestreAnteriorEnd.getMonth() - 3);
+      
+      const [clientesContahubAnterior, clientesYuzerAnterior, clientesSymplaAnterior] = await Promise.all([
+        fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
+          'eq_bar_id': barIdNum,
+          'gte_dt_gerencial': trimestreAnteriorStart.toISOString().split('T')[0],
+          'lte_dt_gerencial': trimestreAnteriorEnd.toISOString().split('T')[0]
+        }),
+        supabase.from('yuzer_produtos').select('quantidade, produto_nome').eq('bar_id', barIdNum)
+          .gte('data_evento', trimestreAnteriorStart.toISOString().split('T')[0])
+          .lte('data_evento', trimestreAnteriorEnd.toISOString().split('T')[0]),
+        fetchAllData(supabase, 'sympla_resumo', 'checkins', {
+          'eq_bar_id': barIdNum,
+          'gte_data_evento': trimestreAnteriorStart.toISOString().split('T')[0],
+          'lte_data_evento': trimestreAnteriorEnd.toISOString().split('T')[0]
+        })
+      ]);
+      
+      const ingressosYuzerAnterior = clientesYuzerAnterior.data?.filter(item => 
+        item.produto_nome && (
+          item.produto_nome.toLowerCase().includes('ingresso') ||
+          item.produto_nome.toLowerCase().includes('entrada')
+        )
+      ) || [];
+      
+      const totalClientesContahubAnterior = clientesContahubAnterior?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
+      const totalClientesYuzerAnterior = ingressosYuzerAnterior.reduce((sum, item) => sum + (item.quantidade || 0), 0);
+      const totalClientesSymplaAnterior = clientesSymplaAnterior?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0;
+      const totalClientesTrimestreAnterior = totalClientesContahubAnterior + totalClientesYuzerAnterior + totalClientesSymplaAnterior;
+      
+      const variacaoClientesTotais = totalClientesTrimestreAnterior > 0 ? 
+        ((totalClientesTrimestre - totalClientesTrimestreAnterior) / totalClientesTrimestreAnterior * 100) : 0;
+      
       // 🔍 DEBUG: Logs detalhados dos clientes totais
       console.log('👥 CLIENTES TOTAIS TRIMESTRE DETALHADOS:');
       if (viewTri) {
@@ -573,7 +665,9 @@ export async function GET(request: Request) {
         console.log(`Yuzer Ingressos: ${ingressosYuzer.length || 0} produtos = ${totalClientesYuzer} pessoas`);
         console.log(`Sympla Check-ins: ${clientesTotaisSymplaData?.length || 0} participantes = ${totalClientesSympla} pessoas`);
       }
-      console.log(`TOTAL CLIENTES TRIMESTRE: ${totalClientesTrimestre}`);
+      console.log(`TOTAL CLIENTES TRIMESTRE ATUAL: ${totalClientesTrimestre}`);
+      console.log(`TOTAL CLIENTES TRIMESTRE ANTERIOR: ${totalClientesTrimestreAnterior}`);
+      console.log(`VARIAÇÃO CLIENTES TOTAIS: ${variacaoClientesTotais.toFixed(1)}%`);
       
       // Logs detalhados removidos
 
@@ -669,54 +763,51 @@ export async function GET(request: Request) {
         console.log(`⚠️  VIEW tinha: ${viewTri.cmo_percent}% (IGNORADO)`);
       }
       
-      // ✅ COMPARAÇÃO CMO COM MÊS ANTERIOR
-      const mesAnteriorStart = new Date(startDate);
-      mesAnteriorStart.setMonth(mesAnteriorStart.getMonth() - 1);
-      const mesAnteriorEnd = new Date(endDate);
-      mesAnteriorEnd.setMonth(mesAnteriorEnd.getMonth() - 1);
+      // ✅ COMPARAÇÃO CMO COM TRIMESTRE ANTERIOR
+      const cmoTrimestreAnteriorStart = trimestreAnteriorStart.toISOString().split('T')[0];
+      const cmoTrimestreAnteriorEnd = trimestreAnteriorEnd.toISOString().split('T')[0];
       
-      const mesAnteriorStartStr = mesAnteriorStart.toISOString().split('T')[0];
-      const mesAnteriorEndStr = mesAnteriorEnd.toISOString().split('T')[0];
-      
-      // Buscar CMO do mês anterior
+      // Buscar CMO do trimestre anterior
       const cmoAnteriorData = await fetchAllData(supabase, 'nibo_lancamentos', 'valor', {
         'eq_bar_id': barIdNum,
-        'gte_data_competencia': mesAnteriorStartStr,
-        'lte_data_competencia': mesAnteriorEndStr,
+        'gte_data_competencia': cmoTrimestreAnteriorStart,
+        'lte_data_competencia': cmoTrimestreAnteriorEnd,
         'in_categoria': categoriasCMO
       });
       
-      // Buscar faturamento do mês anterior
-      const [faturamentoContahubAnterior, faturamentoYuzerAnterior, faturamentoSymplaAnterior] = await Promise.all([
-        fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
-          'eq_bar_id': barIdNum,
-          'gte_dt_gerencial': mesAnteriorStartStr,
-          'lte_dt_gerencial': mesAnteriorEndStr
-        }),
+      // Buscar faturamento do trimestre anterior (já calculado acima)
+      const faturamentoTrimestreAnteriorContahub = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': cmoTrimestreAnteriorStart,
+        'lte_dt_gerencial': cmoTrimestreAnteriorEnd
+      });
+      
+      const [faturamentoYuzerTriAnterior, faturamentoSymplaTriAnterior] = await Promise.all([
         supabase.from('yuzer_pagamento').select('valor_liquido').eq('bar_id', barIdNum)
-          .gte('data_evento', mesAnteriorStartStr).lte('data_evento', mesAnteriorEndStr),
+          .gte('data_evento', cmoTrimestreAnteriorStart).lte('data_evento', cmoTrimestreAnteriorEnd),
         supabase.from('sympla_pedidos').select('valor_liquido').eq('bar_id', barIdNum)
-          .gte('data_evento', mesAnteriorStartStr).lte('data_evento', mesAnteriorEndStr)
+          .gte('data_evento', cmoTrimestreAnteriorStart).lte('data_evento', cmoTrimestreAnteriorEnd)
       ]);
       
       const totalCMOAnterior = cmoAnteriorData?.reduce((sum, item) => sum + Math.abs(item.valor || 0), 0) || 0;
-      const faturamentoAnteriorContahub = faturamentoContahubAnterior?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
-      const faturamentoAnteriorYuzer = faturamentoYuzerAnterior.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
-      const faturamentoAnteriorSympla = faturamentoSymplaAnterior.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
-      const faturamentoAnteriorTotal = faturamentoAnteriorContahub + faturamentoAnteriorYuzer + faturamentoAnteriorSympla;
+      const faturamentoAnteriorContahub = faturamentoTrimestreAnteriorContahub?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+      const faturamentoAnteriorYuzer = faturamentoYuzerTriAnterior.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoAnteriorSympla = faturamentoSymplaTriAnterior.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoTrimestreAnteriorTotal = faturamentoAnteriorContahub + faturamentoAnteriorYuzer + faturamentoAnteriorSympla;
       
-      const percentualCMOAnterior = faturamentoAnteriorTotal > 0 ? (totalCMOAnterior / faturamentoAnteriorTotal) * 100 : 0;
+      const percentualCMOAnterior = faturamentoTrimestreAnteriorTotal > 0 ? (totalCMOAnterior / faturamentoTrimestreAnteriorTotal) * 100 : 0;
       const variacaoCMO = percentualCMOAnterior > 0 ? ((percentualCMO - percentualCMOAnterior) / percentualCMOAnterior * 100) : 0;
       
-      console.log('🧮 COMPARAÇÃO CMO:');
+      console.log('🧮 COMPARAÇÃO CMO (TRIMESTRE):');
       console.log(`CMO Atual: ${percentualCMO.toFixed(2)}%`);
-      console.log(`CMO Anterior (${mesAnteriorStartStr} a ${mesAnteriorEndStr}): ${percentualCMOAnterior.toFixed(2)}%`);
+      console.log(`CMO Trimestre Anterior (${cmoTrimestreAnteriorStart} a ${cmoTrimestreAnteriorEnd}): ${percentualCMOAnterior.toFixed(2)}%`);
       console.log(`Variação: ${variacaoCMO.toFixed(1)}%`);
       
       // Logs detalhados removidos
 
       // % Artística (Planejamento Comercial) - CÁLCULO CORRIGIDO USANDO EVENTOS_BASE
       let viewOk = true;
+      let variacaoArtistica = 0;
       const percentualArtistica = viewTri ? (viewTri.artistica_percent || 0) : (async () => {
         const { data: artisticaData, error: artisticaErr } = await supabase
           .from('eventos_base')
@@ -744,7 +835,37 @@ export async function GET(request: Request) {
         
         const totalCustoCompleto = totalCustoArtistico + totalCustoProducao;
         
-        return totalFaturamento > 0 ? (totalCustoCompleto / totalFaturamento) * 100 : 0;
+        const percentualCalculado = totalFaturamento > 0 ? (totalCustoCompleto / totalFaturamento) * 100 : 0;
+        
+        // ✅ COMPARAÇÃO % ARTÍSTICA COM TRIMESTRE ANTERIOR
+        const { data: artisticaDataAnterior, error: artisticaErrAnterior } = await supabase
+          .from('eventos_base')
+          .select('c_art, c_prod, real_r')
+          .eq('bar_id', barIdNum)
+          .gte('data_evento', cmoTrimestreAnteriorStart)
+          .lte('data_evento', cmoTrimestreAnteriorEnd)
+          .gt('real_r', 0);
+        
+        let variacaoArtistica = 0;
+        if (!artisticaErrAnterior && artisticaDataAnterior && artisticaDataAnterior.length > 0) {
+          const totalCustoArtisticoAnterior = artisticaDataAnterior.reduce((sum, item) => sum + (item.c_art || 0), 0);
+          const totalCustoProducaoAnterior = artisticaDataAnterior.reduce((sum, item) => sum + (item.c_prod || 0), 0);
+          const totalFaturamentoAnterior = artisticaDataAnterior.reduce((sum, item) => sum + (item.real_r || 0), 0);
+          const totalCustoCompletoAnterior = totalCustoArtisticoAnterior + totalCustoProducaoAnterior;
+          
+          const percentualAnterior = totalFaturamentoAnterior > 0 ? (totalCustoCompletoAnterior / totalFaturamentoAnterior) * 100 : 0;
+          const variacaoCalculada = percentualAnterior > 0 ? ((percentualCalculado - percentualAnterior) / percentualAnterior * 100) : 0;
+          variacaoArtistica = variacaoCalculada;
+          
+          console.log('🎭 COMPARAÇÃO % ARTÍSTICA (TRIMESTRE):');
+          console.log(`% Artística Atual: ${percentualCalculado.toFixed(2)}%`);
+          console.log(`% Artística Trimestre Anterior: ${percentualAnterior.toFixed(2)}%`);
+          console.log(`Variação: ${variacaoArtistica.toFixed(1)}%`);
+        }
+        
+        // Variação será usada no retorno da função
+        
+        return percentualCalculado;
       })();
 
       // 🚨 LOG FINAL - VALOR QUE SERÁ ENVIADO
@@ -765,10 +886,11 @@ export async function GET(request: Request) {
           },
           clientesTotais: {
             valor: totalClientesTrimestre,
-            meta: 30000
+            meta: 30000,
+            variacao: variacaoClientesTotais
           },
           retencao: {
-            valor: await calcularRetencao(supabase, barIdNum, mesRetencao || undefined),
+            ...(await calcularRetencao(supabase, barIdNum, mesRetencao || undefined)),
             meta: 10
           },
           cmvLimpo: {
@@ -784,7 +906,7 @@ export async function GET(request: Request) {
           artistica: {
             valor: await percentualArtistica,
             meta: 17,
-            variacao: 0 // TODO: Implementar comparação com mês anterior
+            variacao: variacaoArtistica
           }
         }
       });

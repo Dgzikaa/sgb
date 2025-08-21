@@ -10,17 +10,18 @@ import { Calendar, ChevronLeft, ChevronRight, Target } from 'lucide-react';
 interface IndicadorRetencaoProps {
   valor?: number;
   meta: number;
+  variacao?: number;
   mesSelected?: string;
 }
 
-export function IndicadorRetencao({ valor = 0, meta, mesSelected: initialMesSelected }: IndicadorRetencaoProps) {
+export function IndicadorRetencao({ valor = 0, meta, variacao = 0, mesSelected: initialMesSelected }: IndicadorRetencaoProps) {
   const [mesSelected, setMesSelected] = useState<string>(initialMesSelected || '');
 
   // Usar dados recebidos via props
   const data = {
     valor: valor,
     meta: meta || 85,
-    comparacao: 0, // TODO: Implementar comparação com mês anterior
+    comparacao: variacao,
     tendencia: 'stable' as const,
     clientesAtivos: 0, // TODO: Receber via props se necessário
     clientesTotais: 0  // TODO: Receber via props se necessário
