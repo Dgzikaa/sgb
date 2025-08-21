@@ -291,6 +291,20 @@ export function DarkHeader() {
             )}
           </div>
 
+          {/* Botão Atualizar */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                // Recarregar a página atual
+                window.location.reload();
+              }}
+              className="flex items-center gap-1 px-2 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
+              title="Atualizar dados"
+            >
+              🔄
+            </button>
+          </div>
+
           {/* Notificações */}
           <div className="relative">
             <NotificationCenter />
