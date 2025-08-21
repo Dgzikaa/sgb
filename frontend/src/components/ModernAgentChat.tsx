@@ -63,17 +63,7 @@ export default function ModernAgentChat() {
     setMessages([{
       id: 'welcome',
       type: 'assistant',
-      content: `👋 **Olá! Sou Claude, seu assistente AI integrado ao SGB.**
-
-Tenho acesso completo aos seus dados e posso:
-
-🔍 **Analisar** vendas, produtos, eventos  
-📊 **Criar gráficos** dinâmicos em tempo real  
-🎯 **Comparar** performance entre artistas  
-💡 **Sugerir** otimizações e insights  
-🗣️ **Conversar** naturalmente sobre seu negócio
-
-**Como posso te ajudar hoje?**`,
+      content: `👋 **Olá! Sou Claude, seu assistente AI integrado ao SGB.**`,
       timestamp: new Date()
     }]);
   }, []);
@@ -217,17 +207,17 @@ Tenho acesso completo aos seus dados e posso:
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar do Chat */}
-      <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+      <div className="w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         {/* Header do Chat */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+        <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <Bot className="w-4 h-4 text-white" />
             </div>
             <div>
               <h1 className="text-sm font-semibold text-gray-900 dark:text-white">Claude AI</h1>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
                 <span className="text-xs text-gray-500 dark:text-gray-400">Online</span>
               </div>
             </div>
@@ -235,14 +225,14 @@ Tenho acesso completo aos seus dados e posso:
         </div>
 
         {/* Área de Mensagens */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 p-3">
+          <div className="space-y-3">
             {messages.map((message) => (
               <div key={message.id} className="group">
                 <div className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {message.type === 'assistant' && (
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-4 h-4 text-white" />
+                    <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-3 h-3 text-white" />
                     </div>
                   )}
                   
@@ -281,8 +271,8 @@ Tenho acesso completo aos seus dados e posso:
                   </div>
 
                   {message.type === 'user' && (
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <User className="w-4 h-4 text-white" />
+                    <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <User className="w-3 h-3 text-white" />
                     </div>
                   )}
                 </div>
@@ -291,13 +281,13 @@ Tenho acesso completo aos seus dados e posso:
             
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-white" />
+                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Bot className="w-3 h-3 text-white" />
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-4 py-3">
+                <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Claude está pensando...</span>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Pensando...</span>
                   </div>
                 </div>
               </div>
