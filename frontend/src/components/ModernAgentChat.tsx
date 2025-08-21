@@ -217,7 +217,7 @@ Tenho acesso completo aos seus dados e posso:
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar do Chat */}
-      <div className="w-96 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+      <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         {/* Header do Chat */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
@@ -225,7 +225,7 @@ Tenho acesso completo aos seus dados e posso:
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-semibold text-gray-900 dark:text-white">Claude AI</h1>
+              <h1 className="text-sm font-semibold text-gray-900 dark:text-white">Claude AI</h1>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-xs text-gray-500 dark:text-gray-400">Online</span>
@@ -248,15 +248,15 @@ Tenho acesso completo aos seus dados e posso:
                   
                   <div className={`max-w-[85%] ${message.type === 'user' ? 'order-first' : ''}`}>
                     <div
-                      className={`rounded-2xl px-4 py-3 ${
+                      className={`rounded-2xl px-3 py-2 ${
                         message.type === 'user'
                           ? 'bg-blue-600 text-white ml-auto'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                       }`}
                     >
-                      <div className="prose prose-sm max-w-none">
+                      <div className="prose prose-sm max-w-none text-sm">
                         {message.content.split('\n').map((line, index) => (
-                          <p key={index} className="whitespace-pre-wrap mb-1 last:mb-0">
+                          <p key={index} className="whitespace-pre-wrap mb-1 last:mb-0 text-sm leading-relaxed">
                             {line}
                           </p>
                         ))}
@@ -307,25 +307,25 @@ Tenho acesso completo aos seus dados e posso:
         </ScrollArea>
 
         {/* Sugestões Rápidas */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-2 gap-1.5 mb-3">
             {quickSuggestions.map((suggestion, index) => (
               <Button
                 key={index}
                 variant="outline"
                 size="sm"
-                className="justify-start h-8 text-xs"
+                className="justify-start h-7 text-xs px-2"
                 onClick={() => setInput(suggestion.query)}
               >
-                <span className="mr-1">{suggestion.icon}</span>
-                {suggestion.text}
+                <span className="mr-1 text-xs">{suggestion.icon}</span>
+                <span className="text-xs">{suggestion.text}</span>
               </Button>
             ))}
           </div>
         </div>
 
         {/* Input de Mensagem */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
           <div className="flex gap-2">
             <Input
               value={input}
@@ -333,15 +333,15 @@ Tenho acesso completo aos seus dados e posso:
               placeholder="Digite sua pergunta..."
               onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
               disabled={isLoading}
-              className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+              className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-sm h-8"
             />
             <Button 
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 h-8 px-3"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3 h-3" />
             </Button>
           </div>
         </div>

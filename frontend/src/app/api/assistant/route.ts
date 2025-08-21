@@ -29,36 +29,63 @@ Você pode conversar naturalmente, analisar dados, criar gráficos, ler arquivos
 ## ESTRUTURA DO PROJETO:
 **Frontend:** Next.js 14+ TypeScript em /frontend/src/
 **Backend:** Supabase Edge Functions em /backend/
-**Database:** PostgreSQL com views otimizadas
+**Database:** PostgreSQL com 60+ tabelas e views otimizadas
 
-## TABELAS PRINCIPAIS:
-- **contahub_periodo**: Vendas agregadas por período
-- **contahub_pagamentos**: Pagamentos individuais
-- **yuzer_produtos**: Produtos vendidos (cervejas, doses, comidas)
-- **eventos**: Eventos consolidados com receita e público
-- **sympla_eventos/participantes/pedidos**: Dados do Sympla
+## TABELAS PRINCIPAIS DISPONÍVEIS:
+📊 **VENDAS & FINANCEIRO:**
+- **contahub_periodo**: 41.949 registros de vendas agregadas por período
+- **contahub_pagamentos**: Pagamentos individuais detalhados
+- **contahub_analitico**: Análises detalhadas de vendas
+- **contahub_fatporhora**: Faturamento por hora
 
-## SUAS CAPACIDADES:
-✅ **Análise de Dados**: Consultar qualquer tabela e gerar insights
-✅ **Gráficos Dinâmicos**: Criar visualizações em tempo real
-✅ **Leitura de Código**: Analisar arquivos do projeto
-✅ **Consultas SQL**: Executar queries complexas
-✅ **Business Intelligence**: Insights avançados de negócio
+🎪 **EVENTOS & ARTISTAS:**
+- **eventos_base**: 154 eventos com receita, público e performance
+- **yuzer_eventos**: Dados complementares de eventos
+- **yuzer_produtos**: 2.254 registros de produtos vendidos
+
+🎫 **INGRESSOS & RESERVAS:**
+- **sympla_eventos/participantes/pedidos**: Sistema de ingressos
+- **getin_reservas**: Sistema de reservas de mesa
+- **getin_units**: Unidades/mesas disponíveis
+
+📋 **OPERACIONAL:**
+- **checklists**: Sistema de checklists operacionais
+- **usuarios_bar**: Gestão de usuários
+- **notificacoes**: Sistema de notificações
+- **audit_trail**: Auditoria completa
+
+## SUAS CAPACIDADES EXPANDIDAS:
+✅ **Análise de Dados**: Acesso a 60+ tabelas com milhares de registros
+✅ **Gráficos Dinâmicos**: Line, Bar, Pie, Area, Composed charts
+✅ **Business Intelligence**: Insights de vendas, eventos, produtos, artistas
+✅ **Análise Temporal**: Comparações por período, crescimento, tendências
+✅ **Performance de Artistas**: Receita, público, ticket médio por artista
+✅ **Análise de Produtos**: Top produtos, categorias, margem
 
 ## CONTEXTO DE NEGÓCIO:
-- Bar/casa de shows com eventos regulares
-- Artistas: Pagode Vira-Lata, Sambadona, Quintal do Pagode, etc.
-- Produtos: Cervejas (Spaten, Corona, Stella), doses, comidas
-- Métricas: Ticket médio, faturamento, público, performance
+- **Local**: Bar/casa de shows com eventos regulares
+- **Artistas**: Pagode Vira-Lata, Sambadona, Quintal do Pagode, Samba de Raiz
+- **Produtos**: Cervejas (Spaten, Corona, Stella), doses, comidas, combos
+- **Métricas**: Ticket médio, faturamento, público, ROI por evento
+- **Período**: Dados desde 2024 com 41k+ registros de vendas
+
+## EXEMPLOS DE ANÁLISES QUE VOCÊ PODE FAZER:
+🔍 "Analise as vendas dos últimos 30 dias"
+📊 "Crie um gráfico de performance dos artistas"
+🎯 "Quais produtos vendem mais nos eventos?"
+📈 "Compare o crescimento mensal de receita"
+⏰ "Qual horário tem mais movimento?"
+👥 "Analise o perfil dos clientes"
 
 ## INSTRUÇÕES:
 - Seja conversacional e natural como no Cursor
-- Use emojis quando apropriado para clareza
-- Quando solicitado, crie gráficos com dados reais
+- Use emojis para clareza e engajamento
+- SEMPRE crie gráficos quando solicitado análises visuais
 - Forneça insights valiosos, não apenas dados brutos
-- Seja proativo em sugerir melhorias
+- Seja proativo em sugerir análises complementares
+- Use dados reais do sistema para todas as análises
 
-Data atual: 2025-08-11 | Bar ID padrão: 3
+Data atual: 2025-08-11 | Bar ID padrão: 3 | Dados disponíveis: 2024-presente
 `;
 
 // Ferramentas disponíveis para Claude
@@ -359,55 +386,168 @@ async function executeTool(toolName: string, input: any) {
 
 async function executeCustomQuery(query: string) {
   try {
-    // Mapear queries comuns para execução segura
-    if (query.toLowerCase().includes('contahub_periodo')) {
+    const lowerQuery = query.toLowerCase();
+    
+    // Análise de vendas - ContaHub
+    if (lowerQuery.includes('vendas') || lowerQuery.includes('contahub_periodo')) {
       const { data, error } = await supabase
         .from('contahub_periodo')
-        .select('*')
+        .select('dt_gerencial, total_liquido, total_bruto, pessoas, desconto')
         .eq('bar_id', 3)
-        .eq('dt_gerencial', '2025-08-11')
-        .limit(10);
+        .gte('dt_gerencial', '2024-01-01')
+        .order('dt_gerencial', { ascending: false })
+        .limit(50);
       
       return {
         success: !error,
         data: data || [],
-        message: 'Dados do contahub_periodo recuperados'
+        message: `Dados de vendas recuperados: ${data?.length || 0} registros`,
+        summary: {
+          total_registros: data?.length || 0,
+          periodo: '2024-presente',
+          tabela: 'contahub_periodo'
+        }
       };
     }
     
-    if (query.toLowerCase().includes('yuzer_produtos')) {
+    // Análise de produtos - Yuzer
+    if (lowerQuery.includes('produtos') || lowerQuery.includes('yuzer_produtos')) {
       const { data, error } = await supabase
         .from('yuzer_produtos')
-        .select('*')
+        .select('data_evento, produto, categoria, quantidade, valor_unitario, valor_total')
         .eq('bar_id', 3)
-        .eq('data_evento', '2025-08-11')
-        .limit(10);
+        .gte('data_evento', '2024-01-01')
+        .order('data_evento', { ascending: false })
+        .limit(100);
       
       return {
         success: !error,
         data: data || [],
-        message: 'Dados do yuzer_produtos recuperados'
+        message: `Dados de produtos recuperados: ${data?.length || 0} registros`,
+        summary: {
+          total_registros: data?.length || 0,
+          periodo: '2024-presente',
+          tabela: 'yuzer_produtos'
+        }
       };
     }
 
-    if (query.toLowerCase().includes('eventos')) {
+    // Análise de eventos
+    if (lowerQuery.includes('eventos') || lowerQuery.includes('eventos_base')) {
       const { data, error } = await supabase
-        .from('eventos')
-        .select('*')
+        .from('eventos_base')
+        .select('data_evento, artista, receita_total, publico_total, ticket_medio, status')
         .eq('bar_id', 3)
         .order('data_evento', { ascending: false })
-        .limit(10);
+        .limit(30);
       
       return {
         success: !error,
         data: data || [],
-        message: 'Dados de eventos recuperados'
+        message: `Dados de eventos recuperados: ${data?.length || 0} registros`,
+        summary: {
+          total_registros: data?.length || 0,
+          tabela: 'eventos_base'
+        }
+      };
+    }
+
+    // Análise de artistas/performance
+    if (lowerQuery.includes('artista') || lowerQuery.includes('performance')) {
+      const { data, error } = await supabase
+        .from('eventos_base')
+        .select('artista, receita_total, publico_total, ticket_medio, data_evento')
+        .eq('bar_id', 3)
+        .not('artista', 'is', null)
+        .order('receita_total', { ascending: false })
+        .limit(20);
+      
+      return {
+        success: !error,
+        data: data || [],
+        message: `Performance de artistas recuperada: ${data?.length || 0} registros`,
+        summary: {
+          total_registros: data?.length || 0,
+          tabela: 'eventos_base',
+          ordenacao: 'por receita'
+        }
+      };
+    }
+
+    // Análise de reservas - GetIn
+    if (lowerQuery.includes('reservas') || lowerQuery.includes('getin')) {
+      const { data, error } = await supabase
+        .from('getin_reservas')
+        .select('data_evento, status, valor_total, quantidade_pessoas, created_at')
+        .eq('bar_id', 3)
+        .gte('data_evento', '2024-01-01')
+        .order('data_evento', { ascending: false })
+        .limit(50);
+      
+      return {
+        success: !error,
+        data: data || [],
+        message: `Dados de reservas recuperados: ${data?.length || 0} registros`,
+        summary: {
+          total_registros: data?.length || 0,
+          periodo: '2024-presente',
+          tabela: 'getin_reservas'
+        }
+      };
+    }
+
+    // Análise de ingressos - Sympla
+    if (lowerQuery.includes('ingressos') || lowerQuery.includes('sympla')) {
+      const { data, error } = await supabase
+        .from('sympla_pedidos')
+        .select('data_evento, status, valor_total, quantidade_ingressos, created_at')
+        .eq('bar_id', 3)
+        .gte('data_evento', '2024-01-01')
+        .order('data_evento', { ascending: false })
+        .limit(50);
+      
+      return {
+        success: !error,
+        data: data || [],
+        message: `Dados de ingressos recuperados: ${data?.length || 0} registros`,
+        summary: {
+          total_registros: data?.length || 0,
+          periodo: '2024-presente',
+          tabela: 'sympla_pedidos'
+        }
+      };
+    }
+
+    // Query genérica para análise geral
+    if (lowerQuery.includes('geral') || lowerQuery.includes('resumo') || lowerQuery.includes('dashboard')) {
+      // Buscar dados consolidados de múltiplas fontes
+      const [vendas, eventos, produtos] = await Promise.all([
+        supabase.from('contahub_periodo').select('dt_gerencial, total_liquido, pessoas').eq('bar_id', 3).gte('dt_gerencial', '2024-08-01').limit(10),
+        supabase.from('eventos_base').select('data_evento, artista, receita_total, publico_total').eq('bar_id', 3).order('data_evento', { ascending: false }).limit(5),
+        supabase.from('yuzer_produtos').select('produto, categoria, quantidade, valor_total').eq('bar_id', 3).gte('data_evento', '2024-08-01').limit(10)
+      ]);
+
+      return {
+        success: true,
+        data: {
+          vendas: vendas.data || [],
+          eventos: eventos.data || [],
+          produtos: produtos.data || []
+        },
+        message: 'Dados consolidados recuperados de múltiplas fontes',
+        summary: {
+          vendas_registros: vendas.data?.length || 0,
+          eventos_registros: eventos.data?.length || 0,
+          produtos_registros: produtos.data?.length || 0,
+          periodo: 'Agosto 2024 - presente'
+        }
       };
     }
 
     return {
       success: false,
-      error: 'Query não suportada no modo seguro'
+      error: 'Query não reconhecida. Tente: vendas, produtos, eventos, artistas, reservas, ingressos, ou geral',
+      suggestions: ['vendas', 'produtos', 'eventos', 'artistas', 'reservas', 'ingressos', 'geral']
     };
     
   } catch (error: any) {
