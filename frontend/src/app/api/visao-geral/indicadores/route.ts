@@ -518,9 +518,7 @@ export async function GET(request: Request) {
       
       // Logs detalhados removidos
 
-      // Faturamento trimestral COM PAGINAÇÃO para calcular CMO %
-      // Faturamento trimestral com paginação
-      
+            // Faturamento trimestral - MESMA LÓGICA DO ANUAL (últimos 3 meses)
       let faturamentoTrimestre = viewTri ? (viewTri.faturamento_trimestre || 0) : 0;
       
       // 🔍 DEBUG: Verificar se está usando VIEW
@@ -530,31 +528,36 @@ export async function GET(request: Request) {
       }
       
       if (!viewTri) {
+        // USAR A MESMA LÓGICA DO FATURAMENTO ANUAL
         const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
-          'eq_bar_id': barIdNum,
           'gte_dt_gerencial': startDate,
-          'lte_dt_gerencial': endDate
+          'lte_dt_gerencial': endDate,
+          'eq_bar_id': barIdNum  // Mesma ordem dos parâmetros do anual
         });
         const fatYuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
-          'eq_bar_id': barIdNum,
           'gte_data_evento': startDate,
-          'lte_data_evento': endDate
+          'lte_data_evento': endDate,
+          'eq_bar_id': barIdNum  // Mesma ordem dos parâmetros do anual
         });
         const fatSymplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
           'gte_data_pedido': startDate,
           'lte_data_pedido': endDate
+          // Sympla não tem bar_id (mesma lógica do anual)
         });
+        
+        // Calcular com dados paginados (mesma lógica do anual)
         const faturamentoContahubTri = fatContahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
         const faturamentoYuzerTri = fatYuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
         const faturamentoSymplaTri = fatSymplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
         faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
-        
-        // 🔍 DEBUG: Faturamento trimestral para CMO
-        console.log('📊 FATURAMENTO TRIMESTRE (para CMO):');
-        console.log(`ContaHub: R$ ${faturamentoContahubTri}`);
-        console.log(`Yuzer: R$ ${faturamentoYuzerTri}`);
-        console.log(`Sympla: R$ ${faturamentoSymplaTri}`);
-        console.log(`TOTAL: R$ ${faturamentoTrimestre}`);
+
+        // 🔍 DEBUG: Faturamento trimestral para CMO (MESMA LÓGICA ANUAL)
+        console.log('📊 FATURAMENTO TRIMESTRE (LÓGICA ANUAL):');
+        console.log(`Período: ${startDate} até ${endDate}`);
+        console.log(`ContaHub: R$ ${faturamentoContahubTri.toLocaleString('pt-BR')}`);
+        console.log(`Yuzer: R$ ${faturamentoYuzerTri.toLocaleString('pt-BR')}`);
+        console.log(`Sympla: R$ ${faturamentoSymplaTri.toLocaleString('pt-BR')}`);
+        console.log(`TOTAL: R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
       }
       
       const percentualCMO = viewTri ? (viewTri.cmo_percent || 0) : (faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0);
