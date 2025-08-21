@@ -672,7 +672,7 @@ export default function CalendarioPage() {
             </div>
 
             {/* Grid dos dias */}
-            <div className="grid grid-cols-7 flex-1" style={{ gridTemplateRows: 'repeat(6, 1fr)' }}>
+            <div className="grid grid-cols-7 flex-1" style={{ gridTemplateRows: 'repeat(6, minmax(80px, 1fr))' }}>
               {generateCalendarDays().map((day, index) => {
                 if (!day.isCurrentMonth) {
                   return (
@@ -690,7 +690,7 @@ export default function CalendarioPage() {
                 return (
                   <div
                     key={index}
-                    className={`border-r border-b border-gray-100 dark:border-gray-800 last:border-r-0 p-1 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer ${
+                    className={`border-r border-b border-gray-100 dark:border-gray-800 last:border-r-0 p-1 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer flex flex-col justify-start ${
                       day.isToday 
                         ? 'bg-blue-50 dark:bg-blue-900/10' 
                         : 'bg-white dark:bg-gray-900'
@@ -721,7 +721,7 @@ export default function CalendarioPage() {
                     </div>
 
                     {/* Eventos estilo Google Calendar */}
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 flex-shrink-0">
                       {hasEvento ? (
                         <div 
                           onClick={(e) => {
