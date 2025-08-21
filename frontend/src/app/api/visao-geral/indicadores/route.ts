@@ -522,6 +522,13 @@ export async function GET(request: Request) {
       // Faturamento trimestral com paginação
       
       let faturamentoTrimestre = viewTri ? (viewTri.faturamento_trimestre || 0) : 0;
+      
+      // 🔍 DEBUG: Verificar se está usando VIEW
+      if (viewTri) {
+        console.log('📊 USANDO VIEW MATERIALIZADA para faturamento:');
+        console.log(`Faturamento Trimestre: R$ ${faturamentoTrimestre}`);
+      }
+      
       if (!viewTri) {
         const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
           'eq_bar_id': barIdNum,

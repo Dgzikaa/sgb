@@ -31,6 +31,23 @@ export function IndicadorRetencao({ meta }: IndicadorRetencaoProps) {
     setMesSelected(mesAtual);
   }
 
+  // Função para navegar entre meses
+  const navegarMes = (direcao: 'anterior' | 'proximo') => {
+    if (!mesSelected) return;
+    
+    const [ano, mes] = mesSelected.split('-').map(Number);
+    const dataAtual = new Date(ano, mes - 1, 1);
+    
+    if (direcao === 'anterior') {
+      dataAtual.setMonth(dataAtual.getMonth() - 1);
+    } else {
+      dataAtual.setMonth(dataAtual.getMonth() + 1);
+    }
+    
+    const novoMes = `${dataAtual.getFullYear()}-${(dataAtual.getMonth() + 1).toString().padStart(2, '0')}`;
+    setMesSelected(novoMes);
+  };
+
   const progresso = data.meta > 0 ? (data.valor / data.meta) * 100 : 0;
   const progressoCliente = data.clientesTotais > 0 ? (data.clientesAtivos / data.clientesTotais) * 100 : 0;
   
@@ -62,9 +79,30 @@ export function IndicadorRetencao({ meta }: IndicadorRetencaoProps) {
           </div>
           
           <div className="flex items-center gap-1">
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-              {getNomeMesAbreviado()}
-            </span>
+            {/* Navegador de mês */}
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-full p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navegarMes('anterior')}
+                className="p-1 h-6 w-6 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
+              >
+                <ChevronLeft className="w-3 h-3" />
+              </Button>
+              
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-400 px-2 min-w-[60px] text-center">
+                {getNomeMesAbreviado()}
+              </span>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navegarMes('proximo')}
+                className="p-1 h-6 w-6 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
+              >
+                <ChevronRight className="w-3 h-3" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardHeader>
