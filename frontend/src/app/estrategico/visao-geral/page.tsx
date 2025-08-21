@@ -74,13 +74,14 @@ export default function VisaoGeralEstrategica() {
   const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
 
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
-  const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
+  const [indicadoresTrimessstrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
   const [trimestreAtual, setTrimestreAtual] = useState(3); // 2º, 3º ou 4º trimestre
   const [anualExpanded, setAnualExpanded] = useState(true);
   const [trimestralExpanded, setTrimestralExpanded] = useState(true);
   const [requestInProgress, setRequestInProgress] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [cmoCalculado, setCmoCalculado] = useState<number>(0);
 
 
   // Removido useEffect do PageTitle para evitar re-renders desnecessários
@@ -103,6 +104,78 @@ export default function VisaoGeralEstrategica() {
       setTrimestreAtual(trimestreAtual + 1);
     }
   };
+
+  // Função para calcular CMO diretamente
+  const calcularCMO = useCallback(async () => {
+    if (!selectedBar) return 0;
+
+    try {
+      console.log('🧮 CALCULANDO CMO DIRETAMENTE NO FRONTEND');
+      
+      // Período do trimestre atual
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mesInicio = (trimestreAtual - 1) * 3 + 1;
+      const startDate = `${ano}-${mesInicio.toString().padStart(2, '0')}-01`;
+      const endDate = `${ano}-${(mesInicio + 2).toString().padStart(2, '0')}-31`;
+      
+      console.log(`Período CMO: ${startDate} até ${endDate}`);
+      
+      // 1. Buscar CMO (Nibo)
+      const cmoResponse = await fetch(`/api/nibo/agendamentos?bar_id=${selectedBar.id}&start_date=${startDate}&end_date=${endDate}&categorias=SALARIO FUNCIONARIOS,ALIMENTAÇÃO,PROVISÃO TRABALHISTA,VALE TRANSPORTE,FREELA ATENDIMENTO,FREELA BAR,FREELA COZINHA,FREELA LIMPEZA,FREELA SEGURANÇA,Marketing,MANUTENÇÃO,Materiais Operação,Outros Operação`);
+      
+      let totalCMO = 0;
+      if (cmoResponse.ok) {
+        const cmoData = await cmoResponse.json();
+        totalCMO = cmoData.reduce((sum: number, item: any) => sum + (item.valor || 0), 0);
+      }
+      
+      // 2. Buscar Faturamento (ContaHub + Yuzer + Sympla)
+      const [contahubRes, yuzerRes, symplaRes] = await Promise.all([
+        fetch(`/api/contahub/pagamentos?bar_id=${selectedBar.id}&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`/api/yuzer/pagamentos?bar_id=${selectedBar.id}&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`/api/sympla/pedidos?start_date=${startDate}&end_date=${endDate}`)
+      ]);
+      
+      let faturamentoTotal = 0;
+      
+      if (contahubRes.ok) {
+        const contahubData = await contahubRes.json();
+        const fatContahub = contahubData.reduce((sum: number, item: any) => sum + (item.liquido || 0), 0);
+        faturamentoTotal += fatContahub;
+        console.log(`ContaHub: R$ ${fatContahub.toLocaleString('pt-BR')}`);
+      }
+      
+      if (yuzerRes.ok) {
+        const yuzerData = await yuzerRes.json();
+        const fatYuzer = yuzerData.reduce((sum: number, item: any) => sum + (item.valor_liquido || 0), 0);
+        faturamentoTotal += fatYuzer;
+        console.log(`Yuzer: R$ ${fatYuzer.toLocaleString('pt-BR')}`);
+      }
+      
+      if (symplaRes.ok) {
+        const symplaData = await symplaRes.json();
+        const fatSympla = symplaData.reduce((sum: number, item: any) => sum + (item.valor_liquido || 0), 0);
+        faturamentoTotal += fatSympla;
+        console.log(`Sympla: R$ ${fatSympla.toLocaleString('pt-BR')}`);
+      }
+      
+      // 3. Calcular percentual
+      const percentualCMO = faturamentoTotal > 0 ? (totalCMO / faturamentoTotal) * 100 : 0;
+      
+      console.log('🧮 CÁLCULO CMO FRONTEND:');
+      console.log(`CMO Total: R$ ${totalCMO.toLocaleString('pt-BR')}`);
+      console.log(`Faturamento Total: R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
+      console.log(`Percentual CMO: ${percentualCMO.toFixed(2)}%`);
+      
+      setCmoCalculado(percentualCMO);
+      return percentualCMO;
+      
+    } catch (error) {
+      console.error('Erro ao calcular CMO:', error);
+      return 0;
+    }
+  }, [selectedBar, trimestreAtual]);
 
   // Função para limpar cache e recarregar
   const limparCacheERecarregar = () => {
@@ -135,6 +208,7 @@ export default function VisaoGeralEstrategica() {
       // Recarregar dados
       if (selectedBar) {
         carregarIndicadores();
+        calcularCMO(); // Calcular CMO diretamente
       }
       
       toast({
@@ -259,8 +333,9 @@ export default function VisaoGeralEstrategica() {
     console.log('🔍 useEffect disparado:', { selectedBar: selectedBar?.id, trimestreAtual });
     if (selectedBar) {
       carregarIndicadores();
+      calcularCMO(); // Calcular CMO diretamente
     }
-  }, [selectedBar, trimestreAtual]);
+  }, [selectedBar, trimestreAtual, calcularCMO]);
 
 
 
@@ -512,7 +587,7 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorCard
                     titulo="CMO"
-                    valor={indicadoresTrimestrais.cmo.valor}
+                    valor={cmoCalculado > 0 ? cmoCalculado : indicadoresTrimestrais.cmo.valor}
                     meta={indicadoresTrimestrais.cmo.meta}
                     formato="percentual"
                     cor="orange"
