@@ -92,16 +92,12 @@ export async function GET(request: NextRequest) {
         nome,
         dia_semana,
         bar_id,
-        
-        -- Dados editáveis
         m1_r,
         cl_plan,
         te_plan,
         tb_plan,
         c_artistico_plan,
         observacoes,
-        
-        -- Dados calculados automaticamente
         real_r,
         cl_real,
         lot_max,
@@ -117,14 +113,10 @@ export async function GET(request: NextRequest) {
         t_coz,
         t_bar,
         fat_19h_percent,
-        
-        -- Dados de integração
         sympla_liquido,
         sympla_checkins,
         yuzer_liquido,
         yuzer_ingressos,
-        
-        -- Controle
         calculado_em,
         precisa_recalculo
       `)
