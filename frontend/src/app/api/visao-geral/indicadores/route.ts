@@ -457,6 +457,17 @@ export async function GET(request: Request) {
       const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.length || 0);
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
+      // 🔍 DEBUG: Logs detalhados dos clientes totais
+      console.log('👥 CLIENTES TOTAIS TRIMESTRE DETALHADOS:');
+      if (viewTri) {
+        console.log(`📊 Usando VIEW materializada: ${viewTri.clientes_totais || 0} clientes`);
+      } else {
+        console.log(`ContaHub Período: ${clientesTotaisContahubData?.length || 0} registros = ${totalClientesContahub} pessoas`);
+        console.log(`Yuzer Ingressos: ${ingressosYuzer.length || 0} produtos = ${totalClientesYuzer} pessoas`);
+        console.log(`Sympla Check-ins: ${clientesTotaisSymplaData?.length || 0} participantes = ${totalClientesSympla} pessoas`);
+      }
+      console.log(`TOTAL CLIENTES TRIMESTRE: ${totalClientesTrimestre}`);
+      
       // Logs detalhados removidos
 
       // CMO % (Nibo)
