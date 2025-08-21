@@ -43,6 +43,8 @@ async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?:
     const ultimos2MesesFim = formatDate(fimUltimos2Meses);
     
     console.log('🔄 CALCULANDO RETENÇÃO:');
+    console.log(`Parâmetro mesEspecifico recebido: ${mesEspecifico}`);
+    console.log(`Data de referência calculada: ${dataReferencia.toISOString()}`);
     console.log(`Mês de referência${mesEspecifico ? ` (${mesEspecifico})` : ' (atual)'}: ${mesAtualInicio} até ${mesAtualFim}`);
     console.log(`Últimos 2 meses: ${ultimos2MesesInicio} até ${ultimos2MesesFim}`);
     
@@ -452,6 +454,40 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivos++;
       });
       
+      // ✅ COMPARAÇÃO COM TRIMESTRE ANTERIOR (90 dias anteriores)
+      const dataInicio180Dias = new Date(hoje);
+      dataInicio180Dias.setDate(hoje.getDate() - 180);
+      const dataFim90DiasAntes = new Date(hoje);
+      dataFim90DiasAntes.setDate(hoje.getDate() - 90);
+      
+      const startDate180Dias = dataInicio180Dias.toISOString().split('T')[0];
+      const endDate90DiasAntes = dataFim90DiasAntes.toISOString().split('T')[0];
+      
+      const clientesDataAnterior = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': startDate180Dias,
+        'lte_dt_gerencial': endDate90DiasAntes
+      });
+      
+      const clientesComTelefoneAnterior = clientesDataAnterior?.filter(item => item.cli_fone) || [];
+      const clientesMapAnterior = new Map();
+      clientesComTelefoneAnterior.forEach(item => {
+        const count = clientesMapAnterior.get(item.cli_fone) || 0;
+        clientesMapAnterior.set(item.cli_fone, count + 1);
+      });
+      
+      let clientesAtivosAnterior = 0;
+      clientesMapAnterior.forEach(count => {
+        if (count >= 2) clientesAtivosAnterior++;
+      });
+      
+      // 🔍 DEBUG: Logs de comparação
+      console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO:');
+      console.log(`Período atual (${startDate90Dias} a ${endDate90Dias}): ${clientesAtivos} clientes ativos`);
+      console.log(`Período anterior (${startDate180Dias} a ${endDate90DiasAntes}): ${clientesAtivosAnterior} clientes ativos`);
+      const variacaoClientesAtivos = clientesAtivosAnterior > 0 ? ((clientesAtivos - clientesAtivosAnterior) / clientesAtivosAnterior * 100) : 0;
+      console.log(`Variação: ${variacaoClientesAtivos.toFixed(1)}%`);
+      
       // Logs detalhados removidos
 
       // 🚨 DESABILITANDO VIEW TEMPORARIAMENTE PARA FORÇAR RECÁLCULO DO CMO
@@ -633,14 +669,58 @@ export async function GET(request: Request) {
         console.log(`⚠️  VIEW tinha: ${viewTri.cmo_percent}% (IGNORADO)`);
       }
       
+      // ✅ COMPARAÇÃO CMO COM MÊS ANTERIOR
+      const mesAnteriorStart = new Date(startDate);
+      mesAnteriorStart.setMonth(mesAnteriorStart.getMonth() - 1);
+      const mesAnteriorEnd = new Date(endDate);
+      mesAnteriorEnd.setMonth(mesAnteriorEnd.getMonth() - 1);
+      
+      const mesAnteriorStartStr = mesAnteriorStart.toISOString().split('T')[0];
+      const mesAnteriorEndStr = mesAnteriorEnd.toISOString().split('T')[0];
+      
+      // Buscar CMO do mês anterior
+      const cmoAnteriorData = await fetchAllData(supabase, 'nibo_lancamentos', 'valor', {
+        'eq_bar_id': barIdNum,
+        'gte_data_competencia': mesAnteriorStartStr,
+        'lte_data_competencia': mesAnteriorEndStr,
+        'in_categoria': categoriasCMO
+      });
+      
+      // Buscar faturamento do mês anterior
+      const [faturamentoContahubAnterior, faturamentoYuzerAnterior, faturamentoSymplaAnterior] = await Promise.all([
+        fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+          'eq_bar_id': barIdNum,
+          'gte_dt_gerencial': mesAnteriorStartStr,
+          'lte_dt_gerencial': mesAnteriorEndStr
+        }),
+        supabase.from('yuzer_pagamento').select('valor_liquido').eq('bar_id', barIdNum)
+          .gte('data_evento', mesAnteriorStartStr).lte('data_evento', mesAnteriorEndStr),
+        supabase.from('sympla_pedidos').select('valor_liquido').eq('bar_id', barIdNum)
+          .gte('data_evento', mesAnteriorStartStr).lte('data_evento', mesAnteriorEndStr)
+      ]);
+      
+      const totalCMOAnterior = cmoAnteriorData?.reduce((sum, item) => sum + Math.abs(item.valor || 0), 0) || 0;
+      const faturamentoAnteriorContahub = faturamentoContahubAnterior?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+      const faturamentoAnteriorYuzer = faturamentoYuzerAnterior.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoAnteriorSympla = faturamentoSymplaAnterior.data?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoAnteriorTotal = faturamentoAnteriorContahub + faturamentoAnteriorYuzer + faturamentoAnteriorSympla;
+      
+      const percentualCMOAnterior = faturamentoAnteriorTotal > 0 ? (totalCMOAnterior / faturamentoAnteriorTotal) * 100 : 0;
+      const variacaoCMO = percentualCMOAnterior > 0 ? ((percentualCMO - percentualCMOAnterior) / percentualCMOAnterior * 100) : 0;
+      
+      console.log('🧮 COMPARAÇÃO CMO:');
+      console.log(`CMO Atual: ${percentualCMO.toFixed(2)}%`);
+      console.log(`CMO Anterior (${mesAnteriorStartStr} a ${mesAnteriorEndStr}): ${percentualCMOAnterior.toFixed(2)}%`);
+      console.log(`Variação: ${variacaoCMO.toFixed(1)}%`);
+      
       // Logs detalhados removidos
 
-      // % Artística (Planejamento Comercial) - CÁLCULO CORRIGIDO
+      // % Artística (Planejamento Comercial) - CÁLCULO CORRIGIDO USANDO EVENTOS_BASE
       let viewOk = true;
       const percentualArtistica = viewTri ? (viewTri.artistica_percent || 0) : (async () => {
         const { data: artisticaData, error: artisticaErr } = await supabase
-          .from('view_eventos')
-          .select('c_art_real, c_prod, real_r')
+          .from('eventos_base')
+          .select('c_art, c_prod, real_r, percent_art_fat')
           .eq('bar_id', barIdNum)
           .gte('data_evento', startDate)
           .lte('data_evento', endDate)
@@ -651,9 +731,16 @@ export async function GET(request: Request) {
         if (!artisticaData || artisticaData.length === 0) return 0;
         
         // Calcular percentual agregado (CORRETO): (Custo Artístico + Custo Produção) / Total faturamento * 100
-        const totalCustoArtistico = artisticaData.reduce((sum, item) => sum + (item.c_art_real || 0), 0);
+        const totalCustoArtistico = artisticaData.reduce((sum, item) => sum + (item.c_art || 0), 0);
         const totalCustoProducao = artisticaData.reduce((sum, item) => sum + (item.c_prod || 0), 0);
         const totalFaturamento = artisticaData.reduce((sum, item) => sum + (item.real_r || 0), 0);
+        
+        // 🔍 DEBUG: Logs do cálculo artística
+        console.log('🎭 CÁLCULO % ARTÍSTICA:');
+        console.log(`Eventos encontrados: ${artisticaData.length}`);
+        console.log(`Total Custo Artístico: R$ ${totalCustoArtistico.toLocaleString('pt-BR')}`);
+        console.log(`Total Custo Produção: R$ ${totalCustoProducao.toLocaleString('pt-BR')}`);
+        console.log(`Total Faturamento: R$ ${totalFaturamento.toLocaleString('pt-BR')}`);
         
         const totalCustoCompleto = totalCustoArtistico + totalCustoProducao;
         
@@ -673,7 +760,8 @@ export async function GET(request: Request) {
         trimestral: {
           clientesAtivos: {
             valor: clientesAtivos,
-            meta: 3000
+            meta: 3000,
+            variacao: variacaoClientesAtivos
           },
           clientesTotais: {
             valor: totalClientesTrimestre,
@@ -690,11 +778,13 @@ export async function GET(request: Request) {
           cmo: {
             valor: percentualCMO,
             meta: 20,
-            valorAbsoluto: viewTri ? (viewTri.cmo_total || 0) : totalCMO
+            valorAbsoluto: viewTri ? (viewTri.cmo_total || 0) : totalCMO,
+            variacao: variacaoCMO
           },
           artistica: {
             valor: await percentualArtistica,
-            meta: 17
+            meta: 17,
+            variacao: 0 // TODO: Implementar comparação com mês anterior
           }
         }
       });
