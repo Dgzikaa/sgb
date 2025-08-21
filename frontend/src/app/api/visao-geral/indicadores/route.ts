@@ -255,6 +255,13 @@ export async function GET(request: Request) {
       const faturamentoSympla = symplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
       
+      // 🔍 DEBUG: Logs detalhados dos dados
+      console.log('📊 DADOS DE FATURAMENTO DETALHADOS:');
+      console.log(`ContaHub Pagamentos: ${contahubData?.length || 0} registros = R$ ${faturamentoContahub}`);
+      console.log(`Yuzer Pagamentos: ${yuzerData?.length || 0} registros = R$ ${faturamentoYuzer}`);
+      console.log(`Sympla Pedidos: ${symplaData?.length || 0} registros = R$ ${faturamentoSympla}`);
+      console.log(`TOTAL FATURAMENTO: R$ ${faturamentoTotal}`);
+      
       // Logs detalhados removidos
 
       // Número de Pessoas (ContaHub + Yuzer + Sympla)
@@ -290,6 +297,13 @@ export async function GET(request: Request) {
       const totalPessoasYuzer = pessoasYuzer.data?.reduce((sum, item) => sum + (item.quantidade || 0), 0) || 0;
       const totalPessoasSympla = pessoasSympla.data?.length || 0;
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
+      
+      // 🔍 DEBUG: Logs detalhados das pessoas
+      console.log('👥 DADOS DE PESSOAS DETALHADOS:');
+      console.log(`ContaHub Período: ${pessoasContahubData?.length || 0} registros = ${totalPessoasContahub} pessoas`);
+      console.log(`Yuzer Produtos: ${pessoasYuzer.data?.length || 0} registros = ${totalPessoasYuzer} pessoas`);
+      console.log(`Sympla Participantes: ${pessoasSympla.data?.length || 0} registros = ${totalPessoasSympla} pessoas`);
+      console.log(`TOTAL PESSOAS: ${totalPessoas}`);
       
       // Logs detalhados removidos
 
