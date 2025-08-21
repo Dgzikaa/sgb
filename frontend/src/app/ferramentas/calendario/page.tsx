@@ -552,16 +552,16 @@ export default function CalendarioPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-3 py-4 max-w-full">
+      <div className="container mx-auto px-6 py-6 max-w-7xl">
         {/* Header com filtros */}
-        <div className="card-dark p-4 mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6 shadow-sm">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="card-title-dark mb-2 flex items-center gap-3">
-                <Calendar className="h-7 w-7 text-blue-600" />
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+                <Calendar className="h-6 w-6 text-blue-600" />
                 Calendário de Eventos
               </h1>
-              <p className="card-description-dark">
+              <p className="text-gray-600 dark:text-gray-400">
                 Visualize eventos, artistas e reservas em formato de calendário
               </p>
             </div>
@@ -718,9 +718,8 @@ export default function CalendarioPage() {
                       )}
                     </div>
 
-                    {/* Área de conteúdo */}
-                    <div className="space-y-1 flex-1 flex flex-col">
-                      {/* Evento */}
+                    {/* Eventos estilo Google Calendar */}
+                    <div className="space-y-1 flex-1">
                       {hasEvento ? (
                         <div 
                           onClick={(e) => {
@@ -729,18 +728,15 @@ export default function CalendarioPage() {
                           }}
                           className="group cursor-pointer"
                         >
-                          <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 hover:from-slate-100 hover:to-gray-100 dark:hover:from-slate-700/50 dark:hover:to-gray-700/50 transition-all shadow-sm hover:shadow-md">
-                            <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5" title={day.evento?.nome}>
-                              <Music className="w-3 h-3 text-slate-600 dark:text-slate-400" />
-                              {day.evento?.nome}
-                            </div>
-                            {day.evento?.artista && (
-                              <div className="text-xs text-slate-600 dark:text-slate-400 truncate flex items-center gap-1.5 mt-1" title={day.evento?.artista}>
-                                <User className="w-3 h-3" />
-                                {day.evento?.artista}
-                              </div>
-                            )}
+                          {/* Event pill estilo Google Calendar */}
+                          <div className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium truncate transition-colors shadow-sm">
+                            {day.evento?.nome}
                           </div>
+                          {day.evento?.artista && (
+                            <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1 px-2">
+                              {day.evento?.artista}
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <button
@@ -748,12 +744,9 @@ export default function CalendarioPage() {
                             e.stopPropagation();
                             abrirModalEvento(day.date.toISOString().split('T')[0], null);
                           }}
-                          className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2.5 text-gray-400 hover:border-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all text-xs group"
+                          className="w-full h-6 border border-dashed border-gray-300 dark:border-gray-600 rounded text-gray-400 hover:border-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-xs opacity-0 group-hover:opacity-100"
                         >
-                          <div className="text-center">
-                            <Plus className="w-4 h-4 mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                            <div className="text-xs font-medium">Adicionar Evento</div>
-                          </div>
+                          <Plus className="w-3 h-3 mx-auto" />
                         </button>
                       )}
 
