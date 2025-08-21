@@ -167,7 +167,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
       {/* Hero Section */}
       <section className="relative overflow-hidden h-[70vh] flex items-center">
         {/* Advanced Background Effects */}

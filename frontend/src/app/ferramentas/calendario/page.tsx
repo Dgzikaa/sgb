@@ -635,34 +635,46 @@ export default function CalendarioPage() {
         </div>
 
         {/* Calendário */}
-        <Card className="card-dark">
+        <Card className="card-dark shadow-lg">
           {/* Header do Calendário */}
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-t-xl">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-xl font-bold">
+          <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-600">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
                 {monthNames[currentMonth]} {currentYear}
               </CardTitle>
-              <div className="flex items-center gap-2 text-xs flex-wrap">
-                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span>{totais.confirmadas} realmente foram</span>
+              
+              {/* Estatísticas e Legenda */}
+              <div className="flex flex-col lg:flex-row gap-4">
+                {/* Estatísticas */}
+                <div className="flex items-center gap-3 text-xs flex-wrap">
+                  <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+                    <span className="text-green-700 dark:text-green-300 font-medium">{totais.confirmadas} confirmadas</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
+                    <span className="text-amber-700 dark:text-amber-300 font-medium">{totais.pendentes} pendentes</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+                    <span className="text-red-700 dark:text-red-300 font-medium">{totais.canceladas} canceladas</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <Users className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">{totais.pessoas} pessoas</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
-                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  <span>{totais.pendentes} confirmadas</span>
-                </div>
-                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
-                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <span>{totais.canceladas - totais.noshow} canceladas</span>
-                </div>
-                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                  <span>{totais.noshow} no-show</span>
-                </div>
-                <div className="w-px h-4 bg-white/20"></div>
-                <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full">
-                  <Users className="w-3 h-3" />
-                  <span>{totais.pessoas} pessoas</span>
+                
+                {/* Legenda */}
+                <div className="flex items-center gap-3 text-xs border-l border-gray-300 dark:border-gray-600 pl-4">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 bg-slate-500 rounded text-white flex items-center justify-center text-xs font-bold">5</div>
+                    <span className="text-gray-600 dark:text-gray-400">Reservas (pessoas)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Music className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
+                    <span className="text-gray-600 dark:text-gray-400">Evento</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -697,17 +709,19 @@ export default function CalendarioPage() {
                 return (
                   <div
                     key={index}
-                    className={`border-r border-b last:border-r-0 p-2 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex flex-col ${
+                    className={`border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 p-3 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex flex-col group ${
                       day.isToday 
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-500' 
+                        ? 'bg-slate-50 dark:bg-slate-800/50 ring-2 ring-slate-400 dark:ring-slate-500' 
                         : 'bg-white dark:bg-gray-900'
                     }`}
                     onClick={() => !hasEvento && abrirModalEvento(day.date.toISOString().split('T')[0], null)}
                   >
                     {/* Header do dia */}
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`text-sm font-bold ${
-                        day.isToday ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'
+                      <span className={`text-sm font-bold transition-colors ${
+                        day.isToday 
+                          ? 'text-slate-700 dark:text-slate-300' 
+                          : 'text-gray-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-300'
                       }`}>
                         {day.date.getDate()}
                       </span>
@@ -716,15 +730,15 @@ export default function CalendarioPage() {
                       {hasReservas && (
                         <div className="flex items-center gap-1 flex-wrap">
                           {/* Total de reservas ativas com pessoas */}
-                          <Badge variant="default" className="text-xs px-1.5 py-0.5 bg-blue-500 flex items-center gap-1">
+                          <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 flex items-center gap-1">
                             <span>{day.reservasCount - canceladas}</span>
-                            <span className="text-blue-100">({day.totalPessoas - day.pessoasCanceladas})</span>
+                            <span className="text-slate-500 dark:text-slate-400">({day.totalPessoas - day.pessoasCanceladas})</span>
                           </Badge>
                           {/* Canceladas com pessoas */}
                           {canceladas > 0 && (
-                            <Badge variant="destructive" className="text-xs px-1.5 py-0.5 flex items-center gap-1">
+                            <Badge variant="outline" className="text-xs px-2 py-0.5 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 flex items-center gap-1">
                               <span>-{canceladas}</span>
-                              <span className="text-red-100">({day.pessoasCanceladas})</span>
+                              <span className="text-red-500 dark:text-red-400">({day.pessoasCanceladas})</span>
                             </Badge>
                           )}
                         </div>
@@ -742,13 +756,13 @@ export default function CalendarioPage() {
                           }}
                           className="group cursor-pointer"
                         >
-                          <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 border border-blue-200 dark:border-blue-700 rounded p-2 hover:from-blue-200 hover:to-purple-200 dark:hover:from-blue-800/50 dark:hover:to-purple-800/50 transition-all shadow-sm">
-                            <div className="text-xs font-bold text-blue-800 dark:text-blue-200 truncate flex items-center gap-1" title={day.evento?.nome}>
-                              <Music className="w-3 h-3" />
+                          <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-gray-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 hover:from-slate-100 hover:to-gray-100 dark:hover:from-slate-700/50 dark:hover:to-gray-700/50 transition-all shadow-sm hover:shadow-md">
+                            <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5" title={day.evento?.nome}>
+                              <Music className="w-3 h-3 text-slate-600 dark:text-slate-400" />
                               {day.evento?.nome}
                             </div>
                             {day.evento?.artista && (
-                              <div className="text-xs text-blue-600 dark:text-blue-300 truncate flex items-center gap-1" title={day.evento?.artista}>
+                              <div className="text-xs text-slate-600 dark:text-slate-400 truncate flex items-center gap-1.5 mt-1" title={day.evento?.artista}>
                                 <User className="w-3 h-3" />
                                 {day.evento?.artista}
                               </div>
@@ -761,11 +775,11 @@ export default function CalendarioPage() {
                             e.stopPropagation();
                             abrirModalEvento(day.date.toISOString().split('T')[0], null);
                           }}
-                          className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded p-2 text-gray-400 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all text-xs"
+                          className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2.5 text-gray-400 hover:border-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all text-xs group"
                         >
                           <div className="text-center">
-                            <Plus className="w-4 h-4 mx-auto mb-1" />
-                            <div className="text-xs">Adicionar</div>
+                            <Plus className="w-4 h-4 mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                            <div className="text-xs font-medium">Adicionar Evento</div>
                           </div>
                         </button>
                       )}
@@ -777,52 +791,11 @@ export default function CalendarioPage() {
               })}
             </div>
 
-            {/* Legenda */}
-            <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-t">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-green-600 font-bold">✓</span>
-                    <span className="text-gray-700 dark:text-gray-300 text-xs">Confirmadas</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-blue-600 font-bold">⏳</span>
-                    <span className="text-gray-700 dark:text-gray-300 text-xs">Pendentes</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-red-600 font-bold">✗</span>
-                    <span className="text-gray-700 dark:text-gray-300 text-xs">Canceladas</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 bg-blue-200 rounded-full border border-blue-400"></div>
-                    <span className="text-gray-700 dark:text-gray-300 text-xs">Hoje</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Music className="w-3 h-3 text-blue-600" />
-                    <span className="text-gray-700 dark:text-gray-300 text-xs">Evento</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </CardContent>
         </Card>
 
-        {/* Legenda */}
-        <div className="mt-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-          <div className="flex items-center justify-center gap-6 text-xs text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded text-white flex items-center justify-center text-xs font-bold">5</div>
-              <span>Reservas ativas (pessoas)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-500 rounded text-white flex items-center justify-center text-xs font-bold">-2</div>
-              <span>Canceladas (pessoas)</span>
-            </div>
-            <div className="text-gray-500">
-              <span className="font-medium">Números entre parênteses</span> = pessoas
-            </div>
-          </div>
-        </div>
+
 
         {/* Modal de Edição de Evento */}
         {modalOpen && eventoSelecionado && (

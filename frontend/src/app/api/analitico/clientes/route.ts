@@ -31,6 +31,11 @@ export async function GET(request: NextRequest) {
 			}
 		}
 
+		// Obter filtro de dia da semana da URL
+		const { searchParams } = new URL(request.url)
+		const diaSemanaFiltro = searchParams.get('dia_semana')
+		console.log('📅 API Clientes: Filtro dia da semana:', diaSemanaFiltro)
+
 		const pageSize = 1000
 		let from = 0
 		let totalLinhas = 0
@@ -47,7 +52,16 @@ export async function GET(request: NextRequest) {
 				.neq('cli_fone', '')
 				.range(from, from + pageSize - 1)
 				.order('dt_gerencial', { ascending: false })
+			
 			if (barIdFilter) query = query.eq('bar_id', barIdFilter)
+			
+			// Filtrar por dia da semana se especificado
+			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
+				// Usar RPC ou filtro manual - Supabase não suporta EXTRACT diretamente
+				// Vamos fazer o filtro no JavaScript após buscar os dados
+				console.log('🗓️ API Clientes: Filtro por dia da semana será aplicado no JavaScript:', diaSemanaFiltro)
+			}
+			
 			const { data, error } = await query
 			if (error) {
 				console.error('❌ Erro ao buscar contahub_periodo:', error)
@@ -58,6 +72,15 @@ export async function GET(request: NextRequest) {
 			totalLinhas += data.length
 
 			for (const r of data) {
+				// Aplicar filtro por dia da semana se especificado
+				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
+					const dataGerencial = new Date(r.dt_gerencial as string)
+					const diaSemanaData = dataGerencial.getDay() // 0=domingo, 1=segunda, etc.
+					if (diaSemanaData.toString() !== diaSemanaFiltro) {
+						continue // Pular este registro se não for do dia da semana desejado
+					}
+				}
+
 				const rawFone = (r.cli_fone || '').toString().trim()
 				if (!rawFone) continue
 				const fone = rawFone.replace(/\D/g, '')
