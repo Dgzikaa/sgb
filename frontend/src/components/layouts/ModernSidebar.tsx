@@ -59,6 +59,9 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
   relatorios: ['relatorios', 'dashboard_financeiro_mensal', 'marketing_360'],
   configuracoes: ['configuracoes'],
   
+  // Mapeamento específico para Ferramentas - incluir todas as permissões relacionadas
+  ferramentas: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos', 'operacoes_checklists', 'operacoes_receitas', 'operacoes_meus_checklists', 'operacoes_terminal', 'financeiro_agendamento'],
+  
   // Submenu mappings específicos - SEM 'todos' para testar permissões granulares
   checklists: ['checklists', 'operacoes_checklists', 'operacoes_meus_checklists'],
   terminal_producao: ['terminal_producao', 'operacoes_terminal'],
@@ -147,7 +150,7 @@ const defaultSidebarItems: SidebarItem[] = [
       label: 'Ferramentas',
       href: '/ferramentas',
       color: 'text-green-600 dark:text-green-400',
-      permission: 'operacoes',
+      permission: 'ferramentas',
       subItems: [
         {
           icon: Calendar,

@@ -29,11 +29,11 @@ class ContaHubProcessor {
   private supabase: ReturnType<typeof createClient>
   
   private dataTypes: Record<string, DataTypeConfig> = {
-    'analitico': { batch_size: 100, table: 'contahub_analitico' },
-    'fatporhora': { batch_size: 100, table: 'contahub_fatporhora' },
-    'pagamentos': { batch_size: 100, table: 'contahub_pagamentos' },
-    'periodo': { batch_size: 100, table: 'contahub_periodo' },
-    'tempo': { batch_size: 100, table: 'contahub_tempo' }
+    'analitico': { batch_size: 500, table: 'contahub_analitico' },
+    'fatporhora': { batch_size: 500, table: 'contahub_fatporhora' },
+    'pagamentos': { batch_size: 500, table: 'contahub_pagamentos' },
+    'periodo': { batch_size: 500, table: 'contahub_periodo' },
+    'tempo': { batch_size: 500, table: 'contahub_tempo' }
   }
 
   constructor() {
@@ -118,9 +118,9 @@ class ContaHubProcessor {
 
       console.log(`📊 [PROCESSOR] ${records.length} registros para processar`)
 
-      // Processar em batches menores para evitar timeout
+      // Processar em batches otimizados
       let totalInserted = 0
-      const batchSize = Math.min(config.batch_size, 100) // Máximo 100 registros por batch
+      const batchSize = config.batch_size // Usar o batch size configurado
       
       for (let i = 0; i < records.length; i += batchSize) {
         const batch = records.slice(i, i + batchSize)
@@ -132,11 +132,6 @@ class ContaHubProcessor {
         totalInserted += insertedCount
         
         console.log(`✅ [PROCESSOR] Batch inserido: ${insertedCount} registros`)
-        
-        // Pequena pausa entre batches para evitar sobrecarga
-        if (i + batchSize < records.length) {
-          await new Promise(resolve => setTimeout(resolve, 100))
-        }
       }
 
       // Marcar como processado (sempre, mesmo se não inseriu nada)
@@ -575,18 +570,10 @@ class ContaHubProcessor {
   }
 
   private enrichRecords(records: Record<string, unknown>[], rawDataRecord: any, dataType: string): Record<string, unknown>[] {
-    const crypto = require('crypto')
-    
     return records.map((record, index) => {
-      // Criar chave única baseada no conteúdo do registro + timestamp
-      const recordContent = JSON.stringify(record)
-      const uniqueString = `${dataType}_${rawDataRecord.bar_id}_${recordContent}_${Date.now()}_${Math.random()}`
-      const idempotencyKey = crypto.createHash('md5').update(uniqueString).digest('hex')
-      
       return {
         ...record,
-        bar_id: rawDataRecord.bar_id,
-        idempotency_key: idempotencyKey
+        bar_id: rawDataRecord.bar_id
       }
     })
   }
@@ -594,6 +581,7 @@ class ContaHubProcessor {
   private async insertBatch(records: Record<string, unknown>[], tableName: string): Promise<number> {
     try {
       console.log(`💾 [PROCESSOR] Inserindo ${records.length} registros na tabela ${tableName}`)
+      console.log(`🔍 [DEBUG] Primeiro registro:`, JSON.stringify(records[0], null, 2))
       
       const { data, error } = await this.supabase
         .from(tableName)
@@ -601,17 +589,24 @@ class ContaHubProcessor {
         .select('id')
 
       if (error) {
-        console.error(`❌ [PROCESSOR] Erro ao inserir em ${tableName}:`, error)
+        console.error(`❌ [PROCESSOR] Erro ao inserir em ${tableName}:`, JSON.stringify(error, null, 2))
+        console.error(`❌ [PROCESSOR] Detalhes do erro:`, error.message, error.details, error.hint)
         return 0
       }
 
       const inserted = data ? data.length : 0
       console.log(`✅ [PROCESSOR] Inseridos: ${inserted}/${records.length} registros`)
       
+      if (inserted === 0 && records.length > 0) {
+        console.error(`⚠️ [PROCESSOR] ALERTA: Nenhum registro inserido mesmo sem erro!`)
+        console.error(`⚠️ [PROCESSOR] Data retornada:`, data)
+      }
+      
       return inserted
       
     } catch (error) {
       console.error(`❌ [PROCESSOR] Erro ao inserir batch em ${tableName}:`, error)
+      console.error(`❌ [PROCESSOR] Stack trace:`, error.stack)
       return 0
     }
   }
