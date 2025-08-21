@@ -153,7 +153,7 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [mesAtual, selectedBar, activeTab, carregarDadosMensais, toast]);
+  }, [mesAtual, selectedBar, activeTab]);
 
   const navegarMes = (direcao: 'anterior' | 'proximo') => {
     const novoMes = new Date(mesAtual);
@@ -192,14 +192,14 @@ export default function DesempenhoPage() {
     if (selectedBar) {
       carregarDados();
     }
-  }, [selectedBar, mesAtual, carregarDados]);
+  }, [selectedBar, mesAtual]);
 
   // Carregar dados mensais quando mudar para aba mensal
   useEffect(() => {
     if (activeTab === 'mensal' && selectedBar && dadosMensais.length === 0) {
       carregarDadosMensais();
     }
-  }, [activeTab, selectedBar, dadosMensais.length, carregarDadosMensais]);
+  }, [activeTab, selectedBar, dadosMensais.length]);
 
   if (loading) {
     return (

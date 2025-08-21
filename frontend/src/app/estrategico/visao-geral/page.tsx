@@ -188,6 +188,11 @@ export default function VisaoGeralEstrategica() {
     const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
     const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
 
+    // 🚨 DESABILITAR CACHE TEMPORARIAMENTE PARA TESTAR NOVA LÓGICA
+    console.log('🚨 CACHE DESABILITADO - SEMPRE BUSCAR DADOS FRESCOS');
+    
+    // COMENTADO PARA FORÇAR SEMPRE NOVA REQUISIÇÃO
+    /*
     // Cache com TTL menor para permitir atualizações
     const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
     const anualCacheKey = `vg:anual:${selectedBar.id}`;
@@ -226,6 +231,7 @@ export default function VisaoGeralEstrategica() {
       setLoading(false);
       return;
     }
+    */
 
     // Sem cache: exibe spinner e busca
     setLoading(true);
