@@ -127,11 +127,13 @@ export default function PlanejamentoComercialPage() {
       const mesParam = mes || filtroMes;
       const anoParam = ano || filtroAno;
       
-      console.log(`🔍 Buscando dados para ${mesParam}/${anoParam}`);
+      const timestamp = new Date().getTime();
+      console.log(`🔍 Buscando dados para ${mesParam}/${anoParam} (${timestamp})`);
       
-      const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mesParam}&ano=${anoParam}`, {
+      const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mesParam}&ano=${anoParam}&_t=${timestamp}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify(user)),
+          'Cache-Control': 'no-cache'
         }
       });
       
@@ -141,6 +143,20 @@ export default function PlanejamentoComercialPage() {
         eventos_recalculados: data.meta?.eventos_recalculados,
         dados_reais_disponiveis: data.meta?.dados_reais_disponiveis
       });
+      
+      // Debug específico para 20/08
+      const evento20 = data.data?.find(e => e.data_evento === '2025-08-20');
+      if (evento20) {
+        console.log('✅ Evento 20/08 encontrado na API:', {
+          nome: evento20.evento_nome,
+          real_receita: evento20.real_receita,
+          clientes_real: evento20.clientes_real,
+          res_p: evento20.res_p
+        });
+      } else {
+        console.log('❌ Evento 20/08 NÃO encontrado nos dados da API');
+        console.log('📅 Datas disponíveis:', data.data?.map(e => `${e.data_curta} (${e.data_evento})`) || []);
+      }
 
       if (data.success && data.data) {
         // Filtrar apenas eventos do mês correto e ordenar por data crescente
