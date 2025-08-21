@@ -551,10 +551,10 @@ export default function CalendarioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-6 py-6 max-w-7xl">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      <div className="container mx-auto px-4 py-3 max-w-7xl h-full flex flex-col">
         {/* Header com filtros */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-3 shadow-sm flex-shrink-0">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
@@ -635,9 +635,9 @@ export default function CalendarioPage() {
         </div>
 
         {/* Calendário */}
-        <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+        <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col">
           {/* Header do Calendário */}
-          <CardHeader className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+          <CardHeader className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex-shrink-0">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
               <CardTitle className="text-3xl font-normal text-gray-900 dark:text-white">
                 {monthNames[currentMonth]} {currentYear}
@@ -661,18 +661,18 @@ export default function CalendarioPage() {
             </div>
           </CardHeader>
 
-          <CardContent className="p-0">
+          <CardContent className="p-0 flex-1 flex flex-col">
             {/* Cabeçalho dos dias da semana */}
-            <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800">
+            <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
               {weekDays.map((day) => (
-                <div key={day} className="py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <div key={day} className="py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {day}
                 </div>
               ))}
             </div>
 
             {/* Grid dos dias */}
-            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, 120px)' }}>
+            <div className="grid grid-cols-7 flex-1" style={{ gridTemplateRows: 'repeat(6, 1fr)' }}>
               {generateCalendarDays().map((day, index) => {
                 if (!day.isCurrentMonth) {
                   return (
@@ -690,7 +690,7 @@ export default function CalendarioPage() {
                 return (
                   <div
                     key={index}
-                    className={`border-r border-b border-gray-100 dark:border-gray-800 last:border-r-0 p-2 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer flex flex-col ${
+                    className={`border-r border-b border-gray-100 dark:border-gray-800 last:border-r-0 p-1.5 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer flex flex-col ${
                       day.isToday 
                         ? 'bg-blue-50 dark:bg-blue-900/10' 
                         : 'bg-white dark:bg-gray-900'
@@ -698,28 +698,30 @@ export default function CalendarioPage() {
                     onClick={() => !hasEvento && abrirModalEvento(day.date.toISOString().split('T')[0], null)}
                   >
                     {/* Número do dia */}
-                    <div className="flex justify-between items-start mb-3">
+                    <div className="flex justify-between items-start mb-2">
                       <span className={`text-sm font-medium ${
                         day.isToday 
-                          ? 'bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold' 
+                          ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold' 
                           : 'text-gray-900 dark:text-gray-100'
                       }`}>
                         {day.date.getDate()}
                       </span>
                       
-                      {/* Indicador discreto de reservas */}
+                      {/* Indicador discreto de reservas com cores */}
                       {hasReservas && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                          {day.reservasCount - canceladas}
+                        <div className="text-xs font-medium">
+                          <span className="text-green-600 dark:text-green-400">
+                            {day.reservasCount - canceladas}
+                          </span>
                           {canceladas > 0 && (
-                            <span className="text-red-500 ml-1">-{canceladas}</span>
+                            <span className="text-red-500 dark:text-red-400 ml-1">-{canceladas}</span>
                           )}
                         </div>
                       )}
                     </div>
 
                     {/* Eventos estilo Google Calendar */}
-                    <div className="space-y-1 flex-1">
+                    <div className="space-y-0.5 flex-1">
                       {hasEvento ? (
                         <div 
                           onClick={(e) => {
@@ -729,11 +731,11 @@ export default function CalendarioPage() {
                           className="group cursor-pointer"
                         >
                           {/* Event pill estilo Google Calendar */}
-                          <div className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium truncate transition-colors shadow-sm">
+                          <div className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-medium truncate transition-colors shadow-sm">
                             {day.evento?.nome}
                           </div>
                           {day.evento?.artista && (
-                            <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-1 px-2">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5 px-1">
                               {day.evento?.artista}
                             </div>
                           )}
@@ -744,7 +746,7 @@ export default function CalendarioPage() {
                             e.stopPropagation();
                             abrirModalEvento(day.date.toISOString().split('T')[0], null);
                           }}
-                          className="w-full h-6 border border-dashed border-gray-300 dark:border-gray-600 rounded text-gray-400 hover:border-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-xs opacity-0 group-hover:opacity-100"
+                          className="w-full h-5 border border-dashed border-gray-300 dark:border-gray-600 rounded text-gray-400 hover:border-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-xs opacity-0 group-hover:opacity-100"
                         >
                           <Plus className="w-3 h-3 mx-auto" />
                         </button>
