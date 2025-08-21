@@ -5,7 +5,7 @@ import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import PageHeader from '@/components/layouts/PageHeader';
+
 import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
@@ -290,27 +290,10 @@ export default function VisaoGeralEstrategica() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <GlobalLoadingComponent />
       <div className="container mx-auto px-4 pb-1 space-y-0">
-        <div className="flex items-center justify-between">
-          <PageHeader title="Visão Geral" description="Resumo executivo do bar" />
-          <div className="flex items-center gap-2">
-            {debugInfo && (
-              <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                {debugInfo}
-              </span>
-            )}
-            <Button
-              onClick={limparCacheERecarregar}
-              variant="outline"
-              size="sm"
-              className="text-xs"
-            >
-              🔄 Recarregar
-            </Button>
-          </div>
-        </div>
+
 
         {/* Indicadores Anuais */}
-        <div className="card-dark p-1 relative -top-12">
+        <div className="card-dark p-1">
           <div 
             className="flex items-center justify-between mb-1 cursor-pointer"
             onClick={() => setAnualExpanded(!anualExpanded)}
@@ -409,7 +392,7 @@ export default function VisaoGeralEstrategica() {
         </div>
 
         {/* Indicadores Trimestrais */}
-        <div className="card-dark p-1 relative -top-12">
+        <div className="card-dark p-1">
           <div className="flex items-center justify-between mb-1">
             <div 
               className="flex items-center gap-3 cursor-pointer flex-1"
