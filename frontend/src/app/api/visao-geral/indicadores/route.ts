@@ -153,6 +153,16 @@ export async function GET(request: Request) {
         ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id 
         : null);
     
+    // 🚨 LOG CRÍTICO - INÍCIO DA API
+    console.log('🚨🚨🚨 API CHAMADA:', {
+      periodo,
+      trimestre,
+      mesRetencao,
+      barId,
+      timestamp: new Date().toISOString(),
+      url: request.url
+    });
+    
     if (!barId) {
       return NextResponse.json(
         { success: false, error: 'Bar não selecionado' },
@@ -606,6 +616,15 @@ export async function GET(request: Request) {
         
         return totalFaturamento > 0 ? (totalCustoCompleto / totalFaturamento) * 100 : 0;
       })();
+
+      // 🚨 LOG FINAL - VALOR QUE SERÁ ENVIADO
+      console.log('🚨🚨🚨 VALOR CMO FINAL SENDO ENVIADO:', {
+        percentualCMO: percentualCMO,
+        totalCMO: totalCMO,
+        faturamentoTrimestre: faturamentoTrimestre,
+        calculoManual: (totalCMO / faturamentoTrimestre) * 100,
+        timestamp: new Date().toISOString()
+      });
 
       const resp = NextResponse.json({
         trimestral: {
