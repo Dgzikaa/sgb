@@ -25,7 +25,8 @@ import {
   Target,
   AlertCircle,
   CheckCircle,
-  Filter
+  Filter,
+  Database
 } from 'lucide-react';
 
 interface PlanejamentoData {
@@ -111,6 +112,9 @@ export default function PlanejamentoComercialPage() {
   const [eventoSelecionado, setEventoSelecionado] = useState<PlanejamentoData | null>(null);
   const [eventoEdicao, setEventoEdicao] = useState<EventoEdicao | null>(null);
   const [salvando, setSalvando] = useState(false);
+  
+  // Estado para sincronização Getin
+  const [sincronizandoGetin, setSincronizandoGetin] = useState(false);
 
   // Buscar dados da API
   const buscarDados = async (mes?: number, ano?: number) => {
@@ -167,6 +171,38 @@ export default function PlanejamentoComercialPage() {
     setFiltroMes(novoMes);
     setFiltroAno(novoAno);
     setMesAtual(new Date(novoAno, novoMes - 1, 1));
+  };
+
+  // Sincronizar dados do Getin
+  const sincronizarGetin = async () => {
+    try {
+      setSincronizandoGetin(true);
+      console.log('🔄 Iniciando sincronização forçada do Getin...');
+      
+      const response = await apiCall('/api/trigger-getin-sync', {
+        method: 'GET',
+        headers: {
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        }
+      });
+
+      if (response.success) {
+        console.log('✅ Sincronização Getin concluída:', response.stats);
+        
+        // Mostrar feedback de sucesso
+        alert(`✅ Sincronização concluída!\n\n📊 Reservas processadas: ${response.stats?.total_encontrados || 0}\n✅ Reservas salvas: ${response.stats?.total_salvos || 0}\n❌ Erros: ${response.stats?.total_erros || 0}`);
+        
+        // Recarregar dados da página após sincronização
+        await buscarDados();
+      } else {
+        throw new Error(response.error || 'Erro na sincronização');
+      }
+    } catch (err) {
+      console.error('❌ Erro na sincronização Getin:', err);
+      alert('❌ Erro ao sincronizar dados do Getin. Tente novamente.');
+    } finally {
+      setSincronizandoGetin(false);
+    }
   };
 
   // Abrir modal de edição
@@ -350,8 +386,24 @@ export default function PlanejamentoComercialPage() {
                 variant="outline" 
                 size="sm"
                 className="btn-outline-dark"
+                title="Atualizar dados da página"
               >
                 <RefreshCcw className="h-4 w-4" />
+              </Button>
+              
+              <Button 
+                onClick={sincronizarGetin} 
+                variant="outline" 
+                size="sm"
+                className="btn-outline-dark"
+                disabled={sincronizandoGetin}
+                title="Sincronizar dados do Getin (reservas)"
+              >
+                {sincronizandoGetin ? (
+                  <RefreshCcw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Database className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>

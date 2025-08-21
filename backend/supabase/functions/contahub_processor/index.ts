@@ -93,29 +93,7 @@ class ContaHubProcessor {
           records = this.parsePeriodoData(rawDataRecord.raw_json as any)
           break
         case 'tempo':
-          // TESTE: Usar lógica simples similar ao FATPORHORA
-          const tempoList = (rawDataRecord.raw_json as any)?.list || []
-          records = tempoList.map((item: any) => ({
-            data: item.dia ? String(item.dia).split('T')[0] : null,
-            grp_desc: String(item.grp_desc || ''),
-            prd_desc: String(item.prd_desc || ''),
-            vd_mesadesc: String(item.vd_mesadesc || ''),
-            itm: String(item.itm || ''),
-            prd: parseInt(item.prd) || null,
-            hora: String(item.hora || ''),
-            itm_qtd: parseInt(item.itm_qtd) || 0,
-            prefixo: String(item.prefixo || ''),
-            loc_desc: String(item.loc_desc || ''),
-            usr_lancou: String(item.usr_lancou || ''),
-            tipovenda: String(item.tipovenda || ''),
-            usr_abriu: String(item.usr_abriu || ''),
-            usr_entregou: String(item.usr_entregou || ''),
-            ano: parseInt(item.ano) || null,
-            mes: parseInt(String(item.mes).split('-')[1]) || null,
-            dds: parseInt(item.dds) || null,
-            diadasemana: String(item.diadasemana || ''),
-            t0_t3: parseInt(item['t0-t3']) || null
-          }))
+          records = this.parseTempoData(rawDataRecord.raw_json as any)
           break
         case 'analitico':
           records = this.parseAnaliticoData(rawDataRecord.raw_json as any)
@@ -195,10 +173,18 @@ class ContaHubProcessor {
   }
 
   private parseFatporhoraData(rawJson: any): Record<string, unknown>[] {
-    const list = rawJson.list as any[] | undefined
-    if (!rawJson || !list) return []
+    console.log(`🚀 [FATPORHORA] parseFatporhoraData INICIADA!`)
     
-    return list.map((item: any) => {
+    const list = rawJson.list as any[] | undefined
+    if (!rawJson || !list) {
+      console.log(`⚠️ [FATPORHORA] Lista vazia ou inválida`)
+      return []
+    }
+    
+    console.log(`🔍 [DEBUG FATPORHORA] Processando ${list.length} registros`)
+    console.log(`🔍 [DEBUG FATPORHORA] Primeiro item:`, JSON.stringify(list[0], null, 2))
+    
+    return list.map((item: any, index: number) => {
       // Extrair hora do formato "HH:MM" ou número
       let hora = 0
       const horaRaw = item.hora || 0
@@ -208,13 +194,28 @@ class ContaHubProcessor {
         hora = parseInt(horaRaw) || 0
       }
       
+      // Extrair data do campo vd_dtgerencial
+      const dataRaw = item.vd_dtgerencial || ''
+      const data = String(dataRaw).split('T')[0] || null
+      
+      if (index === 0) {
+        console.log(`🔍 [DEBUG FATPORHORA] Mapeamento do primeiro registro:`, {
+          original_vd_dtgerencial: item.vd_dtgerencial,
+          mapped_vd_dtgerencial: data,
+          original_hora: item.hora,
+          mapped_hora: hora,
+          original_valor: item.$valor,
+          mapped_valor: parseFloat(item.$valor || 0)
+        })
+      }
+      
       return {
-        vd_dtgerencial: item.vd_dtgerencial ? String(item.vd_dtgerencial).split('T')[0] : null,
-        hora,
-        valor: parseFloat(item.$valor || 0),
-        dds: String(item.dds || ''),
+        vd_dtgerencial: data,
+        dds: parseInt(item.dds) || null,
         dia: String(item.dia || ''),
-        qtd: parseFloat(item.qtd || 0)
+        hora,
+        qtd: parseFloat(item.qtd || 0),
+        valor: parseFloat(item.$valor || 0)
       }
     })
   }
@@ -336,6 +337,8 @@ class ContaHubProcessor {
   }
 
   private parseTempoData(rawJson: any): Record<string, unknown>[] {
+    console.log(`🚀 [TEMPO] parseTempoData INICIADA!`)
+    
     const list = rawJson.list as any[] | undefined
     if (!rawJson || !list) {
       console.log(`🔍 [DEBUG TEMPO] rawJson ou list vazio:`, { rawJson: !!rawJson, list: !!list })
@@ -346,10 +349,45 @@ class ContaHubProcessor {
     console.log(`🔍 [DEBUG TEMPO] Primeiro item:`, JSON.stringify(list[0], null, 2))
     
     return list.map((item: any, index: number) => {
-      // Função auxiliar para converter timestamps ISO para timestamp simples
+      // Função auxiliar para converter timestamps ISO para timestamp PostgreSQL
       const extractTimestamp = (isoString: string) => {
-        if (!isoString) return null
-        return isoString.split('-03')[0] || isoString
+        if (!isoString || isoString === '' || isoString === 'undefined' || isoString === 'null') {
+          return null
+        }
+        
+        try {
+          // Formato esperado: "2025-02-01T18:48:53-0300"
+          // Converter para formato PostgreSQL: "2025-02-01 18:48:53"
+          
+          // Remover timezone e converter T para espaço
+          let cleanString = isoString
+            .replace(/T/, ' ')
+            .replace(/-0300$/, '')
+            .replace(/\+0000$/, '')
+            .replace(/-03:00$/, '')
+            .replace(/\+00:00$/, '')
+            .replace(/Z$/, '')
+          
+          // Validar se é um timestamp válido antes de processar
+          const date = new Date(isoString)
+          if (isNaN(date.getTime())) {
+            console.log(`⚠️ [TEMPO] Timestamp inválido: "${isoString}"`)
+            return null
+          }
+          
+          // Garantir formato correto YYYY-MM-DD HH:MM:SS
+          if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(cleanString)) {
+            console.log(`⚠️ [TEMPO] Formato timestamp incorreto após limpeza: "${cleanString}" (original: "${isoString}")`)
+            return null
+          }
+          
+          console.log(`✅ [TEMPO] Timestamp convertido: "${isoString}" → "${cleanString}"`)
+          return cleanString
+          
+        } catch (error) {
+          console.log(`❌ [TEMPO] Erro ao processar timestamp: "${isoString}"`, error)
+          return null
+        }
       }
       
       // Extrair data do campo 'dia'
@@ -402,16 +440,28 @@ class ContaHubProcessor {
       }
       
       if (index === 0) {
-        console.log(`🔍 [DEBUG TEMPO] Primeiro registro processado:`, JSON.stringify({
-          data,
-          grp_desc: String(item.grp_desc || ''),
-          prd_desc: String(item.prd_desc || ''),
-          vd_mesadesc: String(item.vd_mesadesc || ''),
-          itm: String(item.itm || ''),
-          prd: parseInt(item.prd) || null,
-          hora: String(item.hora || ''),
-          itm_qtd: parseInt(item.itm_qtd) || 0
-        }, null, 2))
+        console.log(`🔍 [DEBUG TEMPO] Timestamps originais:`, {
+          't0-lancamento': item['t0-lancamento'],
+          't1-prodini': item['t1-prodini'],
+          't2-prodfim': item['t2-prodfim'],
+          't3-entrega': item['t3-entrega']
+        })
+        
+        console.log(`🔍 [DEBUG TEMPO] Timestamps processados:`, {
+          t0_lancamento: extractTimestamp(String(item['t0-lancamento'] || '')),
+          t1_prodini: extractTimestamp(String(item['t1-prodini'] || '')),
+          t2_prodfim: extractTimestamp(String(item['t2-prodfim'] || '')),
+          t3_entrega: extractTimestamp(String(item['t3-entrega'] || ''))
+        })
+        
+        console.log(`🔍 [DEBUG TEMPO] Intervalos numéricos:`, {
+          't0-t1': item['t0-t1'],
+          't0-t2': item['t0-t2'], 
+          't0-t3': item['t0-t3'],
+          't1-t2': item['t1-t2'],
+          't1-t3': item['t1-t3'],
+          't2-t3': item['t2-t3']
+        })
       }
       
       return {
@@ -462,14 +512,66 @@ class ContaHubProcessor {
   }
 
   private parseAnaliticoData(rawJson: any): Record<string, unknown>[] {
-    const list = rawJson.list as any[] | undefined
-    if (!rawJson || !list) return []
+    console.log(`🚀 [ANALITICO] parseAnaliticoData INICIADA!`)
     
-    // Implementação básica - pode ser expandida conforme necessário
-    return list.map((item: any) => ({
-      // Mapear campos conforme estrutura da tabela contahub_analitico
-      ...item
-    }))
+    const list = rawJson.list as any[] | undefined
+    if (!rawJson || !list) {
+      console.log(`⚠️ [ANALITICO] Lista vazia ou inválida`)
+      return []
+    }
+    
+    console.log(`🔍 [DEBUG ANALITICO] Processando ${list.length} registros`)
+    console.log(`🔍 [DEBUG ANALITICO] Primeiro item:`, JSON.stringify(list[0], null, 2))
+    
+    return list.map((item: any, index: number) => {
+      // Extrair data do campo trn_dtgerencial
+      const dataRaw = item.trn_dtgerencial || ''
+      const data = String(dataRaw).split('T')[0] || null
+      
+      if (index === 0) {
+        console.log(`🔍 [DEBUG ANALITICO] Mapeamento do primeiro registro:`, {
+          original_trn_dtgerencial: item.trn_dtgerencial,
+          mapped_trn_dtgerencial: data,
+          original_mes: item.mes,
+          mapped_mes: parseInt(String(item.mes).split('-')[1]) || null
+        })
+      }
+      
+      return {
+        // Campos básicos
+        vd_mesadesc: String(item.vd_mesadesc || ''),
+        vd_localizacao: String(item.vd_localizacao || ''),
+        itm: parseInt(item.itm) || null,
+        trn: parseInt(item.trn) || null,
+        trn_desc: String(item.trn_desc || ''),
+        prefixo: String(item.prefixo || ''),
+        tipo: String(item.tipo || ''),
+        tipovenda: String(item.tipovenda || ''),
+        
+        // Campos de data e tempo
+        ano: parseInt(item.ano) || null,
+        mes: parseInt(String(item.mes).split('-')[1]) || null, // Extrair mês de "2025-02"
+        trn_dtgerencial: data,
+        
+        // Usuário e produtos
+        usr_lancou: String(item.usr_lancou || ''),
+        prd: String(item.prd || ''),
+        prd_desc: String(item.prd_desc || ''),
+        grp_desc: String(item.grp_desc || ''),
+        loc_desc: String(item.loc_desc || ''),
+        
+        // Valores numéricos
+        qtd: parseFloat(item.qtd) || 0,
+        desconto: parseFloat(item.desconto) || 0,
+        valorfinal: parseFloat(item.valorfinal) || 0,
+        custo: parseFloat(item.custo) || 0,
+        
+        // Campos opcionais
+        itm_obs: String(item.itm_obs || ''),
+        comandaorigem: String(item.comandaorigem || ''),
+        itemorigem: String(item.itemorigem || '')
+      }
+    })
   }
 
   private enrichRecords(records: Record<string, unknown>[], rawDataRecord: any, dataType: string): Record<string, unknown>[] {

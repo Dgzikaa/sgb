@@ -58,6 +58,12 @@ serve(async (req) => {
   }
 
   try {
+    // Log da requisição para debug
+    console.log('📥 Requisição recebida:', {
+      method: req.method,
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries())
+    })
     console.log('🚀 Iniciando sincronização contínua GET IN')
 
     // Initialize Supabase client
@@ -67,8 +73,8 @@ serve(async (req) => {
 
     // Get Getin credentials
     const { data: credenciais, error: credError } = await supabase
-      .from('credenciais_apis')
-      .select('*')
+      .from('api_credentials')
+      .select('username, api_token')
       .eq('sistema', 'getin')
       .eq('ambiente', 'producao')
       .single()
@@ -77,9 +83,13 @@ serve(async (req) => {
       throw new Error('Credenciais do Getin não encontradas')
     }
 
+    if (!credenciais.api_token) {
+      throw new Error('API Token do Getin não configurado')
+    }
+
     console.log('✅ Credenciais encontradas:', { 
-      sistema: credenciais.sistema, 
-      ambiente: credenciais.ambiente, 
+      sistema: 'getin', 
+      ambiente: 'producao', 
       username: credenciais.username 
     })
 
@@ -95,23 +105,7 @@ serve(async (req) => {
     const endDate = dataFim.toISOString().split('T')[0]
 
     console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (61 dias)`)
-
-    // Clean old reservations (older than yesterday)
-    const dataLimpeza = new Date(hoje)
-    dataLimpeza.setDate(hoje.getDate() - 2) // Anteontem
-    const cleanupDate = dataLimpeza.toISOString().split('T')[0]
-
-    console.log(`🧹 Removendo reservas anteriores a ${cleanupDate}...`)
-    const { error: cleanupError } = await supabase
-      .from('getin_reservations')
-      .delete()
-      .lt('reservation_date', cleanupDate)
-
-    if (cleanupError) {
-      console.warn('⚠️ Erro na limpeza:', cleanupError.message)
-    } else {
-      console.log('✅ Limpeza concluída')
-    }
+    console.log(`📋 Modo: Sincronização contínua (mantém histórico completo)`)
 
     let totalReservas = 0
     let totalSalvas = 0
@@ -123,7 +117,7 @@ serve(async (req) => {
     while (hasMorePages) {
       console.log(`📡 Buscando reservas: ${startDate} a ${endDate} (página ${currentPage})`)
 
-      const getinUrl = new URL('https://api.getin.com.br/v1/reservations')
+      const getinUrl = new URL('https://api.getinapis.com/apis/v2/reservations')
       getinUrl.searchParams.set('start_date', startDate)
       getinUrl.searchParams.set('end_date', endDate)
       getinUrl.searchParams.set('page', currentPage.toString())
@@ -132,8 +126,10 @@ serve(async (req) => {
       const response = await fetch(getinUrl.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${credenciais.token}`,
+          'apiKey': credenciais.api_token,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'SGB-Getin-Sync/1.0'
         },
       })
 
