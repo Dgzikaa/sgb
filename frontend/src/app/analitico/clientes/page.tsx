@@ -64,24 +64,6 @@ export default function ClientesPage() {
     { value: '6', label: 'Sábado' },
   ]
 
-  useEffect(() => {
-    fetchClientes()
-  }, [selectedBar, fetchClientes])
-
-  // Filtrar clientes baseado no dia da semana da última visita
-  useEffect(() => {
-    if (diaSemanaFiltro === 'todos') {
-      setClientesFiltrados(clientes)
-    } else {
-      const clientesFiltrados = clientes.filter(cliente => {
-        const dataUltimaVisita = new Date(cliente.ultima_visita)
-        const diaSemanaVisita = dataUltimaVisita.getDay().toString()
-        return diaSemanaVisita === diaSemanaFiltro
-      })
-      setClientesFiltrados(clientesFiltrados)
-    }
-  }, [clientes, diaSemanaFiltro])
-
   const fetchClientes = useCallback(async () => {
     try {
       setLoading(true)
@@ -103,6 +85,24 @@ export default function ClientesPage() {
       setLoading(false)
     }
   }, [selectedBar])
+
+  useEffect(() => {
+    fetchClientes()
+  }, [selectedBar, fetchClientes])
+
+  // Filtrar clientes baseado no dia da semana da última visita
+  useEffect(() => {
+    if (diaSemanaFiltro === 'todos') {
+      setClientesFiltrados(clientes)
+    } else {
+      const clientesFiltrados = clientes.filter(cliente => {
+        const dataUltimaVisita = new Date(cliente.ultima_visita)
+        const diaSemanaVisita = dataUltimaVisita.getDay().toString()
+        return diaSemanaVisita === diaSemanaFiltro
+      })
+      setClientesFiltrados(clientesFiltrados)
+    }
+  }, [clientes, diaSemanaFiltro])
 
   const handleWhatsAppClick = (nome: string, telefone: string | null) => {
     try {
