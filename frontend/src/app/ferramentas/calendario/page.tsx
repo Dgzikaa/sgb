@@ -712,17 +712,19 @@ export default function CalendarioPage() {
                         {day.date.getDate()}
                       </span>
                       
-                      {/* Badge de reservas - Simplificado */}
+                      {/* Badge de reservas com pax */}
                       {hasReservas && (
-                        <div className="flex items-center gap-1">
-                          {/* Total de reservas ativas (pending + confirmed + seated) */}
-                          <Badge variant="default" className="text-xs px-1.5 py-0.5 bg-blue-500">
-                            {day.reservasCount - canceladas}
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {/* Total de reservas ativas com pessoas */}
+                          <Badge variant="default" className="text-xs px-1.5 py-0.5 bg-blue-500 flex items-center gap-1">
+                            <span>{day.reservasCount - canceladas}</span>
+                            <span className="text-blue-100">({day.totalPessoas - day.pessoasCanceladas})</span>
                           </Badge>
-                          {/* Canceladas (canceled-user + no-show) */}
+                          {/* Canceladas com pessoas */}
                           {canceladas > 0 && (
-                            <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
-                              -{canceladas}
+                            <Badge variant="destructive" className="text-xs px-1.5 py-0.5 flex items-center gap-1">
+                              <span>-{canceladas}</span>
+                              <span className="text-red-100">({day.pessoasCanceladas})</span>
                             </Badge>
                           )}
                         </div>
@@ -768,32 +770,7 @@ export default function CalendarioPage() {
                         </button>
                       )}
 
-                      {/* Informações de reserva - Simplificado */}
-                      <div className="mt-auto">
-                        {hasReservas ? (
-                          <div className="bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 text-xs">
-                            <div className="text-center text-gray-700 dark:text-gray-300 font-medium text-xs leading-tight">
-                              {/* Total de reservas ativas */}
-                              <span className="text-blue-600 font-bold">{day.reservasCount - canceladas} reservas</span>
-                              <span className="text-blue-700 dark:text-blue-400 ml-1">({day.totalPessoas - day.pessoasCanceladas} pax)</span>
-                              
-                              {/* Canceladas */}
-                              {canceladas > 0 && (
-                                <>
-                                  <span className="mx-1">•</span>
-                                  <span className="text-red-600 font-bold">{canceladas} não foram</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="bg-gray-50 dark:bg-gray-800 rounded px-1 py-0.5 text-xs">
-                            <div className="text-center text-gray-500 dark:text-gray-400 text-xs font-medium">
-                              0 pax
-                            </div>
-                          </div>
-                        )}
-                      </div>
+
                     </div>
                   </div>
                 );
@@ -825,7 +802,6 @@ export default function CalendarioPage() {
                     <span className="text-gray-700 dark:text-gray-300 text-xs">Evento</span>
                   </div>
                 </div>
-                <span className="text-gray-500 dark:text-gray-400 text-xs">pax = pessoas</span>
               </div>
             </div>
           </CardContent>
@@ -835,15 +811,15 @@ export default function CalendarioPage() {
         <div className="mt-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
           <div className="flex items-center justify-center gap-6 text-xs text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded text-white flex items-center justify-center text-xs font-bold">R</div>
-              <span>Total de reservas ativas</span>
+              <div className="w-4 h-4 bg-blue-500 rounded text-white flex items-center justify-center text-xs font-bold">5</div>
+              <span>Reservas ativas (pessoas)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded text-white flex items-center justify-center text-xs font-bold">-</div>
-              <span>Canceladas + No-show</span>
+              <div className="w-4 h-4 bg-red-500 rounded text-white flex items-center justify-center text-xs font-bold">-2</div>
+              <span>Canceladas (pessoas)</span>
             </div>
             <div className="text-gray-500">
-              <span className="font-medium">pax</span> = pessoas
+              <span className="font-medium">Números entre parênteses</span> = pessoas
             </div>
           </div>
         </div>
