@@ -107,18 +107,30 @@ export default function VisaoGeralEstrategica() {
   // Função para limpar cache e recarregar
   const limparCacheERecarregar = () => {
     try {
-      // Limpar cache específico da visão geral
-      const keys = Object.keys(sessionStorage);
-      keys.forEach(key => {
-        if (key.startsWith('vg:')) {
+      // Limpar TODOS os caches - sessionStorage E localStorage
+      const sessionKeys = Object.keys(sessionStorage);
+      sessionKeys.forEach(key => {
+        if (key.startsWith('vg:') || key.includes('indicadores')) {
           sessionStorage.removeItem(key);
         }
       });
       
-      // Forçar recarregamento
+      const localKeys = Object.keys(localStorage);
+      localKeys.forEach(key => {
+        if (key.startsWith('vg:') || key.includes('indicadores')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Forçar limpeza de estado
       setIndicadoresAnuais(null);
       setIndicadoresTrimestrais(null);
       setLoading(true);
+      setRequestInProgress(false);
+      
+      // Adicionar timestamp para forçar nova requisição
+      const timestamp = Date.now();
+      console.log(`🧹 CACHE TOTALMENTE LIMPO - ${timestamp}`);
       
       // Recarregar dados
       if (selectedBar) {
@@ -126,7 +138,7 @@ export default function VisaoGeralEstrategica() {
       }
       
       toast({
-        title: 'Cache limpo',
+        title: 'Cache totalmente limpo',
         description: 'Dados recarregados com sucesso',
       });
     } catch (error) {
@@ -151,8 +163,9 @@ export default function VisaoGeralEstrategica() {
 
     const hoje = new Date();
     const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
-    const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}`;
-    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}`;
+    const timestamp = Date.now(); // Forçar bypass do cache HTTP
+    const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
+    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
 
     // Cache com TTL menor para permitir atualizações
     const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
