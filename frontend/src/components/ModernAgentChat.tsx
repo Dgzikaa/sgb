@@ -55,9 +55,10 @@ export default function ModernAgentChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // Removido scroll automático para evitar comportamento indesejado
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
   useEffect(() => {
     setMessages([{
@@ -207,7 +208,7 @@ export default function ModernAgentChat() {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar do Chat */}
-      <div className="w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+      <div className="w-72 h-[750px] bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
         {/* Header do Chat */}
         <div className="p-3 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
@@ -225,7 +226,7 @@ export default function ModernAgentChat() {
         </div>
 
         {/* Área de Mensagens */}
-        <ScrollArea className="flex-1 p-3">
+        <ScrollArea className="flex-1 p-3 min-h-0 overflow-y-auto">
           <div className="space-y-3">
             {messages.map((message) => (
               <div key={message.id} className="group">
@@ -297,25 +298,25 @@ export default function ModernAgentChat() {
         </ScrollArea>
 
         {/* Sugestões Rápidas */}
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-2 gap-1.5 mb-3">
+        <div className="p-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-2 gap-1 mb-2">
             {quickSuggestions.map((suggestion, index) => (
               <Button
                 key={index}
                 variant="outline"
                 size="sm"
-                className="justify-start h-7 text-xs px-2"
+                className="justify-start h-6 text-xs px-1.5"
                 onClick={() => setInput(suggestion.query)}
               >
                 <span className="mr-1 text-xs">{suggestion.icon}</span>
-                <span className="text-xs">{suggestion.text}</span>
+                <span className="text-xs truncate">{suggestion.text}</span>
               </Button>
             ))}
           </div>
         </div>
 
         {/* Input de Mensagem */}
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-2 border-t border-gray-200 dark:border-gray-700">
           <div className="flex gap-2">
             <Input
               value={input}

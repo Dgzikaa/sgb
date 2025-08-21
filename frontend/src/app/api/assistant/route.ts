@@ -561,12 +561,135 @@ async function executeCustomQuery(query: string) {
 async function getAdvancedFallback(message: string): Promise<AssistantResponse> {
   const lowerMessage = message.toLowerCase();
   
+  // Análise de gráfico de faturamento
+  if (lowerMessage.includes('gráfico') && (lowerMessage.includes('faturamento') || lowerMessage.includes('vendas'))) {
+    try {
+      let whereClause = '';
+      let periodo = '';
+      
+      // Detectar período específico
+      if (lowerMessage.includes('abril')) {
+        whereClause = "AND dt_gerencial >= '2024-04-01' AND dt_gerencial <= '2024-04-30'";
+        periodo = 'Abril 2024';
+      } else if (lowerMessage.includes('maio')) {
+        whereClause = "AND dt_gerencial >= '2024-05-01' AND dt_gerencial <= '2024-05-31'";
+        periodo = 'Maio 2024';
+      } else if (lowerMessage.includes('junho')) {
+        whereClause = "AND dt_gerencial >= '2024-06-01' AND dt_gerencial <= '2024-06-30'";
+        periodo = 'Junho 2024';
+      } else {
+        // Últimos 30 dias se não especificar
+        whereClause = "AND dt_gerencial >= CURRENT_DATE - INTERVAL '30 days'";
+        periodo = 'Últimos 30 dias';
+      }
+
+      const { data: faturamento } = await supabase
+        .from('contahub_periodo')
+        .select('dt_gerencial, total_liquido, total_bruto')
+        .eq('bar_id', 3)
+        .gte('dt_gerencial', lowerMessage.includes('abril') ? '2024-04-01' : '2024-01-01')
+        .lte('dt_gerencial', lowerMessage.includes('abril') ? '2024-04-30' : '2024-12-31')
+        .order('dt_gerencial', { ascending: true });
+
+      if (!faturamento || faturamento.length === 0) {
+        return {
+          success: true,
+          message: `📊 **Nenhum dado encontrado para ${periodo}**\n\nVerifique se existem dados no período solicitado.`,
+          type: 'text'
+        };
+      }
+
+      // Preparar dados para o gráfico
+      const chartData = faturamento.map(item => ({
+        name: new Date(item.dt_gerencial).toLocaleDateString('pt-BR'),
+        value: parseFloat(item.total_liquido?.toString() || '0'),
+        bruto: parseFloat(item.total_bruto?.toString() || '0')
+      }));
+
+      const totalLiquido = faturamento.reduce((sum, item) => sum + parseFloat(item.total_liquido?.toString() || '0'), 0);
+      const totalBruto = faturamento.reduce((sum, item) => sum + parseFloat(item.total_bruto?.toString() || '0'), 0);
+
+      return {
+        success: true,
+        message: `📊 **Gráfico de Faturamento - ${periodo}**\n\n💰 **Resumo:**\n• Total Líquido: R$ ${totalLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Total Bruto: R$ ${totalBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Registros: ${faturamento.length} dias\n\n📈 **Gráfico gerado com dados reais do sistema!**`,
+        type: 'chart',
+        chartData: {
+          type: 'line',
+          title: `Faturamento - ${periodo}`,
+          description: `Evolução do faturamento líquido em ${periodo}`,
+          data: chartData
+        },
+        chartType: 'line',
+        suggestions: ["📊 Comparar com mês anterior", "🎯 Análise por produto", "📈 Tendência de crescimento"]
+      };
+    } catch (error) {
+      console.error('Erro gráfico faturamento:', error);
+    }
+  }
+
+  // Análise de gráfico de produtos
+  if (lowerMessage.includes('gráfico') && lowerMessage.includes('produto')) {
+    try {
+      const { data: produtos } = await supabase
+        .from('yuzer_produtos')
+        .select('produto, categoria, quantidade, valor_total')
+        .eq('bar_id', 3)
+        .gte('data_evento', '2024-04-01')
+        .lte('data_evento', '2024-04-30');
+
+      if (!produtos || produtos.length === 0) {
+        return {
+          success: true,
+          message: `📊 **Nenhum produto encontrado para o período**`,
+          type: 'text'
+        };
+      }
+
+      // Agrupar por produto
+      const produtosAgrupados = produtos.reduce((acc: any, item) => {
+        const nome = item.produto || 'Produto sem nome';
+        if (!acc[nome]) {
+          acc[nome] = { quantidade: 0, valor: 0 };
+        }
+        acc[nome].quantidade += parseInt(item.quantidade?.toString() || '0');
+        acc[nome].valor += parseFloat(item.valor_total?.toString() || '0');
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(produtosAgrupados)
+        .map(([nome, dados]: [string, any]) => ({
+          name: nome,
+          value: dados.valor,
+          quantidade: dados.quantidade
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10); // Top 10
+
+      return {
+        success: true,
+        message: `📊 **Top 10 Produtos por Faturamento - Abril 2024**\n\n🎯 **Dados encontrados:** ${produtos.length} registros\n📈 **Gráfico gerado com dados reais!**`,
+        type: 'chart',
+        chartData: {
+          type: 'bar',
+          title: 'Top 10 Produtos - Abril 2024',
+          description: 'Produtos com maior faturamento em abril',
+          data: chartData
+        },
+        chartType: 'bar',
+        suggestions: ["📊 Análise por categoria", "🎯 Margem de lucro", "📈 Comparar períodos"]
+      };
+    } catch (error) {
+      console.error('Erro gráfico produtos:', error);
+    }
+  }
+
   // Análise inteligente de vendas
   if (lowerMessage.includes('vendas') || lowerMessage.includes('venda')) {
     try {
       const { data: vendas } = await supabase
         .from('contahub_periodo')
         .select('dt_gerencial, total_liquido, total_bruto, pessoas')
+        .eq('bar_id', 3)
         .gte('dt_gerencial', '2024-01-01')
         .order('dt_gerencial', { ascending: false })
         .limit(30);
@@ -579,7 +702,7 @@ async function getAdvancedFallback(message: string): Promise<AssistantResponse> 
         success: true,
         message: `📊 **Análise de Vendas Completa**\n\n💰 **Últimos 30 registros:**\n• Total Líquido: R$ ${totalLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Total Bruto: R$ ${totalBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Total Pessoas: ${totalPessoas.toLocaleString('pt-BR')}\n\n📈 **Ticket Médio:** R$ ${totalPessoas > 0 ? (totalLiquido / totalPessoas).toLocaleString('pt-BR', {minimumFractionDigits: 2}) : '0,00'}\n\n✨ **Sistema SGB com IA Inteligente ativado!**`,
         type: 'text',
-        suggestions: ["📊 Análise por período", "🎯 Produtos mais vendidos", "📈 Gráfico de crescimento", "👥 Análise de clientes"]
+        suggestions: ["📊 Gráfico de vendas", "🎯 Produtos mais vendidos", "📈 Gráfico de crescimento", "👥 Análise de clientes"]
       };
     } catch (error) {
       console.error('Erro vendas:', error);
@@ -592,6 +715,7 @@ async function getAdvancedFallback(message: string): Promise<AssistantResponse> 
       const { data: clientes } = await supabase
         .from('contahub_periodo')
         .select('pessoas, dt_gerencial')
+        .eq('bar_id', 3)
         .gt('pessoas', 0)
         .order('dt_gerencial', { ascending: false });
 
@@ -612,9 +736,9 @@ async function getAdvancedFallback(message: string): Promise<AssistantResponse> 
   // Análise geral inteligente
   return {
     success: true,
-    message: `🤖 **SGB AI Assistant Ativado!**\n\n✨ **Sistema funcionando perfeitamente!**\n\nPosso ajudar com:\n• 📊 **Análises de vendas** detalhadas\n• 👥 **Relatórios de clientes** completos\n• 📈 **Métricas de performance**\n• 🎯 **Insights de negócio**\n\n**Sua pergunta:** "${message}"\n\n💡 **Experimente perguntas específicas como:**\n"Analise as vendas" ou "Quantos clientes tenho?"`,
+    message: `🤖 **SGB AI Assistant Ativado!**\n\n✨ **Sistema funcionando perfeitamente!**\n\nPosso ajudar com:\n• 📊 **Gráficos de faturamento** por período\n• 🎯 **Análise de produtos** mais vendidos\n• 👥 **Relatórios de clientes** completos\n• 📈 **Métricas de performance**\n\n**Sua pergunta:** "${message}"\n\n💡 **Experimente perguntas específicas como:**\n"Gere um gráfico de faturamento de abril" ou "Top produtos vendidos"`,
     type: 'text',
-    suggestions: ["📊 Vendas hoje", "👥 Total de clientes", "📈 Performance do mês", "🎯 Ticket médio"]
+    suggestions: ["📊 Gráfico faturamento abril", "🎯 Top produtos", "📈 Performance do mês", "👥 Análise clientes"]
   };
 }
 
