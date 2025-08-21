@@ -815,16 +815,7 @@ export default function PlanejamentoComercialPage() {
                             dados.reduce((sum, evento) => sum + (evento.res_p || 0), 0) >= 2600
                               ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {(() => {
-                              const total = dados.reduce((sum, evento) => sum + (evento.res_p || 0), 0);
-                              console.log('🔍 Debug Reservas Presentes:', {
-                                total,
-                                eventos: dados.length,
-                                eventosComReservas: dados.filter(e => e.res_p > 0).length,
-                                detalhes: dados.map(e => ({ nome: e.evento_nome, data: e.data_curta, res_p: e.res_p }))
-                              });
-                              return total.toLocaleString();
-                            })()}
+                            {dados.reduce((sum, evento) => sum + (evento.res_p || 0), 0).toLocaleString()}
                             {dados.reduce((sum, evento) => sum + (evento.res_p || 0), 0) >= 2600
                               ? '📈' : '📉'}
                           </span>

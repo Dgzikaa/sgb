@@ -29,45 +29,34 @@ import {
 import { useBar } from '@/contexts/BarContext';
 import { useToast } from '@/hooks/use-toast';
 
-interface DadosDesempenho {
-  id: number;
-  data_evento: string;
-  nome_evento: string;
-  semana: number;
-  mes: number;
-  ano: number;
-  dia_semana: string;
-  faturamento_real: number;
-  meta_faturamento: number;
-  clientes_real: number;
-  clientes_plan: number;
-  ticket_medio: number;
-  percentual_artistico: number;
-  tempo_bar: number;
-  tempo_cozinha: number;
-  performance_geral: number;
-}
-
-interface ResumoSemanal {
+interface DadosSemana {
   semana: number;
   periodo: string;
-  total_faturamento: number;
-  total_clientes: number;
+  faturamento_total: number;
+  clientes_total: number;
   ticket_medio: number;
-  performance_media: number;
-  eventos: DadosDesempenho[];
+  performance_geral: number;
+  eventos_count: number;
+  meta_faturamento: number;
+  meta_clientes: number;
 }
 
-interface ResumoMensal {
+interface TotaisMensais {
+  faturamento_total: number;
+  clientes_total: number;
+  ticket_medio: number;
+  performance_media: number;
+  eventos_total: number;
+}
+
+interface DadosMes {
   mes: number;
   ano: number;
-  semanas: ResumoSemanal[];
-  totais: {
-    faturamento: number;
-    clientes: number;
-    ticket_medio: number;
-    performance_geral: number;
-  };
+  nome_mes: string;
+  faturamento_total: number;
+  clientes_total: number;
+  ticket_medio: number;
+  performance_media: number;
 }
 
 export default function DesempenhoPage() {
@@ -77,81 +66,58 @@ export default function DesempenhoPage() {
   const [activeTab, setActiveTab] = useState('semanal');
   const [loading, setLoading] = useState(true);
   const [mesAtual, setMesAtual] = useState(() => new Date());
-  const [dadosDesempenho, setDadosDesempenho] = useState<DadosDesempenho[]>([]);
-  const [resumoSemanal, setResumoSemanal] = useState<ResumoSemanal[]>([]);
-  const [resumoMensal, setResumoMensal] = useState<ResumoMensal | null>(null);
-
-  // Estados do Modal
-  const [modalOpen, setModalOpen] = useState(false);
-  const [eventoSelecionado, setEventoSelecionado] = useState<DadosDesempenho | null>(null);
-  const [editData, setEditData] = useState<any>({});
-  const [salvando, setSalvando] = useState(false);
+  const [dadosSemanas, setDadosSemanas] = useState<DadosSemana[]>([]);
+  const [totaisMensais, setTotaisMensais] = useState<TotaisMensais | null>(null);
+  const [dadosMensais, setDadosMensais] = useState<DadosMes[]>([]);
 
   const mesesNomes = useMemo(() => [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ], []);
 
-  const gerarPeriodoSemana = useCallback((semana: number, mes: number, ano: number): string => {
-    // Lógica simplificada - pode ser ajustada conforme necessário
-    const inicioMes = new Date(ano, mes - 1, 1);
-    const inicioSemana = new Date(inicioMes);
-    inicioSemana.setDate(inicioSemana.getDate() + (semana - 1) * 7);
-    
-    const fimSemana = new Date(inicioSemana);
-    fimSemana.setDate(fimSemana.getDate() + 6);
-    
-    return `${inicioSemana.getDate().toString().padStart(2, '0')}-${fimSemana.getDate().toString().padStart(2, '0')} ${mesesNomes[mes - 1].slice(0, 3)}`;
-  }, [mesesNomes]);
+  // Carregar dados mensais consolidados (fevereiro 2025 até atual)
+  const carregarDadosMensais = useCallback(async () => {
+    if (!selectedBar) return;
 
-  // Processar dados para resumos semanais e mensais
-  const processarResumos = useCallback((eventos: DadosDesempenho[]) => {
-    const semanasMap = new Map<number, DadosDesempenho[]>();
-    
-    eventos.forEach(evento => {
-      if (!semanasMap.has(evento.semana)) {
-        semanasMap.set(evento.semana, []);
+    const dadosMensaisTemp: DadosMes[] = [];
+    const anoAtual = new Date().getFullYear();
+    const mesAtual = new Date().getMonth() + 1;
+
+    // Buscar dados de fevereiro 2025 até o mês atual
+    for (let ano = 2025; ano <= anoAtual; ano++) {
+      const mesInicio = ano === 2025 ? 2 : 1; // Começar em fevereiro para 2025
+      const mesFim = ano === anoAtual ? mesAtual : 12;
+
+      for (let mes = mesInicio; mes <= mesFim; mes++) {
+        try {
+          const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
+            headers: {
+              'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.totais_mensais) {
+              dadosMensaisTemp.push({
+                mes,
+                ano,
+                nome_mes: mesesNomes[mes - 1],
+                faturamento_total: data.totais_mensais.faturamento_total,
+                clientes_total: data.totais_mensais.clientes_total,
+                ticket_medio: data.totais_mensais.ticket_medio,
+                performance_media: data.totais_mensais.performance_media
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Erro ao carregar dados de ${mes}/${ano}:`, error);
+        }
       }
-      semanasMap.get(evento.semana)!.push(evento);
-    });
+    }
 
-    const resumos: ResumoSemanal[] = Array.from(semanasMap.entries()).map(([semana, eventosSemanais]) => {
-      const totalFaturamento = eventosSemanais.reduce((sum, e) => sum + e.faturamento_real, 0);
-      const totalClientes = eventosSemanais.reduce((sum, e) => sum + e.clientes_real, 0);
-      const ticketMedio = totalClientes > 0 ? totalFaturamento / totalClientes : 0;
-      const performanceMedia = eventosSemanais.reduce((sum, e) => sum + e.performance_geral, 0) / eventosSemanais.length;
-
-      return {
-        semana,
-        periodo: gerarPeriodoSemana(semana, mesAtual.getMonth() + 1, mesAtual.getFullYear()),
-        total_faturamento: totalFaturamento,
-        total_clientes: totalClientes,
-        ticket_medio: ticketMedio,
-        performance_media: performanceMedia,
-        eventos: eventosSemanais
-      };
-    }).sort((a, b) => a.semana - b.semana);
-
-    setResumoSemanal(resumos);
-
-    // Calcular resumo mensal
-    const totalMensal = resumos.reduce((acc, semana) => ({
-      faturamento: acc.faturamento + semana.total_faturamento,
-      clientes: acc.clientes + semana.total_clientes,
-      ticket_medio: 0,
-      performance_geral: acc.performance_geral + semana.performance_media
-    }), { faturamento: 0, clientes: 0, ticket_medio: 0, performance_geral: 0 });
-
-    totalMensal.ticket_medio = totalMensal.clientes > 0 ? totalMensal.faturamento / totalMensal.clientes : 0;
-    totalMensal.performance_geral = resumos.length > 0 ? totalMensal.performance_geral / resumos.length : 0;
-
-    setResumoMensal({
-      mes: mesAtual.getMonth() + 1,
-      ano: mesAtual.getFullYear(),
-      semanas: resumos,
-      totais: totalMensal
-    });
-  }, [mesAtual, gerarPeriodoSemana]);
+    setDadosMensais(dadosMensaisTemp);
+  }, [selectedBar, mesesNomes]);
 
   // Carregar dados da API
   const carregarDados = useCallback(async () => {
@@ -176,8 +142,13 @@ export default function DesempenhoPage() {
       }
 
       const data = await response.json();
-      setDadosDesempenho(data.eventos || []);
-      processarResumos(data.eventos || []);
+      setDadosSemanas(data.semanas || []);
+      setTotaisMensais(data.totais_mensais || null);
+
+      // Carregar dados mensais se estiver na aba mensal
+      if (activeTab === 'mensal') {
+        await carregarDadosMensais();
+      }
       
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -189,7 +160,7 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [mesAtual, selectedBar]);
+  }, [mesAtual, selectedBar, activeTab, carregarDadosMensais]);
 
   const navegarMes = (direcao: 'anterior' | 'proximo') => {
     const novoMes = new Date(mesAtual);

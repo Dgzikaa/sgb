@@ -74,56 +74,86 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ ${eventos.length} eventos encontrados`);
 
-    // Processar dados usando os campos da eventos_base
-    const eventosProcessados = eventos?.map(evento => {
-      const dataEvento = new Date(evento.data_evento);
-      
-      // Usar semana já calculada ou calcular se necessário
-      const semana = evento.semana || Math.floor((dataEvento.getDate() - 1) / 7) + 1;
+    // Função para calcular número da semana ISO
+    const getWeekNumber = (date: Date): number => {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    };
 
-      // Usar dados reais da tabela eventos_base
-      const faturamentoReal = evento.real_r || 0;
-      const metaFaturamento = evento.m1_r || 0;
-      const clientesReal = evento.cl_real || 0;
-      const clientesPlan = evento.cl_plan || 0;
-      const ticketMedio = evento.t_medio || 0;
+    // Função para obter período da semana
+    const getWeekPeriod = (weekNumber: number, year: number): { inicio: Date, fim: Date } => {
+      const jan1 = new Date(year, 0, 1);
+      const daysToFirstMonday = (8 - jan1.getDay()) % 7;
+      const firstMonday = new Date(year, 0, 1 + daysToFirstMonday);
       
-      // Calcular performance baseada em múltiplos indicadores
+      const weekStart = new Date(firstMonday);
+      weekStart.setDate(firstMonday.getDate() + (weekNumber - 1) * 7);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      
+      return { inicio: weekStart, fim: weekEnd };
+    };
+
+    // Consolidar dados por semana
+    const semanaMap = new Map<number, {
+      semana: number;
+      periodo: string;
+      faturamento_total: number;
+      clientes_total: number;
+      eventos_count: number;
+      metas_faturamento: number;
+      metas_clientes: number;
+    }>();
+
+    eventos.forEach(evento => {
+      const dataEvento = new Date(evento.data_evento);
+      const semana = getWeekNumber(dataEvento);
+      
+      if (!semanaMap.has(semana)) {
+        const { inicio, fim } = getWeekPeriod(semana, ano);
+        semanaMap.set(semana, {
+          semana,
+          periodo: `${inicio.getDate().toString().padStart(2, '0')}.${(inicio.getMonth() + 1).toString().padStart(2, '0')} - ${fim.getDate().toString().padStart(2, '0')}.${(fim.getMonth() + 1).toString().padStart(2, '0')}`,
+          faturamento_total: 0,
+          clientes_total: 0,
+          eventos_count: 0,
+          metas_faturamento: 0,
+          metas_clientes: 0
+        });
+      }
+
+      const semanaData = semanaMap.get(semana)!;
+      semanaData.faturamento_total += evento.real_r || 0;
+      semanaData.clientes_total += evento.cl_real || 0;
+      semanaData.eventos_count += 1;
+      semanaData.metas_faturamento += evento.m1_r || 0;
+      semanaData.metas_clientes += evento.cl_plan || 0;
+    });
+
+    // Converter para array e calcular métricas
+    const semanasConsolidadas = Array.from(semanaMap.values()).map(semana => {
+      const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
+      
+      // Calcular performance geral da semana
       let performanceGeral = 0;
       let indicadores = 0;
 
-      // Performance de receita (peso 40%)
-      if (metaFaturamento > 0) {
-        const performanceReceita = Math.min((faturamentoReal / metaFaturamento) * 100, 150);
-        performanceGeral += performanceReceita * 0.4;
+      // Performance de receita (peso 60%)
+      if (semana.metas_faturamento > 0) {
+        const performanceReceita = Math.min((semana.faturamento_total / semana.metas_faturamento) * 100, 150);
+        performanceGeral += performanceReceita * 0.6;
+        indicadores += 0.6;
+      }
+
+      // Performance de clientes (peso 40%)
+      if (semana.metas_clientes > 0) {
+        const performanceClientes = Math.min((semana.clientes_total / semana.metas_clientes) * 100, 150);
+        performanceGeral += performanceClientes * 0.4;
         indicadores += 0.4;
-      }
-
-      // Performance de clientes (peso 30%)
-      if (clientesPlan > 0) {
-        const performanceClientes = Math.min((clientesReal / clientesPlan) * 100, 150);
-        performanceGeral += performanceClientes * 0.3;
-        indicadores += 0.3;
-      }
-
-      // Performance de ticket médio (peso 20%)
-      if (ticketMedio > 0) {
-        const metaTicket = 93; // Meta padrão
-        const performanceTicket = Math.min((ticketMedio / metaTicket) * 100, 150);
-        performanceGeral += performanceTicket * 0.2;
-        indicadores += 0.2;
-      }
-
-      // Performance de tempo (peso 10%)
-      const tempoBar = evento.t_bar || 0;
-      const tempoCozinha = evento.t_coz || 0;
-      if (tempoBar > 0 || tempoCozinha > 0) {
-        const metaBar = 4; // Meta <= 4min
-        const metaCozinha = 12; // Meta <= 12min
-        const performanceTempo = ((tempoBar <= metaBar ? 100 : (metaBar / tempoBar) * 100) + 
-                                 (tempoCozinha <= metaCozinha ? 100 : (metaCozinha / tempoCozinha) * 100)) / 2;
-        performanceGeral += performanceTempo * 0.1;
-        indicadores += 0.1;
       }
 
       // Normalizar performance
@@ -132,42 +162,46 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        id: evento.id,
-        data_evento: evento.data_evento,
-        nome_evento: evento.nome || '',
-        semana: semana,
-        mes: Number(mes),
-        ano: Number(ano),
-        dia_semana: evento.dia_semana || '',
-        faturamento_real: faturamentoReal,
-        meta_faturamento: metaFaturamento,
-        clientes_real: clientesReal,
-        clientes_plan: clientesPlan,
-        ticket_medio: ticketMedio,
-        te_plan: evento.te_plan || 0,
-        tb_plan: evento.tb_plan || 0,
-        percentual_artistico: Math.round((evento.percent_art_fat || 0) * 100) / 100,
-        tempo_bar: evento.t_bar || 0,
-        tempo_cozinha: evento.t_coz || 0,
+        semana: semana.semana,
+        periodo: semana.periodo,
+        faturamento_total: Math.round(semana.faturamento_total * 100) / 100,
+        clientes_total: semana.clientes_total,
+        ticket_medio: Math.round(ticketMedio * 100) / 100,
         performance_geral: Math.round(performanceGeral * 100) / 100,
-        precisa_recalculo: evento.precisa_recalculo || false,
-        calculado_em: evento.calculado_em
+        eventos_count: semana.eventos_count,
+        meta_faturamento: Math.round(semana.metas_faturamento * 100) / 100,
+        meta_clientes: semana.metas_clientes
       };
-    }) || [];
+    }).sort((a, b) => a.semana - b.semana);
 
-    console.log(`📊 Dados processados: ${eventosProcessados.length} eventos`);
+    console.log(`📊 Dados consolidados: ${semanasConsolidadas.length} semanas`);
+
+    // Calcular totais mensais
+    const totaisMensais = semanasConsolidadas.reduce((acc, semana) => ({
+      faturamento_total: acc.faturamento_total + semana.faturamento_total,
+      clientes_total: acc.clientes_total + semana.clientes_total,
+      eventos_total: acc.eventos_total + semana.eventos_count,
+      performance_media: acc.performance_media + semana.performance_geral
+    }), { faturamento_total: 0, clientes_total: 0, eventos_total: 0, performance_media: 0 });
+
+    const ticketMedioMensal = totaisMensais.clientes_total > 0 ? 
+      totaisMensais.faturamento_total / totaisMensais.clientes_total : 0;
+    
+    const performanceMediaMensal = semanasConsolidadas.length > 0 ? 
+      totaisMensais.performance_media / semanasConsolidadas.length : 0;
 
     return NextResponse.json({
       success: true,
       mes: mes,
       ano: ano,
-      eventos: eventosProcessados,
-      total_eventos: eventosProcessados.length,
-      meta: {
-        eventos_com_dados_reais: eventosProcessados.filter(e => e.faturamento_real > 0).length,
-        eventos_precisam_recalculo: eventosProcessados.filter(e => e.precisa_recalculo).length,
-        performance_media: eventosProcessados.length > 0 ? 
-          eventosProcessados.reduce((sum, e) => sum + e.performance_geral, 0) / eventosProcessados.length : 0
+      semanas: semanasConsolidadas,
+      total_semanas: semanasConsolidadas.length,
+      totais_mensais: {
+        faturamento_total: Math.round(totaisMensais.faturamento_total * 100) / 100,
+        clientes_total: totaisMensais.clientes_total,
+        ticket_medio: Math.round(ticketMedioMensal * 100) / 100,
+        performance_media: Math.round(performanceMediaMensal * 100) / 100,
+        eventos_total: totaisMensais.eventos_total
       }
     });
 

@@ -99,11 +99,20 @@ async function fetchAllData(supabase: any, tableName: string, columns: string, f
   let allData: any[] = [];
   let from = 0;
   const limit = 1000;
+  let pageCount = 0;
   
-      const MAX_ITERATIONS = 1000;
-    let iterations = 0;
-    while (iterations < MAX_ITERATIONS) {
-      iterations++;
+  console.log(`🔍 INICIANDO BUSCA PAGINADA: ${tableName}`);
+  console.log(`📋 Filtros aplicados:`, filters);
+  
+  const MAX_ITERATIONS = 100; // Reduzir para evitar loops infinitos
+  let iterations = 0;
+  
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
+    pageCount++;
+    
+    console.log(`📄 Página ${pageCount}: buscando registros ${from} a ${from + limit - 1}`);
+    
     let query = supabase
       .from(tableName)
       .select(columns)
@@ -125,20 +134,33 @@ async function fetchAllData(supabase: any, tableName: string, columns: string, f
     const { data, error } = await query;
     
     if (error) {
-      console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      console.error(`❌ Erro ao buscar ${tableName} (página ${pageCount}):`, error);
       break;
     }
     
-    if (!data || data.length === 0) break;
+    if (!data || data.length === 0) {
+      console.log(`✅ Fim da paginação: página ${pageCount} sem dados`);
+      break;
+    }
     
+    console.log(`📦 Página ${pageCount}: ${data.length} registros encontrados`);
     allData.push(...data);
     
-    if (data.length < limit) break; // Última página
+    if (data.length < limit) {
+      console.log(`✅ Última página: ${data.length} < ${limit}`);
+      break; // Última página
+    }
     
     from += limit;
   }
   
-  console.log(`📊 ${tableName}: ${allData.length} registros total`);
+  console.log(`📊 ${tableName}: ${allData.length} registros total em ${pageCount} páginas`);
+  
+  // Log de amostra dos primeiros registros para debug
+  if (allData.length > 0) {
+    console.log(`🔍 Amostra dos primeiros registros:`, allData.slice(0, 3));
+  }
+  
   return allData;
 }
 
@@ -188,9 +210,10 @@ export async function GET(request: Request) {
 
     // Buscar dados anuais
     if (periodo === 'anual') {
-      // Performance Anual - Ano completo de 2025
+      // Performance Anual - Desde abertura até data atual
       const startDate = '2025-02-01'; // Bar abriu em Fevereiro
-      const endDate = '2025-12-31'; // Ano completo
+      const hoje = new Date();
+      const endDate = hoje.toISOString().split('T')[0]; // Data atual
       // Tenta usar a view materializada se existir
       try {
         const { data: anualView, error: anualViewErr } = await supabase
@@ -266,11 +289,18 @@ export async function GET(request: Request) {
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
       
       // 🔍 DEBUG: Logs detalhados dos dados
-      console.log('📊 DADOS DE FATURAMENTO DETALHADOS:');
-      console.log(`ContaHub Pagamentos: ${contahubData?.length || 0} registros = R$ ${faturamentoContahub}`);
-      console.log(`Yuzer Pagamentos: ${yuzerData?.length || 0} registros = R$ ${faturamentoYuzer}`);
-      console.log(`Sympla Pedidos: ${symplaData?.length || 0} registros = R$ ${faturamentoSympla}`);
-      console.log(`TOTAL FATURAMENTO: R$ ${faturamentoTotal}`);
+      console.log('📊 DADOS DE FATURAMENTO DETALHADOS (ANUAL):');
+      console.log(`Período: ${startDate} até ${endDate}`);
+      console.log(`ContaHub Pagamentos: ${contahubData?.length || 0} registros = R$ ${faturamentoContahub.toLocaleString('pt-BR')}`);
+      console.log(`Yuzer Pagamentos: ${yuzerData?.length || 0} registros = R$ ${faturamentoYuzer.toLocaleString('pt-BR')}`);
+      console.log(`Sympla Pedidos: ${symplaData?.length || 0} registros = R$ ${faturamentoSympla.toLocaleString('pt-BR')}`);
+      console.log(`TOTAL FATURAMENTO ANUAL: R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
+      
+      // Verificar se os valores estão corretos comparando com consulta direta
+      console.log('🔍 COMPARAÇÃO COM VALORES ESPERADOS:');
+      console.log(`ContaHub esperado: ~R$ 4.266.082,80 | Obtido: R$ ${faturamentoContahub.toLocaleString('pt-BR')}`);
+      console.log(`Yuzer esperado: ~R$ 2.470.051,55 | Obtido: R$ ${faturamentoYuzer.toLocaleString('pt-BR')}`);
+      console.log(`Total esperado: ~R$ 6.736.134,35 | Obtido: R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
       
       // Logs detalhados removidos
 
@@ -309,11 +339,16 @@ export async function GET(request: Request) {
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
       
       // 🔍 DEBUG: Logs detalhados das pessoas
-      console.log('👥 DADOS DE PESSOAS DETALHADOS:');
-      console.log(`ContaHub Período: ${pessoasContahubData?.length || 0} registros = ${totalPessoasContahub} pessoas`);
-      console.log(`Yuzer Produtos: ${pessoasYuzer.data?.length || 0} registros = ${totalPessoasYuzer} pessoas`);
-      console.log(`Sympla Participantes: ${pessoasSympla.data?.length || 0} registros = ${totalPessoasSympla} pessoas`);
-      console.log(`TOTAL PESSOAS: ${totalPessoas}`);
+      console.log('👥 DADOS DE PESSOAS DETALHADOS (ANUAL):');
+      console.log(`Período: ${startDate} até ${endDate}`);
+      console.log(`ContaHub Período: ${pessoasContahubData?.length || 0} registros = ${totalPessoasContahub.toLocaleString('pt-BR')} pessoas`);
+      console.log(`Yuzer Produtos: ${pessoasYuzer.data?.length || 0} registros = ${totalPessoasYuzer.toLocaleString('pt-BR')} pessoas`);
+      console.log(`Sympla Participantes: ${pessoasSympla.data?.length || 0} registros = ${totalPessoasSympla.toLocaleString('pt-BR')} pessoas`);
+      console.log(`TOTAL PESSOAS ANUAL: ${totalPessoas.toLocaleString('pt-BR')}`);
+      
+      // Verificar se os valores estão corretos
+      console.log('🔍 COMPARAÇÃO PESSOAS ESPERADAS:');
+      console.log(`ContaHub esperado: ~44.408 pessoas | Obtido: ${totalPessoasContahub.toLocaleString('pt-BR')} pessoas`);
       
       // Logs detalhados removidos
 
