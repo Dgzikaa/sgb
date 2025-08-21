@@ -587,7 +587,7 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorCard
                     titulo="CMO"
-                    valor={cmoCalculado > 0 ? cmoCalculado : (indicadoresTrimestrais?.cmo?.valor || 0)}
+                    valor={cmoCalculado || indicadoresTrimestrais?.cmo?.valor || 0}
                     meta={indicadoresTrimestrais?.cmo?.meta || 20}
                     formato="percentual"
                     cor="orange"
