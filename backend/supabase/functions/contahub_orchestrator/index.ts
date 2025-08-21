@@ -119,6 +119,40 @@ class ContaHubOrchestrator {
       console.log(`📥 Coletados: ${result.summary.total_records_collected} registros`)
       console.log(`📤 Processados: ${result.summary.total_records_processed} registros`)
       
+      // ✅ SINCRONIZAR EVENTOS_BASE APÓS PROCESSAMENTO CONCLUÍDO
+      console.log(`\n🔄 [ORCHESTRATOR] Sincronizando eventos_base para ${request.data_date}...`)
+      
+      try {
+        // Fazer requisição HTTP para função SQL que reprocessa eventos
+        const syncResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/sync_eventos_after_contahub`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            data_evento: request.data_date,
+            bar_id: barId
+          })
+        })
+        
+        if (syncResponse.ok) {
+          const syncResult = await syncResponse.json()
+          console.log(`✅ [ORCHESTRATOR] Eventos sincronizados: ${JSON.stringify(syncResult)}`)
+          
+          // Adicionar resultado da sincronização ao resultado final
+          result.eventos_sync = syncResult
+        } else {
+          const syncError = await syncResponse.text()
+          console.error(`❌ [ORCHESTRATOR] Erro na sincronização de eventos: ${syncError}`)
+          result.eventos_sync = { error: syncError }
+        }
+      } catch (syncError) {
+        console.error(`❌ [ORCHESTRATOR] Erro na sincronização de eventos:`, syncError)
+        result.eventos_sync = { error: syncError instanceof Error ? syncError.message : String(syncError) }
+      }
+      
       return result
       
     } catch (error) {

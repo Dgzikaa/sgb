@@ -76,7 +76,7 @@ export default function DesempenhoPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('semanal');
   const [loading, setLoading] = useState(true);
-  const [mesAtual, setMesAtual] = useState(new Date());
+  const [mesAtual, setMesAtual] = useState(() => new Date());
   const [dadosDesempenho, setDadosDesempenho] = useState<DadosDesempenho[]>([]);
   const [resumoSemanal, setResumoSemanal] = useState<ResumoSemanal[]>([]);
   const [resumoMensal, setResumoMensal] = useState<ResumoMensal | null>(null);
@@ -189,7 +189,7 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [mesAtual, selectedBar, toast, processarResumos]);
+  }, [mesAtual, selectedBar]);
 
   const navegarMes = (direcao: 'anterior' | 'proximo') => {
     const novoMes = new Date(mesAtual);
@@ -316,6 +316,7 @@ export default function DesempenhoPage() {
 
   useEffect(() => {
     if (selectedBar) {
+      console.log('🔄 useEffect disparado - selectedBar:', selectedBar?.id, 'mesAtual:', mesAtual.toISOString());
       carregarDados();
     }
   }, [selectedBar, mesAtual]);
