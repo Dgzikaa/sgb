@@ -552,9 +552,9 @@ export default function CalendarioPage() {
 
   return (
     <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      <div className="container mx-auto px-4 py-3 max-w-7xl h-full flex flex-col">
+      <div className="container mx-auto px-3 py-2 max-w-7xl h-full flex flex-col">
         {/* Header com filtros */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-3 shadow-sm flex-shrink-0">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-3 mb-2 shadow-sm flex-shrink-0">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
@@ -637,7 +637,7 @@ export default function CalendarioPage() {
         {/* Calendário */}
         <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col">
           {/* Header do Calendário */}
-          <CardHeader className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-4 py-3 flex-shrink-0">
+          <CardHeader className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-3 py-2 flex-shrink-0">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
               <CardTitle className="text-3xl font-normal text-gray-900 dark:text-white">
                 {monthNames[currentMonth]} {currentYear}
@@ -665,7 +665,7 @@ export default function CalendarioPage() {
             {/* Cabeçalho dos dias da semana */}
             <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
               {weekDays.map((day) => (
-                <div key={day} className="py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <div key={day} className="py-1.5 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {day}
                 </div>
               ))}
@@ -690,7 +690,7 @@ export default function CalendarioPage() {
                 return (
                   <div
                     key={index}
-                    className={`border-r border-b border-gray-100 dark:border-gray-800 last:border-r-0 p-1.5 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer flex flex-col ${
+                    className={`border-r border-b border-gray-100 dark:border-gray-800 last:border-r-0 p-1 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer ${
                       day.isToday 
                         ? 'bg-blue-50 dark:bg-blue-900/10' 
                         : 'bg-white dark:bg-gray-900'
@@ -698,7 +698,7 @@ export default function CalendarioPage() {
                     onClick={() => !hasEvento && abrirModalEvento(day.date.toISOString().split('T')[0], null)}
                   >
                     {/* Número do dia */}
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex justify-between items-start mb-1">
                       <span className={`text-sm font-medium ${
                         day.isToday 
                           ? 'bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold' 
@@ -721,7 +721,7 @@ export default function CalendarioPage() {
                     </div>
 
                     {/* Eventos estilo Google Calendar */}
-                    <div className="space-y-0.5 flex-1">
+                    <div className="space-y-0.5">
                       {hasEvento ? (
                         <div 
                           onClick={(e) => {
@@ -735,7 +735,7 @@ export default function CalendarioPage() {
                             {day.evento?.nome}
                           </div>
                           {day.evento?.artista && (
-                            <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5 px-1">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5 px-1 leading-tight">
                               {day.evento?.artista}
                             </div>
                           )}
