@@ -97,9 +97,12 @@ export default function AgendamentoPage() {
     description?: string;
     variant?: 'destructive';
   }) => {
-    // Implementação do toast
-    console.log('Toast:', options);
-  }, []);
+    showToast({
+      type: options.variant === 'destructive' ? 'error' : 'success',
+      title: options.title,
+      message: options.description,
+    });
+  }, [showToast]);
 
   // Estados principais
   const [pagamentos, setPagamentos] = useState<PagamentoAgendamento[]>([]);

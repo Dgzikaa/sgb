@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
-// import { ToastProvider, GlobalToastListener } from '@/components/ui/toast';
+import { ToastProvider, GlobalToastListener } from '@/components/ui/toast';
 // import {
 //   ConfirmDialogProvider,
 //   GlobalConfirmListener,
@@ -47,15 +47,18 @@ export default function RootLayout({
             <UserProvider>
               <BarProvider>
                 <CommandPaletteProvider>
-                  <ErrorBoundary>
-                    <div className="min-h-screen">
-                      {children}
-                    </div>
-                  </ErrorBoundary>
-                  <CommandPaletteWrapper />
-                  <AuthSync />
-                  {/* <AssistantWrapper /> */}
-                  {/* <ZykorPWABanner /> */}
+                  <ToastProvider>
+                    <ErrorBoundary>
+                      <div className="min-h-screen">
+                        {children}
+                      </div>
+                    </ErrorBoundary>
+                    <CommandPaletteWrapper />
+                    <AuthSync />
+                    <GlobalToastListener />
+                    {/* <AssistantWrapper /> */}
+                    {/* <ZykorPWABanner /> */}
+                  </ToastProvider>
                 </CommandPaletteProvider>
               </BarProvider>
             </UserProvider>
