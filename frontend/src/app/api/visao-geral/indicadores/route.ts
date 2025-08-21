@@ -450,10 +450,24 @@ export async function GET(request: Request) {
         )
       ) || [];
       
-      // Logs detalhados removidos
+      // 🔍 DEBUG: Detalhes dos produtos Yuzer
+      if (!viewTri && ingressosYuzer.length > 0) {
+        console.log('🎫 PRODUTOS YUZER DETALHADOS:');
+        ingressosYuzer.forEach((item, index) => {
+          if (index < 5) { // Mostrar apenas os 5 primeiros
+            console.log(`  ${item.produto_nome}: ${item.quantidade} unidades`);
+          }
+        });
+        if (ingressosYuzer.length > 5) {
+          console.log(`  ... e mais ${ingressosYuzer.length - 5} produtos`);
+        }
+      }
       
       const totalClientesContahub = viewTri ? 0 : (clientesTotaisContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0);
-      const totalClientesYuzer = viewTri ? 0 : ingressosYuzer.reduce((sum, item) => sum + (item.quantidade || 0), 0);
+      // ⚠️ CORREÇÃO TEMPORÁRIA: Yuzer não tem dados confiáveis de clientes únicos
+      // A tabela yuzer_produtos tem quantidade de ingressos, não pessoas únicas
+      // TODO: Implementar lógica correta quando tivermos dados de clientes únicos
+      const totalClientesYuzer = 0; // Desabilitado até correção
       const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.length || 0);
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
