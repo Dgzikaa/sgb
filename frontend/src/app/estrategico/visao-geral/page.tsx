@@ -555,8 +555,8 @@ export default function VisaoGeralEstrategica() {
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-1">
                   <IndicadorCard
                     titulo="Clientes Ativos (90d)"
-                    valor={indicadoresTrimestrais.clientesAtivos.valor}
-                    meta={indicadoresTrimestrais.clientesAtivos.meta}
+                    valor={indicadoresTrimestrais?.clientesAtivos?.valor || 0}
+                    meta={indicadoresTrimestrais?.clientesAtivos?.meta || 3000}
                     formato="numero"
                     cor="green"
                     periodoAnalisado="Últimos 90 dias (2+ visitas)"
@@ -564,8 +564,8 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorCard
                     titulo="Clientes Totais"
-                    valor={indicadoresTrimestrais.clientesTotais.valor}
-                    meta={indicadoresTrimestrais.clientesTotais.meta}
+                    valor={indicadoresTrimestrais?.clientesTotais?.valor || 0}
+                    meta={indicadoresTrimestrais?.clientesTotais?.meta || 12000}
                     formato="numero"
                     cor="blue"
                     periodoAnalisado={`${getTrimestreInfo(trimestreAtual)?.periodo} 2025`}
@@ -587,8 +587,8 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorCard
                     titulo="CMO"
-                    valor={cmoCalculado > 0 ? cmoCalculado : indicadoresTrimestrais.cmo.valor}
-                    meta={indicadoresTrimestrais.cmo.meta}
+                    valor={cmoCalculado > 0 ? cmoCalculado : (indicadoresTrimestrais?.cmo?.valor || 0)}
+                    meta={indicadoresTrimestrais?.cmo?.meta || 20}
                     formato="percentual"
                     cor="orange"
                     inverterProgresso={true}
@@ -596,8 +596,8 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorCard
                     titulo="% Artística"
-                    valor={indicadoresTrimestrais.artistica.valor}
-                    meta={indicadoresTrimestrais.artistica.meta}
+                    valor={indicadoresTrimestrais?.artistica?.valor || 0}
+                    meta={indicadoresTrimestrais?.artistica?.meta || 17}
                     formato="percentual"
                     cor="pink"
                     inverterProgresso={true}
