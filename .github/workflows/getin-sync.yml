@@ -1,0 +1,44 @@
+name: Getin Sync Continuous
+
+on:
+  schedule:
+    # Roda a cada 4 horas (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
+    - cron: '0 */4 * * *'
+  
+  # Permite execução manual
+  workflow_dispatch:
+
+jobs:
+  sync-getin:
+    runs-on: ubuntu-latest
+    name: Sincronizar Reservas Getin
+    
+    steps:
+      - name: Trigger Getin Sync
+        run: |
+          echo "🚀 Iniciando sincronização Getin..."
+          
+          response=$(curl -s -w "%{http_code}" -X POST \
+            "${{ secrets.SUPABASE_FUNCTION_URL }}/getin-sync-continuous" \
+            -H "Content-Type: application/json")
+          
+          http_code="${response: -3}"
+          body="${response%???}"
+          
+          echo "📊 Status HTTP: $http_code"
+          
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Sincronização concluída com sucesso!"
+            echo "📋 Resposta: $body"
+          else
+            echo "❌ Erro na sincronização (HTTP $http_code)"
+            echo "📋 Resposta: $body"
+            exit 1
+          fi
+          
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Falha na sincronização do Getin"
+          echo "⏰ Horário: $(date)"
+          # Aqui você pode adicionar notificação via Discord, Slack, etc.
