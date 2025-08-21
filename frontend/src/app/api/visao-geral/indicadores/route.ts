@@ -214,7 +214,11 @@ export async function GET(request: Request) {
       const startDate = '2025-02-01'; // Bar abriu em Fevereiro
       const hoje = new Date();
       const endDate = hoje.toISOString().split('T')[0]; // Data atual
-      // Tenta usar a view materializada se existir
+      // 🚨 DESABILITAR VIEW ANUAL TEMPORARIAMENTE PARA FORÇAR RECÁLCULO
+      console.log('🚨 VIEW ANUAL DESABILITADA - FORÇANDO RECÁLCULO MANUAL');
+      
+      // COMENTADO PARA FORÇAR RECÁLCULO MANUAL
+      /*
       try {
         const { data: anualView, error: anualViewErr } = await supabase
           .from('view_visao_geral_anual')
@@ -223,6 +227,7 @@ export async function GET(request: Request) {
           .eq('ano', 2025)
           .limit(1);
         if (!anualViewErr && anualView && anualView.length > 0) {
+          console.log('📊 USANDO VIEW ANUAL:', anualView[0]);
           const row = anualView[0] as any;
           const resp = NextResponse.json({
             anual: {
@@ -258,9 +263,10 @@ export async function GET(request: Request) {
           resp.headers.set('X-View-Used', 'view_visao_geral_anual');
           return resp;
         }
-      } catch (_) {
-        // segue com fallback abaixo
+      } catch (err) {
+        console.log('❌ Erro ao buscar view anual:', err);
       }
+      */
       // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
       
       const contahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
