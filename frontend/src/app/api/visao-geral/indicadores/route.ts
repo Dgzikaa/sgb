@@ -402,8 +402,10 @@ export async function GET(request: Request) {
       
       // Logs detalhados removidos
 
-      // Tenta usar a view materializada trimestral se existir
+      // 🚨 DESABILITANDO VIEW TEMPORARIAMENTE PARA FORÇAR RECÁLCULO DO CMO
       let viewTri: any | null = null;
+      // COMENTADO PARA FORÇAR RECÁLCULO MANUAL
+      /*
       try {
         const { data: triView, error: triViewErr } = await supabase
           .from('view_visao_geral_trimestral')
@@ -418,6 +420,9 @@ export async function GET(request: Request) {
       } catch (_) {
         // ignora
       }
+      */
+      
+      console.log('🚨 VIEW DESABILITADA - FORÇANDO RECÁLCULO MANUAL DE TUDO');
       // Número total de clientes no trimestre - COM PAGINAÇÃO
       // Clientes totais com paginação
       
