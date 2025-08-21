@@ -316,7 +316,6 @@ export default function DesempenhoPage() {
 
   useEffect(() => {
     if (selectedBar) {
-      console.log('🔄 useEffect disparado - selectedBar:', selectedBar?.id, 'mesAtual:', mesAtual.toISOString());
       carregarDados();
     }
   }, [selectedBar, mesAtual]);
