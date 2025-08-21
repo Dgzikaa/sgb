@@ -264,8 +264,10 @@ export default function VisaoGeralEstrategica() {
 
       setIndicadoresAnuais(anualData.anual);
       setIndicadoresTrimestrais(trimestralData.trimestral);
-      writeCache(anualCacheKey, anualData);
-      writeCache(triCacheKey, trimestralData);
+      
+      // 🚨 CACHE DESABILITADO - NÃO SALVAR NO CACHE
+      // writeCache(anualCacheKey, anualData);
+      // writeCache(triCacheKey, trimestralData);
     } catch (error) {
       console.error('❌ Erro ao carregar indicadores:', error);
       setDebugInfo(`❌ Erro: ${error}`);
