@@ -97,21 +97,37 @@ function generateFebruaryDates() {
 async function checkExistingData() {
   console.log('\n📊 Verificando dados existentes de fevereiro/2025...');
   
-  const tables = [
-    'contahub_analitico',
-    'contahub_fatporhora', 
-    'contahub_pagamentos',
-    'contahub_periodo',
-    'contahub_tempo'
+  // Cada tabela tem seu próprio campo de data
+  const tableQueries = [
+    {
+      table: 'contahub_analitico',
+      dateField: 'trn_dtgerencial'
+    },
+    {
+      table: 'contahub_fatporhora', 
+      dateField: 'dia'
+    },
+    {
+      table: 'contahub_pagamentos',
+      dateField: 'dt_gerencial'
+    },
+    {
+      table: 'contahub_periodo',
+      dateField: 'dt_gerencial'
+    },
+    {
+      table: 'contahub_tempo',
+      dateField: 'data'
+    }
   ];
   
-  for (const table of tables) {
+  for (const { table, dateField } of tableQueries) {
     const { count, error } = await supabase
       .from(table)
       .select('*', { count: 'exact', head: true })
       .eq('bar_id', 3)
-      .gte('trn_dtgerencial', '2025-02-01')
-      .lte('trn_dtgerencial', '2025-02-28');
+      .gte(dateField, '2025-02-01')
+      .lte(dateField, '2025-02-28');
     
     if (error) {
       console.log(`⚠️ Erro ao verificar ${table}:`, error.message);
