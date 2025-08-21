@@ -32,27 +32,41 @@ Você pode conversar naturalmente, analisar dados, criar gráficos, ler arquivos
 **Database:** PostgreSQL com 60+ tabelas e views otimizadas
 
 ## TABELAS PRINCIPAIS DISPONÍVEIS:
-📊 **VENDAS & FINANCEIRO:**
+
+📊 **VENDAS & FINANCEIRO (DIAS NORMAIS - ContaHub):**
 - **contahub_periodo**: 41.949 registros de vendas agregadas por período
-- **contahub_pagamentos**: Pagamentos individuais detalhados
-- **contahub_analitico**: Análises detalhadas de vendas
-- **contahub_fatporhora**: Faturamento por hora
+- **contahub_pagamentos**: Pagamentos individuais detalhados (PIX, cartão, dinheiro)
+- **contahub_analitico**: Produtos vendidos em dias normais (seg-sáb)
+- **contahub_fatporhora**: Faturamento por hora detalhado
+- **contahub_tempo**: Tempo de produção/preparo de cada produto
 
-🎪 **EVENTOS & ARTISTAS:**
+🎪 **EVENTOS & DOMINGOS (Yuzer/Sympla):**
 - **eventos_base**: 154 eventos com receita, público e performance
-- **yuzer_eventos**: Dados complementares de eventos
-- **yuzer_produtos**: 2.254 registros de produtos vendidos
+- **yuzer_produtos**: Produtos vendidos especificamente nos DOMINGOS/eventos
+- **sympla_participantes**: Clientes dos eventos/domingos
+- **sympla_pedidos**: Ingressos vendidos para eventos
 
-🎫 **INGRESSOS & RESERVAS:**
-- **sympla_eventos/participantes/pedidos**: Sistema de ingressos
-- **getin_reservas**: Sistema de reservas de mesa
+🎫 **RESERVAS & OPERACIONAL:**
+- **getin_reservas**: Sistema de reservas de mesa (dias normais)
 - **getin_units**: Unidades/mesas disponíveis
-
-📋 **OPERACIONAL:**
 - **checklists**: Sistema de checklists operacionais
 - **usuarios_bar**: Gestão de usuários
-- **notificacoes**: Sistema de notificações
-- **audit_trail**: Auditoria completa
+
+## LÓGICA DE DADOS POR CONTEXTO:
+🗓️ **DIAS NORMAIS (Segunda a Sábado):**
+- Faturamento: `contahub_periodo`
+- Produtos: `contahub_analitico`
+- Pagamentos: `contahub_pagamentos`
+- Clientes: `contahub_periodo` (campo pessoas)
+- Tempo produção: `contahub_tempo`
+- Faturamento/hora: `contahub_fatporhora`
+- Reservas: `getin_reservas`
+
+🎭 **DOMINGOS/EVENTOS:**
+- Produtos: `yuzer_produtos`
+- Clientes: `sympla_participantes`
+- Ingressos: `sympla_pedidos`
+- Performance: `eventos_base`
 
 ## SUAS CAPACIDADES EXPANDIDAS:
 ✅ **Análise de Dados**: Acesso a 60+ tabelas com milhares de registros
@@ -561,45 +575,40 @@ async function executeCustomQuery(query: string) {
 async function getAdvancedFallback(message: string): Promise<AssistantResponse> {
   const lowerMessage = message.toLowerCase();
   
-  // Análise de gráfico de faturamento
+  // Detectar contexto de domingo vs dias da semana
+  const isDomingoContext = lowerMessage.includes('domingo') || lowerMessage.includes('evento') || lowerMessage.includes('show');
+  
+  // Detectar período específico
+  const getPeriodo = (msg: string) => {
+    if (msg.includes('abril')) return { start: '2024-04-01', end: '2024-04-30', nome: 'Abril 2024' };
+    if (msg.includes('maio')) return { start: '2024-05-01', end: '2024-05-31', nome: 'Maio 2024' };
+    if (msg.includes('junho')) return { start: '2024-06-01', end: '2024-06-30', nome: 'Junho 2024' };
+    if (msg.includes('julho')) return { start: '2024-07-01', end: '2024-07-31', nome: 'Julho 2024' };
+    if (msg.includes('agosto')) return { start: '2024-08-01', end: '2024-08-31', nome: 'Agosto 2024' };
+    return { start: '2024-01-01', end: '2024-12-31', nome: 'Últimos dados' };
+  };
+
+  // ========== ANÁLISE DE FATURAMENTO ==========
   if (lowerMessage.includes('gráfico') && (lowerMessage.includes('faturamento') || lowerMessage.includes('vendas'))) {
     try {
-      let whereClause = '';
-      let periodo = '';
+      const periodo = getPeriodo(lowerMessage);
       
-      // Detectar período específico
-      if (lowerMessage.includes('abril')) {
-        whereClause = "AND dt_gerencial >= '2024-04-01' AND dt_gerencial <= '2024-04-30'";
-        periodo = 'Abril 2024';
-      } else if (lowerMessage.includes('maio')) {
-        whereClause = "AND dt_gerencial >= '2024-05-01' AND dt_gerencial <= '2024-05-31'";
-        periodo = 'Maio 2024';
-      } else if (lowerMessage.includes('junho')) {
-        whereClause = "AND dt_gerencial >= '2024-06-01' AND dt_gerencial <= '2024-06-30'";
-        periodo = 'Junho 2024';
-      } else {
-        // Últimos 30 dias se não especificar
-        whereClause = "AND dt_gerencial >= CURRENT_DATE - INTERVAL '30 days'";
-        periodo = 'Últimos 30 dias';
-      }
-
       const { data: faturamento } = await supabase
         .from('contahub_periodo')
         .select('dt_gerencial, total_liquido, total_bruto')
         .eq('bar_id', 3)
-        .gte('dt_gerencial', lowerMessage.includes('abril') ? '2024-04-01' : '2024-01-01')
-        .lte('dt_gerencial', lowerMessage.includes('abril') ? '2024-04-30' : '2024-12-31')
+        .gte('dt_gerencial', periodo.start)
+        .lte('dt_gerencial', periodo.end)
         .order('dt_gerencial', { ascending: true });
 
       if (!faturamento || faturamento.length === 0) {
         return {
           success: true,
-          message: `📊 **Nenhum dado encontrado para ${periodo}**\n\nVerifique se existem dados no período solicitado.`,
+          message: `📊 **Nenhum dado encontrado para ${periodo.nome}**\n\nVerifique se existem dados no período solicitado.`,
           type: 'text'
         };
       }
 
-      // Preparar dados para o gráfico
       const chartData = faturamento.map(item => ({
         name: new Date(item.dt_gerencial).toLocaleDateString('pt-BR'),
         value: parseFloat(item.total_liquido?.toString() || '0'),
@@ -611,36 +620,54 @@ async function getAdvancedFallback(message: string): Promise<AssistantResponse> 
 
       return {
         success: true,
-        message: `📊 **Gráfico de Faturamento - ${periodo}**\n\n💰 **Resumo:**\n• Total Líquido: R$ ${totalLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Total Bruto: R$ ${totalBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Registros: ${faturamento.length} dias\n\n📈 **Gráfico gerado com dados reais do sistema!**`,
+        message: `📊 **Gráfico de Faturamento - ${periodo.nome}**\n\n💰 **Resumo (ContaHub):**\n• Total Líquido: R$ ${totalLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Total Bruto: R$ ${totalBruto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n• Registros: ${faturamento.length} dias\n\n📈 **Fonte:** contahub_periodo`,
         type: 'chart',
         chartData: {
           type: 'line',
-          title: `Faturamento - ${periodo}`,
-          description: `Evolução do faturamento líquido em ${periodo}`,
+          title: `Faturamento - ${periodo.nome}`,
+          description: `Evolução do faturamento líquido em ${periodo.nome}`,
           data: chartData
         },
         chartType: 'line',
-        suggestions: ["📊 Comparar com mês anterior", "🎯 Análise por produto", "📈 Tendência de crescimento"]
+        suggestions: ["📊 Faturamento por hora", "🎯 Análise de produtos", "📈 Comparar períodos", "💳 Análise de pagamentos"]
       };
     } catch (error) {
       console.error('Erro gráfico faturamento:', error);
     }
   }
 
-  // Análise de gráfico de produtos
-  if (lowerMessage.includes('gráfico') && lowerMessage.includes('produto')) {
+  // ========== ANÁLISE DE PRODUTOS ==========
+  if (lowerMessage.includes('produto') && (lowerMessage.includes('gráfico') || lowerMessage.includes('análise') || lowerMessage.includes('top'))) {
     try {
-      const { data: produtos } = await supabase
-        .from('yuzer_produtos')
-        .select('produto, categoria, quantidade, valor_total')
-        .eq('bar_id', 3)
-        .gte('data_evento', '2024-04-01')
-        .lte('data_evento', '2024-04-30');
+      const periodo = getPeriodo(lowerMessage);
+      let produtos, fonte;
+
+      if (isDomingoContext) {
+        // DOMINGOS: Usar yuzer_produtos (eventos/shows)
+        const { data } = await supabase
+          .from('yuzer_produtos')
+          .select('produto, categoria, quantidade, valor_total, data_evento')
+          .eq('bar_id', 3)
+          .gte('data_evento', periodo.start)
+          .lte('data_evento', periodo.end);
+        produtos = data;
+        fonte = 'yuzer_produtos (Eventos/Domingos)';
+      } else {
+        // DIAS NORMAIS: Usar contahub_analitico
+        const { data } = await supabase
+          .from('contahub_analitico')
+          .select('produto, categoria, quantidade, valor_total, dt_gerencial')
+          .eq('bar_id', 3)
+          .gte('dt_gerencial', periodo.start)
+          .lte('dt_gerencial', periodo.end);
+        produtos = data;
+        fonte = 'contahub_analitico (Dias normais)';
+      }
 
       if (!produtos || produtos.length === 0) {
         return {
           success: true,
-          message: `📊 **Nenhum produto encontrado para o período**`,
+          message: `📊 **Nenhum produto encontrado para ${periodo.nome}**\n\n🔍 **Fonte consultada:** ${fonte}`,
           type: 'text'
         };
       }
@@ -663,23 +690,288 @@ async function getAdvancedFallback(message: string): Promise<AssistantResponse> 
           quantidade: dados.quantidade
         }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 10); // Top 10
+        .slice(0, 10);
 
       return {
         success: true,
-        message: `📊 **Top 10 Produtos por Faturamento - Abril 2024**\n\n🎯 **Dados encontrados:** ${produtos.length} registros\n📈 **Gráfico gerado com dados reais!**`,
+        message: `📊 **Top 10 Produtos - ${periodo.nome}**\n\n🎯 **Dados:** ${produtos.length} registros\n📈 **Fonte:** ${fonte}`,
         type: 'chart',
         chartData: {
           type: 'bar',
-          title: 'Top 10 Produtos - Abril 2024',
-          description: 'Produtos com maior faturamento em abril',
+          title: `Top 10 Produtos - ${periodo.nome}`,
+          description: `Produtos com maior faturamento em ${periodo.nome}`,
           data: chartData
         },
         chartType: 'bar',
-        suggestions: ["📊 Análise por categoria", "🎯 Margem de lucro", "📈 Comparar períodos"]
+        suggestions: ["📊 Análise por categoria", "⏰ Tempo de produção", "📈 Comparar períodos"]
       };
     } catch (error) {
       console.error('Erro gráfico produtos:', error);
+    }
+  }
+
+  // ========== ANÁLISE DE PAGAMENTOS ==========
+  if (lowerMessage.includes('pagamento') || lowerMessage.includes('forma de pagamento') || lowerMessage.includes('pix') || lowerMessage.includes('cartão')) {
+    try {
+      const periodo = getPeriodo(lowerMessage);
+      
+      const { data: pagamentos } = await supabase
+        .from('contahub_pagamentos')
+        .select('forma_pagamento, valor, dt_gerencial')
+        .eq('bar_id', 3)
+        .gte('dt_gerencial', periodo.start)
+        .lte('dt_gerencial', periodo.end);
+
+      if (!pagamentos || pagamentos.length === 0) {
+        return {
+          success: true,
+          message: `💳 **Nenhum pagamento encontrado para ${periodo.nome}**`,
+          type: 'text'
+        };
+      }
+
+      // Agrupar por forma de pagamento
+      const pagamentosAgrupados = pagamentos.reduce((acc: any, item) => {
+        const forma = item.forma_pagamento || 'Não informado';
+        if (!acc[forma]) {
+          acc[forma] = { valor: 0, quantidade: 0 };
+        }
+        acc[forma].valor += parseFloat(item.valor?.toString() || '0');
+        acc[forma].quantidade += 1;
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(pagamentosAgrupados)
+        .map(([forma, dados]: [string, any]) => ({
+          name: forma,
+          value: dados.valor,
+          quantidade: dados.quantidade
+        }))
+        .sort((a, b) => b.value - a.value);
+
+      const totalPagamentos = pagamentos.reduce((sum, p) => sum + parseFloat(p.valor?.toString() || '0'), 0);
+
+      return {
+        success: true,
+        message: `💳 **Análise de Pagamentos - ${periodo.nome}**\n\n💰 **Total:** R$ ${totalPagamentos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n📊 **Transações:** ${pagamentos.length}\n📈 **Fonte:** contahub_pagamentos`,
+        type: 'chart',
+        chartData: {
+          type: 'pie',
+          title: `Formas de Pagamento - ${periodo.nome}`,
+          description: `Distribuição por forma de pagamento em ${periodo.nome}`,
+          data: chartData
+        },
+        chartType: 'pie',
+        suggestions: ["📊 Faturamento total", "⏰ Pagamentos por hora", "👥 Análise de clientes"]
+      };
+    } catch (error) {
+      console.error('Erro análise pagamentos:', error);
+    }
+  }
+
+  // ========== ANÁLISE DE CLIENTES ==========
+  if (lowerMessage.includes('cliente') || lowerMessage.includes('pessoa') || lowerMessage.includes('público')) {
+    try {
+      const periodo = getPeriodo(lowerMessage);
+      let clientes, fonte;
+
+      if (isDomingoContext) {
+        // DOMINGOS: Usar sympla_participantes
+        const { data } = await supabase
+          .from('sympla_participantes')
+          .select('nome, email, data_evento, valor_pago')
+          .eq('bar_id', 3)
+          .gte('data_evento', periodo.start)
+          .lte('data_evento', periodo.end);
+        clientes = data;
+        fonte = 'sympla_participantes (Eventos/Domingos)';
+      } else {
+        // DIAS NORMAIS: Usar contahub_periodo
+        const { data } = await supabase
+          .from('contahub_periodo')
+          .select('pessoas, dt_gerencial, total_liquido')
+          .eq('bar_id', 3)
+          .gt('pessoas', 0)
+          .gte('dt_gerencial', periodo.start)
+          .lte('dt_gerencial', periodo.end);
+        clientes = data;
+        fonte = 'contahub_periodo (Dias normais)';
+      }
+
+      if (!clientes || clientes.length === 0) {
+        return {
+          success: true,
+          message: `👥 **Nenhum cliente encontrado para ${periodo.nome}**\n\n🔍 **Fonte:** ${fonte}`,
+          type: 'text'
+        };
+      }
+
+      let totalClientes, ticketMedio, chartData;
+
+      if (isDomingoContext) {
+        totalClientes = clientes.length;
+        const totalReceita = clientes.reduce((sum: number, c: any) => sum + parseFloat(c.valor_pago?.toString() || '0'), 0);
+        ticketMedio = totalClientes > 0 ? totalReceita / totalClientes : 0;
+        
+        // Agrupar por data para gráfico
+        const clientesPorData = clientes.reduce((acc: any, item: any) => {
+          const data = new Date(item.data_evento).toLocaleDateString('pt-BR');
+          acc[data] = (acc[data] || 0) + 1;
+          return acc;
+        }, {});
+
+        chartData = Object.entries(clientesPorData).map(([data, quantidade]) => ({
+          name: data,
+          value: quantidade
+        }));
+      } else {
+        totalClientes = clientes.reduce((sum: number, c: any) => sum + parseInt(c.pessoas?.toString() || '0'), 0);
+        const totalReceita = clientes.reduce((sum: number, c: any) => sum + parseFloat(c.total_liquido?.toString() || '0'), 0);
+        ticketMedio = totalClientes > 0 ? totalReceita / totalClientes : 0;
+
+        chartData = clientes.map((item: any) => ({
+          name: new Date(item.dt_gerencial).toLocaleDateString('pt-BR'),
+          value: parseInt(item.pessoas?.toString() || '0')
+        }));
+      }
+
+      return {
+        success: true,
+        message: `👥 **Análise de Clientes - ${periodo.nome}**\n\n📊 **Total:** ${totalClientes.toLocaleString('pt-BR')} clientes\n💰 **Ticket Médio:** R$ ${ticketMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n📈 **Fonte:** ${fonte}`,
+        type: 'chart',
+        chartData: {
+          type: 'line',
+          title: `Clientes - ${periodo.nome}`,
+          description: `Evolução do número de clientes em ${periodo.nome}`,
+          data: chartData
+        },
+        chartType: 'line',
+        suggestions: ["💳 Formas de pagamento", "📊 Faturamento", "⏰ Horários de pico"]
+      };
+    } catch (error) {
+      console.error('Erro análise clientes:', error);
+    }
+  }
+
+  // ========== ANÁLISE DE TEMPO DE PRODUÇÃO ==========
+  if (lowerMessage.includes('tempo') && (lowerMessage.includes('produção') || lowerMessage.includes('preparo') || lowerMessage.includes('cozinha'))) {
+    try {
+      const periodo = getPeriodo(lowerMessage);
+      
+      const { data: tempos } = await supabase
+        .from('contahub_tempo')
+        .select('produto, tempo_preparo, dt_gerencial, categoria')
+        .eq('bar_id', 3)
+        .gte('dt_gerencial', periodo.start)
+        .lte('dt_gerencial', periodo.end);
+
+      if (!tempos || tempos.length === 0) {
+        return {
+          success: true,
+          message: `⏰ **Nenhum dado de tempo encontrado para ${periodo.nome}**\n\n📈 **Fonte:** contahub_tempo`,
+          type: 'text'
+        };
+      }
+
+      // Agrupar por produto e calcular tempo médio
+      const temposAgrupados = tempos.reduce((acc: any, item) => {
+        const produto = item.produto || 'Produto sem nome';
+        if (!acc[produto]) {
+          acc[produto] = { tempos: [], categoria: item.categoria };
+        }
+        acc[produto].tempos.push(parseInt(item.tempo_preparo?.toString() || '0'));
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(temposAgrupados)
+        .map(([produto, dados]: [string, any]) => {
+          const tempoMedio = dados.tempos.reduce((sum: number, t: number) => sum + t, 0) / dados.tempos.length;
+          return {
+            name: produto,
+            value: Math.round(tempoMedio),
+            categoria: dados.categoria
+          };
+        })
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 15);
+
+      const tempoMedioGeral = tempos.reduce((sum, t) => sum + parseInt(t.tempo_preparo?.toString() || '0'), 0) / tempos.length;
+
+      return {
+        success: true,
+        message: `⏰ **Análise de Tempo de Produção - ${periodo.nome}**\n\n📊 **Registros:** ${tempos.length}\n⏱️ **Tempo Médio Geral:** ${Math.round(tempoMedioGeral)} min\n📈 **Fonte:** contahub_tempo`,
+        type: 'chart',
+        chartData: {
+          type: 'bar',
+          title: `Tempo de Produção - ${periodo.nome}`,
+          description: `Tempo médio de preparo por produto (em minutos)`,
+          data: chartData
+        },
+        chartType: 'bar',
+        suggestions: ["📊 Produtos mais vendidos", "⏰ Faturamento por hora", "👥 Análise de clientes"]
+      };
+    } catch (error) {
+      console.error('Erro análise tempo:', error);
+    }
+  }
+
+  // ========== ANÁLISE DE FATURAMENTO POR HORA ==========
+  if (lowerMessage.includes('hora') && (lowerMessage.includes('faturamento') || lowerMessage.includes('vendas') || lowerMessage.includes('pico'))) {
+    try {
+      const periodo = getPeriodo(lowerMessage);
+      
+      const { data: fatPorHora } = await supabase
+        .from('contahub_fatporhora')
+        .select('hora, faturamento, dt_gerencial')
+        .eq('bar_id', 3)
+        .gte('dt_gerencial', periodo.start)
+        .lte('dt_gerencial', periodo.end);
+
+      if (!fatPorHora || fatPorHora.length === 0) {
+        return {
+          success: true,
+          message: `⏰ **Nenhum dado de faturamento por hora encontrado para ${periodo.nome}**\n\n📈 **Fonte:** contahub_fatporhora`,
+          type: 'text'
+        };
+      }
+
+      // Agrupar por hora
+      const fatPorHoraAgrupado = fatPorHora.reduce((acc: any, item) => {
+        const hora = item.hora || '00:00';
+        if (!acc[hora]) {
+          acc[hora] = { faturamento: 0, registros: 0 };
+        }
+        acc[hora].faturamento += parseFloat(item.faturamento?.toString() || '0');
+        acc[hora].registros += 1;
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(fatPorHoraAgrupado)
+        .map(([hora, dados]: [string, any]) => ({
+          name: hora,
+          value: Math.round(dados.faturamento / dados.registros), // Média por hora
+          total: dados.faturamento
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      const totalFaturamento = fatPorHora.reduce((sum, f) => sum + parseFloat(f.faturamento?.toString() || '0'), 0);
+      const horaPico = chartData.reduce((max, curr) => curr.value > max.value ? curr : max, chartData[0]);
+
+      return {
+        success: true,
+        message: `⏰ **Faturamento por Hora - ${periodo.nome}**\n\n💰 **Total:** R$ ${totalFaturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n🎯 **Hora Pico:** ${horaPico?.name} (R$ ${horaPico?.value.toLocaleString('pt-BR')})\n📈 **Fonte:** contahub_fatporhora`,
+        type: 'chart',
+        chartData: {
+          type: 'bar',
+          title: `Faturamento por Hora - ${periodo.nome}`,
+          description: `Faturamento médio por horário em ${periodo.nome}`,
+          data: chartData
+        },
+        chartType: 'bar',
+        suggestions: ["📊 Faturamento total", "👥 Clientes por hora", "🎯 Produtos por horário"]
+      };
+    } catch (error) {
+      console.error('Erro faturamento por hora:', error);
     }
   }
 

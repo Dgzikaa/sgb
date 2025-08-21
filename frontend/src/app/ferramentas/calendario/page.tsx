@@ -635,46 +635,27 @@ export default function CalendarioPage() {
         </div>
 
         {/* Calendário */}
-        <Card className="card-dark shadow-lg">
+        <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
           {/* Header do Calendário */}
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b border-gray-200 dark:border-gray-600">
+          <CardHeader className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+              <CardTitle className="text-3xl font-normal text-gray-900 dark:text-white">
                 {monthNames[currentMonth]} {currentYear}
               </CardTitle>
               
-              {/* Estatísticas e Legenda */}
-              <div className="flex flex-col lg:flex-row gap-4">
-                {/* Estatísticas */}
-                <div className="flex items-center gap-3 text-xs flex-wrap">
-                  <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800">
-                    <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-                    <span className="text-green-700 dark:text-green-300 font-medium">{totais.confirmadas} confirmadas</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800">
-                    <div className="w-2.5 h-2.5 bg-amber-500 rounded-full"></div>
-                    <span className="text-amber-700 dark:text-amber-300 font-medium">{totais.pendentes} pendentes</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-800">
-                    <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                    <span className="text-red-700 dark:text-red-300 font-medium">{totais.canceladas} canceladas</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <Users className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">{totais.pessoas} pessoas</span>
-                  </div>
+              {/* Estatísticas Minimalistas */}
+              <div className="flex items-center gap-6 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-gray-600 dark:text-gray-400">{totais.confirmadas} confirmadas</span>
                 </div>
-                
-                {/* Legenda */}
-                <div className="flex items-center gap-3 text-xs border-l border-gray-300 dark:border-gray-600 pl-4">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-4 h-4 bg-slate-500 rounded text-white flex items-center justify-center text-xs font-bold">5</div>
-                    <span className="text-gray-600 dark:text-gray-400">Reservas (pessoas)</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Music className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
-                    <span className="text-gray-600 dark:text-gray-400">Evento</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-orange-400 rounded-full"></div>
+                  <span className="text-gray-600 dark:text-gray-400">{totais.pendentes} pendentes</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                  <span className="text-gray-600 dark:text-gray-400">{totais.canceladas} canceladas</span>
                 </div>
               </div>
             </div>
@@ -682,16 +663,16 @@ export default function CalendarioPage() {
 
           <CardContent className="p-0">
             {/* Cabeçalho dos dias da semana */}
-            <div className="grid grid-cols-7 border-b bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+            <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800">
               {weekDays.map((day) => (
-                <div key={day} className="py-3 text-center text-sm font-bold text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 last:border-r-0">
+                <div key={day} className="py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {day}
                 </div>
               ))}
             </div>
 
             {/* Grid dos dias */}
-            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, 110px)' }}>
+            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, 120px)' }}>
               {generateCalendarDays().map((day, index) => {
                 if (!day.isCurrentMonth) {
                   return (
@@ -709,37 +690,29 @@ export default function CalendarioPage() {
                 return (
                   <div
                     key={index}
-                    className={`border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 p-3 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex flex-col group ${
+                    className={`border-r border-b border-gray-100 dark:border-gray-800 last:border-r-0 p-2 relative transition-all hover:bg-gray-50 dark:hover:bg-gray-800/30 cursor-pointer flex flex-col ${
                       day.isToday 
-                        ? 'bg-slate-50 dark:bg-slate-800/50 ring-2 ring-slate-400 dark:ring-slate-500' 
+                        ? 'bg-blue-50 dark:bg-blue-900/10' 
                         : 'bg-white dark:bg-gray-900'
                     }`}
                     onClick={() => !hasEvento && abrirModalEvento(day.date.toISOString().split('T')[0], null)}
                   >
-                    {/* Header do dia */}
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={`text-sm font-bold transition-colors ${
+                    {/* Número do dia */}
+                    <div className="flex justify-between items-start mb-3">
+                      <span className={`text-sm font-medium ${
                         day.isToday 
-                          ? 'text-slate-700 dark:text-slate-300' 
-                          : 'text-gray-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                          ? 'bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold' 
+                          : 'text-gray-900 dark:text-gray-100'
                       }`}>
                         {day.date.getDate()}
                       </span>
                       
-                      {/* Badge de reservas com pax */}
+                      {/* Indicador discreto de reservas */}
                       {hasReservas && (
-                        <div className="flex items-center gap-1 flex-wrap">
-                          {/* Total de reservas ativas com pessoas */}
-                          <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 flex items-center gap-1">
-                            <span>{day.reservasCount - canceladas}</span>
-                            <span className="text-slate-500 dark:text-slate-400">({day.totalPessoas - day.pessoasCanceladas})</span>
-                          </Badge>
-                          {/* Canceladas com pessoas */}
+                        <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                          {day.reservasCount - canceladas}
                           {canceladas > 0 && (
-                            <Badge variant="outline" className="text-xs px-2 py-0.5 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 flex items-center gap-1">
-                              <span>-{canceladas}</span>
-                              <span className="text-red-500 dark:text-red-400">({day.pessoasCanceladas})</span>
-                            </Badge>
+                            <span className="text-red-500 ml-1">-{canceladas}</span>
                           )}
                         </div>
                       )}
