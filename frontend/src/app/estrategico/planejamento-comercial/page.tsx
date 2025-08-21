@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import { apiCall } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -94,7 +94,7 @@ interface EventoEdicao {
 }
 
 export default function PlanejamentoComercialPage() {
-  const { user } = useAuth();
+  const { user } = useUser();
   
   // Estados principais
   const [dados, setDados] = useState<PlanejamentoData[]>([]);
