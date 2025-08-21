@@ -570,12 +570,12 @@ export default function CalendarioPage() {
             <div className="flex items-center gap-3">
               <Filter className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               <Select value={currentMonth.toString()} onValueChange={(value) => alterarPeriodo(parseInt(value), currentYear)}>
-                <SelectTrigger className="w-32 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                <SelectTrigger className="w-32 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   {meses.map((mes) => (
-                    <SelectItem key={mes.value} value={mes.value.toString()}>
+                    <SelectItem key={mes.value} value={mes.value.toString()} className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">
                       {mes.label}
                     </SelectItem>
                   ))}
@@ -583,12 +583,12 @@ export default function CalendarioPage() {
               </Select>
               
               <Select value={currentYear.toString()} onValueChange={(value) => alterarPeriodo(currentMonth, parseInt(value))}>
-                <SelectTrigger className="w-24 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                <SelectTrigger className="w-24 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   {anos.map((ano) => (
-                    <SelectItem key={ano} value={ano.toString()}>
+                    <SelectItem key={ano} value={ano.toString()} className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">
                       {ano}
                     </SelectItem>
                   ))}
@@ -596,20 +596,10 @@ export default function CalendarioPage() {
               </Select>
               
               <Button 
-                onClick={() => buscarDados()} 
-                variant="outline" 
-                size="sm"
-                className="btn-outline-dark"
-                title="Atualizar dados da página"
-              >
-                <RefreshCcw className="h-4 w-4" />
-              </Button>
-              
-              <Button 
                 onClick={sincronizarGetin} 
                 variant="outline" 
                 size="sm"
-                className="btn-outline-dark"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
                 disabled={sincronizandoGetin}
                 title="Sincronizar dados do Getin (reservas)"
               >
@@ -619,17 +609,6 @@ export default function CalendarioPage() {
                   <Database className="h-4 w-4" />
                 )}
               </Button>
-
-              {/* Auto Refresh */}
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={autoRefresh}
-                  onChange={(e) => setAutoRefresh(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-gray-700 dark:text-gray-300">🔄 Auto</span>
-              </label>
             </div>
           </div>
         </div>
@@ -672,7 +651,7 @@ export default function CalendarioPage() {
             </div>
 
             {/* Grid dos dias */}
-            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, minmax(110px, auto))' }}>
+            <div className="grid grid-cols-7" style={{ gridTemplateRows: 'repeat(6, minmax(115px, auto))' }}>
               {generateCalendarDays().map((day, index) => {
                 if (!day.isCurrentMonth) {
                   return (
@@ -743,15 +722,17 @@ export default function CalendarioPage() {
 
                     {/* Indicador de reservas - canto inferior direito */}
                     {hasReservas && (
-                      <div className="absolute bottom-1 right-1 text-xs font-medium leading-tight">
-                        <div className="text-green-600 dark:text-green-400">
-                          {day.reservasCount - canceladas} ({day.totalPessoas - day.pessoasCanceladas} pax)
+                      <div className="absolute bottom-1 right-1 text-xs font-normal leading-tight">
+                        <div className="flex items-center gap-1 justify-end">
+                          <span className="text-green-600 dark:text-green-400 text-xs">
+                            {day.reservasCount - canceladas} ({day.totalPessoas - day.pessoasCanceladas} pax)
+                          </span>
+                          {canceladas > 0 && (
+                            <span className="text-red-500 dark:text-red-400 text-xs">
+                              -{canceladas} ({day.pessoasCanceladas} pax)
+                            </span>
+                          )}
                         </div>
-                        {canceladas > 0 && (
-                          <div className="text-red-500 dark:text-red-400">
-                            -{canceladas} ({day.pessoasCanceladas} pax)
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -866,9 +847,9 @@ function ModalEdicaoEvento({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             {evento ? <Edit className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
             {evento ? 'Editar Evento' : 'Novo Evento'}
           </DialogTitle>
@@ -894,6 +875,7 @@ function ModalEdicaoEvento({
               placeholder="Ex: Quarta de Bamba"
               required
               disabled={carregandoEvento}
+              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
@@ -906,6 +888,7 @@ function ModalEdicaoEvento({
               onChange={(e) => setFormData({ ...formData, nome_artista: e.target.value })}
               placeholder="Ex: Breno Alves"
               disabled={carregandoEvento}
+              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
@@ -918,18 +901,18 @@ function ModalEdicaoEvento({
               onValueChange={(value) => setFormData({ ...formData, genero_musical: value })}
               disabled={carregandoEvento}
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
                 <SelectValue placeholder="Selecione um gênero" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Samba">Samba</SelectItem>
-                <SelectItem value="Pagode">Pagode</SelectItem>
-                <SelectItem value="Sertanejo">Sertanejo</SelectItem>
-                <SelectItem value="DJ">DJ</SelectItem>
-                <SelectItem value="Jazz">Jazz</SelectItem>
-                <SelectItem value="Vocal">Vocal</SelectItem>
-                <SelectItem value="Cubana">Música Cubana</SelectItem>
-                <SelectItem value="Variado">Variado</SelectItem>
+              <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <SelectItem value="Samba" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">Samba</SelectItem>
+                <SelectItem value="Pagode" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">Pagode</SelectItem>
+                <SelectItem value="Sertanejo" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">Sertanejo</SelectItem>
+                <SelectItem value="DJ" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">DJ</SelectItem>
+                <SelectItem value="Jazz" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">Jazz</SelectItem>
+                <SelectItem value="Vocal" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">Vocal</SelectItem>
+                <SelectItem value="Cubana" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">Música Cubana</SelectItem>
+                <SelectItem value="Variado" className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700">Variado</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -944,6 +927,7 @@ function ModalEdicaoEvento({
               placeholder="Ex: Festival Junino, Feriado, etc."
               rows={3}
               disabled={carregandoEvento}
+              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
@@ -954,15 +938,16 @@ function ModalEdicaoEvento({
                 onClick={onDelete}
                 variant="destructive"
                 disabled={loading || deleting || carregandoEvento}
+                className="flex items-center gap-2"
               >
                 {deleting ? (
                   <>
-                    <RefreshCcw className="w-4 h-4 animate-spin mr-2" />
+                    <RefreshCcw className="w-4 h-4 animate-spin" />
                     Excluindo...
                   </>
                 ) : (
                   <>
-                    <X className="w-4 h-4 mr-2" />
+                    <X className="w-4 h-4" />
                     Excluir
                   </>
                 )}
@@ -974,6 +959,7 @@ function ModalEdicaoEvento({
               onClick={onClose}
               variant="outline"
               disabled={loading || deleting}
+              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               Cancelar
             </Button>
@@ -981,15 +967,16 @@ function ModalEdicaoEvento({
             <Button
               type="submit"
               disabled={loading || deleting || carregandoEvento}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
             >
               {loading ? (
                 <>
-                  <RefreshCcw className="w-4 h-4 animate-spin mr-2" />
+                  <RefreshCcw className="w-4 h-4 animate-spin" />
                   Salvando...
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-4 h-4" />
                   Salvar
                 </>
               )}

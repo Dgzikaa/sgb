@@ -92,43 +92,17 @@ export default function DesempenhoPage() {
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ], []);
 
-  // Carregar dados da API
-  const carregarDados = useCallback(async () => {
-    try {
-      setLoading(true);
-      const mes = mesAtual.getMonth() + 1;
-      const ano = mesAtual.getFullYear();
-      
-      if (!selectedBar) {
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
-        headers: {
-          'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar dados de desempenho');
-      }
-
-      const data = await response.json();
-      setDadosDesempenho(data.eventos || []);
-      processarResumos(data.eventos || []);
-      
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar os dados de desempenho",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [mesAtual, selectedBar, toast, processarResumos]);
+  const gerarPeriodoSemana = useCallback((semana: number, mes: number, ano: number): string => {
+    // Lógica simplificada - pode ser ajustada conforme necessário
+    const inicioMes = new Date(ano, mes - 1, 1);
+    const inicioSemana = new Date(inicioMes);
+    inicioSemana.setDate(inicioSemana.getDate() + (semana - 1) * 7);
+    
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(fimSemana.getDate() + 6);
+    
+    return `${inicioSemana.getDate().toString().padStart(2, '0')}-${fimSemana.getDate().toString().padStart(2, '0')} ${mesesNomes[mes - 1].slice(0, 3)}`;
+  }, [mesesNomes]);
 
   // Processar dados para resumos semanais e mensais
   const processarResumos = useCallback((eventos: DadosDesempenho[]) => {
@@ -177,21 +151,45 @@ export default function DesempenhoPage() {
       semanas: resumos,
       totais: totalMensal
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mesAtual, gerarPeriodoSemana]);
 
-  const gerarPeriodoSemana = useCallback((semana: number, mes: number, ano: number): string => {
-    // Lógica simplificada - pode ser ajustada conforme necessário
-    const inicioMes = new Date(ano, mes - 1, 1);
-    const inicioSemana = new Date(inicioMes);
-    inicioSemana.setDate(inicioSemana.getDate() + (semana - 1) * 7);
-    
-    const fimSemana = new Date(inicioSemana);
-    fimSemana.setDate(fimSemana.getDate() + 6);
-    
-    return `${inicioSemana.getDate().toString().padStart(2, '0')}-${fimSemana.getDate().toString().padStart(2, '0')} ${mesesNomes[mes - 1].slice(0, 3)}`;
-  }, [mesesNomes]);
+  // Carregar dados da API
+  const carregarDados = useCallback(async () => {
+    try {
+      setLoading(true);
+      const mes = mesAtual.getMonth() + 1;
+      const ano = mesAtual.getFullYear();
+      
+      if (!selectedBar) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
+        headers: {
+          'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao carregar dados de desempenho');
+      }
+
+      const data = await response.json();
+      setDadosDesempenho(data.eventos || []);
+      processarResumos(data.eventos || []);
+      
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar os dados de desempenho",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [mesAtual, selectedBar, toast, processarResumos]);
 
   const navegarMes = (direcao: 'anterior' | 'proximo') => {
     const novoMes = new Date(mesAtual);
