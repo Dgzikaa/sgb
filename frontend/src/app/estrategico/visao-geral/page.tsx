@@ -79,7 +79,8 @@ export default function VisaoGeralEstrategica() {
   const [trimestreAtual, setTrimestreAtual] = useState(3); // 2º, 3º ou 4º trimestre
   const [anualExpanded, setAnualExpanded] = useState(true);
   const [trimestralExpanded, setTrimestralExpanded] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [requestInProgress, setRequestInProgress] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
 
   // Removido useEffect do PageTitle para evitar re-renders desnecessários
@@ -103,16 +104,58 @@ export default function VisaoGeralEstrategica() {
     }
   };
 
+  // Função para limpar cache e recarregar
+  const limparCacheERecarregar = () => {
+    try {
+      // Limpar cache específico da visão geral
+      const keys = Object.keys(sessionStorage);
+      keys.forEach(key => {
+        if (key.startsWith('vg:')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      
+      // Forçar recarregamento
+      setIndicadoresAnuais(null);
+      setIndicadoresTrimestrais(null);
+      setLoading(true);
+      
+      // Recarregar dados
+      if (selectedBar) {
+        carregarIndicadores();
+      }
+      
+      toast({
+        title: 'Cache limpo',
+        description: 'Dados recarregados com sucesso',
+      });
+    } catch (error) {
+      console.error('Erro ao limpar cache:', error);
+    }
+  };
+
   const carregarIndicadores = useCallback(async () => {
-    if (!selectedBar || !isInitialized) return;
+    console.log('🔄 carregarIndicadores chamado:', { selectedBar: selectedBar?.id, requestInProgress });
+    setDebugInfo(`Iniciando carregamento... Bar: ${selectedBar?.id}`);
+    
+    if (!selectedBar) {
+      setDebugInfo('❌ Nenhum bar selecionado');
+      return;
+    }
+
+    // Evitar múltiplas requisições simultâneas
+    if (requestInProgress) {
+      setDebugInfo('⏳ Requisição já em andamento');
+      return;
+    }
 
     const hoje = new Date();
     const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
     const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}`;
     const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}`;
 
-    // Cache mais agressivo para evitar loop
-    const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
+    // Cache com TTL menor para permitir atualizações
+    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
     const anualCacheKey = `vg:anual:${selectedBar.id}`;
     const triCacheKey = `vg:tri:${selectedBar.id}:${trimestreAtual}:${mesAtual}`;
 
@@ -140,19 +183,19 @@ export default function VisaoGeralEstrategica() {
     const anualCached = readCache(anualCacheKey);
     const triCached = readCache(triCacheKey);
 
-    // Se há cache válido, usa apenas ele (sem revalidação para evitar loop)
+    // Se há cache válido, usa apenas ele
     if (anualCached && triCached) {
+      console.log('📦 Usando dados do cache');
+      setDebugInfo('📦 Carregado do cache');
       setIndicadoresAnuais(anualCached.anual);
       setIndicadoresTrimestrais(triCached.trimestral);
       setLoading(false);
       return;
     }
 
-    // Evitar múltiplas requisições simultâneas
-    if (loading) return;
-
     // Sem cache: exibe spinner e busca
     setLoading(true);
+    setRequestInProgress(true);
     showLoading('Carregando indicadores...');
     
     const requestHeaders = {
@@ -160,24 +203,32 @@ export default function VisaoGeralEstrategica() {
     } as Record<string, string>;
 
     try {
+      console.log('🔄 Fazendo requisição para indicadores...');
+      setDebugInfo('🔄 Fazendo requisição para APIs...');
+      
       const [anualResponse, trimestralResponse] = await Promise.all([
         fetch(anualUrl, { headers: requestHeaders }),
         fetch(trimestralUrl, { headers: requestHeaders })
       ]);
 
       if (!anualResponse.ok || !trimestralResponse.ok) {
+        setDebugInfo(`❌ Erro HTTP: ${anualResponse.status}/${trimestralResponse.status}`);
         throw new Error('Erro ao buscar indicadores');
       }
 
       const anualData = await anualResponse.json();
       const trimestralData = await trimestralResponse.json();
 
+      console.log('✅ Dados carregados:', { anual: anualData, trimestral: trimestralData });
+      setDebugInfo('✅ Dados carregados com sucesso');
+
       setIndicadoresAnuais(anualData.anual);
       setIndicadoresTrimestrais(trimestralData.trimestral);
       writeCache(anualCacheKey, anualData);
       writeCache(triCacheKey, trimestralData);
     } catch (error) {
-      console.error('Erro ao carregar indicadores:', error);
+      console.error('❌ Erro ao carregar indicadores:', error);
+      setDebugInfo(`❌ Erro: ${error}`);
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar os indicadores',
@@ -185,22 +236,18 @@ export default function VisaoGeralEstrategica() {
       });
     } finally {
       setLoading(false);
+      setRequestInProgress(false);
       hideLoading();
     }
-  }, [selectedBar, trimestreAtual, isInitialized, loading, showLoading, hideLoading, toast]);
+  }, [selectedBar, trimestreAtual, requestInProgress, showLoading, hideLoading, toast]);
 
-  // Inicializar componente apenas uma vez
+  // Carregar indicadores quando selectedBar estiver disponível
   useEffect(() => {
-    if (selectedBar && !isInitialized) {
-      setIsInitialized(true);
-    }
-  }, [selectedBar, isInitialized]);
-
-  useEffect(() => {
-    if (isInitialized) {
+    console.log('🔍 useEffect disparado:', { selectedBar: selectedBar?.id, trimestreAtual });
+    if (selectedBar) {
       carregarIndicadores();
     }
-  }, [carregarIndicadores, isInitialized]);
+  }, [selectedBar, trimestreAtual]);
 
 
 
@@ -208,7 +255,24 @@ export default function VisaoGeralEstrategica() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <GlobalLoadingComponent />
       <div className="container mx-auto px-4 py-4 space-y-4">
-        <PageHeader title="Visão Geral" description="Resumo executivo do bar" />
+        <div className="flex items-center justify-between">
+          <PageHeader title="Visão Geral" description="Resumo executivo do bar" />
+          <div className="flex items-center gap-2">
+            {debugInfo && (
+              <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                {debugInfo}
+              </span>
+            )}
+            <Button
+              onClick={limparCacheERecarregar}
+              variant="outline"
+              size="sm"
+              className="text-xs"
+            >
+              🔄 Recarregar
+            </Button>
+          </div>
+        </div>
 
         {/* Indicadores Anuais */}
         <div className="card-dark p-4">
