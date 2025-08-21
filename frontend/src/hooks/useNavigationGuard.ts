@@ -139,7 +139,7 @@ export function useDOMSafeEffect(
     if (!isNavigating()) {
       return effect();
     }
-  }, [...deps, isNavigating]);
+  }, [deps, isNavigating, effect]);
 }
 
 // Wrapper para operações DOM que podem falhar durante navegação

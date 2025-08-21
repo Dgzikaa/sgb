@@ -461,9 +461,9 @@ export default function PrivacidePage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Dados Pessoais
-                        </label>
+                        </div>
                         <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded border text-sm">
                           • Nome: {userData.nome || 'Não informado'}
                           <br />• Email: {userData.email || 'Não informado'}
@@ -473,9 +473,9 @@ export default function PrivacidePage() {
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Dados de Uso
-                        </label>
+                        </div>
                         <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded border text-sm">
                           • Último login: {userData.lastLogin || 'Nunca'}
                           <br />• Conta criada:{' '}

@@ -86,6 +86,14 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
       <div
         className="fixed inset-0 bg-black/50 z-40 md:hidden"
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClose();
+          }
+        }}
+        role="button"
+        tabIndex={0}
       />
 
       {/* Menu content */}

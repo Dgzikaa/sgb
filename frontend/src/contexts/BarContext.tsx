@@ -257,15 +257,15 @@ export function BarProvider({ children }: { children: ReactNode }) {
 
     // Mapeamento de nomes de bares para favicons
     const getFaviconPath = (name?: string) => {
-      if (!name) return '/logos/zykor-favicon-white.png';
+      if (!name) return '/logos/zykor-logo-white.png';
       
       const normalizedName = name.toLowerCase().replace(/[^a-z]/g, '');
       const barFavicons: Record<string, string> = {
-        'ordinario': '/logos/zykor-favicon-white.png', // Temporariamente usando ZYKOR
-        'deboche': '/logos/zykor-favicon-white.png',   // Temporariamente usando ZYKOR
+        'ordinario': '/logos/zykor-logo-white.png', // Temporariamente usando ZYKOR
+        'deboche': '/logos/zykor-logo-white.png',   // Temporariamente usando ZYKOR
       };
       
-      return barFavicons[normalizedName] || '/logos/zykor-favicon-white.png';
+      return barFavicons[normalizedName] || '/logos/zykor-logo-white.png';
     };
 
     const faviconPath = getFaviconPath(barName);

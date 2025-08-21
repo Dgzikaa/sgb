@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { useRouter } from 'next/navigation';
@@ -86,46 +86,7 @@ export default function HomeModernPage() {
   const [pendingTasks, setPendingTasks] = useState<QuickAction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setPageTitle('🏠 Dashboard');
-    initializeDashboard();
-    return () => setPageTitle('');
-  }, [setPageTitle]);
-
-  const initializeDashboard = async () => {
-    setLoading(true);
-    
-    try {
-      // Inicializar PWA features
-      await Promise.all([
-        pushNotifications.initialize(),
-        backgroundSync.initialize(),
-        badgeAPI.startAutoUpdate(5) // Atualizar a cada 5 minutos
-      ]);
-
-      // Carregar dados do dashboard
-      await loadDashboardData();
-      
-      // Configurar notificação de boas-vindas
-      if (pushNotifications.isEnabled()) {
-        await pushNotifications.notifySystemAlert(
-          `Bem-vindo ao Zykor Dashboard! ${selectedBar?.nome || 'Bar'} está pronto para ser gerenciado.`,
-          'info'
-        );
-      }
-
-      setIsLoaded(true);
-      toast.success('Dashboard carregado!', 'Todas as funcionalidades estão ativas');
-      
-    } catch (error) {
-      console.error('Erro ao inicializar dashboard:', error);
-      toast.error('Erro ao carregar dashboard', 'Algumas funcionalidades podem estar limitadas');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     // Simular carregamento de dados
     await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -238,13 +199,52 @@ export default function HomeModernPage() {
       eventosHoje: 1,
       alertasSistema: 0
     });
-  };
+  }, [badgeAPI]);
+
+  const initializeDashboard = useCallback(async () => {
+    setLoading(true);
+    
+    try {
+      // Inicializar PWA features
+      await Promise.all([
+        pushNotifications.initialize(),
+        backgroundSync.initialize(),
+        badgeAPI.startAutoUpdate(5) // Atualizar a cada 5 minutos
+      ]);
+
+      // Carregar dados do dashboard
+      await loadDashboardData();
+      
+      // Configurar notificação de boas-vindas
+      if (pushNotifications.isEnabled()) {
+        await pushNotifications.notifySystemAlert(
+          `Bem-vindo ao Zykor Dashboard! ${selectedBar?.nome || 'Bar'} está pronto para ser gerenciado.`,
+          'normal'
+        );
+      }
+
+      setIsLoaded(true);
+      toast.success('Dashboard carregado!', 'Todas as funcionalidades estão ativas');
+      
+    } catch (error) {
+      console.error('Erro ao inicializar dashboard:', error);
+      toast.error('Erro ao carregar dashboard', 'Algumas funcionalidades podem estar limitadas');
+    } finally {
+      setLoading(false);
+    }
+  }, [pushNotifications, backgroundSync, badgeAPI, selectedBar?.nome, toast, loadDashboardData]);
+
+  useEffect(() => {
+    setPageTitle('🏠 Dashboard');
+    initializeDashboard();
+    return () => setPageTitle('');
+  }, [setPageTitle, initializeDashboard]);
 
   const handleQuickAction = async (action: QuickAction) => {
     toast.info(`Navegando para ${action.title}`, action.description);
     
     // Sincronizar ação em background
-    await backgroundSync.addTask('sistema', 'update', {
+    await backgroundSync.addTask('config', 'update', {
       action: 'navigation',
       destination: action.href,
       timestamp: new Date().toISOString()
@@ -352,6 +352,14 @@ export default function HomeModernPage() {
                 <HoverMotion key={index} hoverEffect="lift">
                   <div 
                     onClick={() => handleQuickAction(task)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleQuickAction(task);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     className="flex items-center p-4 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                   >
                     <div className={`p-3 rounded-lg ${task.color} text-white mr-4`}>

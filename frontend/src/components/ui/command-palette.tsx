@@ -492,6 +492,16 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                           onClick={() =>
                             !isExecuting && handleSelectCommand(command)
                           }
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              if (!isExecuting) {
+                                handleSelectCommand(command);
+                              }
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <command.icon
                             className={`w-5 h-5 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}

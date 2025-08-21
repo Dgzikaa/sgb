@@ -1,42 +1,100 @@
 {
-  "name": "Ordinário Bar - Cartão Fidelidade",
-  "short_name": "Ordinário Card",
-  "description": "Cartão de fidelidade digital do Ordinário Bar e Música",
+  "name": "Zykor - Gestão de Bares",
+  "short_name": "Zykor",
+  "description": "Plataforma completa de gestão para bares e casas noturnas com design system moderno",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f97316",
-  "theme_color": "#ea580c",
-  "orientation": "portrait",
+  "background_color": "#0f0f23",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
   "scope": "/",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "finance", "utilities"],
   "icons": [
     {
-      "src": "/logos/ordinario-transparente.png",
+      "src": "/favicons/zykor/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/logos/ordinario-transparente.png",
+      "src": "/favicons/zykor/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/favicons/zykor/maskable-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicons/zykor/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Meu Cartão",
-      "short_name": "Cartão",
-      "description": "Acessar meu cartão de fidelidade",
-      "url": "/fidelidade",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Acessar dashboard principal",
+      "url": "/dashboard",
       "icons": [
         {
-          "src": "/logos/ordinario-transparente.png",
+          "src": "/favicons/zykor/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Design System",
+      "short_name": "Design",
+      "description": "Explorar componentes do design system",
+      "url": "/design-system-demo",
+      "icons": [
+        {
+          "src": "/favicons/zykor/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "short_name": "Relatórios",
+      "description": "Ver relatórios e análises",
+      "url": "/relatorios",
+      "icons": [
+        {
+          "src": "/favicons/zykor/android-chrome-192x192.png",
           "sizes": "192x192"
         }
       ]
     }
   ],
-  "categories": ["lifestyle", "food", "entertainment"],
-  "lang": "pt-BR",
-  "dir": "ltr"
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard principal do Zykor"
+    },
+    {
+      "src": "/screenshots/mobile-dashboard.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard mobile do Zykor"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }

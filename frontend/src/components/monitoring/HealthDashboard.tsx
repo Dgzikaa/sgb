@@ -147,7 +147,8 @@ export default function HealthDashboard() {
     };
 
     fetchHealthData();
-    const interval = setInterval(fetchHealthData, 30000); // Update a cada 30s
+    // ✅ Otimizado: Health check a cada 5 minutos em vez de 30s
+    const interval = setInterval(fetchHealthData, 300000); // 5 minutos
 
     return () => clearInterval(interval);
   }, []);

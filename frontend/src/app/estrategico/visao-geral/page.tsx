@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useEffect, useState, useCallback } from 'react';
 import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
@@ -70,7 +69,6 @@ interface IndicadoresTrimestrais {
 }
 
 export default function VisaoGeralEstrategica() {
-  const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
   const { toast } = useToast();
   const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
@@ -81,12 +79,10 @@ export default function VisaoGeralEstrategica() {
   const [trimestreAtual, setTrimestreAtual] = useState(3); // 2º, 3º ou 4º trimestre
   const [anualExpanded, setAnualExpanded] = useState(true);
   const [trimestralExpanded, setTrimestralExpanded] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
 
-  useEffect(() => {
-    setPageTitle('📊 Visão Geral');
-    return () => setPageTitle('');
-  }, [setPageTitle]);
+  // Removido useEffect do PageTitle para evitar re-renders desnecessários
 
   // Informações dos trimestres
   const getTrimestreInfo = (trimestre: number) => {
@@ -107,16 +103,16 @@ export default function VisaoGeralEstrategica() {
     }
   };
 
-  const carregarIndicadores = async () => {
-    if (!selectedBar) return;
+  const carregarIndicadores = useCallback(async () => {
+    if (!selectedBar || !isInitialized) return;
 
     const hoje = new Date();
     const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
     const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}`;
     const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}`;
 
-    // Cache por sessão: evita recarregar tudo ao voltar para a página
-    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
+    // Cache mais agressivo para evitar loop
+    const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutos
     const anualCacheKey = `vg:anual:${selectedBar.id}`;
     const triCacheKey = `vg:tri:${selectedBar.id}:${trimestreAtual}:${mesAtual}`;
 
@@ -144,40 +140,25 @@ export default function VisaoGeralEstrategica() {
     const anualCached = readCache(anualCacheKey);
     const triCached = readCache(triCacheKey);
 
-    const requestHeaders = {
-      'x-user-data': JSON.stringify({ bar_id: selectedBar.id, permissao: 'admin' })
-    } as Record<string, string>;
-
-    // Se há cache, mostra imediatamente e revalida em background
+    // Se há cache válido, usa apenas ele (sem revalidação para evitar loop)
     if (anualCached && triCached) {
       setIndicadoresAnuais(anualCached.anual);
       setIndicadoresTrimestrais(triCached.trimestral);
-
-      // Revalidação silenciosa (sem spinner)
-      try {
-        const [anualResponse, trimestralResponse] = await Promise.all([
-          fetch(anualUrl, { headers: requestHeaders }),
-          fetch(trimestralUrl, { headers: requestHeaders })
-        ]);
-        if (anualResponse.ok) {
-          const data = await anualResponse.json();
-          setIndicadoresAnuais(data.anual);
-          writeCache(anualCacheKey, data);
-        }
-        if (trimestralResponse.ok) {
-          const data = await trimestralResponse.json();
-          setIndicadoresTrimestrais(data.trimestral);
-          writeCache(triCacheKey, data);
-        }
-      } catch {
-        // ignora falhas silenciosamente
-      }
+      setLoading(false);
       return;
     }
+
+    // Evitar múltiplas requisições simultâneas
+    if (loading) return;
 
     // Sem cache: exibe spinner e busca
     setLoading(true);
     showLoading('Carregando indicadores...');
+    
+    const requestHeaders = {
+      'x-user-data': JSON.stringify({ bar_id: selectedBar.id, permissao: 'admin' })
+    } as Record<string, string>;
+
     try {
       const [anualResponse, trimestralResponse] = await Promise.all([
         fetch(anualUrl, { headers: requestHeaders }),
@@ -206,11 +187,20 @@ export default function VisaoGeralEstrategica() {
       setLoading(false);
       hideLoading();
     }
-  };
+  }, [selectedBar, trimestreAtual, isInitialized, loading, showLoading, hideLoading, toast]);
+
+  // Inicializar componente apenas uma vez
+  useEffect(() => {
+    if (selectedBar && !isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [selectedBar, isInitialized]);
 
   useEffect(() => {
-    carregarIndicadores();
-  }, [selectedBar, trimestreAtual]);
+    if (isInitialized) {
+      carregarIndicadores();
+    }
+  }, [carregarIndicadores, isInitialized]);
 
 
 
@@ -225,6 +215,14 @@ export default function VisaoGeralEstrategica() {
           <div 
             className="flex items-center justify-between mb-4 cursor-pointer"
             onClick={() => setAnualExpanded(!anualExpanded)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setAnualExpanded(!anualExpanded);
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
@@ -317,6 +315,14 @@ export default function VisaoGeralEstrategica() {
             <div 
               className="flex items-center gap-3 cursor-pointer flex-1"
               onClick={() => setTrimestralExpanded(!trimestralExpanded)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setTrimestralExpanded(!trimestralExpanded);
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
               <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
                 <Target className="w-5 h-5 text-white" />

@@ -503,7 +503,19 @@ export default function CopyItemsDialog({
 
   return (
     <>
-      <div onClick={() => setCurrentStep('select-items')}>{children}</div>
+      <div 
+        onClick={() => setCurrentStep('select-items')}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setCurrentStep('select-items');
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        {children}
+      </div>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-auto p-6">
           <div className="flex items-center justify-center gap-2 mb-4">

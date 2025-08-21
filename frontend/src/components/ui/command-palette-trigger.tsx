@@ -154,6 +154,14 @@ export function CommandPaletteSearchPlaceholder({
   return (
     <div
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className={`
         flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1 sm:py-1 bg-gray-100 dark:bg-gray-800 
         border border-gray-200 dark:border-gray-700 rounded-full

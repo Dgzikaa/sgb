@@ -226,9 +226,9 @@ export function DashboardWidget({
         <div className="absolute top-full left-0 right-0 z-10 mt-2 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                 Tamanho
-              </label>
+              </div>
               <div className="flex gap-2">
                 {Object.entries(sizeLabels).map(([size, label]) => (
                   <Button
@@ -245,9 +245,9 @@ export function DashboardWidget({
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                 Auto-refresh (segundos)
-              </label>
+              </div>
               <input
                 type="number"
                 value={config.refreshInterval || ''}

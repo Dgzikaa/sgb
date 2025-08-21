@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -84,9 +84,9 @@ export default function PermissoesPage() {
 
   useEffect(() => {
     fetchPermissoes();
-  }, []);
+  }, [fetchPermissoes]);
 
-  const fetchPermissoes = async () => {
+  const fetchPermissoes = useCallback(async () => {
     try {
       const response = await fetch('/api/configuracoes/permissoes');
       const data = await response.json();
@@ -106,7 +106,7 @@ export default function PermissoesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const handleModuloChange = (roleKey: string, moduloId: string, checked: boolean) => {
     setRolesEditadas(prev => ({

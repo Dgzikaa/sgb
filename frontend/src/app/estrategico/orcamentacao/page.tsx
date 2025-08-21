@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { Button } from '@/components/ui/button';
@@ -60,10 +60,10 @@ export default function OrcamentacaoPage() {
     if (selectedBar) {
       carregarDados();
     }
-  }, [selectedBar, mesSelecionado]);
+  }, [selectedBar, mesSelecionado, carregarDados]);
 
   // Dados baseados na estrutura do Excel
-  const getCategoriasEstruturadas = (): CategoriaOrcamento[] => [
+  const getCategoriasEstruturadas = useCallback((): CategoriaOrcamento[] => [
     {
       nome: 'Despesas Variáveis (%)',
       cor: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
@@ -144,9 +144,9 @@ export default function OrcamentacaoPage() {
         { nome: 'CONTRATOS', planejado: 0, projecao: 15700, realizado: 0, editavel: true }
       ]
     }
-  ];
+  ], [despesasVariaveis, cmv]);
 
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     if (!selectedBar) return;
 
     setLoading(true);
@@ -260,7 +260,7 @@ export default function OrcamentacaoPage() {
       setLoading(false);
       hideLoading();
     }
-  };
+  }, [selectedBar, toast, showLoading, hideLoading, getCategoriasEstruturadas]);
 
   const sincronizarManualmente = async () => {
     if (!selectedBar) return;
@@ -501,7 +501,7 @@ export default function OrcamentacaoPage() {
             
             {/* Filtro de Mês */}
             <div className="mb-3">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="mes-selecionado" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mês
               </label>
               <Select value={mesSelecionado} onValueChange={setMesSelecionado}>

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useMenuBadges } from '@/hooks/useMenuBadges';
 import {
@@ -271,11 +272,32 @@ const defaultSidebarItems: SidebarItem[] = [
 // Loading skeleton para quando estiver carregando
 function SidebarSkeleton() {
   return (
-    <div className="flex flex-col gap-4 p-4 w-16">
-      <div className="h-10 bg-gray-700/20 animate-pulse rounded-lg"></div>
-      <div className="h-10 bg-gray-700/20 animate-pulse rounded-lg"></div>
-      <div className="h-10 bg-gray-700/20 animate-pulse rounded-lg"></div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="flex flex-col gap-4 p-4 w-16"
+    >
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.1 }}
+          className="h-10 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded-xl relative overflow-hidden"
+        >
+          <motion.div
+            animate={{ x: ['-100%', '100%'] }}
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity, 
+              ease: "linear",
+              delay: i * 0.2
+            }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 dark:via-gray-500/20 to-transparent"
+          />
+        </motion.div>
+      ))}
+    </motion.div>
   );
 }
 
@@ -291,23 +313,69 @@ function ItemContent({
 }) {
   return (
     <>
-      <item.icon
-        className={`w-5 h-5 flex-shrink-0 transition-colors ${
-          isItemActive
-            ? 'text-blue-600 dark:text-blue-400'
-            : item.color || 'text-gray-500 dark:text-gray-400'
-        }`}
-      />
-      {isHovered && (
-        <span className="ml-3 font-medium animate-slide-in-from-left duration-200 flex-1">
-          {item.label}
-        </span>
-      )}
-      {item.badge && isHovered && (
-        <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 animate-slide-in-from-right duration-200 shadow-sm">
-          {item.badge}
-        </span>
-      )}
+      <motion.div
+        whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        className="relative"
+      >
+        <item.icon
+          className={`w-5 h-5 flex-shrink-0 transition-all duration-300 ${
+            isItemActive
+              ? 'text-blue-600 dark:text-blue-400 drop-shadow-sm'
+              : item.color || 'text-gray-500 dark:text-gray-400'
+          }`}
+        />
+        {isItemActive && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 0.6 }}
+            className="absolute inset-0 bg-blue-400 dark:bg-blue-500 rounded-full blur-md -z-10"
+          />
+        )}
+      </motion.div>
+      
+      <AnimatePresence>
+        {isHovered && (
+          <motion.span
+            initial={{ opacity: 0, x: -20, width: 0 }}
+            animate={{ opacity: 1, x: 0, width: 'auto' }}
+            exit={{ opacity: 0, x: -20, width: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="ml-3 font-medium flex-1 overflow-hidden whitespace-nowrap"
+          >
+            {item.label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence>
+        {item.badge && isHovered && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0, x: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0, x: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
+            className="ml-auto bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full px-2 py-0.5 shadow-lg border border-red-400/20"
+          >
+            <motion.span
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [1, 0.8, 1]
+              }}
+              transition={{ 
+                duration: 2, 
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              {item.badge}
+            </motion.span>
+          </motion.span>
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -318,6 +386,11 @@ export function ModernSidebar() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [manuallyToggledItems, setManuallyToggledItems] = useState<string[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  // Controles de animação
+  const sidebarControls = useAnimation();
+  const backgroundControls = useAnimation();
 
   // 2. Hooks de contexto
   const pathname = usePathname();
@@ -433,7 +506,29 @@ export function ModernSidebar() {
     setIsInitialized(true);
   }, []);
 
-  // 7. Loading and error states
+  // 7. Handlers de mouse
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    sidebarControls.start({ width: 256 });
+    backgroundControls.start({ opacity: 1 });
+  }, [sidebarControls, backgroundControls]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    sidebarControls.start({ width: 56 });
+    backgroundControls.start({ opacity: 0 });
+    setTimeout(() => setManuallyToggledItems([]), 3000);
+  }, [sidebarControls, backgroundControls]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  }, []);
+
+  // 8. Loading and error states - DEPOIS de todos os hooks
   const isLoading = userLoading || !isInitialized;
   if (isLoading) {
     return <SidebarSkeleton />;
@@ -443,43 +538,111 @@ export function ModernSidebar() {
     return null;
   }
 
-  // 8. Render principal
+  // 9. Render principal
   return (
-    <aside
-      className={`
-        hidden md:flex flex-col flex-shrink-0 h-full
-        bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
-        transition-width duration-300 ease-out
-        ${isHovered ? 'w-64' : 'w-14'}
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setTimeout(() => setManuallyToggledItems([]), 3000);
+    <motion.aside
+      initial={{ width: 56, opacity: 0 }}
+      animate={{ 
+        width: isHovered ? 256 : 56,
+        opacity: 1
       }}
+      transition={{ 
+        duration: 0.4, 
+        ease: [0.4, 0, 0.2, 1],
+        opacity: { duration: 0.2 }
+      }}
+      className="hidden md:flex flex-col flex-shrink-0 h-full relative overflow-hidden"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
     >
+      {/* Background com gradiente animado */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={backgroundControls}
+        className="absolute inset-0 bg-gradient-to-br from-white via-gray-50/50 to-blue-50/30 dark:from-gray-900 dark:via-gray-800/50 dark:to-blue-900/10"
+      />
+      
+      {/* Efeito de mouse seguidor */}
+      <motion.div
+        animate={{
+          x: mousePosition.x - 50,
+          y: mousePosition.y - 50,
+        }}
+        transition={{ type: "spring", damping: 30, stiffness: 200 }}
+        className="absolute w-24 h-24 bg-gradient-to-r from-blue-400/10 to-purple-400/10 dark:from-blue-500/10 dark:to-purple-500/10 rounded-full blur-xl pointer-events-none"
+        style={{ opacity: isHovered ? 0.6 : 0 }}
+      />
+      
+      {/* Border animado */}
+      <motion.div
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
+        className="absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent dark:via-gray-700"
+        style={{ transformOrigin: 'top' }}
+      />
+      
+      <div className="relative z-10 flex flex-col h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
       <div className="flex flex-col h-full pt-2 pb-2">
         {/* Navigation items */}
         <nav className="flex-1 px-2 overflow-hidden">
-          <div className="space-y-1">
-            {sidebarItems.map(item => {
+          <motion.div 
+            className="space-y-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, staggerChildren: 0.05 }}
+          >
+            {sidebarItems.map((item, index) => {
               const isItemActive = item.href
                 ? isActive(item.href)
                 : hasActiveSubItem(item.subItems);
               const itemExpanded = isExpanded(item.label);
 
               return (
-                <div key={item.label}>
+                <motion.div 
+                  key={item.label}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + (index * 0.05) }}
+                >
                   {/* Item principal */}
-                  <div
-                    className={`group flex items-center h-10 px-3 transition-width transition-colors duration-200 rounded-xl relative cursor-pointer
+                  <motion.div
+                    whileHover={{ 
+                      scale: 1.02,
+                      x: isHovered ? 4 : 0,
+                      transition: { duration: 0.2 }
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`group flex items-center h-10 px-3 transition-all duration-300 rounded-xl relative cursor-pointer overflow-hidden
                       ${ isHovered ? 'justify-start' : 'justify-center'}
                       ${ isItemActive
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+                          ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 shadow-sm border border-blue-200/50 dark:border-blue-700/30'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100/50 dark:hover:from-gray-800 dark:hover:to-gray-700/50 hover:text-gray-900 dark:hover:text-gray-100 hover:shadow-sm'
                       }
                    `}
                   >
+                    {/* Indicador ativo animado */}
+                    {isItemActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-r-full"
+                        initial={{ scaleY: 0 }}
+                        animate={{ scaleY: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    )}
+                    
+                    {/* Shimmer effect no hover */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                      initial={{ x: '-100%', opacity: 0 }}
+                      whileHover={{ 
+                        x: '100%', 
+                        opacity: 1,
+                        transition: { duration: 0.6, ease: "easeInOut" }
+                      }}
+                    />
                     {/* Link wrapper */}
                     {item.href ? (
                       <Link href={item.href} className="flex items-center flex-1">
@@ -498,91 +661,241 @@ export function ModernSidebar() {
                     )}
 
                     {/* Botão expand/collapse */}
-                    {item.subItems && item.subItems.length > 0 && isHovered && (
-                      <button
-                        onClick={e => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleExpanded(item.label);
-                        }}
-                        className="ml-2 p-1 rounded-[6px] hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        {itemExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                        )}
-                      </button>
-                    )}
+                    <AnimatePresence>
+                      {item.subItems && item.subItems.length > 0 && isHovered && (
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0 }}
+                          whileHover={{ 
+                            scale: 1.1,
+                            backgroundColor: 'rgba(0,0,0,0.05)'
+                          }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleExpanded(item.label);
+                          }}
+                          className="ml-2 p-1.5 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition-all duration-200 relative overflow-hidden"
+                        >
+                          <motion.div
+                            animate={{ rotate: itemExpanded ? 90 : 0 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                          >
+                            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          </motion.div>
+                          
+                          {/* Ripple effect */}
+                          <motion.div
+                            className="absolute inset-0 bg-blue-400/20 rounded-lg"
+                            initial={{ scale: 0, opacity: 0 }}
+                            whileTap={{ 
+                              scale: 1.5, 
+                              opacity: [0, 1, 0],
+                              transition: { duration: 0.3 }
+                            }}
+                          />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
 
-                    {/* Tooltip */}
-                    {!isHovered && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                        {item.label}
-                        <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"></div>
-                      </div>
-                    )}
-                  </div>
+                    {/* Tooltip modernizado */}
+                    <AnimatePresence>
+                      {!isHovered && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                          animate={{ opacity: 1, scale: 1, x: 0 }}
+                          exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute left-full ml-3 px-3 py-2 bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-700 dark:to-gray-600 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-700/50"
+                        >
+                          {item.label}
+                          <motion.div
+                            className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.1 }}
+                          />
+                          
+                          {/* Glow effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur-sm -z-10" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
 
                   {/* Sub-items */}
-                  {item.subItems && item.subItems.length > 0 && isHovered && itemExpanded && (
-                    <div className="ml-6 mt-1 space-y-1 animate-slide-in-from-top">
-                      {item.subItems.map(subItem => {
-                        const isSubActive = isActive(subItem.href);
+                  <AnimatePresence>
+                    {item.subItems && item.subItems.length > 0 && isHovered && itemExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, y: -10 }}
+                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -10 }}
+                        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                        className="ml-6 mt-2 space-y-1 overflow-hidden"
+                      >
+                        {item.subItems.map((subItem, subIndex) => {
+                          const isSubActive = isActive(subItem.href);
 
-                        return (
-                          <Link
-                            key={subItem.href}
-                            href={subItem.href}
-                            className={`group flex items-center px-3 py-2 rounded-[8px] transition-all duration-200 text-sm ${
-                              isSubActive
-                                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                                : 'text-gray-500 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
-                            }`}
-                          >
-                            <subItem.icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="ml-3 font-medium">
-                              {subItem.label}
-                            </span>
-                            {subItem.badge && (
-                              <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-                                {subItem.badge}
-                              </span>
-                            )}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                          return (
+                            <motion.div
+                              key={subItem.href}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: subIndex * 0.05 }}
+                            >
+                              <Link
+                                href={subItem.href}
+                                className={`group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 text-sm relative overflow-hidden ${
+                                  isSubActive
+                                    ? 'bg-gradient-to-r from-blue-100 to-indigo-100/50 dark:from-blue-900/50 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 shadow-sm border border-blue-200/30 dark:border-blue-700/20'
+                                    : 'text-gray-500 dark:text-gray-500 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50 dark:hover:from-gray-700/50 dark:hover:to-gray-800/30 hover:text-gray-700 dark:hover:text-gray-300 hover:shadow-sm'
+                                }`}
+                              >
+                                {/* Indicador ativo para subitem */}
+                                {isSubActive && (
+                                  <motion.div
+                                    layoutId="activeSubIndicator"
+                                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-r-full"
+                                    initial={{ scaleY: 0 }}
+                                    animate={{ scaleY: 1 }}
+                                    transition={{ duration: 0.2 }}
+                                  />
+                                )}
+                                
+                                <motion.div
+                                  whileHover={{ scale: 1.05, rotate: [0, -2, 2, 0] }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <subItem.icon className="w-4 h-4 flex-shrink-0" />
+                                </motion.div>
+                                
+                                <span className="ml-3 font-medium">
+                                  {subItem.label}
+                                </span>
+                                
+                                {subItem.description && (
+                                  <motion.div
+                                    initial={{ opacity: 0 }}
+                                    whileHover={{ opacity: 1 }}
+                                    className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-md pointer-events-none whitespace-nowrap z-50 shadow-lg"
+                                  >
+                                    {subItem.description}
+                                  </motion.div>
+                                )}
+                                
+                                <AnimatePresence>
+                                  {subItem.badge && (
+                                    <motion.span
+                                      initial={{ opacity: 0, scale: 0 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0 }}
+                                      whileHover={{ scale: 1.1 }}
+                                      className="ml-auto bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full px-2 py-0.5 shadow-sm"
+                                    >
+                                      {subItem.badge}
+                                    </motion.span>
+                                  )}
+                                </AnimatePresence>
+                                
+                                {/* Shimmer effect */}
+                                <motion.div
+                                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+                                  initial={{ x: '-100%' }}
+                                  whileHover={{ 
+                                    x: '100%',
+                                    transition: { duration: 0.5 }
+                                  }}
+                                />
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </nav>
 
         {/* Footer */}
-        <div className="px-2 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <motion.div 
+          className="px-2 pt-4 border-t border-gray-100/50 dark:border-gray-800/50"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
           <div
             className={`flex items-center transition-all duration-300 ${
               isHovered ? 'justify-between px-3' : 'justify-center'
             }`}
           >
             <div className="flex items-center">
-              <div className="w-2 h-2 rounded-full bg-green-500 shadow-sm"></div>
-              {isHovered && (
-                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 animate-slide-in-from-left">
-                  Online
-                </span>
-              )}
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  boxShadow: [
+                    '0 0 0 0 rgba(34, 197, 94, 0.4)',
+                    '0 0 0 4px rgba(34, 197, 94, 0.1)',
+                    '0 0 0 0 rgba(34, 197, 94, 0.4)'
+                  ]
+                }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="w-2 h-2 rounded-full bg-gradient-to-r from-green-400 to-emerald-500"
+              />
+              <AnimatePresence>
+                {isHovered && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10, width: 0 }}
+                    animate={{ opacity: 1, x: 0, width: 'auto' }}
+                    exit={{ opacity: 0, x: -10, width: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="ml-2 text-xs text-gray-500 dark:text-gray-400 font-medium"
+                  >
+                    Sistema Online
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </div>
-            {isHovered && (
-              <span className="text-xs text-gray-400 dark:text-gray-500 animate-slide-in-from-right">
-                v2.0
-              </span>
-            )}
+            <AnimatePresence>
+              {isHovered && (
+                <motion.div
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="flex items-center space-x-2"
+                >
+                  <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                    Zykor
+                  </span>
+                  <motion.span
+                    animate={{ 
+                      color: ['#6b7280', '#3b82f6', '#6b7280'],
+                    }}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-xs font-bold"
+                  >
+                    v2.0
+                  </motion.span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </aside>
+      </div>
+    </motion.aside>
   );
 }

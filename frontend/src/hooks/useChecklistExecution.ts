@@ -202,7 +202,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
         clearTimeout(autoSaveTimer);
       }
     };
-  }, [execucao, execucaoOriginal, autoSaveEnabled]);
+  }, [execucao, execucaoOriginal, autoSaveEnabled, temAlteracoesPendentes, salvarRespostas, autoSaveTimer]);
 
   // Atualizar validação quando execução muda
   useEffect(() => {
@@ -273,7 +273,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     }
   };
 
-  const salvarRespostas = async (
+  const salvarRespostas = useCallback(async (
     autoSave: boolean = false
   ): Promise<boolean> => {
     if (!execucao) return false;
@@ -308,7 +308,7 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     } finally {
       setSaving(false);
     }
-  };
+  }, [execucao]);
 
   const finalizarExecucao = async (
     observacoesFinais?: string,

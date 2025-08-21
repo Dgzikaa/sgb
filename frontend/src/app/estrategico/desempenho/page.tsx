@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -87,10 +87,10 @@ export default function DesempenhoPage() {
   const [editData, setEditData] = useState<any>({});
   const [salvando, setSalvando] = useState(false);
 
-  const mesesNomes = [
+  const mesesNomes = useMemo(() => [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
+  ], []);
 
   // Carregar dados da API
   const carregarDados = useCallback(async () => {
@@ -128,10 +128,10 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [mesAtual, selectedBar, toast]);
+  }, [mesAtual, selectedBar, toast, processarResumos]);
 
   // Processar dados para resumos semanais e mensais
-  const processarResumos = (eventos: DadosDesempenho[]) => {
+  const processarResumos = useCallback((eventos: DadosDesempenho[]) => {
     const semanasMap = new Map<number, DadosDesempenho[]>();
     
     eventos.forEach(evento => {
@@ -177,9 +177,11 @@ export default function DesempenhoPage() {
       semanas: resumos,
       totais: totalMensal
     });
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mesAtual, gerarPeriodoSemana]);
 
-  const gerarPeriodoSemana = (semana: number, mes: number, ano: number): string => {
+  const gerarPeriodoSemana = useCallback((semana: number, mes: number, ano: number): string => {
     // Lógica simplificada - pode ser ajustada conforme necessário
     const inicioMes = new Date(ano, mes - 1, 1);
     const inicioSemana = new Date(inicioMes);
@@ -189,7 +191,7 @@ export default function DesempenhoPage() {
     fimSemana.setDate(fimSemana.getDate() + 6);
     
     return `${inicioSemana.getDate().toString().padStart(2, '0')}-${fimSemana.getDate().toString().padStart(2, '0')} ${mesesNomes[mes - 1].slice(0, 3)}`;
-  };
+  }, [mesesNomes]);
 
   const navegarMes = (direcao: 'anterior' | 'proximo') => {
     const novoMes = new Date(mesAtual);
@@ -318,7 +320,7 @@ export default function DesempenhoPage() {
     if (selectedBar) {
       carregarDados();
     }
-  }, [selectedBar, mesAtual]); // Removido carregarDados para evitar loop
+  }, [selectedBar, mesAtual, carregarDados]);
 
   if (loading) {
     return (

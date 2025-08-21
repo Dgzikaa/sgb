@@ -21,9 +21,9 @@ export async function PUT(
 
     console.log('🔧 Atualizando evento:', eventoId, body);
 
-    // Atualizar evento na tabela eventos
+    // Atualizar evento na tabela eventos_base (editável)
     const { data, error } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .update({
         nome,
         m1_r: m1_r ? parseFloat(m1_r) : null,
@@ -65,7 +65,7 @@ export async function GET(
     const eventoId = params.id;
 
     const { data, error } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('*')
       .eq('id', eventoId)
       .single();

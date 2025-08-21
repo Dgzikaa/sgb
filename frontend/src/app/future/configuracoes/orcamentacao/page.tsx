@@ -308,6 +308,14 @@ export default function OrcamentacaoPage() {
               <div
                 className="card-dark p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-105"
                 onClick={() => iniciarOrcamento('2024')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    iniciarOrcamento('2024');
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40 transition-colors">
@@ -336,6 +344,14 @@ export default function OrcamentacaoPage() {
               <div
                 className="card-dark p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-105"
                 onClick={() => iniciarOrcamento('2025')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    iniciarOrcamento('2025');
+                  }
+                }}
+                role="button"
+                tabIndex={0}
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-800/40 transition-colors">
@@ -469,9 +485,9 @@ export default function OrcamentacaoPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <div className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   MÃªs
-                </label>
+                </div>
                 <Select value={mesSelecionado} onValueChange={setMesSelecionado}>
                   <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                     <SelectValue />

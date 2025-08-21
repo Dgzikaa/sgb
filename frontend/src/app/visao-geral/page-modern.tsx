@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useRouter } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
@@ -107,16 +107,7 @@ export default function VisaoGeralModernPage() {
   const [trimestreAtual, setTrimestreAtual] = useState(3);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  useEffect(() => {
-    setPageTitle('📊 Visão Geral');
-    
-    // Inicializar PWA features
-    initializePWAFeatures();
-    
-    return () => setPageTitle('');
-  }, [setPageTitle]);
-
-  const initializePWAFeatures = async () => {
+  const initializePWAFeatures = useCallback(async () => {
     try {
       await Promise.all([
         pushNotifications.initialize(),
@@ -134,15 +125,18 @@ export default function VisaoGeralModernPage() {
       console.error('Erro ao inicializar PWA:', error);
       toast.warning('PWA parcialmente inicializado', 'Algumas funcionalidades podem estar limitadas');
     }
-  };
+  }, [pushNotifications, backgroundSync, badgeAPI, toast]);
 
   useEffect(() => {
-    if (selectedBar?.id) {
-      loadIndicadores();
-    }
-  }, [selectedBar]);
+    setPageTitle('📊 Visão Geral');
+    
+    // Inicializar PWA features
+    initializePWAFeatures();
+    
+    return () => setPageTitle('');
+  }, [setPageTitle, initializePWAFeatures]);
 
-  const loadIndicadores = async () => {
+  const loadIndicadores = useCallback(async () => {
     if (!selectedBar?.id) return;
     
     setLoading(true);
@@ -195,7 +189,7 @@ export default function VisaoGeralModernPage() {
       setLastUpdate(new Date());
       
       // Sincronizar dados em background
-      await backgroundSync.addTask('analytics', 'update', {
+      await backgroundSync.addTask('config', 'update', {
         barId: selectedBar.id,
         indicadores: { mockAnuais, mockTrimestrais }
       }, 'normal');
@@ -218,7 +212,13 @@ export default function VisaoGeralModernPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBar?.id, backgroundSync, toast]);
+
+  useEffect(() => {
+    if (selectedBar?.id) {
+      loadIndicadores();
+    }
+  }, [selectedBar, loadIndicadores]);
 
   const handleRefresh = async () => {
     toast.info('Atualizando dados...', 'Aguarde enquanto sincronizamos');
@@ -341,66 +341,47 @@ export default function VisaoGeralModernPage() {
         className="mb-8"
         hoverable
       >
-        <ModernGrid cols={4}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+          {/* Faturamento Anual */}
           <ModernStat
-            label="Faturamento"
-            value={
-              <AnimatedCounter
-                to={indicadoresAnuais?.faturamento.valor || 0}
-                prefix="R$ "
-                duration={2}
-              />
-            }
-            change={`${((indicadoresAnuais?.faturamento.valor || 0) / (indicadoresAnuais?.faturamento.meta || 1) * 100).toFixed(1)}% da meta`}
-            changeType="positive"
+            label="Faturamento Anual"
+            value={`R$ ${((indicadoresAnuais?.faturamento.valor ?? 0) / 1000000).toFixed(1)}M`}
+            change={`${(((indicadoresAnuais?.faturamento.valor ?? 0) / (indicadoresAnuais?.faturamento.meta ?? 1)) * 100).toFixed(1)}% da meta`}
+            changeType={(indicadoresAnuais?.faturamento.valor ?? 0) >= (indicadoresAnuais?.faturamento.meta ?? 0) ? 'positive' : 'negative'}
             icon={DollarSign}
             loading={loading}
           />
-          
+
+          {/* Pessoas Anual */}
           <ModernStat
-            label="Número de Pessoas"
-            value={
-              <AnimatedCounter
-                to={indicadoresAnuais?.pessoas.valor || 0}
-                duration={2}
-              />
-            }
-            change={`${((indicadoresAnuais?.pessoas.valor || 0) / (indicadoresAnuais?.pessoas.meta || 1) * 100).toFixed(1)}% da meta`}
-            changeType="positive"
+            label="Pessoas Anual"
+            value={`${((indicadoresAnuais?.pessoas.valor ?? 0) / 1000).toFixed(0)}K`}
+            change={`${(((indicadoresAnuais?.pessoas.valor ?? 0) / (indicadoresAnuais?.pessoas.meta ?? 1)) * 100).toFixed(1)}% da meta`}
+            changeType={(indicadoresAnuais?.pessoas.valor ?? 0) >= (indicadoresAnuais?.pessoas.meta ?? 0) ? 'positive' : 'negative'}
             icon={Users}
             loading={loading}
           />
-          
+
+          {/* Reputação */}
           <ModernStat
-            label="Reputação Google"
-            value={
-              <AnimatedCounter
-                to={(indicadoresAnuais?.reputacao.valor || 0) * 10}
-                duration={2}
-                suffix="/50"
-              />
-            }
-            change={`Meta: ${indicadoresAnuais?.reputacao.meta || 0}`}
-            changeType="positive"
+            label="Reputação"
+            value={(indicadoresAnuais?.reputacao.valor ?? 0).toString()}
+            change={`Meta: ${indicadoresAnuais?.reputacao.meta ?? 0}`}
+            changeType={(indicadoresAnuais?.reputacao.valor ?? 0) >= (indicadoresAnuais?.reputacao.meta ?? 0) ? 'positive' : 'negative'}
             icon={Star}
             loading={loading}
           />
-          
+
+          {/* EBITDA */}
           <ModernStat
-            label="EBITDA 2025"
-            value={
-              <AnimatedCounter
-                to={indicadoresAnuais?.ebitda.valor || 0}
-                prefix="R$ "
-                duration={2}
-              />
-            }
-            change="Em desenvolvimento"
-            changeType="neutral"
-            icon={Target}
+            label="EBITDA"
+            value={`R$ ${((indicadoresAnuais?.ebitda.valor ?? 0) / 1000000).toFixed(1)}M`}
+            change={`Meta: R$ ${((indicadoresAnuais?.ebitda.meta ?? 0) / 1000000).toFixed(1)}M`}
+            changeType={(indicadoresAnuais?.ebitda.valor ?? 0) >= (indicadoresAnuais?.ebitda.meta ?? 0) ? 'positive' : 'negative'}
+            icon={TrendingUp}
             loading={loading}
           />
-        </ModernGrid>
+        </div>
 
         {/* Barras de progresso */}
         <div className="mt-6 space-y-4">
@@ -459,51 +440,37 @@ export default function VisaoGeralModernPage() {
           </div>
         }
       >
-        <ModernGrid cols={3}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* Clientes Ativos */}
           <ModernStat
             label="Clientes Ativos"
-            value={
-              <AnimatedCounter
-                to={indicadoresTrimestrais?.clientesAtivos.valor || 0}
-                duration={1.5}
-              />
-            }
-            change={`Meta: ${indicadoresTrimestrais?.clientesAtivos.meta || 0}`}
-            changeType="positive"
-            icon={Activity}
+            value={(indicadoresTrimestrais?.clientesAtivos.valor ?? 0).toString()}
+            change={`${(((indicadoresTrimestrais?.clientesAtivos.valor ?? 0) / (indicadoresTrimestrais?.clientesAtivos.meta ?? 1)) * 100).toFixed(1)}% da meta`}
+            changeType={(indicadoresTrimestrais?.clientesAtivos.valor ?? 0) >= (indicadoresTrimestrais?.clientesAtivos.meta ?? 0) ? 'positive' : 'negative'}
+            icon={Users}
             loading={loading}
           />
-          
+
+          {/* Retenção */}
           <ModernStat
-            label="Retenção"
-            value={
-              <AnimatedCounter
-                to={(indicadoresTrimestrais?.retencao.valor || 0) * 10}
-                duration={1.5}
-                suffix="%"
-              />
-            }
-            change={`Meta: ${indicadoresTrimestrais?.retencao.meta || 0}%`}
-            changeType="positive"
-            icon={Award}
+            label="Retenção (%)"
+            value={`${indicadoresTrimestrais?.retencao.valor ?? 0}%`}
+            change={`Meta: ${indicadoresTrimestrais?.retencao.meta ?? 0}%`}
+            changeType={(indicadoresTrimestrais?.retencao.valor ?? 0) >= (indicadoresTrimestrais?.retencao.meta ?? 0) ? 'positive' : 'negative'}
+            icon={Target}
             loading={loading}
           />
-          
+
+          {/* CMV Limpo */}
           <ModernStat
-            label="CMV Limpo"
-            value={
-              <AnimatedCounter
-                to={(indicadoresTrimestrais?.cmvLimpo.valor || 0) * 10}
-                duration={1.5}
-                suffix="%"
-              />
-            }
-            change={`Meta: ${indicadoresTrimestrais?.cmvLimpo.meta || 0}%`}
-            changeType="positive"
+            label="CMV Limpo (%)"
+            value={`${indicadoresTrimestrais?.cmvLimpo.valor ?? 0}%`}
+            change={`Meta: ${indicadoresTrimestrais?.cmvLimpo.meta ?? 0}%`}
+            changeType={(indicadoresTrimestrais?.cmvLimpo.valor ?? 0) <= (indicadoresTrimestrais?.cmvLimpo.meta ?? 0) ? 'positive' : 'negative'}
             icon={BarChart3}
             loading={loading}
           />
-        </ModernGrid>
+        </div>
       </ModernCard>
 
       {/* Ações Rápidas */}

@@ -91,7 +91,7 @@ export default function NotificationsPage() {
     if (autoRefresh) {
       interval = setInterval(() => {
         recarregar();
-      }, 30000); // Auto-refresh a cada 30 segundos
+      }, 180000); // ✅ Otimizado: Auto-refresh a cada 3 minutos
     }
     return () => {
       if (interval) clearInterval(interval);

@@ -1,83 +1,76 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiCall } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Calendar, 
-  Download, 
-  Filter, 
+  Edit, 
+  Save, 
+  X, 
   RefreshCcw, 
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Users,
+  TrendingUp, 
+  Users, 
   DollarSign,
   Clock,
+  ChefHat,
+  Wine,
   Target,
-  Activity,
-  ChevronLeft,
-  ChevronRight,
-  Edit,
-  Save,
-  X
+  AlertCircle,
+  CheckCircle,
+  Filter
 } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { apiCall } from '@/lib/api-client';
 
 interface PlanejamentoData {
   evento_id: number;
   data_evento: string;
   dia_semana: string;
   evento_nome: string;
-  bar_id: number;
-  bar_nome: string;
   dia: number;
   mes: number;
   ano: number;
   dia_formatado: string;
   data_curta: string;
+  
+  // Dados financeiros
   real_receita: number;
   m1_receita: number;
+  
+  // Dados de público
   clientes_plan: number;
   clientes_real: number;
-  res_total: number;
-  res_presente: number;
   lot_max: number;
+  
+  // Tickets
   te_plan: number;
   te_real: number;
   tb_plan: number;
   tb_real: number;
   t_medio: number;
+  
+  // Custos
   c_art: number;
   c_prod: number;
   percent_art_fat: number;
+  
+  // Percentuais
   percent_b: number;
   percent_d: number;
   percent_c: number;
+  
+  // Tempos e performance
   t_coz: number;
   t_bar: number;
   fat_19h: number;
-  pagamentos_liquido: number;
-  total_vendas: number;
-  vendas_bebida: number;
-  vendas_drink: number;
-  vendas_comida: number;
-  percentual_atingimento_receita: number;
-  percentual_atingimento_clientes: number;
-  performance_geral: number;
   
-  // Campos de orçamentação
-  c_artistico_plan?: number;
-  c_artistico_real?: number;
-  
-  // Flags para coloração verde/vermelho
+  // Flags de performance
   real_vs_m1_green: boolean;
   ci_real_vs_plan_green: boolean;
   te_real_vs_plan_green: boolean;
@@ -89,101 +82,157 @@ interface PlanejamentoData {
   fat_19h_green: boolean;
 }
 
+interface EventoEdicao {
+  id: number;
+  nome: string;
+  m1_r: number;
+  cl_plan: number;
+  te_plan: number;
+  tb_plan: number;
+  c_artistico_plan: number;
+  observacoes: string;
+}
+
 export default function PlanejamentoComercialPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Pega mes/ano da URL ou do sistema
-  const now = new Date();
-  const mesUrl = Number(searchParams.get('mes'));
-  const anoUrl = Number(searchParams.get('ano'));
-  const mesInicial = mesUrl && mesUrl >= 1 && mesUrl <= 12 ? mesUrl - 1 : now.getMonth();
-  const anoInicial = anoUrl || now.getFullYear();
-
+  const { user } = useAuth();
+  
+  // Estados principais
   const [dados, setDados] = useState<PlanejamentoData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mesAtual, setMesAtual] = useState(new Date(anoInicial, mesInicial));
-  const [totalEventos, setTotalEventos] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
-  // Estados do Modal de Edição
+  // Estados de filtros
+  const [mesAtual, setMesAtual] = useState(new Date());
+  const [filtroMes, setFiltroMes] = useState(new Date().getMonth() + 1);
+  const [filtroAno, setFiltroAno] = useState(new Date().getFullYear());
+  
+  // Estados do modal
   const [modalOpen, setModalOpen] = useState(false);
   const [eventoSelecionado, setEventoSelecionado] = useState<PlanejamentoData | null>(null);
-  const [editData, setEditData] = useState<any>({});
+  const [eventoEdicao, setEventoEdicao] = useState<EventoEdicao | null>(null);
   const [salvando, setSalvando] = useState(false);
 
-  const mesesNomes = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
-
   // Buscar dados da API
-  const buscarDados = useCallback(async () => {
+  const buscarDados = async (mes?: number, ano?: number) => {
     try {
       setLoading(true);
-      const mes = mesAtual.getMonth() + 1;
-      const ano = mesAtual.getFullYear();
+      setError(null);
       
-      // Buscar dados do usuário do localStorage
-      const userData = localStorage.getItem('sgb_user');
-      if (!userData) {
-        setError('Usuário não autenticado');
-        return;
-      }
-
-      const user = JSON.parse(userData);
+      const mesParam = mes || filtroMes;
+      const anoParam = ano || filtroAno;
       
-      const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mes}&ano=${ano}`, {
+      console.log(`🔍 Buscando dados para ${mesParam}/${anoParam}`);
+      
+      const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mesParam}&ano=${anoParam}`, {
         headers: {
           'x-user-data': encodeURIComponent(JSON.stringify(user))
         }
       });
+      
+      console.log('📊 Nova estrutura - Dados recebidos:', {
+        total: data.data?.length || 0,
+        estrutura: data.meta?.estrutura,
+        eventos_recalculados: data.meta?.eventos_recalculados,
+        dados_reais_disponiveis: data.meta?.dados_reais_disponiveis
+      });
 
-      if (data.data) {
-        console.log('📊 Dados recebidos na página:', data.data);
-        console.log('📊 Quantidade de registros:', data.data.length);
-        console.log('📊 Primeiro registro (dia):', data.data[0]?.dia);
-        console.log('📊 Todos os dias:', data.data.map(item => item.dia));
-        
-        // Debug limpo
-        console.log('✅ Dados carregados com sucesso!');
-        
+      if (data.success && data.data) {
         setDados(data.data);
-        setTotalEventos(data.data.length || 0);
-        setError(null);
+        console.log(`✅ ${data.data.length} eventos carregados para ${mesParam}/${anoParam}`);
+        
+        // Mostrar informações sobre dados reais disponíveis
+        if (data.meta?.dados_reais_disponiveis) {
+          console.log('📅 Períodos com dados reais:', data.meta.dados_reais_disponiveis);
+        }
       } else {
-        console.log('❌ Erro ou dados vazios:', data);
-        setError(data.error || 'Erro ao carregar dados');
+        setError('Erro ao carregar dados');
       }
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      setError('Erro ao conectar com o servidor');
+    } catch (err) {
+      console.error('❌ Erro ao buscar dados:', err);
+      setError('Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
-  }, [mesAtual]);
-
-  // Atualiza a URL ao mudar de mês
-  useEffect(() => {
-    const mes = mesAtual.getMonth() + 1;
-    const ano = mesAtual.getFullYear();
-    router.replace(`/estrategico/planejamento-comercial?mes=${mes}&ano=${ano}`);
-  }, [mesAtual, router]);
-
-  useEffect(() => {
-    buscarDados();
-  }, [buscarDados]);
-
-  const navegarMes = (direcao: 'anterior' | 'proximo') => {
-    const novoMes = new Date(mesAtual);
-    if (direcao === 'anterior') {
-      novoMes.setMonth(novoMes.getMonth() - 1);
-    } else {
-      novoMes.setMonth(novoMes.getMonth() + 1);
-    }
-    setMesAtual(novoMes);
   };
 
+  // Carregar dados iniciais
+  useEffect(() => {
+    if (user) {
+      buscarDados();
+    }
+  }, [user, filtroMes, filtroAno]);
+
+  // Alterar mês/ano
+  const alterarPeriodo = (novoMes: number, novoAno: number) => {
+    setFiltroMes(novoMes);
+    setFiltroAno(novoAno);
+    setMesAtual(new Date(novoAno, novoMes - 1, 1));
+  };
+
+  // Abrir modal de edição
+  const abrirModal = (evento: PlanejamentoData) => {
+    setEventoSelecionado(evento);
+    setEventoEdicao({
+      id: evento.evento_id,
+      nome: evento.evento_nome,
+      m1_r: evento.m1_receita,
+      cl_plan: evento.clientes_plan,
+      te_plan: evento.te_plan,
+      tb_plan: evento.tb_plan,
+      c_artistico_plan: evento.c_art || 0,
+      observacoes: ''
+    });
+    setModalOpen(true);
+  };
+
+  // Fechar modal
+  const fecharModal = () => {
+    setModalOpen(false);
+    setEventoSelecionado(null);
+    setEventoEdicao(null);
+  };
+
+  // Salvar edição
+  const salvarEdicao = async () => {
+    if (!eventoEdicao) return;
+
+    try {
+      setSalvando(true);
+      
+      const response = await apiCall(`/api/eventos/${eventoEdicao.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        },
+        body: JSON.stringify({
+          nome: eventoEdicao.nome,
+          m1_r: eventoEdicao.m1_r,
+          cl_plan: eventoEdicao.cl_plan,
+          te_plan: eventoEdicao.te_plan,
+          tb_plan: eventoEdicao.tb_plan,
+          c_artistico_plan: eventoEdicao.c_artistico_plan,
+          observacoes: eventoEdicao.observacoes
+        })
+      });
+
+      if (response.success) {
+        console.log('✅ Evento atualizado com sucesso');
+        fecharModal();
+        // Recarregar dados
+        await buscarDados();
+      } else {
+        throw new Error(response.error || 'Erro ao salvar');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao salvar:', err);
+      alert('Erro ao salvar alterações');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  // Formatação de valores
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -191,708 +240,433 @@ export default function PlanejamentoComercialPage() {
     }).format(valor);
   };
 
-  const formatarNumero = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR').format(valor);
+  const formatarPercentual = (valor: number) => {
+    return `${valor.toFixed(1)}%`;
   };
 
-  // Função para aplicar cor verde/vermelho baseado na condição (com suporte a daltonismo)
-  const getColorClass = (isGreen: boolean): string => {
-    if (isGreen) {
-      return 'text-green-600 dark:text-green-400 border-l-4 border-green-500 pl-1 bg-green-50 dark:bg-green-900/20';
-    } else {
-      return 'text-red-600 dark:text-red-400 border-l-4 border-red-500 pl-1 bg-red-50 dark:bg-red-900/20';
-    }
-  };
-
-  // Função para obter ícone baseado na performance (acessibilidade para daltonismo)
-  const getPerformanceIcon = (isGreen: boolean): string => {
-    return isGreen ? '✅' : '❌';
-  };
-
-  // Funções do Modal de Edição
-  const abrirModal = (evento: PlanejamentoData) => {
-    setEventoSelecionado(evento);
-    setEditData({
-      nome_evento: evento.evento_nome || '',
-      m1_receita: evento.m1_receita || 0,
-      real_receita: evento.real_receita || 0,
-      clientes_plan: evento.clientes_plan || 0,
-      te_plan: evento.te_plan || 0,
-      tb_plan: evento.tb_plan || 0,
-      c_artistico_plan: evento.c_artistico_plan || 0,
-      observacoes: ''
-    });
-    setModalOpen(true);
-  };
-
-  const fecharModal = () => {
-    setModalOpen(false);
-    setEventoSelecionado(null);
-    setEditData({});
-  };
-
-  const salvarEdicao = async () => {
-    if (!eventoSelecionado) return;
-    setSalvando(true);
-    try {
-      const resp = await apiCall(
-        `/api/eventos/${eventoSelecionado.evento_id}`,
-        {
-          method: 'PUT',
-          body: JSON.stringify({
-            nome: editData.nome_evento,
-            m1_r: Number(editData.m1_receita),
-            cl_plan: Number(editData.clientes_plan),
-            te_plan: Number(editData.te_plan),
-            tb_plan: Number(editData.tb_plan),
-            c_artistico_plan: Number(editData.c_artistico_plan),
-            observacoes: editData.observacoes
-          })
-        }
-      );
-      if (resp.ok) { buscarDados(); setModalOpen(false); }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSalvando(false);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setEditData((prev: any) => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-      <RefreshCcw className="h-6 w-6 animate-spin text-blue-600" />
-      <span className="ml-2 text-gray-700 dark:text-gray-300">Carregando...</span>
-    </div>
+  // Componente de Badge de Status
+  const StatusBadge = ({ isGreen, value, suffix = '' }: { isGreen: boolean; value: number | string; suffix?: string }) => (
+    <Badge variant={isGreen ? "default" : "destructive"} className="text-xs">
+      {isGreen ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertCircle className="h-3 w-3 mr-1" />}
+      {value}{suffix}
+    </Badge>
   );
+
+  // Meses para o seletor
+  const meses = [
+    { value: 1, label: 'Janeiro' },
+    { value: 2, label: 'Fevereiro' },
+    { value: 3, label: 'Março' },
+    { value: 4, label: 'Abril' },
+    { value: 5, label: 'Maio' },
+    { value: 6, label: 'Junho' },
+    { value: 7, label: 'Julho' },
+    { value: 8, label: 'Agosto' },
+    { value: 9, label: 'Setembro' },
+    { value: 10, label: 'Outubro' },
+    { value: 11, label: 'Novembro' },
+    { value: 12, label: 'Dezembro' }
+  ];
+
+  // Anos disponíveis
+  const anos = [2024, 2025, 2026];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCcw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600 dark:text-gray-400">Carregando planejamento comercial...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Card className="card-dark p-6 max-w-md">
+          <div className="text-center">
+            <AlertCircle className="h-8 w-8 mx-auto mb-4 text-red-600" />
+            <h3 className="card-title-dark mb-2">Erro ao carregar dados</h3>
+            <p className="card-description-dark mb-4">{error}</p>
+            <Button onClick={() => buscarDados()} className="btn-primary-dark">
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Tentar novamente
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row bg-gray-50 dark:bg-gray-900 ">
-      {/* Layout Lateral */}
-      <aside className={`flex flex-col w-80 bg-gray-50 dark:bg-gray-900 p-4 ${modalOpen ? 'hidden' : 'block'}`}>
-        <div className="space-y-6 w-full">
-          {/* Navegação de Mês */}
-          <div>
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => navegarMes('anterior')}
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0 rounded-l-full"
-                aria-label="Mês anterior"
-              >
-                <ChevronLeft className="h-4 w-4 dark:text-white" />
-              </Button>
-              
-              <div className="flex-1 px-3 py-1.5 bg-blue-600 rounded-[4px] text-center text-sm font-bold text-white">
-                {mesesNomes[mesAtual.getMonth()]} {mesAtual.getFullYear()}
-              </div>
-              
-              <Button
-                onClick={() => navegarMes('proximo')}
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0 rounded-r-full"
-                aria-label="Próximo mês"
-              >
-                <ChevronRight className="h-4 w-4 dark:text-white" />
-              </Button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header com filtros */}
+        <div className="card-dark p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="card-title-dark mb-2 flex items-center gap-3">
+                <TrendingUp className="h-7 w-7 text-blue-600" />
+                Planejamento Comercial
+              </h1>
+              <p className="card-description-dark">
+                Gestão completa de metas e resultados dos eventos
+              </p>
             </div>
-          </div>
-
-          {/* Analytics Totais */}
-          <div>
-            <label className="text-xs font-medium dark:text-gray-300 text-gray-800 mb-1 block ">
-              Analytics do Mês
-            </label>
-            <div className="space-y-1 overflow-hidden">
-              {/* Total M1 vs Real */}
-              <div className="dark:bg-gray-800 bg-gray-50 rounded-t-[6px] p-2 border dark:border-gray-700 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs dark:text-gray-400 text-gray-700">Total M1 vs Real</span>
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                      const performance = totalM1 > 0 ? (totalReal / totalM1) * 100 : 0;
-                      
-                      if (performance >= 100) {
-                        return <span className="text-green-400">🚀</span>;
-                      } else if (performance >= 80) {
-                        return <span className="text-yellow-400">⚡</span>;
-                      } else {
-                        return <span className="text-red-400">⬇️</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-blue-400">Planejado:</span>
-                    <span className="font-medium dark:text-white text-black">
-                      R$ {dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-green-400">Realizado:</span>
-                    <span className="font-bold dark:text-white text-black">
-                      R$ {dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs pt-1 border-t border-gray-700">
-                    <span className="dark:text-gray-400 text-gray-700">Resultado:</span>
-                    <span className={`font-bold ${(() => {
-                      const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                      const resultado = totalReal - totalM1;
-                      return resultado >= 0 ? 'text-green-400' : 'text-red-400';
-                    })()}`}>
-                      {(() => {
-                        const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                        const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                        const resultado = totalReal - totalM1;
-                        return resultado >= 0 ? `+R$ ${resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : `R$ ${resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-                      })()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="dark:text-gray-400 text-gray-700">Performance:</span>
-                    <span className={`font-bold ${(() => {
-                      const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                      const perf = totalM1 > 0 ? ((totalReal - totalM1) / totalM1) * 100 : 0;
-                      return perf >= 0 ? 'text-green-400' : 'text-red-400';
-                    })()}`}>
-                      {(() => {
-                        const totalM1 = dados.reduce((sum, item) => sum + (Number(item.m1_receita) || 0), 0);
-                        const totalReal = dados.reduce((sum, item) => sum + (Number(item.real_receita) || 0), 0);
-                        const perf = totalM1 > 0 ? ((totalReal - totalM1) / totalM1) * 100 : 0;
-                        return perf >= 0 ? `+${perf.toFixed(1)}%` : `${perf.toFixed(1)}%`;
-                      })()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Clientes Plan vs Real */}
-              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs dark:text-gray-400 text-gray-700">Clientes Plan vs Real</span>
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const totalPlan = dados.reduce((sum, item) => sum + (Number(item.clientes_plan) || 0), 0);
-                      const totalReal = dados.reduce((sum, item) => sum + (Number(item.clientes_real) || 0), 0);
-                      const performance = totalPlan > 0 ? (totalReal / totalPlan) * 100 : 0;
-                      
-                      if (performance >= 100) {
-                        return <span className="text-green-400">🚀</span>;
-                      } else if (performance >= 80) {
-                        return <span className="text-yellow-400">⚡</span>;
-                      } else {
-                        return <span className="text-red-400">⬇️</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-blue-400">Planejado:</span>
-                    <span className="font-medium dark:text-white text-black">
-                      {dados.reduce((sum, item) => sum + (Number(item.clientes_plan) || 0), 0).toLocaleString('pt-BR')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-green-400">Realizado:</span>
-                    <span className="font-bold dark:text-white text-black">
-                      {dados.reduce((sum, item) => sum + (Number(item.clientes_real) || 0), 0).toLocaleString('pt-BR')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Ticket Médio */}
-              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs dark:text-gray-400 text-gray-700">Ticket Médio</span>
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const mediaTicket = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_medio) || 0), 0) / dados.filter(item => Number(item.t_medio) > 0).length : 0;
-                      const meta = 93.00;
-                      
-                      if (mediaTicket >= meta) {
-                        return <span className="text-green-400">🚀</span>;
-                      } else {
-                        return <span className="text-red-400">⬇️</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-blue-400">Planejado:</span>
-                    <span className="font-medium dark:text-white text-black">R$ 93,00</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-green-400">Realizado:</span>
-                    <span className="font-bold dark:text-white text-black">
-                      R$ {(() => {
-                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_medio) || 0), 0) / dados.filter(item => Number(item.t_medio) > 0).length : 0;
-                        return media.toFixed(2);
-                      })()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tempo Médio de Bar */}
-              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs dark:text-gray-400 text-gray-700">Tempo Médio de Bar</span>
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const mediaBar = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_bar) || 0), 0) / dados.filter(item => Number(item.t_bar) > 0).length : 0;
-                      
-                      if (mediaBar <= 4) {
-                        return <span className="text-green-400">🚀</span>;
-                      } else {
-                        return <span className="text-red-400">⬇️</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-blue-400">Planejado:</span>
-                    <span className="font-medium dark:text-white text-black">≤ 4min</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-green-400">Realizado:</span>
-                    <span className="font-bold dark:text-white text-black">
-                      {(() => {
-                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_bar) || 0), 0) / dados.filter(item => Number(item.t_bar) > 0).length : 0;
-                        return media.toFixed(1);
-                      })()}min
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tempo Médio de Cozinha */}
-              <div className="dark:bg-gray-800 bg-gray-50 p-2 border dark:border-gray-700 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs dark:text-gray-400 text-gray-700">Tempo Médio de Cozinha</span>
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const mediaCoz = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_coz) || 0), 0) / dados.filter(item => Number(item.t_coz) > 0).length : 0;
-                      
-                      if (mediaCoz <= 12) {
-                        return <span className="text-green-400">🚀</span>;
-                      } else {
-                        return <span className="text-red-400">⬇️</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-blue-400">Planejado:</span>
-                    <span className="font-medium dark:text-white text-black">≤ 12min</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-green-400">Realizado:</span>
-                    <span className="font-bold dark:text-white text-black">
-                      {(() => {
-                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.t_coz) || 0), 0) / dados.filter(item => Number(item.t_coz) > 0).length : 0;
-                        return media.toFixed(1);
-                      })()}min
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* % Artístico sobre Faturamento */}
-              <div className="dark:bg-gray-800 bg-gray-50 p-2 border rounded-b-[6px] dark:border-gray-700 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs dark:text-gray-400 text-gray-700">% Art. sobre Fat.</span>
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const mediaPercent = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.percent_art_fat) || 0), 0) / dados.filter(item => Number(item.percent_art_fat) > 0).length : 0;
-                      const meta = 15;
-                      
-                      if (mediaPercent <= meta) {
-                        return <span className="text-green-400">🚀</span>;
-                      } else {
-                        return <span className="text-red-400">⬇️</span>;
-                      }
-                    })()}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-blue-400">Meta:</span>
-                    <span className="font-medium dark:text-white text-black">≤ 15%</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-green-400">Realizado:</span>
-                    <span className="font-bold dark:text-white text-black">
-                      {(() => {
-                        const media = dados.length > 0 ? dados.reduce((sum, item) => sum + (Number(item.percent_art_fat) || 0), 0) / dados.filter(item => Number(item.percent_art_fat) > 0).length : 0;
-                        return media.toFixed(1);
-                      })()}%
-                    </span>
-                  </div>
-                </div>
-              </div>
+            
+            {/* Filtros de período */}
+            <div className="flex items-center gap-3">
+              <Filter className="h-5 w-5 text-gray-500" />
+              <Select value={filtroMes.toString()} onValueChange={(value) => alterarPeriodo(parseInt(value), filtroAno)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {meses.map((mes) => (
+                    <SelectItem key={mes.value} value={mes.value.toString()}>
+                      {mes.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={filtroAno.toString()} onValueChange={(value) => alterarPeriodo(filtroMes, parseInt(value))}>
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {anos.map((ano) => (
+                    <SelectItem key={ano} value={ano.toString()}>
+                      {ano}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                onClick={() => buscarDados()} 
+                variant="outline" 
+                size="sm"
+                className="btn-outline-dark"
+              >
+                <RefreshCcw className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Header - só no mobile */}
-        <div className="lg:hidden bg-gray-900 p-3 border-b border-gray-700">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => navegarMes('anterior')}
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0 bg-gray-800 border-gray-600 text-white"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm font-bold text-white">
-                  {mesesNomes[mesAtual.getMonth()]} {mesAtual.getFullYear()}
-                </span>
-              <Button
-                onClick={() => navegarMes('proximo')}
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0 bg-gray-800 border-gray-600 text-white"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+        {/* Tabela de eventos */}
+        {dados.length === 0 ? (
+          <Card className="card-dark p-8">
+            <div className="text-center">
+              <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="card-title-dark mb-2">Nenhum evento encontrado</h3>
+              <p className="card-description-dark">
+                Não há eventos cadastrados para {meses.find(m => m.value === filtroMes)?.label} de {filtroAno}
+              </p>
             </div>
-            <Button onClick={buscarDados} variant="outline" size="sm" className="h-8 px-3 bg-gray-800 border-gray-600 text-white" aria-label="Atualizar dados">
-              <RefreshCcw className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      </aside>
+          </Card>
+        ) : (
+          <Card className="card-dark">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle className="card-title-dark">
+                {meses.find(m => m.value === filtroMes)?.label} {filtroAno} - {dados.length} eventos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Data/Evento
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Receita
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Público
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Tickets
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Performance
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Ações
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {dados.map((evento) => (
+                      <tr key={evento.evento_id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td className="px-4 py-4">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {evento.dia_formatado}/{filtroMes} - {evento.dia_semana}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {evento.evento_nome}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="space-y-1">
+                            <StatusBadge 
+                              isGreen={evento.real_vs_m1_green} 
+                              value={formatarMoeda(evento.real_receita)} 
+                            />
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              Meta: {formatarMoeda(evento.m1_receita)}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="space-y-1">
+                            <StatusBadge 
+                              isGreen={evento.ci_real_vs_plan_green} 
+                              value={evento.clientes_real} 
+                            />
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              Plan: {evento.clientes_plan} | Max: {evento.lot_max}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="space-y-1">
+                            <div className="flex gap-2">
+                              <StatusBadge 
+                                isGreen={evento.te_real_vs_plan_green} 
+                                value={formatarMoeda(evento.te_real)} 
+                              />
+                              <StatusBadge 
+                                isGreen={evento.tb_real_vs_plan_green} 
+                                value={formatarMoeda(evento.tb_real)} 
+                              />
+                            </div>
+                            <StatusBadge 
+                              isGreen={evento.t_medio_green} 
+                              value={formatarMoeda(evento.t_medio)} 
+                            />
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="space-y-1">
+                            {evento.percent_b > 0 && (
+                              <div className="text-xs">
+                                B: {formatarPercentual(evento.percent_b)} | 
+                                D: {formatarPercentual(evento.percent_d)} | 
+                                C: {formatarPercentual(evento.percent_c)}
+                              </div>
+                            )}
+                            {evento.c_art > 0 && (
+                              <StatusBadge 
+                                isGreen={evento.percent_art_fat_green} 
+                                value={formatarPercentual(evento.percent_art_fat)} 
+                                suffix=" Art/Fat"
+                              />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          <Button
+                            onClick={() => abrirModal(evento)}
+                            size="sm"
+                            variant="outline"
+                            className="btn-outline-dark"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Área Principal da Tabela */}
-      <div className={`flex-1 overflow-x-visible overflow-y-auto hide-scrollbar ${modalOpen ? 'hidden' : ''}`}>
-        <table className="min-w-[1200px] max-h-[900px] w-full table-auto border-collapse border-spacing-0 whitespace-nowrap text-xs dark:bg-transparent ">
-          <thead className="bg-transparent dark:text-white border-b border-gray-200 dark:border-gray-700">
-            <tr>
-              <th className="sticky left-0 bg-transparent px-2 py-1 w-16 text-center font-medium">Data</th>
-              <th className="sticky left-0 bg-transparent px-2 py-1 w-16 text-center font-medium">Dia</th>
-              {/* Faturamento */}
-              <th className="px-1 py-1 w-20">Real</th>
-              <th className="px-1 py-1 w-20">M1</th>
-              {/* Clientes */}
-              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Cl.Plan</th>
-              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Cl.Real</th>
-              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Res.Tot</th>
-              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Res.P</th>
-              <th className="hidden sm:table-cell px-2 py-1 w-16 ">Lot.Max</th>
-              {/* Tickets */}
-              <th className="hidden md:table-cell px-2 py-1 w-16">TE.Plan</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">TE.Real</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">TB.Plan</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">TB.Real</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">T.Medio</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">C.Art</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">C.Prod</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">%Art.Fat</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">%B</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">%D</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">%C</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">T.Coz</th>
-              <th className="hidden md:table-cell px-2 py-1 w-16">T.Bar</th>
+        {/* Modal de edição */}
+        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+          <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-xl shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 text-white border border-gray-700 backdrop-blur-sm">
+            <DialogHeader className="bg-gradient-to-r from-blue-700 to-purple-600 p-6 text-white shadow-lg">
+              <DialogTitle className="flex items-center gap-3 text-2xl font-bold">
+                <Edit className="h-7 w-7 text-blue-200" />
+                Editar Planejamento - {eventoSelecionado?.dia_formatado}/{filtroMes}/{filtroAno}
+              </DialogTitle>
+              <p className="text-blue-100 text-sm mt-1">Ajuste os dados de planejamento e orçamentação para este evento.</p>
+            </DialogHeader>
+            
+            {eventoEdicao && eventoSelecionado && (
+              <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                {/* Seção de Planejamento */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-blue-300 flex items-center gap-2">
+                      <Target className="h-5 w-5" />
+                      Dados de Planejamento
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Nome do Evento</label>
+                        <Input
+                          value={eventoEdicao.nome}
+                          onChange={(e) => setEventoEdicao({...eventoEdicao, nome: e.target.value})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Meta Receita (M1)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicao.m1_r}
+                          onChange={(e) => setEventoEdicao({...eventoEdicao, m1_r: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Clientes Planejados</label>
+                        <Input
+                          type="number"
+                          value={eventoEdicao.cl_plan}
+                          onChange={(e) => setEventoEdicao({...eventoEdicao, cl_plan: parseInt(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Entrada Plan.</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicao.te_plan}
+                          onChange={(e) => setEventoEdicao({...eventoEdicao, te_plan: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Bar Plan.</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicao.tb_plan}
+                          onChange={(e) => setEventoEdicao({...eventoEdicao, tb_plan: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Custo Artístico Plan.</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicao.c_artistico_plan}
+                          onChange={(e) => setEventoEdicao({...eventoEdicao, c_artistico_plan: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            </tr>
-          </thead>
+                {/* Seção de Observações */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-green-300 flex items-center gap-2">
+                      <Edit className="h-5 w-5" />
+                      Observações
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      value={eventoEdicao.observacoes}
+                      onChange={(e) => setEventoEdicao({...eventoEdicao, observacoes: e.target.value})}
+                      placeholder="Observações sobre o evento, ajustes, particularidades..."
+                      className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 min-h-[100px]"
+                    />
+                  </CardContent>
+                </Card>
 
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {dados.map((item, index) => {
-              return (
-              <tr 
-                key={index}
-                onClick={() => abrirModal(item)}
-                className={`cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800`}
+                {/* Seção de Dados Atuais (Read-only) */}
+                <Card className="bg-gray-800/30 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-yellow-300 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Dados Atuais do Sistema
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">Receita Real</div>
+                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.real_receita)}</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">Clientes Real</div>
+                        <div className="text-white font-semibold">{eventoSelecionado.clientes_real}</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">TE Real</div>
+                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.te_real)}</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">TB Real</div>
+                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.tb_real)}</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">T. Médio</div>
+                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.t_medio)}</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">% Bebidas</div>
+                        <div className="text-white font-semibold">{formatarPercentual(eventoSelecionado.percent_b)}</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">% Drinks</div>
+                        <div className="text-white font-semibold">{formatarPercentual(eventoSelecionado.percent_d)}</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <div className="text-gray-400">% Comidas</div>
+                        <div className="text-white font-semibold">{formatarPercentual(eventoSelecionado.percent_c)}</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            
+            <DialogFooter className="bg-gray-900/50 p-4 border-t border-gray-700 flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={fecharModal} 
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center gap-2"
               >
-                {/* Colunas fixas */}
-                <td className="sticky left-0 dark:bg-gray-800 px-2 py-1 text-center text-xs font-medium border-r border-gray-200 dark:border-gray-700 dark:text-white">
-                  {item.dia_semana}
-                </td>
-                <td className="sticky left-16 z-10 bg-gray-50 dark:bg-gray-800 px-1 py-1 text-xs text-center font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700">
-                  {item.dia_formatado}
-                </td>
-                {/* Faturamento */}
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.real_vs_m1_green)}`}>
-                  <div className="flex items-center justify-center gap-1">
-                    <span className="text-[10px]">{getPerformanceIcon(item.real_vs_m1_green)}</span>
-                    <span>{(item.real_receita !== null && item.real_receita !== undefined && Number(item.real_receita) !== 0) ? formatarMoeda(Number(item.real_receita)) : '-'}</span>
-                  </div>
-                </td>
-                <td className="px-1 py-2 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {(item.m1_receita && Number(item.m1_receita) > 0) ? formatarMoeda(Number(item.m1_receita)) : '-'}
-                </td>
-                {/* Clientes */}
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.clientes_plan || '-'}
-                </td>
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.ci_real_vs_plan_green)}`}>
-                  <div className="flex items-center justify-center gap-1">
-                    <span className="text-[10px]">{getPerformanceIcon(item.ci_real_vs_plan_green)}</span>
-                    <span>{(item.clientes_real !== null && item.clientes_real !== undefined) ? item.clientes_real : '-'}</span>
-                  </div>
-                </td>
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.res_total || '-'}
-                </td>
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.res_presente || '-'}
-                </td>
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.lot_max || '-'}
-                </td>
-                {/* Tickets */}
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.te_plan > 0 ? formatarMoeda(item.te_plan) : '-'}
-                </td>
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.te_real_vs_plan_green)}`}>
-                  {item.te_real > 0 ? formatarMoeda(item.te_real) : '-'}
-                </td>
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.tb_plan > 0 ? formatarMoeda(item.tb_plan) : '-'}
-                </td>
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.tb_real_vs_plan_green)}`}>
-                  {item.tb_real > 0 ? formatarMoeda(item.tb_real) : '-'}
-                </td>
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_medio_green)}`}>
-                  {item.t_medio > 0 ? formatarMoeda(item.t_medio) : '-'}
-                </td>
-                {/* Rentabilidade */}
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.c_art > 0 ? formatarMoeda(item.c_art) : '-'}
-                </td>
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {item.c_prod > 0 ? formatarMoeda(item.c_prod) : '-'}
-                </td>
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${
-                  item.percent_art_fat > 0 
-                    ? (item.percent_art_fat < 15 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')
-                    : 'text-gray-900 dark:text-white'
-                }`}>
-                  {item.percent_art_fat > 0 ? `${item.percent_art_fat.toFixed(1)}%` : '-'}
-                </td>
-                
-                {/* Cesta */}
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {(item.percent_b !== null && item.percent_b !== undefined && Number(item.percent_b) !== 0) ? `${Number(item.percent_b).toFixed(1)}%` : '-'}
-                </td>
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {(item.percent_d !== null && item.percent_d !== undefined && Number(item.percent_d) !== 0) ? `${Number(item.percent_d).toFixed(1)}%` : '-'}
-                </td>
-                <td className="px-1 py-1 text-xs text-center text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700">
-                  {(item.percent_c !== null && item.percent_c !== undefined && Number(item.percent_c) !== 0) ? `${Number(item.percent_c).toFixed(1)}%` : '-'}
-                </td>
-                
-                {/* Tempo */}
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_coz_green)}`}>
-                  {item.t_coz > 0 ? item.t_coz.toFixed(1) : '-'}
-                </td>
-                <td className={`px-1 py-1 text-xs text-center border-r border-gray-200 dark:border-gray-700 ${getColorClass(item.t_bar_green)}`}>
-                  {item.t_bar > 0 ? item.t_bar.toFixed(1) : '-'}
-                </td>
-                
-
-              </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                <X className="h-4 w-4" /> Cancelar
+              </Button>
+              <Button 
+                onClick={salvarEdicao} 
+                disabled={salvando} 
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2"
+              >
+                {salvando ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 animate-spin" /> Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" /> Salvar Alterações
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-      
-      {/* Modal de Edição do Evento */}
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-      <DialogContent className="max-w-2xl modal-dark">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <Edit className="h-5 w-5" />
-              Editar Evento - {eventoSelecionado?.dia_formatado}/{mesAtual.getMonth() + 1}/{mesAtual.getFullYear()}
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome_evento" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Nome do Evento
-                </Label>
-                <Input
-                  id="nome_evento"
-                  value={editData.nome_evento || ''}
-                  onChange={(e) => handleInputChange('nome_evento', e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  placeholder="Nome do evento"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="m1_receita" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Meta M1 (R$)
-                </Label>
-                <Input
-                  id="m1_receita"
-                  type="number"
-                  value={editData.m1_receita || ''}
-                  onChange={(e) => handleInputChange('m1_receita', e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  placeholder="0.00"
-                  step="0.01"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="clientes_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Clientes Planejados
-                </Label>
-                <Input
-                  id="clientes_plan"
-                  type="number"
-                  value={editData.clientes_plan || ''}
-                  onChange={(e) => handleInputChange('clientes_plan', e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  placeholder="0"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="te_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  TE Plan (R$)
-                </Label>
-                <Input
-                  id="te_plan"
-                  type="number"
-                  value={editData.te_plan || ''}
-                  onChange={(e) => handleInputChange('te_plan', e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  placeholder="0.00"
-                  step="0.01"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="tb_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  TB Plan (R$)
-                </Label>
-                <Input
-                  id="tb_plan"
-                  type="number"
-                  value={editData.tb_plan || ''}
-                  onChange={(e) => handleInputChange('tb_plan', e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  placeholder="0.00"
-                  step="0.01"
-                />
-              </div>
-            </div>
-
-            {/* Novos campos de orçamentação */}
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="c_artistico_plan" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  C.Artístico Plan (R$)
-                </Label>
-                <Input
-                  id="c_artistico_plan"
-                  type="number"
-                  value={editData.c_artistico_plan || ''}
-                  onChange={(e) => handleInputChange('c_artistico_plan', e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  placeholder="0.00"
-                  step="0.01"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="observacoes" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Observações
-              </Label>
-              <Textarea
-                id="observacoes"
-                value={editData.observacoes || ''}
-                onChange={(e) => handleInputChange('observacoes', e.target.value)}
-                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white min-h-[100px]"
-                placeholder="Adicione observações sobre ajustes manuais, receitas por fora, etc..."
-              />
-            </div>
-
-            {/* Dados Atuais (Read-only) */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Dados Atuais do Sistema</h4>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div className="space-y-1">
-                  <span className="text-gray-500 dark:text-gray-400">Receita Real:</span>
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {formatarMoeda(eventoSelecionado?.real_receita || 0)}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-gray-500 dark:text-gray-400">Clientes Real:</span>
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {eventoSelecionado?.clientes_real || 0}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-gray-500 dark:text-gray-400">Ticket Médio:</span>
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {formatarMoeda(eventoSelecionado?.t_medio || 0)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={fecharModal}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button
-              onClick={salvarEdicao}
-              disabled={salvando}
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
-            >
-              {salvando ? (
-                <>
-                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar Alterações
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
-} 
+}

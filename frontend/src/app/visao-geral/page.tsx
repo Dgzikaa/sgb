@@ -1,9 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useRouter } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  TrendingUp, 
+  Target, 
+  ChevronUp, 
+  ChevronDown, 
+  ChevronLeft, 
+  ChevronRight,
+  RefreshCw
+} from 'lucide-react';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
 import { 
@@ -12,31 +25,11 @@ import {
   ModernGrid, 
   ModernStat 
 } from '@/components/layouts/ModernPageLayout';
-import { Button } from '@/components/ui/button';
 import { useZykorToast } from '@/components/ui/toast-modern';
 import { usePushNotifications } from '@/lib/push-notifications';
 import { useBackgroundSync } from '@/lib/background-sync';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { PageHeader } from '@/components/ui/page-header';
-import { useGlobalLoading } from '@/hooks/useGlobalLoading';
-import { useToast } from '@/components/ui/toast';
-import { 
-  TrendingUp, 
-  DollarSign, 
-  Target,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  Users,
-  Star,
-  Activity,
-  BarChart3,
-  Filter,
-  Settings,
-  Maximize2
-} from 'lucide-react';
+import { useBadgeAPI } from '@/lib/badge-api';
+import { AnimatedCounter, HoverMotion } from '@/components/ui/motion-wrapper';
 
 interface IndicadoresAnuais {
   faturamento: {
@@ -88,15 +81,17 @@ interface IndicadoresTrimestrais {
 
 export default function VisaoGeralPage() {
   const { setPageTitle } = usePageTitle();
-  const { selectedBar } = useBar();
   const router = useRouter();
+  const { selectedBar } = useBar();
+  const toast = useToast();
+  const pushNotifications = usePushNotifications();
+  const backgroundSync = useBackgroundSync();
+  const badgeAPI = useBadgeAPI();
 
   // Redirecionar para nova estrutura
   useEffect(() => {
     router.replace('/estrategico/visao-geral');
   }, [router]);
-  const { toast } = useToast();
-  const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
 
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
@@ -130,124 +125,71 @@ export default function VisaoGeralPage() {
     }
   };
 
-  const carregarIndicadores = async () => {
-    if (!selectedBar) return;
-
-    const hoje = new Date();
-    const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
-    const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}`;
-    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}`;
-
-    // Cache por sessão: evita recarregar tudo ao voltar para a página
-    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
-    const anualCacheKey = `vg:anual:${selectedBar.id}`;
-    const triCacheKey = `vg:tri:${selectedBar.id}:${trimestreAtual}:${mesAtual}`;
-
-    const readCache = (key: string) => {
-      try {
-        const raw = sessionStorage.getItem(key);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || !parsed.data || !parsed.ts) return null;
-        const isFresh = Date.now() - parsed.ts < CACHE_TTL_MS;
-        return isFresh ? parsed.data : null;
-      } catch {
-        return null;
-      }
-    };
-
-    const writeCache = (key: string, data: unknown) => {
-      try {
-        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-      } catch (error) {
-        console.warn('Erro ao salvar cache:', error);
-      }
-    };
-
-    const anualCached = readCache(anualCacheKey);
-    const triCached = readCache(triCacheKey);
-
-    const requestHeaders = {
-      'x-user-data': JSON.stringify({ bar_id: selectedBar.id, permissao: 'admin' })
-    } as Record<string, string>;
-
-    // Se há cache, mostra imediatamente e revalida em background
-    if (anualCached && triCached) {
-      setIndicadoresAnuais(anualCached.anual);
-      setIndicadoresTrimestrais(triCached.trimestral);
-
-      // Revalidação silenciosa (sem spinner)
-      try {
-        const [anualResponse, trimestralResponse] = await Promise.all([
-          fetch(anualUrl, { headers: requestHeaders }),
-          fetch(trimestralUrl, { headers: requestHeaders })
-        ]);
-        if (anualResponse.ok) {
-          const data = await anualResponse.json();
-          setIndicadoresAnuais(data.anual);
-          writeCache(anualCacheKey, data);
-        }
-        if (trimestralResponse.ok) {
-          const data = await trimestralResponse.json();
-          setIndicadoresTrimestrais(data.trimestral);
-          writeCache(triCacheKey, data);
-        }
-      } catch {
-        // ignora falhas silenciosamente
-      }
-      return;
-    }
-
-    // Sem cache: exibe spinner e busca
+  const carregarIndicadores = useCallback(async () => {
+    if (!selectedBar?.id) return;
+    
     setLoading(true);
-    showLoading('Carregando indicadores...');
+    
     try {
-      const [anualResponse, trimestralResponse] = await Promise.all([
-        fetch(anualUrl, { headers: requestHeaders }),
-        fetch(trimestralUrl, { headers: requestHeaders })
-      ]);
-
-      if (!anualResponse.ok || !trimestralResponse.ok) {
-        throw new Error('Erro ao buscar indicadores');
+      const response = await fetch(`/api/visao-geral/indicadores?barId=${selectedBar.id}&trimestre=${trimestreAtual}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      const anualData = await anualResponse.json();
-      const trimestralData = await trimestralResponse.json();
-
-      setIndicadoresAnuais(anualData.anual);
-      setIndicadoresTrimestrais(trimestralData.trimestral);
-      writeCache(anualCacheKey, anualData);
-      writeCache(triCacheKey, trimestralData);
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setIndicadoresAnuais(data.data.anual);
+        setIndicadoresTrimestrais(data.data.trimestral);
+      } else {
+        toast.toast({
+          title: 'Erro',
+          description: data.error || 'Erro ao carregar indicadores',
+          variant: 'destructive'
+        });
+      }
     } catch (error) {
       console.error('Erro ao carregar indicadores:', error);
-      toast({
+      toast.toast({
         title: 'Erro',
         description: 'Não foi possível carregar os indicadores',
         variant: 'destructive'
       });
     } finally {
       setLoading(false);
-      hideLoading();
     }
-  };
+  }, [selectedBar?.id, trimestreAtual, toast]);
 
   useEffect(() => {
     carregarIndicadores();
-  }, [selectedBar, trimestreAtual]);
+  }, [carregarIndicadores]);
 
 
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <GlobalLoadingComponent />
       <div className="container mx-auto px-4 py-4 space-y-4">
-        <PageHeader title="Visão Geral" description="Resumo executivo do bar" />
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Visão Geral</h1>
+            <p className="text-gray-600 dark:text-gray-400">Resumo executivo do bar</p>
+          </div>
+        </div>
 
         {/* Indicadores Anuais */}
         <div className="card-dark p-4">
           <div 
             className="flex items-center justify-between mb-4 cursor-pointer"
             onClick={() => setAnualExpanded(!anualExpanded)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setAnualExpanded(!anualExpanded);
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
@@ -339,6 +281,14 @@ export default function VisaoGeralPage() {
             <div 
               className="flex items-center gap-3 cursor-pointer flex-1"
               onClick={() => setTrimestralExpanded(!trimestralExpanded)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setTrimestralExpanded(!trimestralExpanded);
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
               <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
                 <Target className="w-5 h-5 text-white" />

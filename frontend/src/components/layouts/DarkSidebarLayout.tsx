@@ -178,7 +178,7 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
             <DarkHeader />
             <div className="flex flex-1 overflow-hidden">
               <ModernSidebar />
-              <main className="flex-1 transition-all duration-300 ease-in-out overflow-auto">
+              <main className="flex-1 transition-all duration-300 ease-in-out overflow-hidden">
                 <ErrorBoundary>
                   <GlobalPageWrapper>{children}</GlobalPageWrapper>
                 </ErrorBoundary>

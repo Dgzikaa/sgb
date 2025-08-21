@@ -17,55 +17,6 @@ export function useDragAndDropPersistence<T>(
   // Create storage key with version
   const storageKey = `dragdrop_${key}_v${version}`;
 
-
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    if (!enabled) {
-      setItems(defaultItems);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        const parsedItems = JSON.parse(stored);
-
-        // Validate that stored items have same structure
-        if (Array.isArray(parsedItems) && parsedItems.length > 0) {
-          // Merge with default items to handle new items or structure changes
-          const mergedItems = mergeWithDefaults(parsedItems, defaultItems);
-          setItems(mergedItems);
-        } else {
-          setItems(defaultItems);
-        }
-      } else {
-        setItems(defaultItems);
-      }
-    } catch (error) {
-      console.warn('Failed to load persisted drag & drop data:', error);
-      setItems(defaultItems);
-    }
-
-    setIsLoading(false);
-  }, [storageKey, enabled, defaultItems]);
-
-  // Debounced save to localStorage
-  useEffect(() => {
-    if (!enabled || isLoading) return;
-
-    const timeoutId = setTimeout(() => {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(items));
-      } catch (error) {
-        console.warn('Failed to persist drag & drop data:', error);
-      }
-    }, debounceMs);
-
-    return () => clearTimeout(timeoutId);
-  }, [items, storageKey, enabled, debounceMs, isLoading]);
-
   // Merge function to handle structure changes
   const mergeWithDefaults = useCallback((stored: T[], defaults: T[]): T[] => {
     if (!defaults.length) return stored;
@@ -111,6 +62,53 @@ export function useDragAndDropPersistence<T>(
     // Fallback: return defaults if can't merge intelligently
     return defaults;
   }, []);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    if (!enabled) {
+      setItems(defaultItems);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        const parsedItems = JSON.parse(stored);
+
+        // Validate that stored items have same structure
+        if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+          // Merge with default items to handle new items or structure changes
+          const mergedItems = mergeWithDefaults(parsedItems, defaultItems);
+          setItems(mergedItems);
+        } else {
+          setItems(defaultItems);
+        }
+      } else {
+        setItems(defaultItems);
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted drag & drop data:', error);
+      setItems(defaultItems);
+    }
+
+    setIsLoading(false);
+  }, [storageKey, enabled, defaultItems, mergeWithDefaults]);
+
+  // Debounced save to localStorage
+  useEffect(() => {
+    if (!enabled || isLoading) return;
+
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(items));
+      } catch (error) {
+        console.warn('Failed to persist drag & drop data:', error);
+      }
+    }, debounceMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [items, storageKey, enabled, debounceMs, isLoading]);
 
   // Reset to defaults
   const reset = useCallback(() => {

@@ -1,0 +1,23 @@
+'use client';
+
+// =====================================================
+// 📦 DESIGN SYSTEM ZYKOR - EXPORTAÇÕES BÁSICAS
+// =====================================================
+
+// Re-export componentes base existentes
+export { Button } from './button';
+export { Input } from './input';
+export { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
+export { Badge } from './badge';
+export { Switch } from './switch';
+export { Slider } from './slider';
+
+// Componentes básicos do Design System (sem dependências complexas)
+export { default as ErrorBoundary } from './error-boundary';
+
+// Exportação padrão simples
+export default {
+  Button: () => import('./button'),
+  Card: () => import('./card'),
+  ErrorBoundary: () => import('./error-boundary'),
+};

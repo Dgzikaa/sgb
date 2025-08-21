@@ -358,9 +358,9 @@ export function AccessibilityPanel() {
 
         {/* Tamanho da Fonte */}
         <div>
-          <label className="text-sm font-medium mb-2 block">
+          <div className="text-sm font-medium mb-2 block">
             Tamanho da Fonte
-          </label>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {(['small', 'medium', 'large', 'extra-large'] as const).map((size) => (
               <button

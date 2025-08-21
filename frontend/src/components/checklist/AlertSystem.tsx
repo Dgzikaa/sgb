@@ -572,8 +572,8 @@ export function useAlerts() {
   useEffect(() => {
     fetchAlerts();
 
-    // Auto-refresh alerts every 2 minutes
-    const interval = setInterval(fetchAlerts, 2 * 60 * 1000);
+    // ✅ Otimizado: Auto-refresh alerts a cada 10 minutos em vez de 2
+    const interval = setInterval(fetchAlerts, 10 * 60 * 1000); // 10 minutos
     return () => clearInterval(interval);
   }, []);
 

@@ -263,7 +263,7 @@ export class ZykorBadgeAPI {
   /**
    * Agenda atualização automática periódica
    */
-  startAutoUpdate(intervalMinutes: number = 5): void {
+  startAutoUpdate(intervalMinutes: number = 15): void { // ✅ Otimizado: 15min em vez de 5min
     // Atualizar imediatamente
     this.autoUpdateFromAPIs();
 

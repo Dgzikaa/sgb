@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -94,9 +94,9 @@ function UsuariosPage() {
   useEffect(() => {
     fetchUsuarios();
     fetchModulos();
-  }, []);
+  }, [fetchUsuarios, fetchModulos]);
 
-  const fetchUsuarios = async () => {
+  const fetchUsuarios = useCallback(async () => {
     try {
       const response = await fetch('/api/configuracoes/usuarios');
       const data = await response.json();
@@ -113,9 +113,9 @@ function UsuariosPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const fetchModulos = async () => {
+  const fetchModulos = useCallback(async () => {
     try {
       const response = await fetch('/api/configuracoes/permissoes');
       const data = await response.json();
@@ -125,7 +125,7 @@ function UsuariosPage() {
     } catch (error) {
       console.error('Erro ao buscar módulos:', error);
     }
-  };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -77,8 +77,8 @@ export function useMenuBadges() {
   useEffect(() => {
     fetchBadges();
 
-    // Atualizar a cada 30 segundos
-    const interval = setInterval(fetchBadges, 30000);
+    // ✅ Otimizado: Atualizar a cada 5 minutos em vez de 30s
+    const interval = setInterval(fetchBadges, 300000); // 5 minutos
 
     return () => clearInterval(interval);
   }, [fetchBadges]);

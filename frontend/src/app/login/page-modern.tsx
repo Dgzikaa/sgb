@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -73,12 +73,7 @@ export default function LoginModernPage() {
 
   const returnUrl = isHydrated ? searchParams.get('returnUrl') : null;
 
-  useEffect(() => {
-    setIsHydrated(true);
-    initializeLoginPage();
-  }, []);
-
-  const initializeLoginPage = async () => {
+  const initializeLoginPage = useCallback(async () => {
     try {
       // Detectar dispositivo móvel
       const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
@@ -115,7 +110,12 @@ export default function LoginModernPage() {
       console.error('Erro ao inicializar página de login:', error);
       toast.warning('Inicialização parcial', 'Algumas funcionalidades podem estar limitadas');
     }
-  };
+  }, [pushNotifications, backgroundSync, toast]);
+
+  useEffect(() => {
+    setIsHydrated(true);
+    initializeLoginPage();
+  }, [initializeLoginPage]);
 
   const handleInputChange = (field: keyof LoginFormData) => (
     e: React.ChangeEvent<HTMLInputElement>

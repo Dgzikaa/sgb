@@ -55,39 +55,36 @@ interface ToastProviderProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
 }
 
-export function ToastProvider({ 
-  children, 
-  maxToasts = 5,
-  position = 'top-right'
-}: ToastProviderProps) {
+export function ToastProvider({ children, position = 'top-right', maxToasts = 5 }: ToastProviderProps) {
   const [toasts, setToasts] = React.useState<ToastData[]>([]);
 
-  const addToast = React.useCallback((toastData: Omit<ToastData, 'id'>) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const toast: ToastData = {
-      id,
-      duration: 5000,
-      ...toastData
-    };
-
-    setToasts(prev => {
-      const newToasts = [toast, ...prev];
-      return newToasts.slice(0, maxToasts);
-    });
-
-    // Auto-remove após duration (exceto para loading e persistent)
-    if (!toast.persistent && toast.type !== 'loading' && toast.duration) {
-      setTimeout(() => {
-        removeToast(id);
-      }, toast.duration);
-    }
-
-    return id;
-  }, [maxToasts]);
+  const generateId = () => Math.random().toString(36).substr(2, 9);
 
   const removeToast = React.useCallback((id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
+
+  const addToast = React.useCallback((toast: Omit<ToastData, 'id'>) => {
+    const id = generateId();
+    const newToast: ToastData = {
+      ...toast,
+      id,
+      duration: toast.duration || 5000
+    };
+
+    setToasts(prev => {
+      const updated = [...prev, newToast];
+      return updated.slice(-maxToasts);
+    });
+
+    if ((newToast.duration || 0) > 0) {
+      setTimeout(() => {
+        removeToast(id);
+      }, newToast.duration || 5000);
+    }
+
+    return id;
+  }, [maxToasts, removeToast]);
 
   const clearAllToasts = React.useCallback(() => {
     setToasts([]);

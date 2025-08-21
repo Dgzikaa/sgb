@@ -551,6 +551,14 @@ export default function UnifiedSearch({
                               : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                           )}
                           onClick={() => handleResultSelect(result)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleResultSelect(result);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <result.icon
                             className={cn(

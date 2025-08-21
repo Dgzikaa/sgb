@@ -634,7 +634,19 @@ export default function ScheduleDialog({
 
   return (
     <>
-      <div onClick={() => setIsOpen(true)}>{children}</div>
+      <div 
+        onClick={() => setIsOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsOpen(true);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        {children}
+      </div>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md mx-auto">
           <DialogHeader>

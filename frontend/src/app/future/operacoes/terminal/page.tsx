@@ -793,6 +793,14 @@ export default function TerminalProducao() {
                           key={receita.receita_codigo}
                           className="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors touch-manipulation"
                           onClick={() => criarNovaProducao(receita)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              criarNovaProducao(receita);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <div className="font-semibold text-gray-900 dark:text-white">
                             {receita.receita_nome}
@@ -1434,6 +1442,17 @@ export default function TerminalProducao() {
                                                           insumo
                                                         )
                                                       }
+                                                      onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                          e.preventDefault();
+                                                          adicionarInsumoProducao(
+                                                            producao.id,
+                                                            insumo
+                                                          );
+                                                        }
+                                                      }}
+                                                      role="button"
+                                                      tabIndex={0}
                                                     >
                                                       <div className="font-semibold text-black text-sm">
                                                         {insumo.nome}

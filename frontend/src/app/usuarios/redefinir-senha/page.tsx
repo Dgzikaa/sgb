@@ -139,11 +139,12 @@ export default function RedefinirSenhaPage() {
         <form onSubmit={redefinirSenha} className="space-y-6">
           {/* Nova Senha */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="nova-senha" className="block text-sm font-medium text-gray-700 mb-2">
               Nova Senha
             </label>
             <div className="relative">
               <input
+                id="nova-senha"
                 type={mostrarSenha ? 'text' : 'password'}
                 value={novaSenha}
                 onChange={e => setNovaSenha(e.target.value)}
@@ -168,11 +169,12 @@ export default function RedefinirSenhaPage() {
 
           {/* Confirmar Senha */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="confirmar-senha" className="block text-sm font-medium text-gray-700 mb-2">
               Confirmar Nova Senha
             </label>
             <div className="relative">
               <input
+                id="confirmar-senha"
                 type={mostrarConfirmar ? 'text' : 'password'}
                 value={confirmarSenha}
                 onChange={e => setConfirmarSenha(e.target.value)}

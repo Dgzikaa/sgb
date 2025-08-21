@@ -1,0 +1,118 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradientes principais -->
+    <radialGradient id="bgGradient" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#4338ca;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e1b4b;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="zGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#e2e8f0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#cbd5e1;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="shadowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.4" />
+    </linearGradient>
+    
+    <!-- Filtros para efeitos -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offset"/>
+      <feFlood flood-color="#1e1b4b" flood-opacity="0.3"/>
+      <feComposite in2="offset" operator="in"/>
+      <feMerge> 
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Padrão de textura sutil -->
+    <pattern id="texture" patternUnits="userSpaceOnUse" width="4" height="4">
+      <rect width="4" height="4" fill="none"/>
+      <circle cx="2" cy="2" r="0.5" fill="#ffffff" opacity="0.05"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background principal -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGradient)"/>
+  
+  <!-- Textura sutil -->
+  <rect width="512" height="512" rx="128" fill="url(#texture)"/>
+  
+  <!-- Efeitos de luz ambiente -->
+  <ellipse cx="150" cy="100" rx="80" ry="40" fill="#ffffff" opacity="0.1" transform="rotate(-20 150 100)"/>
+  <ellipse cx="400" cy="350" rx="60" ry="30" fill="#8b5cf6" opacity="0.15" transform="rotate(45 400 350)"/>
+  
+  <!-- Letra Z principal -->
+  <g transform="translate(256, 256)">
+    <!-- Sombra/Glow da letra Z -->
+    <path d="M-120 -130 L120 -130 L120 -70 L-40 70 L120 70 L120 130 L-120 130 L-120 70 L40 -70 L-120 -70 Z" 
+          fill="url(#shadowGradient)" 
+          filter="url(#glow)" 
+          transform="translate(6, 6)"/>
+    
+    <!-- Letra Z principal -->
+    <path d="M-120 -130 L120 -130 L120 -70 L-40 70 L120 70 L120 130 L-120 130 L-120 70 L40 -70 L-120 -70 Z" 
+          fill="url(#zGradient)" 
+          stroke="#ffffff" 
+          stroke-width="4"
+          filter="url(#innerShadow)"/>
+    
+    <!-- Highlight interno -->
+    <path d="M-100 -110 L100 -110 L100 -80 L-30 60 L100 60 L100 110 L-100 110 L-100 80 L30 -60 L-100 -60 Z" 
+          fill="none" 
+          stroke="#ffffff" 
+          stroke-width="2" 
+          opacity="0.7"/>
+    
+    <!-- Brilho superior */
+    <path d="M-120 -130 L120 -130 L120 -100 L-90 -100 Z" 
+          fill="url(#zGradient)" 
+          opacity="0.8"/>
+  </g>
+  
+  <!-- Partículas decorativas */
+  <g opacity="0.6">
+    <!-- Partículas grandes -->
+    <circle cx="100" cy="100" r="6" fill="#ffffff">
+      <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="420" cy="120" r="4" fill="#e2e8f0">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="450" cy="380" r="5" fill="#cbd5e1">
+      <animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="80" cy="420" r="3" fill="#ffffff">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Partículas pequenas -->
+    <circle cx="180" cy="80" r="2" fill="#f8fafc" opacity="0.4"/>
+    <circle cx="350" cy="150" r="1.5" fill="#e2e8f0" opacity="0.5"/>
+    <circle cx="400" cy="450" r="2.5" fill="#cbd5e1" opacity="0.3"/>
+    <circle cx="60" cy="300" r="1" fill="#ffffff" opacity="0.6"/>
+    <circle cx="480" cy="250" r="2" fill="#f8fafc" opacity="0.4"/>
+    <circle cx="150" cy="450" r="1.5" fill="#e2e8f0" opacity="0.5"/>
+  </g>
+  
+  <!-- Reflexo sutil no canto superior -->
+  <path d="M128 0 Q256 0 384 0 Q512 0 512 128 Q512 64 384 64 Q256 64 128 64 Q0 64 0 128 Q0 0 128 0" 
+        fill="url(#zGradient)" 
+        opacity="0.1"/>
+</svg>

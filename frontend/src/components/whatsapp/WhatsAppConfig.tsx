@@ -606,7 +606,7 @@ export default function WhatsAppConfig({
                   {/* Enable/Disable */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <label className="font-medium">Ativar WhatsApp</label>
+                      <label htmlFor="ativar-whatsapp" className="font-medium">Ativar WhatsApp</label>
                       <p className="text-sm text-gray-600">
                         Habilitar envio de mensagens via WhatsApp
                       </p>
@@ -686,7 +686,7 @@ export default function WhatsAppConfig({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <label className="font-medium">Lembretes</label>
+                          <label htmlFor="lembretes" className="font-medium">Lembretes</label>
                           <p className="text-xs text-gray-600">
                             Enviar lembretes de checklists agendados
                           </p>
@@ -708,7 +708,7 @@ export default function WhatsAppConfig({
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <label className="font-medium">
+                          <label htmlFor="send-alerts" className="font-medium">
                             Alertas de Atraso
                           </label>
                           <p className="text-xs text-gray-600">
@@ -716,6 +716,7 @@ export default function WhatsAppConfig({
                           </p>
                         </div>
                         <Switch
+                          id="send-alerts"
                           checked={config.settings.send_alerts}
                           onCheckedChange={checked =>
                             setConfig(prev => ({
@@ -732,12 +733,13 @@ export default function WhatsAppConfig({
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <label className="font-medium">Confirmações</label>
+                          <label htmlFor="send-completions" className="font-medium">Confirmações</label>
                           <p className="text-xs text-gray-600">
                             Enviar confirmação quando checklist for completado
                           </p>
                         </div>
                         <Switch
+                          id="send-completions"
                           checked={config.settings.send_completions}
                           onCheckedChange={checked =>
                             setConfig(prev => ({
@@ -755,7 +757,7 @@ export default function WhatsAppConfig({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
+                        <label htmlFor="reminder-hours" className="text-sm font-medium mb-2 block">
                           Lembrete (horas antes)
                         </label>
                         <Select
@@ -770,7 +772,7 @@ export default function WhatsAppConfig({
                             }))
                           }
                         >
-                          <SelectTrigger className="touch-manipulation">
+                          <SelectTrigger id="reminder-hours" className="touch-manipulation">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -784,7 +786,7 @@ export default function WhatsAppConfig({
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
+                        <label htmlFor="alert-repeat" className="text-sm font-medium mb-2 block">
                           Repetir alertas (minutos)
                         </label>
                         <Select
@@ -799,7 +801,7 @@ export default function WhatsAppConfig({
                             }))
                           }
                         >
-                          <SelectTrigger className="touch-manipulation">
+                          <SelectTrigger id="alert-repeat" className="touch-manipulation">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

@@ -159,7 +159,7 @@ export default function TabelaDesempenhoPage() {
       setLoading(false);
       hideLoading();
     }
-  }, [selectedBar?.id, anoFiltro, mesFiltro]);
+  }, [selectedBar?.id, anoFiltro, mesFiltro, hideLoading, showLoading]);
 
   useEffect(() => {
     if (selectedBar?.id) {
@@ -167,7 +167,7 @@ export default function TabelaDesempenhoPage() {
       // Recálculo automático ao carregar página
       recalcularAutomatico();
     }
-  }, [carregarDados, selectedBar?.id]);
+  }, [carregarDados, selectedBar?.id, recalcularAutomatico]);
 
   const sincronizarComGoogleSheets = async () => {
     if (!selectedBar?.id) {
@@ -292,7 +292,7 @@ export default function TabelaDesempenhoPage() {
     }
   };
 
-  const recalcularAutomatico = async () => {
+  const recalcularAutomatico = useCallback(async () => {
     if (!selectedBar?.id) return;
 
     setRecalculating(true);
@@ -340,7 +340,7 @@ export default function TabelaDesempenhoPage() {
       setRecalculating(false);
       hideLoading();
     }
-  };
+  }, [selectedBar?.id, carregarDados, toast, hideLoading, showLoading]);
 
   const criarSemanasFaltantes = async () => {
     if (!selectedBar?.id) return;
@@ -648,7 +648,7 @@ export default function TabelaDesempenhoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="ano-filtro" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Ano
                     </label>
                     <Select value={anoFiltro} onValueChange={setAnoFiltro}>
@@ -664,7 +664,7 @@ export default function TabelaDesempenhoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="mes-filtro" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Mês
                     </label>
                     <Select value={mesFiltro} onValueChange={setMesFiltro}>

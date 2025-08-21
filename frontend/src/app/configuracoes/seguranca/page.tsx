@@ -143,6 +143,7 @@ export default function SecurityPage() {
 
   useEffect(() => {
     if (autoRefresh) {
+      // ✅ Otimizado: Reduzir frequência de verificação de segurança
       const interval = setInterval(() => {
         if (!loading) {
           loadSecurityData();

@@ -640,10 +640,11 @@ export default function LoginPage() {
             ) : (
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="forgot-email" className="block text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2">
                     E-mail
                   </label>
                   <input
+                    id="forgot-email"
                     type="email"
                     value={forgotEmail}
                     onChange={e => setForgotEmail(e.target.value)}

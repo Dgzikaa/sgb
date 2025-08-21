@@ -27,12 +27,14 @@ interface PermissionsHook {
 export function usePermissions(): PermissionsHook {
   const [user, setUser] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     // Carregar dados do usuário do localStorage
     const loadUserData = () => {
       if (!isClient) {
         setLoading(false);
+        setIsInitialized(true);
         return;
       }
 
@@ -44,6 +46,7 @@ export function usePermissions(): PermissionsHook {
           if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.modulos_permitidos) {
             setUser(parsedUser);
             setLoading(false);
+            setIsInitialized(true);
             return;
           }
         }
@@ -52,13 +55,23 @@ export function usePermissions(): PermissionsHook {
         safeLocalStorage.removeItem('sgb_user');
         setUser(null);
         setLoading(false);
-        window.location.href = '/login'; // Redirecionar para login se não tiver dados válidos
+        setIsInitialized(true);
+        
+        // Só redirecionar se estiver inicializado e não for página de login
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
         safeLocalStorage.removeItem('sgb_user');
         setUser(null);
         setLoading(false);
-        window.location.href = '/login';
+        setIsInitialized(true);
+        
+        // Só redirecionar se estiver inicializado e não for página de login
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       }
     };
 

@@ -726,9 +726,9 @@ export default function DrePage() {
                       <div className="space-y-6 w-full">
                         {/* Analytics do Mês - Mobile Responsive */}
                         <div>
-                          <label className="text-xs font-medium dark:text-gray-300 text-gray-800 mb-2 block lg:mb-1">
+                          <div className="text-xs font-medium dark:text-gray-300 text-gray-800 mb-2 block lg:mb-1">
                             Analytics do Mês
-                          </label>
+                          </div>
                           <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 lg:space-y-1 lg:gap-0 overflow-hidden">
                             {(() => {
                               // Calcular métricas

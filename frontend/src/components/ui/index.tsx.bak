@@ -1,0 +1,488 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { Card, CardContent } from './card';
+
+// =====================================================
+// 📦 DESIGN SYSTEM ZYKOR - EXPORTAÇÕES
+// =====================================================
+
+// 🎬 Page Transitions
+export { 
+  PageTransition, 
+  TransitionWrapper, 
+  LoadingTransition,
+  TransitionProvider,
+  RouteTransition,
+  usePageTransition,
+  useResponsiveTransition
+} from './page-transitions';
+
+// 🚨 Error Boundaries
+export { 
+  default as ErrorBoundary, 
+  FormErrorBoundary, 
+  ComponentErrorBoundary,
+  ResponsiveErrorBoundary,
+  useErrorHandler
+} from './error-boundary';
+
+// 🎭 Empty States
+export { 
+  EmptyState, 
+  ResponsiveEmptyState,
+  EmptyChecklist,
+  EmptyData,
+  EmptySearch,
+  EmptyUsers,
+  EmptyReports,
+  EmptyEvents,
+  EmptySettings,
+  useEmptyState
+} from './empty-states';
+
+// 📜 Scroll Animations & Parallax
+export {
+  ScrollTrigger,
+  Parallax,
+  StaggeredContainer,
+  ScrollProgress,
+  TextReveal,
+  ImageReveal,
+  ScrollToTop,
+  useScrollAnimation,
+  useParallaxScroll,
+  useResponsiveScrollAnimation,
+} from './scroll-animations';
+
+// 📱 Mobile Gestures
+export {
+  GestureHandler,
+  Swipeable,
+  Pinchable,
+  TapHandler,
+  GestureFeedback,
+  useSwipeGesture,
+  usePinchGesture,
+  useTouchGesture,
+  useResponsiveGestures,
+  calculateSwipeDirection,
+  calculatePinchScale,
+  calculateRotation,
+} from './mobile-gestures';
+
+// 🔍 Global Search
+export {
+  GlobalSearch,
+  ResponsiveGlobalSearch,
+  useGlobalSearch,
+  useSearchHistory,
+} from './global-search';
+
+// 🍞 Breadcrumbs
+export {
+  Breadcrumbs,
+  SmartBreadcrumbs,
+  ResponsiveBreadcrumbs,
+  useBreadcrumbs,
+  useBreadcrumbHistory,
+} from './breadcrumbs';
+
+// 📈 Analytics UX & Heatmaps
+export {
+  AnalyticsUX,
+  UserEventTracker,
+  HeatmapVisualizer,
+  PerformanceMonitor,
+  UserInsightsGenerator,
+  useAnalytics,
+  usePerformanceMetrics,
+} from './analytics-ux';
+
+// ♿ Accessibility WCAG AAA
+export {
+  AccessibilityProvider,
+  ResponsiveAccessibilityProvider,
+  SkipLink,
+  FocusTrap,
+  LiveRegion,
+  ScreenReaderOnly,
+  useAccessibility,
+  useFocusManagement,
+  useKeyboardNavigation,
+  useHighContrast,
+} from './accessibility';
+
+// =====================================================
+// 🎯 COMPONENTES BASE (já existentes)
+// =====================================================
+
+// Re-export componentes base existentes
+export { Button } from './button';
+export { Input } from './input';
+export { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
+export { Badge } from './badge';
+export { Switch } from './switch';
+export { Slider } from './slider';
+
+// =====================================================
+// 🎯 COMPONENTES MODERNOS
+// =====================================================
+
+// Command Palette
+export { CommandPalette } from './command-palette';
+
+// Theme Switcher
+export { ThemeSwitcher, useTheme } from './theme-switcher-modern';
+
+// Keyboard Shortcuts
+export { 
+  KeyboardShortcuts, 
+  useKeyboardShortcuts, 
+  useKeyCombination,
+  ShortcutHelp,
+  useShortcutHelp,
+  defaultShortcuts
+} from './keyboard-shortcuts-modern';
+
+// Notifications
+export { ModernNotifications } from './notifications-modern';
+
+// =====================================================
+// 🚀 UTILITÁRIOS E TIPOS
+// =====================================================
+
+// Tipos comuns
+export type {
+  // Page Transitions
+  PageTransitionProps,
+  TransitionVariant,
+  
+  // Error Boundaries
+  ErrorBoundaryProps,
+  ErrorFallbackProps,
+  
+  // Empty States
+  EmptyStateProps,
+  EmptyStateAction,
+  
+  // Scroll Animations
+  ScrollAnimationProps,
+  ParallaxProps,
+  ScrollTriggerProps,
+  
+  // Mobile Gestures
+  GestureProps,
+  SwipeableProps,
+  PinchableProps,
+  
+  // Global Search
+  SearchResult,
+  SearchCategory,
+  GlobalSearchProps,
+  
+  // Breadcrumbs
+  BreadcrumbItem,
+  BreadcrumbsProps,
+  
+  // Analytics
+  UserEvent,
+  HeatmapData,
+  PerformanceMetric,
+  UserInsight,
+  
+  // Accessibility
+  AccessibilitySettings,
+  AccessibilityProviderProps,
+} from './types';
+
+// =====================================================
+// 🎨 CONSTANTES E CONFIGURAÇÕES
+// =====================================================
+
+// Configurações padrão
+export const DESIGN_SYSTEM_CONFIG = {
+  // Animações
+  defaultTransitionDuration: 0.3,
+  defaultEasing: [0.4, 0, 0.2, 1],
+  
+  // Scroll
+  defaultScrollThreshold: 0.1,
+  defaultScrollRootMargin: '0px 0px -100px 0px',
+  
+  // Gestos
+  defaultSwipeThreshold: 50,
+  defaultLongPressDelay: 500,
+  
+  // Acessibilidade
+  defaultFontSize: 16,
+  defaultLineHeight: 1.5,
+  defaultLetterSpacing: 0,
+  
+  // Performance
+  defaultDebounceDelay: 300,
+  defaultThrottleDelay: 100,
+} as const;
+
+// =====================================================
+// 🔧 FUNÇÕES UTILITÁRIAS
+// =====================================================
+
+// Debounce
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+// Throttle
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  return (...args: Parameters<T>) => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
+
+// Clamp
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+// Lerp (Linear interpolation)
+export function lerp(start: number, end: number, factor: number): number {
+  return start + (end - start) * factor;
+}
+
+// =====================================================
+// 🎯 HOOKS COMPOSTOS
+// =====================================================
+
+// Hook para animações responsivas
+export function useResponsiveAnimation() {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  const getAnimationSettings = () => {
+    if (isMobile) {
+      return {
+        duration: 0.4,
+        threshold: 0.05,
+        rootMargin: '0px 0px -50px 0px',
+        reducedMotion: true,
+      };
+    }
+
+    if (isTablet) {
+      return {
+        duration: 0.5,
+        threshold: 0.08,
+        rootMargin: '0px 0px -75px 0px',
+        reducedMotion: false,
+      };
+    }
+
+    return {
+      duration: 0.6,
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px',
+      reducedMotion: false,
+    };
+  };
+
+  return {
+    isMobile,
+    isTablet,
+    animationSettings: getAnimationSettings(),
+  };
+}
+
+// Hook para gestos responsivos - já exportado de mobile-gestures.tsx
+
+// Hook para acessibilidade responsiva
+export function useResponsiveAccessibility() {
+  const { isMobile, isTablet } = useResponsiveAnimation();
+
+  const getAccessibilitySettings = () => {
+    if (isMobile) {
+      return {
+        enableVoiceControl: false,
+        enableEyeTracking: false,
+        enableSwitchControl: true,
+        defaultFontSize: 18,
+        defaultLineHeight: 1.6,
+        enableLargeTouchTargets: true,
+      };
+    }
+
+    if (isTablet) {
+      return {
+        enableVoiceControl: true,
+        enableEyeTracking: false,
+        enableSwitchControl: true,
+        defaultFontSize: 17,
+        defaultLineHeight: 1.55,
+        enableLargeTouchTargets: true,
+      };
+    }
+
+    return {
+      enableVoiceControl: true,
+      enableEyeTracking: true,
+      enableSwitchControl: true,
+      defaultFontSize: 16,
+      defaultLineHeight: 1.5,
+      enableLargeTouchTargets: false,
+    };
+  };
+
+  return {
+    isMobile,
+    isTablet,
+    accessibilitySettings: getAccessibilitySettings(),
+  };
+}
+
+// =====================================================
+// 🎨 COMPONENTES COMPOSTOS
+// =====================================================
+
+// Componente de página com todas as funcionalidades
+export function EnhancedPage({
+  children,
+  className = '',
+  enableAnimations = true,
+  enableGestures = true,
+  enableAccessibility = true,
+  enableAnalytics = true,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  enableAnimations?: boolean;
+  enableGestures?: boolean;
+  enableAccessibility?: boolean;
+  enableAnalytics?: boolean;
+}) {
+  return (
+    <div className={className}>
+      {children}
+    </div>
+  );
+}
+
+// Componente de card com animações e gestos
+export function EnhancedCard({
+  children,
+  className = '',
+  enableHover = true,
+  enableSwipe = false,
+  enablePinch = false,
+  onSwipeLeft,
+  onSwipeRight,
+  onPinch,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  enableHover?: boolean;
+  enableSwipe?: boolean;
+  enablePinch?: boolean;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  onPinch?: (scale: number) => void;
+}) {
+  const cardContent = (
+    <Card className={cn('transition-all duration-200', className)}>
+      <CardContent className="p-6">
+        {children}
+      </CardContent>
+    </Card>
+  );
+
+  if (enableSwipe) {
+    return cardContent;
+  }
+
+  if (enablePinch) {
+    return cardContent;
+  }
+
+  return cardContent;
+}
+
+// =====================================================
+// 📱 RESPONSIVE WRAPPERS
+// =====================================================
+
+// Wrapper responsivo para todos os componentes
+export function ResponsiveWrapper({
+  children,
+  mobileProps = {},
+  tabletProps = {},
+  desktopProps = {},
+}: {
+  children: React.ReactNode;
+  mobileProps?: Record<string, any>;
+  tabletProps?: Record<string, any>;
+  desktopProps?: Record<string, any>;
+}) {
+  const { isMobile, isTablet } = useResponsiveAnimation();
+
+  const getProps = () => {
+    if (isMobile) return mobileProps;
+    if (isTablet) return tabletProps;
+    return desktopProps;
+  };
+
+  const props = getProps();
+
+  return (
+    <div {...props}>
+      {children}
+    </div>
+  );
+}
+
+// =====================================================
+// 🎯 EXPORTAÇÕES PADRÃO
+// =====================================================
+
+// Exportar tudo como default
+export default {
+  // Utilitários
+  debounce,
+  throttle,
+  clamp,
+  lerp,
+  
+  // Configurações
+  DESIGN_SYSTEM_CONFIG,
+  
+  // Componentes compostos
+  EnhancedPage,
+  EnhancedCard,
+  ResponsiveWrapper,
+};

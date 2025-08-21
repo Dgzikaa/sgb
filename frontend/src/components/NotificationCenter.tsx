@@ -73,7 +73,7 @@ export function NotificationCenter() {
     autoRefresh: true,
     showBadge: true,
     playSound: false,
-    refreshInterval: 30000, // 30 segundos
+    refreshInterval: 120000, // ✅ Otimizado: 2 minutos em vez de 30s
   });
 
   // =====================================================
@@ -108,31 +108,37 @@ export function NotificationCenter() {
 
     // Cleanup ao desmontar
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      const currentInterval = intervalRef.current;
+      if (currentInterval) {
+        clearInterval(currentInterval);
       }
     };
-  }, []); // DEPENDÊNCIAS VAZIAS - executar apenas uma vez
+  }, [carregarNotificacoes]); // Adicionar carregarNotificacoes como dependência
 
   // =====================================================
-  // CONTROLE DE POLLING VIA CONFIGURAÇÕES
+  // POLLING AUTOMÁTICO
   // =====================================================
 
   useEffect(() => {
-    carregarNotificacoes();
-  }, [carregarNotificacoes]);
+    // ✅ Só ativar polling se autoRefresh estiver habilitado
+    if (!configuracoes.autoRefresh) return;
 
-  useEffect(() => {
-    if (configuracoes.autoRefresh && configuracoes.refreshInterval > 0) {
-      const interval = setInterval(() => {
-        if (!loading) {
-          carregarNotificacoes();
-        }
-      }, configuracoes.refreshInterval * 1000);
+    const interval = setInterval(() => {
+      if (!loading && !isOpen) { // ✅ Só atualizar se modal estiver fechado
+        carregarNotificacoes();
+      }
+    }, configuracoes.refreshInterval); // ✅ Usar configuração dinâmica
 
-      return () => clearInterval(interval);
-    }
-  }, [configuracoes.autoRefresh, configuracoes.refreshInterval, loading, carregarNotificacoes]);
+    // Armazenar o intervalo no ref
+    intervalRef.current = interval;
+
+    return () => {
+      clearInterval(interval);
+      intervalRef.current = null;
+    };
+  }, [configuracoes.autoRefresh, configuracoes.refreshInterval, loading, isOpen, carregarNotificacoes]); // ✅ Dependencies otimizadas
+
+  // ✅ useEffect duplicado removido - já existe polling otimizado acima
 
   // =====================================================
   // FILTRAR NOTIFICAÇÕES

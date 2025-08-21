@@ -1,31 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 
 export function PWAManager() {
   const pathname = usePathname()
 
-  useEffect(() => {
-    // Verificar se service workers são suportados
-    if ('serviceWorker' in navigator) {
-      // Registrar PWA apenas para área de gestão
-      const isGestaoArea = pathname.startsWith('/dashboard') || 
-                          pathname.startsWith('/operacoes') || 
-                          pathname.startsWith('/configuracoes') ||
-                          pathname.startsWith('/relatorios') ||
-                          pathname.startsWith('/visao-geral')
-
-      if (isGestaoArea) {
-        // Registrar PWA apenas para gestão
-        registerGestaoPWA()
-      }
-    }
-  }, [pathname])
-
-
-
-  const registerGestaoPWA = async () => {
+  const registerGestaoPWA = useCallback(async () => {
     try {
       // Limpar service workers antigos se necessário
       const registrations = await navigator.serviceWorker.getRegistrations()
@@ -48,7 +29,25 @@ export function PWAManager() {
     } catch (error) {
       console.error('Erro ao registrar PWA Zykor:', error)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // Verificar se service workers são suportados
+    if ('serviceWorker' in navigator) {
+      // Registrar PWA apenas para área de gestão
+      const isGestaoArea = pathname.startsWith('/dashboard') || 
+                          pathname.startsWith('/operacoes') || 
+                          pathname.startsWith('/configuracoes') ||
+                          pathname.startsWith('/relatorios') ||
+                          pathname.startsWith('/visao-geral')
+
+      if (isGestaoArea) {
+        // Registrar PWA apenas para gestão
+        registerGestaoPWA()
+      }
+    }
+  }, [pathname, registerGestaoPWA])
+
 
   const updateManifest = (manifestPath: string) => {
     // Remover manifests anteriores

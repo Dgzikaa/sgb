@@ -65,16 +65,12 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.nextUrl.hostname;
 
-  // LOG SEMPRE - para qualquer rota
-  console.log(`🚀 MIDDLEWARE EXECUTANDO SEMPRE: ${pathname}`);
-
-  console.log(`🔥 MIDDLEWARE: ${pathname}`);
-
   // Redirecionar raiz para /login apenas em produção (domínio zykor.com.br)
   if (
     (hostname === 'zykor.com.br' || hostname === 'www.zykor.com.br') &&
     pathname === '/'
   ) {
+    console.log(`🔄 REDIRECIONANDO ${pathname} para /login (hostname: ${hostname})`);
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

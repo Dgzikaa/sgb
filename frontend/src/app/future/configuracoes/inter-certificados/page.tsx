@@ -177,9 +177,9 @@ export default function InterCertificadosPage() {
             <CardContent className="space-y-6">
               {/* Certificado do Cliente */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Certificado do Cliente (cert.crt)
-                </label>
+                </div>
                 <div className="flex gap-2">
                   <input
                     type="file"
@@ -207,9 +207,9 @@ export default function InterCertificadosPage() {
 
               {/* Chave Privada */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Chave Privada (key.key)
-                </label>
+                </div>
                 <div className="flex gap-2">
                   <input
                     type="file"
@@ -237,9 +237,9 @@ export default function InterCertificadosPage() {
 
               {/* Certificado da CA */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Certificado da CA (ca.crt)
-                </label>
+                </div>
                 <div className="flex gap-2">
                   <input
                     type="file"

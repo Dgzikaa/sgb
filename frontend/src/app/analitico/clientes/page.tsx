@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import PageHeader from '@/components/layouts/PageHeader'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -82,7 +82,7 @@ export default function ClientesPage() {
     }
   }, [clientes, diaSemanaFiltro])
 
-  const fetchClientes = async () => {
+  const fetchClientes = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch('/api/analitico/clientes', {
@@ -102,7 +102,7 @@ export default function ClientesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedBar])
 
   const handleWhatsAppClick = (nome: string, telefone: string | null) => {
     try {

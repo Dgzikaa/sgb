@@ -230,7 +230,18 @@ export function PWAInstallBanner({
 
       {/* Backdrop para modal */}
       {variant === 'modal' && (
-        <div className="absolute inset-0 -z-10" onClick={handleDismiss} />
+        <div 
+          className="absolute inset-0 -z-10" 
+          onClick={handleDismiss}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleDismiss();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+        />
       )}
     </div>
   );
