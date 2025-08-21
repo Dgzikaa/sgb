@@ -151,6 +151,13 @@ const defaultSidebarItems: SidebarItem[] = [
       subItems: [
         {
           icon: Calendar,
+          label: 'Calendário',
+          href: '/ferramentas/calendario',
+          description: 'Calendário visual de eventos e reservas',
+          permission: 'operacoes',
+        },
+        {
+          icon: Calendar,
           label: 'Agendamento',
           href: '/ferramentas/agendamento',
           description: 'Ferramenta de agendamento avançado',
