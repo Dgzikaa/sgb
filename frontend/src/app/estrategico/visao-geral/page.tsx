@@ -254,7 +254,7 @@ export default function VisaoGeralEstrategica() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <GlobalLoadingComponent />
-      <div className="container mx-auto px-4 pt-0 pb-1 space-y-1">
+      <div className="container mx-auto px-4 pt-0 pb-1 space-y-2">
         <div className="flex items-center justify-between">
           <PageHeader title="Visão Geral" description="Resumo executivo do bar" />
           <div className="flex items-center gap-2">
