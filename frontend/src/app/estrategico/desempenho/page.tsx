@@ -18,6 +18,7 @@ import {
   Activity
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
+import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface DadosSemana {
@@ -53,6 +54,7 @@ interface DadosMes {
 export default function DesempenhoPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
+  const { user } = useUser();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('semanal');
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ export default function DesempenhoPage() {
 
   // Carregar dados mensais consolidados (fevereiro 2025 até atual)
   const carregarDadosMensais = useCallback(async () => {
-    if (!selectedBar) return;
+    if (!selectedBar || !user) return;
 
     const dadosMensaisTemp: DadosMes[] = [];
     const anoAtualNum = new Date().getFullYear();
@@ -83,7 +85,7 @@ export default function DesempenhoPage() {
         try {
           const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
             headers: {
-              'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+              'x-user-data': encodeURIComponent(JSON.stringify(user))
             }
           });
 
@@ -108,21 +110,21 @@ export default function DesempenhoPage() {
     }
 
     setDadosMensais(dadosMensaisTemp);
-  }, [selectedBar, mesesNomes]);
+  }, [selectedBar, user, mesesNomes]);
 
   // Carregar dados da API
   const carregarDados = useCallback(async () => {
     try {
       setLoading(true);
       
-      if (!selectedBar) {
+      if (!selectedBar || !user) {
         setLoading(false);
         return;
       }
 
       const response = await fetch(`/api/estrategico/desempenho?mes=1&ano=${anoAtual}`, {
         headers: {
-          'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
         }
       });
 
@@ -149,7 +151,7 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [anoAtual, selectedBar, activeTab]);
+  }, [anoAtual, selectedBar, user, activeTab]);
 
   const navegarAno = (direcao: 'anterior' | 'proximo') => {
     if (direcao === 'anterior') {
@@ -183,17 +185,17 @@ export default function DesempenhoPage() {
   }, [setPageTitle]);
 
   useEffect(() => {
-    if (selectedBar) {
+    if (selectedBar && user) {
       carregarDados();
     }
-  }, [selectedBar, anoAtual]);
+  }, [selectedBar, user, anoAtual]);
 
   // Carregar dados mensais quando mudar para aba mensal
   useEffect(() => {
-    if (activeTab === 'mensal' && selectedBar && dadosMensais.length === 0) {
+    if (activeTab === 'mensal' && selectedBar && user && dadosMensais.length === 0) {
       carregarDadosMensais();
     }
-  }, [activeTab, selectedBar, dadosMensais.length]);
+  }, [activeTab, selectedBar, user, dadosMensais.length]);
 
   if (loading) {
     return (
