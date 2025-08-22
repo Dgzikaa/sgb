@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function checkExistingData(
-  supabase: ReturnType<typeof createClient>, 
+  supabase: any, 
   dataType: string, 
   date: string, 
   barId: number

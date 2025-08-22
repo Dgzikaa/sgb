@@ -323,7 +323,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      semanasAtualizadas.push(atualizada);
+      (semanasAtualizadas as any).push(atualizada);
       console.log(`✅ Semana ${semana.numero_semana} atualizada com sucesso!`);
     }
 

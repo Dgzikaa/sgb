@@ -459,34 +459,34 @@ export default function VisaoGeralEstrategica() {
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                   <IndicadorCard
                     titulo="Clientes Ativos (90d)"
-                    valor={indicadoresTrimestrais?.clientesAtivos?.valor || 0}
-                    meta={indicadoresTrimestrais?.clientesAtivos?.meta || 3000}
+                    valor={indicadoresTrimestraisMemo?.clientesAtivos?.valor || 0}
+                    meta={indicadoresTrimestraisMemo?.clientesAtivos?.meta || 3000}
                     formato="numero"
                     cor="green"
                     periodoAnalisado="Últimos 90 dias (2+ visitas)"
                     comparacao={{
-                      valor: indicadoresTrimestrais?.clientesAtivos?.variacao || 0,
+                      valor: indicadoresTrimestraisMemo?.clientesAtivos?.variacao || 0,
                       label: "vs trimestre anterior"
                     }}
                   />
                   
                   <IndicadorCard
                     titulo="Clientes Totais"
-                    valor={indicadoresTrimestrais?.clientesTotais?.valor || 0}
-                    meta={indicadoresTrimestrais?.clientesTotais?.meta || 12000}
+                    valor={indicadoresTrimestraisMemo?.clientesTotais?.valor || 0}
+                    meta={indicadoresTrimestraisMemo?.clientesTotais?.meta || 12000}
                     formato="numero"
                     cor="blue"
-                    periodoAnalisado={`${getTrimestreInfo(trimestreAtual)?.periodo} 2025`}
+                    periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
                     comparacao={{
-                      valor: indicadoresTrimestrais?.clientesTotais?.variacao || 0,
+                      valor: indicadoresTrimestraisMemo?.clientesTotais?.variacao || 0,
                       label: "vs trimestre anterior"
                     }}
                   />
                   
                   <IndicadorRetencao
-                    valor={indicadoresTrimestrais?.retencao?.valor || 0}
-                    meta={indicadoresTrimestrais?.retencao?.meta || 10}
-                    variacao={indicadoresTrimestrais?.retencao?.variacao || 0}
+                    valor={indicadoresTrimestraisMemo?.retencao?.valor || 0}
+                    meta={indicadoresTrimestraisMemo?.retencao?.meta || 10}
+                    variacao={indicadoresTrimestraisMemo?.retencao?.variacao || 0}
                     mesSelected={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`}
                   />
                   
@@ -502,28 +502,28 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorCard
                     titulo="CMO"
-                    valor={indicadoresTrimestrais?.cmo?.valor || 0}
-                    meta={indicadoresTrimestrais?.cmo?.meta || 20}
+                    valor={indicadoresTrimestraisMemo?.cmo?.valor || 0}
+                    meta={indicadoresTrimestraisMemo?.cmo?.meta || 20}
                     formato="percentual"
                     cor="orange"
                     inverterProgresso={true}
                     inverterComparacao={true}
                     comparacao={{
-                      valor: indicadoresTrimestrais?.cmo?.variacao || 0,
+                      valor: indicadoresTrimestraisMemo?.cmo?.variacao || 0,
                       label: "vs trimestre anterior"
                     }}
                   />
                   
                   <IndicadorCard
                     titulo="% Artística"
-                    valor={indicadoresTrimestrais?.artistica?.valor || 0}
-                    meta={indicadoresTrimestrais?.artistica?.meta || 17}
+                    valor={indicadoresTrimestraisMemo?.artistica?.valor || 0}
+                    meta={indicadoresTrimestraisMemo?.artistica?.meta || 17}
                     formato="percentual"
                     cor="pink"
                     inverterProgresso={true}
                     inverterComparacao={true}
                     comparacao={{
-                      valor: indicadoresTrimestrais?.artistica?.variacao || 0,
+                      valor: indicadoresTrimestraisMemo?.artistica?.variacao || 0,
                       label: "vs trimestre anterior"
                     }}
                   />

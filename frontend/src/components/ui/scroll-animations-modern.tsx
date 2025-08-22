@@ -56,7 +56,7 @@ interface ParallaxProps {
 // Hook para detectar scroll
 export const useScrollAnimation = (threshold = 0.1) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { threshold, once: true });
+  const isInView = useInView(ref, { once: true } as any);
   
   return { ref, isInView };
 };

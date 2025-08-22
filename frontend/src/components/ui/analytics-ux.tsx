@@ -319,11 +319,12 @@ export function HeatmapVisualizer({
   const [hoveredPoint, setHoveredPoint] = useState<HeatmapData | null>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [currentIntensity, setIntensity] = useState(intensity);
 
   // Filtrar dados por intensidade
   const filteredData = data.filter(point => {
-    if (intensity === 'all') return true;
-    return point.eventType === intensity;
+    if (currentIntensity === 'all') return true;
+    return point.eventType === currentIntensity;
   });
 
   // Calcular intensidade máxima para normalização
@@ -397,7 +398,7 @@ export function HeatmapVisualizer({
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600 dark:text-gray-400">Intensidade:</span>
           <select
-            value={intensity}
+            value={currentIntensity}
             onChange={(e) => setIntensity(e.target.value as any)}
             className="text-sm border rounded px-2 py-1"
           >
@@ -569,7 +570,7 @@ export function PerformanceMonitor({
       },
       {
         name: 'First Input Delay',
-        value: performance.getEntriesByType('first-input')[0]?.processingStart || 0,
+        value: (performance.getEntriesByType('first-input')[0] as any)?.processingStart || 0,
         unit: 'ms',
         target: 100,
         status: 'good',

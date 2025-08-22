@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     for (const date of datesToProcess) {
       const exists = await checkDateExists(supabase, dataType, date, barId)
       if (!exists) {
-        actualMissingDates.push(date)
+        (actualMissingDates as any).push(date)
       }
     }
 
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function getNextMissingDate(
-  supabase: ReturnType<typeof createClient>, 
+  supabase: any, 
   dataType: string, 
   barId: number,
   startDate?: string
@@ -222,7 +222,7 @@ function generateSequentialDates(startDate: string, count: number): string[] {
 }
 
 async function checkDateExists(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   dataType: string,
   date: string,
   barId: number
@@ -345,7 +345,7 @@ async function collectDataForDate(dataType: string, date: string, barId: number)
   }
 }
 
-async function processRawData(supabase: ReturnType<typeof createClient>, rawDataId: number) {
+async function processRawData(supabase: any, rawDataId: number) {
   try {
     const { data, error } = await supabase.functions.invoke('contahub_processor', {
       body: { raw_data_id: rawDataId }

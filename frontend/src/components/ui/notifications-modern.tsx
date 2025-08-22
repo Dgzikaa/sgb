@@ -397,7 +397,7 @@ export const ModernNotifications = React.forwardRef<HTMLDivElement, ModernNotifi
               variants={progressVariants}
               initial="initial"
               animate="animate"
-              custom={notification.progress || 100}
+              custom={(notification as any).progress || 100}
             />
           )}
 

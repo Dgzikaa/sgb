@@ -236,7 +236,7 @@ class UnifiedContaHubWorker {
     
     const { data, error } = await this.supabase
       .from('contahub_raw_data')
-      .insert({
+      .upsert({
         data_type: dataType,
         raw_json: rawData,
         data_date: dataDate,
@@ -244,6 +244,9 @@ class UnifiedContaHubWorker {
         record_count: recordCount,
         processed: false,
         created_at: new Date().toISOString()
+      }, {
+        onConflict: 'bar_id,data_type,data_date',
+        ignoreDuplicates: true
       })
       .select('id')
       .single()

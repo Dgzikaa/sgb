@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function getMissingDatesForType(
-  supabase: ReturnType<typeof createClient>, 
+  supabase: any, 
   dataType: string, 
   barId: number
 ): Promise<string[]> {
@@ -331,7 +331,7 @@ async function collectDataForSpecificDate(dataType: string, date: string, barId:
   }
 }
 
-async function processRawData(supabase: ReturnType<typeof createClient>, rawDataId: number) {
+async function processRawData(supabase: any, rawDataId: number) {
   try {
     // Chamar a Edge Function para processar
     const { data, error } = await supabase.functions.invoke('contahub_processor', {

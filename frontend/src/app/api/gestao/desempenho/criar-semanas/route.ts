@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       
       console.log(`📝 Preparando Semana ${semana}: ${start} - ${end}`);
       
-      semanasParaCriar.push({
+      (semanasParaCriar as any).push({
         bar_id: barId,
         ano: 2025,
         numero_semana: semana,

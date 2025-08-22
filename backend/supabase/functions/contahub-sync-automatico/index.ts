@@ -120,12 +120,15 @@ async function saveRawDataOnly(supabase: any, dataType: string, rawData: any, da
     // Salvar JSON completo como está - SEM PROCESSAMENTO
     const { data, error } = await supabase
           .from('contahub_raw_data')
-          .insert({
+          .upsert({
         bar_id: barId,
             data_type: dataType,
         data_date: dataDate,
         raw_json: rawData, // JSON completo sem modificação
         processed: false    // Sempre false - processamento será manual
+      }, {
+        onConflict: 'bar_id,data_type,data_date',
+        ignoreDuplicates: true
       })
       .select('id')
       .single();
