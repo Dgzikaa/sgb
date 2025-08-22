@@ -20,6 +20,8 @@ import {
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
+import { AnimatedCounter, AnimatedCurrency } from '@/components/ui/animated-counter';
+import { motion } from 'framer-motion';
 
 interface DadosSemana {
   semana: number;
@@ -209,7 +211,7 @@ export default function DesempenhoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-6">
         {/* Header compacto */}
         <div className="flex items-center justify-between mb-6">
@@ -262,61 +264,115 @@ export default function DesempenhoPage() {
         {/* Cards de Resumo */}
         {totaisAnuais && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Faturamento Total</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.faturamento_total)}</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden hover:scale-105">
+                <CardHeader className="pb-3 bg-gradient-to-r from-blue-500 to-blue-600">
+                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Faturamento Total
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <AnimatedCurrency 
+                      value={totaisAnuais.faturamento_total}
+                      duration={2}
+                      className="text-gray-900 dark:text-white"
+                    />
                   </div>
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                    Anual {anoAtual}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Clientes Atendidos</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{totaisAnuais.clientes_total.toLocaleString()}</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden hover:scale-105">
+                <CardHeader className="pb-3 bg-gradient-to-r from-emerald-500 to-emerald-600">
+                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Clientes Atendidos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <AnimatedCounter 
+                      value={totaisAnuais.clientes_total}
+                      duration={2.2}
+                      className="text-gray-900 dark:text-white"
+                    />
                   </div>
-                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg">
-                    <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                    Total {anoAtual}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Ticket Médio</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.ticket_medio)}</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden hover:scale-105">
+                <CardHeader className="pb-3 bg-gradient-to-r from-violet-500 to-violet-600">
+                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Ticket Médio
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <AnimatedCurrency 
+                      value={totaisAnuais.ticket_medio}
+                      duration={2.4}
+                      className="text-gray-900 dark:text-white"
+                    />
                   </div>
-                  <div className="p-2 bg-violet-100 dark:bg-violet-900/20 rounded-lg">
-                    <BarChart3 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <p className="text-xs text-violet-600 dark:text-violet-400 mt-1">
+                    Por cliente
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Performance Geral</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{totaisAnuais.performance_media.toFixed(1)}%</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden hover:scale-105">
+                <CardHeader className="pb-3 bg-gradient-to-r from-orange-500 to-orange-600">
+                  <CardTitle className="text-sm font-medium text-white flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Performance Geral
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <AnimatedCounter 
+                      value={totaisAnuais.performance_media}
+                      duration={2.6}
+                      className="text-gray-900 dark:text-white"
+                      suffix="%"
+                      decimals={1}
+                    />
                   </div>
-                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-                    <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                    Média {anoAtual}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
         )}
 
@@ -341,7 +397,12 @@ export default function DesempenhoPage() {
 
           {/* Visão Semanal */}
           <TabsContent value="semanal" className="space-y-4">
-            <Card className="card-dark">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
                 <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
@@ -366,7 +427,7 @@ export default function DesempenhoPage() {
                     </thead>
                     <tbody>
                       {dadosSemanas.map((semana, index) => (
-                        <tr key={semana.semana} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
+                        <tr key={semana.semana} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
                               <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
@@ -403,11 +464,17 @@ export default function DesempenhoPage() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
           </TabsContent>
 
           {/* Visão Mensal */}
           <TabsContent value="mensal" className="space-y-4">
-            <Card className="card-dark">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
                 <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg">
@@ -430,7 +497,7 @@ export default function DesempenhoPage() {
                     </thead>
                     <tbody>
                       {dadosMensais.map((dadoMes, index) => (
-                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
+                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 dark:hover:from-violet-900/20 dark:hover:to-purple-900/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
                               <div className="w-1 h-6 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
@@ -476,6 +543,7 @@ export default function DesempenhoPage() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
           </TabsContent>
         </Tabs>
       </div>

@@ -244,7 +244,7 @@ export class NLPProcessor {
 
   // Extrair categoria
   private extractCategory(query: string): QueryIntent['category'] {
-    let bestCategory: QueryIntent['category'] = 'general';
+    let bestCategory: QueryIntent['category'] = 'general' as any;
     let bestScore = 0;
 
     for (const [category, patterns] of Object.entries(CATEGORY_PATTERNS)) {
@@ -253,7 +253,7 @@ export class NLPProcessor {
           const score = 1;
           if (score > bestScore) {
             bestScore = score;
-            bestCategory = category as QueryIntent['category'];
+            bestCategory = category as any;
           }
         }
       }

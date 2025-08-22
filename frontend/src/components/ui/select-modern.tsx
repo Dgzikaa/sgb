@@ -536,4 +536,4 @@ export const ModernSelect = React.forwardRef<HTMLDivElement, ModernSelectProps>(
 ModernSelect.displayName = 'ModernSelect';
 
 // 🚀 EXPORT
-export { ModernSelect };
+// export { ModernSelect }; // Já exportado acima

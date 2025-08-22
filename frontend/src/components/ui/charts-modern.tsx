@@ -617,4 +617,4 @@ export const ModernChart = React.forwardRef<HTMLDivElement, ModernChartProps>(
 ModernChart.displayName = 'ModernChart';
 
 // 🚀 EXPORT
-export { ModernChart };
+// export { ModernChart }; // Já exportado acima
