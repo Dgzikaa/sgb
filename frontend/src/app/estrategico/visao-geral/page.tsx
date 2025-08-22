@@ -108,33 +108,6 @@ export default function VisaoGeralEstrategica() {
 
 
 
-  // Função para recarregar dados
-  const recarregarDados = useCallback(() => {
-    try {
-      // Resetar estados
-      setIndicadoresAnuais(null);
-      setIndicadoresTrimestrais(null);
-      setLoading(true);
-      setRequestInProgress(false);
-      
-      // Recarregar dados
-      if (selectedBar) {
-        setTimeout(() => carregarIndicadores(), 100);
-      }
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Dados recarregados com sucesso',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível recarregar os dados',
-        variant: 'destructive'
-      });
-    }
-  }, [selectedBar?.id, toast, carregarIndicadores]);
-
   const carregarIndicadores = useCallback(async () => {
     if (!selectedBar || requestInProgress) {
       return;
@@ -199,6 +172,33 @@ export default function VisaoGeralEstrategica() {
       hideLoading();
     }
   }, [selectedBar?.id, trimestreAtual, requestInProgress, toast, showLoading, hideLoading]);
+
+  // Função para recarregar dados
+  const recarregarDados = useCallback(() => {
+    try {
+      // Resetar estados
+      setIndicadoresAnuais(null);
+      setIndicadoresTrimestrais(null);
+      setLoading(true);
+      setRequestInProgress(false);
+      
+      // Recarregar dados
+      if (selectedBar) {
+        setTimeout(() => carregarIndicadores(), 100);
+      }
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Dados recarregados com sucesso',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível recarregar os dados',
+        variant: 'destructive'
+      });
+    }
+  }, [selectedBar?.id, toast, carregarIndicadores]);
 
   // Carregar indicadores quando selectedBar estiver disponível
   useEffect(() => {
