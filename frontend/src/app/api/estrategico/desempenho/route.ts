@@ -148,6 +148,12 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Debug: Verificar valores específicos das datas de agosto
+    console.log('🔍 Debug - Valores dos mapas para agosto:');
+    ['2025-08-03', '2025-08-09', '2025-08-10', '2025-08-11'].forEach(data => {
+      console.log(`  📅 ${data}: ContaHub=R$${contahubMap.get(data) || 0}, Yuzer=R$${yuzerMap.get(data) || 0}, Sympla=R$${symplaMap.get(data) || 0}`);
+    });
+
     const symplaMap = new Map();
     symplaData?.forEach(item => {
       symplaMap.set(item.data_evento, item.total_liquido || 0);
@@ -236,9 +242,9 @@ export async function GET(request: NextRequest) {
       const faturamenteSympla = symplaMap.get(evento.data_evento) || 0;
       const faturamentoTotal = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
       
-      // Debug para semana 32
-      if (semana === 32) {
-        console.log(`🔍 Semana 32 - Evento ${evento.nome} (${evento.data_evento}):`, {
+      // Debug detalhado para semanas recentes
+      if (semana >= 31 && semana <= 34) {
+        console.log(`🔍 Semana ${semana} - Evento ${evento.nome} (${evento.data_evento}):`, {
           contahub: faturamentoContaHub,
           yuzer: faturamentoYuzer,
           sympla: faturamenteSympla,
