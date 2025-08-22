@@ -105,6 +105,10 @@ export async function GET(request: NextRequest) {
 
 				const prev = map.get(fone)
 				if (!prev) {
+					// Debug: Log quando Laura é adicionada pela primeira vez
+					if (fone === '61992053013') {
+						console.log(`🔍 DEBUG: Adicionando Laura - Nome: ${nome}, Visitas: 1, Valor: R$ ${vrPagamentos}`)
+					}
 					map.set(fone, { 
 						nome, 
 						fone, 
@@ -115,6 +119,10 @@ export async function GET(request: NextRequest) {
 						totalGasto: vrPagamentos
 					})
 				} else {
+					// Debug: Log quando Laura é atualizada
+					if (fone === '61992053013') {
+						console.log(`🔍 DEBUG: Atualizando Laura - ${prev.nome} → ${nome}, Visitas: ${prev.visitas} → ${prev.visitas + 1}, Valor: R$ ${prev.totalGasto} → R$ ${prev.totalGasto + vrPagamentos}`)
+					}
 					prev.visitas += 1
 					prev.totalEntrada += vrCouvert
 					prev.totalConsumo += vrConsumo
