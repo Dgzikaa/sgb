@@ -104,11 +104,21 @@ const nextConfig = {
     serverComponentsExternalPackages: [],
     esmExternals: true,
     webpackBuildWorker: false, // Desabilitar para evitar problemas
+    // Otimizações para produção
+    ...(process.env.NODE_ENV === 'production' && {
+      optimizeCss: true,
+      turbotrace: {
+        logLevel: 'error',
+        logAll: false,
+      },
+    }),
   },
   
   // ✅ Configurações de compilação
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error'], // Manter console.error em produção
+    } : false,
   },
   
   // ✅ Configurações de performance

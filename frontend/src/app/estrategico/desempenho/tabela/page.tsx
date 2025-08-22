@@ -120,7 +120,10 @@ export default function TabelaDesempenhoPage() {
 
     setLoading(true);
     showLoading('Carregando dados de desempenho...');
-    console.log('🔄 Carregando dados de desempenho...');
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 Carregando dados de desempenho...');
+    }
 
     try {
       const params = new URLSearchParams({
@@ -145,7 +148,10 @@ export default function TabelaDesempenhoPage() {
       if (data.success) {
         setDados(data.data || []);
         setResumo(data.resumo || null);
-        console.log('✅ Dados carregados:', data.data?.length || 0, 'semanas');
+        // Log apenas em desenvolvimento
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Dados carregados:', data.data?.length || 0, 'semanas');
+        }
       } else {
         console.error('❌ Erro ao carregar dados:', data.error);
         setDados([]);
@@ -228,7 +234,10 @@ export default function TabelaDesempenhoPage() {
     setSyncing(true);
 
     try {
-      console.log('🔄 Iniciando sincronização com Google Sheets...');
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Iniciando sincronização com Google Sheets...');
+      }
 
       const response = await fetch('/api/gestao/desempenho/sync-sheets', {
         method: 'POST',

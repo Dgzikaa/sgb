@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🚀 Trigger Getin Sync - Iniciado em:', new Date().toISOString())
+    // Logs apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚀 Trigger Getin Sync - Iniciado em:', new Date().toISOString())
+    }
     
     // URL da Edge Function do Supabase (seguindo padrão do projeto)
     const functionUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/getin-sync-continuous'
     
-    console.log('📡 Chamando Edge Function:', functionUrl)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📡 Chamando Edge Function:', functionUrl)
+    }
     
     const response = await fetch(functionUrl, {
       method: 'POST',
@@ -24,7 +29,10 @@ export async function GET(request: NextRequest) {
 
     const result = await response.json()
     
-    console.log('✅ Sincronização Getin concluída:', result)
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ Sincronização Getin concluída:', result)
+    }
 
     return NextResponse.json({
       success: true,
