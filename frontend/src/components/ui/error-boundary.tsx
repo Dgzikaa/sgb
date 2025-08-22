@@ -82,7 +82,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     });
   }
 
-  private logError = (error: Error, errorInfo: ErrorInfo) => {
+  logError = (error: Error, errorInfo: ErrorInfo) => {
     const errorData = {
       errorId: this.state.errorId,
       timestamp: new Date().toISOString(),
@@ -108,7 +108,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     this.sendErrorToMonitoring(errorData);
   };
 
-  private sendErrorToMonitoring = async (errorData: any) => {
+  sendErrorToMonitoring = async (errorData: any) => {
     try {
       // Enviar para API de monitoramento (se configurada)
       if (process.env.NEXT_PUBLIC_ERROR_MONITORING_URL) {
@@ -124,7 +124,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     }
   };
 
-  private saveErrorToLocalStorage = (errorData: any) => {
+  saveErrorToLocalStorage = (errorData: any) => {
     try {
       const existingErrors = JSON.parse(localStorage.getItem('zykor_errors') || '[]');
       existingErrors.push(errorData);
@@ -140,7 +140,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     }
   };
 
-  private handleRetry = () => {
+  handleRetry = () => {
     const { maxRetries = 3, retryDelay = 1000 } = this.props;
     
     if (this.state.retryCount >= maxRetries) {
@@ -164,15 +164,15 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     }));
   };
 
-  private handleGoHome = () => {
+  handleGoHome = () => {
     window.location.href = '/home';
   };
 
-  private handleGoBack = () => {
+  handleGoBack = () => {
     window.history.back();
   };
 
-  private handleReportBug = () => {
+  handleReportBug = () => {
     const { error, errorInfo, errorId } = this.state;
     const bugReport = {
       errorId,
