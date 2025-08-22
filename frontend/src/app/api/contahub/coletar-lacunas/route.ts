@@ -349,7 +349,7 @@ async function collectContaHubDataForDate(dataType: string, date: string, barId:
 }
 
 async function getMissingDatesManually(
-  supabase: ReturnType<typeof createClient>, 
+  supabase: any, 
   dataType: string, 
   barId: number, 
   limit: number

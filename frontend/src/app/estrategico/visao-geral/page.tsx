@@ -141,153 +141,88 @@ export default function VisaoGeralEstrategica() {
     }
   }), []);
 
-  // Função para limpar cache e recarregar
-  const limparCacheERecarregar = () => {
+  // Função para limpar cache e recarregar - otimizada
+  const limparCacheERecarregar = useCallback(() => {
     try {
-      // Limpar TODOS os caches - sessionStorage E localStorage
-      const sessionKeys = Object.keys(sessionStorage);
-      sessionKeys.forEach(key => {
-        if (key.startsWith('vg:') || key.includes('indicadores')) {
-          sessionStorage.removeItem(key);
-        }
-      });
+      cacheManager.clear();
       
-      const localKeys = Object.keys(localStorage);
-      localKeys.forEach(key => {
-        if (key.startsWith('vg:') || key.includes('indicadores')) {
-          localStorage.removeItem(key);
-        }
-      });
-      
-      // Forçar limpeza de estado
+      // Resetar estados
       setIndicadoresAnuais(null);
       setIndicadoresTrimestrais(null);
       setLoading(true);
       setRequestInProgress(false);
       
-      // Adicionar timestamp para forçar nova requisição
-      const timestamp = Date.now();
-      console.log(`🧹 CACHE TOTALMENTE LIMPO - ${timestamp}`);
-      
-      // Recarregar dados
+      // Recarregar dados se bar selecionado
       if (selectedBar) {
         carregarIndicadores();
-        calcularCMO(); // Calcular CMO diretamente
       }
       
       toast({
-        title: 'Cache totalmente limpo',
+        title: 'Cache limpo',
         description: 'Dados recarregados com sucesso',
       });
     } catch (error) {
-      console.error('Erro ao limpar cache:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível limpar o cache',
+        variant: 'destructive'
+      });
     }
-  };
+  }, [selectedBar, cacheManager, toast]);
 
   const carregarIndicadores = useCallback(async () => {
-    console.log('🔄 carregarIndicadores chamado:', { selectedBar: selectedBar?.id, requestInProgress });
-    setDebugInfo(`Iniciando carregamento... Bar: ${selectedBar?.id}`);
-    
-    if (!selectedBar) {
-      setDebugInfo('❌ Nenhum bar selecionado');
-      return;
-    }
-
-    // Evitar múltiplas requisições simultâneas
-    if (requestInProgress) {
-      setDebugInfo('⏳ Requisição já em andamento');
+    if (!selectedBar || requestInProgress) {
       return;
     }
 
     const hoje = new Date();
     const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
-    const timestamp = Date.now(); // Forçar bypass do cache HTTP
-    const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
-    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
-
-    // 🚨 DESABILITAR CACHE TEMPORARIAMENTE PARA TESTAR NOVA LÓGICA
-    console.log('🚨 CACHE DESABILITADO - SEMPRE BUSCAR DADOS FRESCOS');
-    
-    // COMENTADO PARA FORÇAR SEMPRE NOVA REQUISIÇÃO
-    /*
-    // Cache com TTL menor para permitir atualizações
-    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
     const anualCacheKey = `vg:anual:${selectedBar.id}`;
     const triCacheKey = `vg:tri:${selectedBar.id}:${trimestreAtual}:${mesAtual}`;
 
-    const readCache = (key: string) => {
-      try {
-        const raw = sessionStorage.getItem(key);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || !parsed.data || !parsed.ts) return null;
-        const isFresh = Date.now() - parsed.ts < CACHE_TTL_MS;
-        return isFresh ? parsed.data : null;
-      } catch {
-        return null;
-      }
-    };
+    // Verificar cache primeiro
+    const anualCached = cacheManager.read(anualCacheKey);
+    const triCached = cacheManager.read(triCacheKey);
 
-    const writeCache = (key: string, data: unknown) => {
-      try {
-        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-      } catch (error) {
-        console.warn('Erro ao salvar cache:', error);
-      }
-    };
-
-    const anualCached = readCache(anualCacheKey);
-    const triCached = readCache(triCacheKey);
-
-    // Se há cache válido, usa apenas ele
     if (anualCached && triCached) {
-      console.log('📦 Usando dados do cache');
-      setDebugInfo('📦 Carregado do cache');
       setIndicadoresAnuais(anualCached.anual);
       setIndicadoresTrimestrais(triCached.trimestral);
       setLoading(false);
       return;
     }
-    */
 
-    // Sem cache: exibe spinner e busca
+    // Buscar dados da API
     setLoading(true);
     setRequestInProgress(true);
-    showLoading('Carregando indicadores...');
+    
+    const timestamp = Date.now();
+    const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
+    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
     
     const requestHeaders = {
       'x-user-data': JSON.stringify({ bar_id: selectedBar.id, permissao: 'admin' })
-    } as Record<string, string>;
+    };
 
     try {
-      console.log('🔄 Fazendo requisição para indicadores...');
-      setDebugInfo('🔄 Fazendo requisição para APIs...');
-      
       const [anualResponse, trimestralResponse] = await Promise.all([
         fetch(anualUrl, { headers: requestHeaders }),
         fetch(trimestralUrl, { headers: requestHeaders })
       ]);
 
       if (!anualResponse.ok || !trimestralResponse.ok) {
-        setDebugInfo(`❌ Erro HTTP: ${anualResponse.status}/${trimestralResponse.status}`);
         throw new Error('Erro ao buscar indicadores');
       }
 
       const anualData = await anualResponse.json();
       const trimestralData = await trimestralResponse.json();
 
-      console.log('✅ Dados carregados:', { anual: anualData, trimestral: trimestralData });
-      setDebugInfo('✅ Dados carregados com sucesso');
-
       setIndicadoresAnuais(anualData.anual);
       setIndicadoresTrimestrais(trimestralData.trimestral);
       
-      // 🚨 CACHE DESABILITADO - NÃO SALVAR NO CACHE
-      // writeCache(anualCacheKey, anualData);
-      // writeCache(triCacheKey, trimestralData);
+      // Salvar no cache
+      cacheManager.write(anualCacheKey, anualData);
+      cacheManager.write(triCacheKey, trimestralData);
     } catch (error) {
-      console.error('❌ Erro ao carregar indicadores:', error);
-      setDebugInfo(`❌ Erro: ${error}`);
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar os indicadores',
@@ -296,24 +231,62 @@ export default function VisaoGeralEstrategica() {
     } finally {
       setLoading(false);
       setRequestInProgress(false);
-      hideLoading();
     }
-  }, [selectedBar, trimestreAtual, requestInProgress, showLoading, hideLoading, toast]);
+  }, [selectedBar, trimestreAtual, requestInProgress, cacheManager, toast]);
 
   // Carregar indicadores quando selectedBar estiver disponível
   useEffect(() => {
-    console.log('🔍 useEffect disparado:', { selectedBar: selectedBar?.id, trimestreAtual });
     if (selectedBar) {
       carregarIndicadores();
-      calcularCMO(); // Calcular CMO diretamente
     }
-  }, [selectedBar, trimestreAtual, calcularCMO]);
+  }, [selectedBar, trimestreAtual, carregarIndicadores]);
 
+  // Memoizar dados dos indicadores para evitar re-renders desnecessários
+  const indicadoresAnuaisMemo = useMemo(() => indicadoresAnuais, [indicadoresAnuais]);
+  const indicadoresTrimestraisMemo = useMemo(() => indicadoresTrimestrais, [indicadoresTrimestrais]);
 
+  // Memoizar informações do trimestre atual
+  const trimestreInfo = useMemo(() => getTrimestreInfo(trimestreAtual), [getTrimestreInfo, trimestreAtual]);
+
+  // Memoizar componentes de skeleton para evitar re-renders
+  const SkeletonCards = useMemo(() => {
+    const AnualSkeleton = () => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="bg-gray-50 dark:bg-gray-900">
+            <CardHeader className="pb-2">
+              <Skeleton className="h-4 w-20" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-6 w-24 mb-2" />
+              <Skeleton className="h-2 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+
+    const TrimestralSkeleton = () => (
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="bg-gray-50 dark:bg-gray-900">
+            <CardHeader className="pb-2">
+              <Skeleton className="h-4 w-20" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-6 w-24 mb-2" />
+              <Skeleton className="h-2 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+
+    return { AnualSkeleton, TrimestralSkeleton };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <GlobalLoadingComponent />
       <div className="container mx-auto px-4 py-2 space-y-2">
 
 
@@ -356,43 +329,31 @@ export default function VisaoGeralEstrategica() {
           {anualExpanded && (
             <>
               {loading ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                  {[...Array(4)].map((_, i) => (
-                    <Card key={i} className="bg-gray-50 dark:bg-gray-900">
-                      <CardHeader className="pb-2">
-                        <Skeleton className="h-4 w-20" />
-                      </CardHeader>
-                      <CardContent>
-                        <Skeleton className="h-6 w-24 mb-2" />
-                        <Skeleton className="h-2 w-full" />
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : indicadoresAnuais ? (
+                <SkeletonCards.AnualSkeleton />
+              ) : indicadoresAnuaisMemo ? (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                   <IndicadorCard
                     titulo="Faturamento 2025"
-                    valor={indicadoresAnuais.faturamento.valor}
-                    meta={indicadoresAnuais.faturamento.meta}
+                    valor={indicadoresAnuaisMemo.faturamento.valor}
+                    meta={indicadoresAnuaisMemo.faturamento.meta}
                     formato="moeda"
                     cor="green"
-                    detalhes={indicadoresAnuais.faturamento.detalhes}
+                    detalhes={indicadoresAnuaisMemo.faturamento.detalhes}
                   />
                   
                   <IndicadorCard
                     titulo="Pessoas"
-                    valor={indicadoresAnuais.pessoas.valor}
-                    meta={indicadoresAnuais.pessoas.meta}
+                    valor={indicadoresAnuaisMemo.pessoas.valor}
+                    meta={indicadoresAnuaisMemo.pessoas.meta}
                     formato="numero"
                     cor="blue"
-                    detalhes={indicadoresAnuais.pessoas.detalhes}
+                    detalhes={indicadoresAnuaisMemo.pessoas.detalhes}
                   />
                   
                   <IndicadorCard
                     titulo="Reputação"
-                    valor={indicadoresAnuais.reputacao.valor}
-                    meta={indicadoresAnuais.reputacao.meta}
+                    valor={indicadoresAnuaisMemo.reputacao.valor}
+                    meta={indicadoresAnuaisMemo.reputacao.meta}
                     formato="decimal"
                     cor="purple"
                     sufixo=" ⭐"
@@ -435,7 +396,7 @@ export default function VisaoGeralEstrategica() {
                 <Target className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{getTrimestreInfo(trimestreAtual)?.nome}</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{trimestreInfo?.nome}</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Performance operacional</p>
               </div>
             </div>
@@ -493,19 +454,7 @@ export default function VisaoGeralEstrategica() {
           {trimestralExpanded && (
             <>
               {loading ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                  {[...Array(6)].map((_, i) => (
-                    <Card key={i} className="bg-gray-50 dark:bg-gray-900">
-                      <CardHeader className="pb-2">
-                        <Skeleton className="h-4 w-20" />
-                      </CardHeader>
-                      <CardContent>
-                        <Skeleton className="h-6 w-24 mb-2" />
-                        <Skeleton className="h-2 w-full" />
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <SkeletonCards.TrimestralSkeleton />
               ) : (
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                   <IndicadorCard

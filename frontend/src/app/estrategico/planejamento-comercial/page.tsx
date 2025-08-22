@@ -238,6 +238,47 @@ export default function PlanejamentoComercialPage() {
     }
   };
 
+  // Forçar recálculo da tabela eventos_base
+  const [recalculandoEventos, setRecalculandoEventos] = useState(false);
+  
+  const recalcularEventosBase = async () => {
+    try {
+      setRecalculandoEventos(true);
+      console.log('🔄 Iniciando recálculo forçado da eventos_base...');
+      
+      const response = await apiCall('/api/eventos/recalcular-eventos-base', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        },
+        body: JSON.stringify({
+          data_inicio: `${filtroAno}-${filtroMes.toString().padStart(2, '0')}-01`,
+          data_fim: filtroMes === 12 
+            ? `${filtroAno + 1}-01-31` 
+            : `${filtroAno}-${(filtroMes + 1).toString().padStart(2, '0')}-01`
+        })
+      });
+
+      if (response.success) {
+        console.log('✅ Recálculo eventos_base concluído:', response);
+        
+        // Mostrar feedback de sucesso
+        alert(`✅ Recálculo concluído!\n\n📊 Eventos recalculados: ${response.total_recalculados || 0}\n🔄 Dados atualizados com sucesso!`);
+        
+        // Recarregar dados da página após recálculo
+        await buscarDados();
+      } else {
+        throw new Error(response.error || 'Erro no recálculo');
+      }
+    } catch (err) {
+      console.error('❌ Erro no recálculo eventos_base:', err);
+      alert('❌ Erro ao recalcular dados dos eventos. Tente novamente.');
+    } finally {
+      setRecalculandoEventos(false);
+    }
+  };
+
   // Abrir modal de edição
   const abrirModal = (evento: PlanejamentoData) => {
     setEventoSelecionado(evento);
@@ -600,11 +641,12 @@ export default function PlanejamentoComercialPage() {
                   {/* Ações */}
                   <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                     <button 
-                      onClick={() => buscarDados()} 
-                      className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 text-sm"
-                      title="Atualizar dados da página"
+                      onClick={recalcularEventosBase} 
+                      disabled={recalculandoEventos}
+                      className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                      title="Forçar recálculo dos dados dos eventos"
                     >
-                      🔄 Atualizar
+                      {recalculandoEventos ? '⏳ Recalculando...' : '🔄 Atualizar Eventos'}
                     </button>
                     
                     <button 
