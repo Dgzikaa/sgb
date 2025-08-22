@@ -146,18 +146,35 @@ export async function GET(request: NextRequest) {
 		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
 			console.log('🔍 DEBUG: Top 5 clientes filtrados por dia da semana:')
 			clientes.slice(0, 5).forEach((cliente, index) => {
-				const valorGasto = cliente.total_gasto || 0
+				const valorGasto = cliente.valor_total_gasto || 0
 				console.log(`  ${index + 1}º: ${cliente.nome_principal} - ${cliente.total_visitas} visitas - R$ ${valorGasto.toFixed(2)} (${cliente.telefone})`)
 			})
 			
-			// Debug específico para Gabriela
-			const gabrielaClientes = clientes.filter(c => c.nome_principal.toLowerCase().includes('gabriela'))
-			if (gabrielaClientes.length > 0) {
-				console.log('🔍 DEBUG: Gabrielas encontradas:')
-				gabrielaClientes.forEach((cliente, index) => {
-					console.log(`  Gabriela ${index + 1}: ${cliente.total_visitas} visitas - ${cliente.telefone}`)
-				})
-			}
+					// Debug específico para Gabriela e Laura
+		const gabrielaClientes = clientes.filter(c => c.nome_principal.toLowerCase().includes('gabriela'))
+		const lauraClientes = clientes.filter(c => c.nome_principal.toLowerCase().includes('laura'))
+		
+		if (gabrielaClientes.length > 0) {
+			console.log('🔍 DEBUG: Gabrielas encontradas:')
+			gabrielaClientes.forEach((cliente, index) => {
+				console.log(`  Gabriela ${index + 1}: ${cliente.total_visitas} visitas - R$ ${(cliente.valor_total_gasto || 0).toFixed(2)} - ${cliente.telefone}`)
+			})
+		}
+		
+		if (lauraClientes.length > 0) {
+			console.log('🔍 DEBUG: Lauras encontradas:')
+			lauraClientes.forEach((cliente, index) => {
+				console.log(`  Laura ${index + 1}: ${cliente.total_visitas} visitas - R$ ${(cliente.valor_total_gasto || 0).toFixed(2)} - ${cliente.telefone}`)
+			})
+		}
+		
+		// Debug: Verificar se Laura 61992053013 está no Map
+		const lauraMap = map.get('61992053013')
+		if (lauraMap) {
+			console.log(`🔍 DEBUG: Laura no Map: ${lauraMap.nome} - ${lauraMap.visitas} visitas - R$ ${lauraMap.totalGasto.toFixed(2)}`)
+		} else {
+			console.log('🔍 DEBUG: Laura 61992053013 NÃO encontrada no Map!')
+		}
 		}
 
 		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
