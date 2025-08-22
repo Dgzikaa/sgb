@@ -73,6 +73,13 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
+				// FILTRO OPERACIONAL: Excluir terças-feiras (bar não abre)
+				const dataGerencial = new Date(r.dt_gerencial as string)
+				const diaSemanaData = dataGerencial.getDay()
+				if (diaSemanaData === 2) { // Terça-feira
+					continue // Pular registros de terça-feira (bar fechado)
+				}
+				
 				// Contar linha apenas se passou no filtro
 				totalLinhas++
 
