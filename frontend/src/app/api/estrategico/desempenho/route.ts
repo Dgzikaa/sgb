@@ -148,12 +148,6 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Debug: Verificar valores específicos das datas de agosto
-    console.log('🔍 Debug - Valores dos mapas para agosto:');
-    ['2025-08-03', '2025-08-09', '2025-08-10', '2025-08-11'].forEach(data => {
-      console.log(`  📅 ${data}: ContaHub=R$${contahubMap.get(data) || 0}, Yuzer=R$${yuzerMap.get(data) || 0}, Sympla=R$${symplaMap.get(data) || 0}`);
-    });
-
     const symplaMap = new Map();
     symplaData?.forEach(item => {
       symplaMap.set(item.data_evento, item.total_liquido || 0);
@@ -163,6 +157,12 @@ export async function GET(request: NextRequest) {
     contahubData?.forEach(item => {
       const currentValue = contahubMap.get(item.dt_gerencial) || 0;
       contahubMap.set(item.dt_gerencial, currentValue + (item.liquido || 0));
+    });
+
+    // Debug: Verificar valores específicos das datas de agosto (após inicializar todos os mapas)
+    console.log('🔍 Debug - Valores dos mapas para agosto:');
+    ['2025-08-03', '2025-08-09', '2025-08-10', '2025-08-11'].forEach(data => {
+      console.log(`  📅 ${data}: ContaHub=R$${contahubMap.get(data) || 0}, Yuzer=R$${yuzerMap.get(data) || 0}, Sympla=R$${symplaMap.get(data) || 0}`);
     });
 
     if (!eventos || eventos.length === 0) {
