@@ -82,10 +82,6 @@ export default function PermissoesPage() {
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchPermissoes();
-  }, [fetchPermissoes]);
-
   const fetchPermissoes = useCallback(async () => {
     try {
       const response = await fetch('/api/configuracoes/permissoes');
@@ -107,6 +103,10 @@ export default function PermissoesPage() {
       setLoading(false);
     }
   }, [toast]);
+
+  useEffect(() => {
+    fetchPermissoes();
+  }, [fetchPermissoes]);
 
   const handleModuloChange = (roleKey: string, moduloId: string, checked: boolean) => {
     setRolesEditadas(prev => ({

@@ -91,11 +91,6 @@ function UsuariosPage() {
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchUsuarios();
-    fetchModulos();
-  }, [fetchUsuarios, fetchModulos]);
-
   const fetchUsuarios = useCallback(async () => {
     try {
       const response = await fetch('/api/configuracoes/usuarios');
@@ -126,6 +121,11 @@ function UsuariosPage() {
       console.error('Erro ao buscar módulos:', error);
     }
   }, []);
+
+  useEffect(() => {
+    fetchUsuarios();
+    fetchModulos();
+  }, [fetchUsuarios, fetchModulos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -161,6 +161,56 @@ export default function TabelaDesempenhoPage() {
     }
   }, [selectedBar?.id, anoFiltro, mesFiltro, hideLoading, showLoading]);
 
+  const recalcularAutomatico = useCallback(async () => {
+    if (!selectedBar?.id) return;
+
+    setRecalculating(true);
+    showLoading('Atualizando dados automaticamente...');
+
+    try {
+      const response = await fetch('/api/gestao/desempenho/recalcular', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': JSON.stringify({
+            bar_id: selectedBar.id,
+            permissao: 'admin',
+          }),
+        },
+        body: JSON.stringify({
+          recalcular_todas: true
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: '✅ Recálculo Concluído!',
+          description: `${result.data?.length || 0} semana(s) foram recalculadas automaticamente.`,
+        });
+        await carregarDados();
+      } else {
+        toast({
+          title: '❌ Erro no Recálculo',
+          description: result.error || 'Erro desconhecido',
+          variant: 'destructive'
+        });
+      }
+    } catch (error: unknown) {
+      console.error('❌ Erro ao recalcular:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({
+        title: '❌ Erro no Recálculo',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+    } finally {
+      setRecalculating(false);
+      hideLoading();
+    }
+  }, [selectedBar?.id, carregarDados, toast, hideLoading, showLoading]);
+
   useEffect(() => {
     if (selectedBar?.id) {
       carregarDados();
@@ -291,56 +341,6 @@ export default function TabelaDesempenhoPage() {
       alert(`❌ Erro ao limpar dados: ${errorMessage}`);
     }
   };
-
-  const recalcularAutomatico = useCallback(async () => {
-    if (!selectedBar?.id) return;
-
-    setRecalculating(true);
-    showLoading('Atualizando dados automaticamente...');
-
-    try {
-      const response = await fetch('/api/gestao/desempenho/recalcular', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-data': JSON.stringify({
-            bar_id: selectedBar.id,
-            permissao: 'admin',
-          }),
-        },
-        body: JSON.stringify({
-          recalcular_todas: true
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast({
-          title: '✅ Recálculo Concluído!',
-          description: `${result.data?.length || 0} semana(s) foram recalculadas automaticamente.`,
-        });
-        await carregarDados();
-      } else {
-        toast({
-          title: '❌ Erro no Recálculo',
-          description: result.error || 'Erro desconhecido',
-          variant: 'destructive'
-        });
-      }
-    } catch (error: unknown) {
-      console.error('❌ Erro ao recalcular:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      toast({
-        title: '❌ Erro no Recálculo',
-        description: errorMessage,
-        variant: 'destructive'
-      });
-    } finally {
-      setRecalculating(false);
-      hideLoading();
-    }
-  }, [selectedBar?.id, carregarDados, toast, hideLoading, showLoading]);
 
   const criarSemanasFaltantes = async () => {
     if (!selectedBar?.id) return;
