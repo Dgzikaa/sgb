@@ -273,6 +273,7 @@ export default function CalendarioPage() {
     setSalvandoEvento(true);
     try {
       const eventoId = eventoCompleto?.id;
+      let response;
       
       if (eventoId) {
         // Atualizar evento existente usando PUT
@@ -285,7 +286,7 @@ export default function CalendarioPage() {
           observacoes: dadosEvento.observacoes || null
         };
         
-        const response = await apiCall('/api/ferramentas/calendario/eventos', {
+        response = await apiCall('/api/ferramentas/calendario/eventos', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -310,7 +311,7 @@ export default function CalendarioPage() {
           observacoes: dadosEvento.observacoes || null
         };
 
-        const response = await apiCall('/api/ferramentas/calendario/eventos', {
+        response = await apiCall('/api/ferramentas/calendario/eventos', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

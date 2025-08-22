@@ -412,7 +412,7 @@ export class ZykorShareAPI {
 
     return new Promise<Blob>((resolve) => {
       canvas.toBlob((blob) => resolve(blob!), 'image/png');
-    });
+    }) as any;
   }
 
   private showShareDialog(message: string): void {

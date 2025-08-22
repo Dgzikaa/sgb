@@ -211,7 +211,6 @@ export default function ContaHubRetroativoPage() {
                   {dataTypes.map((type) => (
                     <div key={type.id} className="flex items-start space-x-3">
                       <Checkbox
-                        id={type.id}
                         checked={selectedTypes.includes(type.id)}
                         onCheckedChange={(checked) => handleTypeChange(type.id, !!checked)}
                       />
@@ -232,7 +231,6 @@ export default function ContaHubRetroativoPage() {
               <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="force-recollect"
                     checked={forceRecollect}
                     onCheckedChange={setForceRecollect}
                   />

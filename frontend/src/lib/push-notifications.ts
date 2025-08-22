@@ -115,7 +115,6 @@ export class ZykorPushNotifications {
       body: finalConfig.body,
       icon: finalConfig.icon,
       badge: finalConfig.badge,
-      image: finalConfig.image,
       tag: finalConfig.tag,
       requireInteraction: finalConfig.requireInteraction,
       actions: finalConfig.actions,

@@ -5,7 +5,7 @@ import ModernAgentChat from '@/components/ModernAgentChat';
 
 export default function AgentePage() {
   return (
-    <ProtectedRoute requiredPermission="operacoes">
+    <ProtectedRoute>
       <ModernAgentChat />
     </ProtectedRoute>
   );

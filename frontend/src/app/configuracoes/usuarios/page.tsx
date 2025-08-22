@@ -517,7 +517,6 @@ function UsuariosPage() {
                               {categoriaModulos.map(modulo => (
                                 <div key={modulo.id} className="flex items-center space-x-2">
                                   <Checkbox
-                                    id={modulo.id}
                                     checked={formData.modulos_permitidos.includes(modulo.id)}
                                     onCheckedChange={(checked) => handleModuloChange(modulo.id, checked as boolean)}
                                   />
@@ -540,7 +539,6 @@ function UsuariosPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <Checkbox
-                            id="ativo"
                             checked={formData.ativo}
                             onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ativo: checked as boolean }))}
                           />

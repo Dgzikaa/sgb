@@ -1,17 +1,17 @@
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { Resource } from '@opentelemetry/resources';
+// import { NodeSDK } from '@opentelemetry/sdk-node';
+// import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+// import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
 import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
 import { metrics, trace } from '@opentelemetry/api';
 
 // Configuração do Resource
-const resource = new Resource({
-  [SemanticResourceAttributes.SERVICE_NAME]: 'zykor-frontend',
-  [SemanticResourceAttributes.SERVICE_VERSION]: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
-  [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
-});
+// const resource = new Resource({
+//   [SemanticResourceAttributes.SERVICE_NAME]: 'zykor-frontend',
+//   [SemanticResourceAttributes.SERVICE_VERSION]: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
+//   [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
+// });
 
 // Configuração para diferentes ambientes
 const getExporters = () => {

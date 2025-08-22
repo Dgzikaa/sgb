@@ -733,16 +733,16 @@ export default function DrePage() {
                             {(() => {
                               // Calcular métricas
                               const custoFixo = (
-                                (data.macroCategorias.find(m => m.nome === "Mão-de-Obra")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas Comerciais")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas Administrativas")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas Operacionais")?.total_saidas || 0) +
-                                (data.macroCategorias.find(m => m.nome === "Despesas de Ocupação (Contas)")?.total_saidas || 0)
+                                (data?.macroCategorias.find(m => m.nome === "Mão-de-Obra")?.total_saidas || 0) +
+                                (data?.macroCategorias.find(m => m.nome === "Despesas Comerciais")?.total_saidas || 0) +
+                                (data?.macroCategorias.find(m => m.nome === "Despesas Administrativas")?.total_saidas || 0) +
+                                (data?.macroCategorias.find(m => m.nome === "Despesas Operacionais")?.total_saidas || 0) +
+                                (data?.macroCategorias.find(m => m.nome === "Despesas de Ocupação (Contas)")?.total_saidas || 0)
                               );
                               
-                              const totalReceitas = data.macroCategorias.find(m => m.nome === "Receita")?.total_entradas || 1;
-                              const custosVariaveis = data.macroCategorias.find(m => m.nome === "Custos Variáveis")?.total_saidas || 0;
-                              const cmv = data.macroCategorias.find(m => m.nome === "Custo insumos (CMV)")?.total_saidas || 0;
+                              const totalReceitas = data?.macroCategorias.find(m => m.nome === "Receita")?.total_entradas || 1;
+                              const custosVariaveis = data?.macroCategorias.find(m => m.nome === "Custos Variáveis")?.total_saidas || 0;
+                              const cmv = data?.macroCategorias.find(m => m.nome === "Custo insumos (CMV)")?.total_saidas || 0;
                               
                               const mc = (1 - ((custosVariaveis + cmv) / totalReceitas)) * 100;
                               const breakeven = custoFixo / (mc / 100);

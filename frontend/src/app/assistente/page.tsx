@@ -179,7 +179,7 @@ export default function AssistentePage() {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
-            {chartType === 'line' && (
+            {chartType === 'line' ? (
               <LineChart data={chartData.data}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -198,9 +198,7 @@ export default function AssistentePage() {
                   />
                 ))}
               </LineChart>
-            )}
-            
-            {chartType === 'bar' && (
+            ) : chartType === 'bar' ? (
               <BarChart data={chartData.data}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -217,9 +215,7 @@ export default function AssistentePage() {
                   />
                 ))}
               </BarChart>
-            )}
-            
-            {chartType === 'pie' && (
+            ) : chartType === 'pie' ? (
               <PieChart>
                 <Pie
                   data={chartData.data}
@@ -237,9 +233,7 @@ export default function AssistentePage() {
                 </Pie>
                 <Tooltip />
               </PieChart>
-            )}
-            
-            {chartType === 'composed' && (
+            ) : (
               <ComposedChart data={chartData.data}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />

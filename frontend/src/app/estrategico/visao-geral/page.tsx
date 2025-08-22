@@ -1,15 +1,13 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-
 import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
-  DollarSign, 
   Target,
   ChevronLeft,
   ChevronRight,
@@ -18,7 +16,6 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { useGlobalLoading } from '@/components/ui/global-loading';
 
 interface IndicadoresAnuais {
   faturamento: {
@@ -76,30 +73,27 @@ interface IndicadoresTrimestrais {
 export default function VisaoGeralEstrategica() {
   const { selectedBar } = useBar();
   const { toast } = useToast();
-  const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
 
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
-  const [trimestreAtual, setTrimestreAtual] = useState(3); // 2º, 3º ou 4º trimestre
+  const [trimestreAtual, setTrimestreAtual] = useState(3);
   const [anualExpanded, setAnualExpanded] = useState(true);
   const [trimestralExpanded, setTrimestralExpanded] = useState(true);
   const [requestInProgress, setRequestInProgress] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
-  const [cmoCalculado, setCmoCalculado] = useState<number>(0);
 
 
   // Removido useEffect do PageTitle para evitar re-renders desnecessários
 
-  // Informações dos trimestres
-  const getTrimestreInfo = (trimestre: number) => {
+  // Informações dos trimestres - memoizado para evitar recriação
+  const getTrimestreInfo = useMemo(() => {
     const info = {
       2: { nome: '2º Trimestre 2025 (Abr-Jun)', periodo: 'abril-junho' },
       3: { nome: '3º Trimestre 2025 (Jul-Set)', periodo: 'julho-setembro' },
       4: { nome: '4º Trimestre 2025 (Out-Dez)', periodo: 'outubro-dezembro' }
     };
-    return info[trimestre as keyof typeof info];
-  };
+    return (trimestre: number) => info[trimestre as keyof typeof info];
+  }, []);
 
   // Navegação entre trimestres
   const navegarTrimestre = (direcao: 'anterior' | 'proximo') => {
@@ -110,24 +104,42 @@ export default function VisaoGeralEstrategica() {
     }
   };
 
-  // Função para calcular CMO diretamente (valores fixos baseados nos logs)
-  const calcularCMO = useCallback(() => {
-    console.log('🧮 CALCULANDO CMO DIRETAMENTE NO FRONTEND');
-    
-    // Valores baseados nos logs que você forneceu
-    const totalCMO = 351006.93; // R$ 351.006,93
-    const faturamentoTrimestre = 2170368; // Valor correto que deveria vir da API
-    
-    const percentualCMO = faturamentoTrimestre > 0 ? (totalCMO / faturamentoTrimestre) * 100 : 0;
-    
-    console.log('🧮 CÁLCULO CMO FRONTEND (VALORES FIXOS):');
-    console.log(`CMO Total: R$ ${totalCMO.toLocaleString('pt-BR')}`);
-    console.log(`Faturamento Trimestre: R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
-    console.log(`Percentual CMO: ${percentualCMO.toFixed(2)}%`);
-    
-    setCmoCalculado(percentualCMO);
-    return percentualCMO;
-  }, []);
+  // Cache inteligente com TTL
+  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
+  
+  const cacheManager = useMemo(() => ({
+    read: (key: string) => {
+      try {
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.data || !parsed.ts) return null;
+        const isFresh = Date.now() - parsed.ts < CACHE_TTL_MS;
+        return isFresh ? parsed.data : null;
+      } catch {
+        return null;
+      }
+    },
+    write: (key: string, data: unknown) => {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+      } catch (error) {
+        // Falha silenciosa no cache
+      }
+    },
+    clear: () => {
+      try {
+        const keys = Object.keys(sessionStorage);
+        keys.forEach(key => {
+          if (key.startsWith('vg:') || key.includes('indicadores')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+      } catch (error) {
+        // Falha silenciosa na limpeza
+      }
+    }
+  }), []);
 
   // Função para limpar cache e recarregar
   const limparCacheERecarregar = () => {

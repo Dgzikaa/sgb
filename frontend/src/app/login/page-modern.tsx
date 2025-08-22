@@ -177,7 +177,7 @@ export default function LoginModernPage() {
         }));
 
         // Sincronizar login em background
-        await backgroundSync.addTask('auth', 'create', {
+        await backgroundSync.addTask('evento', 'create', {
           email: formData.email,
           loginMethod: 'traditional',
           timestamp: new Date().toISOString()
@@ -187,7 +187,7 @@ export default function LoginModernPage() {
         if (pushNotifications.isEnabled()) {
           await pushNotifications.notifySystemAlert(
             `Login realizado com sucesso! Bem-vindo de volta.`,
-            'info'
+            'normal'
           );
         }
 

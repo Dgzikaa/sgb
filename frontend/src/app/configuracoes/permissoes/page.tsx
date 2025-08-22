@@ -321,7 +321,6 @@ export default function PermissoesPage() {
                               {categoriaModulos.map(modulo => (
                                 <div key={modulo.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                   <Checkbox
-                                    id={`${roleKey}-${modulo.id}`}
                                     checked={modulosPermitidos.includes(modulo.id)}
                                     onCheckedChange={(checked) => 
                                       handleModuloChange(roleKey, modulo.id, checked as boolean)
