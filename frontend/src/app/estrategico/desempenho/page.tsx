@@ -14,7 +14,8 @@ import {
   DollarSign,
   ChevronLeft,
   ChevronRight,
-  RefreshCcw
+  RefreshCcw,
+  Activity
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useToast } from '@/hooks/use-toast';
@@ -166,15 +167,15 @@ export default function DesempenhoPage() {
   };
 
   const getPerformanceColor = (performance: number) => {
-    if (performance >= 90) return 'text-green-600 dark:text-green-400';
-    if (performance >= 70) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
+    if (performance >= 90) return 'text-emerald-600 dark:text-emerald-400';
+    if (performance >= 70) return 'text-amber-600 dark:text-amber-400';
+    return 'text-rose-600 dark:text-rose-400';
   };
 
   const getPerformanceBadge = (performance: number) => {
-    if (performance >= 90) return 'bg-green-100 text-green-800';
-    if (performance >= 70) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-red-100 text-red-800';
+    if (performance >= 90) return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800';
+    if (performance >= 70) return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800';
+    return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800';
   };
 
   useEffect(() => {
@@ -196,26 +197,31 @@ export default function DesempenhoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <RefreshCcw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Carregando dados de desempenho...</p>
+          <div className="relative">
+            <RefreshCcw className="h-12 w-12 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+            <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-blue-200 dark:border-blue-800 animate-pulse mx-auto"></div>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Carregando dados de desempenho...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <BarChart3 className="h-8 w-8 text-blue-600" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className="container mx-auto px-6 py-8">
+        {/* Header Elegante */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+                <BarChart3 className="h-8 w-8 text-white" />
+              </div>
               Desempenho Operacional
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-slate-600 dark:text-slate-400 text-lg font-medium ml-16">
               Análise detalhada dos indicadores de performance
             </p>
           </div>
@@ -223,129 +229,166 @@ export default function DesempenhoPage() {
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => navegarAno('anterior')}
+              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
             
-            <div className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium min-w-[100px] text-center">
+            <div className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-lg min-w-[120px] text-center shadow-lg">
               {anoAtual}
             </div>
             
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => navegarAno('proximo')}
+              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
             
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={carregarDados}
+              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
             >
-              <RefreshCcw className="h-4 w-4" />
+              <RefreshCcw className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
-        {/* Cards de Resumo */}
+        {/* Cards de Resumo Elegantes */}
         {totaisAnuais && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardContent className="p-6">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 relative">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Faturamento Total</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.faturamento_total)}</p>
+                  <div className="space-y-2">
+                    <p className="text-blue-100 text-sm font-medium uppercase tracking-wide">Faturamento Total</p>
+                    <p className="text-3xl font-bold">{formatarMoeda(totaisAnuais.faturamento_total)}</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-blue-600" />
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <DollarSign className="h-8 w-8" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 relative">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Clientes Atendidos</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{totaisAnuais.clientes_total.toLocaleString()}</p>
+                  <div className="space-y-2">
+                    <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide">Clientes Atendidos</p>
+                    <p className="text-3xl font-bold">{totaisAnuais.clientes_total.toLocaleString()}</p>
                   </div>
-                  <Users className="h-8 w-8 text-green-600" />
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Users className="h-8 w-8" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-violet-500 to-violet-600 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 relative">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ticket Médio</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.ticket_medio)}</p>
+                  <div className="space-y-2">
+                    <p className="text-violet-100 text-sm font-medium uppercase tracking-wide">Ticket Médio</p>
+                    <p className="text-3xl font-bold">{formatarMoeda(totaisAnuais.ticket_medio)}</p>
                   </div>
-                  <BarChart3 className="h-8 w-8 text-purple-600" />
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <BarChart3 className="h-8 w-8" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardContent className="p-6">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <CardContent className="p-6 relative">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Performance Geral</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{totaisAnuais.performance_media.toFixed(1)}%</p>
+                  <div className="space-y-2">
+                    <p className="text-orange-100 text-sm font-medium uppercase tracking-wide">Performance Geral</p>
+                    <p className="text-3xl font-bold">{totaisAnuais.performance_media.toFixed(1)}%</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-orange-600" />
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <TrendingUp className="h-8 w-8" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="semanal">Visão Semanal</TabsTrigger>
-            <TabsTrigger value="mensal">Visão Mensal</TabsTrigger>
+        {/* Tabs Elegantes */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg p-1 rounded-xl">
+            <TabsTrigger 
+              value="semanal" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg px-6 py-3 font-medium transition-all duration-200"
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              Visão Semanal
+            </TabsTrigger>
+            <TabsTrigger 
+              value="mensal" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg px-6 py-3 font-medium transition-all duration-200"
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Visão Mensal
+            </TabsTrigger>
           </TabsList>
 
           {/* Visão Semanal */}
           <TabsContent value="semanal" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Eventos por Semana - {anoAtual}</CardTitle>
+            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700">
+                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-white" />
+                  </div>
+                  Eventos por Semana - {anoAtual}
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium">Semana</th>
-                        <th className="text-left py-3 px-4 font-medium">Período</th>
-                        <th className="text-right py-3 px-4 font-medium">Faturamento</th>
-                        <th className="text-right py-3 px-4 font-medium">Clientes</th>
-                        <th className="text-right py-3 px-4 font-medium">Ticket Médio</th>
-                        <th className="text-right py-3 px-4 font-medium">Performance</th>
-                        <th className="text-right py-3 px-4 font-medium">Eventos</th>
+                      <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <th className="text-left py-4 px-6 font-semibold text-slate-900 dark:text-white">Semana</th>
+                        <th className="text-left py-4 px-6 font-semibold text-slate-900 dark:text-white">Período</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Faturamento</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Clientes</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Ticket Médio</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Performance</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Eventos</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {dadosSemanas.map((semana) => (
-                        <tr key={semana.semana} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="py-3 px-4 font-medium">Semana {semana.semana}</td>
-                          <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{semana.periodo}</td>
-                          <td className="py-3 px-4 text-right font-medium">{formatarMoeda(semana.faturamento_total)}</td>
-                          <td className="py-3 px-4 text-right">{semana.clientes_total}</td>
-                          <td className="py-3 px-4 text-right">{formatarMoeda(semana.ticket_medio)}</td>
-                          <td className="py-3 px-4 text-right">
-                            <Badge className={getPerformanceBadge(semana.performance_geral)}>
+                      {dadosSemanas.map((semana, index) => (
+                        <tr key={semana.semana} className={`border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/50 dark:bg-slate-800/50'}`}>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
+                              <span className="font-semibold text-slate-900 dark:text-white">Semana {semana.semana}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-slate-600 dark:text-slate-300 font-medium">{semana.periodo}</td>
+                          <td className="py-4 px-6 text-right font-bold text-slate-900 dark:text-white">{formatarMoeda(semana.faturamento_total)}</td>
+                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{semana.clientes_total.toLocaleString()}</td>
+                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{formatarMoeda(semana.ticket_medio)}</td>
+                          <td className="py-4 px-6 text-right">
+                            <Badge className={`${getPerformanceBadge(semana.performance_geral)} font-bold px-3 py-1 border`}>
                               {semana.performance_geral.toFixed(1)}%
                             </Badge>
                           </td>
-                          <td className="py-3 px-4 text-right">
-                            <Badge variant="outline">
+                          <td className="py-4 px-6 text-right">
+                            <Badge variant="outline" className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium">
                               {semana.eventos_count} eventos
                             </Badge>
                           </td>
@@ -360,50 +403,65 @@ export default function DesempenhoPage() {
 
           {/* Visão Mensal */}
           <TabsContent value="mensal" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Comparativo dos Meses - Fevereiro 2025 até {mesesNomes[new Date().getMonth()]} {new Date().getFullYear()}</CardTitle>
+            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
+              <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700">
+                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg">
+                    <Calendar className="h-6 w-6 text-white" />
+                  </div>
+                  Comparativo dos Meses - Fevereiro 2025 até {mesesNomes[new Date().getMonth()]} {new Date().getFullYear()}
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium">Mês</th>
-                        <th className="text-right py-3 px-4 font-medium">Faturamento</th>
-                        <th className="text-right py-3 px-4 font-medium">Clientes</th>
-                        <th className="text-right py-3 px-4 font-medium">Ticket Médio</th>
-                        <th className="text-right py-3 px-4 font-medium">Performance</th>
+                      <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <th className="text-left py-4 px-6 font-semibold text-slate-900 dark:text-white">Mês</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Faturamento</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Clientes</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Ticket Médio</th>
+                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Performance</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {dadosMensais.map((dadoMes) => (
-                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="py-3 px-4 font-medium">{dadoMes.nome_mes} {dadoMes.ano}</td>
-                          <td className="py-3 px-4 text-right font-medium">{formatarMoeda(dadoMes.faturamento_total)}</td>
-                          <td className="py-3 px-4 text-right">{dadoMes.clientes_total}</td>
-                          <td className="py-3 px-4 text-right">{formatarMoeda(dadoMes.ticket_medio)}</td>
-                          <td className="py-3 px-4 text-right">
-                            <Badge className={getPerformanceBadge(dadoMes.performance_media)}>
+                      {dadosMensais.map((dadoMes, index) => (
+                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/50 dark:bg-slate-800/50'}`}>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-8 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
+                              <span className="font-semibold text-slate-900 dark:text-white">{dadoMes.nome_mes} {dadoMes.ano}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-right font-bold text-slate-900 dark:text-white">{formatarMoeda(dadoMes.faturamento_total)}</td>
+                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{dadoMes.clientes_total.toLocaleString()}</td>
+                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{formatarMoeda(dadoMes.ticket_medio)}</td>
+                          <td className="py-4 px-6 text-right">
+                            <Badge className={`${getPerformanceBadge(dadoMes.performance_media)} font-bold px-3 py-1 border`}>
                               {dadoMes.performance_media.toFixed(1)}%
                             </Badge>
                           </td>
                         </tr>
                       ))}
                       {dadosMensais.length > 0 && (
-                        <tr className="border-t-2 bg-gray-50 dark:bg-gray-800 font-bold">
-                          <td className="py-3 px-4">TOTAL GERAL</td>
-                          <td className="py-3 px-4 text-right">
+                        <tr className="border-t-2 border-slate-300 dark:border-slate-600 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full"></div>
+                              <span className="font-bold text-slate-900 dark:text-white text-lg">TOTAL GERAL</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-right font-bold text-xl text-slate-900 dark:text-white">
                             {formatarMoeda(dadosMensais.reduce((sum, m) => sum + m.faturamento_total, 0))}
                           </td>
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-4 px-6 text-right font-bold text-xl text-slate-900 dark:text-white">
                             {dadosMensais.reduce((sum, m) => sum + m.clientes_total, 0).toLocaleString()}
                           </td>
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-4 px-6 text-right font-bold text-xl text-slate-900 dark:text-white">
                             {formatarMoeda(dadosMensais.reduce((sum, m) => sum + m.ticket_medio, 0) / dadosMensais.length)}
                           </td>
-                          <td className="py-3 px-4 text-right">
-                            <Badge className="bg-blue-100 text-blue-800 font-bold">
+                          <td className="py-4 px-6 text-right">
+                            <Badge className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold px-4 py-2 text-lg border-0">
                               {(dadosMensais.reduce((sum, m) => sum + m.performance_media, 0) / dadosMensais.length).toFixed(1)}%
                             </Badge>
                           </td>
