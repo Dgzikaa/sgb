@@ -112,7 +112,10 @@ export async function GET(request: NextRequest) {
 					prev.totalConsumo += vrConsumo
 					prev.totalGasto += vrPagamentos
 					if (ultima > prev.ultima) prev.ultima = ultima
-					if (nome && nome !== 'Sem nome') prev.nome = nome
+					// Usar sempre o nome mais completo (maior length) e que não seja 'Sem nome'
+					if (nome && nome !== 'Sem nome' && nome.length > prev.nome.length) {
+						prev.nome = nome
+					}
 				}
 			}
 
