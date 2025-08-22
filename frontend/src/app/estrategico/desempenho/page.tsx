@@ -199,13 +199,10 @@ export default function DesempenhoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="relative">
-            <RefreshCcw className="h-12 w-12 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
-            <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-blue-200 dark:border-blue-800 animate-pulse mx-auto"></div>
-          </div>
-          <p className="text-slate-600 dark:text-slate-400 font-medium">Carregando dados de desempenho...</p>
+          <RefreshCcw className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando dados de desempenho...</p>
         </div>
       </div>
     );
@@ -323,19 +320,19 @@ export default function DesempenhoPage() {
           </div>
         )}
 
-        {/* Tabs Elegantes */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg p-1 rounded-xl">
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 rounded-lg">
             <TabsTrigger 
               value="semanal" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg px-6 py-3 font-medium transition-all duration-200"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
             >
               <Activity className="h-4 w-4 mr-2" />
               Visão Semanal
             </TabsTrigger>
             <TabsTrigger 
               value="mensal" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg px-6 py-3 font-medium transition-all duration-200"
+              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
             >
               <Calendar className="h-4 w-4 mr-2" />
               Visão Mensal
@@ -343,12 +340,12 @@ export default function DesempenhoPage() {
           </TabsList>
 
           {/* Visão Semanal */}
-          <TabsContent value="semanal" className="space-y-6">
-            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-              <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700">
-                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+          <TabsContent value="semanal" className="space-y-4">
+            <Card className="card-dark">
+              <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
+                <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
-                    <BarChart3 className="h-6 w-6 text-white" />
+                    <BarChart3 className="h-5 w-5 text-white" />
                   </div>
                   Eventos por Semana - {anoAtual}
                 </CardTitle>
@@ -357,45 +354,45 @@ export default function DesempenhoPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                        <th className="text-left py-4 px-6 font-semibold text-slate-900 dark:text-white">Semana</th>
-                        <th className="text-left py-4 px-6 font-semibold text-slate-900 dark:text-white">Período</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Faturamento</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Clientes</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Ticket Médio</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Performance</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Eventos</th>
+                      <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Semana</th>
+                        <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Período</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Faturamento</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Clientes</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Ticket Médio</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Performance</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Eventos</th>
                       </tr>
                     </thead>
                     <tbody>
                       {dadosSemanas.map((semana, index) => (
-                        <tr key={semana.semana} className={`border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/50 dark:bg-slate-800/50'}`}>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
-                              <span className="font-semibold text-slate-900 dark:text-white">Semana {semana.semana}</span>
+                        <tr key={semana.semana} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
+                              <span className="font-semibold text-gray-900 dark:text-white text-sm">Semana {semana.semana}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-slate-600 dark:text-slate-300 font-medium">{semana.periodo}</td>
-                          <td className="py-4 px-6 text-right font-bold">
-                            <div className="flex flex-col items-end space-y-1">
-                              <span className={`text-lg font-bold ${semana.faturamento_total >= 263000 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          <td className="py-3 px-4 text-gray-600 dark:text-gray-300 font-medium text-sm">{semana.periodo}</td>
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${semana.faturamento_total >= 263000 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                 {formatarMoeda(semana.faturamento_total)}
                               </span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 / {formatarMoeda(263000)}
                               </span>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{semana.clientes_total.toLocaleString()}</td>
-                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{formatarMoeda(semana.ticket_medio)}</td>
-                          <td className="py-4 px-6 text-right">
-                            <Badge className={`${getPerformanceBadge(semana.performance_geral)} font-bold px-3 py-1 border`}>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{semana.clientes_total.toLocaleString()}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{formatarMoeda(semana.ticket_medio)}</td>
+                          <td className="py-3 px-4 text-right">
+                            <Badge className={`${getPerformanceBadge(semana.performance_geral)} font-bold px-2 py-1 border text-xs`}>
                               {semana.performance_geral.toFixed(1)}%
                             </Badge>
                           </td>
-                          <td className="py-4 px-6 text-right">
-                            <Badge variant="outline" className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium">
+                          <td className="py-3 px-4 text-right">
+                            <Badge variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-xs">
                               {semana.eventos_count} eventos
                             </Badge>
                           </td>
@@ -409,12 +406,12 @@ export default function DesempenhoPage() {
           </TabsContent>
 
           {/* Visão Mensal */}
-          <TabsContent value="mensal" className="space-y-6">
-            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
-              <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700">
-                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+          <TabsContent value="mensal" className="space-y-4">
+            <Card className="card-dark">
+              <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
+                <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg">
-                    <Calendar className="h-6 w-6 text-white" />
+                    <Calendar className="h-5 w-5 text-white" />
                   </div>
                   Comparativo dos Meses - Fevereiro 2025 até {mesesNomes[new Date().getMonth()]} {new Date().getFullYear()}
                 </CardTitle>
@@ -423,52 +420,52 @@ export default function DesempenhoPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                        <th className="text-left py-4 px-6 font-semibold text-slate-900 dark:text-white">Mês</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Faturamento</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Clientes</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Ticket Médio</th>
-                        <th className="text-right py-4 px-6 font-semibold text-slate-900 dark:text-white">Performance</th>
+                      <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Mês</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Faturamento</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Clientes</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Ticket Médio</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Performance</th>
                       </tr>
                     </thead>
                     <tbody>
                       {dadosMensais.map((dadoMes, index) => (
-                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50/50 dark:bg-slate-800/50'}`}>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-8 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
-                              <span className="font-semibold text-slate-900 dark:text-white">{dadoMes.nome_mes} {dadoMes.ano}</span>
+                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1 h-6 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
+                              <span className="font-semibold text-gray-900 dark:text-white text-sm">{dadoMes.nome_mes} {dadoMes.ano}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-right font-bold text-slate-900 dark:text-white">{formatarMoeda(dadoMes.faturamento_total)}</td>
-                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{dadoMes.clientes_total.toLocaleString()}</td>
-                          <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{formatarMoeda(dadoMes.ticket_medio)}</td>
-                          <td className="py-4 px-6 text-right">
-                            <Badge className={`${getPerformanceBadge(dadoMes.performance_media)} font-bold px-3 py-1 border`}>
+                          <td className="py-3 px-4 text-right font-bold text-gray-900 dark:text-white text-sm">{formatarMoeda(dadoMes.faturamento_total)}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{dadoMes.clientes_total.toLocaleString()}</td>
+                          <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{formatarMoeda(dadoMes.ticket_medio)}</td>
+                          <td className="py-3 px-4 text-right">
+                            <Badge className={`${getPerformanceBadge(dadoMes.performance_media)} font-bold px-2 py-1 border text-xs`}>
                               {dadoMes.performance_media.toFixed(1)}%
                             </Badge>
                           </td>
                         </tr>
                       ))}
                       {dadosMensais.length > 0 && (
-                        <tr className="border-t-2 border-slate-300 dark:border-slate-600 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full"></div>
-                              <span className="font-bold text-slate-900 dark:text-white text-lg">TOTAL GERAL</span>
+                        <tr className="border-t-2 border-gray-300 dark:border-gray-600 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-1 h-6 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full"></div>
+                              <span className="font-bold text-gray-900 dark:text-white text-sm">TOTAL GERAL</span>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-right font-bold text-xl text-slate-900 dark:text-white">
+                          <td className="py-3 px-4 text-right font-bold text-sm text-gray-900 dark:text-white">
                             {formatarMoeda(dadosMensais.reduce((sum, m) => sum + m.faturamento_total, 0))}
                           </td>
-                          <td className="py-4 px-6 text-right font-bold text-xl text-slate-900 dark:text-white">
+                          <td className="py-3 px-4 text-right font-bold text-sm text-gray-900 dark:text-white">
                             {dadosMensais.reduce((sum, m) => sum + m.clientes_total, 0).toLocaleString()}
                           </td>
-                          <td className="py-4 px-6 text-right font-bold text-xl text-slate-900 dark:text-white">
+                          <td className="py-3 px-4 text-right font-bold text-sm text-gray-900 dark:text-white">
                             {formatarMoeda(dadosMensais.reduce((sum, m) => sum + m.ticket_medio, 0) / dadosMensais.length)}
                           </td>
-                          <td className="py-4 px-6 text-right">
-                            <Badge className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold px-4 py-2 text-lg border-0">
+                          <td className="py-3 px-4 text-right">
+                            <Badge className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold px-2 py-1 text-xs border-0">
                               {(dadosMensais.reduce((sum, m) => sum + m.performance_media, 0) / dadosMensais.length).toFixed(1)}%
                             </Badge>
                           </td>

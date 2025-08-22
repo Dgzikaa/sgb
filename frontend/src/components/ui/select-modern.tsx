@@ -363,7 +363,7 @@ export const ModernSelect = React.forwardRef<HTMLDivElement, ModernSelectProps>(
         return options.map((group, groupIndex) => (
           <div key={group.label} className="border-b border-gray-100 dark:border-gray-800 last:border-b-0">
             <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-800/50">
-              {group.icon && <span className="mr-2">{group.icon}</span>}
+              {(group as any).icon && <span className="mr-2">{(group as any).icon}</span>}
               {group.label}
             </div>
             {group.options

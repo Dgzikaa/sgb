@@ -176,6 +176,44 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   // EFEITOS
   // =====================================================
 
+  // Função para salvar respostas
+  const salvarRespostas = useCallback(async (
+    autoSave: boolean = false
+  ): Promise<boolean> => {
+    if (!execucao) return false;
+
+    try {
+      setSaving(true);
+
+      const response = await api.put(`/api/operacional/execucoes/${execucao.id}`, {
+        respostas: execucao.respostas,
+        observacoes: execucao.observacoes,
+        auto_save: autoSave,
+      });
+
+      if (response.success) {
+        const execucaoAtualizada = response.data.execucao;
+        setExecucao(execucaoAtualizada);
+        setExecucaoOriginal(deepClone(execucaoAtualizada));
+
+        if (!autoSave) {
+          console.log('💾 Respostas salvas manualmente');
+        }
+
+        return true;
+      } else {
+        setError(response.error || 'Erro ao salvar respostas');
+        return false;
+      }
+    } catch (err: unknown) {
+      console.error('Erro ao salvar respostas:', err);
+      setError('Erro ao salvar respostas');
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }, [execucao, api]);
+
   // Auto-save quando há mudanças
   useEffect(() => {
     if (
@@ -272,43 +310,6 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
       setLoading(false);
     }
   };
-
-  const salvarRespostas = useCallback(async (
-    autoSave: boolean = false
-  ): Promise<boolean> => {
-    if (!execucao) return false;
-
-    try {
-      setSaving(true);
-
-      const response = await api.put(`/api/operacional/execucoes/${execucao.id}`, {
-        respostas: execucao.respostas,
-        observacoes: execucao.observacoes,
-        auto_save: autoSave,
-      });
-
-      if (response.success) {
-        const execucaoAtualizada = response.data.execucao;
-        setExecucao(execucaoAtualizada);
-        setExecucaoOriginal(deepClone(execucaoAtualizada));
-
-        if (!autoSave) {
-          console.log('💾 Respostas salvas manualmente');
-        }
-
-        return true;
-      } else {
-        setError(response.error || 'Erro ao salvar respostas');
-        return false;
-      }
-    } catch (err: unknown) {
-      console.error('Erro ao salvar respostas:', err);
-      setError('Erro ao salvar respostas');
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  }, [execucao]);
 
   const finalizarExecucao = async (
     observacoesFinais?: string,
