@@ -132,7 +132,13 @@ export async function GET(request: NextRequest) {
       }
 
       const semanaData = semanaMap.get(semana)!;
-      semanaData.faturamento_total += evento.real_r || 0;
+      // Somar faturamento de todas as fontes: ContaHub + Yuzer + Sympla
+      const faturamentoContaHub = evento.real_r || 0;
+      const faturamentoYuzer = evento.yuzer_liquido || 0;
+      const faturamenteSympla = evento.sympla_liquido || 0;
+      const faturamentoTotal = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
+      
+      semanaData.faturamento_total += faturamentoTotal;
       semanaData.clientes_total += evento.cl_real || 0;
       semanaData.eventos_count += 1;
       semanaData.metas_faturamento += evento.m1_r || 0;
