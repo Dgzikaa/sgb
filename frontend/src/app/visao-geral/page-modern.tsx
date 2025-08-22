@@ -122,7 +122,10 @@ export default function VisaoGeralModernPage() {
       
       toast.success('Sistema PWA inicializado', 'Todas as funcionalidades avançadas estão ativas');
     } catch (error) {
-      console.error('Erro ao inicializar PWA:', error);
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao inicializar PWA:', error);
+      }
       toast.warning('PWA parcialmente inicializado', 'Algumas funcionalidades podem estar limitadas');
     }
   }, [pushNotifications, backgroundSync, badgeAPI, toast]);

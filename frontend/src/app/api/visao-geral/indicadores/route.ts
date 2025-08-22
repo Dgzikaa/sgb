@@ -146,7 +146,10 @@ async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?:
     };
     
   } catch (error) {
-    console.error('❌ Erro ao calcular retenção:', error);
+    // Log apenas em desenvolvimento para evitar poluir console em produção
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Erro ao calcular retenção:', error);
+    }
     return { valor: 0, variacao: 0 };
   }
 }
@@ -186,7 +189,10 @@ async function fetchAllData(supabase: any, tableName: string, columns: string, f
     const { data, error } = await query;
     
     if (error) {
-      console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      // Log apenas em desenvolvimento para evitar poluir console em produção
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      }
       break;
     }
     
@@ -898,12 +904,23 @@ export async function GET(request: Request) {
     return resp;
 
   } catch (error) {
-    console.error('Erro ao buscar indicadores:', error);
+    // Log detalhado apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.error('❌ Erro ao buscar indicadores:', error);
+    } else {
+      // Em produção, log simplificado
+      console.error('Erro na API visão-geral:', error instanceof Error ? error.message : 'Erro desconhecido');
+    }
+    
     const resp = NextResponse.json(
-      { error: 'Erro ao buscar indicadores' },
+      { 
+        success: false,
+        error: 'Erro interno do servidor',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
-    resp.headers.set('Cache-Control', 's-maxage=10');
+    resp.headers.set('Cache-Control', 'no-store');
     return resp;
   }
 }

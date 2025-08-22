@@ -212,8 +212,14 @@ export default function VisaoGeralEstrategica() {
         fetch(trimestralUrl, { headers: requestHeaders })
       ]);
 
-      if (!anualResponse.ok || !trimestralResponse.ok) {
-        throw new Error('Erro ao buscar indicadores');
+      if (!anualResponse.ok) {
+        const errorText = await anualResponse.text();
+        throw new Error(`Erro ao buscar dados anuais: ${anualResponse.status} - ${errorText}`);
+      }
+      
+      if (!trimestralResponse.ok) {
+        const errorText = await trimestralResponse.text();
+        throw new Error(`Erro ao buscar dados trimestrais: ${trimestralResponse.status} - ${errorText}`);
       }
 
       const anualData = await anualResponse.json();
@@ -226,9 +232,18 @@ export default function VisaoGeralEstrategica() {
       cacheManager.write(anualCacheKey, anualData);
       cacheManager.write(triCacheKey, trimestralData);
     } catch (error) {
+      // Log detalhado apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Erro ao carregar indicadores da visão geral:', error);
+      }
+      
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      
       toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os indicadores',
+        title: 'Erro ao carregar dados',
+        description: errorMessage.includes('Failed to fetch') 
+          ? 'Verifique sua conexão com a internet'
+          : 'Erro interno do servidor. Tente novamente.',
         variant: 'destructive'
       });
     } finally {

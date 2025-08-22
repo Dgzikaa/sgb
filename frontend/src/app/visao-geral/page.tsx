@@ -88,9 +88,13 @@ export default function VisaoGeralPage() {
   const backgroundSync = useBackgroundSync();
   const badgeAPI = useBadgeAPI();
 
-  // Redirecionar para nova estrutura
+  // Redirecionar para nova estrutura apenas uma vez
   useEffect(() => {
-    router.replace('/estrategico/visao-geral');
+    const timer = setTimeout(() => {
+      router.replace('/estrategico/visao-geral');
+    }, 100); // Delay para evitar loops
+    
+    return () => clearTimeout(timer);
   }, [router]);
 
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
@@ -150,7 +154,11 @@ export default function VisaoGeralPage() {
         });
       }
     } catch (error) {
-      console.error('Erro ao carregar indicadores:', error);
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao carregar indicadores:', error);
+      }
+      
       toast.toast({
         title: 'Erro',
         description: 'Não foi possível carregar os indicadores',
