@@ -128,7 +128,10 @@ export default function PlanejamentoComercialPage() {
       const anoParam = ano || filtroAno;
       
       const timestamp = new Date().getTime();
-      console.log(`🔍 Buscando dados para ${mesParam}/${anoParam} (${timestamp})`);
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔍 Buscando dados para ${mesParam}/${anoParam} (${timestamp})`);
+      }
       
       const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mesParam}&ano=${anoParam}&_t=${timestamp}`, {
         headers: {
@@ -139,25 +142,30 @@ export default function PlanejamentoComercialPage() {
         }
       });
       
-      console.log('📊 Nova estrutura - Dados recebidos:', {
-        total: data.data?.length || 0,
-        estrutura: data.meta?.estrutura,
-        eventos_recalculados: data.meta?.eventos_recalculados,
-        dados_reais_disponiveis: data.meta?.dados_reais_disponiveis
-      });
-      
-      // Debug específico para 20/08
-      const evento20 = data.data?.find(e => e.data_evento === '2025-08-20');
-      if (evento20) {
-        console.log('✅ Evento 20/08 encontrado na API:', {
-          nome: evento20.evento_nome,
-          real_receita: evento20.real_receita,
-          clientes_real: evento20.clientes_real,
-          res_p: evento20.res_p
+      // Log detalhado apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📊 Nova estrutura - Dados recebidos:', {
+          total: data.data?.length || 0,
+          estrutura: data.meta?.estrutura,
+          eventos_recalculados: data.meta?.eventos_recalculados,
+          dados_reais_disponiveis: data.meta?.dados_reais_disponiveis
         });
-      } else {
-        console.log('❌ Evento 20/08 NÃO encontrado nos dados da API');
-        console.log('📅 Datas disponíveis:', data.data?.map(e => `${e.data_curta} (${e.data_evento})`) || []);
+      }
+      
+      // Debug específico para 20/08 - apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        const evento20 = data.data?.find(e => e.data_evento === '2025-08-20');
+        if (evento20) {
+          console.log('✅ Evento 20/08 encontrado na API:', {
+            nome: evento20.evento_nome,
+            real_receita: evento20.real_receita,
+            clientes_real: evento20.clientes_real,
+            res_p: evento20.res_p
+          });
+        } else {
+          console.log('❌ Evento 20/08 NÃO encontrado nos dados da API');
+          console.log('📅 Datas disponíveis:', data.data?.map(e => `${e.data_curta} (${e.data_evento})`) || []);
+        }
       }
 
       if (data.success && data.data) {
@@ -169,17 +177,21 @@ export default function PlanejamentoComercialPage() {
         });
         
         setDados(dadosOrdenados);
-        console.log(`✅ ${dadosOrdenados.length} eventos carregados para ${mesParam}/${anoParam} (ordenados por data)`);
         
-        // Debug: mostrar as primeiras datas
-        if (dadosOrdenados.length > 0) {
-          console.log(`🔍 Frontend - Primeira data processada: ${dadosOrdenados[0].data_evento} (${dadosOrdenados[0].data_curta})`);
-          console.log(`🔍 Frontend - Última data processada: ${dadosOrdenados[dadosOrdenados.length - 1].data_evento} (${dadosOrdenados[dadosOrdenados.length - 1].data_curta})`);
-        }
-        
-        // Mostrar informações sobre dados reais disponíveis
-        if (data.meta?.dados_reais_disponiveis) {
-          console.log('📅 Períodos com dados reais:', data.meta.dados_reais_disponiveis);
+        // Debug: logs apenas em desenvolvimento
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`✅ ${dadosOrdenados.length} eventos carregados para ${mesParam}/${anoParam} (ordenados por data)`);
+          
+          // Mostrar as primeiras datas
+          if (dadosOrdenados.length > 0) {
+            console.log(`🔍 Frontend - Primeira data processada: ${dadosOrdenados[0].data_evento} (${dadosOrdenados[0].data_curta})`);
+            console.log(`🔍 Frontend - Última data processada: ${dadosOrdenados[dadosOrdenados.length - 1].data_evento} (${dadosOrdenados[dadosOrdenados.length - 1].data_curta})`);
+          }
+          
+          // Mostrar informações sobre dados reais disponíveis
+          if (data.meta?.dados_reais_disponiveis) {
+            console.log('📅 Períodos com dados reais:', data.meta.dados_reais_disponiveis);
+          }
         }
       } else {
         setError('Erro ao carregar dados');

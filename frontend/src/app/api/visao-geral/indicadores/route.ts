@@ -42,11 +42,14 @@ async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?:
     const ultimos2MesesInicio = formatDate(inicioUltimos2Meses);
     const ultimos2MesesFim = formatDate(fimUltimos2Meses);
     
-    console.log('🔄 CALCULANDO RETENÇÃO:');
-    console.log(`Parâmetro mesEspecifico recebido: ${mesEspecifico}`);
-    console.log(`Data de referência calculada: ${dataReferencia.toISOString()}`);
-    console.log(`Mês de referência${mesEspecifico ? ` (${mesEspecifico})` : ' (atual)'}: ${mesAtualInicio} até ${mesAtualFim}`);
-    console.log(`Últimos 2 meses: ${ultimos2MesesInicio} até ${ultimos2MesesFim}`);
+    // Logs apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 CALCULANDO RETENÇÃO:');
+      console.log(`Parâmetro mesEspecifico recebido: ${mesEspecifico}`);
+      console.log(`Data de referência calculada: ${dataReferencia.toISOString()}`);
+      console.log(`Mês de referência${mesEspecifico ? ` (${mesEspecifico})` : ' (atual)'}: ${mesAtualInicio} até ${mesAtualFim}`);
+      console.log(`Últimos 2 meses: ${ultimos2MesesInicio} até ${ultimos2MesesFim}`);
+    }
     
     // Buscar clientes do mês atual
     const clientesMesAtualData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
@@ -132,13 +135,16 @@ async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?:
       ? ((percentualRetencao - percentualRetencaoAnterior) / percentualRetencaoAnterior * 100)
       : 0;
     
-    console.log('🔄 RETENÇÃO CALCULADA:');
-    console.log(`Clientes únicos mês atual: ${totalClientesMesAtual}`);
-    console.log(`Clientes únicos últimos 2 meses: ${clientesUltimos2Meses.size}`);
-    console.log(`Clientes retidos (intersecção): ${totalClientesRetidos}`);
-    console.log(`Taxa de retenção: ${percentualRetencao.toFixed(1)}%`);
-    console.log(`Taxa de retenção mês anterior: ${percentualRetencaoAnterior.toFixed(1)}%`);
-    console.log(`Variação retenção: ${variacaoRetencao.toFixed(1)}%`);
+    // Logs detalhados apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 RETENÇÃO CALCULADA:');
+      console.log(`Clientes únicos mês atual: ${totalClientesMesAtual}`);
+      console.log(`Clientes únicos últimos 2 meses: ${clientesUltimos2Meses.size}`);
+      console.log(`Clientes retidos (intersecção): ${totalClientesRetidos}`);
+      console.log(`Taxa de retenção: ${percentualRetencao.toFixed(1)}%`);
+      console.log(`Taxa de retenção mês anterior: ${percentualRetencaoAnterior.toFixed(1)}%`);
+      console.log(`Variação retenção: ${variacaoRetencao.toFixed(1)}%`);
+    }
     
     return {
       valor: parseFloat(percentualRetencao.toFixed(1)),
@@ -224,7 +230,10 @@ export async function GET(request: Request) {
         : null);
     
     // Log simplificado de início
-    console.log(`📊 Visão Geral: Calculando ${periodo}${trimestre ? ` T${trimestre}` : ''} - Bar ${barId}`);
+    // Log principal apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Visão Geral: Calculando ${periodo}${trimestre ? ` T${trimestre}` : ''} - Bar ${barId}`);
+    }
     
     if (!barId) {
       return NextResponse.json(
@@ -256,7 +265,10 @@ export async function GET(request: Request) {
       const hoje = new Date();
       const endDate = hoje.toISOString().split('T')[0]; // Data atual
       // 🚨 DESABILITAR VIEW ANUAL TEMPORARIAMENTE PARA FORÇAR RECÁLCULO
-      console.log('🚨 VIEW ANUAL DESABILITADA - FORÇANDO RECÁLCULO MANUAL');
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚨 VIEW ANUAL DESABILITADA - FORÇANDO RECÁLCULO MANUAL');
+      }
       
       // COMENTADO PARA FORÇAR RECÁLCULO MANUAL
       /*
@@ -268,7 +280,10 @@ export async function GET(request: Request) {
           .eq('ano', 2025)
           .limit(1);
         if (!anualViewErr && anualView && anualView.length > 0) {
-          console.log('📊 USANDO VIEW ANUAL:', anualView[0]);
+          // Log apenas em desenvolvimento
+          if (process.env.NODE_ENV === 'development') {
+            console.log('📊 USANDO VIEW ANUAL:', anualView[0]);
+          }
           const row = anualView[0] as any;
           const resp = NextResponse.json({
             anual: {
@@ -305,7 +320,10 @@ export async function GET(request: Request) {
           return resp;
         }
       } catch (err) {
-        console.log('❌ Erro ao buscar view anual:', err);
+        // Log de erro apenas em desenvolvimento
+        if (process.env.NODE_ENV === 'development') {
+          console.log('❌ Erro ao buscar view anual:', err);
+        }
       }
       */
       // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
@@ -336,7 +354,10 @@ export async function GET(request: Request) {
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
       
       // Log final de faturamento
-      console.log(`💰 Faturamento Anual (${startDate} a ${endDate}): R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`💰 Faturamento Anual (${startDate} a ${endDate}): R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
+      }
       
       // Logs detalhados removidos
 
@@ -501,11 +522,16 @@ export async function GET(request: Request) {
       });
       
       // 🔍 DEBUG: Logs de comparação
-      console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO:');
-      console.log(`Período atual (${startDate90Dias} a ${endDate90Dias}): ${clientesAtivos} clientes ativos`);
-      console.log(`Período anterior (${startDate180Dias} a ${endDate90DiasAntes}): ${clientesAtivosAnterior} clientes ativos`);
+      // Logs detalhados apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO:');
+        console.log(`Período atual (${startDate90Dias} a ${endDate90Dias}): ${clientesAtivos} clientes ativos`);
+        console.log(`Período anterior (${startDate180Dias} a ${endDate90DiasAntes}): ${clientesAtivosAnterior} clientes ativos`);
+      }
       const variacaoClientesAtivos = clientesAtivosAnterior > 0 ? ((clientesAtivos - clientesAtivosAnterior) / clientesAtivosAnterior * 100) : 0;
-      console.log(`Variação: ${variacaoClientesAtivos.toFixed(1)}%`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Variação: ${variacaoClientesAtivos.toFixed(1)}%`);
+      }
       
       // Logs detalhados removidos
 
@@ -563,7 +589,7 @@ export async function GET(request: Request) {
       ) || [];
       
       // 🔍 DEBUG: Detalhes dos produtos Yuzer
-      if (!viewTri && ingressosYuzer.length > 0) {
+      if (!viewTri && ingressosYuzer.length > 0 && process.env.NODE_ENV === 'development') {
         console.log('🎫 PRODUTOS YUZER DETALHADOS:');
         ingressosYuzer.forEach((item, index) => {
           if (index < 5) { // Mostrar apenas os 5 primeiros

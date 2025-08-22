@@ -167,7 +167,10 @@ export function BarProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        console.log('🔍 BarContext: Usando API para buscar bares...');
+        // Log apenas em desenvolvimento
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔍 BarContext: Usando API para buscar bares...');
+        }
 
         try {
           const response = await fetch('/api/configuracoes/bars/user-bars', {
@@ -178,7 +181,10 @@ export function BarProvider({ children }: { children: ReactNode }) {
 
           if (response.ok) {
             const data = await response.json();
-            console.log('✅ BarContext: Dados recebidos da API:', data);
+            // Log detalhado apenas em desenvolvimento
+            if (process.env.NODE_ENV === 'development') {
+              console.log('✅ BarContext: Dados recebidos da API:', data);
+            }
 
             if (data.bars && data.bars.length > 0) {
               if (mounted) {
@@ -210,7 +216,10 @@ export function BarProvider({ children }: { children: ReactNode }) {
                 return;
               }
             } else {
-              console.log('❌ BarContext: Nenhum bar encontrado na API');
+              // Log apenas em desenvolvimento
+              if (process.env.NODE_ENV === 'development') {
+                console.log('❌ BarContext: Nenhum bar encontrado na API');
+              }
             }
           } else {
             console.error('❌ BarContext: Erro na API:', response.status);
