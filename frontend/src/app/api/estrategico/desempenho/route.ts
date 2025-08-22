@@ -123,6 +123,11 @@ export async function GET(request: NextRequest) {
     // Buscar dados do ContaHub excluindo 'Conta Assinada' (com paginação)
     const contahubData = await fetchContaHubData();
     console.log(`📊 ContaHub: ${contahubData.length} registros encontrados (excluindo Conta Assinada)`);
+    
+    // Debug: Log dos primeiros registros para verificar se o filtro está funcionando
+    console.log('🔍 Debug ContaHub - Primeiros 5 registros:', contahubData.slice(0, 5));
+    console.log('🔍 Debug Yuzer - Primeiros 5 registros:', yuzerData.slice(0, 5));
+    console.log('🔍 Debug Sympla - Primeiros 5 registros:', symplaData.slice(0, 5));
 
     // Criar mapas para facilitar a busca
     const yuzerMap = new Map();
@@ -218,6 +223,16 @@ export async function GET(request: NextRequest) {
       const faturamentoYuzer = yuzerMap.get(evento.data_evento) || 0;
       const faturamenteSympla = symplaMap.get(evento.data_evento) || 0;
       const faturamentoTotal = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
+      
+      // Debug para semana 32
+      if (semana === 32) {
+        console.log(`🔍 Semana 32 - Evento ${evento.nome} (${evento.data_evento}):`, {
+          contahub: faturamentoContaHub,
+          yuzer: faturamentoYuzer,
+          sympla: faturamenteSympla,
+          total: faturamentoTotal
+        });
+      }
       
       semanaData.faturamento_total += faturamentoTotal;
       semanaData.clientes_total += evento.cl_real || 0;
