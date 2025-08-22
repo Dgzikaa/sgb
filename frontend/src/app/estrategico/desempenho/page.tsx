@@ -10,11 +10,8 @@ import {
   BarChart3, 
   TrendingUp, 
   Calendar, 
-  Target,
-  Activity,
   Users,
   DollarSign,
-  Clock,
   ChevronLeft,
   ChevronRight,
   RefreshCcw
@@ -58,9 +55,9 @@ export default function DesempenhoPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('semanal');
   const [loading, setLoading] = useState(true);
-  const [mesAtual, setMesAtual] = useState(() => new Date());
+  const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
   const [dadosSemanas, setDadosSemanas] = useState<DadosSemana[]>([]);
-  const [totaisMensais, setTotaisMensais] = useState<TotaisMensais | null>(null);
+  const [totaisAnuais, setTotaisAnuais] = useState<TotaisMensais | null>(null);
   const [dadosMensais, setDadosMensais] = useState<DadosMes[]>([]);
 
   const mesesNomes = useMemo(() => [
@@ -73,13 +70,13 @@ export default function DesempenhoPage() {
     if (!selectedBar) return;
 
     const dadosMensaisTemp: DadosMes[] = [];
-    const anoAtual = new Date().getFullYear();
+    const anoAtualNum = new Date().getFullYear();
     const mesAtualNum = new Date().getMonth() + 1;
 
     // Buscar dados de fevereiro 2025 até o mês atual
-    for (let ano = 2025; ano <= anoAtual; ano++) {
+    for (let ano = 2025; ano <= anoAtualNum; ano++) {
       const mesInicio = ano === 2025 ? 2 : 1; // Começar em fevereiro para 2025
-      const mesFim = ano === anoAtual ? mesAtualNum : 12;
+      const mesFim = ano === anoAtualNum ? mesAtualNum : 12;
 
       for (let mes = mesInicio; mes <= mesFim; mes++) {
         try {
@@ -116,15 +113,13 @@ export default function DesempenhoPage() {
   const carregarDados = useCallback(async () => {
     try {
       setLoading(true);
-      const mes = mesAtual.getMonth() + 1;
-      const ano = mesAtual.getFullYear();
       
       if (!selectedBar) {
         setLoading(false);
         return;
       }
 
-      const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
+      const response = await fetch(`/api/estrategico/desempenho?mes=1&ano=${anoAtual}`, {
         headers: {
           'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
         }
@@ -136,7 +131,7 @@ export default function DesempenhoPage() {
 
       const data = await response.json();
       setDadosSemanas(data.semanas || []);
-      setTotaisMensais(data.totais_mensais || null);
+      setTotaisAnuais(data.totais_mensais || null);
 
       // Carregar dados mensais se estiver na aba mensal
       if (activeTab === 'mensal') {
@@ -153,16 +148,14 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [mesAtual, selectedBar, activeTab]);
+  }, [anoAtual, selectedBar, activeTab]);
 
-  const navegarMes = (direcao: 'anterior' | 'proximo') => {
-    const novoMes = new Date(mesAtual);
+  const navegarAno = (direcao: 'anterior' | 'proximo') => {
     if (direcao === 'anterior') {
-      novoMes.setMonth(novoMes.getMonth() - 1);
+      setAnoAtual(prev => prev - 1);
     } else {
-      novoMes.setMonth(novoMes.getMonth() + 1);
+      setAnoAtual(prev => prev + 1);
     }
-    setMesAtual(novoMes);
   };
 
   const formatarMoeda = (valor: number) => {
@@ -179,9 +172,9 @@ export default function DesempenhoPage() {
   };
 
   const getPerformanceBadge = (performance: number) => {
-    if (performance >= 90) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-    if (performance >= 70) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-    return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+    if (performance >= 90) return 'bg-green-100 text-green-800';
+    if (performance >= 70) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-red-100 text-red-800';
   };
 
   useEffect(() => {
@@ -192,7 +185,7 @@ export default function DesempenhoPage() {
     if (selectedBar) {
       carregarDados();
     }
-  }, [selectedBar, mesAtual]);
+  }, [selectedBar, anoAtual]);
 
   // Carregar dados mensais quando mudar para aba mensal
   useEffect(() => {
@@ -203,9 +196,9 @@ export default function DesempenhoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <RefreshCcw className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+          <RefreshCcw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Carregando dados de desempenho...</p>
         </div>
       </div>
@@ -213,13 +206,13 @@ export default function DesempenhoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <BarChart3 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <BarChart3 className="h-8 w-8 text-blue-600" />
               Desempenho Operacional
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -231,21 +224,19 @@ export default function DesempenhoPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navegarMes('anterior')}
-              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+              onClick={() => navegarAno('anterior')}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            <div className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium min-w-[140px] text-center">
-              {mesesNomes[mesAtual.getMonth()]} {mesAtual.getFullYear()}
+            <div className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium min-w-[100px] text-center">
+              {anoAtual}
             </div>
             
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navegarMes('proximo')}
-              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+              onClick={() => navegarAno('proximo')}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -254,7 +245,6 @@ export default function DesempenhoPage() {
               variant="outline"
               size="sm"
               onClick={carregarDados}
-              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
             >
               <RefreshCcw className="h-4 w-4" />
             </Button>
@@ -262,52 +252,52 @@ export default function DesempenhoPage() {
         </div>
 
         {/* Cards de Resumo */}
-        {totaisMensais && (
+        {totaisAnuais && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-100 text-sm font-medium">Faturamento Total</p>
-                    <p className="text-2xl font-bold">{formatarMoeda(totaisMensais.faturamento_total)}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Faturamento Total</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.faturamento_total)}</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-blue-200" />
+                  <DollarSign className="h-8 w-8 text-blue-600" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-green-100 text-sm font-medium">Clientes Atendidos</p>
-                    <p className="text-2xl font-bold">{totaisMensais.clientes_total.toLocaleString()}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Clientes Atendidos</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{totaisAnuais.clientes_total.toLocaleString()}</p>
                   </div>
-                  <Users className="h-8 w-8 text-green-200" />
+                  <Users className="h-8 w-8 text-green-600" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-purple-100 text-sm font-medium">Ticket Médio</p>
-                    <p className="text-2xl font-bold">{formatarMoeda(totaisMensais.ticket_medio)}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Ticket Médio</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.ticket_medio)}</p>
                   </div>
-                  <Target className="h-8 w-8 text-purple-200" />
+                  <BarChart3 className="h-8 w-8 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0">
+            <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-orange-100 text-sm font-medium">Performance Geral</p>
-                    <p className="text-2xl font-bold">{totaisMensais.performance_media.toFixed(1)}%</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Performance Geral</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{totaisAnuais.performance_media.toFixed(1)}%</p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-orange-200" />
+                  <TrendingUp className="h-8 w-8 text-orange-600" />
                 </div>
               </CardContent>
             </Card>
@@ -316,45 +306,36 @@ export default function DesempenhoPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <TabsTrigger value="semanal" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Activity className="h-4 w-4 mr-2" />
-              Visão Semanal
-            </TabsTrigger>
-            <TabsTrigger value="mensal" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Calendar className="h-4 w-4 mr-2" />
-              Visão Mensal
-            </TabsTrigger>
+          <TabsList>
+            <TabsTrigger value="semanal">Visão Semanal</TabsTrigger>
+            <TabsTrigger value="mensal">Visão Mensal</TabsTrigger>
           </TabsList>
 
           {/* Visão Semanal */}
           <TabsContent value="semanal" className="space-y-6">
-            <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Eventos por Semana - {mesesNomes[mesAtual.getMonth()]} {mesAtual.getFullYear()}
-                </CardTitle>
+                <CardTitle>Eventos por Semana - {anoAtual}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-blue-500">
-                        <th className="text-left py-3 px-4 font-medium text-blue-100">Semana</th>
-                        <th className="text-left py-3 px-4 font-medium text-blue-100">Período</th>
-                        <th className="text-right py-3 px-4 font-medium text-blue-100">Faturamento</th>
-                        <th className="text-right py-3 px-4 font-medium text-blue-100">Clientes</th>
-                        <th className="text-right py-3 px-4 font-medium text-blue-100">Ticket Médio</th>
-                        <th className="text-right py-3 px-4 font-medium text-blue-100">Performance</th>
-                        <th className="text-right py-3 px-4 font-medium text-blue-100">Eventos</th>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4 font-medium">Semana</th>
+                        <th className="text-left py-3 px-4 font-medium">Período</th>
+                        <th className="text-right py-3 px-4 font-medium">Faturamento</th>
+                        <th className="text-right py-3 px-4 font-medium">Clientes</th>
+                        <th className="text-right py-3 px-4 font-medium">Ticket Médio</th>
+                        <th className="text-right py-3 px-4 font-medium">Performance</th>
+                        <th className="text-right py-3 px-4 font-medium">Eventos</th>
                       </tr>
                     </thead>
                     <tbody>
                       {dadosSemanas.map((semana) => (
-                        <tr key={semana.semana} className="border-b border-blue-500/30 hover:bg-blue-500/20">
+                        <tr key={semana.semana} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="py-3 px-4 font-medium">Semana {semana.semana}</td>
-                          <td className="py-3 px-4 text-blue-100">{semana.periodo}</td>
+                          <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{semana.periodo}</td>
                           <td className="py-3 px-4 text-right font-medium">{formatarMoeda(semana.faturamento_total)}</td>
                           <td className="py-3 px-4 text-right">{semana.clientes_total}</td>
                           <td className="py-3 px-4 text-right">{formatarMoeda(semana.ticket_medio)}</td>
@@ -364,7 +345,7 @@ export default function DesempenhoPage() {
                             </Badge>
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <Badge variant="outline" className="text-blue-100 border-blue-300">
+                            <Badge variant="outline">
                               {semana.eventos_count} eventos
                             </Badge>
                           </td>
@@ -379,28 +360,25 @@ export default function DesempenhoPage() {
 
           {/* Visão Mensal */}
           <TabsContent value="mensal" className="space-y-6">
-            <Card className="bg-gradient-to-r from-purple-600 to-purple-700 text-white border-0">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Comparativo dos Meses - Fevereiro 2025 até {mesesNomes[new Date().getMonth()]} {new Date().getFullYear()}
-                </CardTitle>
+                <CardTitle>Comparativo dos Meses - Fevereiro 2025 até {mesesNomes[new Date().getMonth()]} {new Date().getFullYear()}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-purple-500">
-                        <th className="text-left py-3 px-4 font-medium text-purple-100">Mês</th>
-                        <th className="text-right py-3 px-4 font-medium text-purple-100">Faturamento</th>
-                        <th className="text-right py-3 px-4 font-medium text-purple-100">Clientes</th>
-                        <th className="text-right py-3 px-4 font-medium text-purple-100">Ticket Médio</th>
-                        <th className="text-right py-3 px-4 font-medium text-purple-100">Performance</th>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4 font-medium">Mês</th>
+                        <th className="text-right py-3 px-4 font-medium">Faturamento</th>
+                        <th className="text-right py-3 px-4 font-medium">Clientes</th>
+                        <th className="text-right py-3 px-4 font-medium">Ticket Médio</th>
+                        <th className="text-right py-3 px-4 font-medium">Performance</th>
                       </tr>
                     </thead>
                     <tbody>
                       {dadosMensais.map((dadoMes) => (
-                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className="border-b border-purple-500/30 hover:bg-purple-500/20">
+                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="py-3 px-4 font-medium">{dadoMes.nome_mes} {dadoMes.ano}</td>
                           <td className="py-3 px-4 text-right font-medium">{formatarMoeda(dadoMes.faturamento_total)}</td>
                           <td className="py-3 px-4 text-right">{dadoMes.clientes_total}</td>
@@ -413,7 +391,7 @@ export default function DesempenhoPage() {
                         </tr>
                       ))}
                       {dadosMensais.length > 0 && (
-                        <tr className="border-t-2 border-purple-400 bg-purple-500/30 font-bold">
+                        <tr className="border-t-2 bg-gray-50 dark:bg-gray-800 font-bold">
                           <td className="py-3 px-4">TOTAL GERAL</td>
                           <td className="py-3 px-4 text-right">
                             {formatarMoeda(dadosMensais.reduce((sum, m) => sum + m.faturamento_total, 0))}
@@ -425,7 +403,7 @@ export default function DesempenhoPage() {
                             {formatarMoeda(dadosMensais.reduce((sum, m) => sum + m.ticket_medio, 0) / dadosMensais.length)}
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <Badge className="bg-white text-purple-700 font-bold">
+                            <Badge className="bg-blue-100 text-blue-800 font-bold">
                               {(dadosMensais.reduce((sum, m) => sum + m.performance_media, 0) / dadosMensais.length).toFixed(1)}%
                             </Badge>
                           </td>

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`📅 Buscando dados de desempenho para ${mes}/${ano} - Bar ID: ${user.bar_id}`);
 
-    // Buscar eventos do mês específico da tabela eventos_base (atualizada)
+    // Buscar eventos de todo o ano da tabela eventos_base (desde semana 05)
     const { data: eventos, error: eventosError } = await supabase
       .from('eventos_base')
       .select(`
@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
         precisa_recalculo
       `)
       .eq('bar_id', user.bar_id)
-      .gte('data_evento', `${ano}-${mes.toString().padStart(2, '0')}-01`)
-      .lt('data_evento', `${ano}-${(Number(mes) + 1).toString().padStart(2, '0')}-01`)
+      .gte('data_evento', `${ano}-01-01`)
+      .lt('data_evento', `${ano + 1}-01-01`)
       .eq('ativo', true)
       .order('data_evento', { ascending: true });
 
@@ -76,22 +76,27 @@ export async function GET(request: NextRequest) {
 
     // Função para calcular número da semana ISO
     const getWeekNumber = (date: Date): number => {
-      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-      return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+      const target = new Date(date.valueOf());
+      const dayNr = (date.getDay() + 6) % 7;
+      target.setDate(target.getDate() - dayNr + 3);
+      const jan4 = new Date(target.getFullYear(), 0, 4);
+      const dayDiff = (target.getTime() - jan4.getTime()) / 86400000;
+      return 1 + Math.ceil(dayDiff / 7);
     };
 
-    // Função para obter período da semana
+    // Função para obter período da semana ISO
     const getWeekPeriod = (weekNumber: number, year: number): { inicio: Date, fim: Date } => {
-      const jan1 = new Date(year, 0, 1);
-      const daysToFirstMonday = (8 - jan1.getDay()) % 7;
-      const firstMonday = new Date(year, 0, 1 + daysToFirstMonday);
+      // Encontrar a primeira segunda-feira da primeira semana ISO do ano
+      const jan4 = new Date(year, 0, 4); // 4 de janeiro sempre está na primeira semana ISO
+      const dayOfWeek = jan4.getDay() || 7; // Domingo = 7, Segunda = 1
+      const firstMonday = new Date(jan4);
+      firstMonday.setDate(jan4.getDate() - dayOfWeek + 1); // Volta para a segunda-feira
       
+      // Calcular início da semana desejada
       const weekStart = new Date(firstMonday);
       weekStart.setDate(firstMonday.getDate() + (weekNumber - 1) * 7);
       
+      // Fim da semana (domingo)
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
       
@@ -134,8 +139,10 @@ export async function GET(request: NextRequest) {
       semanaData.metas_clientes += evento.cl_plan || 0;
     });
 
-    // Converter para array e calcular métricas
-    const semanasConsolidadas = Array.from(semanaMap.values()).map(semana => {
+    // Converter para array e calcular métricas (filtrar apenas semanas >= 5)
+    const semanasConsolidadas = Array.from(semanaMap.values())
+      .filter(semana => semana.semana >= 5)
+      .map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
       
       // Calcular performance geral da semana
