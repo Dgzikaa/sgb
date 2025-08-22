@@ -381,7 +381,16 @@ export default function DesempenhoPage() {
                             </div>
                           </td>
                           <td className="py-4 px-6 text-slate-600 dark:text-slate-300 font-medium">{semana.periodo}</td>
-                          <td className="py-4 px-6 text-right font-bold text-slate-900 dark:text-white">{formatarMoeda(semana.faturamento_total)}</td>
+                          <td className="py-4 px-6 text-right font-bold">
+                            <div className="flex flex-col items-end space-y-1">
+                              <span className={`text-lg font-bold ${semana.faturamento_total >= 263000 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatarMoeda(semana.faturamento_total)}
+                              </span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">
+                                / {formatarMoeda(263000)}
+                              </span>
+                            </div>
+                          </td>
                           <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{semana.clientes_total.toLocaleString()}</td>
                           <td className="py-4 px-6 text-right font-semibold text-slate-700 dark:text-slate-300">{formatarMoeda(semana.ticket_medio)}</td>
                           <td className="py-4 px-6 text-right">
