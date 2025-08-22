@@ -55,13 +55,6 @@ export async function GET(request: NextRequest) {
 			
 			if (barIdFilter) query = query.eq('bar_id', barIdFilter)
 			
-			// Filtrar por dia da semana se especificado
-			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-				// Usar RPC ou filtro manual - Supabase não suporta EXTRACT diretamente
-				// Vamos fazer o filtro no JavaScript após buscar os dados
-				console.log('🗓️ API Clientes: Filtro por dia da semana será aplicado no JavaScript:', diaSemanaFiltro)
-			}
-			
 			const { data, error } = await query
 			if (error) {
 				console.error('❌ Erro ao buscar contahub_periodo:', error)
@@ -69,8 +62,7 @@ export async function GET(request: NextRequest) {
 			}
 			if (!data || data.length === 0) break
 
-			totalLinhas += data.length
-
+			// Processar todos os dados e aplicar filtro por dia da semana
 			for (const r of data) {
 				// Aplicar filtro por dia da semana se especificado
 				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
@@ -80,6 +72,9 @@ export async function GET(request: NextRequest) {
 						continue // Pular este registro se não for do dia da semana desejado
 					}
 				}
+				
+				// Contar linha apenas se passou no filtro
+				totalLinhas++
 
 				const rawFone = (r.cli_fone || '').toString().trim()
 				if (!rawFone) continue
@@ -135,7 +130,7 @@ export async function GET(request: NextRequest) {
 				ultima_visita: c.ultima,
 			}))
 
-		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas`)
+		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
 
 		// Calcular estatísticas globais
 		const totalEntradaGlobal = Array.from(map.values()).reduce((sum, c) => sum + c.totalEntrada, 0)

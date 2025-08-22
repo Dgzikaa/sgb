@@ -617,13 +617,13 @@ export default function ClientesPage() {
                   
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Select value={diaSemanaFiltro} onValueChange={setDiaSemanaFiltro}>
-                      <SelectTrigger className="w-full sm:w-[200px] bg-white/90 dark:bg-gray-700/90 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm">
-                        <CalendarDays className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
-                        <SelectValue />
+                      <SelectTrigger className="w-full sm:w-[200px] bg-slate-700/90 dark:bg-gray-700/90 border-gray-300 dark:border-gray-600 text-white dark:text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm">
+                        <CalendarDays className="h-4 w-4 mr-2 text-slate-200 dark:text-gray-400" />
+                        <SelectValue className="text-white" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                         {diasSemana.map((dia) => (
-                          <SelectItem key={dia.value} value={dia.value}>
+                          <SelectItem key={dia.value} value={dia.value} className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
                             {dia.label}
                           </SelectItem>
                         ))}
