@@ -16,6 +16,7 @@ interface IndicadorCardProps {
   detalhes?: Record<string, number>;
   cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
   inverterProgresso?: boolean; // Para indicadores onde "menos é melhor"
+  inverterComparacao?: boolean; // Para indicadores onde variação negativa é boa (CMO, % Artística)
   periodoAnalisado?: string; // Período que está sendo analisado
   emDesenvolvimento?: boolean; // Para indicadores em desenvolvimento
   comparacao?: {
@@ -35,6 +36,7 @@ export function IndicadorCard({
   detalhes,
   cor = 'blue',
   inverterProgresso = false,
+  inverterComparacao = false,
   periodoAnalisado,
   emDesenvolvimento = false,
   comparacao
@@ -152,20 +154,31 @@ export function IndicadorCard({
         {!emDesenvolvimento && comparacao && (
           <div className="flex items-center justify-center mb-2">
             <div className="flex items-center gap-1">
-              {comparacao.valor > 0 ? (
-                <TrendingUp className="w-3 h-3 text-green-600 dark:text-green-400" />
-              ) : comparacao.valor < 0 ? (
-                <TrendingDown className="w-3 h-3 text-red-600 dark:text-red-400" />
-              ) : (
-                <Minus className="w-3 h-3 text-gray-500 dark:text-gray-500" />
-              )}
-              <span className={`text-xs font-medium ${
-                comparacao.valor > 0 
-                  ? 'text-green-600 dark:text-green-400' 
-                  : comparacao.valor < 0 
-                    ? 'text-red-600 dark:text-red-400' 
-                    : 'text-gray-500 dark:text-gray-500'
-              }`}>
+              {(() => {
+                // Lógica de cores baseada em inverterComparacao
+                const isPositive = inverterComparacao ? comparacao.valor < 0 : comparacao.valor > 0;
+                const isNegative = inverterComparacao ? comparacao.valor > 0 : comparacao.valor < 0;
+                
+                if (isPositive) {
+                  return <TrendingUp className="w-3 h-3 text-green-600 dark:text-green-400" />;
+                } else if (isNegative) {
+                  return <TrendingDown className="w-3 h-3 text-red-600 dark:text-red-400" />;
+                } else {
+                  return <Minus className="w-3 h-3 text-gray-500 dark:text-gray-500" />;
+                }
+              })()}
+              <span className={`text-xs font-medium ${(() => {
+                const isPositive = inverterComparacao ? comparacao.valor < 0 : comparacao.valor > 0;
+                const isNegative = inverterComparacao ? comparacao.valor > 0 : comparacao.valor < 0;
+                
+                if (isPositive) {
+                  return 'text-green-600 dark:text-green-400';
+                } else if (isNegative) {
+                  return 'text-red-600 dark:text-red-400';
+                } else {
+                  return 'text-gray-500 dark:text-gray-500';
+                }
+              })()}`}>
                 {comparacao.label} {comparacao.valor > 0 ? '+' : ''}{comparacao.valor.toFixed(1)}%
               </span>
             </div>

@@ -546,6 +546,7 @@ export default function VisaoGeralEstrategica() {
                     formato="percentual"
                     cor="orange"
                     inverterProgresso={true}
+                    inverterComparacao={true}
                     comparacao={{
                       valor: indicadoresTrimestrais?.cmo?.variacao || 0,
                       label: "vs trimestre anterior"
@@ -559,6 +560,7 @@ export default function VisaoGeralEstrategica() {
                     formato="percentual"
                     cor="pink"
                     inverterProgresso={true}
+                    inverterComparacao={true}
                     comparacao={{
                       valor: indicadoresTrimestrais?.artistica?.variacao || 0,
                       label: "vs trimestre anterior"
