@@ -107,7 +107,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, ModernTextareaProps>(
             onChange={handleInputChange}
             whileFocus={animated ? { scale: 1.01 } : undefined}
             transition={{ duration: 0.2 }}
-            {...props}
+            {...(props as any)}
           />
 
           {/* Focus Ring Animation */}

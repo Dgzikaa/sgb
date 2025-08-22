@@ -47,7 +47,7 @@ const Table = React.forwardRef<HTMLTableElement, ModernTableProps>(
               variantStyles[variant],
               className
             )}
-            {...props}
+            {...(props as any)}
           />
         </div>
       </motion.div>
@@ -115,7 +115,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, ModernTableRowProps>(
         selected && 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700',
         className
       )}
-      {...props}
+      {...(props as any)}
     />
   )
 );
@@ -144,7 +144,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, ModernTableHeadProps>(
         className
       )}
       onClick={sortable ? onSort : undefined}
-      {...props}
+      {...(props as any)}
     >
       <div className="flex items-center space-x-2">
         <span>{children}</span>

@@ -120,7 +120,7 @@ const Input = React.forwardRef<HTMLInputElement, ModernInputProps>(
             onChange={handleInputChange}
             whileFocus={animated ? { scale: 1.02 } : undefined}
             transition={{ duration: 0.2 }}
-            {...props}
+            {...(props as any)}
           />
 
           {/* Focus Ring Animation */}
