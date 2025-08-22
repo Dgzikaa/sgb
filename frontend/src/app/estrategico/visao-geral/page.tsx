@@ -106,99 +106,49 @@ export default function VisaoGeralEstrategica() {
     }
   };
 
-  // Cache inteligente com TTL
-  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
-  
-  const cacheManager = useMemo(() => ({
-    read: (key: string) => {
-      try {
-        const raw = sessionStorage.getItem(key);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || !parsed.data || !parsed.ts) return null;
-        const isFresh = Date.now() - parsed.ts < CACHE_TTL_MS;
-        return isFresh ? parsed.data : null;
-      } catch {
-        return null;
-      }
-    },
-    write: (key: string, data: unknown) => {
-      try {
-        sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
-      } catch (error) {
-        // Falha silenciosa no cache
-      }
-    },
-    clear: () => {
-      try {
-        const keys = Object.keys(sessionStorage);
-        keys.forEach(key => {
-          if (key.startsWith('vg:') || key.includes('indicadores')) {
-            sessionStorage.removeItem(key);
-          }
-        });
-      } catch (error) {
-        // Falha silenciosa na limpeza
-      }
-    }
-  }), []);
 
-  // Função para limpar cache e recarregar - otimizada
-  const limparCacheERecarregar = useCallback(() => {
+
+  // Função para recarregar dados
+  const recarregarDados = useCallback(() => {
     try {
-      cacheManager.clear();
-      
       // Resetar estados
       setIndicadoresAnuais(null);
       setIndicadoresTrimestrais(null);
       setLoading(true);
       setRequestInProgress(false);
       
-      // Recarregar dados se bar selecionado
+      // Recarregar dados
       if (selectedBar) {
-        carregarIndicadores();
+        setTimeout(() => carregarIndicadores(), 100);
       }
       
       toast({
-        title: 'Cache limpo',
+        title: 'Sucesso',
         description: 'Dados recarregados com sucesso',
       });
     } catch (error) {
       toast({
         title: 'Erro',
-        description: 'Não foi possível limpar o cache',
+        description: 'Não foi possível recarregar os dados',
         variant: 'destructive'
       });
     }
-  }, [selectedBar, cacheManager, toast]);
+  }, [selectedBar?.id, toast, carregarIndicadores]);
 
   const carregarIndicadores = useCallback(async () => {
     if (!selectedBar || requestInProgress) {
       return;
     }
 
-    const hoje = new Date();
-    const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
-    const anualCacheKey = `vg:anual:${selectedBar.id}`;
-    const triCacheKey = `vg:tri:${selectedBar.id}:${trimestreAtual}:${mesAtual}`;
-
-    // Verificar cache primeiro
-    const anualCached = cacheManager.read(anualCacheKey);
-    const triCached = cacheManager.read(triCacheKey);
-
-    if (anualCached && triCached) {
-      setIndicadoresAnuais(anualCached.anual);
-      setIndicadoresTrimestrais(triCached.trimestral);
-      setLoading(false);
-      return;
-    }
-
-    // Buscar dados da API
+    // Buscar dados da API diretamente
     setLoading(true);
     setRequestInProgress(true);
     showLoading('Carregando dados da visão geral...');
     
+    const hoje = new Date();
+    const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
     const timestamp = Date.now();
+    
     const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
     const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
     
@@ -228,9 +178,6 @@ export default function VisaoGeralEstrategica() {
       setIndicadoresAnuais(anualData.anual);
       setIndicadoresTrimestrais(trimestralData.trimestral);
       
-      // Salvar no cache
-      cacheManager.write(anualCacheKey, anualData);
-      cacheManager.write(triCacheKey, trimestralData);
     } catch (error) {
       // Log detalhado apenas em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
@@ -251,14 +198,15 @@ export default function VisaoGeralEstrategica() {
       setRequestInProgress(false);
       hideLoading();
     }
-  }, [selectedBar, trimestreAtual, requestInProgress, cacheManager, toast, showLoading, hideLoading]);
+  }, [selectedBar?.id, trimestreAtual, requestInProgress, toast, showLoading, hideLoading]);
 
   // Carregar indicadores quando selectedBar estiver disponível
   useEffect(() => {
     if (selectedBar) {
       carregarIndicadores();
     }
-  }, [selectedBar, trimestreAtual, carregarIndicadores]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBar, trimestreAtual]);
 
   // Memoizar dados dos indicadores para evitar re-renders desnecessários
   const indicadoresAnuaisMemo = useMemo(() => indicadoresAnuais, [indicadoresAnuais]);
