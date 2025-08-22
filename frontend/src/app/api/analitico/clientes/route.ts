@@ -143,7 +143,8 @@ export async function GET(request: NextRequest) {
 		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
 			console.log('🔍 DEBUG: Top 5 clientes filtrados por dia da semana:')
 			clientes.slice(0, 5).forEach((cliente, index) => {
-				console.log(`  ${index + 1}º: ${cliente.nome_principal} - ${cliente.total_visitas} visitas - R$ ${cliente.total_gasto.toFixed(2)} (${cliente.telefone})`)
+				const valorGasto = cliente.total_gasto || 0
+				console.log(`  ${index + 1}º: ${cliente.nome_principal} - ${cliente.total_visitas} visitas - R$ ${valorGasto.toFixed(2)} (${cliente.telefone})`)
 			})
 			
 			// Debug específico para Gabriela
