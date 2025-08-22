@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
         semana,
         cl_real,
         real_r,
-        m1_r
+        m1_r,
+        cl_plan
       `)
       .eq('bar_id', user.bar_id)
       .gte('data_evento', `${ano}-01-01`)
@@ -201,8 +202,8 @@ export async function GET(request: NextRequest) {
     }>();
 
     eventos.forEach(evento => {
-      const dataEvento = new Date(evento.data_evento);
-      const semana = getWeekNumber(dataEvento);
+      // Usar a semana já calculada na tabela eventos_base em vez de recalcular
+      const semana = evento.semana;
       
       if (!semanaMap.has(semana)) {
         const { inicio, fim } = getWeekPeriod(semana, ano);
