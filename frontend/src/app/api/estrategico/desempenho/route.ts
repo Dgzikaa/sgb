@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`📅 Buscando dados de desempenho para ${mes}/${ano} - Bar ID: ${user.bar_id}`);
 
-    // Buscar eventos de todo o ano da tabela eventos_base (desde semana 05)
+    // Buscar eventos básicos de todo o ano
     const { data: eventos, error: eventosError } = await supabase
       .from('eventos_base')
       .select(`
@@ -32,23 +32,9 @@ export async function GET(request: NextRequest) {
         nome,
         dia_semana,
         semana,
-        m1_r,
-        cl_plan,
         cl_real,
-        te_plan,
-        tb_plan,
-        te_real,
-        tb_real,
-        t_medio,
-        c_art,
-        c_prod,
         real_r,
-        percent_art_fat,
-        t_coz,
-        t_bar,
-        fat_19h_percent,
-        calculado_em,
-        precisa_recalculo
+        m1_r
       `)
       .eq('bar_id', user.bar_id)
       .gte('data_evento', `${ano}-01-01`)
@@ -60,6 +46,44 @@ export async function GET(request: NextRequest) {
       console.error('❌ Erro ao buscar eventos:', eventosError);
       return NextResponse.json({ error: 'Erro ao buscar eventos' }, { status: 500 });
     }
+
+    // Buscar dados do Yuzer das tabelas de resumo
+    const { data: yuzerData, error: yuzerError } = await supabase
+      .from('yuzer_resumo2')
+      .select('data_evento, faturamento_liquido')
+      .gte('data_evento', `${ano}-01-01`)
+      .lt('data_evento', `${ano + 1}-01-01`);
+
+    // Buscar dados do Sympla das tabelas de resumo  
+    const { data: symplaData, error: symplaError } = await supabase
+      .from('sympla_resumo')
+      .select('data_evento, total_liquido')
+      .gte('data_evento', `${ano}-01-01`)
+      .lt('data_evento', `${ano + 1}-01-01`);
+
+    // Buscar dados do ContaHub direto da tabela de pagamentos
+    const { data: contahubData, error: contahubError } = await supabase
+      .from('contahub_pagamentos')
+      .select('dt_gerencial, liquido')
+      .gte('dt_gerencial', `${ano}-01-01`)
+      .lt('dt_gerencial', `${ano + 1}-01-01`);
+
+    // Criar mapas para facilitar a busca
+    const yuzerMap = new Map();
+    yuzerData?.forEach(item => {
+      yuzerMap.set(item.data_evento, item.faturamento_liquido || 0);
+    });
+
+    const symplaMap = new Map();
+    symplaData?.forEach(item => {
+      symplaMap.set(item.data_evento, item.total_liquido || 0);
+    });
+
+    const contahubMap = new Map();
+    contahubData?.forEach(item => {
+      const currentValue = contahubMap.get(item.dt_gerencial) || 0;
+      contahubMap.set(item.dt_gerencial, currentValue + (item.liquido || 0));
+    });
 
     if (!eventos || eventos.length === 0) {
       console.log('⚠️ Nenhum evento encontrado para o período');
@@ -133,9 +157,9 @@ export async function GET(request: NextRequest) {
 
       const semanaData = semanaMap.get(semana)!;
       // Somar faturamento de todas as fontes: ContaHub + Yuzer + Sympla
-      const faturamentoContaHub = evento.real_r || 0;
-      const faturamentoYuzer = evento.yuzer_liquido || 0;
-      const faturamenteSympla = evento.sympla_liquido || 0;
+      const faturamentoContaHub = contahubMap.get(evento.data_evento) || 0;
+      const faturamentoYuzer = yuzerMap.get(evento.data_evento) || 0;
+      const faturamenteSympla = symplaMap.get(evento.data_evento) || 0;
       const faturamentoTotal = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
       
       semanaData.faturamento_total += faturamentoTotal;
