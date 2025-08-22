@@ -132,9 +132,20 @@ export async function GET(request: NextRequest) {
 
     // Criar mapas para facilitar a busca
     const yuzerMap = new Map();
+    const yuzerDebug = new Map(); // Para debug
     yuzerData?.forEach(item => {
       const currentValue = yuzerMap.get(item.data_evento) || 0;
+      const currentCount = yuzerDebug.get(item.data_evento) || 0;
       yuzerMap.set(item.data_evento, currentValue + (item.valor_liquido || 0));
+      yuzerDebug.set(item.data_evento, currentCount + 1);
+    });
+
+    // Debug: Verificar se há múltiplos registros por data
+    console.log('🔍 Debug Yuzer - Registros por data:');
+    yuzerDebug.forEach((count, data) => {
+      if (count > 1) {
+        console.log(`  📅 ${data}: ${count} registros (DUPLICADO!) - Total: R$ ${yuzerMap.get(data)}`);
+      }
     });
 
     const symplaMap = new Map();
