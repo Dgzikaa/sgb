@@ -47,26 +47,49 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar eventos' }, { status: 500 });
     }
 
-    // Buscar dados do Yuzer das tabelas de resumo
-    const { data: yuzerData, error: yuzerError } = await supabase
-      .from('yuzer_resumo2')
-      .select('data_evento, faturamento_liquido')
-      .gte('data_evento', `${ano}-01-01`)
-      .lt('data_evento', `${ano + 1}-01-01`);
+    // Função para buscar todos os dados com paginação
+    const fetchAllData = async (table: string, columns: string, dateColumn: string) => {
+      let allData: any[] = [];
+      let from = 0;
+      const limit = 1000;
+      let hasMore = true;
 
-    // Buscar dados do Sympla das tabelas de resumo  
-    const { data: symplaData, error: symplaError } = await supabase
-      .from('sympla_resumo')
-      .select('data_evento, total_liquido')
-      .gte('data_evento', `${ano}-01-01`)
-      .lt('data_evento', `${ano + 1}-01-01`);
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from(table)
+          .select(columns)
+          .gte(dateColumn, `${ano}-01-01`)
+          .lt(dateColumn, `${ano + 1}-01-01`)
+          .range(from, from + limit - 1);
 
-    // Buscar dados do ContaHub direto da tabela de pagamentos
-    const { data: contahubData, error: contahubError } = await supabase
-      .from('contahub_pagamentos')
-      .select('dt_gerencial, liquido')
-      .gte('dt_gerencial', `${ano}-01-01`)
-      .lt('dt_gerencial', `${ano + 1}-01-01`);
+        if (error) {
+          console.error(`❌ Erro ao buscar dados de ${table}:`, error);
+          break;
+        }
+
+        if (data && data.length > 0) {
+          allData = allData.concat(data);
+          hasMore = data.length === limit;
+          from += limit;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allData;
+    };
+
+    // Buscar dados do Yuzer das tabelas de resumo (com paginação)
+    const yuzerData = await fetchAllData('yuzer_resumo2', 'data_evento, faturamento_liquido', 'data_evento');
+    console.log(`📊 Yuzer: ${yuzerData.length} registros encontrados`);
+
+    // Buscar dados do Sympla das tabelas de resumo (com paginação)
+    const symplaData = await fetchAllData('sympla_resumo', 'data_evento, total_liquido', 'data_evento');
+    console.log(`📊 Sympla: ${symplaData.length} registros encontrados`);
+
+    // Buscar dados do ContaHub direto da tabela de pagamentos (com paginação)
+    const contahubData = await fetchAllData('contahub_pagamentos', 'dt_gerencial, liquido', 'dt_gerencial');
+    console.log(`📊 ContaHub: ${contahubData.length} registros encontrados`);
 
     // Criar mapas para facilitar a busca
     const yuzerMap = new Map();
