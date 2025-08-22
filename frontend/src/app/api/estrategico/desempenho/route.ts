@@ -139,9 +139,13 @@ export async function GET(request: NextRequest) {
       semanaData.metas_clientes += evento.cl_plan || 0;
     });
 
-    // Converter para array e calcular métricas (filtrar apenas semanas >= 5)
+    // Obter semana atual
+    const hoje = new Date();
+    const semanaAtual = getWeekNumber(hoje);
+
+    // Converter para array e calcular métricas (filtrar semanas >= 5 e <= semana atual)
     const semanasConsolidadas = Array.from(semanaMap.values())
-      .filter(semana => semana.semana >= 5)
+      .filter(semana => semana.semana >= 5 && semana.semana <= semanaAtual)
       .map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
       
@@ -179,7 +183,7 @@ export async function GET(request: NextRequest) {
         meta_faturamento: Math.round(semana.metas_faturamento * 100) / 100,
         meta_clientes: semana.metas_clientes
       };
-    }).sort((a, b) => a.semana - b.semana);
+    }).sort((a, b) => b.semana - a.semana); // Ordenar decrescente (semana atual primeiro)
 
     console.log(`📊 Dados consolidados: ${semanasConsolidadas.length} semanas`);
 
