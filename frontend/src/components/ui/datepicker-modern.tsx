@@ -9,8 +9,10 @@ import {
   X, 
   CalendarDays,
   Clock,
-  Range,
-  SingleSelect
+  ArrowLeftRight,
+  ArrowLeftRight as Range,
+  Circle,
+  Circle as SingleSelect
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

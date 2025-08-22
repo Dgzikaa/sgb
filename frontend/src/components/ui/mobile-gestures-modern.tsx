@@ -8,8 +8,8 @@ import {
   RotateCcw, 
   ZoomIn, 
   ZoomOut, 
-  Swipe,
-  Touch,
+  Move as Swipe,
+  Hand as Touch,
   Smartphone,
   Tablet,
   Monitor,
@@ -17,9 +17,11 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowDown,
-  Rotate,
-  Pinch,
-  Gesture
+  Rotate3D,
+  Rotate3D as Rotate,
+  Minus,
+  Minus as Pinch,
+  Hand as Gesture
 } from 'lucide-react';
 
 // Tipos para gestos

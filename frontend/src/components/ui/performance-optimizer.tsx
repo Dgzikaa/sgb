@@ -10,7 +10,7 @@ import {
   Clock, 
   HardDrive, 
   Cpu, 
-  Memory,
+  HardDrive as Memory,
   Wifi,
   WifiOff,
   RefreshCw,
