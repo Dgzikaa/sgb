@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useGlobalLoading } from '@/components/ui/global-loading';
 
 interface IndicadoresAnuais {
   faturamento: {
@@ -73,6 +74,7 @@ interface IndicadoresTrimestrais {
 export default function VisaoGeralEstrategica() {
   const { selectedBar } = useBar();
   const { toast } = useToast();
+  const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
 
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
@@ -194,6 +196,7 @@ export default function VisaoGeralEstrategica() {
     // Buscar dados da API
     setLoading(true);
     setRequestInProgress(true);
+    showLoading('Carregando dados da visão geral...');
     
     const timestamp = Date.now();
     const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
@@ -231,8 +234,9 @@ export default function VisaoGeralEstrategica() {
     } finally {
       setLoading(false);
       setRequestInProgress(false);
+      hideLoading();
     }
-  }, [selectedBar, trimestreAtual, requestInProgress, cacheManager, toast]);
+  }, [selectedBar, trimestreAtual, requestInProgress, cacheManager, toast, showLoading, hideLoading]);
 
   // Carregar indicadores quando selectedBar estiver disponível
   useEffect(() => {
@@ -287,6 +291,7 @@ export default function VisaoGeralEstrategica() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <GlobalLoadingComponent />
       <div className="container mx-auto px-4 py-2 space-y-2">
 
 

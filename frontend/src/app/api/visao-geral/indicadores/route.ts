@@ -158,17 +158,12 @@ async function fetchAllData(supabase: any, tableName: string, columns: string, f
   const limit = 1000;
   let pageCount = 0;
   
-  console.log(`🔍 INICIANDO BUSCA PAGINADA: ${tableName}`);
-  console.log(`📋 Filtros aplicados:`, filters);
-  
-  const MAX_ITERATIONS = 100; // Reduzir para evitar loops infinitos
+  const MAX_ITERATIONS = 100;
   let iterations = 0;
   
   while (iterations < MAX_ITERATIONS) {
     iterations++;
     pageCount++;
-    
-    console.log(`📄 Página ${pageCount}: buscando registros ${from} a ${from + limit - 1}`);
     
     let query = supabase
       .from(tableName)
@@ -191,31 +186,21 @@ async function fetchAllData(supabase: any, tableName: string, columns: string, f
     const { data, error } = await query;
     
     if (error) {
-      console.error(`❌ Erro ao buscar ${tableName} (página ${pageCount}):`, error);
+      console.error(`❌ Erro ao buscar ${tableName}:`, error);
       break;
     }
     
     if (!data || data.length === 0) {
-      console.log(`✅ Fim da paginação: página ${pageCount} sem dados`);
       break;
     }
     
-    console.log(`📦 Página ${pageCount}: ${data.length} registros encontrados`);
     allData.push(...data);
     
     if (data.length < limit) {
-      console.log(`✅ Última página: ${data.length} < ${limit}`);
       break; // Última página
     }
     
     from += limit;
-  }
-  
-  console.log(`📊 ${tableName}: ${allData.length} registros total em ${pageCount} páginas`);
-  
-  // Log de amostra dos primeiros registros para debug
-  if (allData.length > 0) {
-    console.log(`🔍 Amostra dos primeiros registros:`, allData.slice(0, 3));
   }
   
   return allData;
@@ -232,15 +217,8 @@ export async function GET(request: Request) {
         ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id 
         : null);
     
-    // 🚨 LOG CRÍTICO - INÍCIO DA API
-    console.log('🚨🚨🚨 API CHAMADA:', {
-      periodo,
-      trimestre,
-      mesRetencao,
-      barId,
-      timestamp: new Date().toISOString(),
-      url: request.url
-    });
+    // Log simplificado de início
+    console.log(`📊 Visão Geral: Calculando ${periodo}${trimestre ? ` T${trimestre}` : ''} - Bar ${barId}`);
     
     if (!barId) {
       return NextResponse.json(
@@ -351,19 +329,8 @@ export async function GET(request: Request) {
       const faturamentoSympla = symplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
       
-      // 🔍 DEBUG: Logs detalhados dos dados
-      console.log('📊 DADOS DE FATURAMENTO DETALHADOS (ANUAL):');
-      console.log(`Período: ${startDate} até ${endDate}`);
-      console.log(`ContaHub Pagamentos: ${contahubData?.length || 0} registros = R$ ${faturamentoContahub.toLocaleString('pt-BR')}`);
-      console.log(`Yuzer Pagamentos: ${yuzerData?.length || 0} registros = R$ ${faturamentoYuzer.toLocaleString('pt-BR')}`);
-      console.log(`Sympla Pedidos: ${symplaData?.length || 0} registros = R$ ${faturamentoSympla.toLocaleString('pt-BR')}`);
-      console.log(`TOTAL FATURAMENTO ANUAL: R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
-      
-      // Verificar se os valores estão corretos comparando com consulta direta
-      console.log('🔍 COMPARAÇÃO COM VALORES ESPERADOS:');
-      console.log(`ContaHub esperado: ~R$ 4.266.082,80 | Obtido: R$ ${faturamentoContahub.toLocaleString('pt-BR')}`);
-      console.log(`Yuzer esperado: ~R$ 2.470.051,55 | Obtido: R$ ${faturamentoYuzer.toLocaleString('pt-BR')}`);
-      console.log(`Total esperado: ~R$ 6.736.134,35 | Obtido: R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
+      // Log final de faturamento
+      console.log(`💰 Faturamento Anual (${startDate} a ${endDate}): R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
       
       // Logs detalhados removidos
 
@@ -402,17 +369,8 @@ export async function GET(request: Request) {
       const totalPessoasSympla = pessoasSympla.data?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0;
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
       
-      // 🔍 DEBUG: Logs detalhados das pessoas
-      console.log('👥 DADOS DE PESSOAS DETALHADOS (ANUAL):');
-      console.log(`Período: ${startDate} até ${endDate}`);
-      console.log(`ContaHub Período: ${pessoasContahubData?.length || 0} registros = ${totalPessoasContahub.toLocaleString('pt-BR')} pessoas`);
-      console.log(`Yuzer Produtos: ${pessoasYuzer.data?.length || 0} registros = ${totalPessoasYuzer.toLocaleString('pt-BR')} pessoas`);
-      console.log(`Sympla Participantes: ${pessoasSympla.data?.length || 0} registros = ${totalPessoasSympla.toLocaleString('pt-BR')} pessoas`);
-      console.log(`TOTAL PESSOAS ANUAL: ${totalPessoas.toLocaleString('pt-BR')}`);
-      
-      // Verificar se os valores estão corretos
-      console.log('🔍 COMPARAÇÃO PESSOAS ESPERADAS:');
-      console.log(`ContaHub esperado: ~44.408 pessoas | Obtido: ${totalPessoasContahub.toLocaleString('pt-BR')} pessoas`);
+      // Log final de pessoas
+      console.log(`👥 Total Pessoas (${startDate} a ${endDate}): ${totalPessoas.toLocaleString('pt-BR')}`);
       
       // Logs detalhados removidos
 
@@ -739,13 +697,8 @@ export async function GET(request: Request) {
         const faturamentoSymplaTri = fatSymplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
         faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
 
-        // 🔍 DEBUG: Faturamento trimestral para CMO (MESMA LÓGICA ANUAL)
-        console.log('📊 FATURAMENTO TRIMESTRE (LÓGICA ANUAL):');
-        console.log(`Período: ${startDate} até ${endDate}`);
-        console.log(`ContaHub: R$ ${faturamentoContahubTri.toLocaleString('pt-BR')}`);
-        console.log(`Yuzer: R$ ${faturamentoYuzerTri.toLocaleString('pt-BR')}`);
-        console.log(`Sympla: R$ ${faturamentoSymplaTri.toLocaleString('pt-BR')}`);
-        console.log(`TOTAL: R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
+        // Log final faturamento trimestre
+        console.log(`💰 Faturamento T${trimestre} (${startDate} a ${endDate}): R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
       }
       
       // FORÇAR RECÁLCULO DO CMO % (não usar VIEW para garantir valor correto)
@@ -898,14 +851,8 @@ export async function GET(request: Request) {
         return percentualCalculado;
       })();
 
-      // 🚨 LOG FINAL - VALOR QUE SERÁ ENVIADO
-      console.log('🚨🚨🚨 VALOR CMO FINAL SENDO ENVIADO:', {
-        percentualCMO: percentualCMO,
-        totalCMO: totalCMO,
-        faturamentoTrimestre: faturamentoTrimestre,
-        calculoManual: (totalCMO / faturamentoTrimestre) * 100,
-        timestamp: new Date().toISOString()
-      });
+      // Log final do CMO
+      console.log(`📊 CMO T${trimestre}: ${percentualCMO.toFixed(1)}% (R$ ${totalCMO.toLocaleString('pt-BR')} / R$ ${faturamentoTrimestre.toLocaleString('pt-BR')})`);
 
       const resp = NextResponse.json({
         trimestral: {

@@ -212,114 +212,110 @@ export default function DesempenhoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="container mx-auto px-6 py-8">
-        {/* Header Elegante */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                <BarChart3 className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header compacto */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                <BarChart3 className="h-6 w-6 text-white" />
               </div>
               Desempenho Operacional
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-lg font-medium ml-16">
+            <p className="text-gray-600 dark:text-gray-400 text-sm ml-11">
               Análise detalhada dos indicadores de performance
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="lg"
+              size="sm"
               onClick={() => navegarAno('anterior')}
-              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+              className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             
-            <div className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold text-lg min-w-[120px] text-center shadow-lg">
+            <div className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold text-sm min-w-[80px] text-center">
               {anoAtual}
             </div>
             
             <Button
               variant="outline"
-              size="lg"
+              size="sm"
               onClick={() => navegarAno('proximo')}
-              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+              className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
             
             <Button
               variant="outline"
-              size="lg"
+              size="sm"
               onClick={carregarDados}
-              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200"
+              className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
-              <RefreshCcw className="h-5 w-5" />
+              <RefreshCcw className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Cards de Resumo Elegantes */}
+        {/* Cards de Resumo */}
         {totaisAnuais && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-              <CardContent className="p-6 relative">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-blue-100 text-sm font-medium uppercase tracking-wide">Faturamento Total</p>
-                    <p className="text-3xl font-bold">{formatarMoeda(totaisAnuais.faturamento_total)}</p>
+                  <div className="space-y-1">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Faturamento Total</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.faturamento_total)}</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <DollarSign className="h-8 w-8" />
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                    <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-              <CardContent className="p-6 relative">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-emerald-100 text-sm font-medium uppercase tracking-wide">Clientes Atendidos</p>
-                    <p className="text-3xl font-bold">{totaisAnuais.clientes_total.toLocaleString()}</p>
+                  <div className="space-y-1">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Clientes Atendidos</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{totaisAnuais.clientes_total.toLocaleString()}</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <Users className="h-8 w-8" />
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg">
+                    <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-violet-500 to-violet-600 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-              <CardContent className="p-6 relative">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-violet-100 text-sm font-medium uppercase tracking-wide">Ticket Médio</p>
-                    <p className="text-3xl font-bold">{formatarMoeda(totaisAnuais.ticket_medio)}</p>
+                  <div className="space-y-1">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Ticket Médio</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{formatarMoeda(totaisAnuais.ticket_medio)}</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <BarChart3 className="h-8 w-8" />
+                  <div className="p-2 bg-violet-100 dark:bg-violet-900/20 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-              <CardContent className="p-6 relative">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-orange-100 text-sm font-medium uppercase tracking-wide">Performance Geral</p>
-                    <p className="text-3xl font-bold">{totaisAnuais.performance_media.toFixed(1)}%</p>
+                  <div className="space-y-1">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Performance Geral</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{totaisAnuais.performance_media.toFixed(1)}%</p>
                   </div>
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <TrendingUp className="h-8 w-8" />
+                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
                 </div>
               </CardContent>
