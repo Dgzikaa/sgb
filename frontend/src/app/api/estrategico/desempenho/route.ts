@@ -154,8 +154,8 @@ export async function GET(request: NextRequest) {
       yuzerDebug.set(item.data_evento, currentCount + 1);
     });
 
-    // Debug: Verificar se há múltiplos registros por data - apenas em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
+    // Debug verbose - apenas quando necessário
+    if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
       console.log('🔍 Debug Yuzer - Registros por data:');
       yuzerDebug.forEach((count, data) => {
         if (count > 1) {
@@ -175,17 +175,11 @@ export async function GET(request: NextRequest) {
       contahubMap.set(item.dt_gerencial, currentValue + (item.liquido || 0));
     });
 
-    // Debug: Verificar valores específicos das datas de agosto - apenas em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Debug - Valores dos mapas para agosto:');
-      ['2025-08-03', '2025-08-09', '2025-08-10', '2025-08-11'].forEach(data => {
-        console.log(`  📅 ${data}: ContaHub=R$${contahubMap.get(data) || 0}, Yuzer=R$${yuzerMap.get(data) || 0}, Sympla=R$${symplaMap.get(data) || 0}`);
-      });
-    }
+    // Debug específico removido para reduzir logs desnecessários
 
     if (!eventos || eventos.length === 0) {
-      // Log apenas em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
+      // Log apenas em modo verbose
+      if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
         console.log('⚠️ Nenhum evento encontrado para o período');
       }
       return NextResponse.json({ 

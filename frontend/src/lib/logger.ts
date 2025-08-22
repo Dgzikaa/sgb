@@ -1,5 +1,6 @@
 ﻿const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
+const isVerboseLogging = process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true';
 
 // ✅ Sistema de logs profissional para produção
 export const logger = {
@@ -40,11 +41,30 @@ export const logger = {
 };
 
 // ✅ Substituições seguras para produção
-export const devLog = isDevelopment ? console.log : () => {};
+export const devLog = (isDevelopment && isVerboseLogging) ? console.log : () => {};
 export const devError = isDevelopment ? console.error : logger.error;
-export const devWarn = isDevelopment ? console.warn : () => {};
-export const devInfo = isDevelopment ? console.info : () => {};
-export const devDebug = isDevelopment ? console.debug : () => {};
+export const devWarn = (isDevelopment && isVerboseLogging) ? console.warn : () => {};
+export const devInfo = (isDevelopment && isVerboseLogging) ? console.info : () => {};
+export const devDebug = (isDevelopment && isVerboseLogging) ? console.debug : () => {};
+
+// ✅ Logs silenciosos para desenvolvimento normal
+export const silentDevLog = () => {};
+export const quietLogger = {
+  log: (message: string, ...args: unknown[]) => {
+    // Apenas erros críticos em desenvolvimento normal
+    if (isProduction) return;
+    if (message.includes('ERROR') || message.includes('CRITICAL')) {
+      console.log(`[${new Date().toISOString()}] ${message}`, ...args);
+    }
+  },
+  info: (message: string, ...args: unknown[]) => {
+    // Apenas informações importantes
+    if (isProduction) return;
+    if (message.includes('✅') || message.includes('❌') || message.includes('⚠️')) {
+      console.info(`[INFO] ${message}`, ...args);
+    }
+  }
+};
 
 // ✅ Logger para APIs (sempre ativo para auditoria)
 export const apiLogger = {

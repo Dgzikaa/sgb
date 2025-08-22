@@ -167,8 +167,8 @@ export function BarProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // Log apenas em desenvolvimento
-        if (process.env.NODE_ENV === 'development') {
+        // Debug verbose apenas quando necessário
+        if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
           console.log('🔍 BarContext: Usando API para buscar bares...');
         }
 
@@ -181,8 +181,8 @@ export function BarProvider({ children }: { children: ReactNode }) {
 
           if (response.ok) {
             const data = await response.json();
-            // Log detalhado apenas em desenvolvimento
-            if (process.env.NODE_ENV === 'development') {
+            // Debug detalhado apenas verbose
+            if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
               console.log('✅ BarContext: Dados recebidos da API:', data);
             }
 
@@ -216,8 +216,8 @@ export function BarProvider({ children }: { children: ReactNode }) {
                 return;
               }
             } else {
-              // Log apenas em desenvolvimento
-              if (process.env.NODE_ENV === 'development') {
+              // Log apenas em modo verbose
+              if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
                 console.log('❌ BarContext: Nenhum bar encontrado na API');
               }
             }

@@ -408,11 +408,24 @@ export default function ClientesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8">
-        <PageHeader title="Análise de Clientes" description="Insights detalhados dos seus clientes mais valiosos" />
+      <div className="container mx-auto px-4 py-6">
+        {/* Header compacto */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              Análise de Clientes
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm ml-11">
+              Insights detalhados dos seus clientes mais valiosos
+            </p>
+          </div>
+        </div>
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
 
 
           <motion.div
@@ -604,7 +617,7 @@ export default function ClientesPage() {
                   
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Select value={diaSemanaFiltro} onValueChange={setDiaSemanaFiltro}>
-                      <SelectTrigger className="w-full sm:w-[200px] bg-white/90 dark:bg-gray-700/90 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm">
+                      <SelectTrigger className="w-full sm:w-[200px] bg-white/90 dark:bg-gray-700/90 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm">
                         <CalendarDays className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
                         <SelectValue />
                       </SelectTrigger>
@@ -620,7 +633,7 @@ export default function ClientesPage() {
                     <Button
                       onClick={exportarCSV}
                       disabled={(activeTab === 'clientes' ? clientesFiltrados.length : reservantes.length) === 0}
-                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-400 dark:to-green-500 dark:hover:from-green-500 dark:hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl"
+                      className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-400 dark:to-green-500 dark:hover:from-green-500 dark:hover:to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-lg"
                       size="icon"
                     >
                       <Download className="h-4 w-4" />
@@ -628,12 +641,18 @@ export default function ClientesPage() {
                   </div>
                 </div>
 
-                <TabsList className="bg-slate-700/80 dark:bg-slate-800/80 w-fit rounded-2xl backdrop-blur-sm shadow-lg p-1">
-                  <TabsTrigger value="clientes" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-lg data-[state=active]:scale-105 rounded-xl transition-all duration-300 ease-out hover:scale-102">
+                <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 rounded-lg">
+                  <TabsTrigger 
+                    value="clientes" 
+                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Clientes
                   </TabsTrigger>
-                  <TabsTrigger value="reservantes" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-lg data-[state=active]:scale-105 rounded-xl transition-all duration-300 ease-out hover:scale-102">
+                  <TabsTrigger 
+                    value="reservantes" 
+                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
+                  >
                     <Calendar className="h-4 w-4 mr-2" />
                     Reservantes
                   </TabsTrigger>

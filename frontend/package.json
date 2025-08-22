@@ -26,7 +26,12 @@
     "clean:cache": "rm -rf .next/cache",
     "precommit": "npm run code-quality && npm run type-check",
     "prebuild": "npm run clean && npm run type-check",
-    "postbuild": "echo '✅ Build completed successfully'"
+    "postbuild": "echo '✅ Build completed successfully'",
+    "logs:on": "node scripts/toggle-logs.js on",
+    "logs:off": "node scripts/toggle-logs.js off",
+    "logs:status": "node scripts/toggle-logs.js status",
+    "dev:quiet": "npm run logs:off && npm run dev",
+    "dev:verbose": "npm run logs:on && npm run dev"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.60.0",

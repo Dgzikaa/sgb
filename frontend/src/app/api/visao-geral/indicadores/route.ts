@@ -328,11 +328,15 @@ export async function GET(request: Request) {
       */
       // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
       
-      const contahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+      // Buscar dados do ContaHub excluindo 'Conta Assinada' (mesma lógica do desempenho)
+      const contahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido, meio', {
         'gte_dt_gerencial': startDate,
         'lte_dt_gerencial': endDate,
         'eq_bar_id': barIdNum
       });
+      
+      // Filtrar para excluir 'Conta Assinada' (consumo de sócios)
+      const contahubFiltrado = contahubData?.filter(item => item.meio !== 'Conta Assinada') || [];
       
       const yuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
         'gte_data_evento': startDate,
@@ -348,7 +352,7 @@ export async function GET(request: Request) {
 
       // Calcular com dados paginados
       
-      const faturamentoContahub = contahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+      const faturamentoContahub = contahubFiltrado?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
       const faturamentoYuzer = yuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoSympla = symplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
       const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
@@ -706,12 +710,15 @@ export async function GET(request: Request) {
       }
       
       if (!viewTri) {
-        // USAR A MESMA LÓGICA DO FATURAMENTO ANUAL
-        const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+        // USAR A MESMA LÓGICA DO FATURAMENTO ANUAL (excluindo Conta Assinada)
+        const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido, meio', {
           'gte_dt_gerencial': startDate,
           'lte_dt_gerencial': endDate,
           'eq_bar_id': barIdNum  // Mesma ordem dos parâmetros do anual
         });
+        
+        // Filtrar para excluir 'Conta Assinada' (consumo de sócios)
+        const fatContahubFiltrado = fatContahubData?.filter(item => item.meio !== 'Conta Assinada') || [];
         const fatYuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
           'gte_data_evento': startDate,
           'lte_data_evento': endDate,
@@ -724,7 +731,7 @@ export async function GET(request: Request) {
         });
         
         // Calcular com dados paginados (mesma lógica do anual)
-        const faturamentoContahubTri = fatContahubData?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+        const faturamentoContahubTri = fatContahubFiltrado?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
         const faturamentoYuzerTri = fatYuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
         const faturamentoSymplaTri = fatSymplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
         faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
@@ -760,12 +767,15 @@ export async function GET(request: Request) {
         'in_categoria_nome': categoriasCMO
       });
       
-      // Buscar faturamento do trimestre anterior (já calculado acima)
-      const faturamentoTrimestreAnteriorContahub = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+      // Buscar faturamento do trimestre anterior (excluindo Conta Assinada)
+      const faturamentoTrimestreAnteriorContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido, meio', {
         'eq_bar_id': barIdNum,
         'gte_dt_gerencial': cmoTrimestreAnteriorStart,
         'lte_dt_gerencial': cmoTrimestreAnteriorEnd
       });
+      
+      // Filtrar para excluir 'Conta Assinada' (consumo de sócios)
+      const faturamentoTrimestreAnteriorContahub = faturamentoTrimestreAnteriorContahubData?.filter(item => item.meio !== 'Conta Assinada') || [];
       
       const [faturamentoYuzerTriAnterior, faturamentoSymplaTriAnterior] = await Promise.all([
         supabase.from('yuzer_pagamento').select('valor_liquido').eq('bar_id', barIdNum)

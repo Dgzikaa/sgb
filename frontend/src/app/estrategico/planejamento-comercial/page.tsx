@@ -128,8 +128,8 @@ export default function PlanejamentoComercialPage() {
       const anoParam = ano || filtroAno;
       
       const timestamp = new Date().getTime();
-      // Log apenas em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
+      // Debug verbose apenas quando necessário
+      if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
         console.log(`🔍 Buscando dados para ${mesParam}/${anoParam} (${timestamp})`);
       }
       
@@ -142,8 +142,8 @@ export default function PlanejamentoComercialPage() {
         }
       });
       
-      // Log detalhado apenas em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
+      // Debug detalhado apenas verbose
+      if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
         console.log('📊 Nova estrutura - Dados recebidos:', {
           total: data.data?.length || 0,
           estrutura: data.meta?.estrutura,
@@ -152,21 +152,7 @@ export default function PlanejamentoComercialPage() {
         });
       }
       
-      // Debug específico para 20/08 - apenas em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-        const evento20 = data.data?.find(e => e.data_evento === '2025-08-20');
-        if (evento20) {
-          console.log('✅ Evento 20/08 encontrado na API:', {
-            nome: evento20.evento_nome,
-            real_receita: evento20.real_receita,
-            clientes_real: evento20.clientes_real,
-            res_p: evento20.res_p
-          });
-        } else {
-          console.log('❌ Evento 20/08 NÃO encontrado nos dados da API');
-          console.log('📅 Datas disponíveis:', data.data?.map(e => `${e.data_curta} (${e.data_evento})`) || []);
-        }
-      }
+      // Debug específico removido para reduzir logs desnecessários
 
       if (data.success && data.data) {
         // A API já retorna os dados filtrados por mês/ano, apenas ordenar por data crescente
@@ -178,17 +164,14 @@ export default function PlanejamentoComercialPage() {
         
         setDados(dadosOrdenados);
         
-        // Debug: logs apenas em desenvolvimento
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ ${dadosOrdenados.length} eventos carregados para ${mesParam}/${anoParam} (ordenados por data)`);
+        // Debug silencioso - apenas verbose quando necessário
+        if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
+          console.log(`✅ ${dadosOrdenados.length} eventos carregados para ${mesParam}/${anoParam}`);
           
-          // Mostrar as primeiras datas
           if (dadosOrdenados.length > 0) {
-            console.log(`🔍 Frontend - Primeira data processada: ${dadosOrdenados[0].data_evento} (${dadosOrdenados[0].data_curta})`);
-            console.log(`🔍 Frontend - Última data processada: ${dadosOrdenados[dadosOrdenados.length - 1].data_evento} (${dadosOrdenados[dadosOrdenados.length - 1].data_curta})`);
+            console.log(`🔍 Primeira data: ${dadosOrdenados[0].data_evento} | Última: ${dadosOrdenados[dadosOrdenados.length - 1].data_evento}`);
           }
           
-          // Mostrar informações sobre dados reais disponíveis
           if (data.meta?.dados_reais_disponiveis) {
             console.log('📅 Períodos com dados reais:', data.meta.dados_reais_disponiveis);
           }
