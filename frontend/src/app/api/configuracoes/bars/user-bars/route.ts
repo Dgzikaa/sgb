@@ -4,18 +4,30 @@ import { authenticateUser, authErrorResponse } from '@/middleware/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 API: Buscando bares do usuário...');
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 API: Buscando bares do usuário...');
+    }
 
     const user = await authenticateUser(request);
     if (!user) {
-      console.log('❌ API: Usuário não autenticado');
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ API: Usuário não autenticado');
+      }
       return authErrorResponse('Usuário não autenticado');
     }
 
-    console.log('✅ API: Usuário autenticado:', user.nome);
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ API: Usuário autenticado:', user.nome);
+    }
 
     const supabase = await getAdminClient();
-    console.log('🔗 API: Cliente Supabase conectado');
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔗 API: Cliente Supabase conectado');
+    }
 
     // Buscar os bares do usuário
     const { data: userData, error: userError } = await supabase
@@ -34,10 +46,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('📊 API: Dados do usuário encontrados:', userData);
+    // Logs detalhados apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📊 API: Dados do usuário encontrados:', userData);
+    }
 
     if (!userData || userData.length === 0) {
-      console.log('❌ API: Usuário não tem acesso a nenhum bar');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ API: Usuário não tem acesso a nenhum bar');
+      }
       return NextResponse.json(
         {
           error: 'Usuário não tem acesso a nenhum bar',
@@ -48,7 +65,10 @@ export async function GET(request: NextRequest) {
 
     // Extrair IDs únicos dos bares
     const barIds = [...new Set(userData.map((user: any) => user.bar_id))];
-    console.log('🏪 API: IDs dos bares encontrados:', barIds);
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🏪 API: IDs dos bares encontrados:', barIds);
+    }
 
     // Buscar detalhes dos bares
     const { data: barsData, error: barsError } = await supabase
@@ -67,7 +87,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('✅ API: Bares encontrados:', barsData);
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✅ API: Bares encontrados:', barsData);
+    }
 
     return NextResponse.json({
       success: true,

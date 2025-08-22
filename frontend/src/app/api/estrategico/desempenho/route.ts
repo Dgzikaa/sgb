@@ -9,7 +9,10 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🚀 API Desempenho - Buscando dados de performance');
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🚀 API Desempenho - Buscando dados de performance');
+    }
 
     // Autenticação
     const user = await authenticateUser(request);
@@ -21,7 +24,10 @@ export async function GET(request: NextRequest) {
     const mes = parseInt(searchParams.get('mes') || (new Date().getMonth() + 1).toString());
     const ano = parseInt(searchParams.get('ano') || new Date().getFullYear().toString());
 
-    console.log(`📅 Buscando dados de desempenho para ${mes}/${ano} - Bar ID: ${user.bar_id}`);
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📅 Buscando dados de desempenho para ${mes}/${ano} - Bar ID: ${user.bar_id}`);
+    }
 
     // Buscar eventos básicos de todo o ano
     const { data: eventos, error: eventosError } = await supabase
@@ -82,11 +88,16 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados do Yuzer da tabela original (com paginação)
     const yuzerData = await fetchAllData('yuzer_pagamento', 'data_evento, valor_liquido', 'data_evento');
-    console.log(`📊 Yuzer: ${yuzerData.length} registros encontrados`);
+    // Logs apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Yuzer: ${yuzerData.length} registros encontrados`);
+    }
 
     // Buscar dados do Sympla das tabelas de resumo (com paginação)
     const symplaData = await fetchAllData('sympla_resumo', 'data_evento, total_liquido', 'data_evento');
-    console.log(`📊 Sympla: ${symplaData.length} registros encontrados`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Sympla: ${symplaData.length} registros encontrados`);
+    }
 
     // Função para buscar dados do ContaHub excluindo 'Conta Assinada'
     const fetchContaHubData = async () => {
@@ -123,12 +134,15 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados do ContaHub excluindo 'Conta Assinada' (com paginação)
     const contahubData = await fetchContaHubData();
-    console.log(`📊 ContaHub: ${contahubData.length} registros encontrados (excluindo Conta Assinada)`);
-    
-    // Debug: Log dos primeiros registros para verificar se o filtro está funcionando
-    console.log('🔍 Debug ContaHub - Primeiros 5 registros:', contahubData.slice(0, 5));
-    console.log('🔍 Debug Yuzer - Primeiros 5 registros:', yuzerData.slice(0, 5));
-    console.log('🔍 Debug Sympla - Primeiros 5 registros:', symplaData.slice(0, 5));
+    // Logs detalhados apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 ContaHub: ${contahubData.length} registros encontrados (excluindo Conta Assinada)`);
+      
+      // Debug: Log dos primeiros registros para verificar se o filtro está funcionando
+      console.log('🔍 Debug ContaHub - Primeiros 5 registros:', contahubData.slice(0, 5));
+      console.log('🔍 Debug Yuzer - Primeiros 5 registros:', yuzerData.slice(0, 5));
+      console.log('🔍 Debug Sympla - Primeiros 5 registros:', symplaData.slice(0, 5));
+    }
 
     // Criar mapas para facilitar a busca
     const yuzerMap = new Map();
@@ -140,13 +154,15 @@ export async function GET(request: NextRequest) {
       yuzerDebug.set(item.data_evento, currentCount + 1);
     });
 
-    // Debug: Verificar se há múltiplos registros por data
-    console.log('🔍 Debug Yuzer - Registros por data:');
-    yuzerDebug.forEach((count, data) => {
-      if (count > 1) {
-        console.log(`  📅 ${data}: ${count} registros (DUPLICADO!) - Total: R$ ${yuzerMap.get(data)}`);
-      }
-    });
+    // Debug: Verificar se há múltiplos registros por data - apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Debug Yuzer - Registros por data:');
+      yuzerDebug.forEach((count, data) => {
+        if (count > 1) {
+          console.log(`  📅 ${data}: ${count} registros (DUPLICADO!) - Total: R$ ${yuzerMap.get(data)}`);
+        }
+      });
+    }
 
     const symplaMap = new Map();
     symplaData?.forEach(item => {
@@ -159,14 +175,19 @@ export async function GET(request: NextRequest) {
       contahubMap.set(item.dt_gerencial, currentValue + (item.liquido || 0));
     });
 
-    // Debug: Verificar valores específicos das datas de agosto (após inicializar todos os mapas)
-    console.log('🔍 Debug - Valores dos mapas para agosto:');
-    ['2025-08-03', '2025-08-09', '2025-08-10', '2025-08-11'].forEach(data => {
-      console.log(`  📅 ${data}: ContaHub=R$${contahubMap.get(data) || 0}, Yuzer=R$${yuzerMap.get(data) || 0}, Sympla=R$${symplaMap.get(data) || 0}`);
-    });
+    // Debug: Verificar valores específicos das datas de agosto - apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Debug - Valores dos mapas para agosto:');
+      ['2025-08-03', '2025-08-09', '2025-08-10', '2025-08-11'].forEach(data => {
+        console.log(`  📅 ${data}: ContaHub=R$${contahubMap.get(data) || 0}, Yuzer=R$${yuzerMap.get(data) || 0}, Sympla=R$${symplaMap.get(data) || 0}`);
+      });
+    }
 
     if (!eventos || eventos.length === 0) {
-      console.log('⚠️ Nenhum evento encontrado para o período');
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⚠️ Nenhum evento encontrado para o período');
+      }
       return NextResponse.json({ 
         success: true,
         mes: mes,
@@ -176,7 +197,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log(`✅ ${eventos.length} eventos encontrados`);
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ ${eventos.length} eventos encontrados`);
+    }
 
     // Função para calcular número da semana ISO
     const getWeekNumber = (date: Date): number => {
@@ -243,7 +267,8 @@ export async function GET(request: NextRequest) {
       const faturamentoTotal = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
       
       // Debug detalhado para semanas recentes
-      if (semana >= 31 && semana <= 34) {
+      // Debug apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development' && semana >= 31 && semana <= 34) {
         console.log(`🔍 Semana ${semana} - Evento ${evento.nome} (${evento.data_evento}):`, {
           contahub: faturamentoContaHub,
           yuzer: faturamentoYuzer,
@@ -305,7 +330,10 @@ export async function GET(request: NextRequest) {
       };
     }).sort((a, b) => b.semana - a.semana); // Ordenar decrescente (semana atual primeiro)
 
-    console.log(`📊 Dados consolidados: ${semanasConsolidadas.length} semanas`);
+    // Log apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Dados consolidados: ${semanasConsolidadas.length} semanas`);
+    }
 
     // Calcular totais mensais
     const totaisMensais = semanasConsolidadas.reduce((acc, semana) => ({
