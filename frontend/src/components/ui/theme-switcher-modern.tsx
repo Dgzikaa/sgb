@@ -171,7 +171,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       color: 'from-blue-600 to-purple-700'
     },
     ...(showSystem ? [{
-      value: 'system',
+      value: 'system' as any,
       label: 'Sistema',
       icon: <Monitor className={sizeClasses[size].icon} />,
       description: 'Segue as preferências do seu sistema',
