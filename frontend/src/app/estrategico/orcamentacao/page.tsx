@@ -56,6 +56,118 @@ export default function OrcamentacaoPage() {
     return () => setPageTitle('');
   }, [setPageTitle]);
 
+  const carregarDados = useCallback(async () => {
+    if (!selectedBar) return;
+
+    setLoading(true);
+    showLoading('Carregando dados orçamentários...');
+    
+    try {
+      const anoAtual = new Date().getFullYear();
+      
+      // 1. Primeiro sincronizar com NIBO para o ano atual
+      console.log('🔄 Sincronizando com NIBO...');
+      const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          ano: anoAtual
+        })
+      });
+
+      if (!syncResponse.ok) {
+        console.warn('⚠️ Falha na sincronização NIBO, continuando com dados existentes...');
+      }
+
+      // 2. Buscar dados orçamentários
+      console.log('📊 Buscando dados orçamentários...');
+      const response = await fetch(`/api/estrategico/orcamentacao?bar_id=${selectedBar.id}&mes=${mesSelecionado}&ano=${anoAtual}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Dados recebidos:', data);
+        
+        // Processar dados realizados do NIBO
+        const dadosRealizados = new Map();
+        
+        data.dados_realizados?.forEach((item: any) => {
+          const key = item.categoria_nome || 'Outros';
+          if (!dadosRealizados.has(key)) {
+            dadosRealizados.set(key, {
+              realizado: 0,
+              planejado: 0,
+              projecao: 0
+            });
+          }
+          const existing = dadosRealizados.get(key);
+          existing.realizado += item.valor_realizado || 0;
+          existing.planejado += item.valor_previsto || 0;
+          existing.projecao += item.valor_previsto || 0;
+        });
+        
+        // Atualizar estrutura base com dados reais
+        const categoriasBase = getCategoriasEstruturadas();
+        const categoriasAtualizadas = categoriasBase.map(categoria => ({
+          ...categoria,
+          subcategorias: categoria.subcategorias.map(sub => {
+            const dadosReais = dadosRealizados.get(sub.nome);
+            
+            // Para CMV, agrupar todos os custos
+            let realizadoCMV = 0;
+            if (sub.nome === 'CMV') {
+              for (const [key, data] of dadosRealizados) {
+                if (key.includes('CUSTO') || key.includes('CMV') || key.includes('PRODUTO')) {
+                  realizadoCMV += data.realizado;
+                }
+              }
+              return {
+                ...sub,
+                realizado: realizadoCMV
+              };
+            }
+            
+            return dadosReais ? {
+              ...sub,
+              realizado: dadosReais.realizado,
+              planejado: dadosReais.planejado || sub.planejado,
+              projecao: dadosReais.projecao || sub.projecao
+            } : sub;
+          })
+        }));
+        
+        setCategorias(categoriasAtualizadas);
+        
+        toast({
+          title: '✅ Dados carregados',
+          description: `Orçamento de ${mesSelecionado}/${anoAtual} atualizado com dados do NIBO`,
+        });
+      } else {
+        // Fallback para dados base se API não retornar dados
+        setCategorias(getCategoriasEstruturadas());
+        toast({
+          title: 'Dados base carregados',
+          description: 'Usando estrutura padrão. Valores realizados podem estar desatualizados.',
+          variant: 'default',
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      // Fallback para dados base
+      setCategorias(getCategoriasEstruturadas());
+      toast({
+        title: 'Erro ao carregar',
+        description: 'Usando dados base. Verifique conexão.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+      hideLoading();
+    }
+  }, [selectedBar, toast, showLoading, hideLoading, getCategoriasEstruturadas]);
+
   useEffect(() => {
     if (selectedBar) {
       carregarDados();
@@ -145,8 +257,6 @@ export default function OrcamentacaoPage() {
       ]
     }
   ], [despesasVariaveis, cmv]);
-
-  const carregarDados = useCallback(async () => {
     if (!selectedBar) return;
 
     setLoading(true);
@@ -260,8 +370,6 @@ export default function OrcamentacaoPage() {
       setLoading(false);
       hideLoading();
     }
-  }, [selectedBar, toast, showLoading, hideLoading, getCategoriasEstruturadas]);
-
   const sincronizarManualmente = async () => {
     if (!selectedBar) return;
 
