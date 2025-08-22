@@ -121,8 +121,16 @@ export async function GET(request: NextRequest) {
 					prev.totalGasto += vrPagamentos
 					if (ultima > prev.ultima) prev.ultima = ultima
 					// Usar sempre o nome mais completo (maior length) e que não seja 'Sem nome'
-					if (nome && nome !== 'Sem nome' && nome.length > prev.nome.length) {
-						prev.nome = nome
+					// Priorizar nomes com acentos e mais completos
+					if (nome && nome !== 'Sem nome') {
+						const nomeTemAcento = /[àáâãäèéêëìíîïòóôõöùúûüç]/i.test(nome)
+						const prevTemAcento = /[àáâãäèéêëìíîïòóôõöùúûüç]/i.test(prev.nome)
+						
+						// Priorizar: 1) Nome com acento, 2) Nome mais longo
+						if ((nomeTemAcento && !prevTemAcento) || 
+							(nomeTemAcento === prevTemAcento && nome.length > prev.nome.length)) {
+							prev.nome = nome
+						}
 					}
 				}
 			}
