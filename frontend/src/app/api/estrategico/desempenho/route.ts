@@ -87,9 +87,42 @@ export async function GET(request: NextRequest) {
     const symplaData = await fetchAllData('sympla_resumo', 'data_evento, total_liquido', 'data_evento');
     console.log(`📊 Sympla: ${symplaData.length} registros encontrados`);
 
-    // Buscar dados do ContaHub direto da tabela de pagamentos (com paginação)
-    const contahubData = await fetchAllData('contahub_pagamentos', 'dt_gerencial, liquido', 'dt_gerencial');
-    console.log(`📊 ContaHub: ${contahubData.length} registros encontrados`);
+    // Função para buscar dados do ContaHub excluindo 'Conta Assinada'
+    const fetchContaHubData = async () => {
+      let allData: any[] = [];
+      let from = 0;
+      const limit = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('contahub_pagamentos')
+          .select('dt_gerencial, liquido')
+          .gte('dt_gerencial', `${ano}-01-01`)
+          .lt('dt_gerencial', `${ano + 1}-01-01`)
+          .neq('meio', 'Conta Assinada')  // Excluir consumo de sócios
+          .range(from, from + limit - 1);
+
+        if (error) {
+          console.error(`❌ Erro ao buscar dados de contahub_pagamentos:`, error);
+          break;
+        }
+
+        if (data && data.length > 0) {
+          allData = allData.concat(data);
+          hasMore = data.length === limit;
+          from += limit;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allData;
+    };
+
+    // Buscar dados do ContaHub excluindo 'Conta Assinada' (com paginação)
+    const contahubData = await fetchContaHubData();
+    console.log(`📊 ContaHub: ${contahubData.length} registros encontrados (excluindo Conta Assinada)`);
 
     // Criar mapas para facilitar a busca
     const yuzerMap = new Map();
