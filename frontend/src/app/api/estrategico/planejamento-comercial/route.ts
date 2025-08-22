@@ -175,8 +175,13 @@ export async function GET(request: NextRequest) {
       // Trigger recálculo assíncrono usando a função completa
       for (const evento of eventosParaRecalcular) {
         supabase.rpc('calculate_evento_metrics_complete', { p_evento_id: evento.id })
-          .then(() => console.log(`✅ Evento ${evento.id} recalculado com função completa`))
-          .catch(err => console.error(`❌ Erro ao recalcular evento ${evento.id}:`, err));
+          .then((result) => {
+            if (result.error) {
+              console.error(`❌ Erro ao recalcular evento ${evento.id}:`, result.error);
+            } else {
+              console.log(`✅ Evento ${evento.id} recalculado com função completa`);
+            }
+          });
       }
     }
 

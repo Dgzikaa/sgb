@@ -16,13 +16,7 @@ Sentry.init({
   // Integrations corretas para Sentry v10+
   integrations: [
     // Usar browserTracingIntegration em vez de BrowserTracing
-    Sentry.browserTracingIntegration({
-      tracePropagationTargets: [
-        "localhost",
-        "zykor.com.br",
-        /^https:\/\/zykor\.com\.br\/api/,
-      ],
-    }),
+    Sentry.browserTracingIntegration(),
     // Usar replayIntegration em vez de Replay
     Sentry.replayIntegration({
       maskAllText: false,

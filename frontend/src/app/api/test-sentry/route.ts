@@ -30,13 +30,12 @@ export async function GET(request: NextRequest) {
 
       case 'performance': {
         // Teste de performance
-        const transaction = Sentry.startTransaction({
+        await Sentry.startSpan({
           name: 'test-performance',
           op: 'test'
+        }, async () => {
+          await new Promise(resolve => setTimeout(resolve, 500));
         });
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        transaction.finish();
         
         return NextResponse.json({
           message: 'Teste de performance enviado',
