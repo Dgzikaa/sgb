@@ -11,6 +11,7 @@ export { Card, CardContent, CardDescription, CardHeader, CardTitle } from './car
 export { Badge } from './badge';
 export { Switch } from './switch';
 export { Slider } from './slider';
+export { Alert, AlertDescription } from './alert';
 
 // 🚨 Error Boundaries (apenas o que funciona)
 export { default as ErrorBoundary } from './error-boundary';
@@ -20,6 +21,14 @@ export const PageTransition = ({ children }: { children: React.ReactNode }) => <
 export const ScrollTrigger = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 export const TransitionWrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 export const LoadingTransition = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+// Componentes modernos avançados
+export { default as GlobalSearch } from './search-global-modern';
+export { default as ScrollToTop } from './scroll-animations-modern';
+export { default as CommandPalette } from './command-palette-modern';
+export { default as ThemeSwitcher } from './theme-switcher-modern';
+export { default as KeyboardShortcuts } from './accessibility';
+export { default as ModernNotifications } from './notifications-modern';
 
 // Utility functions
 export const debounce = (func: Function, wait: number) => {

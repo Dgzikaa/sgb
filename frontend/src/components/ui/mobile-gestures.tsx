@@ -201,7 +201,7 @@ export function Swipeable({
   const rotate = useTransform(x, [-100, 100], [-15, 15]);
   const opacity = useTransform(x, [-100, 0, 100], [0.5, 1, 0.5]);
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (event: any, info: any) => {
     const { offset, velocity: dragVelocity } = info;
     const shouldTrigger = Math.abs(offset.x) > threshold || Math.abs(offset.y) > threshold;
 

@@ -136,7 +136,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         onMouseLeave={() => setIsPressed(false)}
         onClick={handleClick}
         disabled={disabled || loading}
-        {...props}
+        {...(props as any)}
       >
         {/* Glow effect */}
         {glow && (

@@ -257,16 +257,17 @@ export default function OrcamentacaoPage() {
       ]
     }
   ], [despesasVariaveis, cmv]);
+
+
+  const sincronizarManualmente = async () => {
     if (!selectedBar) return;
 
-    setLoading(true);
-    showLoading('Carregando dados orçamentários...');
+    setSincronizando(true);
+    showLoading('Sincronizando com NIBO...');
     
     try {
       const anoAtual = new Date().getFullYear();
       
-      // 1. Primeiro sincronizar com NIBO para o ano atual
-      console.log('🔄 Sincronizando com NIBO...');
       const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
         method: 'POST',
         headers: {
@@ -345,59 +346,7 @@ export default function OrcamentacaoPage() {
         setUltimaAtualizacao(new Date());
         
         toast({
-          title: 'Dados atualizados',
-          description: `${result.data.length} registros carregados (Julho/2025)`,
-        });
-      } else {
-        // Fallback para dados base se API não retornar dados
-        setCategorias(getCategoriasEstruturadas());
-        toast({
-          title: 'Dados base carregados',
-          description: 'Usando estrutura padrão. Valores realizados podem estar desatualizados.',
-          variant: 'default',
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-      // Fallback para dados base
-      setCategorias(getCategoriasEstruturadas());
-      toast({
-        title: 'Erro ao carregar',
-        description: 'Usando dados base. Verifique conexão.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-      hideLoading();
-    }
-  const sincronizarManualmente = async () => {
-    if (!selectedBar) return;
-
-    setSincronizando(true);
-    showLoading('Sincronizando com NIBO...');
-    
-    try {
-      const anoAtual = new Date().getFullYear();
-      
-      const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          bar_id: selectedBar.id,
-          ano: anoAtual,
-        }),
-      });
-      
-      const syncResult = await syncResponse.json();
-      
-      if (syncResult.success) {
-        // Recarregar dados após sincronização
-        await carregarDados();
-        
-        toast({
-          title: 'Sincronização concluída',
+          title: 'Sincronização completa',
           description: `${syncResult.total} registros processados (${syncResult.importados} novos, ${syncResult.atualizados} atualizados)`,
         });
       } else {
@@ -416,17 +365,122 @@ export default function OrcamentacaoPage() {
     }
   };
 
-    const handleEdit = (categoriaIndex: number, subIndex: number) => {
+  const handleSave = async (categoriaIndex: number, subIndex: number) => {
     const key = `${categoriaIndex}-${subIndex}`;
-    const subcategoria = categorias[categoriaIndex].subcategorias[subIndex];
-    
-    // Se for despesas variáveis ou CMV, editar diretamente no estado
-    if (subcategoria.nome === 'IMPOSTO/TX MAQ/COMISSÃO') {
-      setEditMode(prev => ({ ...prev, [key]: true }));
-      setEditedValues(prev => ({
-        ...prev,
-        [key]: {
-          planejado: despesasVariaveis.planejado,
+    const novoValor = editedValues[key];
+    if (!novoValor) return;
+
+    try {
+      const subcategoria = categorias[categoriaIndex].subcategorias[subIndex];
+
+      // Se for despesas variáveis ou CMV, salvar no estado específico
+      if (subcategoria.nome === 'IMPOSTO/TX MAQ/COMISSÃO') {
+        setDespesasVariaveis(prev => ({
+          ...prev,
+          planejado: parseFloat(novoValor)
+        }));
+      } else if (subcategoria.nome === 'CMV') {
+        setCmv(prev => ({
+          ...prev,
+          planejado: parseFloat(novoValor)
+        }));
+      } else {
+        // Para outras categorias, atualizar diretamente
+        setCategorias(prev => prev.map((cat, catIndex) => 
+          catIndex === categoriaIndex 
+            ? {
+                ...cat,
+                subcategorias: cat.subcategorias.map((sub, subIdx) => 
+                  subIdx === subIndex 
+                    ? { ...sub, planejado: parseFloat(novoValor) }
+                    : sub
+                )
+              }
+            : cat
+        ));
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Valores atualizados com sucesso',
+      });
+      setEditMode(prev => ({ ...prev, [key]: false }));
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar a alteração',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCancel = (categoriaIndex: number, subIndex: number) => {
+    const key = `${categoriaIndex}-${subIndex}`;
+    setEditedValues(prev => {
+      const newValues = { ...prev };
+      delete newValues[key];
+      return newValues;
+    });
+    setEditMode(prev => ({ ...prev, [key]: false }));
+  };
+
+  const handleEdit = (categoriaIndex: number, subIndex: number, valorAtual: number) => {
+    const key = `${categoriaIndex}-${subIndex}`;
+    setEditedValues(prev => ({ ...prev, [key]: valorAtual.toString() }));
+    setEditMode(prev => ({ ...prev, [key]: true }));
+  };
+
+  const formatarMoeda = (valor: number): string => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(valor);
+  };
+
+  const formatarPorcentagem = (valor: number) => {
+    return `${valor.toFixed(1)}%`;
+  };
+
+  // Cálculos automáticos
+  const calcularValores = () => {
+    // Real Fixo - Planejado, Projeção e Realizado
+    const totalRealFixoPlanejado = categorias.reduce((acc, cat) => {
+      if (cat.nome.includes('Variáveis') || cat.nome.includes('CMV')) return acc;
+      return acc + cat.subcategorias.reduce((subAcc, sub) => subAcc + sub.planejado, 0);
+    }, 0);
+
+    const totalRealFixoProjecao = categorias.reduce((acc, cat) => {
+      if (cat.nome.includes('Variáveis') || cat.nome.includes('CMV')) return acc;
+      return acc + cat.subcategorias.reduce((subAcc, sub) => subAcc + sub.projecao, 0);
+    }, 0);
+
+    const totalRealFixoRealizado = categorias.reduce((acc, cat) => {
+      if (cat.nome.includes('Variáveis') || cat.nome.includes('CMV')) return acc;
+      return acc + cat.subcategorias.reduce((subAcc, sub) => subAcc + sub.realizado, 0);
+    }, 0);
+
+    return {
+      totalRealFixoPlanejado,
+      totalRealFixoProjecao,
+      totalRealFixoRealizado,
+    };
+  };
+
+  const valoresCalculados = calcularValores();
+
+  if (loading) {
+    return (
+      <GlobalLoadingComponent />
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <GlobalLoadingComponent />
+      <div className="container mx-auto px-4 py-6">
           projecao: despesasVariaveis.projecao
         }
       }));
