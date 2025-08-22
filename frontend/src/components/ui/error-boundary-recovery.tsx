@@ -538,7 +538,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({
       errorInfo,
-      componentStack: errorInfo.componentStack
+      componentStack: errorInfo.componentStack || ''
     });
 
     // Notificar sobre o erro
@@ -564,7 +564,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           stack: error.stack
         },
         errorInfo: {
-          componentStack: errorInfo.componentStack
+          componentStack: errorInfo.componentStack || ''
         },
         context: {
           timestamp: this.state.timestamp,

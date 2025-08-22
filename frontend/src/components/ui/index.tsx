@@ -23,12 +23,13 @@ export const TransitionWrapper = ({ children }: { children: React.ReactNode }) =
 export const LoadingTransition = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 // Componentes modernos avançados
-export { default as GlobalSearch } from './search-global-modern';
-export { default as ScrollToTop } from './scroll-animations-modern';
+export { SearchGlobal as GlobalSearch } from './search-global-modern';
+export { ScrollToTop } from './scroll-animations-modern';
 export { default as CommandPalette } from './command-palette-modern';
 export { default as ThemeSwitcher } from './theme-switcher-modern';
-export { default as KeyboardShortcuts } from './accessibility';
-export { default as ModernNotifications } from './notifications-modern';
+// KeyboardShortcuts não está implementado ainda
+// export { KeyboardShortcuts } from './accessibility';
+export { ModernNotifications } from './notifications-modern';
 
 // Utility functions
 export const debounce = (func: Function, wait: number) => {

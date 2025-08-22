@@ -1,6 +1,9 @@
 // Sistema de Processamento de Linguagem Natural para Zykor AI
 import { zykorAI, type AIResponse, type AIAnalysisResult } from './setup';
 
+// Re-export AIAnalysisResult for convenience
+export type { AIAnalysisResult } from './setup';
+
 // Tipos para análise de consultas
 export interface QueryAnalysis {
   intent: QueryIntent;
@@ -459,7 +462,7 @@ export class NLPProcessor {
 
   // Construir prompt do sistema otimizado
   private buildSystemPrompt(analysis: QueryAnalysis): string {
-    const prompts = [];
+    const prompts: string[] = [];
 
     prompts.push("Você é o Zykor AI Assistant, especialista em análise de dados para gestão de bares e casas noturnas.");
     

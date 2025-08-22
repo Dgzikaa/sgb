@@ -63,7 +63,7 @@ export function PageTransition({
       transition={{
         duration,
         delay,
-        ease: [0.4, 0, 0.2, 1], // Easing suave
+        ease: [0.4, 0, 0.2, 1] as any, // Easing suave
       }}
     >
       {children}
@@ -240,7 +240,7 @@ export function RouteTransition({
         exit="exit"
         transition={{
           duration: 0.4,
-          ease: [0.4, 0, 0.2, 1],
+          ease: [0.4, 0, 0.2, 1] as any,
         }}
         className={cn('w-full', className)}
       >
@@ -322,7 +322,7 @@ export const zykorTransitions = {
     initial: { opacity: 0, y: 20, scale: 0.95 },
     animate: { opacity: 1, y: 0, scale: 1 },
     exit: { opacity: 0, y: -20, scale: 0.95 },
-    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] as any },
   },
 
   // Transição para modais
@@ -330,7 +330,7 @@ export const zykorTransitions = {
     initial: { opacity: 0, scale: 0.8, y: -20 },
     animate: { opacity: 1, scale: 1, y: 0 },
     exit: { opacity: 0, scale: 0.8, y: 20 },
-    transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as any },
   },
 
   // Transição para listas
@@ -338,7 +338,7 @@ export const zykorTransitions = {
     initial: { opacity: 0, x: -20 },
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: 20 },
-    transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as any },
   },
 
   // Transição para gráficos
@@ -346,7 +346,7 @@ export const zykorTransitions = {
     initial: { opacity: 0, scale: 0.9 },
     animate: { opacity: 1, scale: 1 },
     exit: { opacity: 0, scale: 1.1 },
-    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] as any },
   },
 };
 

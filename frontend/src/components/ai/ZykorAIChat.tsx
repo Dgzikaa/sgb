@@ -431,7 +431,7 @@ export default function ZykorAIChat() {
                                 {Object.entries(message.result.metrics).map(([key, value]) => (
                                   <div key={key} className="text-sm">
                                     <span className="text-white/60">{key}:</span>
-                                    <span className="ml-2 text-white font-medium">{value}</span>
+                                    <span className="ml-2 text-white font-medium">{String(value)}</span>
                                   </div>
                                 ))}
                               </div>
@@ -482,7 +482,11 @@ export default function ZykorAIChat() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleSendMessage(messages.find(m => m.id === message.id - 1)?.content || '')}
+                        onClick={() => {
+                          const currentIndex = messages.findIndex(m => m.id === message.id);
+                          const previousMessage = currentIndex > 0 ? messages[currentIndex - 1] : null;
+                          handleSendMessage(previousMessage?.content || '');
+                        }}
                         className="h-6 px-2 text-white/60 hover:text-white"
                       >
                         <RefreshCw className="w-3 h-3" />

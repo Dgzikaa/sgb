@@ -437,12 +437,18 @@ export const SearchGlobal: React.FC<SearchGlobalProps> = ({
 
   // Toggle filtro
   const toggleFilter = useCallback((type: keyof SearchFilters, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [type]: prev[type].includes(value)
-        ? prev[type].filter(v => v !== value)
-        : [...prev[type], value]
-    }));
+    setFilters(prev => {
+      const currentValue = prev[type];
+      if (Array.isArray(currentValue)) {
+        return {
+          ...prev,
+          [type]: currentValue.includes(value)
+            ? currentValue.filter(v => v !== value)
+            : [...currentValue, value]
+        };
+      }
+      return prev;
+    });
   }, []);
 
   if (!isOpen) return null;

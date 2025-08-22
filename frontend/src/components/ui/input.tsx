@@ -69,7 +69,7 @@ const Input = React.forwardRef<HTMLInputElement, ModernInputProps>(
               scale: isFocused || hasValue ? 0.85 : 1,
               color: isFocused ? '#3b82f6' : error ? '#ef4444' : success ? '#10b981' : '#6b7280'
             }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] as any }}
             className="absolute left-3 top-2.5 pointer-events-none origin-left text-sm font-medium z-10"
           >
             {label}

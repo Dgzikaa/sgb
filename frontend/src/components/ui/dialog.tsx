@@ -247,7 +247,7 @@ const DialogContent: React.FC<DialogContentProps> = ({
       y: 0,
       transition: { 
         duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
+        ease: [0.4, 0, 0.2, 1] as any
       }
     },
     exit: { 
@@ -258,6 +258,8 @@ const DialogContent: React.FC<DialogContentProps> = ({
     }
   };
 
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+  
   return (
     <motion.div
       variants={animated ? contentVariants : undefined}
@@ -271,7 +273,7 @@ const DialogContent: React.FC<DialogContentProps> = ({
         className
       )}
       style={{ maxHeight }}
-      {...props}
+      {...motionProps}
     >
       {/* Resize handle */}
       {resizable && !isMaximized && (
@@ -300,6 +302,8 @@ const DialogHeader: React.FC<DialogHeaderProps> = ({
 }) => {
   const { onOpenChange, showCloseButton, animated } = useDialogContext();
 
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+  
   return (
     <motion.div
       initial={animated ? { opacity: 0, y: -20 } : undefined}
@@ -310,7 +314,7 @@ const DialogHeader: React.FC<DialogHeaderProps> = ({
         'bg-gray-50/50 dark:bg-gray-800/50',
         className
       )}
-      {...props}
+      {...motionProps}
     >
       <div className="flex-1 min-w-0">
         {children}
@@ -354,6 +358,8 @@ const DialogTitle: React.FC<DialogTitleProps> = ({
 }) => {
   const { animated } = useDialogContext();
 
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+  
   return (
     <motion.h2
       initial={animated ? { opacity: 0, x: -20 } : undefined}
@@ -363,7 +369,7 @@ const DialogTitle: React.FC<DialogTitleProps> = ({
         'text-lg font-semibold text-gray-900 dark:text-gray-100 truncate',
         className
       )}
-      {...props}
+      {...motionProps}
     >
       {children}
     </motion.h2>
@@ -377,6 +383,8 @@ const DialogDescription: React.FC<DialogDescriptionProps> = ({
 }) => {
   const { animated } = useDialogContext();
 
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+  
   return (
     <motion.p
       initial={animated ? { opacity: 0, x: -20 } : undefined}
@@ -386,7 +394,7 @@ const DialogDescription: React.FC<DialogDescriptionProps> = ({
         'text-sm text-gray-600 dark:text-gray-400 mt-1',
         className
       )}
-      {...props}
+      {...motionProps}
     >
       {children}
     </motion.p>
@@ -400,6 +408,8 @@ const DialogBody: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => {
   const { animated } = useDialogContext();
 
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+  
   return (
     <motion.div
       initial={animated ? { opacity: 0, y: 20 } : undefined}
@@ -409,7 +419,7 @@ const DialogBody: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
         'flex-1 p-6 overflow-y-auto',
         className
       )}
-      {...props}
+      {...motionProps}
     >
       {children}
     </motion.div>
@@ -431,6 +441,8 @@ const DialogFooter: React.FC<DialogFooterProps> = ({
     between: 'justify-between'
   };
 
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+  
   return (
     <motion.div
       initial={animated ? { opacity: 0, y: 20 } : undefined}
@@ -442,7 +454,7 @@ const DialogFooter: React.FC<DialogFooterProps> = ({
         justifyClasses[justify],
         className
       )}
-      {...props}
+      {...motionProps}
     >
       {children}
     </motion.div>

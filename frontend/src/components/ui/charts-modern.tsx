@@ -268,7 +268,7 @@ export const ModernChart = React.forwardRef<HTMLDivElement, ModernChartProps>(
         transition: {
           delay: i * 0.05,
           duration: 0.3,
-          ease: "easeOut"
+          ease: "easeOut" as any
         }
       })
     };
@@ -322,7 +322,7 @@ export const ModernChart = React.forwardRef<HTMLDivElement, ModernChartProps>(
             <motion.path
               initial={{ pathLength: 0 }}
               animate={{ pathLength: 1 }}
-              transition={{ duration: 1, ease: "easeInOut" }}
+              transition={{ duration: 1, ease: "easeInOut" as any }}
               d={generateLinePath(allData, maxValue, minValue, valueRange)}
               fill="none"
               stroke={getColor(allData[0], 0)}

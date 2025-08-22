@@ -59,7 +59,7 @@ interface ModernFileUploadProps {
 }
 
 // 🎨 COMPONENTE PRINCIPAL
-export const ModernFileUpload = React.forwardRef<HTMLDivElement, ModernFileUploadProps>(
+const ModernFileUpload = React.forwardRef<HTMLDivElement, ModernFileUploadProps>(
   ({
     multiple = false,
     accept,
@@ -359,7 +359,7 @@ export const ModernFileUpload = React.forwardRef<HTMLDivElement, ModernFileUploa
         transition: {
           delay: i * 0.1,
           duration: 0.3,
-          ease: "easeOut"
+          ease: "easeOut" as any
         }
       }),
       exit: { 

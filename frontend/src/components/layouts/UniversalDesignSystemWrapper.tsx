@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   ErrorBoundary,
   PageTransition,
-  AccessibilityProvider,
-  UserEventTracker,
-  PerformanceMonitor,
   GlobalSearch,
   ScrollToTop,
   CommandPalette,
   ThemeSwitcher,
-  KeyboardShortcuts,
+  // KeyboardShortcuts,
   ModernNotifications
 } from '@/components/ui';
 import { Button } from '@/components/ui/button';
@@ -86,12 +83,8 @@ export function UniversalDesignSystemWrapper({
 
   return (
     <ErrorBoundary>
-      {enableAccessibility && (
-        <AccessibilityProvider>
-          {enableAnalytics && (
-            <UserEventTracker>
-              <PerformanceMonitor>
-                <PageTransition variant="fade" duration={0.3}>
+      {enableAccessibility && enableAnalytics && (
+                <PageTransition>
                   <div className={`design-system-wrapper ${className}`}>
                     {children}
                     
@@ -164,24 +157,20 @@ export function UniversalDesignSystemWrapper({
                     <ModernNotifications />
                     
                     {/* Keyboard Shortcuts Handler */}
+                    {/* KeyboardShortcuts não implementado ainda
                     {enableKeyboardShortcuts && (
                       <KeyboardShortcuts />
                     )}
+                    */}
                   </div>
                 </PageTransition>
-              </PerformanceMonitor>
-            </UserEventTracker>
-          )}
-        </AccessibilityProvider>
       )}
       
       {/* Fallback sem acessibilidade */}
       {!enableAccessibility && (
         <>
           {enableAnalytics && (
-            <UserEventTracker>
-              <PerformanceMonitor>
-                <PageTransition variant="fade" duration={0.3}>
+                <PageTransition>
                   <div className={`design-system-wrapper ${className}`}>
                     {children}
                     
@@ -214,12 +203,10 @@ export function UniversalDesignSystemWrapper({
                     <ModernNotifications />
                   </div>
                 </PageTransition>
-              </PerformanceMonitor>
-            </UserEventTracker>
           )}
           
           {!enableAnalytics && (
-            <PageTransition variant="fade" duration={0.3}>
+            <PageTransition>
               <div className={`design-system-wrapper ${className}`}>
                 {children}
                 

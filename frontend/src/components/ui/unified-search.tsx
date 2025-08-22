@@ -92,7 +92,7 @@ export default function UnifiedSearch({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<SearchResult[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -511,7 +511,7 @@ export default function UnifiedSearch({
                       className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 dark:text-gray-300"
                     >
                       <History className="h-3 w-3" />
-                      {search}
+                      {search.title}
                     </div>
                   ))}
                 </div>

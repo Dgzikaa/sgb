@@ -58,6 +58,9 @@ serve(async (req) => {
   }
 
   try {
+    // Log de autorização para debug
+    const authHeader = req.headers.get('authorization')
+    console.log('🔐 Authorization header:', authHeader ? 'Presente' : 'Ausente')
     // Log da requisição para debug
     console.log('📥 Requisição recebida:', {
       method: req.method,
@@ -69,15 +72,27 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    
+    console.log('🔐 Configurações:', {
+      supabaseUrl: supabaseUrl ? 'Configurada' : 'Não encontrada',
+      supabaseKey: supabaseKey ? 'Configurada' : 'Não encontrada'
+    })
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Get Getin credentials
+    console.log('🔍 Buscando credenciais GET IN...')
     const { data: credenciais, error: credError } = await supabase
       .from('api_credentials')
       .select('username, api_token')
       .eq('sistema', 'getin')
-      .eq('ambiente', 'producao')
+      .eq('ativo', true)
       .single()
+    
+    console.log('🔐 Resultado da busca:', {
+      encontrou: !!credenciais,
+      erro: credError?.message,
+      username: credenciais?.username
+    })
 
     if (credError || !credenciais) {
       throw new Error('Credenciais do Getin não encontradas')
@@ -282,7 +297,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         timestamp: new Date().toISOString()
       }),
       {

@@ -338,7 +338,7 @@ export const ModernNotifications = React.forwardRef<HTMLDivElement, ModernNotifi
         scale: 1,
         transition: { 
           duration: 0.3,
-          ease: [0.4, 0, 0.2, 1]
+          ease: [0.4, 0, 0.2, 1] as any
         }
       },
       exit: { 

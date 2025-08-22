@@ -11,9 +11,7 @@ import {
 } from '@/components/ui/motion-wrapper';
 import { 
   Skeleton, 
-  SkeletonCard, 
-  SkeletonDashboard,
-  useSkeletonLoading 
+  SkeletonCard
 } from '@/components/ui/skeleton-modern';
 import { AccessibleText, SkipLink, FocusRing } from '@/components/ui/accessibility-wrapper';
 import { useZykorToast } from '@/components/ui/toast-modern';
@@ -61,14 +59,23 @@ export function ModernPageLayout({
   onFullscreen,
   onFilter
 }: ModernPageLayoutProps) {
-  const showSkeleton = useSkeletonLoading(loading, 200);
+  const showSkeleton = loading;
   const toast = useZykorToast();
 
   // Componente de skeleton baseado no tipo
   const renderSkeleton = () => {
     switch (skeletonType) {
       case 'dashboard':
-        return <SkeletonDashboard />;
+        return (
+          <div className="space-y-6">
+            <SkeletonCard />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          </div>
+        );
       case 'form':
         return (
           <div className="space-y-6">
@@ -113,7 +120,16 @@ export function ModernPageLayout({
           </div>
         );
       default:
-        return <SkeletonDashboard />;
+        return (
+          <div className="space-y-6">
+            <SkeletonCard />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          </div>
+        );
     }
   };
 
@@ -274,7 +290,7 @@ export function ModernCard({
   hoverable = false,
   actions
 }: ModernCardProps) {
-  const showSkeleton = useSkeletonLoading(loading, 100);
+  const showSkeleton = loading;
 
   if (showSkeleton) {
     return <SkeletonCard className={className} />;
@@ -373,7 +389,7 @@ export function ModernStat({
   loading = false,
   className
 }: ModernStatProps) {
-  const showSkeleton = useSkeletonLoading(loading, 50);
+  const showSkeleton = loading;
 
   if (showSkeleton) {
     return (

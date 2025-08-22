@@ -287,6 +287,8 @@ export function AccessibleButton({
     lg: 'px-6 py-3 text-lg'
   };
 
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, ...motionProps } = props;
+  
   return (
     <motion.button
       whileHover={!reducedMotion ? { scale: 1.02 } : {}}
@@ -300,7 +302,7 @@ export function AccessibleButton({
       disabled={loading}
       aria-disabled={loading}
       aria-label={loading ? loadingText : undefined}
-      {...props}
+      {...motionProps}
     >
       {loading ? (
         <>

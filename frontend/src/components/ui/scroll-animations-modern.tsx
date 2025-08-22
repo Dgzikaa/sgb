@@ -107,7 +107,7 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({
     const baseConfig = {
       duration,
       delay,
-      ease: "easeOut"
+      ease: "easeOut" as any
     };
 
     switch (type) {
@@ -234,7 +234,7 @@ export const ScrollAnimation: React.FC<ScrollAnimationProps> = ({
       className={className}
       initial={config.initial}
       animate={isInView ? config.animate : config.initial}
-      transition={config.transition || config}
+      transition={(config.transition || config) as any}
       onAnimationStart={onAnimationStart}
       onAnimationComplete={onAnimationComplete}
       style={{
@@ -355,7 +355,7 @@ export const AnimatedSection: React.FC<{
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
       transition={{
         duration: 0.8,
-        ease: "easeOut",
+        ease: "easeOut" as any,
         staggerChildren: staggerDelay
       }}
     >
@@ -378,7 +378,7 @@ export const AnimatedItem: React.FC<{
       transition={{
         duration: 0.6,
         delay,
-        ease: "easeOut"
+        ease: "easeOut" as any
       }}
     >
       {children}

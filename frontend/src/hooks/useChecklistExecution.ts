@@ -214,6 +214,15 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
     }
   }, [execucao, api]);
 
+  // Calcular se tem alterações pendentes
+  const temAlteracoesPendentes = useMemo(() => {
+    if (!execucao || !execucaoOriginal) return false;
+    return (
+      JSON.stringify(execucao.respostas) !==
+      JSON.stringify(execucaoOriginal.respostas)
+    );
+  }, [execucao, execucaoOriginal]);
+
   // Auto-save quando há mudanças
   useEffect(() => {
     if (
@@ -481,15 +490,6 @@ export function useChecklistExecution(): UseChecklistExecutionResult {
   const toggleAutoSave = useCallback(() => {
     setAutoSaveEnabled(prev => !prev);
   }, []);
-
-  // Calcular se tem alterações pendentes
-  const temAlteracoesPendentes = useMemo(() => {
-    if (!execucao || !execucaoOriginal) return false;
-    return (
-      JSON.stringify(execucao.respostas) !==
-      JSON.stringify(execucaoOriginal.respostas)
-    );
-  }, [execucao, execucaoOriginal]);
 
   // Verificar se pode ser finalizada
   const podeSerFinalizada = useMemo(() => {

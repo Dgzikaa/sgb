@@ -1,10 +1,12 @@
-// import { NodeSDK } from '@opentelemetry/sdk-node';
-// import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-// import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
-import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
-import { metrics, trace } from '@opentelemetry/api';
+// Telemetry disabled for frontend build
+// import type { NodeSDK } from '@opentelemetry/sdk-node';
+// import type { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+// import type { Resource } from '@opentelemetry/resources';
+// All telemetry imports disabled for frontend
+// import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+// import { BatchSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-node';
+// import { PeriodicExportingMetricReader, MeterProvider } from '@opentelemetry/sdk-metrics';
+// import { metrics, trace } from '@opentelemetry/api';
 
 // Configuração do Resource
 // const resource = new Resource({
@@ -20,12 +22,13 @@ const getExporters = () => {
     return [];
   } else {
     // Em desenvolvimento, usar console
-    return [new ConsoleSpanExporter()];
+    // return [new ConsoleSpanExporter()];
+    return [];
   }
 };
 
-// Inicialização do SDK
-let sdk: NodeSDK | null = null;
+// Telemetry SDK disabled for frontend
+// let sdk: NodeSDK | null = null;
 
 export function initializeTelemetry() {
   if (typeof window !== 'undefined') {
@@ -33,15 +36,12 @@ export function initializeTelemetry() {
     return;
   }
 
-  if (sdk) {
-    // Já inicializado
-    return;
-  }
+  // Telemetry disabled for now to avoid import errors
+  return;
+}
 
-  sdk = new NodeSDK({
-    resource,
-    instrumentations: [
-      getNodeAutoInstrumentations({
+// Resto da telemetria desabilitada temporariamente
+/*
         // Configurações específicas
         '@opentelemetry/instrumentation-fs': {
           enabled: false, // Desabilitar instrumentação de filesystem
@@ -295,3 +295,4 @@ if (typeof window !== 'undefined') {
     }
   };
 }
+*/

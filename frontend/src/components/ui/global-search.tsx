@@ -97,6 +97,7 @@ interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   className?: string;
+  children?: React.ReactNode;
 }
 
 // =====================================================
@@ -675,7 +676,7 @@ function RecentItem({
 }
 
 // Modal de busca
-function SearchModal({ isOpen, onClose, className = '' }: SearchModalProps) {
+function SearchModal({ isOpen, onClose, className = '', children }: SearchModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -698,7 +699,7 @@ function SearchModal({ isOpen, onClose, className = '' }: SearchModalProps) {
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          {isOpen && (
+          {children || (isOpen && (
             <GlobalSearch
               className="hidden"
               onResultSelect={(result) => {
@@ -706,7 +707,7 @@ function SearchModal({ isOpen, onClose, className = '' }: SearchModalProps) {
                 console.log('Selected:', result);
               }}
             />
-          )}
+          ))}
         </motion.div>
       </motion.div>
     </AnimatePresence>

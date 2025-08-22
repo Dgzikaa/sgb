@@ -285,7 +285,7 @@ async function syncGetInReservations(barId = 3, options = {}) {
 
     // 4. Configurar parâmetros de busca
     const searchParams = {
-      startDate: options.startDate || '2024-01-31', // Data inicial padrão
+      startDate: options.startDate || '2025-01-01', // Data inicial padrão
       endDate: options.endDate || new Date().toISOString().split('T')[0], // Hoje
       perPage: options.perPage || 50, // Reservas por página
       sort: 'date:desc', // Ordenar por data decrescente
@@ -474,13 +474,13 @@ async function main() {
       console.log('  list    Listar reservas salvas no banco');
       console.log('');
       console.log('Opções para sync:');
-      console.log('  --start-date YYYY-MM-DD    Data inicial (padrão: 2020-01-01)');
+      console.log('  --start-date YYYY-MM-DD    Data inicial (padrão: 2025-01-01)');
       console.log('  --end-date YYYY-MM-DD      Data final (padrão: hoje)');
       console.log('  --limit N                  Limite por requisição (padrão: 100)');
       console.log('');
       console.log('Exemplos:');
       console.log('  node sync-getin-reservas.js sync 3');
-      console.log('  node sync-getin-reservas.js sync 3 --start-date 2024-01-01 --end-date 2024-12-31');
+      console.log('  node sync-getin-reservas.js sync 3 --start-date 2025-01-01 --end-date 2025-12-31');
       console.log('  node sync-getin-reservas.js list 3 20');
   }
 }

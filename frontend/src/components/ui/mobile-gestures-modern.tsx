@@ -219,7 +219,7 @@ export const Swipeable: React.FC<SwipeProps> = ({
     <motion.div
       className={className}
       onPanStart={handlePanStart}
-      onPanUpdate={handlePanUpdate}
+      onPan={handlePanUpdate}
       onPanEnd={handlePanEnd}
       style={{
         touchAction: direction === 'horizontal' ? 'pan-y' : direction === 'vertical' ? 'pan-x' : 'none'
@@ -258,7 +258,8 @@ export const Pinchable: React.FC<PinchProps> = ({
     <motion.div
       className={className}
       style={{ scale }}
-      onPinch={handlePinch}
+      // onPinch não suportado diretamente pelo Framer Motion
+      // onPinch={handlePinch}
     >
       {children}
     </motion.div>
@@ -287,7 +288,8 @@ export const Rotatable: React.FC<RotateProps> = ({
     <motion.div
       className={className}
       style={{ rotate: rotation }}
-      onRotate={handleRotate}
+      // onRotate não suportado diretamente pelo Framer Motion  
+      // onRotate={handleRotate}
     >
       {children}
     </motion.div>

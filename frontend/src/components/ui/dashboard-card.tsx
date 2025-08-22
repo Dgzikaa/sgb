@@ -89,7 +89,7 @@ export default function DashboardCard({
       scale: 1,
       transition: {
         duration: 0.4,
-        ease: [0.4, 0, 0.2, 1]
+        ease: [0.4, 0, 0.2, 1] as any
       }
     },
     hover: {
@@ -97,7 +97,7 @@ export default function DashboardCard({
       scale: 1.02,
       transition: {
         duration: 0.2,
-        ease: [0.4, 0, 0.2, 1]
+        ease: [0.4, 0, 0.2, 1] as any
       }
     },
     tap: {
@@ -115,7 +115,7 @@ export default function DashboardCard({
       transition: {
         duration: 2,
         repeat: glow ? Infinity : 0,
-        ease: "easeInOut"
+        ease: "easeInOut" as any
       }
     }
   };
@@ -210,7 +210,7 @@ export default function DashboardCard({
                 transition={{ 
                   duration: 2, 
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut" as any
                 }}
                 className="w-12 h-12 bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800 rounded-xl flex items-center justify-center"
               >
@@ -531,7 +531,7 @@ export function StatCard({
                 transition={{ 
                   delay: 0.7 + (index * 0.1),
                   duration: 0.6,
-                  ease: [0.4, 0, 0.2, 1]
+                  ease: [0.4, 0, 0.2, 1] as any
                 }}
                 whileHover={{ 
                   scale: 1.1,

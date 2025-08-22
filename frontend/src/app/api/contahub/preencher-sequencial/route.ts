@@ -254,9 +254,9 @@ async function checkDateExists(
 }
 
 async function countRemainingGaps(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   dataType: string,
-  barId: number
+  barId: number | string
 ): Promise<number> {
   try {
     let tableName = ''

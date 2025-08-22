@@ -51,9 +51,12 @@ export function ScrollTrigger({
 }: ScrollTriggerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, {
-    threshold,
-    triggerOnce,
-    rootMargin,
+    // threshold não suportado na versão atual do useInView
+    // threshold,
+    // triggerOnce não suportado na versão atual do useInView
+    // triggerOnce,
+    // rootMargin não suportado na versão atual do useInView
+    // rootMargin,
   });
 
   const getAnimationVariants = () => {
@@ -120,7 +123,7 @@ export function ScrollTrigger({
       transition={{
         duration,
         delay,
-        ease: [0.4, 0, 0.2, 1],
+        ease: [0.4, 0, 0.2, 1] as any,
       }}
     >
       {children}
@@ -201,8 +204,10 @@ export function StaggeredContainer({
 }: StaggeredContainerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, {
-    threshold,
-    triggerOnce,
+    // threshold não suportado na versão atual do useInView
+    // threshold,
+    // triggerOnce não suportado na versão atual do useInView
+    // triggerOnce,
   });
 
   const getStaggerVariants = () => {
@@ -337,7 +342,7 @@ export function TextReveal({
   threshold = 0.1,
 }: TextRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { threshold, triggerOnce: true });
+  const isInView = useInView(ref, {});
 
   const renderText = () => {
     if (animation === 'word') {
@@ -349,7 +354,7 @@ export function TextReveal({
           transition={{
             duration,
             delay: delay + index * 0.1,
-            ease: [0.4, 0, 0.2, 1],
+            ease: [0.4, 0, 0.2, 1] as any,
           }}
           className="inline-block mr-2"
         >
@@ -367,7 +372,7 @@ export function TextReveal({
           transition={{
             duration,
             delay: delay + index * 0.02,
-            ease: [0.4, 0, 0.2, 1],
+            ease: [0.4, 0, 0.2, 1] as any,
           }}
           className="inline-block"
         >
@@ -385,7 +390,7 @@ export function TextReveal({
           transition={{
             duration,
             delay: delay + index * 0.2,
-            ease: [0.4, 0, 0.2, 1],
+            ease: [0.4, 0, 0.2, 1] as any,
           }}
         >
           {line}
@@ -427,7 +432,7 @@ export function ImageReveal({
   threshold = 0.1,
 }: ImageRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { threshold, triggerOnce: true });
+  const isInView = useInView(ref, {});
 
   const getImageVariants = () => {
     switch (animation) {
@@ -473,7 +478,7 @@ export function ImageReveal({
       transition={{
         duration,
         delay,
-        ease: [0.4, 0, 0.2, 1],
+        ease: [0.4, 0, 0.2, 1] as any,
       }}
     >
       <img
@@ -566,7 +571,7 @@ export function ScrollToTop({
 
 export function useScrollAnimation(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { threshold, triggerOnce: true });
+  const isInView = useInView(ref, {});
 
   const scrollVariants = {
     hidden: { opacity: 0, y: 50 },

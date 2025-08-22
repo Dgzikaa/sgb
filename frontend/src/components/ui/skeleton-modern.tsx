@@ -64,7 +64,7 @@ interface SkeletonFormProps {
 }
 
 // 🎨 COMPONENTE BASE
-export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
   ({
     className,
     variant = 'default',
@@ -144,7 +144,7 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
           duration: 1.5,
           repeat: Infinity,
           repeatDelay: 1,
-          ease: "linear"
+          ease: "linear" as any
         }
       }
     };
@@ -156,7 +156,7 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
         transition: {
           duration: 2,
           repeat: Infinity,
-          ease: "easeInOut"
+          ease: "easeInOut" as any
         }
       }
     };
@@ -211,7 +211,7 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
 Skeleton.displayName = 'Skeleton';
 
 // 🎨 SKELETON TEXT
-export const SkeletonText = React.forwardRef<HTMLDivElement, SkeletonTextProps>(
+const SkeletonText = React.forwardRef<HTMLDivElement, SkeletonTextProps>(
   ({
     lines = 3,
     className,
@@ -255,7 +255,7 @@ export const SkeletonText = React.forwardRef<HTMLDivElement, SkeletonTextProps>(
 SkeletonText.displayName = 'SkeletonText';
 
 // 🎨 SKELETON CARD
-export const SkeletonCard = React.forwardRef<HTMLDivElement, SkeletonCardProps>(
+const SkeletonCard = React.forwardRef<HTMLDivElement, SkeletonCardProps>(
   ({
     className,
     variant = 'default',
@@ -345,7 +345,7 @@ export const SkeletonCard = React.forwardRef<HTMLDivElement, SkeletonCardProps>(
 SkeletonCard.displayName = 'SkeletonCard';
 
 // 🎨 SKELETON TABLE
-export const SkeletonTable = React.forwardRef<HTMLDivElement, SkeletonTableProps>(
+const SkeletonTable = React.forwardRef<HTMLDivElement, SkeletonTableProps>(
   ({
     rows = 5,
     columns = 4,
@@ -435,7 +435,7 @@ export const SkeletonTable = React.forwardRef<HTMLDivElement, SkeletonTableProps
 SkeletonTable.displayName = 'SkeletonTable';
 
 // 🎨 SKELETON FORM
-export const SkeletonForm = React.forwardRef<HTMLDivElement, SkeletonFormProps>(
+const SkeletonForm = React.forwardRef<HTMLDivElement, SkeletonFormProps>(
   ({
     fields = 4,
     className,
@@ -494,7 +494,7 @@ export const SkeletonForm = React.forwardRef<HTMLDivElement, SkeletonFormProps>(
 SkeletonForm.displayName = 'SkeletonForm';
 
 // 🎨 SKELETON GROUP
-export const SkeletonGroup = React.forwardRef<HTMLDivElement, SkeletonGroupProps>(
+const SkeletonGroup = React.forwardRef<HTMLDivElement, SkeletonGroupProps>(
   ({
     children,
     className,
@@ -545,28 +545,28 @@ export const SkeletonGroup = React.forwardRef<HTMLDivElement, SkeletonGroupProps
 SkeletonGroup.displayName = 'SkeletonGroup';
 
 // 🎨 SKELETON AVATAR
-export const SkeletonAvatar = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
+const SkeletonAvatar = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
   (props, ref) => <Skeleton ref={ref} variant="avatar" {...props} />
 );
 
 SkeletonAvatar.displayName = 'SkeletonAvatar';
 
 // 🎨 SKELETON BUTTON
-export const SkeletonButton = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
+const SkeletonButton = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
   (props, ref) => <Skeleton ref={ref} variant="rectangular" {...props} />
 );
 
 SkeletonButton.displayName = 'SkeletonButton';
 
 // 🎨 SKELETON INPUT
-export const SkeletonInput = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
+const SkeletonInput = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
   (props, ref) => <Skeleton ref={ref} variant="rectangular" className="h-10" {...props} />
 );
 
 SkeletonInput.displayName = 'SkeletonInput';
 
 // 🎨 SKELETON IMAGE
-export const SkeletonImage = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
+const SkeletonImage = React.forwardRef<HTMLDivElement, Omit<SkeletonProps, 'variant'>>(
   (props, ref) => <Skeleton ref={ref} variant="rectangular" className="w-full h-48" {...props} />
 );
 

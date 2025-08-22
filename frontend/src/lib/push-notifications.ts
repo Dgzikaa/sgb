@@ -117,9 +117,10 @@ export class ZykorPushNotifications {
       badge: finalConfig.badge,
       tag: finalConfig.tag,
       requireInteraction: finalConfig.requireInteraction,
-      actions: finalConfig.actions,
-      data: finalConfig.data,
-      timestamp: Date.now()
+      // actions: finalConfig.actions, // Not supported in all browsers
+      data: finalConfig.data
+      // timestamp não suportado em todos os browsers
+      // timestamp: Date.now()
     });
   }
 

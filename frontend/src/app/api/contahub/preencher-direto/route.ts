@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     console.log(`🔄 [API] Preenchendo ${dates.length} datas específicas para ${data_type}`)
 
     let processedCount = 0
-    const results = []
+    const results: any[] = []
 
     for (const date of dates) {
       try {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
         if (existing && existing.length > 0) {
           console.log(`⏭️ [API] ${date} já existe, pulando`)
-          (results as any).push({ date, status: 'exists', records: 0 })
+          results.push({ date, status: 'exists', records: 0 })
           continue
         }
 
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
 
         if (insertError) {
           console.error(`❌ [API] Erro ao salvar ${date}:`, insertError.message)
-          (results as any).push({ date, status: 'error', error: insertError.message })
+          results.push({ date, status: 'error', error: insertError.message })
           continue
         }
 
@@ -236,12 +236,12 @@ export async function POST(request: NextRequest) {
 
         if (processError || !processResult?.success) {
           console.error(`❌ [API] Erro ao processar ${date}:`, processError?.message)
-          (results as any).push({ date, status: 'process_error', error: processError?.message })
+          results.push({ date, status: 'process_error', error: processError?.message })
           continue
         }
 
         processedCount++
-        (results as any).push({ 
+        results.push({ 
           date, 
           status: 'success', 
           records: processResult.inserted_records || recordCount 
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
 
       } catch (error) {
         console.error(`❌ [API] Erro em ${date}:`, error)
-        (results as any).push({ 
+        results.push({ 
           date, 
           status: 'error', 
           error: error instanceof Error ? error.message : String(error) 

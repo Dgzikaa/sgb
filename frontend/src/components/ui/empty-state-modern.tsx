@@ -410,7 +410,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           key={variant}
           initial={animated ? { scale: 0.8, opacity: 0 } : false}
           animate={animated ? { scale: 1, opacity: 1 } : false}
-          exit={animated ? { scale: 0.8, opacity: 0 } : false}
+          exit={animated ? { scale: 0.8, opacity: 0 } : undefined}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="mb-6"
         >
@@ -453,72 +453,87 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 // Componentes de ação pré-definidos
 export const EmptyStateActions = {
   // Ação primária
-  Primary: ({ children, onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <motion.button
-      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
-      onClick={onClick}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      {...props}
-    >
-      {children}
-    </motion.button>
-  ),
+  Primary: ({ children, onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+    const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+    return (
+      <motion.button
+        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
+        onClick={onClick}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        {...motionProps}
+      >
+        {children}
+      </motion.button>
+    );
+  },
 
   // Ação secundária
-  Secondary: ({ children, onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <motion.button
-      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium rounded-lg transition-colors"
-      onClick={onClick}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      {...props}
-    >
-      {children}
-    </motion.button>
-  ),
+  Secondary: ({ children, onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+    const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+    return (
+      <motion.button
+        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium rounded-lg transition-colors"
+        onClick={onClick}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        {...motionProps}
+      >
+        {children}
+      </motion.button>
+    );
+  },
 
   // Ação de atualizar
-  Refresh: ({ onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <motion.button
-      className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
-      onClick={onClick}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      {...props}
-    >
-      <RefreshCw className="w-4 h-4" />
-      Atualizar
-    </motion.button>
-  ),
+  Refresh: ({ onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+    const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+    return (
+      <motion.button
+        className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+        onClick={onClick}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        {...motionProps}
+      >
+        <RefreshCw className="w-4 h-4" />
+        Atualizar
+      </motion.button>
+    );
+  },
 
   // Ação de adicionar
-  Add: ({ onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <motion.button
-      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-medium rounded-lg transition-colors"
-      onClick={onClick}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      {...props}
-    >
-      <Plus className="w-4 h-4" />
-      {children || 'Adicionar'}
-    </motion.button>
-  ),
+  Add: ({ onClick, children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+    const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+    return (
+      <motion.button
+        className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-medium rounded-lg transition-colors"
+        onClick={onClick}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        {...motionProps}
+      >
+        <Plus className="w-4 h-4" />
+        {children || 'Adicionar'}
+      </motion.button>
+    );
+  },
 
   // Ação de continuar
-  Continue: ({ onClick, children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <motion.button
-      className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
-      onClick={onClick}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      {...props}
-    >
-      {children || 'Continuar'}
-      <ArrowRight className="w-4 h-4" />
-    </motion.button>
-  )
+  Continue: ({ onClick, children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+    const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, onTransitionEnd, ...motionProps } = props;
+    return (
+      <motion.button
+        className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+        onClick={onClick}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        {...motionProps}
+      >
+        {children || 'Continuar'}
+        <ArrowRight className="w-4 h-4" />
+      </motion.button>
+    );
+  }
 };
 
 // Componente de exemplo de uso

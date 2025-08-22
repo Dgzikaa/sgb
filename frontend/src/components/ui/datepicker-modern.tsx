@@ -44,7 +44,7 @@ interface ModernDatePickerProps {
 }
 
 // 🎨 COMPONENTE PRINCIPAL
-export const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePickerProps>(
+const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePickerProps>(
   ({
     value,
     onChange,
@@ -98,7 +98,7 @@ export const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePicke
       if (mode === 'single' && value instanceof Date) {
         return formatDate(value);
       }
-      if (mode === 'range' && 'start' in value && value.start && value.end) {
+      if (mode === 'range' && value && 'start' in value && value.start && value.end) {
         return `${formatDate(value.start)} - ${formatDate(value.end)}`;
       }
       if (mode === 'multiple' && Array.isArray(value) && value.length > 0) {
@@ -118,8 +118,8 @@ export const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePicke
       if (mode === 'single' && value instanceof Date) {
         return date.toDateString() === value.toDateString();
       }
-      if (mode === 'range' && 'start' in value) {
-        return (
+      if (mode === 'range' && value && 'start' in value) {
+        return Boolean(
           (value.start && date.toDateString() === value.start.toDateString()) ||
           (value.end && date.toDateString() === value.end.toDateString())
         );
@@ -131,7 +131,7 @@ export const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePicke
     };
 
     const isDateInRange = (date: Date): boolean => {
-      if (mode !== 'range' || !('start' in value) || !value.start || !value.end) return false;
+      if (mode !== 'range' || !value || !('start' in value) || !value.start || !value.end) return false;
       
       const start = new Date(value.start);
       const end = new Date(value.end);
@@ -141,7 +141,7 @@ export const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePicke
     };
 
     const isDateHovered = (date: Date): boolean => {
-      if (mode !== 'range' || !hoveredDate || !('start' in value) || !value.start) return false;
+      if (mode !== 'range' || !hoveredDate || !value || !('start' in value) || !value.start) return false;
       
       const start = new Date(value.start);
       const current = new Date(date);
@@ -318,7 +318,7 @@ export const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePicke
         scale: 1,
         transition: { 
           duration: 0.3,
-          ease: [0.4, 0, 0.2, 1]
+          ease: [0.4, 0, 0.2, 1] as any
         }
       },
       exit: { 
@@ -554,7 +554,7 @@ export const ModernDatePicker = React.forwardRef<HTMLDivElement, ModernDatePicke
 
             {/* Clear button */}
             {((mode === 'single' && value instanceof Date) || 
-              (mode === 'range' && 'start' in value && value.start) ||
+              (mode === 'range' && value && 'start' in value && value.start) ||
               (mode === 'multiple' && Array.isArray(value) && value.length > 0)) && (
               <motion.button
                 initial={{ scale: 0 }}

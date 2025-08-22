@@ -4,13 +4,9 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🚀 Trigger Getin Sync - Iniciado em:', new Date().toISOString())
     
-    // URL da Edge Function do Supabase
-    const functionUrl = process.env.SUPABASE_FUNCTION_URL + '/getin-sync-continuous'
+    // URL da Edge Function do Supabase (seguindo padrão do projeto)
+    const functionUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/getin-sync-continuous'
     
-    if (!functionUrl || !process.env.SUPABASE_FUNCTION_URL) {
-      throw new Error('SUPABASE_FUNCTION_URL não configurada')
-    }
-
     console.log('📡 Chamando Edge Function:', functionUrl)
     
     const response = await fetch(functionUrl, {
