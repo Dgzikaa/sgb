@@ -91,17 +91,11 @@ export async function GET(request: NextRequest) {
 				let fone = rawFone.replace(/\D/g, '')
 				if (!fone) continue
 				
-				// Debug: Log da normalização para telefones específicos
-				if (rawFone.includes('61992053013') || rawFone.includes('61-992053013')) {
-					console.log(`🔍 DEBUG: Normalizando Laura - Original: ${rawFone} → Normalizado: ${fone}`)
-				}
-				
 				// Padronizar: se tem 11 dígitos e começa com DDD, manter
 				// se tem 10 dígitos, adicionar 9 após o DDD (celular antigo)
 				if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
 					// Adicionar 9 após o DDD para celulares antigos
 					fone = fone.substring(0, 2) + '9' + fone.substring(2)
-					console.log(`🔍 DEBUG: Telefone ${rawFone} padronizado de 10 para 11 dígitos: ${fone}`)
 				}
 				const nome = (r.cli_nome || '').toString().trim() || 'Sem nome'
 				const ultima = r.dt_gerencial as string
@@ -111,10 +105,6 @@ export async function GET(request: NextRequest) {
 
 				const prev = map.get(fone)
 				if (!prev) {
-					// Debug: Log quando Laura é adicionada pela primeira vez
-					if (fone === '61992053013') {
-						console.log(`🔍 DEBUG: Adicionando Laura ao Map - Nome: ${nome}, Fone: ${fone}, Visitas: 1, Valor: R$ ${vrPagamentos}`)
-					}
 					map.set(fone, { 
 						nome, 
 						fone, 
@@ -125,10 +115,6 @@ export async function GET(request: NextRequest) {
 						totalGasto: vrPagamentos
 					})
 				} else {
-					// Debug: Log quando Laura é atualizada
-					if (fone === '61992053013') {
-						console.log(`🔍 DEBUG: Atualizando Laura - Visitas: ${prev.visitas} → ${prev.visitas + 1}, Valor: R$ ${prev.totalGasto} → R$ ${prev.totalGasto + vrPagamentos}`)
-					}
 					prev.visitas += 1
 					prev.totalEntrada += vrCouvert
 					prev.totalConsumo += vrConsumo
@@ -172,31 +158,7 @@ export async function GET(request: NextRequest) {
 				console.log(`  ${index + 1}º: ${cliente.nome_principal} - ${cliente.total_visitas} visitas - R$ ${valorGasto.toFixed(2)} (${cliente.telefone})`)
 			})
 			
-					// Debug específico para Gabriela e Laura
-		const gabrielaClientes = clientes.filter(c => c.nome_principal.toLowerCase().includes('gabriela'))
-		const lauraClientes = clientes.filter(c => c.nome_principal.toLowerCase().includes('laura'))
-		
-		if (gabrielaClientes.length > 0) {
-			console.log('🔍 DEBUG: Gabrielas encontradas:')
-			gabrielaClientes.forEach((cliente, index) => {
-				console.log(`  Gabriela ${index + 1}: ${cliente.total_visitas} visitas - R$ ${(cliente.valor_total_gasto || 0).toFixed(2)} - ${cliente.telefone}`)
-			})
-		}
-		
-		if (lauraClientes.length > 0) {
-			console.log('🔍 DEBUG: Lauras encontradas:')
-			lauraClientes.forEach((cliente, index) => {
-				console.log(`  Laura ${index + 1}: ${cliente.total_visitas} visitas - R$ ${(cliente.valor_total_gasto || 0).toFixed(2)} - ${cliente.telefone}`)
-			})
-		}
-		
-		// Debug: Verificar se Laura 61992053013 está no Map
-		const lauraMap = map.get('61992053013')
-		if (lauraMap) {
-			console.log(`🔍 DEBUG: Laura no Map: ${lauraMap.nome} - ${lauraMap.visitas} visitas - R$ ${lauraMap.totalGasto.toFixed(2)}`)
-		} else {
-			console.log('🔍 DEBUG: Laura 61992053013 NÃO encontrada no Map!')
-		}
+			
 		}
 
 		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
