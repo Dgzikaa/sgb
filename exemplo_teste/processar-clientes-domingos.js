@@ -3,7 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Configuração do Supabase
 const supabaseUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxdGdzdnVqd2NieW1qbXZramh5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNzE5MjIwNCwiZXhwIjoyMDMyNzY4MjA0fQ.GhrUKgdomainHere'; // Você precisa colocar a service key real
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxdGdzdnVqd2NieW1qbXZramh5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNzE5MjIwNCwiZXhwIjoyMDMyNzY4MjA0fQ.lJtyJBUCdvosOQQiXlBaXoaKQ-qjgqaKZQrgvN6KKQE';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function processarClientesDomingos() {
@@ -11,7 +11,7 @@ async function processarClientesDomingos() {
     console.log('🔍 Processando dados de clientes dos domingos...');
     
     // Ler o arquivo CSV
-    const csvContent = fs.readFileSync('exemplo_teste/ordinario/Planilha Estratégica Ordinário - Tab Desemp ContaHub.csv', 'utf-8');
+    const csvContent = fs.readFileSync('ordinario/Planilha Estratégica Ordinário - Tab Desemp ContaHub.csv', 'utf-8');
     const lines = csvContent.split('\n');
     
     // Linha 4: Datas de início (segunda-feira) - índice 3
@@ -44,22 +44,17 @@ async function processarClientesDomingos() {
       const [, dia, mes, ano] = dataMatch;
       const dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
       
-      // Verificar se é domingo (dia da semana 0)
-      const dataObj = new Date(dataFormatada);
-      const diaSemana = dataObj.getDay();
+      // As datas da linha 5 JÁ SÃO domingos (fim da semana), não precisa verificar dia da semana
+      const clientes = parseInt(clientesStr.replace(/[^\d]/g, '')) || 0;
       
-      if (diaSemana === 0) { // Domingo
-        const clientes = parseInt(clientesStr.replace(/[^\d]/g, '')) || 0;
+      if (clientes > 0) {
+        domingosDados.push({
+          data: dataFormatada,
+          clientes: clientes,
+          semana: i - 2 // Semana baseada na posição da coluna
+        });
         
-        if (clientes > 0) {
-          domingosDados.push({
-            data: dataFormatada,
-            clientes: clientes,
-            semana: Math.ceil(dataObj.getTime() / (7 * 24 * 60 * 60 * 1000)) // Aproximação da semana
-          });
-          
-          console.log(`📅 Domingo ${dataFormatada}: ${clientes} clientes`);
-        }
+        console.log(`📅 Domingo ${dataFormatada}: ${clientes} clientes`);
       }
     }
     
