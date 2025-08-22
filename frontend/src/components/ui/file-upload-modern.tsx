@@ -506,7 +506,7 @@ export const ModernFileUpload = React.forwardRef<HTMLDivElement, ModernFileUploa
               className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded"
             >
               {fileItem.error}
-            </motion.button>
+            </motion.div>
           )}
         </motion.div>
       );
