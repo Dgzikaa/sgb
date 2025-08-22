@@ -79,8 +79,8 @@ export async function GET(request: NextRequest) {
       return allData;
     };
 
-    // Buscar dados do Yuzer das tabelas de resumo (com paginação)
-    const yuzerData = await fetchAllData('yuzer_resumo2', 'data_evento, faturamento_liquido', 'data_evento');
+    // Buscar dados do Yuzer da tabela original (com paginação)
+    const yuzerData = await fetchAllData('yuzer_pagamento', 'data_evento, valor_liquido', 'data_evento');
     console.log(`📊 Yuzer: ${yuzerData.length} registros encontrados`);
 
     // Buscar dados do Sympla das tabelas de resumo (com paginação)
@@ -94,7 +94,8 @@ export async function GET(request: NextRequest) {
     // Criar mapas para facilitar a busca
     const yuzerMap = new Map();
     yuzerData?.forEach(item => {
-      yuzerMap.set(item.data_evento, item.faturamento_liquido || 0);
+      const currentValue = yuzerMap.get(item.data_evento) || 0;
+      yuzerMap.set(item.data_evento, currentValue + (item.valor_liquido || 0));
     });
 
     const symplaMap = new Map();
