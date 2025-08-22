@@ -603,12 +603,18 @@ export default function ClientesPage() {
                       </CardTitle>
                       <CardDescription className="text-slate-200">
                         {activeTab === 'clientes' 
-                          ? 'Dados do ContaHub ordenados por visitas'
-                          : 'Dados de reservas ordenados por reservas efetivadas (seated)'
+                          ? (diaSemanaFiltro !== 'todos' 
+                              ? `Clientes ordenados por visitas em ${diasSemana.find(d => d.value === diaSemanaFiltro)?.label}s`
+                              : 'Dados do ContaHub ordenados por visitas totais'
+                            )
+                          : (diaSemanaFiltro !== 'todos'
+                              ? `Reservantes com reservas em ${diasSemana.find(d => d.value === diaSemanaFiltro)?.label}s`
+                              : 'Dados de reservas ordenados por reservas efetivadas (seated)'
+                            )
                         }
                         {diaSemanaFiltro !== 'todos' && (
-                          <span className="ml-2 text-yellow-300">
-                            • Filtrado por {diasSemana.find(d => d.value === diaSemanaFiltro)?.label}
+                          <span className="ml-2 text-yellow-300 font-semibold">
+                            • Apenas visitas/reservas deste dia da semana
                           </span>
                         )}
                       </CardDescription>

@@ -130,6 +130,14 @@ export async function GET(request: NextRequest) {
 				ultima_visita: c.ultima,
 			}))
 
+		// Debug: Mostrar top 5 clientes para análise
+		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
+			console.log('🔍 DEBUG: Top 5 clientes filtrados por dia da semana:')
+			clientes.slice(0, 5).forEach((cliente, index) => {
+				console.log(`  ${index + 1}º: ${cliente.nome_principal} - ${cliente.total_visitas} visitas (${cliente.telefone?.slice(0, 4)}****)`)
+			})
+		}
+
 		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
 
 		// Calcular estatísticas globais
