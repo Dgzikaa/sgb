@@ -92,9 +92,12 @@ export async function GET(request: NextRequest) {
 
     // Transformar dados para o formato esperado pelo frontend (FILTRANDO TERÇAS INVÁLIDAS)
     const visitasValidas = visitasCliente.filter(registro => {
-      const data = new Date(registro.dt_gerencial)
-      const diaSemana = data.getDay()
-      const ultimaTercaOperacional = new Date('2025-04-15')
+      // CORREÇÃO: Usar UTC para evitar problemas de timezone
+      const data = new Date(registro.dt_gerencial + 'T12:00:00Z') // Meio-dia UTC
+      const diaSemana = data.getUTCDay()
+      const ultimaTercaOperacional = new Date('2025-04-15T12:00:00Z')
+      
+      console.log(`🔍 FILTRO DEBUG: ${registro.dt_gerencial} → Dia ${diaSemana} (${['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][diaSemana]})`)
       
       // Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
       if (diaSemana === 2 && data > ultimaTercaOperacional) {
@@ -127,8 +130,11 @@ export async function GET(request: NextRequest) {
     console.log(`🔍 Analisando ${visitasValidas.length} visitas válidas para calcular dia destaque...`)
     
     visitasValidas.forEach(registro => {
-      const data = new Date(registro.dt_gerencial)
-      const diaSemana = data.getDay() // 0=domingo, 1=segunda, etc.
+      // CORREÇÃO: Usar UTC para evitar problemas de timezone
+      const data = new Date(registro.dt_gerencial + 'T12:00:00Z') // Meio-dia UTC
+      const diaSemana = data.getUTCDay() // 0=domingo, 1=segunda, etc.
+      
+      console.log(`🔍 DEBUG DATA: ${registro.dt_gerencial} → ${data.toISOString()} → Dia ${diaSemana} (${diasSemanaLabels[diaSemana]})`)
       
       diasSemanaCount.set(diaSemana, (diasSemanaCount.get(diaSemana) || 0) + 1)
       console.log(`📅 ${diasSemanaLabels[diaSemana]} (${registro.dt_gerencial}): ${diasSemanaCount.get(diaSemana)} visitas`)
