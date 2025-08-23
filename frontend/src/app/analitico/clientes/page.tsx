@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import PageHeader from '@/components/layouts/PageHeader'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -70,6 +70,7 @@ export default function ClientesPage() {
   const [activeTab, setActiveTab] = useState<string>('clientes')
   const { toast } = useToast()
   const { selectedBar } = useBar()
+  const isApiCallingRef = useRef(false)
 
   const diasSemana = [
     { value: 'todos', label: 'Todos os dias' },
@@ -83,7 +84,14 @@ export default function ClientesPage() {
   ]
 
   const fetchClientes = useCallback(async () => {
+    // Evitar múltiplas chamadas simultâneas usando useRef
+    if (isApiCallingRef.current) {
+      console.log('⚠️ API já está sendo chamada, ignorando chamada duplicada')
+      return
+    }
+    
     try {
+      isApiCallingRef.current = true
       setLoading(true)
       
       // Delay mínimo para mostrar loading
@@ -98,17 +106,44 @@ export default function ClientesPage() {
       const url = `/api/analitico/clientes${params.toString() ? `?${params.toString()}` : ''}`
       console.log('🔍 Frontend: Buscando clientes com URL:', url)
       
-      const [response] = await Promise.all([
-        fetch(url, {
-          headers: selectedBar ? {
-            'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
-          } : undefined
-        }),
-        minLoadingTime
-      ])
+      // Retry automático para lidar com falhas temporárias do React StrictMode
+      let response
+      let attempts = 0
+      const maxAttempts = 3
+      
+      while (attempts < maxAttempts) {
+        attempts++
+        try {
+          const [fetchResponse] = await Promise.all([
+            fetch(url, {
+              headers: selectedBar ? {
+                'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+              } : undefined
+            }),
+            attempts === 1 ? minLoadingTime : Promise.resolve()
+          ])
+          
+          if (fetchResponse.ok) {
+            response = fetchResponse
+            console.log(`✅ Sucesso na tentativa ${attempts}`)
+            break
+          } else {
+            console.log(`⚠️ Tentativa ${attempts} falhou: ${fetchResponse.status}`)
+            if (attempts === maxAttempts) {
+              response = fetchResponse
+              break
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000)) // Aguardar 1s
+          }
+        } catch (error) {
+          console.log(`⚠️ Erro na tentativa ${attempts}:`, error)
+          if (attempts === maxAttempts) throw error
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+      }
       
       if (!response.ok) {
-        console.error('❌ Response não OK:', response.status, response.statusText)
+        console.error('❌ Todas as tentativas falharam:', response.status, response.statusText)
         throw new Error('Erro ao carregar dados dos clientes')
       }
       const data: ApiResponse = await response.json()
@@ -121,6 +156,7 @@ export default function ClientesPage() {
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
     } finally {
       setLoading(false)
+      isApiCallingRef.current = false
     }
   }, [selectedBar, diaSemanaFiltro])
 
@@ -161,10 +197,10 @@ export default function ClientesPage() {
     }
   }, [selectedBar, diaSemanaFiltro])
 
-  // Carregamento inicial
+  // Carregamento inicial e quando filtros mudam
   useEffect(() => {
     fetchClientes()
-  }, [fetchClientes])
+  }, [selectedBar, diaSemanaFiltro])
 
   // Mudança de aba
   useEffect(() => {

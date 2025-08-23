@@ -3,6 +3,7 @@ const nextConfig = {
   // ✅ Otimizações básicas
   poweredByHeader: false,
   compress: true,
+  reactStrictMode: false, // Desabilitar para evitar chamadas duplas da API
   
   // ✅ TypeScript e ESLint
   typescript: {

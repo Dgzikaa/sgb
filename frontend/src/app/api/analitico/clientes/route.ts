@@ -44,11 +44,11 @@ export async function GET(request: NextRequest) {
 	let totalLinhas = 0
 	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
-	const MAX_ITERATIONS = 50 // Reduzir para evitar timeout
+	const MAX_ITERATIONS = 100 // Aumentar para processar todas as páginas
 	let iterations = 0
 	
 	const startTime = Date.now()
-	const MAX_PROCESSING_TIME = 10000 // 10 segundos máximo
+	const MAX_PROCESSING_TIME = 20000 // 20 segundos máximo para processar todas as páginas
 	
 	while (iterations < MAX_ITERATIONS) {
 		iterations++
@@ -67,9 +67,13 @@ export async function GET(request: NextRequest) {
 			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
 			.not('cli_fone', 'is', null)
 			.neq('cli_fone', '')
-			.eq('bar_id', barIdFilter)
 			.order('dt_gerencial', { ascending: false })
 			.range(offset, offset + pageSize - 1)
+		
+		// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
+		const finalBarId = barIdFilter || 3
+		query = query.eq('bar_id', finalBarId)
+		console.log(`🏪 API Clientes: Filtrando por bar_id = ${finalBarId}`)
 		
 		// Aplicar filtro de dia da semana se especificado (será feito no processamento)
 		const { data, error } = await query
@@ -161,8 +165,13 @@ export async function GET(request: NextRequest) {
 				}
 			}
 
-			if (data.length < pageSize) break
-			offset += pageSize
+					if (data.length < pageSize) break
+		offset += pageSize
+		
+		// Pequeno delay para evitar sobrecarga do Supabase
+		if (iterations < MAX_ITERATIONS) {
+			await new Promise(resolve => setTimeout(resolve, 50)) // 50ms delay
+		}
 		}
 
 		const clientes = Array.from(map.values())
