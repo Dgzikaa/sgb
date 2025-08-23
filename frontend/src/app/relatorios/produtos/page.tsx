@@ -264,12 +264,16 @@ export default function ProdutosPage() {
           {/* Filtros */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Select value={diaSemanaFiltro} onValueChange={setDiaSemanaFiltro}>
-              <SelectTrigger className="w-full sm:w-[280px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <SelectValue placeholder="Filtrar por dia da semana" />
+              <SelectTrigger className="w-full sm:w-[280px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">
+                <SelectValue placeholder="Filtrar por dia da semana" className="text-gray-900 dark:text-gray-100" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 {diasSemana.map((dia) => (
-                  <SelectItem key={dia.value} value={dia.value} className="text-gray-900 dark:text-gray-100">
+                  <SelectItem 
+                    key={dia.value} 
+                    value={dia.value} 
+                    className="text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
+                  >
                     {dia.label}
                   </SelectItem>
                 ))}
