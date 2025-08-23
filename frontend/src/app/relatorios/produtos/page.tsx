@@ -100,7 +100,7 @@ export default function ProdutosPage() {
         params.append('dia_semana', diaSemanaFiltro)
       }
 
-      const response = await fetch(`/api/analitico/produtos?${params.toString()}`)
+      const response = await fetch(`/api/analitico/produtos-otimizado?${params.toString()}`)
       
       if (!response.ok) {
         throw new Error(`Erro ${response.status}: ${response.statusText}`)

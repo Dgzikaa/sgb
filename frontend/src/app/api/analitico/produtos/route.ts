@@ -19,8 +19,9 @@ export async function GET(request: NextRequest) {
 
     // Configurações de paginação e performance
     const pageSize = 1000
-    const MAX_ITERATIONS = 100
-    const MAX_PROCESSING_TIME = 30000 // 30 segundos
+    const MAX_ITERATIONS = 50 // Reduzir para evitar loop infinito
+    const MAX_PROCESSING_TIME = 20000 // 20 segundos
+    const MAX_RECORDS = 50000 // Limite máximo de registros processados
     
     let page = 0
     let totalRegistros = 0
@@ -40,10 +41,15 @@ export async function GET(request: NextRequest) {
     }>()
 
     // Buscar dados com paginação
-    while (iterations < MAX_ITERATIONS) {
+    while (iterations < MAX_ITERATIONS && totalRegistros < MAX_RECORDS) {
       const currentTime = Date.now()
       if (currentTime - startTime > MAX_PROCESSING_TIME) {
         console.log(`⏰ Timeout atingido após ${MAX_PROCESSING_TIME}ms`)
+        break
+      }
+
+      if (totalRegistros >= MAX_RECORDS) {
+        console.log(`📊 Limite de registros atingido: ${MAX_RECORDS}`)
         break
       }
 
