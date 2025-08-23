@@ -85,12 +85,16 @@ export default function ProdutosPage() {
   const isApiCallingRef = useRef(false)
 
   const fetchProdutos = useCallback(async () => {
-    if (isApiCallingRef.current) return
+    if (isApiCallingRef.current) {
+      console.log('⚠️ API já está sendo chamada, ignorando...')
+      return
+    }
     
     try {
       isApiCallingRef.current = true
       setLoading(true)
       setError(null)
+      console.log('🔍 Frontend: Iniciando busca de produtos...')
 
       const params = new URLSearchParams()
       if (selectedBar?.id) {
@@ -99,6 +103,8 @@ export default function ProdutosPage() {
       if (diaSemanaFiltro !== 'todos') {
         params.append('dia_semana', diaSemanaFiltro)
       }
+      
+      console.log('📋 Frontend: Parâmetros da busca:', params.toString())
 
       const response = await fetch(`/api/analitico/produtos-final?${params.toString()}`)
       
@@ -107,6 +113,7 @@ export default function ProdutosPage() {
       }
 
       const data: ApiResponse = await response.json()
+      console.log('✅ Frontend: Dados recebidos:', data.produtos.length, 'produtos')
       setProdutos(data.produtos)
       setEstatisticas(data.estatisticas)
 
@@ -122,7 +129,7 @@ export default function ProdutosPage() {
       setLoading(false)
       isApiCallingRef.current = false
     }
-  }, [selectedBar, diaSemanaFiltro, toast])
+  }, [])
 
   const fetchVendasDetalhadas = async (produto: Produto) => {
     try {
@@ -164,8 +171,9 @@ export default function ProdutosPage() {
   }
 
   useEffect(() => {
+    console.log('🔄 useEffect: Dependências mudaram, chamando fetchProdutos')
     fetchProdutos()
-  }, [fetchProdutos])
+  }, [selectedBar, diaSemanaFiltro])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
