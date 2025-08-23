@@ -193,7 +193,7 @@ const defaultSidebarItems: SidebarItem[] = [
         {
           icon: Package,
           label: 'Produtos',
-          href: '/relatorios/produtos',
+          href: '/analitico/produtos',
           description: 'Análise de produtos mais vendidos',
           permission: 'relatorios',
         },

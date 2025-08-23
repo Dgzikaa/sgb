@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
     const diaSemana = searchParams.get('dia_semana')
     const barId = parseInt(searchParams.get('bar_id') || '3')
 
-    console.log(`🚀 API Produtos FINAL: Filtrando por bar_id = ${barId}`)
-    if (diaSemana) {
-      console.log(`📅 API Produtos FINAL: Filtrando por dia da semana = ${diaSemana}`)
-    }
+
 
     // Usar view materializada - SEM PAGINAÇÃO!
     let query = supabase
@@ -46,7 +43,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    console.log(`⚡ View materializada retornou ${produtosMaterializados.length} produtos pré-calculados`)
+
 
     // Função para calcular dia destaque
     const calcularDiaDestaque = (vendasPorDia: any[]) => {
@@ -69,20 +66,17 @@ export async function GET(request: NextRequest) {
     if (diaSemana && diaSemana !== 'todos') {
       const diaSemanaNum = parseInt(diaSemana)
       if (!isNaN(diaSemanaNum)) {
-        console.log(`🔍 Filtrando por dia da semana: ${diaSemanaNum}`)
-        
         produtosFiltrados = produtosMaterializados.map(produto => {
           const vendasPorDia = produto.vendas_por_dia || []
-          console.log(`🔍 Produto: ${produto.produto} - Vendas por dia:`, vendasPorDia.map(v => `Dia ${v.dia_semana}: ${v.vendas} vendas`))
-          
           const vendaDia = vendasPorDia.find((v: any) => v.dia_semana === diaSemanaNum)
           
           if (!vendaDia) {
-            console.log(`❌ Produto ${produto.produto} não tem vendas no dia ${diaSemanaNum}`)
             return null // Produto não tem vendas neste dia
           }
           
-          console.log(`✅ Produto ${produto.produto} tem vendas no dia ${diaSemanaNum}:`, vendaDia)
+          // Quando filtrado por dia, o dia destaque é sempre o dia filtrado
+          const diasSemanaLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+          const diaDestaqueFiltrado = diasSemanaLabels[diaSemanaNum] || 'Sem dados'
           
           return {
             produto: produto.produto,
@@ -93,13 +87,11 @@ export async function GET(request: NextRequest) {
             visitas: vendaDia.vendas,
             ultimaVenda: produto.ultima_venda,
             primeiraVenda: produto.primeira_venda,
-            diaDestaque: calcularDiaDestaque(vendasPorDia)
+            diaDestaque: diaDestaqueFiltrado
           }
         }).filter(p => p !== null)
         .sort((a, b) => b.valorTotal - a.valorTotal)
         .slice(0, 100)
-        
-        console.log(`📊 Produtos filtrados para dia ${diaSemanaNum}: ${produtosFiltrados.length} produtos`)
       }
     } else {
       // Usar dados agregados totais
@@ -123,7 +115,7 @@ export async function GET(request: NextRequest) {
     const totalCusto = produtosFiltrados.reduce((sum, p) => sum + p.custoTotal, 0)
     const margemLucro = totalVendas > 0 ? ((totalVendas - totalCusto) / totalVendas) * 100 : 0
 
-    console.log(`✅ API Produtos FINAL: ${produtosFiltrados.length} produtos • R$ ${totalVendas.toFixed(2)} • ${totalQuantidade.toFixed(0)} itens`)
+
 
     return NextResponse.json({
       produtos: produtosFiltrados,

@@ -52,31 +52,26 @@ export default function ProdutosPage() {
   const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
   const [activeTab, setActiveTab] = useState<string>('produtos')
   
+
+  
   const { selectedBar } = useBar()
   const { toast } = useToast()
   const isApiCallingRef = useRef(false)
 
   const fetchProdutos = useCallback(async () => {
-    if (isApiCallingRef.current) {
-      console.log('⚠️ API já está sendo chamada, ignorando...')
-      return
-    }
+    if (isApiCallingRef.current) return
     
     try {
       isApiCallingRef.current = true
       setLoading(true)
       setError(null)
-      console.log('🔍 Frontend: Iniciando busca de produtos...')
-
-      const params = new URLSearchParams()
+            const params = new URLSearchParams()
       if (selectedBar?.id) {
         params.append('bar_id', selectedBar.id.toString())
       }
       if (diaSemanaFiltro !== 'todos') {
         params.append('dia_semana', diaSemanaFiltro)
       }
-      
-      console.log('📋 Frontend: Parâmetros da busca:', params.toString())
 
       const response = await fetch(`/api/analitico/produtos-final?${params.toString()}`)
       
@@ -85,7 +80,6 @@ export default function ProdutosPage() {
       }
 
       const data: ApiResponse = await response.json()
-      console.log('✅ Frontend: Dados recebidos:', data.produtos.length, 'produtos')
       setProdutos(data.produtos)
       setEstatisticas(data.estatisticas)
 
@@ -101,14 +95,11 @@ export default function ProdutosPage() {
       setLoading(false)
       isApiCallingRef.current = false
     }
-  }, [])
-
-
+  }, [selectedBar, diaSemanaFiltro])
 
   useEffect(() => {
-    console.log('🔄 useEffect: Dependências mudaram, chamando fetchProdutos')
     fetchProdutos()
-  }, [selectedBar, diaSemanaFiltro])
+  }, [fetchProdutos])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -126,15 +117,23 @@ export default function ProdutosPage() {
     return `${value.toFixed(1)}%`
   }
 
-  const exportarCSV = () => {
-    try {
-      let dadosCSV: any[] = []
-      let nomeArquivo = ''
+  const exportarCSV = async () => {
+    if (produtos.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Não há produtos para exportar.",
+        variant: "destructive",
+      })
+      return
+    }
 
-      dadosCSV = produtos.map(produto => ({
+    try {
+      let nomeArquivo = ''
+      const dadosCSV = produtos.map(produto => ({
         'Produto': produto.produto,
         'Grupo': produto.grupo,
-        'Quantidade Vendida': produto.quantidade,
+        'Quantidade': produto.quantidade,
+        'Visitas': produto.visitas,
         'Valor Total': produto.valorTotal,
         'Custo Total': produto.custoTotal,
         'Margem (%)': produto.valorTotal > 0 ? (((produto.valorTotal - produto.custoTotal) / produto.valorTotal) * 100).toFixed(1) : '0',
@@ -375,9 +374,9 @@ export default function ProdutosPage() {
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                           Margem de Lucro
                         </p>
-                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                           {formatPercent(estatisticas.margemLucro)}
-                        </p>
+                        </div>
                       </div>
                       <Percent className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                     </div>
@@ -387,124 +386,126 @@ export default function ProdutosPage() {
             </div>
           )}
 
-          {/* Tabs de Produtos */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-              <TabsTrigger 
-                value="produtos" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white rounded-md transition-all duration-200"
-              >
-                <Package className="w-4 h-4 mr-2" />
-                Top 100 Produtos por Vendas
-                <Badge variant="secondary" className="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                  {produtos.length}
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="produtos" className="mt-6 space-y-6">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-                <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Ranking dos Produtos Mais Vendidos
-                  </CardTitle>
-                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
-                    Produtos ordenados por faturamento total
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-gray-200 dark:border-gray-700">
-                          <TableHead className="text-gray-900 dark:text-gray-100 font-medium">#</TableHead>
-                          <TableHead className="text-gray-900 dark:text-gray-100 font-medium">Produto</TableHead>
-                          <TableHead className="text-gray-900 dark:text-gray-100 font-medium">Grupo</TableHead>
-                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Qtd</TableHead>
-                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Vendas</TableHead>
-                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Valor Total</TableHead>
-                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Margem</TableHead>
-                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Dia Destaque</TableHead>
-                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Última Venda</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {produtos.map((produto, index) => {
-                          const posicao = index + 1
-                          const margem = produto.valorTotal > 0 ? ((produto.valorTotal - produto.custoTotal) / produto.valorTotal) * 100 : 0
-                          
-                          return (
-                            <TableRow key={`${produto.produto}-${produto.grupo}`} className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                              <TableCell className="py-4">
-                                <Badge 
-                                  variant={getBadgeVariant(posicao)}
-                                  className="font-semibold"
-                                >
-                                  {posicao}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="py-4">
-                                <div className="flex items-center space-x-3">
-                                  <div className="flex-shrink-0">
-                                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                      <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-gray-900 dark:text-white">
-                                      {produto.produto}
-                                    </div>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell className="py-4 text-gray-600 dark:text-gray-400">
-                                {produto.grupo}
-                              </TableCell>
-                              <TableCell className="py-4 text-center font-medium text-gray-900 dark:text-gray-100">
-                                {produto.quantidade.toFixed(0)}
-                              </TableCell>
-                              <TableCell className="py-4 text-center font-medium text-gray-900 dark:text-gray-100">
-                                {produto.visitas}
-                              </TableCell>
-                              <TableCell className="py-4 text-center font-semibold text-green-600 dark:text-green-400">
-                                {formatCurrency(produto.valorTotal)}
-                              </TableCell>
-                              <TableCell className="py-4 text-center">
-                                <Badge 
-                                  variant="outline"
-                                  className={`font-medium ${
-                                    margem >= 50 
-                                      ? 'text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20' 
-                                      : margem >= 30 
-                                      ? 'text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20'
-                                      : 'text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20'
-                                  }`}
-                                >
-                                  {formatPercent(margem)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="py-4 text-center">
-                                <Badge 
-                                  variant="secondary"
-                                  className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
-                                >
-                                  <Star className="w-3 h-3 mr-1" />
-                                  {produto.diaDestaque}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="py-4 text-center text-gray-600 dark:text-gray-400">
-                                {formatDate(produto.ultimaVenda)}
-                              </TableCell>
-                            </TableRow>
-                          )
-                        })}
-                      </TableBody>
-                    </Table>
+          {/* Tabela de Produtos */}
+          <Card className="card-dark">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Target className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <CardTitle className="card-title-dark">Top 100 Produtos por Vendas</CardTitle>
+                    <CardDescription className="card-description-dark">
+                      Produtos ordenados por faturamento total
+                    </CardDescription>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                <TabsList className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1.5 rounded-xl shadow-sm">
+                  <TabsTrigger 
+                    value="produtos" 
+                    className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/25 !rounded-xl"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Top 100 Produtos por Vendas
+                    <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0">
+                      {produtos.length}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </CardHeader>
+          <CardContent className="p-0">
+            <TabsContent value="produtos" className="mt-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold w-12">#</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold min-w-[200px]">Produto</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Grupo</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold text-center">Qtd</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold text-center">Vendas</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold text-right">Valor Total</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold text-center">Margem</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold text-center">Dia Destaque</TableHead>
+                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold text-center">Última Venda</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {produtos.map((produto, index) => {
+                      const posicao = index + 1
+                      const margem = produto.valorTotal > 0 ? ((produto.valorTotal - produto.custoTotal) / produto.valorTotal) * 100 : 0
+                      
+                      return (
+                        <TableRow 
+                          key={`${produto.produto}-${index}`}
+                          className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                        >
+                          <TableCell className="font-medium">
+                            <Badge variant={getBadgeVariant(posicao)} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold">
+                              {posicao}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Package className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-gray-900 dark:text-white truncate">
+                                  {produto.produto}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {produto.grupo}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {produto.quantidade.toLocaleString('pt-BR')}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {produto.visitas.toLocaleString('pt-BR')}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span className="font-bold text-green-600 dark:text-green-400">
+                              {formatCurrency(produto.valorTotal)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge 
+                              variant={margem >= 50 ? "default" : margem >= 30 ? "secondary" : "destructive"}
+                              className="font-medium"
+                            >
+                              {formatPercent(margem)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <Star className="h-3 w-3 text-yellow-500" />
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {produto.diaDestaque}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {formatDate(produto.ultimaVenda)}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </TabsContent>
-          </Tabs>
+          </CardContent>
+          </Card>
         </div>
       </div>
     </div>
