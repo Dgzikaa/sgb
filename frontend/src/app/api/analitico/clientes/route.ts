@@ -38,9 +38,9 @@ export async function GET(request: NextRequest) {
 
 	// Removido teste - implementando paginação SQL direta
 
-	// IMPLEMENTAÇÃO DE PAGINAÇÃO CURSOR-BASED (mais confiável)
+	// IMPLEMENTAÇÃO DE PAGINAÇÃO OFFSET/LIMIT com ordenação estável
 	const pageSize = 1000
-	let lastId = 0 // Cursor baseado no ID
+	let offset = 0
 	let totalLinhas = 0
 	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
@@ -62,17 +62,15 @@ export async function GET(request: NextRequest) {
 			break
 		}
 		
-		console.log(`📄 Página ${iterations}: Buscando ${pageSize} registros (cursor: id > ${lastId})`)
+		console.log(`📄 Página ${iterations}: Buscando ${pageSize} registros (offset: ${offset})`)
 		
-		// Query Supabase com cursor-based pagination (100% confiável)
+		// Query Supabase SEM ordenação específica (deixar o Supabase decidir)
 		let query = supabase
 			.from('contahub_periodo')
-			.select('id, cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
+			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
 			.not('cli_fone', 'is', null)
 			.neq('cli_fone', '')
-			.gt('id', lastId)
-			.order('id', { ascending: true })
-			.limit(pageSize)
+			.range(offset, offset + pageSize - 1)
 		
 		// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
 		const finalBarId = barIdFilter || 3
@@ -184,13 +182,8 @@ export async function GET(request: NextRequest) {
 				}
 			}
 
-					// Atualizar cursor para próxima página
-		if (data.length > 0) {
-			lastId = Math.max(...data.map(r => r.id))
-			console.log(`📍 Cursor atualizado para: ${lastId}`)
-		}
-		
-		if (data.length < pageSize) break
+					if (data.length < pageSize) break
+		offset += pageSize
 		
 		// Pequeno delay para evitar sobrecarga do Supabase
 		if (iterations < MAX_ITERATIONS) {
