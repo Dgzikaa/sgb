@@ -119,9 +119,9 @@ export async function GET(request: NextRequest) {
 				let fone = rawFone.replace(/\D/g, '')
 				if (!fone) continue
 				
-				// DEBUG: Rastrear Laura Galvão especificamente
-				if (fone.includes('992053013')) {
-					console.log(`🔍 LAURA DEBUG: ${nome} | Fone: ${rawFone} → ${fone} | Data: ${r.dt_gerencial} | Visita: ${totalLinhas}`)
+				// DEBUG: Rastrear Laura Galvão especificamente (telefone 61992053013)
+				if (fone === '61992053013') {
+					console.log(`🔍 LAURA DEBUG: ${nome} | Fone: ${rawFone} → ${fone} | Data: ${r.dt_gerencial} | Couvert: R$ ${vrCouvert} | Pagamentos: R$ ${vrPagamentos}`)
 				}
 				
 				// Padronizar: se tem 11 dígitos e começa com DDD, manter
@@ -211,10 +211,12 @@ export async function GET(request: NextRequest) {
 
 
 
-		// DEBUG: Verificar Laura no resultado final
-		const lauraFinal = Array.from(map.values()).find(c => c.fone.includes('992053013'))
+		// DEBUG: Verificar Laura no resultado final (por telefone)
+		const lauraFinal = Array.from(map.values()).find(c => c.fone === '61992053013')
 		if (lauraFinal) {
-			console.log(`🔍 LAURA FINAL: ${lauraFinal.nome} | Fone: ${lauraFinal.fone} | Visitas: ${lauraFinal.visitas}`)
+			console.log(`🔍 LAURA FINAL: ${lauraFinal.nome} | Fone: ${lauraFinal.fone} | Visitas: ${lauraFinal.visitas} | Total Gasto: R$ ${lauraFinal.totalGasto.toFixed(2)}`)
+		} else {
+			console.log(`❌ LAURA NÃO ENCONTRADA no resultado final com telefone 61992053013`)
 		}
 
 		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
