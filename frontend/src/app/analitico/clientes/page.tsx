@@ -108,9 +108,12 @@ export default function ClientesPage() {
       ])
       
       if (!response.ok) {
+        console.error('❌ Response não OK:', response.status, response.statusText)
         throw new Error('Erro ao carregar dados dos clientes')
       }
       const data: ApiResponse = await response.json()
+      console.log('✅ Dados recebidos da API:', data)
+      console.log('✅ Clientes recebidos:', data.clientes?.length || 0)
       setClientes(data.clientes)
       setClientesFiltrados(data.clientes) // Agora já vem filtrado da API
       setEstatisticas(data.estatisticas)

@@ -44,11 +44,20 @@ export async function GET(request: NextRequest) {
 	let totalLinhas = 0
 	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
-	const MAX_ITERATIONS = 200
+	const MAX_ITERATIONS = 50 // Reduzir para evitar timeout
 	let iterations = 0
+	
+	const startTime = Date.now()
+	const MAX_PROCESSING_TIME = 10000 // 10 segundos máximo
 	
 	while (iterations < MAX_ITERATIONS) {
 		iterations++
+		
+		// Verificar timeout
+		if (Date.now() - startTime > MAX_PROCESSING_TIME) {
+			console.log(`⏰ Timeout atingido após ${iterations} páginas`)
+			break
+		}
 		
 		console.log(`📄 Página ${iterations}: Buscando ${pageSize} registros (offset: ${offset})`)
 		
