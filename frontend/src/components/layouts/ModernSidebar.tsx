@@ -27,6 +27,7 @@ import {
   TrendingUp,
   Briefcase,
   Wrench,
+  Package,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -187,6 +188,13 @@ const defaultSidebarItems: SidebarItem[] = [
           label: 'Clientes',
           href: '/analitico/clientes',
           description: 'Análise de clientes mais recorrentes',
+          permission: 'relatorios',
+        },
+        {
+          icon: Package,
+          label: 'Produtos',
+          href: '/relatorios/produtos',
+          description: 'Análise de produtos mais vendidos',
           permission: 'relatorios',
         },
       ],
