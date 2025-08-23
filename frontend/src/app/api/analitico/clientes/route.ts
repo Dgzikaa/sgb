@@ -34,49 +34,64 @@ export async function GET(request: NextRequest) {
 		// Obter filtro de dia da semana da URL
 		const { searchParams } = new URL(request.url)
 		const diaSemanaFiltro = searchParams.get('dia_semana')
-		console.log('📅 API Clientes: Filtro dia da semana:', diaSemanaFiltro)
+			console.log('📅 API Clientes: Filtro dia da semana:', diaSemanaFiltro)
 
-		const pageSize = 1000
-		let from = 0
-		let totalLinhas = 0
-		const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
+	// Removido teste - implementando paginação SQL direta
 
-		const MAX_ITERATIONS = 100; // Prevenir loop infinito
-		let iterations = 0;
-		while (iterations < MAX_ITERATIONS) {
-			iterations++;
-			let query = supabase
-				.from('contahub_periodo')
-				.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
-				.not('cli_fone', 'is', null)
-				.neq('cli_fone', '')
-				.range(from, from + pageSize - 1)
-				.order('dt_gerencial', { ascending: false })
+	// IMPLEMENTAÇÃO DE PAGINAÇÃO SQL DIRETA
+	const pageSize = 1000
+	let offset = 0
+	let totalLinhas = 0
+	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
+
+	const MAX_ITERATIONS = 200
+	let iterations = 0
+	
+	while (iterations < MAX_ITERATIONS) {
+		iterations++
+		
+		console.log(`📄 Página ${iterations}: Buscando ${pageSize} registros (offset: ${offset})`)
+		
+		// Query Supabase com paginação
+		let query = supabase
+			.from('contahub_periodo')
+			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
+			.not('cli_fone', 'is', null)
+			.neq('cli_fone', '')
+			.eq('bar_id', barIdFilter)
+			.order('dt_gerencial', { ascending: false })
+			.range(offset, offset + pageSize - 1)
+		
+		// Aplicar filtro de dia da semana se especificado (será feito no processamento)
+		const { data, error } = await query
+		
+		if (error) {
+			console.error('❌ Erro na consulta SQL:', error)
+			return NextResponse.json({ error: 'Erro ao buscar dados' }, { status: 500 })
+		}
+		
+		if (!data || data.length === 0) {
+			console.log(`🔚 Paginação finalizada: nenhum registro retornado na página ${iterations}`)
+			break
+		}
+		
+		console.log(`✅ Página ${iterations}: ${data.length} registros retornados`)
+
+		// Processar todos os dados
+		for (const r of data) {
+			// Processar data uma única vez
+			const dataGerencial = new Date(r.dt_gerencial as string)
+			const diaSemanaData = dataGerencial.getDay() // 0=domingo, 1=segunda, etc.
 			
-			if (barIdFilter) query = query.eq('bar_id', barIdFilter)
-			
-			const { data, error } = await query
-			if (error) {
-				console.error('❌ Erro ao buscar contahub_periodo:', error)
-				break
-			}
-			if (!data || data.length === 0) break
-
-			// Processar todos os dados e aplicar filtro por dia da semana
-			for (const r of data) {
-				// Aplicar filtro por dia da semana se especificado
-				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-					const dataGerencial = new Date(r.dt_gerencial as string)
-					const diaSemanaData = dataGerencial.getDay() // 0=domingo, 1=segunda, etc.
-					if (diaSemanaData.toString() !== diaSemanaFiltro) {
-						continue // Pular este registro se não for do dia da semana desejado
-					}
+			// Aplicar filtro por dia da semana se especificado
+			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
+				if (diaSemanaData.toString() !== diaSemanaFiltro) {
+					continue // Pular este registro se não for do dia da semana desejado
 				}
+			}
 				
-				// FILTRO OPERACIONAL: Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
-				const dataGerencial = new Date(r.dt_gerencial as string)
-				const diaSemanaData = dataGerencial.getDay()
-				const ultimaTercaOperacional = new Date('2025-04-15')
+			// FILTRO OPERACIONAL: Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
+			const ultimaTercaOperacional = new Date('2025-04-15')
 				if (diaSemanaData === 2 && dataGerencial > ultimaTercaOperacional) { 
 					continue // Pular registros de terça-feira após 15/04/2025 (dados incorretos)
 				}
@@ -138,7 +153,7 @@ export async function GET(request: NextRequest) {
 			}
 
 			if (data.length < pageSize) break
-			from += pageSize
+			offset += pageSize
 		}
 
 		const clientes = Array.from(map.values())
