@@ -119,6 +119,11 @@ export async function GET(request: NextRequest) {
 				let fone = rawFone.replace(/\D/g, '')
 				if (!fone) continue
 				
+				// DEBUG: Rastrear Laura Galvão especificamente
+				if (fone.includes('992053013')) {
+					console.log(`🔍 LAURA DEBUG: ${nome} | Fone: ${rawFone} → ${fone} | Data: ${r.dt_gerencial} | Visita: ${totalLinhas}`)
+				}
+				
 				// Padronizar: se tem 11 dígitos e começa com DDD, manter
 				// se tem 10 dígitos, adicionar 9 após o DDD (celular antigo)
 				if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
@@ -205,6 +210,12 @@ export async function GET(request: NextRequest) {
 		}
 
 
+
+		// DEBUG: Verificar Laura no resultado final
+		const lauraFinal = Array.from(map.values()).find(c => c.fone.includes('992053013'))
+		if (lauraFinal) {
+			console.log(`🔍 LAURA FINAL: ${lauraFinal.nome} | Fone: ${lauraFinal.fone} | Visitas: ${lauraFinal.visitas}`)
+		}
 
 		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
 
