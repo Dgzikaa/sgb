@@ -90,8 +90,22 @@ export async function GET(request: NextRequest) {
     const visitasCliente = data || []
     console.log(`✅ Total de visitas encontradas: ${visitasCliente.length}`)
 
-    // Transformar dados para o formato esperado pelo frontend
-    const visitas = visitasCliente.map(registro => {
+    // Transformar dados para o formato esperado pelo frontend (FILTRANDO TERÇAS INVÁLIDAS)
+    const visitasValidas = visitasCliente.filter(registro => {
+      const data = new Date(registro.dt_gerencial)
+      const diaSemana = data.getDay()
+      const ultimaTercaOperacional = new Date('2025-04-15')
+      
+      // Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
+      if (diaSemana === 2 && data > ultimaTercaOperacional) {
+        console.log(`🚫 Removendo visita inválida de terça-feira: ${registro.dt_gerencial}`)
+        return false
+      }
+      
+      return true
+    })
+
+    const visitas = visitasValidas.map(registro => {
       const couvert = parseFloat(registro.vr_couvert || '0') || 0
       const pagamentos = parseFloat(registro.vr_pagamentos || '0') || 0
       const consumo = pagamentos - couvert
@@ -103,34 +117,44 @@ export async function GET(request: NextRequest) {
         total: pagamentos
       }
     })
+    
+    console.log(`📊 Visitas filtradas: ${visitasCliente.length} → ${visitasValidas.length} (removidas ${visitasCliente.length - visitasValidas.length} terças inválidas)`)
 
-    // Calcular dia da semana mais frequentado
+    // Calcular dia da semana mais frequentado (usando apenas visitas válidas)
     const diasSemanaCount = new Map<number, number>()
     const diasSemanaLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
     
-    visitasCliente.forEach(registro => {
+    console.log(`🔍 Analisando ${visitasValidas.length} visitas válidas para calcular dia destaque...`)
+    
+    visitasValidas.forEach(registro => {
       const data = new Date(registro.dt_gerencial)
       const diaSemana = data.getDay() // 0=domingo, 1=segunda, etc.
+      
       diasSemanaCount.set(diaSemana, (diasSemanaCount.get(diaSemana) || 0) + 1)
+      console.log(`📅 ${diasSemanaLabels[diaSemana]} (${registro.dt_gerencial}): ${diasSemanaCount.get(diaSemana)} visitas`)
     })
 
-    // Encontrar o dia mais frequentado
+    // Encontrar o dia mais frequentado (excluindo terças inválidas)
     let diaDestaque = 'Não definido'
     let maxVisitas = 0
     
+    console.log(`📊 Contagem por dia da semana:`)
     diasSemanaCount.forEach((count, dia) => {
+      console.log(`   ${diasSemanaLabels[dia]}: ${count} visitas`)
       if (count > maxVisitas) {
         maxVisitas = count
         diaDestaque = diasSemanaLabels[dia]
       }
     })
+    
+    console.log(`🏆 Dia destaque: ${diaDestaque} (${maxVisitas} visitas)`)
 
     return NextResponse.json({
       visitas,
       total_visitas: visitas.length,
       dia_destaque: diaDestaque,
       cliente: {
-        nome: visitasCliente[0]?.cli_nome || 'Cliente',
+        nome: visitasValidas[0]?.cli_nome || visitasCliente[0]?.cli_nome || 'Cliente',
         telefone: telefone
       }
     })
