@@ -93,6 +93,9 @@ export async function GET(request: NextRequest) {
 		console.log(`✅ Página ${iterations}: ${data.length} registros retornados (total acumulado: ${offset + data.length})`)
 
 		// Processar todos os dados
+		let registrosPaginaProcessados = 0
+		let registrosPaginaDescartados = 0
+		
 		for (const r of data) {
 			// Processar data uma única vez
 			const dataGerencial = new Date(r.dt_gerencial as string)
@@ -101,18 +104,18 @@ export async function GET(request: NextRequest) {
 			// Aplicar filtro por dia da semana se especificado
 			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
 				if (diaSemanaData.toString() !== diaSemanaFiltro) {
+					registrosPaginaDescartados++
 					continue // Pular este registro se não for do dia da semana desejado
 				}
 			}
 				
-			// FILTRO OPERACIONAL: Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
-			const ultimaTercaOperacional = new Date('2025-04-15')
-				if (diaSemanaData === 2 && dataGerencial > ultimaTercaOperacional) { 
-					continue // Pular registros de terça-feira após 15/04/2025 (dados incorretos)
-				}
+			// FILTRO OPERACIONAL: Excluir apenas terças-feiras específicas com dados incorretos
+			// Remover filtro geral de terças - estava descartando dados válidos
+			// Se necessário, implementar filtro mais específico baseado em outras condições
 				
 				// Contar linha apenas se passou no filtro
 				totalLinhas++
+				registrosPaginaProcessados++
 
 				const rawFone = (r.cli_fone || '').toString().trim()
 				if (!rawFone) {
@@ -182,7 +185,9 @@ export async function GET(request: NextRequest) {
 				}
 			}
 
-					if (data.length < pageSize) break
+					console.log(`📊 Página ${iterations}: ${registrosPaginaProcessados} processados, ${registrosPaginaDescartados} descartados por filtros`)
+		
+		if (data.length < pageSize) break
 		offset += pageSize
 		
 		// Pequeno delay para evitar sobrecarga do Supabase
