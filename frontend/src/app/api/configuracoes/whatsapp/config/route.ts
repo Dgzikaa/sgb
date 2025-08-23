@@ -1,7 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 import { getSupabaseClient } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic'
 
 // Interfaces para tipagem adequada
 interface UserData {

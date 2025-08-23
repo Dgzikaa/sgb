@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 // Função para obter as datas de início e fim de uma semana do ano
 function getWeekDates(year: number, weekNumber: number) {
   // Janeiro 1 do ano

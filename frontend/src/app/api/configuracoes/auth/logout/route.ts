@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logLogout } from '@/lib/audit-logger';
 
+export const dynamic = 'force-dynamic'
+
 // Interfaces TypeScript
 interface UserInfo {
   id: string;

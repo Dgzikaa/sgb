@@ -1,5 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic'
 
 // Dados históricos de fevereiro a junho 2025
 const eventosHistoricos = `

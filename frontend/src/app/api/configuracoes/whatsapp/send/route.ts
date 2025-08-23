@@ -1,4 +1,6 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic'
 
 const EVOLUTION_API_URL =
   process.env.EVOLUTION_API_URL || 'http://localhost:8080';

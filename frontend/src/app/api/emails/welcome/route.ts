@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
+export const dynamic = 'force-dynamic'
+
 // Verificar se a chave da API está disponível
 const RESEND_API_KEY = process.env.RESEND_API_KEY || 'dummy-key'
 const resend = new Resend(RESEND_API_KEY)

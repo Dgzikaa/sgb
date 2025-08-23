@@ -50,6 +50,7 @@ export default function ProdutosPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
+  const [grupoFiltro, setGrupoFiltro] = useState<string>('todos')
   const [activeTab, setActiveTab] = useState<string>('produtos')
   
 
@@ -71,6 +72,9 @@ export default function ProdutosPage() {
       }
       if (diaSemanaFiltro !== 'todos') {
         params.append('dia_semana', diaSemanaFiltro)
+      }
+      if (grupoFiltro !== 'todos') {
+        params.append('grupo', grupoFiltro)
       }
 
       const response = await fetch(`/api/analitico/produtos-final?${params.toString()}`)
@@ -95,7 +99,7 @@ export default function ProdutosPage() {
       setLoading(false)
       isApiCallingRef.current = false
     }
-  }, [selectedBar, diaSemanaFiltro])
+  }, [selectedBar, diaSemanaFiltro, grupoFiltro])
 
   useEffect(() => {
     fetchProdutos()
@@ -142,7 +146,13 @@ export default function ProdutosPage() {
         'Primeira Venda': formatDate(produto.primeiraVenda)
       }))
       const diaLabel = diasSemana.find(d => d.value === diaSemanaFiltro)?.label.replace(/[^a-zA-Z0-9]/g, '_') || 'todos'
-      nomeArquivo = `produtos_${diaSemanaFiltro !== 'todos' ? `${diaLabel}_` : ''}${new Date().toISOString().split('T')[0]}.csv`
+      const grupoLabel = gruposProdutos.find(g => g.value === grupoFiltro)?.label.replace(/[^a-zA-Z0-9]/g, '_') || 'todos'
+      
+      let filtros = []
+      if (diaSemanaFiltro !== 'todos') filtros.push(diaLabel)
+      if (grupoFiltro !== 'todos') filtros.push(grupoLabel)
+      
+      nomeArquivo = `produtos_${filtros.length > 0 ? `${filtros.join('_')}_` : ''}${new Date().toISOString().split('T')[0]}.csv`
 
       const headers = Object.keys(dadosCSV[0])
       const csvContent = [
@@ -190,6 +200,24 @@ export default function ProdutosPage() {
     { value: '4', label: 'Quinta-feira' },
     { value: '5', label: 'Sexta-feira' },
     { value: '6', label: 'Sábado' },
+  ]
+
+  const gruposProdutos = [
+    { value: 'todos', label: 'Todos os grupos' },
+    { value: 'Baldes', label: 'Baldes' },
+    { value: 'Bebidas Não Alcoólicas', label: 'Bebidas Não Alcoólicas' },
+    { value: 'Bebidas Prontas', label: 'Bebidas Prontas' },
+    { value: 'Cervejas', label: 'Cervejas' },
+    { value: 'Combos', label: 'Combos' },
+    { value: 'Doses', label: 'Doses' },
+    { value: 'Drinks Autorais', label: 'Drinks Autorais' },
+    { value: 'Drinks Classicos', label: 'Drinks Clássicos' },
+    { value: 'Drinks sem Álcool', label: 'Drinks sem Álcool' },
+    { value: 'Happy Hour', label: 'Happy Hour' },
+    { value: 'Pratos Individuais', label: 'Pratos Individuais' },
+    { value: 'Pratos Para Compartilhar - P/ 4 Pessoas', label: 'Pratos Para Compartilhar' },
+    { value: 'Sanduíches', label: 'Sanduíches' },
+    { value: 'Vinhos', label: 'Vinhos' },
   ]
 
   if (loading) {
@@ -274,6 +302,23 @@ export default function ProdutosPage() {
                     className="text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
                   >
                     {dia.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={grupoFiltro} onValueChange={setGrupoFiltro}>
+              <SelectTrigger className="w-full sm:w-[280px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">
+                <SelectValue placeholder="Filtrar por grupo" className="text-gray-900 dark:text-gray-100" />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                {gruposProdutos.map((grupo) => (
+                  <SelectItem 
+                    key={grupo.value} 
+                    value={grupo.value} 
+                    className="text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
+                  >
+                    {grupo.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -387,35 +432,25 @@ export default function ProdutosPage() {
           )}
 
           {/* Tabela de Produtos */}
-          <Card className="card-dark">
-            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Target className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  <div>
-                    <CardTitle className="card-title-dark">Top 100 Produtos por Vendas</CardTitle>
-                    <CardDescription className="card-description-dark">
-                      Produtos ordenados por faturamento total
-                    </CardDescription>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Card className="card-dark">
+              <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Target className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <div>
+                      <CardTitle className="card-title-dark">Top 100 Produtos por Vendas</CardTitle>
+                      <CardDescription className="card-description-dark">
+                        Produtos ordenados por faturamento total
+                      </CardDescription>
+                    </div>
                   </div>
-                </div>
 
-                <TabsList className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1.5 rounded-xl shadow-sm">
-                  <TabsTrigger 
-                    value="produtos" 
-                    className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/25 !rounded-xl"
-                  >
-                    <Package className="h-4 w-4 mr-2" />
-                    Top 100 Produtos por Vendas
-                    <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0">
-                      {produtos.length}
-                    </Badge>
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </CardHeader>
-          <CardContent className="p-0">
-            <TabsContent value="produtos" className="mt-0">
+
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <TabsContent value="produtos" className="mt-0">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -503,9 +538,10 @@ export default function ProdutosPage() {
                   </TableBody>
                 </Table>
               </div>
-            </TabsContent>
-          </CardContent>
-          </Card>
+                </TabsContent>
+              </CardContent>
+            </Card>
+          </Tabs>
         </div>
       </div>
     </div>

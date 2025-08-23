@@ -4,6 +4,8 @@ import { getInterAccessToken } from '@/lib/inter/getAccessToken';
 import https from 'https';
 import { getInterCertificates } from '@/lib/inter/certificates';
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

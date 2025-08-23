@@ -1,7 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { securityMonitor } from '@/lib/security-monitor';
+
+export const dynamic = 'force-dynamic'
 
 // Interfaces para tipagem adequada
 interface SecurityEvent {

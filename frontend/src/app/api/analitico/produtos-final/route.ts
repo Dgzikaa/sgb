@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+export const dynamic = 'force-dynamic'
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -10,6 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const diaSemana = searchParams.get('dia_semana')
+    const grupo = searchParams.get('grupo')
     const barId = parseInt(searchParams.get('bar_id') || '3')
 
 
@@ -106,6 +109,13 @@ export async function GET(request: NextRequest) {
         primeiraVenda: produto.primeira_venda,
         diaDestaque: calcularDiaDestaque(produto.vendas_por_dia)
       }))
+    }
+
+    // Aplicar filtro de grupo se necessário
+    if (grupo && grupo !== 'todos') {
+      produtosFiltrados = produtosFiltrados.filter(produto => 
+        produto.grupo.toLowerCase().includes(grupo.toLowerCase())
+      )
     }
 
     // Calcular estatísticas

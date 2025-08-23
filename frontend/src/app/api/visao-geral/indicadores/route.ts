@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 // Função para calcular datas do trimestre
 function getTrimestreDates(trimestre: number) {
   const year = 2025;

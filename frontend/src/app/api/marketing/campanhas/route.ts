@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     // Aqui você faria a chamada para o Supabase para buscar os dados

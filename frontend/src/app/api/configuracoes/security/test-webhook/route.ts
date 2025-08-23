@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { securityMonitor } from '@/lib/security-monitor';
 
+export const dynamic = 'force-dynamic'
+
 export async function POST() {
   try {
     console.log('🧪 Iniciando teste do webhook Discord...');

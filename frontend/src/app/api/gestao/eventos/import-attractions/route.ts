@@ -1,5 +1,7 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic'
 
 interface AttractionItem {
   data: string;

@@ -1,10 +1,12 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import {
   authenticateUser,
   authErrorResponse,
   permissionErrorResponse,
 } from '@/middleware/auth';
+
+export const dynamic = 'force-dynamic'
 
 // =====================================================
 // CONFIGURAÇÕES DE UPLOAD

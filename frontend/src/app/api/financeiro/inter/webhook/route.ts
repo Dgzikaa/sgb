@@ -4,6 +4,8 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic'
+
 interface InterWebhookConfig {
   webhookUrl: string;
   tipoWebhook: 'pix-pagamento' | 'boleto-pagamento';

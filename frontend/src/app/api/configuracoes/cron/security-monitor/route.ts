@@ -1,6 +1,8 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { securityMonitor } from '@/lib/security-monitor';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+export const dynamic = 'force-dynamic'
 
 // Tipos para eventos de segurança
 interface SecurityEvent {

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { agora, formatarDataHora, timestampBrasilia } from '@/lib/timezone';
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     // Teste do frontend

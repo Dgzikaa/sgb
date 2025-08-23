@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 // Configurações do Inter
 const INTER_CONFIG = {
   BASE_URL: 'https://cdp.inter.co',

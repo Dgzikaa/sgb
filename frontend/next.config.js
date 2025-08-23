@@ -99,20 +99,15 @@ const nextConfig = {
     return config;
   },
   
-  // ✅ Configurações experimentais
+  // ✅ Configurações experimentais (simplificadas para evitar travamentos)
   experimental: {
     optimizePackageImports: ['lucide-react'],
     serverComponentsExternalPackages: [],
     esmExternals: true,
     webpackBuildWorker: false, // Desabilitar para evitar problemas
-    // Otimizações para produção
-    ...(process.env.NODE_ENV === 'production' && {
-      optimizeCss: true,
-      turbotrace: {
-        logLevel: 'error',
-        logAll: false,
-      },
-    }),
+    // Testar otimizações individualmente
+    optimizeCss: true, // Testar se funciona com critters instalado
+    // turbotrace causa travamento - manter desabilitado
   },
   
   // ✅ Configurações de compilação

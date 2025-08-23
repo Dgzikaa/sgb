@@ -101,57 +101,57 @@ export function LazyLoader({
   );
 }
 
-// ✅ Componentes lazy pré-configurados para páginas pesadas
-export const LazyDashboard = createLazyComponent(
-  () => import('@/app/visao-geral/page-modern'),
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-    {Array.from({ length: 6 }).map((_, i) => (
-      <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 space-y-3">
-        <Skeleton className="h-6 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-20 w-full" />
-      </div>
-    ))}
-  </div>
-);
+// ✅ Componentes lazy pré-configurados para páginas pesadas - TEMPORARIAMENTE DESABILITADOS
+// export const LazyDashboard = createLazyComponent(
+//   () => import('@/app/visao-geral/page-modern'),
+//   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+//     {Array.from({ length: 6 }).map((_, i) => (
+//       <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 space-y-3">
+//         <Skeleton className="h-6 w-3/4" />
+//         <Skeleton className="h-4 w-1/2" />
+//         <Skeleton className="h-20 w-full" />
+//       </div>
+//     ))}
+//   </div>
+// );
 
-export const LazyTerminal = createLazyComponent(
-  () => import('@/app/future/operacoes/terminal/page'),
-  <div className="p-6 space-y-4">
-    <Skeleton className="h-8 w-1/3" />
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Skeleton key={i} className="h-32" />
-      ))}
-    </div>
-  </div>
-);
+// export const LazyTerminal = createLazyComponent(
+//   () => import('@/app/future/operacoes/terminal/page'),
+//   <div className="p-6 space-y-4">
+//     <Skeleton className="h-8 w-1/3" />
+//     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+//       {Array.from({ length: 8 }).map((_, i) => (
+//         <Skeleton key={i} className="h-32" />
+//       ))}
+//     </div>
+//   </div>
+// );
 
-export const LazyReports = createLazyComponent(
-  () => import('@/app/estrategico/desempenho/page'),
-  <div className="p-6 space-y-6">
-    <Skeleton className="h-8 w-1/4" />
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Skeleton className="h-64" />
-      <Skeleton className="h-64" />
-    </div>
-    <Skeleton className="h-96 w-full" />
-  </div>
-);
+// export const LazyReports = createLazyComponent(
+//   () => import('@/app/estrategico/desempenho/page'),
+//   <div className="p-6 space-y-6">
+//     <Skeleton className="h-8 w-1/4" />
+//     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+//       <Skeleton className="h-64" />
+//       <Skeleton className="h-64" />
+//     </div>
+//     <Skeleton className="h-96 w-full" />
+//   </div>
+// );
 
-export const LazyChecklists = createLazyComponent(
-  () => import('@/app/future/configuracoes/checklists/page'),
-  <div className="p-6 space-y-4">
-    <Skeleton className="h-8 w-1/3" />
-    {Array.from({ length: 5 }).map((_, i) => (
-      <div key={i} className="border rounded-lg p-4 space-y-2">
-        <Skeleton className="h-6 w-2/3" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-4 w-3/4" />
-      </div>
-    ))}
-  </div>
-);
+// export const LazyChecklists = createLazyComponent(
+//   () => import('@/app/future/configuracoes/checklists/page'),
+//   <div className="p-6 space-y-4">
+//     <Skeleton className="h-8 w-1/3" />
+//     {Array.from({ length: 5 }).map((_, i) => (
+//       <div key={i} className="border rounded-lg p-4 space-y-2">
+//         <Skeleton className="h-6 w-2/3" />
+//         <Skeleton className="h-4 w-1/2" />
+//         <Skeleton className="h-4 w-3/4" />
+//       </div>
+//     ))}
+//   </div>
+// );
 
 // ✅ Hook para lazy loading condicional
 export function useLazyLoad(condition: boolean, delay: number = 100) {

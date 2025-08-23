@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 // Configurações OAuth - ADICIONE NO SEU .env.local:
 // GOOGLE_OAUTH_CLIENT_ID=your_google_oauth_client_id
 // GOOGLE_OAUTH_CLIENT_SECRET=your_google_oauth_client_secret

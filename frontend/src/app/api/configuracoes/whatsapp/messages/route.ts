@@ -1,6 +1,8 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 import { z } from 'zod';
+
+export const dynamic = 'force-dynamic'
 
 // Interfaces para tipagem adequada
 interface ProcessedParams {

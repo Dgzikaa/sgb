@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { JWT } from 'google-auth-library'
 
+export const dynamic = 'force-dynamic'
+
 // GET - Testar configuração do Google Wallet
 export async function GET() {
   try {

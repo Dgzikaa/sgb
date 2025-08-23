@@ -1,5 +1,7 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { processDiscordCommand } from '@/lib/discord-bot-service';
+
+export const dynamic = 'force-dynamic'
 
 // Removido o schema DiscordWebhookSchema e o import z
 

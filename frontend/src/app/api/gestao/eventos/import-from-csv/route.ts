@@ -3,6 +3,8 @@ import { getSupabaseClient } from '@/lib/supabase';
 import * as fs from 'fs';
 import * as path from 'path';
 
+export const dynamic = 'force-dynamic'
+
 function parseCSVDate(dateStr: string): string {
   // Converte datas do formato "1-Feb" para "2025-02-01"
   const [day, monthStr] = dateStr.split('-');

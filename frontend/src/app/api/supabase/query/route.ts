@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 const SUPABASE_PROJECT_ID = "uqtgsvujwcbymjmvkjhy";
 
 interface Evento {

@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 // Função para fetch de todos os dados (paginação)
 async function fetchAllData(supabase: any, tableName: string, columns: string, filters: any = {}) {
   let allData: any[] = [];

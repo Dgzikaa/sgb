@@ -95,6 +95,7 @@
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
+    "critters": "^0.0.25",
     "eslint": "^8.54.0",
     "eslint-config-next": "14.0.4",
     "eslint-plugin-jsx-a11y": "^6.8.0",

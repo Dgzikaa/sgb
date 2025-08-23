@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 // Definindo as permissões baseadas na SIDEBAR REAL do sistema
 const MODULOS_SISTEMA = [
   // Permissão especial

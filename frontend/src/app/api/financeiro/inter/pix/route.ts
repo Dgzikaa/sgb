@@ -5,6 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import { getInterAccessToken } from '@/lib/inter/getAccessToken';
 import { realizarPagamentoPixInter } from '@/lib/inter/pixPayment';
 
+export const dynamic = 'force-dynamic'
+
 interface PagamentoInter {
   valor: string;
   descricao: string;

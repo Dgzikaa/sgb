@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic'
+
 // Função para buscar dados com paginação (contorna limite de 1000 do Supabase)
 async function fetchAllData(supabase: any, tableName: string, columns: string, filters: any = {}) {
   let allData: any[] = [];

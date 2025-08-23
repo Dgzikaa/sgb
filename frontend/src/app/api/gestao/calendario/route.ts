@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
+export const dynamic = 'force-dynamic'
+
 // Interfaces para o Planejamento Comercial
 interface EventoCalendario {
   id: string

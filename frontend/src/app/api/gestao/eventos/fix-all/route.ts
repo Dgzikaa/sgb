@@ -1,5 +1,7 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic'
 
 // Event name mappings to fix encoding issues
 const eventMappings = [

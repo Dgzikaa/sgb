@@ -1,7 +1,9 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { authenticateUser, authErrorResponse } from '@/middleware/auth';
 import { z } from 'zod';
+
+export const dynamic = 'force-dynamic'
 
 // =====================================================
 // SCHEMAS DE VALIDAÇÃO

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic'
+
 // GET - Buscar metas de um bar do banco de dados
 export async function GET(request: NextRequest) {
   try {

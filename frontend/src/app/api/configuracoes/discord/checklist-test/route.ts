@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DiscordChecklistService from '@/lib/discord-checklist-service';
 
+export const dynamic = 'force-dynamic'
+
 // ========================================
 // 🧪 API PARA TESTAR INTEGRAÇÃO DISCORD + CHECKLISTS
 // ========================================

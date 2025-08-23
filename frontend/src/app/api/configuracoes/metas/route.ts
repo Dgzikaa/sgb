@@ -1,6 +1,8 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { authenticateUser, authErrorResponse } from '@/middleware/auth';
+
+export const dynamic = 'force-dynamic'
 
 // =====================================================
 // GET - LISTAR METAS

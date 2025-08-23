@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { DiscordChecklistService } from '@/lib/discord-checklist-service';
 
+export const dynamic = 'force-dynamic'
+
 // ========================================
 // 🚨 API PARA ALERTAS DE CHECKLISTS
 // ========================================
