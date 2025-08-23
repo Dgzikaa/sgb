@@ -9,7 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target, Download, CalendarDays, Calendar, User } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target, Download, CalendarDays, Calendar, User, Eye, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
 import { AnimatedCounter, AnimatedCurrency } from '@/components/ui/animated-counter'
@@ -59,6 +60,13 @@ interface Reservante {
   percentual_presenca: number
 }
 
+interface VisitaDetalhada {
+  data: string
+  couvert: number
+  consumo: number
+  total: number
+}
+
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [reservantes, setReservantes] = useState<Reservante[]>([])
@@ -68,6 +76,10 @@ export default function ClientesPage() {
   const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
   const [clientesFiltrados, setClientesFiltrados] = useState<Cliente[]>([])
   const [activeTab, setActiveTab] = useState<string>('clientes')
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
+  const [visitasDetalhadas, setVisitasDetalhadas] = useState<VisitaDetalhada[]>([])
+  const [loadingVisitas, setLoadingVisitas] = useState(false)
+  const [modalAberto, setModalAberto] = useState(false)
   const { toast } = useToast()
   const { selectedBar } = useBar()
   const isApiCallingRef = useRef(false)
@@ -197,10 +209,44 @@ export default function ClientesPage() {
     }
   }, [selectedBar, diaSemanaFiltro])
 
+  const fetchVisitasDetalhadas = useCallback(async (cliente: Cliente) => {
+    try {
+      setLoadingVisitas(true)
+      
+      const response = await fetch(`/api/analitico/clientes/detalhes?telefone=${cliente.telefone}`, {
+        headers: selectedBar ? {
+          'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+        } : undefined
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erro ao carregar detalhes das visitas')
+      }
+      
+      const data = await response.json()
+      setVisitasDetalhadas(data.visitas || [])
+    } catch (err) {
+      toast({
+        title: "Erro ao carregar detalhes",
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: "destructive"
+      })
+      setVisitasDetalhadas([])
+    } finally {
+      setLoadingVisitas(false)
+    }
+  }, [selectedBar, toast])
+
+  const abrirModalCliente = useCallback(async (cliente: Cliente) => {
+    setClienteSelecionado(cliente)
+    setModalAberto(true)
+    await fetchVisitasDetalhadas(cliente)
+  }, [fetchVisitasDetalhadas])
+
   // Carregamento inicial e quando filtros mudam
   useEffect(() => {
     fetchClientes()
-  }, [selectedBar, diaSemanaFiltro])
+  }, [fetchClientes])
 
   // Mudança de aba
   useEffect(() => {
@@ -767,6 +813,12 @@ export default function ClientesPage() {
                     </TableHead>
                     <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
                       <div className="flex items-center gap-2 justify-center">
+                        <Eye className="h-4 w-4" />
+                        Detalhes
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
                         <MessageCircle className="h-4 w-4" />
                         Contato
                       </div>
@@ -853,6 +905,18 @@ export default function ClientesPage() {
                   </TableCell>
                   <TableCell className="text-center text-gray-600 dark:text-gray-400">
                     {formatDate(cliente.ultima_visita)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={() => abrirModalCliente(cliente)}
+                        size="sm"
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-400 dark:to-blue-500 dark:hover:from-blue-500 dark:hover:to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full w-8 h-8 p-0"
+                        aria-label={`Ver detalhes de ${cliente.nome_principal}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="flex justify-center">
@@ -1079,6 +1143,189 @@ export default function ClientesPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Modal de Detalhes do Cliente */}
+        <Dialog open={modalAberto} onOpenChange={setModalAberto}>
+          <DialogContent className="max-w-4xl max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 overflow-hidden">
+            <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                      {clienteSelecionado?.nome_principal}
+                    </DialogTitle>
+                    <DialogDescription className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      {clienteSelecionado?.telefone || 'Sem telefone'}
+                    </DialogDescription>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setModalAberto(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </DialogHeader>
+
+            <div className="py-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {/* Resumo do Cliente */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                      {clienteSelecionado?.total_visitas}
+                    </div>
+                    <div className="text-sm text-purple-600 dark:text-purple-400">Total de Visitas</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                      {formatCurrency(clienteSelecionado?.valor_total_gasto || 0)}
+                    </div>
+                    <div className="text-sm text-green-600 dark:text-green-400">Total Gasto</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                      {formatCurrency(clienteSelecionado?.ticket_medio_geral || 0)}
+                    </div>
+                    <div className="text-sm text-orange-600 dark:text-orange-400">Ticket Médio</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                      {clienteSelecionado?.ultima_visita ? formatDate(clienteSelecionado.ultima_visita) : 'N/A'}
+                    </div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400">Última Visita</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Histórico de Visitas */}
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800">
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <CalendarDays className="h-5 w-5" />
+                    Histórico de Visitas
+                  </CardTitle>
+                  <CardDescription className="text-slate-200">
+                    Detalhamento de todas as visitas registradas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {loadingVisitas ? (
+                    <div className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                      <p className="text-gray-600 dark:text-gray-400">Carregando histórico...</p>
+                    </div>
+                  ) : visitasDetalhadas.length > 0 ? (
+                    <div className="max-h-96 overflow-y-auto">
+                      <Table>
+                        <TableHeader className="bg-slate-50 dark:bg-slate-800/50 sticky top-0">
+                          <TableRow className="border-b border-slate-200 dark:border-slate-700">
+                            <TableHead className="text-slate-900 dark:text-white font-semibold">
+                              <div className="flex items-center gap-2">
+                                <CalendarDays className="h-4 w-4" />
+                                Data da Visita
+                              </div>
+                            </TableHead>
+                            <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                              <div className="flex items-center gap-2 justify-center">
+                                <span className="text-lg">🎫</span>
+                                Couvert
+                              </div>
+                            </TableHead>
+                            <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                              <div className="flex items-center gap-2 justify-center">
+                                <span className="text-lg">🍺</span>
+                                Consumo
+                              </div>
+                            </TableHead>
+                            <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                              <div className="flex items-center gap-2 justify-center">
+                                <DollarSign className="h-4 w-4" />
+                                Total
+                              </div>
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {visitasDetalhadas.map((visita, index) => (
+                            <TableRow 
+                              key={index}
+                              className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200"
+                            >
+                              <TableCell className="font-medium text-gray-900 dark:text-white">
+                                {formatDate(visita.data)}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800">
+                                  {formatCurrency(visita.couvert)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                                  {formatCurrency(visita.consumo)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 font-semibold">
+                                  {formatCurrency(visita.total)}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <CalendarDays className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-400">Nenhuma visita detalhada encontrada</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Footer do Modal */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-between items-center">
+              <div className="flex gap-2">
+                {clienteSelecionado?.telefone && (
+                  <Button
+                    onClick={() => handleWhatsAppClick(clienteSelecionado.nome_principal, clienteSelecionado.telefone)}
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Enviar WhatsApp
+                  </Button>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setModalAberto(false)}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+              >
+                Fechar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

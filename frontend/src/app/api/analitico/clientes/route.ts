@@ -4,22 +4,15 @@ import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 API Clientes: Iniciando busca...')
-    
     // Autenticar usuário
     const user = await authenticateUser(request)
     if (!user) {
-      console.log('❌ API Clientes: Usuário não autenticado')
       return authErrorResponse('Usuário não autenticado')
     }
     
-    console.log('✅ API Clientes: Usuário autenticado:', user.nome)
-    
     const supabase = await getAdminClient()
-    console.log('✅ API Clientes: Cliente administrativo Supabase obtido')
 
 		// Buscar dados dos clientes com paginação completa
-		console.log('📊 API Clientes: Buscando dados dos clientes (paginaçao completa)...')
 		const barIdHeader = request.headers.get('x-user-data')
 		let barIdFilter: number | null = null
 		if (barIdHeader) {
@@ -34,7 +27,6 @@ export async function GET(request: NextRequest) {
 		// Obter filtro de dia da semana da URL
 		const { searchParams } = new URL(request.url)
 		const diaSemanaFiltro = searchParams.get('dia_semana')
-			console.log('📅 API Clientes: Filtro dia da semana:', diaSemanaFiltro)
 
 	// Removido teste - implementando paginação SQL direta
 
@@ -46,9 +38,8 @@ export async function GET(request: NextRequest) {
 
 	const MAX_ITERATIONS = 100 // Aumentar para processar todas as páginas
 	let iterations = 0
-	let lauraCount = 0 // DEBUG: Contador específico da Laura
-	let telefonesProcessados = 0 // DEBUG: Total de telefones processados
-	let telefonesDescartados = 0 // DEBUG: Telefones descartados por filtros
+	let telefonesProcessados = 0
+	let telefonesDescartados = 0
 	
 	const startTime = Date.now()
 	const MAX_PROCESSING_TIME = 20000 // 20 segundos máximo para processar todas as páginas
@@ -58,11 +49,8 @@ export async function GET(request: NextRequest) {
 		
 		// Verificar timeout
 		if (Date.now() - startTime > MAX_PROCESSING_TIME) {
-			console.log(`⏰ Timeout atingido após ${iterations} páginas`)
 			break
 		}
-		
-		console.log(`📄 Página ${iterations}: Buscando ${pageSize} registros (offset: ${offset})`)
 		
 		// Query Supabase SEM ordenação específica (deixar o Supabase decidir)
 		let query = supabase
@@ -75,7 +63,6 @@ export async function GET(request: NextRequest) {
 		// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
 		const finalBarId = barIdFilter || 3
 		query = query.eq('bar_id', finalBarId)
-		console.log(`🏪 API Clientes: Filtrando por bar_id = ${finalBarId}`)
 		
 		// Aplicar filtro de dia da semana se especificado (será feito no processamento)
 		const { data, error } = await query
@@ -86,15 +73,10 @@ export async function GET(request: NextRequest) {
 		}
 		
 		if (!data || data.length === 0) {
-			console.log(`🔚 Paginação finalizada: nenhum registro retornado na página ${iterations}`)
 			break
 		}
-		
-		console.log(`✅ Página ${iterations}: ${data.length} registros retornados (total acumulado: ${offset + data.length})`)
 
 		// Processar todos os dados
-		let registrosPaginaProcessados = 0
-		let registrosPaginaDescartados = 0
 		
 		for (const r of data) {
 			// Processar data uma única vez
@@ -104,7 +86,6 @@ export async function GET(request: NextRequest) {
 			// Aplicar filtro por dia da semana se especificado
 			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
 				if (diaSemanaData.toString() !== diaSemanaFiltro) {
-					registrosPaginaDescartados++
 					continue // Pular este registro se não for do dia da semana desejado
 				}
 			}
@@ -115,7 +96,6 @@ export async function GET(request: NextRequest) {
 				
 				// Contar linha apenas se passou no filtro
 				totalLinhas++
-				registrosPaginaProcessados++
 
 				const rawFone = (r.cli_fone || '').toString().trim()
 				if (!rawFone) {
@@ -128,7 +108,6 @@ export async function GET(request: NextRequest) {
 				let fone = rawFone.replace(/\D/g, '')
 				if (!fone) {
 					telefonesDescartados++
-					console.log(`❌ TELEFONE DESCARTADO após normalização: "${rawFone}" → "${fone}"`)
 					continue
 				}
 				
@@ -144,11 +123,7 @@ export async function GET(request: NextRequest) {
 				const vrCouvert = parseFloat(r.vr_couvert || '0') || 0
 				const vrPagamentos = parseFloat(r.vr_pagamentos || '0') || 0
 				
-				// DEBUG: Rastrear Laura Galvão especificamente (telefone 61992053013)
-				if (fone === '61992053013') {
-					lauraCount++
-					console.log(`🔍 LAURA DEBUG ${lauraCount}: ${nome} | Fone: ${rawFone} → ${fone} | Data: ${r.dt_gerencial} | Couvert: R$ ${vrCouvert} | Pagamentos: R$ ${vrPagamentos}`)
-				}
+
 				const vrConsumo = vrPagamentos - vrCouvert
 
 				const prev = map.get(fone)
@@ -185,7 +160,7 @@ export async function GET(request: NextRequest) {
 				}
 			}
 
-					console.log(`📊 Página ${iterations}: ${registrosPaginaProcessados} processados, ${registrosPaginaDescartados} descartados por filtros`)
+	
 		
 		if (data.length < pageSize) break
 		offset += pageSize
@@ -215,38 +190,11 @@ export async function GET(request: NextRequest) {
 				ultima_visita: c.ultima,
 			}))
 
-		// Debug: Mostrar top 5 clientes para análise
-		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-			console.log('🔍 DEBUG: Top 5 clientes filtrados por dia da semana:')
-			clientes.slice(0, 5).forEach((cliente, index) => {
-				const valorGasto = cliente.valor_total_gasto || 0
-				console.log(`  ${index + 1}º: ${cliente.nome_principal} - ${cliente.total_visitas} visitas - R$ ${valorGasto.toFixed(2)} (${cliente.telefone})`)
-			})
-			
-			
-		}
 
 
 
-		// DEBUG: Verificar Laura no resultado final (por telefone)
-		console.log(`🔍 LAURA PROCESSAMENTO: ${lauraCount} registros encontrados durante paginação`)
-		const lauraFinal = Array.from(map.values()).find(c => c.fone === '61992053013')
-		if (lauraFinal) {
-			console.log(`🔍 LAURA FINAL: ${lauraFinal.nome} | Fone: ${lauraFinal.fone} | Visitas: ${lauraFinal.visitas} | Total Gasto: R$ ${lauraFinal.totalGasto.toFixed(2)}`)
-			console.log(`❌ PROBLEMA: Laura deveria ter ${lauraCount} visitas, mas tem apenas ${lauraFinal.visitas}`)
-		} else {
-			console.log(`❌ LAURA NÃO ENCONTRADA no resultado final com telefone 61992053013`)
-		}
 
-		console.log(`📊 ESTATÍSTICAS DE PROCESSAMENTO:`)
-		console.log(`   • Registros esperados no banco: ~40.201`)
-		console.log(`   • Registros processados: ${telefonesProcessados}`)
-		console.log(`   • Registros perdidos: ${40201 - telefonesProcessados} (${(((40201 - telefonesProcessados) / 40201) * 100).toFixed(1)}%)`)
-		console.log(`   • Telefones descartados: ${telefonesDescartados}`)
-		console.log(`   • Clientes únicos finais: ${map.size}`)
-		console.log(`   • Taxa de aproveitamento: ${((map.size / telefonesProcessados) * 100).toFixed(1)}%`)
 
-		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
 
 		// Calcular estatísticas globais
 		const totalEntradaGlobal = Array.from(map.values()).reduce((sum, c) => sum + c.totalEntrada, 0)
