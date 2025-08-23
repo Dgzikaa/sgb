@@ -9,8 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Package, ShoppingCart, TrendingUp, DollarSign, Target, Download, CalendarDays, Calendar, Eye, X, Percent } from 'lucide-react'
+
+import { Package, ShoppingCart, TrendingUp, DollarSign, Target, Download, CalendarDays, Calendar, Star, Percent } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
 import { AnimatedCounter, AnimatedCurrency } from '@/components/ui/animated-counter'
@@ -25,6 +25,7 @@ interface Produto {
   visitas: number
   ultimaVenda: string
   primeiraVenda: string
+  diaDestaque: string
 }
 
 interface EstatisticasProdutos {
@@ -41,32 +42,7 @@ interface ApiResponse {
   estatisticas: EstatisticasProdutos
 }
 
-interface VendaDetalhada {
-  data: string
-  quantidade: number
-  valorUnitario: number
-  valorTotal: number
-  custo: number
-  margem: number
-}
 
-interface ProdutoDetalhado {
-  nome: string
-  grupo: string
-}
-
-interface DetalhesResponse {
-  produto: ProdutoDetalhado
-  vendas: VendaDetalhada[]
-  estatisticas: {
-    totalVendas: number
-    quantidadeTotal: number
-    valorTotal: number
-    custoTotal: number
-    margemLucro: number
-  }
-  dia_destaque: string
-}
 
 export default function ProdutosPage() {
   const [produtos, setProdutos] = useState<Produto[]>([])
@@ -74,11 +50,6 @@ export default function ProdutosPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
-  const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null)
-  const [vendasDetalhadas, setVendasDetalhadas] = useState<VendaDetalhada[]>([])
-  const [diaDestaque, setDiaDestaque] = useState<string>('')
-  const [loadingVendas, setLoadingVendas] = useState(false)
-  const [modalAberto, setModalAberto] = useState(false)
   
   const { selectedBar } = useBar()
   const { toast } = useToast()
@@ -131,44 +102,7 @@ export default function ProdutosPage() {
     }
   }, [])
 
-  const fetchVendasDetalhadas = async (produto: Produto) => {
-    try {
-      setLoadingVendas(true)
-      
-      const params = new URLSearchParams()
-      params.append('produto', produto.produto)
-      params.append('grupo', produto.grupo)
-      if (selectedBar?.id) {
-        params.append('bar_id', selectedBar.id.toString())
-      }
 
-      const response = await fetch(`/api/analitico/produtos/detalhes?${params.toString()}`)
-      
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}: ${response.statusText}`)
-      }
-
-      const data: DetalhesResponse = await response.json()
-      setVendasDetalhadas(data.vendas)
-      setDiaDestaque(data.dia_destaque)
-
-    } catch (err) {
-      console.error('Erro ao buscar vendas detalhadas:', err)
-      toast({
-        title: "Erro ao carregar detalhes",
-        description: "Não foi possível carregar os detalhes do produto.",
-        variant: "destructive",
-      })
-    } finally {
-      setLoadingVendas(false)
-    }
-  }
-
-  const abrirModalProduto = async (produto: Produto) => {
-    setProdutoSelecionado(produto)
-    setModalAberto(true)
-    await fetchVendasDetalhadas(produto)
-  }
 
   useEffect(() => {
     console.log('🔄 useEffect: Dependências mudaram, chamando fetchProdutos')
@@ -448,250 +382,122 @@ export default function ProdutosPage() {
           )}
 
           {/* Tabela de Produtos */}
-          <Card className="card-dark">
-            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-              <CardTitle className="card-title-dark">
+          <Tabs defaultValue="produtos" className="w-full">
+            <TabsList className="grid w-full grid-cols-1 bg-gray-100 dark:bg-gray-800">
+              <TabsTrigger 
+                value="produtos" 
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+              >
+                <Package className="w-4 h-4 mr-2" />
                 Top 100 Produtos por Vendas
-              </CardTitle>
-              <CardDescription className="card-description-dark">
-                Ranking dos produtos com maior faturamento
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-gray-200 dark:border-gray-700">
-                      <TableHead className="text-gray-900 dark:text-gray-100">#</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100">Produto</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100">Grupo</TableHead>
-                      <TableHead className="text-center text-gray-900 dark:text-gray-100">Qtd</TableHead>
-                      <TableHead className="text-center text-gray-900 dark:text-gray-100">Vendas</TableHead>
-                      <TableHead className="text-center text-gray-900 dark:text-gray-100">Valor Total</TableHead>
-                      <TableHead className="text-center text-gray-900 dark:text-gray-100">Margem</TableHead>
-                      <TableHead className="text-center text-gray-900 dark:text-gray-100">Última Venda</TableHead>
-                      <TableHead className="text-center text-gray-900 dark:text-gray-100">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {produtos.map((produto, index) => {
-                      const posicao = index + 1
-                      const margem = produto.valorTotal > 0 ? ((produto.valorTotal - produto.custoTotal) / produto.valorTotal) * 100 : 0
-                      
-                      return (
-                        <TableRow key={`${produto.produto}-${produto.grupo}`} className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <TableCell>
-                            <Badge variant={getBadgeVariant(posicao)}>
-                              {posicao}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium text-gray-900 dark:text-gray-100">
-                            {produto.produto}
-                          </TableCell>
-                          <TableCell className="text-gray-600 dark:text-gray-400">
-                            {produto.grupo}
-                          </TableCell>
-                          <TableCell className="text-center text-gray-900 dark:text-gray-100">
-                            {produto.quantidade.toFixed(0)}
-                          </TableCell>
-                          <TableCell className="text-center text-gray-900 dark:text-gray-100">
-                            {produto.visitas}
-                          </TableCell>
-                          <TableCell className="text-center font-medium text-green-600 dark:text-green-400">
-                            {formatCurrency(produto.valorTotal)}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className={margem >= 50 ? 'text-green-600 dark:text-green-400' : margem >= 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}>
-                              {formatPercent(margem)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                            {formatDate(produto.ultimaVenda)}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => abrirModalProduto(produto)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="produtos" className="mt-6">
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+                <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Ranking dos Produtos Mais Vendidos
+                  </CardTitle>
+                  <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
+                    Produtos ordenados por faturamento total
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-gray-200 dark:border-gray-700">
+                          <TableHead className="text-gray-900 dark:text-gray-100 font-medium">#</TableHead>
+                          <TableHead className="text-gray-900 dark:text-gray-100 font-medium">Produto</TableHead>
+                          <TableHead className="text-gray-900 dark:text-gray-100 font-medium">Grupo</TableHead>
+                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Qtd</TableHead>
+                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Vendas</TableHead>
+                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Valor Total</TableHead>
+                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Margem</TableHead>
+                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Dia Destaque</TableHead>
+                          <TableHead className="text-center text-gray-900 dark:text-gray-100 font-medium">Última Venda</TableHead>
                         </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Modal de Detalhes do Produto */}
-          <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-            <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <DialogHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-lg -m-6 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="bg-white/20 p-3 rounded-full">
-                    <Package className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-2xl font-bold">
-                      {produtoSelecionado?.produto}
-                    </DialogTitle>
-                    <DialogDescription className="text-blue-100 text-lg">
-                      📞 {produtoSelecionado?.grupo}
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-
-              {loadingVendas ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-2 text-gray-600 dark:text-gray-400">Carregando vendas...</span>
-                </div>
-              ) : (
-                <>
-                  {/* Cards de Resumo */}
-                  <div className="grid grid-cols-5 gap-3 mb-6">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.1 }}
-                    >
-                      <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-                        <CardContent className="p-4">
-                          <div className="text-center">
-                            <p className="text-xl font-bold">{vendasDetalhadas.length}</p>
-                            <p className="text-sm opacity-90">Total de Vendas</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-                        <CardContent className="p-4">
-                          <div className="text-center">
-                            <p className="text-xl font-bold">
-                              {formatCurrency(vendasDetalhadas.reduce((sum, v) => sum + v.valorTotal, 0))}
-                            </p>
-                            <p className="text-sm opacity-90">Total Faturado</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-                        <CardContent className="p-4">
-                          <div className="text-center">
-                            <p className="text-xl font-bold">
-                              {vendasDetalhadas.reduce((sum, v) => sum + v.quantidade, 0).toFixed(0)}
-                            </p>
-                            <p className="text-sm opacity-90">Quantidade Total</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.4 }}
-                    >
-                      <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                        <CardContent className="p-4">
-                          <div className="text-center">
-                            <p className="text-xl font-bold">
-                              {vendasDetalhadas.length > 0 ? formatDate(vendasDetalhadas[0].data) : '-'}
-                            </p>
-                            <p className="text-sm opacity-90">Última Venda</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-                        <CardContent className="p-4">
-                          <div className="text-center">
-                            <p className="text-xl font-bold">{diaDestaque}</p>
-                            <p className="text-sm opacity-90">Dia Destaque</p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  </div>
-
-                  {/* Histórico de Vendas */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Histórico de Vendas</h3>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Detalhamento de todas as vendas registradas
-                      </span>
-                    </div>
-
-                    <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <Table>
-                        <TableHeader className="sticky top-0 bg-gray-50 dark:bg-gray-800">
-                          <TableRow>
-                            <TableHead className="text-gray-900 dark:text-gray-100">Data da Venda</TableHead>
-                            <TableHead className="text-center justify-center text-gray-900 dark:text-gray-100">Quantidade</TableHead>
-                            <TableHead className="text-center justify-center text-gray-900 dark:text-gray-100">Valor Unit.</TableHead>
-                            <TableHead className="text-center justify-center text-gray-900 dark:text-gray-100">Total</TableHead>
-                            <TableHead className="text-center justify-center text-gray-900 dark:text-gray-100">Margem</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {vendasDetalhadas.map((venda, index) => (
-                            <TableRow key={index} className="border-gray-200 dark:border-gray-700">
-                              <TableCell className="font-medium text-gray-900 dark:text-gray-100">
-                                {formatDate(venda.data)}
+                      </TableHeader>
+                      <TableBody>
+                        {produtos.map((produto, index) => {
+                          const posicao = index + 1
+                          const margem = produto.valorTotal > 0 ? ((produto.valorTotal - produto.custoTotal) / produto.valorTotal) * 100 : 0
+                          
+                          return (
+                            <TableRow key={`${produto.produto}-${produto.grupo}`} className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                              <TableCell className="py-4">
+                                <Badge 
+                                  variant={getBadgeVariant(posicao)}
+                                  className="font-semibold"
+                                >
+                                  {posicao}
+                                </Badge>
                               </TableCell>
-                              <TableCell className="text-center text-gray-900 dark:text-gray-100">
-                                {venda.quantidade.toFixed(1)}
+                              <TableCell className="py-4">
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex-shrink-0">
+                                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                      <Package className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="font-medium text-gray-900 dark:text-white">
+                                      {produto.produto}
+                                    </div>
+                                  </div>
+                                </div>
                               </TableCell>
-                              <TableCell className="text-center text-gray-900 dark:text-gray-100">
-                                {formatCurrency(venda.valorUnitario)}
+                              <TableCell className="py-4 text-gray-600 dark:text-gray-400">
+                                {produto.grupo}
                               </TableCell>
-                              <TableCell className="text-center font-medium text-green-600 dark:text-green-400">
-                                {formatCurrency(venda.valorTotal)}
+                              <TableCell className="py-4 text-center font-medium text-gray-900 dark:text-gray-100">
+                                {produto.quantidade.toFixed(0)}
                               </TableCell>
-                              <TableCell className="text-center">
-                                <span className={venda.margem >= 50 ? 'text-green-600 dark:text-green-400' : venda.margem >= 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}>
-                                  {formatPercent(venda.margem)}
-                                </span>
+                              <TableCell className="py-4 text-center font-medium text-gray-900 dark:text-gray-100">
+                                {produto.visitas}
+                              </TableCell>
+                              <TableCell className="py-4 text-center font-semibold text-green-600 dark:text-green-400">
+                                {formatCurrency(produto.valorTotal)}
+                              </TableCell>
+                              <TableCell className="py-4 text-center">
+                                <Badge 
+                                  variant="outline"
+                                  className={`font-medium ${
+                                    margem >= 50 
+                                      ? 'text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20' 
+                                      : margem >= 30 
+                                      ? 'text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20'
+                                      : 'text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20'
+                                  }`}
+                                >
+                                  {formatPercent(margem)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="py-4 text-center">
+                                <Badge 
+                                  variant="secondary"
+                                  className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                                >
+                                  <Star className="w-3 h-3 mr-1" />
+                                  {produto.diaDestaque}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="py-4 text-center text-gray-600 dark:text-gray-400">
+                                {formatDate(produto.ultimaVenda)}
                               </TableCell>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    <div className="text-right text-sm text-gray-500 dark:text-gray-400">
-                      {vendasDetalhadas.length} vendas encontradas
-                    </div>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
                   </div>
-                </>
-              )}
-            </DialogContent>
-          </Dialog>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+
         </div>
       </div>
     </div>

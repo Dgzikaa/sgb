@@ -48,8 +48,22 @@ export async function GET(request: NextRequest) {
 
     console.log(`⚡ View materializada retornou ${produtosMaterializados.length} produtos pré-calculados`)
 
+    // Função para calcular dia destaque
+    const calcularDiaDestaque = (vendasPorDia: any[]) => {
+      if (!vendasPorDia || vendasPorDia.length === 0) return 'Sem dados'
+      
+      const diasSemanaLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+      
+      // Encontrar o dia com mais vendas
+      const diaComMaisVendas = vendasPorDia.reduce((max, dia) => 
+        dia.vendas > max.vendas ? dia : max
+      )
+      
+      return diasSemanaLabels[diaComMaisVendas.dia_semana] || 'Sem dados'
+    }
+
     // Processar dados da view materializada
-    let produtosFiltrados = produtosMaterializados
+    let produtosFiltrados = []
 
     // Aplicar filtro de dia da semana se necessário
     if (diaSemana && diaSemana !== 'todos') {
@@ -73,7 +87,8 @@ export async function GET(request: NextRequest) {
             custoTotal: vendaDia.custo,
             visitas: vendaDia.vendas,
             ultimaVenda: produto.ultima_venda,
-            primeiraVenda: produto.primeira_venda
+            primeiraVenda: produto.primeira_venda,
+            diaDestaque: calcularDiaDestaque(vendasPorDia)
           }
         }).filter(p => p !== null)
         .sort((a, b) => b.valorTotal - a.valorTotal)
@@ -89,7 +104,8 @@ export async function GET(request: NextRequest) {
         custoTotal: produto.custo_total,
         visitas: produto.total_vendas,
         ultimaVenda: produto.ultima_venda,
-        primeiraVenda: produto.primeira_venda
+        primeiraVenda: produto.primeira_venda,
+        diaDestaque: calcularDiaDestaque(produto.vendas_por_dia)
       }))
     }
 
