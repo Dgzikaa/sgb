@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
 			break
 		}
 		
-		console.log(`✅ Página ${iterations}: ${data.length} registros retornados`)
+		console.log(`✅ Página ${iterations}: ${data.length} registros retornados (total acumulado: ${offset + data.length})`)
 
 		// Processar todos os dados
 		for (const r of data) {
@@ -234,7 +234,9 @@ export async function GET(request: NextRequest) {
 		}
 
 		console.log(`📊 ESTATÍSTICAS DE PROCESSAMENTO:`)
-		console.log(`   • Telefones processados: ${telefonesProcessados}`)
+		console.log(`   • Registros esperados no banco: ~40.201`)
+		console.log(`   • Registros processados: ${telefonesProcessados}`)
+		console.log(`   • Registros perdidos: ${40201 - telefonesProcessados} (${(((40201 - telefonesProcessados) / 40201) * 100).toFixed(1)}%)`)
 		console.log(`   • Telefones descartados: ${telefonesDescartados}`)
 		console.log(`   • Clientes únicos finais: ${map.size}`)
 		console.log(`   • Taxa de aproveitamento: ${((map.size / telefonesProcessados) * 100).toFixed(1)}%`)
