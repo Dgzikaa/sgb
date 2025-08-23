@@ -104,9 +104,31 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Calcular dia da semana mais frequentado
+    const diasSemanaCount = new Map<number, number>()
+    const diasSemanaLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+    
+    visitasCliente.forEach(registro => {
+      const data = new Date(registro.dt_gerencial)
+      const diaSemana = data.getDay() // 0=domingo, 1=segunda, etc.
+      diasSemanaCount.set(diaSemana, (diasSemanaCount.get(diaSemana) || 0) + 1)
+    })
+
+    // Encontrar o dia mais frequentado
+    let diaDestaque = 'Não definido'
+    let maxVisitas = 0
+    
+    diasSemanaCount.forEach((count, dia) => {
+      if (count > maxVisitas) {
+        maxVisitas = count
+        diaDestaque = diasSemanaLabels[dia]
+      }
+    })
+
     return NextResponse.json({
       visitas,
       total_visitas: visitas.length,
+      dia_destaque: diaDestaque,
       cliente: {
         nome: visitasCliente[0]?.cli_nome || 'Cliente',
         telefone: telefone

@@ -67,6 +67,16 @@ interface VisitaDetalhada {
   total: number
 }
 
+interface DetalhesResponse {
+  visitas: VisitaDetalhada[]
+  total_visitas: number
+  dia_destaque: string
+  cliente: {
+    nome: string
+    telefone: string
+  }
+}
+
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [reservantes, setReservantes] = useState<Reservante[]>([])
@@ -78,6 +88,7 @@ export default function ClientesPage() {
   const [activeTab, setActiveTab] = useState<string>('clientes')
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
   const [visitasDetalhadas, setVisitasDetalhadas] = useState<VisitaDetalhada[]>([])
+  const [diaDestaque, setDiaDestaque] = useState<string>('')
   const [loadingVisitas, setLoadingVisitas] = useState(false)
   const [modalAberto, setModalAberto] = useState(false)
   const { toast } = useToast()
@@ -223,8 +234,9 @@ export default function ClientesPage() {
         throw new Error('Erro ao carregar detalhes das visitas')
       }
       
-      const data = await response.json()
+      const data: DetalhesResponse = await response.json()
       setVisitasDetalhadas(data.visitas || [])
+      setDiaDestaque(data.dia_destaque || 'Não definido')
     } catch (err) {
       toast({
         title: "Erro ao carregar detalhes",
@@ -1166,18 +1178,18 @@ export default function ClientesPage() {
 
             <div className="p-6 overflow-y-auto max-h-[calc(95vh-180px)]">
               {/* Resumo do Cliente */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-5 gap-3 mb-6">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.1 }}
                 >
-                  <Card className="bg-gradient-to-br from-purple-500 to-purple-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-white mb-2">
+                  <Card className="bg-gradient-to-br from-purple-500 to-purple-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-white mb-1">
                         {clienteSelecionado?.total_visitas}
                       </div>
-                      <div className="text-purple-100 font-medium">Total de Visitas</div>
+                      <div className="text-purple-100 text-sm font-medium">Total de Visitas</div>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -1187,12 +1199,12 @@ export default function ClientesPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.2 }}
                 >
-                  <Card className="bg-gradient-to-br from-green-500 to-green-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-white mb-2">
+                  <Card className="bg-gradient-to-br from-green-500 to-green-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-xl font-bold text-white mb-1">
                         {formatCurrency(clienteSelecionado?.valor_total_gasto || 0)}
                       </div>
-                      <div className="text-green-100 font-medium">Total Gasto</div>
+                      <div className="text-green-100 text-sm font-medium">Total Gasto</div>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -1202,12 +1214,12 @@ export default function ClientesPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.3 }}
                 >
-                  <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-white mb-2">
+                  <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-xl font-bold text-white mb-1">
                         {formatCurrency(clienteSelecionado?.ticket_medio_geral || 0)}
                       </div>
-                      <div className="text-orange-100 font-medium">Ticket Médio</div>
+                      <div className="text-orange-100 text-sm font-medium">Ticket Médio</div>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -1217,12 +1229,27 @@ export default function ClientesPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.4 }}
                 >
-                  <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-white mb-2">
+                  <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-xl font-bold text-white mb-1">
                         {clienteSelecionado?.ultima_visita ? formatDate(clienteSelecionado.ultima_visita) : 'N/A'}
                       </div>
-                      <div className="text-blue-100 font-medium">Última Visita</div>
+                      <div className="text-blue-100 text-sm font-medium">Última Visita</div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.5 }}
+                >
+                  <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-xl font-bold text-white mb-1">
+                        {diaDestaque}
+                      </div>
+                      <div className="text-indigo-100 text-sm font-medium">Dia Destaque</div>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -1250,7 +1277,7 @@ export default function ClientesPage() {
                       <Table>
                         <TableHeader className="bg-slate-50 dark:bg-slate-800/50 sticky top-0">
                           <TableRow className="border-b border-slate-200 dark:border-slate-700">
-                            <TableHead className="text-slate-900 dark:text-white font-semibold">
+                            <TableHead className="text-slate-900 dark:text-white font-semibold text-left">
                               <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4" />
                                 Data da Visita
@@ -1323,14 +1350,17 @@ export default function ClientesPage() {
                 {clienteSelecionado?.telefone && (
                   <Button
                     onClick={() => handleWhatsAppClick(clienteSelecionado.nome_principal, clienteSelecionado.telefone)}
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-3 rounded-xl font-medium"
+                    size="lg"
                   >
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Enviar WhatsApp
+                    <div className="flex items-center gap-3">
+                      <MessageCircle className="h-5 w-5" />
+                      <span>Enviar WhatsApp</span>
+                    </div>
                   </Button>
                 )}
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 {visitasDetalhadas.length} visita{visitasDetalhadas.length !== 1 ? 's' : ''} encontrada{visitasDetalhadas.length !== 1 ? 's' : ''}
               </div>
             </div>
