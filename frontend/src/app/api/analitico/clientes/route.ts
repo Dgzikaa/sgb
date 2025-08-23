@@ -38,14 +38,17 @@ export async function GET(request: NextRequest) {
 
 	// Removido teste - implementando paginação SQL direta
 
-	// IMPLEMENTAÇÃO DE PAGINAÇÃO SQL DIRETA
+	// IMPLEMENTAÇÃO DE PAGINAÇÃO CURSOR-BASED (mais confiável)
 	const pageSize = 1000
-	let offset = 0
+	let lastId = 0 // Cursor baseado no ID
 	let totalLinhas = 0
 	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
 	const MAX_ITERATIONS = 100 // Aumentar para processar todas as páginas
 	let iterations = 0
+	let lauraCount = 0 // DEBUG: Contador específico da Laura
+	let telefonesProcessados = 0 // DEBUG: Total de telefones processados
+	let telefonesDescartados = 0 // DEBUG: Telefones descartados por filtros
 	
 	const startTime = Date.now()
 	const MAX_PROCESSING_TIME = 20000 // 20 segundos máximo para processar todas as páginas
@@ -59,16 +62,17 @@ export async function GET(request: NextRequest) {
 			break
 		}
 		
-		console.log(`📄 Página ${iterations}: Buscando ${pageSize} registros (offset: ${offset})`)
+		console.log(`📄 Página ${iterations}: Buscando ${pageSize} registros (cursor: id > ${lastId})`)
 		
-		// Query Supabase com paginação
+		// Query Supabase com cursor-based pagination (100% confiável)
 		let query = supabase
 			.from('contahub_periodo')
-			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
+			.select('id, cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
 			.not('cli_fone', 'is', null)
 			.neq('cli_fone', '')
-			.order('dt_gerencial', { ascending: false })
-			.range(offset, offset + pageSize - 1)
+			.gt('id', lastId)
+			.order('id', { ascending: true })
+			.limit(pageSize)
 		
 		// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
 		const finalBarId = barIdFilter || 3
@@ -113,15 +117,18 @@ export async function GET(request: NextRequest) {
 				totalLinhas++
 
 				const rawFone = (r.cli_fone || '').toString().trim()
-				if (!rawFone) continue
+				if (!rawFone) {
+					telefonesDescartados++
+					continue
+				}
+				telefonesProcessados++
 				
 				// Normalizar telefone: remover todos os caracteres não numéricos
 				let fone = rawFone.replace(/\D/g, '')
-				if (!fone) continue
-				
-				// DEBUG: Rastrear Laura Galvão especificamente (telefone 61992053013)
-				if (fone === '61992053013') {
-					console.log(`🔍 LAURA DEBUG: ${nome} | Fone: ${rawFone} → ${fone} | Data: ${r.dt_gerencial} | Couvert: R$ ${vrCouvert} | Pagamentos: R$ ${vrPagamentos}`)
+				if (!fone) {
+					telefonesDescartados++
+					console.log(`❌ TELEFONE DESCARTADO após normalização: "${rawFone}" → "${fone}"`)
+					continue
 				}
 				
 				// Padronizar: se tem 11 dígitos e começa com DDD, manter
@@ -130,10 +137,17 @@ export async function GET(request: NextRequest) {
 					// Adicionar 9 após o DDD para celulares antigos
 					fone = fone.substring(0, 2) + '9' + fone.substring(2)
 				}
+				
 				const nome = (r.cli_nome || '').toString().trim() || 'Sem nome'
 				const ultima = r.dt_gerencial as string
 				const vrCouvert = parseFloat(r.vr_couvert || '0') || 0
 				const vrPagamentos = parseFloat(r.vr_pagamentos || '0') || 0
+				
+				// DEBUG: Rastrear Laura Galvão especificamente (telefone 61992053013)
+				if (fone === '61992053013') {
+					lauraCount++
+					console.log(`🔍 LAURA DEBUG ${lauraCount}: ${nome} | Fone: ${rawFone} → ${fone} | Data: ${r.dt_gerencial} | Couvert: R$ ${vrCouvert} | Pagamentos: R$ ${vrPagamentos}`)
+				}
 				const vrConsumo = vrPagamentos - vrCouvert
 
 				const prev = map.get(fone)
@@ -170,8 +184,13 @@ export async function GET(request: NextRequest) {
 				}
 			}
 
-					if (data.length < pageSize) break
-		offset += pageSize
+					// Atualizar cursor para próxima página
+		if (data.length > 0) {
+			lastId = Math.max(...data.map(r => r.id))
+			console.log(`📍 Cursor atualizado para: ${lastId}`)
+		}
+		
+		if (data.length < pageSize) break
 		
 		// Pequeno delay para evitar sobrecarga do Supabase
 		if (iterations < MAX_ITERATIONS) {
@@ -212,12 +231,20 @@ export async function GET(request: NextRequest) {
 
 
 		// DEBUG: Verificar Laura no resultado final (por telefone)
+		console.log(`🔍 LAURA PROCESSAMENTO: ${lauraCount} registros encontrados durante paginação`)
 		const lauraFinal = Array.from(map.values()).find(c => c.fone === '61992053013')
 		if (lauraFinal) {
 			console.log(`🔍 LAURA FINAL: ${lauraFinal.nome} | Fone: ${lauraFinal.fone} | Visitas: ${lauraFinal.visitas} | Total Gasto: R$ ${lauraFinal.totalGasto.toFixed(2)}`)
+			console.log(`❌ PROBLEMA: Laura deveria ter ${lauraCount} visitas, mas tem apenas ${lauraFinal.visitas}`)
 		} else {
 			console.log(`❌ LAURA NÃO ENCONTRADA no resultado final com telefone 61992053013`)
 		}
+
+		console.log(`📊 ESTATÍSTICAS DE PROCESSAMENTO:`)
+		console.log(`   • Telefones processados: ${telefonesProcessados}`)
+		console.log(`   • Telefones descartados: ${telefonesDescartados}`)
+		console.log(`   • Clientes únicos finais: ${map.size}`)
+		console.log(`   • Taxa de aproveitamento: ${((map.size / telefonesProcessados) * 100).toFixed(1)}%`)
 
 		console.log(`✅ API Clientes: ${clientes.length} no ranking • ${map.size} únicos • ${totalLinhas} visitas${diaSemanaFiltro && diaSemanaFiltro !== 'todos' ? ` • Filtrado por ${diaSemanaFiltro === '0' ? 'Domingo' : diaSemanaFiltro === '1' ? 'Segunda' : diaSemanaFiltro === '2' ? 'Terça' : diaSemanaFiltro === '3' ? 'Quarta' : diaSemanaFiltro === '4' ? 'Quinta' : diaSemanaFiltro === '5' ? 'Sexta' : 'Sábado'}` : ''}`)
 
