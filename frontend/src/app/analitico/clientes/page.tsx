@@ -314,7 +314,9 @@ export default function ClientesPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
+    // Usar UTC para evitar problemas de timezone
+    const date = new Date(dateString + 'T12:00:00Z')
+    return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' })
   }
 
   const exportarCSV = () => {

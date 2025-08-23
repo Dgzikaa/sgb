@@ -97,13 +97,10 @@ export async function GET(request: NextRequest) {
       const diaSemana = data.getUTCDay()
       const ultimaTercaOperacional = new Date('2025-04-15T12:00:00Z')
       
-      console.log(`🔍 FILTRO DEBUG: ${registro.dt_gerencial} → Dia ${diaSemana} (${['Dom','Seg','Ter','Qua','Qui','Sex','Sab'][diaSemana]})`)
-      
-      // Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
-      if (diaSemana === 2 && data > ultimaTercaOperacional) {
-        console.log(`🚫 Removendo visita inválida de terça-feira: ${registro.dt_gerencial}`)
-        return false
-      }
+              // Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
+        if (diaSemana === 2 && data > ultimaTercaOperacional) {
+          return false
+        }
       
       return true
     })
@@ -113,8 +110,10 @@ export async function GET(request: NextRequest) {
       const pagamentos = parseFloat(registro.vr_pagamentos || '0') || 0
       const consumo = pagamentos - couvert
 
+
+
       return {
-        data: registro.dt_gerencial,
+        data: registro.dt_gerencial, // Manter exatamente como vem do banco
         couvert,
         consumo,
         total: pagamentos
@@ -134,10 +133,7 @@ export async function GET(request: NextRequest) {
       const data = new Date(registro.dt_gerencial + 'T12:00:00Z') // Meio-dia UTC
       const diaSemana = data.getUTCDay() // 0=domingo, 1=segunda, etc.
       
-      console.log(`🔍 DEBUG DATA: ${registro.dt_gerencial} → ${data.toISOString()} → Dia ${diaSemana} (${diasSemanaLabels[diaSemana]})`)
-      
-      diasSemanaCount.set(diaSemana, (diasSemanaCount.get(diaSemana) || 0) + 1)
-      console.log(`📅 ${diasSemanaLabels[diaSemana]} (${registro.dt_gerencial}): ${diasSemanaCount.get(diaSemana)} visitas`)
+              diasSemanaCount.set(diaSemana, (diasSemanaCount.get(diaSemana) || 0) + 1)
     })
 
     // Encontrar o dia mais frequentado (excluindo terças inválidas)
