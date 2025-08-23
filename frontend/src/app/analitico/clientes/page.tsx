@@ -1146,72 +1146,86 @@ export default function ClientesPage() {
 
         {/* Modal de Detalhes do Cliente */}
         <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-          <DialogContent className="max-w-4xl max-h-[90vh] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 overflow-hidden">
-            <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
-                    <Users className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
-                      {clienteSelecionado?.nome_principal}
-                    </DialogTitle>
-                    <DialogDescription className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      {clienteSelecionado?.telefone || 'Sem telefone'}
-                    </DialogDescription>
-                  </div>
+          <DialogContent className="max-w-5xl max-h-[95vh] bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 overflow-hidden p-0">
+            <DialogHeader className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                  <Users className="h-7 w-7 text-white" />
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setModalAberto(false)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
+                <div className="flex-1">
+                  <DialogTitle className="text-2xl font-bold text-white mb-1">
+                    {clienteSelecionado?.nome_principal}
+                  </DialogTitle>
+                  <DialogDescription className="text-slate-200 flex items-center gap-2 text-base">
+                    <Phone className="h-4 w-4" />
+                    {clienteSelecionado?.telefone || 'Sem telefone cadastrado'}
+                  </DialogDescription>
+                </div>
               </div>
             </DialogHeader>
 
-            <div className="py-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+            <div className="p-6 overflow-y-auto max-h-[calc(95vh-180px)]">
               {/* Resumo do Cliente */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                      {clienteSelecionado?.total_visitas}
-                    </div>
-                    <div className="text-sm text-purple-600 dark:text-purple-400">Total de Visitas</div>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  <Card className="bg-gradient-to-br from-purple-500 to-purple-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-white mb-2">
+                        {clienteSelecionado?.total_visitas}
+                      </div>
+                      <div className="text-purple-100 font-medium">Total de Visitas</div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
 
-                <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">
-                      {formatCurrency(clienteSelecionado?.valor_total_gasto || 0)}
-                    </div>
-                    <div className="text-sm text-green-600 dark:text-green-400">Total Gasto</div>
-                  </CardContent>
-                </Card>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <Card className="bg-gradient-to-br from-green-500 to-green-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-white mb-2">
+                        {formatCurrency(clienteSelecionado?.valor_total_gasto || 0)}
+                      </div>
+                      <div className="text-green-100 font-medium">Total Gasto</div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
 
-                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-                      {formatCurrency(clienteSelecionado?.ticket_medio_geral || 0)}
-                    </div>
-                    <div className="text-sm text-orange-600 dark:text-orange-400">Ticket Médio</div>
-                  </CardContent>
-                </Card>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
+                  <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-white mb-2">
+                        {formatCurrency(clienteSelecionado?.ticket_medio_geral || 0)}
+                      </div>
+                      <div className="text-orange-100 font-medium">Ticket Médio</div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
 
-                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                      {clienteSelecionado?.ultima_visita ? formatDate(clienteSelecionado.ultima_visita) : 'N/A'}
-                    </div>
-                    <div className="text-sm text-blue-600 dark:text-blue-400">Última Visita</div>
-                  </CardContent>
-                </Card>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
+                >
+                  <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-3xl font-bold text-white mb-2">
+                        {clienteSelecionado?.ultima_visita ? formatDate(clienteSelecionado.ultima_visita) : 'N/A'}
+                      </div>
+                      <div className="text-blue-100 font-medium">Última Visita</div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </div>
 
               {/* Histórico de Visitas */}
@@ -1304,25 +1318,21 @@ export default function ClientesPage() {
             </div>
 
             {/* Footer do Modal */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-between items-center">
-              <div className="flex gap-2">
+            <div className="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-6 flex justify-between items-center">
+              <div className="flex gap-3">
                 {clienteSelecionado?.telefone && (
                   <Button
                     onClick={() => handleWhatsAppClick(clienteSelecionado.nome_principal, clienteSelecionado.telefone)}
-                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                    className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Enviar WhatsApp
                   </Button>
                 )}
               </div>
-              <Button
-                variant="outline"
-                onClick={() => setModalAberto(false)}
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-              >
-                Fechar
-              </Button>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {visitasDetalhadas.length} visita{visitasDetalhadas.length !== 1 ? 's' : ''} encontrada{visitasDetalhadas.length !== 1 ? 's' : ''}
+              </div>
             </div>
           </DialogContent>
         </Dialog>

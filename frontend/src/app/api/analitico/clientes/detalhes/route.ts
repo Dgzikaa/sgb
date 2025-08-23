@@ -35,41 +35,60 @@ export async function GET(request: NextRequest) {
     // Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
     const finalBarId = barIdFilter || 3
 
-    // Normalizar telefone para busca
+    // Normalizar telefone para busca e gerar variações
     let telefoneNormalizado = telefone.replace(/\D/g, '')
     
-    // Padronizar: se tem 10 dígitos, adicionar 9 após o DDD (celular antigo)
-    if (telefoneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(telefoneNormalizado.substring(0, 2))) {
-      // Adicionar 9 após o DDD para celulares antigos
-      telefoneNormalizado = telefoneNormalizado.substring(0, 2) + '9' + telefoneNormalizado.substring(2)
+    // Gerar todas as variações possíveis do telefone para busca
+    const variacoesTelefone = new Set<string>()
+    
+    // Adicionar o telefone original
+    variacoesTelefone.add(telefone)
+    variacoesTelefone.add(telefoneNormalizado)
+    
+    // Se tem 11 dígitos, criar versão sem o 9
+    if (telefoneNormalizado.length === 11 && telefoneNormalizado.charAt(2) === '9') {
+      const semNove = telefoneNormalizado.substring(0, 2) + telefoneNormalizado.substring(3)
+      variacoesTelefone.add(semNove)
     }
+    
+    // Se tem 10 dígitos, criar versão com o 9
+    if (telefoneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(telefoneNormalizado.substring(0, 2))) {
+      const comNove = telefoneNormalizado.substring(0, 2) + '9' + telefoneNormalizado.substring(2)
+      variacoesTelefone.add(comNove)
+    }
+    
+    // Adicionar versões com formatação comum
+    if (telefoneNormalizado.length === 11) {
+      const formatado = `${telefoneNormalizado.substring(0, 2)}-${telefoneNormalizado.substring(2)}`
+      variacoesTelefone.add(formatado)
+      const formatado2 = `(${telefoneNormalizado.substring(0, 2)}) ${telefoneNormalizado.substring(2, 7)}-${telefoneNormalizado.substring(7)}`
+      variacoesTelefone.add(formatado2)
+    }
+    
+    const listaVariacoes = Array.from(variacoesTelefone)
+    console.log(`🔍 Buscando visitas para telefone: ${telefone}`)
+    console.log(`📱 Variações de busca: ${listaVariacoes.join(', ')}`)
 
-    // Buscar todas as visitas do cliente
-    const { data, error } = await supabase
+    // Buscar diretamente por todas as variações do telefone usando OR
+    let query = supabase
       .from('contahub_periodo')
       .select('cli_nome, cli_fone, dt_gerencial, vr_couvert, vr_pagamentos')
       .eq('bar_id', finalBarId)
-      .not('cli_fone', 'is', null)
-      .neq('cli_fone', '')
       .order('dt_gerencial', { ascending: false })
+
+    // Aplicar filtro OR para todas as variações do telefone
+    const orConditions = listaVariacoes.map(variacao => `cli_fone.eq.${variacao}`).join(',')
+    query = query.or(orConditions)
+
+    const { data, error } = await query
 
     if (error) {
       console.error('❌ Erro na consulta SQL:', error)
       return NextResponse.json({ error: 'Erro ao buscar dados' }, { status: 500 })
     }
 
-    // Filtrar registros que correspondem ao telefone normalizado
-    const visitasCliente = data.filter(registro => {
-      const foneRegistro = (registro.cli_fone || '').toString().replace(/\D/g, '')
-      
-      // Normalizar telefone do registro da mesma forma
-      let foneNormalizado = foneRegistro
-      if (foneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(foneNormalizado.substring(0, 2))) {
-        foneNormalizado = foneNormalizado.substring(0, 2) + '9' + foneNormalizado.substring(2)
-      }
-      
-      return foneNormalizado === telefoneNormalizado
-    })
+    const visitasCliente = data || []
+    console.log(`✅ Total de visitas encontradas: ${visitasCliente.length}`)
 
     // Transformar dados para o formato esperado pelo frontend
     const visitas = visitasCliente.map(registro => {
