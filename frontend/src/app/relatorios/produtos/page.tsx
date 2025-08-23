@@ -50,6 +50,7 @@ export default function ProdutosPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
+  const [activeTab, setActiveTab] = useState<string>('produtos')
   
   const { selectedBar } = useBar()
   const { toast } = useToast()
@@ -141,7 +142,8 @@ export default function ProdutosPage() {
         'Última Venda': formatDate(produto.ultimaVenda),
         'Primeira Venda': formatDate(produto.primeiraVenda)
       }))
-      nomeArquivo = `produtos_${diaSemanaFiltro !== 'todos' ? `dia_${diaSemanaFiltro}_` : ''}${new Date().toISOString().split('T')[0]}.csv`
+      const diaLabel = diasSemana.find(d => d.value === diaSemanaFiltro)?.label.replace(/[^a-zA-Z0-9]/g, '_') || 'todos'
+      nomeArquivo = `produtos_${diaSemanaFiltro !== 'todos' ? `${diaLabel}_` : ''}${new Date().toISOString().split('T')[0]}.csv`
 
       const headers = Object.keys(dadosCSV[0])
       const csvContent = [
@@ -180,15 +182,15 @@ export default function ProdutosPage() {
     return "outline"
   }
 
-  const diasSemanaOptions = [
+  const diasSemana = [
     { value: 'todos', label: 'Todos os dias' },
     { value: '0', label: 'Domingo' },
     { value: '1', label: 'Segunda-feira' },
-    { value: '2', label: 'Terça-feira' },
+    { value: '2', label: 'Terça-feira (até 15/04/25)' }, // Dados históricos apenas
     { value: '3', label: 'Quarta-feira' },
     { value: '4', label: 'Quinta-feira' },
     { value: '5', label: 'Sexta-feira' },
-    { value: '6', label: 'Sábado' }
+    { value: '6', label: 'Sábado' },
   ]
 
   if (loading) {
@@ -252,7 +254,7 @@ export default function ProdutosPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        <div className="card-dark p-6">
+        <div className="space-y-6">
           <PageHeader
             title="Produtos"
             description="Análise detalhada dos produtos mais vendidos"
@@ -260,15 +262,15 @@ export default function ProdutosPage() {
           />
 
           {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Select value={diaSemanaFiltro} onValueChange={setDiaSemanaFiltro}>
-              <SelectTrigger className="w-full sm:w-[200px] bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
-                <SelectValue placeholder="Filtrar por dia" />
+              <SelectTrigger className="w-full sm:w-[280px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <SelectValue placeholder="Filtrar por dia da semana" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                {diasSemanaOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="text-gray-900 dark:text-gray-100">
-                    {option.label}
+                {diasSemana.map((dia) => (
+                  <SelectItem key={dia.value} value={dia.value} className="text-gray-900 dark:text-gray-100">
+                    {dia.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -277,7 +279,7 @@ export default function ProdutosPage() {
             <Button 
               onClick={exportarCSV} 
               variant="outline" 
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
               disabled={produtos.length === 0}
             >
               <Download className="h-4 w-4" />
@@ -381,19 +383,22 @@ export default function ProdutosPage() {
             </div>
           )}
 
-          {/* Tabela de Produtos */}
-          <Tabs defaultValue="produtos" className="w-full">
-            <TabsList className="grid w-full grid-cols-1 bg-gray-100 dark:bg-gray-800">
+          {/* Tabs de Produtos */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <TabsTrigger 
                 value="produtos" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white rounded-md transition-all duration-200"
               >
                 <Package className="w-4 h-4 mr-2" />
                 Top 100 Produtos por Vendas
+                <Badge variant="secondary" className="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                  {produtos.length}
+                </Badge>
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="produtos" className="mt-6">
+            <TabsContent value="produtos" className="mt-6 space-y-6">
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
                 <CardHeader className="border-b border-gray-200 dark:border-gray-700">
                   <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -496,8 +501,6 @@ export default function ProdutosPage() {
               </Card>
             </TabsContent>
           </Tabs>
-
-
         </div>
       </div>
     </div>
