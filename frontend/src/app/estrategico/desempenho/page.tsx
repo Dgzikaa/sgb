@@ -158,11 +158,6 @@ export default function DesempenhoPage() {
       const data = await response.json();
       setDadosSemanas(data.semanas || []);
       setTotaisAnuais(data.totais_mensais || null);
-
-      // Carregar dados mensais se estiver na aba mensal
-      if (activeTab === 'mensal') {
-        await carregarDadosMensais();
-      }
       
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -174,9 +169,12 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [anoAtual, selectedBar, user, activeTab]);
+  }, [anoAtual, selectedBar, user, toast]);
 
   const navegarAno = (direcao: 'anterior' | 'proximo') => {
+    // Limpar dados mensais ao mudar de ano
+    setDadosMensais([]);
+    
     if (direcao === 'anterior') {
       setAnoAtual(prev => prev - 1);
     } else {
@@ -213,12 +211,12 @@ export default function DesempenhoPage() {
     }
   }, [selectedBar, user, anoAtual]);
 
-  // Carregar dados mensais quando mudar para aba mensal
+  // Carregar dados mensais quando mudar para aba mensal ou ano
   useEffect(() => {
-    if (activeTab === 'mensal' && selectedBar && user) {
+    if (activeTab === 'mensal' && selectedBar && user && dadosMensais.length === 0) {
       carregarDadosMensais();
     }
-  }, [activeTab, selectedBar, user, carregarDadosMensais]);
+  }, [activeTab, selectedBar, user, anoAtual, dadosMensais.length, carregarDadosMensais]);
 
   if (loading) {
     return (
