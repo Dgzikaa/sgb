@@ -111,6 +111,12 @@ export default function DesempenhoPage() {
       }
     }
 
+    // Ordenar por ano e mês decrescente (mais recente primeiro)
+    dadosMensaisTemp.sort((a, b) => {
+      if (a.ano !== b.ano) return b.ano - a.ano;
+      return b.mes - a.mes;
+    });
+    
     setDadosMensais(dadosMensaisTemp);
   }, [selectedBar, user, mesesNomes]);
 
