@@ -284,9 +284,24 @@ export async function GET(request: NextRequest) {
     const hoje = new Date();
     const semanaAtual = getWeekNumber(hoje);
 
+    // Debug: Log das semanas disponíveis
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🗓️ Semana atual calculada: ${semanaAtual}`);
+      console.log(`📋 Semanas disponíveis no mapa:`, Array.from(semanaMap.keys()).sort((a, b) => a - b));
+      console.log(`🔍 Filtro aplicado: semana >= 5 && semana <= ${semanaAtual}`);
+    }
+
     // Converter para array e calcular métricas (filtrar semanas >= 5 e <= semana atual)
+    // CORREÇÃO: Remover filtro restritivo que estava eliminando todas as semanas
     let semanasConsolidadas = Array.from(semanaMap.values())
-      .filter(semana => semana.semana >= 5 && semana.semana <= semanaAtual)
+      .filter(semana => {
+        // Filtro mais flexível: aceitar todas as semanas que têm eventos
+        const passa = semana.eventos_count > 0;
+        if (process.env.NODE_ENV === 'development' && !passa) {
+          console.log(`❌ Semana ${semana.semana} filtrada (sem eventos)`);
+        }
+        return passa;
+      })
       .map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
       
