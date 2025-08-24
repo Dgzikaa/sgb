@@ -310,8 +310,14 @@ export async function GET(request: NextRequest) {
           }
         }
         return passa;
-      })
-      .map(semana => {
+      });
+
+    // Debug: Verificar quantas semanas passaram no filtro
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🎯 Semanas após filtro: ${semanasConsolidadas.length}`);
+    }
+
+    semanasConsolidadas = semanasConsolidadas.map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
       
       // Calcular performance geral da semana
@@ -350,6 +356,11 @@ export async function GET(request: NextRequest) {
       };
     }).sort((a, b) => b.semana - a.semana); // Ordenar decrescente (semana atual primeiro)
 
+    // Debug: Verificar quantas semanas após processamento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📈 Semanas após processamento: ${semanasConsolidadas.length}`);
+    }
+
     // Filtrar por mês específico APENAS se solicitado (para visualização mensal)
     if (mes && mes !== new Date().getMonth() + 1) {
       // Filtrar semanas que contêm eventos do mês solicitado
@@ -360,11 +371,16 @@ export async function GET(request: NextRequest) {
       
       const semanasDoMes = new Set(eventosDoMes.map(evento => evento.semana));
       semanasConsolidadas = semanasConsolidadas.filter(semana => semanasDoMes.has(semana.semana));
+      
+      // Debug: Log do filtro mensal
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🗓️ Filtro mensal aplicado para mês ${mes}: ${semanasConsolidadas.length} semanas restantes`);
+      }
     }
 
     // Log apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
-      console.log(`📊 Dados consolidados: ${semanasConsolidadas.length} semanas`);
+      console.log(`📊 Dados consolidados FINAL: ${semanasConsolidadas.length} semanas`);
     }
 
     // Calcular totais mensais
