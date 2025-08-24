@@ -291,14 +291,23 @@ export async function GET(request: NextRequest) {
       console.log(`🔍 Filtro aplicado: semana.eventos_count > 0 (semanas com eventos)`);
     }
 
+    // Debug: Verificar conteúdo do mapa de semanas
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔍 Primeiras 3 semanas do mapa:`, Array.from(semanaMap.values()).slice(0, 3));
+    }
+
     // Converter para array e calcular métricas (filtrar semanas >= 5 e <= semana atual)
     // CORREÇÃO: Remover filtro restritivo que estava eliminando todas as semanas
     let semanasConsolidadas = Array.from(semanaMap.values())
       .filter(semana => {
         // Filtro mais flexível: aceitar todas as semanas que têm eventos
         const passa = semana.eventos_count > 0;
-        if (process.env.NODE_ENV === 'development' && !passa) {
-          console.log(`❌ Semana ${semana.semana} filtrada (sem eventos)`);
+        if (process.env.NODE_ENV === 'development') {
+          if (!passa) {
+            console.log(`❌ Semana ${semana.semana} filtrada (eventos_count: ${semana.eventos_count})`);
+          } else {
+            console.log(`✅ Semana ${semana.semana} aceita (eventos_count: ${semana.eventos_count})`);
+          }
         }
         return passa;
       })
