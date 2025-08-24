@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateUser } from '@/middleware/auth';
-import { getWeekOfYear, parseISO, format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 export const dynamic = 'force-dynamic'
 
@@ -10,10 +8,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-// Cache em memória para dados de desempenho
-const performanceCache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos em millisegundos
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,18 +26,6 @@ export async function GET(request: NextRequest) {
     const mesParam = searchParams.get('mes');
     const mes = mesParam ? parseInt(mesParam) : null;
     const ano = parseInt(searchParams.get('ano') || new Date().getFullYear().toString());
-
-    // Limpar cache temporariamente para debug
-    const cacheKey = `desempenho-${user.bar_id}-${mes}-${ano}`;
-    performanceCache.delete(cacheKey); // Forçar busca nova
-    
-    // const cached = performanceCache.get(cacheKey);
-    // if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
-    //   if (process.env.NODE_ENV === 'development') {
-    //     console.log('📦 Dados retornados do cache');
-    //   }
-    //   return NextResponse.json(cached.data);
-    // }
 
     // Log apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
@@ -107,6 +89,19 @@ export async function GET(request: NextRequest) {
       return allData;
     };
 
+    // Buscar dados do Yuzer da tabela original (com paginação)
+    const yuzerData = await fetchAllData('yuzer_pagamento', 'data_evento, valor_liquido', 'data_evento');
+    // Logs apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Yuzer: ${yuzerData.length} registros encontrados`);
+    }
+
+    // Buscar dados do Sympla das tabelas de resumo (com paginação)
+    const symplaData = await fetchAllData('sympla_resumo', 'data_evento, total_liquido', 'data_evento');
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Sympla: ${symplaData.length} registros encontrados`);
+    }
+
     // Função para buscar dados do ContaHub excluindo 'Conta Assinada'
     const fetchContaHubData = async () => {
       let allData: any[] = [];
@@ -140,19 +135,16 @@ export async function GET(request: NextRequest) {
       return allData;
     };
 
-    // Buscar dados sequencialmente para garantir consistência
-    const yuzerData = await fetchAllData('yuzer_pagamento', 'data_evento, valor_liquido', 'data_evento');
-    const symplaData = await fetchAllData('sympla_resumo', 'data_evento, total_liquido', 'data_evento');
+    // Buscar dados do ContaHub excluindo 'Conta Assinada' (com paginação)
     const contahubData = await fetchContaHubData();
-
     // Logs detalhados apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
-      console.log(`📊 Yuzer: ${yuzerData.length} registros encontrados`);
-      console.log('🔍 Debug Yuzer - Primeiros 5 registros:', yuzerData.slice(0, 5));
-      console.log(`📊 Sympla: ${symplaData.length} registros encontrados`);
-      console.log('🔍 Debug Sympla - Primeiros 5 registros:', symplaData.slice(0, 5));
       console.log(`📊 ContaHub: ${contahubData.length} registros encontrados (excluindo Conta Assinada)`);
+      
+      // Debug: Log dos primeiros registros para verificar se o filtro está funcionando
       console.log('🔍 Debug ContaHub - Primeiros 5 registros:', contahubData.slice(0, 5));
+      console.log('🔍 Debug Yuzer - Primeiros 5 registros:', yuzerData.slice(0, 5));
+      console.log('🔍 Debug Sympla - Primeiros 5 registros:', symplaData.slice(0, 5));
     }
 
     // Criar mapas para facilitar a busca
@@ -374,8 +366,11 @@ export async function GET(request: NextRequest) {
       console.log(`🔍 Parâmetros recebidos - mes: ${mes}, ano: ${ano}, mesAtual: ${new Date().getMonth() + 1}`);
     }
 
-    // CORREÇÃO: Aplicar filtro mensal SEMPRE quando mes é especificado
-    if (mes !== null && mes !== undefined) {
+    // CORREÇÃO: Só aplicar filtro mensal quando mes é especificamente solicitado
+    // Se não há parâmetro mes, é visualização semanal (mostrar todas as semanas)
+    const isVisualizacaoMensal = mes !== null && mes !== undefined;
+    
+    if (isVisualizacaoMensal) {
       // Filtrar semanas que contêm eventos do mês solicitado
       const eventosDoMes = eventos.filter(evento => {
         const dataEvento = new Date(evento.data_evento);
@@ -392,19 +387,14 @@ export async function GET(request: NextRequest) {
         console.log(`🔢 Semanas do mês: [${Array.from(semanasDoMes).sort((a, b) => a - b).join(', ')}]`);
       }
     } else {
-      // Visualização anual - ordenar por semana decrescente (mais recente primeiro)
       if (process.env.NODE_ENV === 'development') {
-        console.log(`📊 Visualização anual - sem filtro mensal aplicado`);
+        console.log(`📊 Visualização semanal - sem filtro mensal aplicado`);
       }
     }
-
-    // Ordenar semanas em ordem decrescente (mais recente primeiro)
-    semanasConsolidadas.sort((a, b) => b.semana - a.semana);
 
     // Log apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
       console.log(`📊 Dados consolidados FINAL: ${semanasConsolidadas.length} semanas`);
-      console.log(`🔢 Ordem das semanas: [${semanasConsolidadas.map(s => s.semana).join(', ')}]`);
     }
 
     // Calcular totais mensais
@@ -421,7 +411,7 @@ export async function GET(request: NextRequest) {
     const performanceMediaMensal = semanasConsolidadas.length > 0 ? 
       totaisMensais.performance_media / semanasConsolidadas.length : 0;
 
-    const responseData = {
+    return NextResponse.json({
       success: true,
       mes: mes,
       ano: ano,
@@ -434,15 +424,7 @@ export async function GET(request: NextRequest) {
         performance_media: Math.round(performanceMediaMensal * 100) / 100,
         eventos_total: totaisMensais.eventos_total
       }
-    };
-
-    // Salvar no cache
-    performanceCache.set(cacheKey, {
-      data: responseData,
-      timestamp: Date.now()
     });
-
-    return NextResponse.json(responseData);
 
   } catch (error) {
     console.error('❌ Erro na API de desempenho:', error);
