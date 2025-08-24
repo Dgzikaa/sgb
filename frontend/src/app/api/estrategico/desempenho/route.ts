@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const mes = parseInt(searchParams.get('mes') || (new Date().getMonth() + 1).toString());
+    const mesParam = searchParams.get('mes');
+    const mes = mesParam ? parseInt(mesParam) : null;
     const ano = parseInt(searchParams.get('ano') || new Date().getFullYear().toString());
 
     // Log apenas em desenvolvimento
@@ -296,15 +297,14 @@ export async function GET(request: NextRequest) {
       console.log(`🔍 Primeiras 3 semanas do mapa:`, Array.from(semanaMap.values()).slice(0, 3));
     }
 
-    // Converter para array e calcular métricas (filtrar semanas >= 5 e <= semana atual)
-    // CORREÇÃO: Remover filtro restritivo que estava eliminando todas as semanas
+    // Converter para array e calcular métricas (mostrar desde semana 6)
     let semanasConsolidadas = Array.from(semanaMap.values())
       .filter(semana => {
-        // Filtro mais flexível: aceitar todas as semanas que têm eventos
-        const passa = semana.eventos_count > 0;
+        // Mostrar semanas >= 6 que têm eventos
+        const passa = semana.eventos_count > 0 && semana.semana >= 6;
         if (process.env.NODE_ENV === 'development') {
           if (!passa) {
-            console.log(`❌ Semana ${semana.semana} filtrada (eventos_count: ${semana.eventos_count})`);
+            console.log(`❌ Semana ${semana.semana} filtrada (eventos_count: ${semana.eventos_count}, semana < 6: ${semana.semana < 6})`);
           } else {
             console.log(`✅ Semana ${semana.semana} aceita (eventos_count: ${semana.eventos_count})`);
           }
