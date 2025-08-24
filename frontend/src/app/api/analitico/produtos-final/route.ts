@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Processar dados da view materializada
-    let produtosFiltrados = []
+    let produtosFiltrados: any[] = []
 
     // Aplicar filtro de dia da semana se necessário
     if (diaSemana && diaSemana !== 'todos') {
@@ -113,16 +113,16 @@ export async function GET(request: NextRequest) {
 
     // Aplicar filtro de grupo se necessário
     if (grupo && grupo !== 'todos') {
-      produtosFiltrados = produtosFiltrados.filter(produto => 
+      produtosFiltrados = produtosFiltrados.filter((produto: any) => 
         produto.grupo.toLowerCase().includes(grupo.toLowerCase())
       )
     }
 
     // Calcular estatísticas
     const totalProdutos = produtosFiltrados.length
-    const totalVendas = produtosFiltrados.reduce((sum, p) => sum + p.valorTotal, 0)
-    const totalQuantidade = produtosFiltrados.reduce((sum, p) => sum + p.quantidade, 0)
-    const totalCusto = produtosFiltrados.reduce((sum, p) => sum + p.custoTotal, 0)
+    const totalVendas = produtosFiltrados.reduce((sum, p: any) => sum + p.valorTotal, 0)
+    const totalQuantidade = produtosFiltrados.reduce((sum, p: any) => sum + p.quantidade, 0)
+    const totalCusto = produtosFiltrados.reduce((sum, p: any) => sum + p.custoTotal, 0)
     const margemLucro = totalVendas > 0 ? ((totalVendas - totalCusto) / totalVendas) * 100 : 0
 
 

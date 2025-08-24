@@ -148,7 +148,7 @@ export default function ProdutosPage() {
       const diaLabel = diasSemana.find(d => d.value === diaSemanaFiltro)?.label.replace(/[^a-zA-Z0-9]/g, '_') || 'todos'
       const grupoLabel = gruposProdutos.find(g => g.value === grupoFiltro)?.label.replace(/[^a-zA-Z0-9]/g, '_') || 'todos'
       
-      let filtros = []
+      let filtros: string[] = []
       if (diaSemanaFiltro !== 'todos') filtros.push(diaLabel)
       if (grupoFiltro !== 'todos') filtros.push(grupoLabel)
       
@@ -285,7 +285,6 @@ export default function ProdutosPage() {
           <PageHeader
             title="Produtos"
             description="Análise detalhada dos produtos mais vendidos"
-            icon={Package}
           />
 
           {/* Filtros */}
