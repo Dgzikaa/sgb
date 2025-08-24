@@ -361,8 +361,17 @@ export async function GET(request: NextRequest) {
       console.log(`📈 Semanas após processamento: ${semanasConsolidadas.length}`);
     }
 
-    // Filtrar por mês específico APENAS se solicitado (para visualização mensal)
-    if (mes && mes !== new Date().getMonth() + 1) {
+    // Debug: Verificar parâmetros recebidos
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔍 Parâmetros recebidos - mes: ${mes}, ano: ${ano}, mesAtual: ${new Date().getMonth() + 1}`);
+    }
+
+    // CORREÇÃO: Não aplicar filtro mensal para visualização semanal
+    // Só filtrar se for uma requisição específica para visualização mensal
+    // (quando mes é diferente do mês atual E não é uma visualização geral)
+    const isVisualizacaoMensal = mes && mes !== new Date().getMonth() + 1;
+    
+    if (isVisualizacaoMensal) {
       // Filtrar semanas que contêm eventos do mês solicitado
       const eventosDoMes = eventos.filter(evento => {
         const dataEvento = new Date(evento.data_evento);
@@ -375,6 +384,12 @@ export async function GET(request: NextRequest) {
       // Debug: Log do filtro mensal
       if (process.env.NODE_ENV === 'development') {
         console.log(`🗓️ Filtro mensal aplicado para mês ${mes}: ${semanasConsolidadas.length} semanas restantes`);
+        console.log(`📅 Eventos do mês ${mes}: ${eventosDoMes.length}`);
+        console.log(`🔢 Semanas do mês: [${Array.from(semanasDoMes).sort((a, b) => a - b).join(', ')}]`);
+      }
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`📊 Visualização semanal - sem filtro mensal aplicado`);
       }
     }
 
