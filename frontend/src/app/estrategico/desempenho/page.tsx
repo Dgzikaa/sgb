@@ -195,10 +195,10 @@ export default function DesempenhoPage() {
 
   // Carregar dados mensais quando mudar para aba mensal
   useEffect(() => {
-    if (activeTab === 'mensal' && selectedBar && user && dadosMensais.length === 0) {
+    if (activeTab === 'mensal' && selectedBar && user) {
       carregarDadosMensais();
     }
-  }, [activeTab, selectedBar, user, dadosMensais.length]);
+  }, [activeTab, selectedBar, user, carregarDadosMensais]);
 
   if (loading) {
     return (
