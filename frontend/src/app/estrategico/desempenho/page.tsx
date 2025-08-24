@@ -60,6 +60,7 @@ export default function DesempenhoPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('semanal');
   const [loading, setLoading] = useState(true);
+  const [loadingMensal, setLoadingMensal] = useState(false);
   const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
   const [dadosSemanas, setDadosSemanas] = useState<DadosSemana[]>([]);
   const [totaisAnuais, setTotaisAnuais] = useState<TotaisMensais | null>(null);
@@ -74,51 +75,64 @@ export default function DesempenhoPage() {
   const carregarDadosMensais = useCallback(async () => {
     if (!selectedBar || !user) return;
 
-    const dadosMensaisTemp: DadosMes[] = [];
-    const anoAtualNum = new Date().getFullYear();
-    const mesAtualNum = new Date().getMonth() + 1;
+    setLoadingMensal(true);
+    
+    try {
+      const dadosMensaisTemp: DadosMes[] = [];
+      const anoAtualNum = new Date().getFullYear();
+      const mesAtualNum = new Date().getMonth() + 1;
 
-    // Buscar dados de fevereiro 2025 até o mês atual
-    for (let ano = 2025; ano <= anoAtualNum; ano++) {
-      const mesInicio = ano === 2025 ? 2 : 1; // Começar em fevereiro para 2025
-      const mesFim = ano === anoAtualNum ? mesAtualNum : 12;
+      // Buscar dados de fevereiro 2025 até o mês atual
+      for (let ano = 2025; ano <= anoAtualNum; ano++) {
+        const mesInicio = ano === 2025 ? 2 : 1; // Começar em fevereiro para 2025
+        const mesFim = ano === anoAtualNum ? mesAtualNum : 12;
 
-      for (let mes = mesInicio; mes <= mesFim; mes++) {
-        try {
-          const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
-            headers: {
-              'x-user-data': encodeURIComponent(JSON.stringify(user))
+        for (let mes = mesInicio; mes <= mesFim; mes++) {
+          try {
+            const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
+              headers: {
+                'x-user-data': encodeURIComponent(JSON.stringify(user))
+              }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.totais_mensais) {
+                dadosMensaisTemp.push({
+                  mes,
+                  ano,
+                  nome_mes: mesesNomes[mes - 1],
+                  faturamento_total: data.totais_mensais.faturamento_total,
+                  clientes_total: data.totais_mensais.clientes_total,
+                  ticket_medio: data.totais_mensais.ticket_medio,
+                  performance_media: data.totais_mensais.performance_media
+                });
+              }
             }
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.totais_mensais) {
-              dadosMensaisTemp.push({
-                mes,
-                ano,
-                nome_mes: mesesNomes[mes - 1],
-                faturamento_total: data.totais_mensais.faturamento_total,
-                clientes_total: data.totais_mensais.clientes_total,
-                ticket_medio: data.totais_mensais.ticket_medio,
-                performance_media: data.totais_mensais.performance_media
-              });
-            }
+          } catch (error) {
+            console.error(`Erro ao carregar dados de ${mes}/${ano}:`, error);
           }
-        } catch (error) {
-          console.error(`Erro ao carregar dados de ${mes}/${ano}:`, error);
         }
       }
-    }
 
-    // Ordenar por ano e mês decrescente (mais recente primeiro)
-    dadosMensaisTemp.sort((a, b) => {
-      if (a.ano !== b.ano) return b.ano - a.ano;
-      return b.mes - a.mes;
-    });
-    
-    setDadosMensais(dadosMensaisTemp);
-  }, [selectedBar, user, mesesNomes]);
+      // Ordenar por ano e mês decrescente (mais recente primeiro)
+      dadosMensaisTemp.sort((a, b) => {
+        if (a.ano !== b.ano) return b.ano - a.ano;
+        return b.mes - a.mes;
+      });
+      
+      setDadosMensais(dadosMensaisTemp);
+    } catch (error) {
+      console.error('Erro ao carregar dados mensais:', error);
+      toast({
+        title: "Erro ao carregar dados mensais",
+        description: "Não foi possível carregar os dados mensais",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingMensal(false);
+    }
+  }, [selectedBar, user, mesesNomes, toast]);
 
   // Carregar dados da API
   const carregarDados = useCallback(async () => {
@@ -503,25 +517,45 @@ export default function DesempenhoPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {dadosMensais.map((dadoMes, index) => (
-                        <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 dark:hover:from-violet-900/20 dark:hover:to-purple-900/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1 h-6 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
-                              <span className="font-semibold text-gray-900 dark:text-white text-sm">{dadoMes.nome_mes} {dadoMes.ano}</span>
+                      {loadingMensal ? (
+                        <tr>
+                          <td colSpan={5} className="py-12 text-center">
+                            <div className="flex flex-col items-center justify-center">
+                              <RefreshCcw className="h-8 w-8 animate-spin text-violet-600 dark:text-violet-400 mb-4" />
+                              <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando dados mensais...</p>
                             </div>
                           </td>
-                          <td className="py-3 px-4 text-right font-bold text-gray-900 dark:text-white text-sm">{formatarMoeda(dadoMes.faturamento_total)}</td>
-                          <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{dadoMes.clientes_total.toLocaleString()}</td>
-                          <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{formatarMoeda(dadoMes.ticket_medio)}</td>
-                          <td className="py-3 px-4 text-right">
-                            <Badge className={`${getPerformanceBadge(dadoMes.performance_media)} font-bold px-2 py-1 border text-xs`}>
-                              {dadoMes.performance_media.toFixed(1)}%
-                            </Badge>
+                        </tr>
+                      ) : dadosMensais.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-12 text-center">
+                            <div className="flex flex-col items-center justify-center">
+                              <Calendar className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />
+                              <p className="text-gray-600 dark:text-gray-400 font-medium">Nenhum dado mensal encontrado</p>
+                            </div>
                           </td>
                         </tr>
-                      ))}
-                      {dadosMensais.length > 0 && (
+                      ) : (
+                        dadosMensais.map((dadoMes, index) => (
+                          <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 dark:hover:from-violet-900/20 dark:hover:to-purple-900/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">{dadoMes.nome_mes} {dadoMes.ano}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-gray-900 dark:text-white text-sm">{formatarMoeda(dadoMes.faturamento_total)}</td>
+                            <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{dadoMes.clientes_total.toLocaleString()}</td>
+                            <td className="py-3 px-4 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{formatarMoeda(dadoMes.ticket_medio)}</td>
+                            <td className="py-3 px-4 text-right">
+                              <Badge className={`${getPerformanceBadge(dadoMes.performance_media)} font-bold px-2 py-1 border text-xs`}>
+                                {dadoMes.performance_media.toFixed(1)}%
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                      {dadosMensais.length > 0 && !loadingMensal && (
                         <tr className="border-t-2 border-gray-300 dark:border-gray-600 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
