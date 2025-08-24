@@ -284,8 +284,55 @@ export async function GET(request: NextRequest) {
     const hoje = new Date();
     const semanaAtual = getWeekNumber(hoje);
 
-    // Converter para array e calcular métricas (filtrar semanas >= 5 e <= semana atual)
-    const semanasConsolidadas = Array.from(semanaMap.values())
+    // Filtrar eventos por mês específico se solicitado
+    const eventosFiltrados = mes ? eventos.filter(evento => {
+      const dataEvento = new Date(evento.data_evento);
+      return dataEvento.getMonth() + 1 === mes && dataEvento.getFullYear() === ano;
+    }) : eventos;
+
+    // Recriar mapa de semanas apenas com eventos do mês solicitado
+    const semanaMapFiltrado = new Map<number, {
+      semana: number;
+      periodo: string;
+      faturamento_total: number;
+      clientes_total: number;
+      eventos_count: number;
+      metas_faturamento: number;
+      metas_clientes: number;
+    }>();
+
+    eventosFiltrados.forEach(evento => {
+      const semana = evento.semana;
+      
+      if (!semanaMapFiltrado.has(semana)) {
+        const { inicio, fim } = getWeekPeriod(semana, ano);
+        semanaMapFiltrado.set(semana, {
+          semana,
+          periodo: `${inicio.getDate().toString().padStart(2, '0')}.${(inicio.getMonth() + 1).toString().padStart(2, '0')} - ${fim.getDate().toString().padStart(2, '0')}.${(fim.getMonth() + 1).toString().padStart(2, '0')}`,
+          faturamento_total: 0,
+          clientes_total: 0,
+          eventos_count: 0,
+          metas_faturamento: 0,
+          metas_clientes: 0
+        });
+      }
+
+      const semanaData = semanaMapFiltrado.get(semana)!;
+      // Somar faturamento de todas as fontes: ContaHub + Yuzer + Sympla
+      const faturamentoContaHub = contahubMap.get(evento.data_evento) || 0;
+      const faturamentoYuzer = yuzerMap.get(evento.data_evento) || 0;
+      const faturamenteSympla = symplaMap.get(evento.data_evento) || 0;
+      const faturamentoTotal = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
+      
+      semanaData.faturamento_total += faturamentoTotal;
+      semanaData.clientes_total += evento.cl_real || 0;
+      semanaData.eventos_count += 1;
+      semanaData.metas_faturamento += evento.m1_r || 0;
+      semanaData.metas_clientes += evento.cl_plan || 0;
+    });
+    
+    // Converter para array e calcular métricas
+    const semanasConsolidadas = Array.from(semanaMapFiltrado.values())
       .filter(semana => semana.semana >= 5 && semana.semana <= semanaAtual)
       .map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
