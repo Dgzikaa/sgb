@@ -288,7 +288,7 @@ export async function GET(request: NextRequest) {
     if (process.env.NODE_ENV === 'development') {
       console.log(`🗓️ Semana atual calculada: ${semanaAtual}`);
       console.log(`📋 Semanas disponíveis no mapa:`, Array.from(semanaMap.keys()).sort((a, b) => a - b));
-      console.log(`🔍 Filtro aplicado: semana >= 5 && semana <= ${semanaAtual}`);
+      console.log(`🔍 Filtro aplicado: semana.eventos_count > 0 (semanas com eventos)`);
     }
 
     // Converter para array e calcular métricas (filtrar semanas >= 5 e <= semana atual)
