@@ -366,10 +366,9 @@ export async function GET(request: NextRequest) {
       console.log(`🔍 Parâmetros recebidos - mes: ${mes}, ano: ${ano}, mesAtual: ${new Date().getMonth() + 1}`);
     }
 
-    // CORREÇÃO: Não aplicar filtro mensal para visualização semanal
-    // Só filtrar se for uma requisição específica para visualização mensal
-    // (quando mes é diferente do mês atual E não é uma visualização geral)
-    const isVisualizacaoMensal = mes && mes !== new Date().getMonth() + 1;
+    // CORREÇÃO: Só aplicar filtro mensal quando mes é especificamente solicitado
+    // Se não há parâmetro mes, é visualização semanal (mostrar todas as semanas)
+    const isVisualizacaoMensal = mes !== null && mes !== undefined;
     
     if (isVisualizacaoMensal) {
       // Filtrar semanas que contêm eventos do mês solicitado

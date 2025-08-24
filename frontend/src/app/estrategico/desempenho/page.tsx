@@ -124,7 +124,8 @@ export default function DesempenhoPage() {
         return;
       }
 
-      const response = await fetch(`/api/estrategico/desempenho?mes=1&ano=${anoAtual}`, {
+      // Para visualização semanal, não passar parâmetro 'mes'
+      const response = await fetch(`/api/estrategico/desempenho?ano=${anoAtual}`, {
         headers: {
           'x-user-data': encodeURIComponent(JSON.stringify(user))
         }
