@@ -92,7 +92,29 @@ export async function GET(request: NextRequest) {
 		// Processar todos os dados
 		
 		for (const r of data) {
-			// Processar data uma única vez - USAR UTC para compatibilidade com PostgreSQL
+			// Primeiro, processar telefone para contar no total ANTES de qualquer filtro
+			const rawFone = (r.cli_fone || '').toString().trim()
+			if (!rawFone) {
+				continue // Pular registros sem telefone
+			}
+			
+			// Normalizar telefone: remover todos os caracteres não numéricos
+			let fone = rawFone.replace(/\D/g, '')
+			if (!fone) {
+				continue // Pular telefones inválidos
+			}
+			
+			// Padronizar: se tem 11 dígitos e começa com DDD, manter
+			// se tem 10 dígitos, adicionar 9 após o DDD (celular antigo)
+			if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
+				// Adicionar 9 após o DDD para celulares antigos
+				fone = fone.substring(0, 2) + '9' + fone.substring(2)
+			}
+			
+			// SEMPRE contar no total (sem filtro de dia) - ANTES de qualquer filtro
+			mapTotal.set(fone, (mapTotal.get(fone) || 0) + 1)
+			
+			// Agora processar data e aplicar filtro de dia da semana
 			const dataGerencial = new Date(r.dt_gerencial + 'T12:00:00Z') // Forçar UTC
 			const diaSemanaData = dataGerencial.getUTCDay() // 0=domingo, 1=segunda, etc. - UTC
 			
@@ -107,42 +129,19 @@ export async function GET(request: NextRequest) {
 			// Remover filtro geral de terças - estava descartando dados válidos
 			// Se necessário, implementar filtro mais específico baseado em outras condições
 				
-				// Contar linha apenas se passou no filtro
-				totalLinhas++
-
-				const rawFone = (r.cli_fone || '').toString().trim()
-				if (!rawFone) {
-					telefonesDescartados++
-					continue
-				}
-				telefonesProcessados++
-				
-				// Normalizar telefone: remover todos os caracteres não numéricos
-				let fone = rawFone.replace(/\D/g, '')
-				if (!fone) {
-					telefonesDescartados++
-					continue
-				}
-				
-				// Padronizar: se tem 11 dígitos e começa com DDD, manter
-				// se tem 10 dígitos, adicionar 9 após o DDD (celular antigo)
-				if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
-					// Adicionar 9 após o DDD para celulares antigos
-					fone = fone.substring(0, 2) + '9' + fone.substring(2)
-				}
-				
-				const nome = (r.cli_nome || '').toString().trim() || 'Sem nome'
-				const ultima = r.dt_gerencial as string
-				const vrCouvert = parseFloat(r.vr_couvert || '0') || 0
-				const vrPagamentos = parseFloat(r.vr_pagamentos || '0') || 0
-				
-				// Contador específico para Laura Galvão (61992053013)
-				if (rawFone === '61-992053013') {
-					contadorLauraGalvao++
-				}
-				
-				// SEMPRE contar no total (sem filtro de dia)
-				mapTotal.set(fone, (mapTotal.get(fone) || 0) + 1)
+			// Contar linha apenas se passou no filtro
+			totalLinhas++
+			telefonesProcessados++
+			
+			const nome = (r.cli_nome || '').toString().trim() || 'Sem nome'
+			const ultima = r.dt_gerencial as string
+			const vrCouvert = parseFloat(r.vr_couvert || '0') || 0
+			const vrPagamentos = parseFloat(r.vr_pagamentos || '0') || 0
+			
+			// Contador específico para Laura Galvão (61992053013)
+			if (rawFone === '61-992053013') {
+				contadorLauraGalvao++
+			}
 				
 
 				const vrConsumo = vrPagamentos - vrCouvert
