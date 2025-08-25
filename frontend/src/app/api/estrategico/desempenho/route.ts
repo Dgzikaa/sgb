@@ -141,7 +141,8 @@ export async function GET(request: NextRequest) {
       return data || [];
     };
 
-    // Buscar dados otimizados - sem agregação SQL no cliente (será feita no código)
+    // OTIMIZAÇÃO: Como estamos usando real_r da tabela eventos_base,
+    // só precisamos buscar dados externos para debug/comparação
     const [yuzerData, symplaData, contahubData] = await Promise.all([
       fetchAllDataFallback('yuzer_pagamento', 'data_evento, valor_liquido', 'data_evento'),
       fetchAllDataFallback('sympla_resumo', 'data_evento, total_liquido', 'data_evento'), 
@@ -289,20 +290,26 @@ export async function GET(request: NextRequest) {
       }
 
       const semanaData = semanaMap.get(semana)!;
-      // Somar faturamento de todas as fontes: ContaHub + Yuzer + Sympla
+      // USAR DADOS JÁ CALCULADOS DA TABELA eventos_base
+      // O campo real_r já contém o faturamento total calculado corretamente
+      const faturamentoTotal = evento.real_r || 0;
+      
+      // Debug: Comparar com cálculo manual para verificar discrepâncias
       const faturamentoContaHub = contahubMap.get(evento.data_evento) || 0;
       const faturamentoYuzer = yuzerMap.get(evento.data_evento) || 0;
       const faturamenteSympla = symplaMap.get(evento.data_evento) || 0;
-      const faturamentoTotal = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
+      const faturamentoManual = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
       
       // Debug detalhado para semanas recentes
       // Debug apenas em desenvolvimento
       if (process.env.NODE_ENV === 'development' && semana >= 31 && semana <= 34) {
         console.log(`🔍 Semana ${semana} - Evento ${evento.nome} (${evento.data_evento}):`, {
+          real_r_tabela: faturamentoTotal,
+          calculo_manual: faturamentoManual,
+          diferenca: Math.abs(faturamentoTotal - faturamentoManual),
           contahub: faturamentoContaHub,
           yuzer: faturamentoYuzer,
-          sympla: faturamenteSympla,
-          total: faturamentoTotal
+          sympla: faturamenteSympla
         });
       }
       

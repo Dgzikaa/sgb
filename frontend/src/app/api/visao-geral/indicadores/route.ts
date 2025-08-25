@@ -15,6 +15,18 @@ function getTrimestreDates(trimestre: number) {
   return quarters[trimestre as keyof typeof quarters] || quarters[3];
 }
 
+// Função para calcular trimestre anterior
+function getTrimestreAnterior(trimestre: number) {
+  const year = 2025;
+  const quarters = {
+    2: { start: `${year}-01-01`, end: `${year}-03-31` }, // T1 (Jan-Mar) - anterior ao T2
+    3: { start: `${year}-04-01`, end: `${year}-06-30` }, // T2 (Abr-Jun) - anterior ao T3
+    4: { start: `${year}-07-01`, end: `${year}-09-30` }  // T3 (Jul-Set) - anterior ao T4
+  };
+  
+  return quarters[trimestre as keyof typeof quarters] || quarters[2]; // Default T1
+}
+
 // Função para calcular retenção dinâmica (mês específico vs últimos 2 meses)
 async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?: string) {
   try {
@@ -466,22 +478,13 @@ export async function GET(request: Request) {
       const { start: startDate, end: endDate } = getTrimestreDates(trimestre);
       // Trimestre selecionado
 
-      // Clientes Ativos (visitaram 2+ vezes nos últimos 90 dias) - COM PAGINAÇÃO
-      // Clientes ativos últimos 90 dias baseado no final do trimestre selecionado
-      
-      // Usar o final do trimestre como referência, não a data atual
-      const fimTrimestre = new Date(endDate + 'T23:59:59Z'); // Final do trimestre selecionado
-      const dataInicio90Dias = new Date(fimTrimestre);
-      dataInicio90Dias.setDate(fimTrimestre.getDate() - 90);
-      const startDate90Dias = dataInicio90Dias.toISOString().split('T')[0];
-      const endDate90Dias = fimTrimestre.toISOString().split('T')[0];
-      
-      // Período de 90 dias
+      // Clientes Ativos (visitaram 2+ vezes) no TRIMESTRE ATUAL
+      // Usar as datas completas do trimestre selecionado
       
       const clientesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate90Dias,
-        'lte_dt_gerencial': endDate90Dias
+        'gte_dt_gerencial': startDate,
+        'lte_dt_gerencial': endDate
       });
       
       // Filtrar apenas clientes com telefone
@@ -501,19 +504,13 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivos++;
       });
       
-      // ✅ COMPARAÇÃO COM TRIMESTRE ANTERIOR (90 dias anteriores baseado no trimestre)
-      const dataInicio180Dias = new Date(fimTrimestre);
-      dataInicio180Dias.setDate(fimTrimestre.getDate() - 180);
-      const dataFim90DiasAntes = new Date(fimTrimestre);
-      dataFim90DiasAntes.setDate(fimTrimestre.getDate() - 90);
-      
-      const startDate180Dias = dataInicio180Dias.toISOString().split('T')[0];
-      const endDate90DiasAntes = dataFim90DiasAntes.toISOString().split('T')[0];
+      // ✅ COMPARAÇÃO COM TRIMESTRE ANTERIOR COMPLETO
+      const { start: startDateAnterior, end: endDateAnterior } = getTrimestreAnterior(trimestre);
       
       const clientesDataAnterior = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate180Dias,
-        'lte_dt_gerencial': endDate90DiasAntes
+        'gte_dt_gerencial': startDateAnterior,
+        'lte_dt_gerencial': endDateAnterior
       });
       
       const clientesComTelefoneAnterior = clientesDataAnterior?.filter(item => item.cli_fone) || [];
@@ -531,11 +528,9 @@ export async function GET(request: Request) {
       // 🔍 DEBUG: Logs de comparação
       // Logs detalhados apenas em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO:');
-        console.log(`Trimestre selecionado: T${trimestre} (${startDate} a ${endDate})`);
-        console.log(`Final do trimestre usado como referência: ${fimTrimestre.toISOString().split('T')[0]}`);
-        console.log(`Período atual (90d): ${startDate90Dias} a ${endDate90Dias} = ${clientesAtivos} clientes ativos`);
-        console.log(`Período anterior (90d): ${startDate180Dias} a ${endDate90DiasAntes} = ${clientesAtivosAnterior} clientes ativos`);
+        console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO TRIMESTRAL:');
+        console.log(`Trimestre atual: T${trimestre} (${startDate} a ${endDate}) = ${clientesAtivos} clientes ativos`);
+        console.log(`Trimestre anterior: T${trimestre-1} (${startDateAnterior} a ${endDateAnterior}) = ${clientesAtivosAnterior} clientes ativos`);
       }
       const variacaoClientesAtivos = clientesAtivosAnterior > 0 ? ((clientesAtivos - clientesAtivosAnterior) / clientesAtivosAnterior * 100) : 0;
       if (process.env.NODE_ENV === 'development') {
@@ -619,24 +614,21 @@ export async function GET(request: Request) {
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
       // ✅ COMPARAÇÃO CLIENTES TOTAIS COM TRIMESTRE ANTERIOR
-      const trimestreAnteriorStart = new Date(startDate);
-      trimestreAnteriorStart.setMonth(trimestreAnteriorStart.getMonth() - 3);
-      const trimestreAnteriorEnd = new Date(endDate);
-      trimestreAnteriorEnd.setMonth(trimestreAnteriorEnd.getMonth() - 3);
+      // Usar as mesmas datas já calculadas para o trimestre anterior
       
       const [clientesContahubAnterior, clientesYuzerAnterior, clientesSymplaAnterior] = await Promise.all([
         fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
           'eq_bar_id': barIdNum,
-          'gte_dt_gerencial': trimestreAnteriorStart.toISOString().split('T')[0],
-          'lte_dt_gerencial': trimestreAnteriorEnd.toISOString().split('T')[0]
+          'gte_dt_gerencial': startDateAnterior,
+          'lte_dt_gerencial': endDateAnterior
         }),
         supabase.from('yuzer_produtos').select('quantidade, produto_nome').eq('bar_id', barIdNum)
-          .gte('data_evento', trimestreAnteriorStart.toISOString().split('T')[0])
-          .lte('data_evento', trimestreAnteriorEnd.toISOString().split('T')[0]),
+          .gte('data_evento', startDateAnterior)
+          .lte('data_evento', endDateAnterior),
         fetchAllData(supabase, 'sympla_resumo', 'checkins', {
           'eq_bar_id': barIdNum,
-          'gte_data_evento': trimestreAnteriorStart.toISOString().split('T')[0],
-          'lte_data_evento': trimestreAnteriorEnd.toISOString().split('T')[0]
+          'gte_data_evento': startDateAnterior,
+          'lte_data_evento': endDateAnterior
         })
       ]);
       
