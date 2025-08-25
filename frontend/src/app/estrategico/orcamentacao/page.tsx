@@ -24,11 +24,6 @@ import {
   CalendarDays,
   TrendingUp,
   TrendingDown,
-  Target,
-  PieChart,
-  BarChart3,
-  Download,
-  Upload,
   ArrowUp,
   ArrowDown,
   Minus,
@@ -326,37 +321,7 @@ export default function OrcamentacaoPage() {
     }
   };
 
-  const testarDadosNibo = async () => {
-    if (!selectedBar) return;
 
-    try {
-      console.log('🧪 Testando dados NIBO...');
-      
-      const testUrl = `/api/estrategico/orcamentacao/test-nibo-data?bar_id=${selectedBar.id}&ano=${anoSelecionado}&mes=${mesSelecionado}`;
-      console.log('🔗 URL de teste:', testUrl);
-      
-      const response = await fetch(testUrl);
-      const result = await response.json();
-      
-      console.log('📊 Resultado do teste NIBO:', result);
-      
-      if (result.success) {
-        toast({
-          title: 'Teste concluído',
-          description: `${result.total_registros} registros encontrados. Veja o console para detalhes.`,
-        });
-      } else {
-        throw new Error(result.error || 'Erro no teste');
-      }
-    } catch (error) {
-      console.error('Erro no teste NIBO:', error);
-      toast({
-        title: 'Erro no teste',
-        description: 'Não foi possível testar os dados do NIBO',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const handleEdit = (categoriaIndex: number, subIndex: number, valorAtual: number) => {
     const key = `${categoriaIndex}-${subIndex}`;
@@ -599,16 +564,6 @@ export default function OrcamentacaoPage() {
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${sincronizando ? 'animate-spin' : ''}`} />
               Sincronizar NIBO
-            </Button>
-            
-            <Button
-              onClick={testarDadosNibo}
-              size="sm"
-              variant="outline"
-              className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Testar Dados
             </Button>
           </div>
         </motion.div>

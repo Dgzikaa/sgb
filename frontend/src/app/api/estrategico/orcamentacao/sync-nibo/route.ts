@@ -20,27 +20,49 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Buscar dados do Nibo para o ano especificado
+    // Buscar dados do Nibo para o ano especificado COM PAGINAÇÃO
     // USANDO DATA_COMPETENCIA e CATEGORIA_NOME conforme estrutura correta
     console.log(`🔍 Buscando dados NIBO para bar_id: ${bar_id}, ano: ${ano}`);
     
-    const { data: niboData, error: niboError } = await supabase
-      .from('nibo_agendamentos')
-      .select('*')
-      .eq('bar_id', bar_id)
-      .gte('data_competencia', `${ano}-01-01`)
-      .lte('data_competencia', `${ano}-12-31`)
-      .not('categoria_nome', 'is', null);
+    // Buscar todos os dados com paginação
+    let allData: any[] = [];
+    let from = 0;
+    const pageSize = 1000; // Buscar 1000 registros por vez
+    let hasMore = true;
 
-    console.log(`📊 Dados NIBO encontrados: ${niboData?.length || 0} registros`);
-    
-    if (niboError) {
-      console.error('Erro ao buscar dados Nibo:', niboError);
-      return NextResponse.json(
-        { success: false, error: 'Erro ao buscar dados do Nibo' },
-        { status: 500 }
-      );
+    while (hasMore) {
+      console.log(`📄 Buscando página ${Math.floor(from / pageSize) + 1} (registros ${from + 1}-${from + pageSize})...`);
+      
+      const { data: pageData, error: pageError } = await supabase
+        .from('nibo_agendamentos')
+        .select('*')
+        .eq('bar_id', parseInt(bar_id))
+        .gte('data_competencia', `${ano}-01-01`)
+        .lte('data_competencia', `${ano}-12-31`)
+        .not('categoria_nome', 'is', null)
+        .range(from, from + pageSize - 1);
+
+      if (pageError) {
+        console.error('❌ Erro ao buscar página de dados NIBO:', pageError);
+        return NextResponse.json(
+          { success: false, error: 'Erro ao buscar dados do NIBO' },
+          { status: 500 }
+        );
+      }
+
+      if (pageData && pageData.length > 0) {
+        allData = allData.concat(pageData);
+        from += pageSize;
+        hasMore = pageData.length === pageSize; // Se retornou menos que pageSize, não há mais dados
+        console.log(`✅ Página carregada: ${pageData.length} registros (total acumulado: ${allData.length})`);
+      } else {
+        hasMore = false;
+        console.log(`🏁 Fim da paginação - nenhum registro na página atual`);
+      }
     }
+
+    const niboData = allData;
+    console.log(`📊 TOTAL de dados NIBO encontrados: ${niboData?.length || 0} registros`);
 
     // Log de amostra dos dados para debug
     if (niboData && niboData.length > 0) {
