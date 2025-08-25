@@ -46,7 +46,7 @@ export async function GET(request: Request) {
       .eq('bar_id', parseInt(barId))
       .gte('data_competencia', `${ano}-01-01`)
       .lte('data_competencia', `${ano}-12-31`)
-      .eq('status', 'Paid'); // Apenas pagos
+      .in('status', ['Paid', 'Pago']); // Apenas pagos (ambos os status)
 
     if (mes && mes !== 'todos') {
       const mesFormatado = mes.padStart(2, '0');
@@ -130,13 +130,15 @@ export async function GET(request: Request) {
       ['CONTRATOS', 'CONTRATOS'],
       ['CONTRATO', 'CONTRATOS'],
       ['Contratos', 'CONTRATOS'],
-      ['OUTRAS RECEITAS', 'CONTRATOS'],
-      ['Outras Receitas', 'CONTRATOS'],
+      ['OUTRAS RECEITAS', 'Outras Receitas'],
+      ['Outras Receitas', 'Outras Receitas'],
       ['Ambev Bonificações Contrato Anual', 'CONTRATOS'],
       ['Ambev Bonificação Contrato Cash-back Março', 'CONTRATOS'],
       ['Ambev Bonificação Contrato Cash-back Fevereiro', 'CONTRATOS'],
       ['Ambev Bonificação Contrato Cash-back Junho', 'CONTRATOS'],
       ['Ambev Bonificação Contrato Cash-back Julho', 'CONTRATOS'],
+      ['Escritório Central', 'Escritório Central'], // Manter como categoria própria
+      ['ESCRITÓRIO CENTRAL', 'Escritório Central'],
       ['Dividendos', 'Dividendos'],
       ['DIVIDENDOS', 'Dividendos'],
       ['PRO LABORE', 'PRO LABORE'],
@@ -194,59 +196,50 @@ export async function GET(request: Request) {
       }
     });
 
-    // 5. Estrutura base das categorias (caso não existam dados planejados)
+    // 5. Estrutura base das categorias (conforme lista do usuário)
     const estruturaBase = [
-      // Despesas Variáveis
+      // Custos Diretos
       { categoria: 'IMPOSTO/TX MAQ/COMISSAO', tipo: 'despesa' },
-      
-      // CMV
       { categoria: 'CMV', tipo: 'despesa' },
       
       // Pessoal
       { categoria: 'CUSTO-EMPRESA FUNCIONARIOS', tipo: 'despesa' },
-      { categoria: 'PROVISÃO TRABALHISTA', tipo: 'despesa' },
-      { categoria: 'FREELA SEGURANÇA', tipo: 'despesa' },
-      { categoria: 'FREELA ATENDIMENTO', tipo: 'despesa' },
-      { categoria: 'FREELA COZINHA', tipo: 'despesa' },
       { categoria: 'ADICIONAIS', tipo: 'despesa' },
+      { categoria: 'FREELA ATENDIMENTO', tipo: 'despesa' },
+      { categoria: 'FREELA BAR', tipo: 'despesa' },
+      { categoria: 'FREELA COZINHA', tipo: 'despesa' },
+      { categoria: 'FREELA LIMPEZA', tipo: 'despesa' },
+      { categoria: 'FREELA SEGURANÇA', tipo: 'despesa' },
+      { categoria: 'PRO LABORE', tipo: 'despesa' },
       
       // Administrativas
-      { categoria: 'RECURSOS HUMANOS', tipo: 'despesa' },
+      { categoria: 'Escritório Central', tipo: 'despesa' },
       { categoria: 'Administrativo Ordinário', tipo: 'despesa' },
-      
-      // Ocupação
-      { categoria: 'ALUGUEL/CONDOMÍNIO/IPTU', tipo: 'despesa' },
-      { categoria: 'LUZ', tipo: 'despesa' },
-      { categoria: 'ÁGUA', tipo: 'despesa' },
-      { categoria: 'GÁS', tipo: 'despesa' },
-      { categoria: 'INTERNET', tipo: 'despesa' },
-      
-      // Operacionais
-      { categoria: 'Manutenção', tipo: 'despesa' },
-      { categoria: 'Materiais de Limpeza e Descartáveis', tipo: 'despesa' },
-      { categoria: 'Materiais Operação', tipo: 'despesa' },
-      { categoria: 'Equipamentos Operação', tipo: 'despesa' },
-      { categoria: 'Utensílios', tipo: 'despesa' },
+      { categoria: 'RECURSOS HUMANOS', tipo: 'despesa' },
       
       // Marketing e Eventos
       { categoria: 'Marketing', tipo: 'despesa' },
-      { categoria: 'Produção Eventos', tipo: 'despesa' },
       { categoria: 'Atrações Programação', tipo: 'despesa' },
+      { categoria: 'Produção Eventos', tipo: 'despesa' },
       
-      // Receitas
-      { categoria: 'RECEITA BRUTA', tipo: 'receita' },
+      // Operacionais
+      { categoria: 'Materiais Operação', tipo: 'despesa' },
+      { categoria: 'Estorno', tipo: 'despesa' },
+      { categoria: 'Equipamentos Operação', tipo: 'despesa' },
+      { categoria: 'Materiais de Limpeza e Descartáveis', tipo: 'despesa' },
+      { categoria: 'Utensílios', tipo: 'despesa' },
+      { categoria: 'Outros Operação', tipo: 'despesa' },
+      
+      // Fixas
+      { categoria: 'ALUGUEL/CONDOMÍNIO/IPTU', tipo: 'despesa' },
+      { categoria: 'ÁGUA', tipo: 'despesa' },
+      { categoria: 'GÁS', tipo: 'despesa' },
+      { categoria: 'INTERNET', tipo: 'despesa' },
+      { categoria: 'Manutenção', tipo: 'despesa' },
+      { categoria: 'LUZ', tipo: 'despesa' },
       
       // Não Operacionais
-      { categoria: 'CONTRATOS', tipo: 'receita' },
-      { categoria: 'Dividendos', tipo: 'despesa' },
-      { categoria: 'PRO LABORE', tipo: 'despesa' },
-      { categoria: 'Despesas Financeiras', tipo: 'despesa' },
-      { categoria: 'Outros Sócios', tipo: 'despesa' },
-      { categoria: 'Aporte de capital', tipo: 'receita' },
-      { categoria: 'Empréstimos de Sócios', tipo: 'receita' },
-      { categoria: 'Outros Investimentos', tipo: 'despesa' },
-      { categoria: 'Escritório Central', tipo: 'despesa' },
-      { categoria: 'VALE TRANSPORTE', tipo: 'despesa' }
+      { categoria: 'CONTRATOS', tipo: 'receita' }
     ];
 
     // 6. Combinar dados planejados + realizados
@@ -255,7 +248,12 @@ export async function GET(request: Request) {
 
     // Processar dados planejados existentes
     dadosPlanejados?.forEach(item => {
-      const valorRealizado = valoresRealizados.get(item.categoria_nome) || 0;
+      let valorRealizado = valoresRealizados.get(item.categoria_nome) || 0;
+      
+      // Se não encontrou no NIBO, usa o valor realizado da tabela orçamentação (fallback)
+      if (valorRealizado === 0 && item.valor_realizado) {
+        valorRealizado = Number(item.valor_realizado);
+      }
       
       dadosFinais.push({
         id: item.id,
@@ -276,26 +274,34 @@ export async function GET(request: Request) {
     });
 
     // Processar categorias que só têm dados realizados (sem planejamento)
+    // Lógica: 1º busca no NIBO, se não encontrar, busca na tabela orçamentação
     estruturaBase.forEach(base => {
       if (!categoriasProcessadas.has(base.categoria)) {
-        const valorRealizado = valoresRealizados.get(base.categoria) || 0;
+        let valorRealizado = valoresRealizados.get(base.categoria) || 0;
         
-        if (valorRealizado > 0) { // Só incluir se tiver valor realizado
-          dadosFinais.push({
-            id: null,
-            bar_id: parseInt(barId),
-            ano: parseInt(ano),
-            mes: mes ? parseInt(mes) : null,
-            categoria: base.categoria,
-            subcategoria: null,
-            valor_planejado: 0,
-            valor_realizado: valorRealizado,
-            percentual_realizado: 0,
-            observacoes: null,
-            criado_em: null,
-            atualizado_em: null
-          });
+        // Se não encontrou no NIBO, busca na tabela orçamentação (fallback)
+        if (valorRealizado === 0) {
+          const dadoOrcamentacao = dadosPlanejados?.find(item => 
+            item.categoria_nome === base.categoria && item.valor_realizado
+          );
+          valorRealizado = dadoOrcamentacao?.valor_realizado || 0;
         }
+        
+        // Sempre incluir todas as categorias da estrutura base (mesmo com valor 0)
+        dadosFinais.push({
+          id: null,
+          bar_id: parseInt(barId),
+          ano: parseInt(ano),
+          mes: mes ? parseInt(mes) : null,
+          categoria: base.categoria,
+          subcategoria: null,
+          valor_planejado: 0,
+          valor_realizado: valorRealizado,
+          percentual_realizado: 0,
+          observacoes: null,
+          criado_em: null,
+          atualizado_em: null
+        });
       }
     });
 
@@ -319,7 +325,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { bar_id, ano, mes, categoria_nome, subcategoria, valor_planejado, observacoes } = body;
+    const { bar_id, ano, mes, categoria_nome, subcategoria, valor_planejado, valor_realizado, observacoes, tipo } = body;
 
     if (!bar_id || !ano || !categoria_nome) {
       return NextResponse.json(
@@ -333,18 +339,45 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Inserir ou atualizar planejamento
+    // Preparar dados para inserção/atualização
+    const dadosUpsert: any = {
+      bar_id,
+      ano,
+      mes,
+      categoria_nome,
+      subcategoria
+    };
+
+    // Adicionar valor planejado se fornecido
+    if (valor_planejado !== undefined) {
+      dadosUpsert.valor_planejado = Number(valor_planejado) || 0;
+    }
+
+    // Adicionar valor realizado se fornecido
+    if (valor_realizado !== undefined) {
+      dadosUpsert.valor_realizado = Number(valor_realizado) || 0;
+    }
+
+    // Adicionar observações se fornecidas
+    if (observacoes !== undefined) {
+      dadosUpsert.observacoes = observacoes;
+    }
+
+    // Determinar tipo se não fornecido
+    if (!tipo) {
+      const valorReferencia = valor_planejado !== undefined ? valor_planejado : valor_realizado;
+      dadosUpsert.tipo = valorReferencia >= 0 ? 'receita' : 'despesa';
+    } else {
+      dadosUpsert.tipo = tipo;
+    }
+
+    console.log('💾 Salvando dados na tabela orcamentacao:', dadosUpsert);
+
+    // Inserir ou atualizar
     const { data, error } = await supabase
       .from('orcamentacao')
-      .upsert({
-        bar_id,
-        ano,
-        mes,
-        categoria_nome,
-        subcategoria,
-        valor_planejado: Number(valor_planejado) || 0,
-        observacoes,
-        tipo: valor_planejado >= 0 ? 'receita' : 'despesa'
+      .upsert(dadosUpsert, {
+        onConflict: 'bar_id,ano,mes,categoria_nome,subcategoria'
       })
       .select();
 

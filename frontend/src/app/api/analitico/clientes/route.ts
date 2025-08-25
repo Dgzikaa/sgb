@@ -29,6 +29,8 @@ export async function GET(request: NextRequest) {
 		// Obter filtro de dia da semana da URL
 		const { searchParams } = new URL(request.url)
 		const diaSemanaFiltro = searchParams.get('dia_semana')
+		
+		console.log('🔍 API: Filtro dia da semana recebido:', diaSemanaFiltro)
 
 	// Removido teste - implementando paginação SQL direta
 
@@ -125,6 +127,11 @@ export async function GET(request: NextRequest) {
 				const vrCouvert = parseFloat(r.vr_couvert || '0') || 0
 				const vrPagamentos = parseFloat(r.vr_pagamentos || '0') || 0
 				
+				// Log para debug - apenas para Laura Galvão quando há filtro de dia
+				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão'))) {
+					console.log('✅ Laura Galvão - Registro aceito:', { nome, fone: rawFone, data: r.dt_gerencial, diaSemana: diaSemanaData })
+				}
+				
 
 				const vrConsumo = vrPagamentos - vrCouvert
 
@@ -176,7 +183,14 @@ export async function GET(request: NextRequest) {
 		const clientes = Array.from(map.values())
 			.sort((a, b) => b.visitas - a.visitas)
 			.slice(0, 100)
-			.map((c) => ({
+			
+		// Log para debug - mostrar dados da Laura Galvão
+		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
+			const lauraClientes = clientes.filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão'))
+			console.log('🔍 Laura Galvão no resultado final:', lauraClientes)
+		}
+		
+		const clientesFormatados = clientes.map((c) => ({
 				identificador_principal: c.fone,
 				nome_principal: c.nome,
 				telefone: c.fone,
@@ -204,7 +218,7 @@ export async function GET(request: NextRequest) {
 		const totalGastoGlobal = Array.from(map.values()).reduce((sum, c) => sum + c.totalGasto, 0)
 
 		return NextResponse.json({
-			clientes,
+			clientes: clientesFormatados,
 			estatisticas: {
 				total_clientes_unicos: map.size,
 				total_visitas_geral: totalLinhas,

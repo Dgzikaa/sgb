@@ -66,6 +66,8 @@ export default function OrcamentacaoPage() {
   const [anoSelecionado, setAnoSelecionado] = useState<string>('2025');
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
+  const [editModeRealizado, setEditModeRealizado] = useState<Record<string, boolean>>({});
+  const [editedValuesRealizado, setEditedValuesRealizado] = useState<Record<string, string>>({});
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
   const [activeTab, setActiveTab] = useState<string>('planejamento');
   
@@ -75,6 +77,20 @@ export default function OrcamentacaoPage() {
 
   // Ref para evitar dependências desnecessárias
   const isLoadingRef = useRef(false);
+
+  // Categorias que podem ter valores realizados editados manualmente
+  const categoriasEditaveisRealizado = [
+    'Custo Bebidas',
+    'CONTRATOS', 
+    'Produção Eventos',
+    'Marketing',
+    'Outros Sócios',
+    'RECURSOS HUMANOS',
+    'Escritório Central',
+    'Custo Comida',
+    'Custo Drinks',
+    'LUZ'
+  ];
 
   // Função para obter estrutura base das categorias baseada no NIBO real
   const getCategoriasEstruturadas = (): CategoriaOrcamento[] => [
@@ -334,6 +350,82 @@ export default function OrcamentacaoPage() {
       return newValues;
     });
     setEditMode(prev => ({ ...prev, [key]: false }));
+  };
+
+  // Funções para editar valores realizados
+  const handleEditRealizado = (categoriaIndex: number, subIndex: number, valorAtual: number) => {
+    const key = `${categoriaIndex}-${subIndex}`;
+    setEditedValuesRealizado(prev => ({ ...prev, [key]: valorAtual.toString() }));
+    setEditModeRealizado(prev => ({ ...prev, [key]: true }));
+  };
+
+  const handleSaveRealizado = async (categoriaIndex: number, subIndex: number) => {
+    const key = `${categoriaIndex}-${subIndex}`;
+    const novoValor = editedValuesRealizado[key];
+    if (!novoValor || !selectedBar) return;
+
+    try {
+      const subcategoria = categorias[categoriaIndex].subcategorias[subIndex];
+      const valorNumerico = parseFloat(novoValor);
+
+      // Salvar na tabela orcamentacao como valor_realizado
+      const response = await fetch('/api/estrategico/orcamentacao', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          ano: parseInt(anoSelecionado),
+          mes: parseInt(mesSelecionado),
+          categoria_nome: subcategoria.nome,
+          valor_realizado: valorNumerico,
+          tipo: 'manual' // Indicar que é um valor manual
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao salvar valor realizado');
+      }
+
+      // Atualizar localmente
+      setCategorias(prev => prev.map((cat, catIndex) => 
+        catIndex === categoriaIndex 
+          ? {
+              ...cat,
+              subcategorias: cat.subcategorias.map((sub, subIdx) => 
+                subIdx === subIndex 
+                  ? { ...sub, realizado: valorNumerico }
+                  : sub
+              )
+            }
+          : cat
+      ));
+
+      toast({
+        title: 'Sucesso',
+        description: `Valor realizado de ${subcategoria.nome} atualizado para ${formatarMoeda(valorNumerico)}`,
+      });
+      
+      setEditModeRealizado(prev => ({ ...prev, [key]: false }));
+    } catch (error) {
+      console.error('Erro ao salvar valor realizado:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao salvar valor realizado',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCancelRealizado = (categoriaIndex: number, subIndex: number) => {
+    const key = `${categoriaIndex}-${subIndex}`;
+    setEditedValuesRealizado(prev => {
+      const newValues = { ...prev };
+      delete newValues[key];
+      return newValues;
+    });
+    setEditModeRealizado(prev => ({ ...prev, [key]: false }));
   };
 
   const formatarMoeda = (valor: number): string => {
@@ -665,31 +757,68 @@ export default function OrcamentacaoPage() {
                                     {sub.isPercentage ? formatarPorcentagem(sub.projecao) : formatarMoeda(sub.projecao)}
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    <div className="flex items-center justify-center gap-2">
-                                      <span className="text-gray-900 dark:text-white font-mono font-semibold">
+                                    {editModeRealizado[key] ? (
+                                      <div className="flex items-center justify-center gap-2">
+                                        <Input
+                                          value={editedValuesRealizado[key] || ''}
+                                          onChange={(e) => setEditedValuesRealizado(prev => ({ ...prev, [key]: e.target.value }))}
+                                          className="w-32 text-center bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                                          autoFocus
+                                        />
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleSaveRealizado(catIndex, subIndex)}
+                                          className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white"
+                                        >
+                                          <Check className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => handleCancelRealizado(catIndex, subIndex)}
+                                          className="h-8 w-8 p-0 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center justify-center gap-2">
+                                        <span 
+                                          className={`text-gray-900 dark:text-white font-mono font-semibold ${
+                                            categoriasEditaveisRealizado.includes(sub.nome) ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded' : ''
+                                          }`}
+                                          onClick={() => {
+                                            if (categoriasEditaveisRealizado.includes(sub.nome)) {
+                                              handleEditRealizado(catIndex, subIndex, sub.realizado);
+                                            }
+                                          }}
+                                        >
+                                          {sub.isPercentage ? formatarPorcentagem(sub.realizado) : formatarMoeda(sub.realizado)}
+                                        </span>
+                                        {categoriasEditaveisRealizado.includes(sub.nome) && (
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleEditRealizado(catIndex, subIndex, sub.realizado)}
+                                            className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                                          >
+                                            <Edit className="h-3 w-3" />
+                                          </Button>
+                                        )}
                                         {(() => {
-                                          // Debug log direto na renderização
-                                          if (sub.realizado > 0) {
-                                            console.log(`🎯 RENDERIZANDO ${sub.nome}: ${sub.realizado}`);
-                                            const valorFormatado = formatarMoeda(sub.realizado);
-                                            console.log(`💰 VALOR FORMATADO: "${valorFormatado}"`);
-                                          }
-                                          return sub.isPercentage ? formatarPorcentagem(sub.realizado) : formatarMoeda(sub.realizado);
-                                        })()}
-                                      </span>
-                                      {(() => {
-                                        const indicador = obterIndicadorPerformance(sub.realizado, sub.planejado, sub.isPercentage);
-                                        const IconComponent = indicador.icon;
-                                        return (
-                                          <div key={`indicator-${key}`} className="relative group">
-                                            <IconComponent className={`h-4 w-4 ${indicador.color}`} />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                              {indicador.tooltip}
+                                          const indicador = obterIndicadorPerformance(sub.realizado, sub.planejado, sub.isPercentage);
+                                          const IconComponent = indicador.icon;
+                                          return (
+                                            <div key={`indicator-${key}`} className="relative group">
+                                              <IconComponent className={`h-4 w-4 ${indicador.color}`} />
+                                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                                {indicador.tooltip}
+                                              </div>
                                             </div>
-                                          </div>
-                                        );
-                                      })()}
-                                    </div>
+                                          );
+                                        })()}
+                                      </div>
+                                    )}
                                   </TableCell>
                                   <TableCell className="text-center">
                                     {sub.editavel && (
