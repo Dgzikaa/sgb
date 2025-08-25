@@ -97,6 +97,11 @@ export async function GET(request: NextRequest) {
 			
 			// Aplicar filtro por dia da semana se especificado
 			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
+				// DEBUG: Log para ver se o filtro está funcionando
+				if (rawFone === '21-999811048') { // Luciano Marcelo
+					console.log(`🔍 Luciano Marcelo: data=${r.dt_gerencial}, diaSemana=${diaSemanaData}, filtro=${diaSemanaFiltro}, aceito=${diaSemanaData.toString() === diaSemanaFiltro}`)
+				}
+				
 				if (diaSemanaData.toString() !== diaSemanaFiltro) {
 					continue // Pular este registro se não for do dia da semana desejado
 				}
@@ -196,11 +201,18 @@ export async function GET(request: NextRequest) {
 			.sort((a, b) => b.visitas - a.visitas)
 			.slice(0, 100)
 			
-		// Log final apenas para Laura Galvão específica
+		// Log final para debug - comparar Laura com top 5
 		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
 			console.log(`🎯 Laura Galvão (61992053013) processados: ${contadorLauraGalvao} registros`)
 			const lauraGalvaoEspecifica = map.get('61992053013')
 			console.log('🎯 Laura Galvão (61992053013) resultado final:', lauraGalvaoEspecifica)
+			
+			// Debug: Verificar top 5 clientes e quantos dias eles realmente foram
+			const top5 = Array.from(map.values()).sort((a, b) => b.visitas - a.visitas).slice(0, 5)
+			console.log('🏆 TOP 5 CLIENTES COM FILTRO DE QUARTA:')
+			top5.forEach((cliente, index) => {
+				console.log(`${index + 1}. ${cliente.nome} (${cliente.fone}): ${cliente.visitas} visitas`)
+			})
 		}
 		
 		const clientesFormatados = clientes.map((c) => ({
