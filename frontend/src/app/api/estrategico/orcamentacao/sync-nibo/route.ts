@@ -22,6 +22,8 @@ export async function POST(request: Request) {
 
     // Buscar dados do Nibo para o ano especificado
     // USANDO DATA_COMPETENCIA e CATEGORIA_NOME conforme estrutura correta
+    console.log(`🔍 Buscando dados NIBO para bar_id: ${bar_id}, ano: ${ano}`);
+    
     const { data: niboData, error: niboError } = await supabase
       .from('nibo_agendamentos')
       .select('*')
@@ -30,12 +32,24 @@ export async function POST(request: Request) {
       .lte('data_competencia', `${ano}-12-31`)
       .not('categoria_nome', 'is', null);
 
+    console.log(`📊 Dados NIBO encontrados: ${niboData?.length || 0} registros`);
+    
     if (niboError) {
       console.error('Erro ao buscar dados Nibo:', niboError);
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar dados do Nibo' },
         { status: 500 }
       );
+    }
+
+    // Log de amostra dos dados para debug
+    if (niboData && niboData.length > 0) {
+      console.log('📋 Amostra dos dados NIBO (primeiros 3):');
+      niboData.slice(0, 3).forEach((item, index) => {
+        console.log(`  ${index + 1}. Categoria: ${item.categoria_nome}, Status: ${item.status}, Valor: ${item.valor}, Data: ${item.data_competencia}`);
+      });
+    } else {
+      console.log('⚠️ Nenhum dado NIBO encontrado para os critérios especificados');
     }
 
     // Mapeamento baseado nos dados REAIS encontrados no banco
@@ -114,9 +128,21 @@ export async function POST(request: Request) {
     
     console.log(`🔍 Processando ${niboData?.length || 0} registros do Nibo...`);
     
-    niboData?.forEach(item => {
+    niboData?.forEach((item, index) => {
       const mes = new Date(item.data_competencia).getMonth() + 1;
       const categoriaNormalizada = encontrarCategoria(item.categoria_nome);
+      
+      // Log detalhado para debug
+      if (index < 5) { // Log apenas os primeiros 5 para não poluir
+        console.log(`🔍 Item ${index + 1}:`, {
+          categoria_original: item.categoria_nome,
+          categoria_normalizada: categoriaNormalizada,
+          status: item.status,
+          valor: item.valor,
+          mes: mes,
+          data: item.data_competencia
+        });
+      }
       
       // Tratamento especial para agrupamentos
       let categoriaFinal = categoriaNormalizada;
@@ -133,7 +159,9 @@ export async function POST(request: Request) {
       
       const key = `${categoriaFinal}-${subcategoriaFinal || ''}-${mes}`;
       
-      console.log(`📊 Processando: ${item.categoria_nome} → ${categoriaFinal} (Mês: ${mes})`);
+      if (index < 5) {
+        console.log(`📊 Processando: ${item.categoria_nome} → ${categoriaFinal} (Mês: ${mes}, Key: ${key})`);
+      }
       
       if (!orcamentoMap.has(key)) {
         orcamentoMap.set(key, {
@@ -153,6 +181,9 @@ export async function POST(request: Request) {
       // Somar valores realizados (status: Paid)
       if (item.status === 'Paid') {
         orcamento.valor_realizado += Math.abs(parseFloat(item.valor) || 0);
+        if (index < 5) {
+          console.log(`💰 Valor realizado adicionado: ${Math.abs(parseFloat(item.valor) || 0)} (Total: ${orcamento.valor_realizado})`);
+        }
       }
       
       // Para orçamento, usar o valor total como planejado
@@ -160,6 +191,14 @@ export async function POST(request: Request) {
     });
     
     console.log(`📈 Total de categorias agrupadas: ${orcamentoMap.size}`);
+    
+    // Log das categorias processadas para debug
+    if (orcamentoMap.size > 0) {
+      console.log('📋 Resumo das categorias processadas:');
+      Array.from(orcamentoMap.entries()).slice(0, 10).forEach(([key, orcamento]) => {
+        console.log(`  ${key}: Planejado: ${orcamento.valor_planejado}, Realizado: ${orcamento.valor_realizado}`);
+      });
+    }
 
     // Verificar registros existentes e atualizar/inserir
     let importados = 0;
