@@ -101,10 +101,27 @@ export async function GET(request: NextRequest) {
 				let fone = rawFone.replace(/\D/g, '')
 				if (!fone) continue
 				
-				// Padronizar telefone: se tem 10 dígitos, adicionar 9 após o DDD (celular antigo)
-				if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
-					// Adicionar 9 após o DDD para celulares antigos
-					fone = fone.substring(0, 2) + '9' + fone.substring(2)
+				// Normalizar telefone para formato padrão (11 dígitos: DDD + 9 + número)
+				if (fone.length === 13 && fone.startsWith('55')) {
+					// Remover código do país (55) -> 11 dígitos
+					fone = fone.substring(2)
+				}
+				
+				if (fone.length === 12 && fone.startsWith('55')) {
+					// Remover código do país (55) e adicionar 9 -> 11 dígitos
+					const ddd = fone.substring(2, 4)
+					const numero = fone.substring(4)
+					if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
+						fone = ddd + '9' + numero
+					}
+				}
+				
+				if (fone.length === 10) {
+					// Adicionar 9 após o DDD para celulares antigos (10 -> 11 dígitos)
+					const ddd = fone.substring(0, 2)
+					if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
+						fone = ddd + '9' + fone.substring(2)
+					}
 				}
 				const nome = (r.customer_name || '').toString().trim() || 'Sem nome'
 				const ultimaReserva = r.reservation_date as string
@@ -175,8 +192,26 @@ export async function GET(request: NextRequest) {
 				if (!foneNormalizado) return
 				
 				// Aplicar a mesma normalização usada nos reservantes
-				if (foneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(foneNormalizado.substring(0, 2))) {
-					foneNormalizado = foneNormalizado.substring(0, 2) + '9' + foneNormalizado.substring(2)
+				if (foneNormalizado.length === 13 && foneNormalizado.startsWith('55')) {
+					// Remover código do país (55) -> 11 dígitos
+					foneNormalizado = foneNormalizado.substring(2)
+				}
+				
+				if (foneNormalizado.length === 12 && foneNormalizado.startsWith('55')) {
+					// Remover código do país (55) e adicionar 9 -> 11 dígitos
+					const ddd = foneNormalizado.substring(2, 4)
+					const numero = foneNormalizado.substring(4)
+					if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
+						foneNormalizado = ddd + '9' + numero
+					}
+				}
+				
+				if (foneNormalizado.length === 10) {
+					// Adicionar 9 após o DDD para celulares antigos (10 -> 11 dígitos)
+					const ddd = foneNormalizado.substring(0, 2)
+					if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
+						foneNormalizado = ddd + '9' + foneNormalizado.substring(2)
+					}
 				}
 				
 				mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
@@ -191,15 +226,17 @@ export async function GET(request: NextRequest) {
 		// Fazer match entre reservantes e visitas
 		console.log('🔗 API Reservantes: Fazendo match entre reservantes e visitas...')
 		let matchesEncontrados = 0
+		let debugCount = 0
 		
 		const reservantes = Array.from(map.values())
 			.map(r => {
 				const visitas = mapVisitas.get(r.fone) || 0
 				if (visitas > 0) matchesEncontrados++
 				
-				// Log para os primeiros 5 reservantes para debug
-				if (matchesEncontrados <= 5) {
-					console.log(`🔍 Match: ${r.nome} (${r.fone}) -> ${visitas} visitas`)
+				// Log para os primeiros 10 reservantes (com e sem match) para debug
+				if (debugCount < 10) {
+					console.log(`🔍 Debug ${debugCount + 1}: ${r.nome} (${r.fone}) -> ${visitas} visitas`)
+					debugCount++
 				}
 				
 				return {
