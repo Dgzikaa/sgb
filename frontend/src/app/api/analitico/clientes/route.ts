@@ -98,6 +98,9 @@ export async function GET(request: NextRequest) {
 			// Aplicar filtro por dia da semana se especificado
 			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
 				// DEBUG: Log detalhado para entender o problema
+				const rawFone = (r.cli_fone || '').toString().trim()
+				const nome = (r.cli_nome || '').toString().trim() || 'Sem nome'
+				
 				if (rawFone === '21-999811048' || rawFone === '61-992053013') { // Luciano Marcelo ou Laura Galvão
 					const dataOriginal = r.dt_gerencial
 					const dataJS = new Date(dataOriginal)
