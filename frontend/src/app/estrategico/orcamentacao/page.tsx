@@ -173,7 +173,6 @@ export default function OrcamentacaoPage() {
 
     isLoadingRef.current = true;
     setLoading(true);
-    showLoading('Carregando dados orçamentários...');
     
     try {
       const anoAtual = new Date().getFullYear();
@@ -253,7 +252,6 @@ export default function OrcamentacaoPage() {
       });
     } finally {
       setLoading(false);
-      hideLoading();
       isLoadingRef.current = false;
     }
   };
@@ -268,7 +266,6 @@ export default function OrcamentacaoPage() {
     if (!selectedBar) return;
 
     setSincronizando(true);
-    showLoading('Sincronizando com NIBO...');
     
     try {
       const anoAtual = new Date().getFullYear();
@@ -306,7 +303,6 @@ export default function OrcamentacaoPage() {
       });
     } finally {
       setSincronizando(false);
-      hideLoading();
     }
   };
 
