@@ -65,9 +65,11 @@ export async function GET(request: Request) {
     const categoriasMap = new Map([
       // Despesas Variáveis
       ['IMPOSTO/TX MAQ/COMISSAO', 'IMPOSTO/TX MAQ/COMISSAO'],
+      ['IMPOSTO', 'IMPOSTO/TX MAQ/COMISSAO'],
       ['TAXA MAQUININHA', 'IMPOSTO/TX MAQ/COMISSAO'],
       ['COMISSÃO', 'IMPOSTO/TX MAQ/COMISSAO'],
       ['COMISSAO', 'IMPOSTO/TX MAQ/COMISSAO'],
+      ['COMISSÃO 10%', 'IMPOSTO/TX MAQ/COMISSAO'],
       
       // CMV
       ['Custo Comida', 'CMV'],
@@ -81,10 +83,15 @@ export async function GET(request: Request) {
       ['CUSTO-EMPRESA FUNCIONÁRIOS', 'CUSTO-EMPRESA FUNCIONARIOS'],
       ['CUSTO-EMPRESA FUNCIONARIOS', 'CUSTO-EMPRESA FUNCIONARIOS'],
       ['SALARIO FUNCIONARIOS', 'CUSTO-EMPRESA FUNCIONARIOS'],
+      ['SALÁRIO FUNCIONÁRIOS', 'CUSTO-EMPRESA FUNCIONARIOS'],
       ['PROVISÃO TRABALHISTA', 'PROVISÃO TRABALHISTA'],
+      ['PROVISAO TRABALHISTA', 'PROVISÃO TRABALHISTA'],
       ['FREELA SEGURANÇA', 'FREELA SEGURANÇA'],
+      ['FREELA SEGURANCA', 'FREELA SEGURANÇA'],
       ['FREELA ATENDIMENTO', 'FREELA ATENDIMENTO'],
       ['FREELA COZINHA', 'FREELA COZINHA'],
+      ['FREELA BAR', 'FREELA BAR'],
+      ['FREELA LIMPEZA', 'FREELA LIMPEZA'],
       ['ADICIONAIS', 'ADICIONAIS'],
       
       // Administrativas
@@ -122,6 +129,16 @@ export async function GET(request: Request) {
       // Não Operacionais
       ['CONTRATOS', 'CONTRATOS'],
       ['CONTRATO', 'CONTRATOS'],
+      ['Contratos', 'CONTRATOS'],
+      ['OUTRAS RECEITAS', 'CONTRATOS'],
+      ['Outras Receitas', 'CONTRATOS'],
+      ['Ambev Bonificações Contrato Anual', 'CONTRATOS'],
+      ['Ambev Bonificação Contrato Cash-back Março', 'CONTRATOS'],
+      ['Ambev Bonificação Contrato Cash-back Fevereiro', 'CONTRATOS'],
+      ['Ambev Bonificação Contrato Cash-back Junho', 'CONTRATOS'],
+      ['Ambev Bonificação Contrato Cash-back Julho', 'CONTRATOS'],
+      ['Dividendos', 'Dividendos'],
+      ['DIVIDENDOS', 'Dividendos'],
       ['PRO LABORE', 'PRO LABORE'],
       ['Despesas Financeiras', 'Despesas Financeiras'],
       ['Outros Sócios', 'Outros Sócios'],
@@ -134,12 +151,29 @@ export async function GET(request: Request) {
 
     // 4. Calcular valores realizados por categoria
     const valoresRealizados = new Map<string, number>();
+    let receitaTotal = 0;
     
+    // Primeiro, calcular receita total para porcentagens
     dadosNibo?.forEach(item => {
       if (!item.categoria_nome) return;
       
-      const categoriaNormalizada = categoriasMap.get(item.categoria_nome) || item.categoria_nome;
       const valor = Math.abs(parseFloat(item.valor) || 0);
+      
+      // Categorias que são receita
+      if (['Receita de Eventos', 'Stone Crédito', 'Stone Débito', 'Stone Pix', 'Dinheiro', 'Pix Direto na Conta', 'RECEITA BRUTA'].includes(item.categoria_nome)) {
+        receitaTotal += valor;
+      }
+    });
+    
+    // Depois, calcular valores por categoria
+    dadosNibo?.forEach(item => {
+      if (!item.categoria_nome) return;
+      
+      const valorOriginal = parseFloat(item.valor) || 0;
+      const valor = Math.abs(valorOriginal);
+      
+      // Mapear categoria normalmente
+      const categoriaNormalizada = categoriasMap.get(item.categoria_nome) || item.categoria_nome;
       
       if (!valoresRealizados.has(categoriaNormalizada)) {
         valoresRealizados.set(categoriaNormalizada, 0);
@@ -148,6 +182,16 @@ export async function GET(request: Request) {
       valoresRealizados.set(categoriaNormalizada, 
         valoresRealizados.get(categoriaNormalizada)! + valor
       );
+    });
+    
+    // Converter valores absolutos para porcentagens onde necessário
+    const categoriasPercentuais = ['IMPOSTO/TX MAQ/COMISSAO', 'CMV'];
+    categoriasPercentuais.forEach(categoria => {
+      if (valoresRealizados.has(categoria) && receitaTotal > 0) {
+        const valorAbsoluto = valoresRealizados.get(categoria)!;
+        const porcentagem = (valorAbsoluto / receitaTotal) * 100;
+        valoresRealizados.set(categoria, porcentagem);
+      }
     });
 
     // 5. Estrutura base das categorias (caso não existam dados planejados)
@@ -193,7 +237,8 @@ export async function GET(request: Request) {
       { categoria: 'RECEITA BRUTA', tipo: 'receita' },
       
       // Não Operacionais
-      { categoria: 'CONTRATOS', tipo: 'despesa' },
+      { categoria: 'CONTRATOS', tipo: 'receita' },
+      { categoria: 'Dividendos', tipo: 'despesa' },
       { categoria: 'PRO LABORE', tipo: 'despesa' },
       { categoria: 'Despesas Financeiras', tipo: 'despesa' },
       { categoria: 'Outros Sócios', tipo: 'despesa' },

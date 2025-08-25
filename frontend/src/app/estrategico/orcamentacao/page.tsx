@@ -112,7 +112,8 @@ export default function OrcamentacaoPage() {
       subcategorias: [
         { nome: 'Escritório Central', planejado: 2000, projecao: 2000, realizado: 0, editavel: true },
         { nome: 'Administrativo Ordinário', planejado: 1500, projecao: 1500, realizado: 0, editavel: true },
-        { nome: 'RECURSOS HUMANOS', planejado: 1000, projecao: 1000, realizado: 0, editavel: true }
+        { nome: 'RECURSOS HUMANOS', planejado: 1000, projecao: 1000, realizado: 0, editavel: true },
+        { nome: 'VALE TRANSPORTE', planejado: 15000, projecao: 15000, realizado: 0, editavel: true }
       ]
     },
     {
@@ -172,41 +173,7 @@ export default function OrcamentacaoPage() {
     setLoading(true);
     
     try {
-      const anoAtual = new Date().getFullYear();
-      
-      // 1. Primeiro sincronizar com NIBO para o ano atual
-      console.log('🔄 Sincronizando com NIBO...', {
-        bar_id: selectedBar.id,
-        ano: anoAtual,
-        mes: mesSelecionado
-      });
-      
-      const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          bar_id: selectedBar.id,
-          ano: anoAtual,
-        }),
-      });
-      
-      const syncResult = await syncResponse.json();
-      console.log('📊 Resultado da sincronização NIBO:', syncResult);
-      
-      if (syncResult.success) {
-        console.log('✅ Sincronização NIBO concluída:', {
-          importados: syncResult.importados,
-          atualizados: syncResult.atualizados,
-          total: syncResult.total,
-          categorias: syncResult.categorias_processadas
-        });
-      } else {
-        console.error('❌ Erro na sincronização NIBO:', syncResult.error);
-      }
-
-      // 2. Buscar dados orçamentários da tabela
+      // Buscar dados orçamentários (planejado + realizado calculado do NIBO)
       const apiUrl = `/api/estrategico/orcamentacao?bar_id=${selectedBar.id}&ano=${anoSelecionado}&mes=${mesSelecionado}`;
       console.log('🔍 Buscando dados orçamentários:', apiUrl);
       
@@ -222,30 +189,47 @@ export default function OrcamentacaoPage() {
       if (result.success && result.data && result.data.length > 0) {
         console.log('📊 Dados orçamentários recebidos:', result.data);
         
-        // Aplicar valores realizados na estrutura
+        // Aplicar valores realizados na estrutura (forçar nova referência)
         const categoriasAtualizadas = getCategoriasEstruturadas().map(categoria => ({
           ...categoria,
+          id: Math.random(), // Forçar re-render
           subcategorias: categoria.subcategorias.map(sub => {
-            // Buscar correspondência nos dados recebidos
+            // Buscar correspondência nos dados recebidos (match exato por categoria)
             const dadosCorrespondentes = result.data.find((item: any) => 
-              item.subcategoria === sub.nome || item.categoria === sub.nome
+              item.categoria === sub.nome || 
+              (item.subcategoria && item.subcategoria === sub.nome)
             );
             
             if (dadosCorrespondentes) {
+              console.log(`✅ Match encontrado: ${sub.nome} → Realizado: R$ ${dadosCorrespondentes.valor_realizado}`);
               return {
                 ...sub,
-                realizado: dadosCorrespondentes.valor_realizado || 0,
-                planejado: dadosCorrespondentes.valor_planejado || sub.planejado
+                id: Math.random(), // Forçar re-render
+                realizado: Number(dadosCorrespondentes.valor_realizado) || 0,
+                planejado: Number(dadosCorrespondentes.valor_planejado) || sub.planejado
               };
             }
             
-            return sub;
+            return { ...sub, id: Math.random() }; // Forçar re-render mesmo sem dados
           })
         }));
 
         setCategorias(categoriasAtualizadas);
         setUltimaAtualizacao(new Date());
         console.log('✅ Categorias atualizadas com dados reais');
+        
+        // Debug: verificar se os dados foram realmente atualizados no estado
+        console.log('🔍 Estado das categorias após atualização:');
+        categoriasAtualizadas.forEach(cat => {
+          console.log(`📁 Categoria: ${cat.nome}`);
+          cat.subcategorias.forEach(sub => {
+            if (sub.realizado > 0) {
+              console.log(`  ✅ ${sub.nome}: Realizado = ${sub.realizado}, Planejado = ${sub.planejado}`);
+            } else {
+              console.log(`  ❌ ${sub.nome}: Realizado = ${sub.realizado} (ZERO!)`);
+            }
+          });
+        });
       } else {
         console.log('⚠️ Sem dados específicos, usando estrutura base');
         setCategorias(getCategoriasEstruturadas());
@@ -645,7 +629,7 @@ export default function OrcamentacaoPage() {
                       </TableHeader>
                       <TableBody>
                         {categorias.map((categoria, catIndex) => (
-                          <React.Fragment key={`categoria-${catIndex}`}>
+                          <React.Fragment key={`categoria-${categoria.nome}-${catIndex}`}>
                             {/* Cabeçalho da Categoria */}
                             <TableRow className="border-gray-200 dark:border-gray-700">
                               <TableCell colSpan={5} className={`font-semibold ${categoria.cor} p-3 rounded-lg`}>
@@ -659,7 +643,7 @@ export default function OrcamentacaoPage() {
                               const isEditing = editMode[key];
                               
                               return (
-                                <TableRow key={`sub-${key}`} className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <TableRow key={`sub-${sub.nome}-${key}`} className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                   <TableCell className="text-gray-900 dark:text-white pl-8 font-medium">
                                     {sub.nome}
                                   </TableCell>
@@ -682,8 +666,16 @@ export default function OrcamentacaoPage() {
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-2">
-                                      <span className="text-gray-900 dark:text-white font-mono">
-                                        {sub.isPercentage ? formatarPorcentagem(sub.realizado) : formatarMoeda(sub.realizado)}
+                                      <span className="text-gray-900 dark:text-white font-mono font-semibold">
+                                        {(() => {
+                                          // Debug log direto na renderização
+                                          if (sub.realizado > 0) {
+                                            console.log(`🎯 RENDERIZANDO ${sub.nome}: ${sub.realizado}`);
+                                            const valorFormatado = formatarMoeda(sub.realizado);
+                                            console.log(`💰 VALOR FORMATADO: "${valorFormatado}"`);
+                                          }
+                                          return sub.isPercentage ? formatarPorcentagem(sub.realizado) : formatarMoeda(sub.realizado);
+                                        })()}
                                       </span>
                                       {(() => {
                                         const indicador = obterIndicadorPerformance(sub.realizado, sub.planejado, sub.isPercentage);
