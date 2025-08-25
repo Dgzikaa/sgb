@@ -608,7 +608,7 @@ export default function OrcamentacaoPage() {
           <Card className={`bg-gradient-to-br ${valoresCalculados.lucroPlanejado >= 0 ? 'from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700' : 'from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-700'}`}>
             <CardHeader className="pb-2">
               <CardTitle className={`text-sm font-medium flex items-center gap-2 ${valoresCalculados.lucroPlanejado >= 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>
-                <Target className="h-4 w-4" />
+                <TrendingUp className="h-4 w-4" />
                 Lucro Planejado
               </CardTitle>
             </CardHeader>
@@ -644,7 +644,7 @@ export default function OrcamentacaoPage() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <TabsTrigger value="planejamento" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/50 dark:data-[state=active]:text-blue-300">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <Calendar className="h-4 w-4 mr-2" />
                 Planejamento
               </TabsTrigger>
               <TabsTrigger value="comparativo" className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700 dark:data-[state=active]:bg-green-900/50 dark:data-[state=active]:text-green-300">
@@ -652,7 +652,7 @@ export default function OrcamentacaoPage() {
                 Comparativo
               </TabsTrigger>
               <TabsTrigger value="analise" className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 dark:data-[state=active]:bg-purple-900/50 dark:data-[state=active]:text-purple-300">
-                <Target className="h-4 w-4 mr-2" />
+                <TrendingDown className="h-4 w-4 mr-2" />
                 Análise
               </TabsTrigger>
             </TabsList>
@@ -661,7 +661,7 @@ export default function OrcamentacaoPage() {
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
+                    <DollarSign className="h-5 w-5" />
                     Detalhamento Orçamentário
                   </CardTitle>
                   <CardDescription className="text-gray-600 dark:text-gray-400">
