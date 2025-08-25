@@ -65,12 +65,7 @@ export function IndicadorRetencao({ valor = 0, meta, variacao = 0, mesSelected: 
             </div>
           </div>
           
-          <div className="flex items-center gap-1">
-            {/* Período fixo - sem navegação */}
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 px-2">
-              {getNomeMesAbreviado()}
-            </span>
-          </div>
+
         </div>
       </CardHeader>
       

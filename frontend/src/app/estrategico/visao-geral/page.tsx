@@ -118,12 +118,21 @@ export default function VisaoGeralEstrategica() {
     setRequestInProgress(true);
     showLoading('Carregando dados da visão geral...');
     
-    const hoje = new Date();
-    const mesAtual = `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}`;
+    // Calcular o mês de retenção baseado no trimestre selecionado
+    const getMesRetencao = (trimestre: number) => {
+      const ultimoMesTrimestre = {
+        2: '2025-06', // 2º Trimestre: Abr-Jun (usar Junho)
+        3: '2025-09', // 3º Trimestre: Jul-Set (usar Setembro) 
+        4: '2025-12'  // 4º Trimestre: Out-Dez (usar Dezembro)
+      };
+      return ultimoMesTrimestre[trimestre as keyof typeof ultimoMesTrimestre] || '2025-09';
+    };
+    
+    const mesRetencao = getMesRetencao(trimestreAtual);
     const timestamp = Date.now();
     
     const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
-    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
+    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesRetencao}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
     
     const requestHeaders = {
       'x-user-data': JSON.stringify({ bar_id: selectedBar.id, permissao: 'admin' })
