@@ -40,7 +40,8 @@ export async function GET(request: NextRequest) {
 	const pageSize = 1000
 	let offset = 0
 	let totalLinhas = 0
-	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
+	const map = new Map<string, { nome: string; fone: string; visitas: number; visitasTotal: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
+	const mapTotal = new Map<string, number>() // Mapa para contar total de visitas (sem filtro)
 
 	const MAX_ITERATIONS = 500 // Aumentar drasticamente para garantir processamento completo
 	let iterations = 0
@@ -140,6 +141,9 @@ export async function GET(request: NextRequest) {
 					contadorLauraGalvao++
 				}
 				
+				// SEMPRE contar no total (sem filtro de dia)
+				mapTotal.set(fone, (mapTotal.get(fone) || 0) + 1)
+				
 
 				const vrConsumo = vrPagamentos - vrCouvert
 
@@ -150,6 +154,7 @@ export async function GET(request: NextRequest) {
 						nome, 
 						fone, 
 						visitas: 1, 
+						visitasTotal: mapTotal.get(fone) || 1,
 						ultima,
 						totalEntrada: vrCouvert,
 						totalConsumo: vrConsumo,
@@ -160,6 +165,7 @@ export async function GET(request: NextRequest) {
 				} else {
 
 					prev.visitas += 1
+					prev.visitasTotal = mapTotal.get(fone) || prev.visitas
 					prev.totalEntrada += vrCouvert
 					prev.totalConsumo += vrConsumo
 					prev.totalGasto += vrPagamentos
@@ -205,6 +211,10 @@ export async function GET(request: NextRequest) {
 				email: null,
 				sistema: 'ContaHub',
 				total_visitas: c.visitas,
+				total_visitas_geral: c.visitasTotal, // Total sem filtro
+				visitas_formatadas: diaSemanaFiltro && diaSemanaFiltro !== 'todos' 
+					? `${c.visitas}/${c.visitasTotal}` 
+					: c.visitas.toString(),
 				valor_total_gasto: c.totalGasto,
 				valor_total_entrada: c.totalEntrada,
 				valor_total_consumo: c.totalConsumo,

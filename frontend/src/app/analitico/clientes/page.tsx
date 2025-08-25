@@ -22,6 +22,8 @@ interface Cliente {
   telefone: string | null
   email: string | null
   total_visitas: number
+  total_visitas_geral?: number
+  visitas_formatadas?: string
   valor_total_gasto: number
   valor_total_entrada: number
   valor_total_consumo: number
@@ -889,7 +891,7 @@ export default function ClientesPage() {
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                      {cliente.total_visitas}
+                      {cliente.visitas_formatadas || cliente.total_visitas}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center text-gray-900 dark:text-white font-medium">
