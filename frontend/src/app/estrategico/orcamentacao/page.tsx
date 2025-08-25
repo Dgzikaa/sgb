@@ -61,7 +61,6 @@ export default function OrcamentacaoPage() {
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(false);
-  const [sincronizando, setSincronizando] = useState(false);
   const [categorias, setCategorias] = useState<CategoriaOrcamento[]>([]);
   const [mesSelecionado, setMesSelecionado] = useState<string>('8'); // Agosto pré-selecionado
   const [anoSelecionado, setAnoSelecionado] = useState<string>('2025');
@@ -277,48 +276,12 @@ export default function OrcamentacaoPage() {
     }
   }, [selectedBar, anoSelecionado, mesSelecionado]); // Removido carregarDados das dependências
 
-  const sincronizarManualmente = async () => {
-    if (!selectedBar) return;
-
-    setSincronizando(true);
-    
-    try {
-      const anoAtual = new Date().getFullYear();
-      
-      const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          bar_id: selectedBar.id,
-          ano: anoAtual,
-        }),
-      });
-      
-      const syncResult = await syncResponse.json();
-      
-      if (syncResult.success) {
-        // Recarregar dados após sincronização
-        await carregarDados();
-        
-        toast({
-          title: 'Sincronização concluída',
-          description: `${syncResult.total} registros processados (${syncResult.importados} novos, ${syncResult.atualizados} atualizados)`,
-        });
-      } else {
-        throw new Error(syncResult.error || 'Erro na sincronização');
-      }
-    } catch (error) {
-      console.error('Erro na sincronização manual:', error);
-      toast({
-        title: 'Erro na sincronização',
-        description: 'Não foi possível sincronizar com o NIBO',
-        variant: 'destructive',
-      });
-    } finally {
-      setSincronizando(false);
-    }
+  const recarregarDados = async () => {
+    await carregarDados();
+    toast({
+      title: "Dados atualizados",
+      description: "Os dados foram recarregados automaticamente do NIBO",
+    });
   };
 
 
@@ -557,13 +520,13 @@ export default function OrcamentacaoPage() {
 
           <div className="flex gap-2">
             <Button
-              onClick={sincronizarManualmente}
-              disabled={sincronizando}
+              onClick={recarregarDados}
+              disabled={loading}
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${sincronizando ? 'animate-spin' : ''}`} />
-              Sincronizar NIBO
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Atualizar Dados
             </Button>
           </div>
         </motion.div>
