@@ -52,75 +52,208 @@ export async function POST(request: Request) {
       console.log('⚠️ Nenhum dado NIBO encontrado para os critérios especificados');
     }
 
-    // Mapeamento baseado nos dados REAIS encontrados no banco
-    // Mapeando categorias "problema" para as que existem no banco
+    // Mapeamento expandido baseado nas categorias reais do orçamento
     const categoriasMap = new Map([
-      // ✅ FUNCIONÁRIOS -> Existem como SALARIO FUNCIONARIOS 
-      ['CUSTO-EMPRESA FUNCIONÁRIOS', 'SALARIO FUNCIONARIOS'],
-      ['FUNCIONÁRIOS', 'SALARIO FUNCIONARIOS'],
-      ['SALÁRIOS', 'SALARIO FUNCIONARIOS'],
+      // ✅ DESPESAS VARIÁVEIS
+      ['IMPOSTO/TX MAQ/COMISSAO', 'IMPOSTO/TX MAQ/COMISSAO'],
+      ['IMPOSTO', 'IMPOSTO/TX MAQ/COMISSAO'],
+      ['IMPOSTOS', 'IMPOSTO/TX MAQ/COMISSAO'],
+      ['COMISSÃO', 'IMPOSTO/TX MAQ/COMISSAO'],
+      ['COMISSAO', 'IMPOSTO/TX MAQ/COMISSAO'],
+      ['TX MAQ', 'IMPOSTO/TX MAQ/COMISSAO'],
       
-      // ✅ IMPOSTOS -> Existe como IMPOSTO
-      ['IMPOSTO/TX MAQ/COMISSÃO', 'IMPOSTO'],
-      ['IMPOSTOS', 'IMPOSTO'],
-      ['COMISSÃO', 'COMISSÃO 10%'], // Existe no banco
+      // ✅ CMV
+      ['CMV', 'CMV'],
+      ['CUSTO MERCADORIA', 'CMV'],
+      ['CUSTO PRODUTO', 'CMV'],
+      ['INSUMOS', 'CMV'],
       
-      // ✅ CMV -> Agrupamento das categorias de custo existentes
-      ['CMV', 'CUSTO_AGRUPADO'], // Será tratado especialmente
+      // ✅ PESSOAL
+      ['CUSTO-EMPRESA FUNCIONÁRIOS', 'CUSTO-EMPRESA FUNCIONÁRIOS'],
+      ['FUNCIONÁRIOS', 'CUSTO-EMPRESA FUNCIONÁRIOS'],
+      ['SALÁRIOS', 'CUSTO-EMPRESA FUNCIONÁRIOS'],
+      ['SALARIO', 'CUSTO-EMPRESA FUNCIONÁRIOS'],
+      ['FOLHA PAGAMENTO', 'CUSTO-EMPRESA FUNCIONÁRIOS'],
       
-      // ✅ PRO LABORE -> Existe exatamente assim
+      ['ADICIONAIS', 'ADICIONAIS'],
+      ['ADICIONAL', 'ADICIONAIS'],
+      ['HORA EXTRA', 'ADICIONAIS'],
+      
+      ['FREELA ATENDIMENTO', 'FREELA ATENDIMENTO'],
+      ['FREELANCER ATENDIMENTO', 'FREELA ATENDIMENTO'],
+      
+      ['FREELA BAR', 'FREELA BAR'],
+      ['FREELANCER BAR', 'FREELA BAR'],
+      
+      ['FREELA COZINHA', 'FREELA COZINHA'],
+      ['FREELANCER COZINHA', 'FREELA COZINHA'],
+      
+      ['FREELA LIMPEZA', 'FREELA LIMPEZA'],
+      ['FREELANCER LIMPEZA', 'FREELA LIMPEZA'],
+      
+      ['FREELA SEGURANÇA', 'FREELA SEGURANÇA'],
+      ['FREELA SEGURANCA', 'FREELA SEGURANÇA'],
+      ['FREELANCER SEGURANÇA', 'FREELA SEGURANÇA'],
+      ['FREELANCER SEGURANCA', 'FREELA SEGURANÇA'],
+      
+      ['PRO LABORE', 'PRO LABORE'],
       ['PRO-LABORE', 'PRO LABORE'],
       ['PROLABORE', 'PRO LABORE'],
       
-      // ✅ ESCRITÓRIO CENTRAL -> Existe como Administrativo Ordinário
-      ['ESCRITÓRIO CENTRAL', 'Administrativo Ordinário'],
-      ['ESCRITORIO CENTRAL', 'Administrativo Ordinário'],
+      // ✅ ADMINISTRATIVAS
+      ['Escritório Central', 'Escritório Central'],
+      ['ESCRITÓRIO CENTRAL', 'Escritório Central'],
+      ['ESCRITORIO CENTRAL', 'Escritório Central'],
       
-      // ✅ ALUGUEL -> Existe exatamente assim
+      ['Administrativo Ordinário', 'Administrativo Ordinário'],
+      ['ADMINISTRATIVO ORDINÁRIO', 'Administrativo Ordinário'],
+      ['ADMINISTRATIVO ORDINARIO', 'Administrativo Ordinário'],
+      
+      ['RECURSOS HUMANOS', 'RECURSOS HUMANOS'],
+      ['RH', 'RECURSOS HUMANOS'],
+      
+      // ✅ MARKETING E EVENTOS
+      ['Marketing', 'Marketing'],
+      ['MARKETING', 'Marketing'],
+      ['PUBLICIDADE', 'Marketing'],
+      
+      ['Atrações Programação', 'Atrações Programação'],
+      ['ATRAÇÕES PROGRAMAÇÃO', 'Atrações Programação'],
+      ['ATRACOES PROGRAMACAO', 'Atrações Programação'],
+      ['ATRACAO', 'Atrações Programação'],
+      ['SHOW', 'Atrações Programação'],
+      
+      ['Produção Eventos', 'Produção Eventos'],
+      ['PRODUÇÃO EVENTOS', 'Produção Eventos'],
+      ['PRODUCAO EVENTOS', 'Produção Eventos'],
+      ['EVENTO', 'Produção Eventos'],
+      
+      // ✅ OPERACIONAIS
+      ['Materiais Operação', 'Materiais Operação'],
+      ['MATERIAIS OPERAÇÃO', 'Materiais Operação'],
+      ['MATERIAIS OPERACAO', 'Materiais Operação'],
+      ['MATERIAL OPERACAO', 'Materiais Operação'],
+      
+      ['Estorno', 'Estorno'],
+      ['ESTORNO', 'Estorno'],
+      
+      ['Equipamentos Operação', 'Equipamentos Operação'],
+      ['EQUIPAMENTOS OPERAÇÃO', 'Equipamentos Operação'],
+      ['EQUIPAMENTOS OPERACAO', 'Equipamentos Operação'],
+      ['EQUIPAMENTO', 'Equipamentos Operação'],
+      
+      ['Materiais de Limpeza e Descartáveis', 'Materiais de Limpeza e Descartáveis'],
+      ['MATERIAIS LIMPEZA', 'Materiais de Limpeza e Descartáveis'],
+      ['LIMPEZA', 'Materiais de Limpeza e Descartáveis'],
+      ['DESCARTÁVEIS', 'Materiais de Limpeza e Descartáveis'],
+      ['DESCARTAVEIS', 'Materiais de Limpeza e Descartáveis'],
+      
+      ['Utensílios', 'Utensílios'],
+      ['UTENSÍLIOS', 'Utensílios'],
+      ['UTENSILIOS', 'Utensílios'],
+      ['UTENSILIO', 'Utensílios'],
+      
+      ['Outros Operação', 'Outros Operação'],
+      ['OUTROS OPERAÇÃO', 'Outros Operação'],
+      ['OUTROS OPERACAO', 'Outros Operação'],
+      
+      // ✅ OCUPAÇÃO
+      ['ALUGUEL/CONDOMÍNIO/IPTU', 'ALUGUEL/CONDOMÍNIO/IPTU'],
       ['ALUGUEL', 'ALUGUEL/CONDOMÍNIO/IPTU'],
       ['CONDOMÍNIO', 'ALUGUEL/CONDOMÍNIO/IPTU'],
+      ['CONDOMINIO', 'ALUGUEL/CONDOMÍNIO/IPTU'],
       ['IPTU', 'ALUGUEL/CONDOMÍNIO/IPTU'],
       
-      // ✅ Utilidades - MANTER SEPARADAS (não agrupar)
-      // Estas são categorias INDIVIDUAIS conforme DRE
-      ['INTERNET', 'INTERNET'], // Categoria separada
-      ['LUZ', 'LUZ'], // Categoria separada
-      ['ÁGUA', 'ÁGUA'], // Categoria separada
-      ['GÁS', 'GÁS'], // Categoria separada
-      ['MANUTENÇÃO', 'MANUTENÇÃO'], // Categoria separada
+      ['ÁGUA', 'ÁGUA'],
+      ['AGUA', 'ÁGUA'],
       
-      // ❌ CONTRATOS não é uma categoria real - remover agrupamento
+      ['GÁS', 'GÁS'],
+      ['GAS', 'GÁS'],
+      
+      ['INTERNET', 'INTERNET'],
+      ['NET', 'INTERNET'],
+      ['WIFI', 'INTERNET'],
+      
+      ['Manutenção', 'Manutenção'],
+      ['MANUTENÇÃO', 'Manutenção'],
+      ['MANUTENCAO', 'Manutenção'],
+      ['REPARO', 'Manutenção'],
+      
+      ['LUZ', 'LUZ'],
+      ['ENERGIA', 'LUZ'],
+      ['ENERGIA ELÉTRICA', 'LUZ'],
+      ['ENERGIA ELETRICA', 'LUZ'],
+      
+      // ✅ RECEITAS
+      ['RECEITA BRUTA', 'RECEITA BRUTA'],
+      ['RECEITA', 'RECEITA BRUTA'],
+      ['FATURAMENTO', 'RECEITA BRUTA'],
+      ['VENDAS', 'RECEITA BRUTA'],
+      
+      // ✅ NÃO OPERACIONAIS
+      ['CONTRATOS', 'CONTRATOS'],
+      ['CONTRATO', 'CONTRATOS'],
     ]);
     
-    // Função para encontrar categoria normalizada
+    // Função para encontrar categoria normalizada (melhorada)
     const encontrarCategoria = (nomeOriginal: string) => {
       if (!nomeOriginal) return nomeOriginal;
       
-      // Correspondência direta no mapa
+      // 1. Correspondência direta no mapa
       if (categoriasMap.has(nomeOriginal)) {
         return categoriasMap.get(nomeOriginal);
       }
       
-      // Busca por correspondência parcial
-      const nomeUpper = nomeOriginal.toUpperCase();
-      
+      // 2. Busca case-insensitive
+      const nomeUpper = nomeOriginal.toUpperCase().trim();
       for (const [busca, destino] of categoriasMap) {
-        if (nomeUpper.includes(busca.toUpperCase()) || busca.toUpperCase().includes(nomeUpper)) {
+        if (busca.toUpperCase() === nomeUpper) {
           return destino;
         }
       }
       
-      // Casos especiais para CMV (agrupar custos)
-      if (nomeOriginal.includes('Custo ') && 
-          (nomeOriginal.includes('Bebidas') || nomeOriginal.includes('Comida') || 
-           nomeOriginal.includes('Drinks') || nomeOriginal.includes('Outros'))) {
-        return 'CMV'; // Agrupa todos os custos como CMV
+      // 3. Busca por correspondência parcial (contém)
+      for (const [busca, destino] of categoriasMap) {
+        const buscaUpper = busca.toUpperCase();
+        if (nomeUpper.includes(buscaUpper) || buscaUpper.includes(nomeUpper)) {
+          return destino;
+        }
       }
       
-      // ❌ REMOVIDO: Agrupamento incorreto de utilitários
-      // INTERNET, LUZ, ÁGUA, GÁS, MANUTENÇÃO são categorias SEPARADAS
+      // 4. Casos especiais para CMV (agrupar custos de produtos)
+      if (nomeOriginal.toLowerCase().includes('custo') && 
+          (nomeOriginal.toLowerCase().includes('bebida') || 
+           nomeOriginal.toLowerCase().includes('comida') || 
+           nomeOriginal.toLowerCase().includes('drink') || 
+           nomeOriginal.toLowerCase().includes('produto') ||
+           nomeOriginal.toLowerCase().includes('mercadoria'))) {
+        return 'CMV';
+      }
       
-      return nomeOriginal; // Retorna original se não encontrar
+      // 5. Casos especiais para freelancers
+      if (nomeOriginal.toLowerCase().includes('freela') || 
+          nomeOriginal.toLowerCase().includes('freelancer')) {
+        if (nomeOriginal.toLowerCase().includes('bar')) return 'FREELA BAR';
+        if (nomeOriginal.toLowerCase().includes('cozinha')) return 'FREELA COZINHA';
+        if (nomeOriginal.toLowerCase().includes('atendimento')) return 'FREELA ATENDIMENTO';
+        if (nomeOriginal.toLowerCase().includes('limpeza')) return 'FREELA LIMPEZA';
+        if (nomeOriginal.toLowerCase().includes('segur')) return 'FREELA SEGURANÇA';
+      }
+      
+      // 6. Casos especiais para utilidades
+      if (nomeOriginal.toLowerCase().includes('energia') || 
+          nomeOriginal.toLowerCase().includes('eletric')) return 'LUZ';
+      if (nomeOriginal.toLowerCase().includes('agua') || 
+          nomeOriginal.toLowerCase().includes('água')) return 'ÁGUA';
+      if (nomeOriginal.toLowerCase().includes('gas') || 
+          nomeOriginal.toLowerCase().includes('gás')) return 'GÁS';
+      if (nomeOriginal.toLowerCase().includes('internet') || 
+          nomeOriginal.toLowerCase().includes('wifi')) return 'INTERNET';
+      if (nomeOriginal.toLowerCase().includes('manut') || 
+          nomeOriginal.toLowerCase().includes('reparo')) return 'Manutenção';
+      
+      // 7. Retorna original se não encontrar correspondência
+      return nomeOriginal;
     };
     
     // Agrupar por categoria, subcategoria e mês
