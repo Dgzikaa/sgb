@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/layouts/PageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -181,7 +181,12 @@ export default function OrcamentacaoPage() {
       const anoAtual = new Date().getFullYear();
       
       // 1. Primeiro sincronizar com NIBO para o ano atual
-      console.log('🔄 Sincronizando com NIBO...');
+      console.log('🔄 Sincronizando com NIBO...', {
+        bar_id: selectedBar.id,
+        ano: anoAtual,
+        mes: mesSelecionado
+      });
+      
       const syncResponse = await fetch('/api/estrategico/orcamentacao/sync-nibo', {
         method: 'POST',
         headers: {
@@ -194,19 +199,31 @@ export default function OrcamentacaoPage() {
       });
       
       const syncResult = await syncResponse.json();
+      console.log('📊 Resultado da sincronização NIBO:', syncResult);
+      
       if (syncResult.success) {
         console.log('✅ Sincronização NIBO concluída:', {
           importados: syncResult.importados,
           atualizados: syncResult.atualizados,
-          total: syncResult.total
+          total: syncResult.total,
+          categorias: syncResult.categorias_processadas
         });
+      } else {
+        console.error('❌ Erro na sincronização NIBO:', syncResult.error);
       }
 
       // 2. Buscar dados orçamentários da tabela
-      const response = await fetch(
-        `/api/estrategico/orcamentacao?bar_id=${selectedBar.id}&ano=${anoSelecionado}&mes=${mesSelecionado}`
-      );
+      const apiUrl = `/api/estrategico/orcamentacao?bar_id=${selectedBar.id}&ano=${anoSelecionado}&mes=${mesSelecionado}`;
+      console.log('🔍 Buscando dados orçamentários:', apiUrl);
+      
+      const response = await fetch(apiUrl);
       const result = await response.json();
+      
+      console.log('📋 Resposta da API orçamentação:', {
+        success: result.success,
+        dataLength: result.data?.length || 0,
+        data: result.data
+      });
       
       if (result.success && result.data && result.data.length > 0) {
         console.log('📊 Dados orçamentários recebidos:', result.data);
@@ -666,9 +683,9 @@ export default function OrcamentacaoPage() {
                       </TableHeader>
                       <TableBody>
                         {categorias.map((categoria, catIndex) => (
-                          <>
+                          <React.Fragment key={`categoria-${catIndex}`}>
                             {/* Cabeçalho da Categoria */}
-                            <TableRow key={`cat-${catIndex}`} className="border-gray-200 dark:border-gray-700">
+                            <TableRow className="border-gray-200 dark:border-gray-700">
                               <TableCell colSpan={5} className={`font-semibold ${categoria.cor} p-3 rounded-lg`}>
                                 {categoria.nome}
                               </TableCell>
@@ -680,7 +697,7 @@ export default function OrcamentacaoPage() {
                               const isEditing = editMode[key];
                               
                               return (
-                                <TableRow key={key} className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <TableRow key={`sub-${key}`} className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                   <TableCell className="text-gray-900 dark:text-white pl-8 font-medium">
                                     {sub.nome}
                                   </TableCell>
@@ -710,7 +727,7 @@ export default function OrcamentacaoPage() {
                                         const indicador = obterIndicadorPerformance(sub.realizado, sub.planejado, sub.isPercentage);
                                         const IconComponent = indicador.icon;
                                         return (
-                                          <div className="relative group">
+                                          <div key={`indicator-${key}`} className="relative group">
                                             <IconComponent className={`h-4 w-4 ${indicador.color}`} />
                                             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                               {indicador.tooltip}
@@ -757,7 +774,7 @@ export default function OrcamentacaoPage() {
                                 </TableRow>
                               );
                             })}
-                          </>
+                          </React.Fragment>
                         ))}
                       </TableBody>
                     </Table>
