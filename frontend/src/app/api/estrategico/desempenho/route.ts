@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateUser } from '@/middleware/auth';
-import { getWeekOfYear, parseISO, format } from 'date-fns';
+import { parseISO, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const dynamic = 'force-dynamic'
@@ -356,11 +356,11 @@ export async function GET(request: NextRequest) {
         periodo: semana.periodo,
         faturamento_total: Math.round(semana.faturamento_total * 100) / 100,
         clientes_total: semana.clientes_total,
-        ticket_medio: Math.round(ticketMedio * 100) / 100,
-        performance_geral: Math.round(performanceGeral * 100) / 100,
         eventos_count: semana.eventos_count,
-        meta_faturamento: Math.round(semana.metas_faturamento * 100) / 100,
-        meta_clientes: semana.metas_clientes
+        metas_faturamento: Math.round(semana.metas_faturamento * 100) / 100,
+        metas_clientes: semana.metas_clientes,
+        ticket_medio: Math.round(ticketMedio * 100) / 100,
+        performance_geral: Math.round(performanceGeral * 100) / 100
       };
     }).sort((a, b) => b.semana - a.semana); // Ordenar decrescente (semana atual primeiro)
 
@@ -412,7 +412,7 @@ export async function GET(request: NextRequest) {
       faturamento_total: acc.faturamento_total + semana.faturamento_total,
       clientes_total: acc.clientes_total + semana.clientes_total,
       eventos_total: acc.eventos_total + semana.eventos_count,
-      performance_media: acc.performance_media + semana.performance_geral
+      performance_media: acc.performance_media + (semana as any).performance_geral
     }), { faturamento_total: 0, clientes_total: 0, eventos_total: 0, performance_media: 0 });
 
     const ticketMedioMensal = totaisMensais.clientes_total > 0 ? 
