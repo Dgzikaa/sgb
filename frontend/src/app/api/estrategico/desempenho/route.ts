@@ -62,7 +62,12 @@ export async function GET(request: NextRequest) {
         cl_real,
         real_r,
         m1_r,
-        cl_plan
+        cl_plan,
+        te_real,
+        tb_real,
+        percent_art_fat,
+        c_art,
+        c_prod
       `)
       .eq('bar_id', user.bar_id)
       .gte('data_evento', `${ano}-01-01`)
@@ -75,75 +80,83 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Erro ao buscar eventos' }, { status: 500 });
     }
 
-    // Função para buscar todos os dados com paginação
-    const fetchAllData = async (table: string, columns: string, dateColumn: string) => {
-      let allData: any[] = [];
-      let from = 0;
-      const limit = 1000;
-      let hasMore = true;
+    // Função otimizada para buscar dados agregados por data
+    const fetchAggregatedData = async (table: string, dateColumn: string, aggregateColumn: string, aggregateFunction = 'sum') => {
+      const { data, error } = await supabase
+        .rpc('aggregate_by_date', {
+          table_name: table,
+          date_column: dateColumn,
+          aggregate_column: aggregateColumn,
+          aggregate_function: aggregateFunction,
+          start_date: `${ano}-01-01`,
+          end_date: `${ano + 1}-01-01`,
+          bar_id_filter: user.bar_id
+        });
 
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from(table)
-          .select(columns)
-          .gte(dateColumn, `${ano}-01-01`)
-          .lt(dateColumn, `${ano + 1}-01-01`)
-          .range(from, from + limit - 1);
-
-        if (error) {
-          console.error(`❌ Erro ao buscar dados de ${table}:`, error);
-          break;
-        }
-
-        if (data && data.length > 0) {
-          allData = allData.concat(data);
-          hasMore = data.length === limit;
-          from += limit;
-        } else {
-          hasMore = false;
-        }
+      if (error) {
+        console.error(`❌ Erro ao buscar dados agregados de ${table}:`, error);
+        // Fallback para método original se RPC falhar
+        return await fetchAllDataFallback(table, `${dateColumn}, ${aggregateColumn}`, dateColumn);
       }
 
-      return allData;
+      return data || [];
     };
 
-    // Função para buscar dados do ContaHub excluindo 'Conta Assinada'
+    // Função de fallback (método original) caso RPC não esteja disponível
+    const fetchAllDataFallback = async (table: string, columns: string, dateColumn: string, useGroupBy = false) => {
+      let query = supabase
+        .from(table)
+        .select(columns)
+        .gte(dateColumn, `${ano}-01-01`)
+        .lt(dateColumn, `${ano + 1}-01-01`)
+        .eq('bar_id', user.bar_id);
+
+      if (useGroupBy) {
+        query = query.group(dateColumn).order(dateColumn);
+      } else {
+        query = query.limit(10000); // Limite maior para reduzir chamadas
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error(`❌ Erro ao buscar dados de ${table}:`, error);
+        return [];
+      }
+
+      return data || [];
+    };
+
+    // Função otimizada para buscar dados do ContaHub agregados por data
     const fetchContaHubData = async () => {
-      let allData: any[] = [];
-      let from = 0;
-      const limit = 1000;
-      let hasMore = true;
+      const { data, error } = await supabase
+        .from('contahub_pagamentos')
+        .select('dt_gerencial, sum(liquido)')
+        .gte('dt_gerencial', `${ano}-01-01`)
+        .lt('dt_gerencial', `${ano + 1}-01-01`)
+        .neq('meio', 'Conta Assinada')  // Excluir consumo de sócios
+        .eq('bar_id', user.bar_id)
+        .group('dt_gerencial')
+        .order('dt_gerencial');
 
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from('contahub_pagamentos')
-          .select('dt_gerencial, liquido')
-          .gte('dt_gerencial', `${ano}-01-01`)
-          .lt('dt_gerencial', `${ano + 1}-01-01`)
-          .neq('meio', 'Conta Assinada')  // Excluir consumo de sócios
-          .range(from, from + limit - 1);
-
-        if (error) {
-          console.error(`❌ Erro ao buscar dados de contahub_pagamentos:`, error);
-          break;
-        }
-
-        if (data && data.length > 0) {
-          allData = allData.concat(data);
-          hasMore = data.length === limit;
-          from += limit;
-        } else {
-          hasMore = false;
-        }
+      if (error) {
+        console.error('❌ Erro ao buscar dados agregados do ContaHub:', error);
+        return [];
       }
 
-      return allData;
+      // Transformar resultado para formato esperado
+      return (data || []).map(row => ({
+        dt_gerencial: row.dt_gerencial,
+        liquido: row.sum || 0
+      }));
     };
 
-    // Buscar dados sequencialmente para garantir consistência
-    const yuzerData = await fetchAllData('yuzer_pagamento', 'data_evento, valor_liquido', 'data_evento');
-    const symplaData = await fetchAllData('sympla_resumo', 'data_evento, total_liquido', 'data_evento');
-    const contahubData = await fetchContaHubData();
+    // Buscar dados otimizados com agregação SQL
+    const [yuzerData, symplaData, contahubData] = await Promise.all([
+      fetchAllDataFallback('yuzer_pagamento', 'data_evento, sum(valor_liquido) as valor_liquido', 'data_evento', true),
+      fetchAllDataFallback('sympla_resumo', 'data_evento, sum(total_liquido) as total_liquido', 'data_evento', true), 
+      fetchContaHubData()
+    ]);
 
     // Logs detalhados apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
@@ -155,25 +168,11 @@ export async function GET(request: NextRequest) {
       console.log('🔍 Debug ContaHub - Primeiros 5 registros:', contahubData.slice(0, 5));
     }
 
-    // Criar mapas para facilitar a busca
+    // Criar mapas otimizados (dados já vêm agregados)
     const yuzerMap = new Map();
-    const yuzerDebug = new Map(); // Para debug
     yuzerData?.forEach(item => {
-      const currentValue = yuzerMap.get(item.data_evento) || 0;
-      const currentCount = yuzerDebug.get(item.data_evento) || 0;
-      yuzerMap.set(item.data_evento, currentValue + (item.valor_liquido || 0));
-      yuzerDebug.set(item.data_evento, currentCount + 1);
+      yuzerMap.set(item.data_evento, item.valor_liquido || 0);
     });
-
-    // Debug verbose - apenas quando necessário
-    if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
-      console.log('🔍 Debug Yuzer - Registros por data:');
-      yuzerDebug.forEach((count, data) => {
-        if (count > 1) {
-          console.log(`  📅 ${data}: ${count} registros (DUPLICADO!) - Total: R$ ${yuzerMap.get(data)}`);
-        }
-      });
-    }
 
     const symplaMap = new Map();
     symplaData?.forEach(item => {
@@ -182,8 +181,22 @@ export async function GET(request: NextRequest) {
 
     const contahubMap = new Map();
     contahubData?.forEach(item => {
-      const currentValue = contahubMap.get(item.dt_gerencial) || 0;
-      contahubMap.set(item.dt_gerencial, currentValue + (item.liquido || 0));
+      contahubMap.set(item.dt_gerencial, item.liquido || 0);
+    });
+
+    // Buscar dados do Getin para reservas (otimizado)
+    const { data: getinData } = await supabase
+      .from('getin_reservations')
+      .select('reservation_date, count(*)')
+      .gte('reservation_date', `${ano}-01-01`)
+      .lt('reservation_date', `${ano + 1}-01-01`)
+      .eq('bar_id', user.bar_id)
+      .group('reservation_date')
+      .order('reservation_date');
+
+    const getinMap = new Map();
+    getinData?.forEach(item => {
+      getinMap.set(item.reservation_date, item.count || 0);
     });
 
     // Debug específico removido para reduzir logs desnecessários
@@ -245,6 +258,13 @@ export async function GET(request: NextRequest) {
       eventos_count: number;
       metas_faturamento: number;
       metas_clientes: number;
+      faturamento_couvert: number;
+      faturamento_bar: number;
+      cmv_total: number;
+      cmo_percentual: number;
+      atracao_faturamento: number;
+      reservas_totais: number;
+      reservas_presentes: number;
     }>();
 
     eventos.forEach(evento => {
@@ -260,7 +280,14 @@ export async function GET(request: NextRequest) {
           clientes_total: 0,
           eventos_count: 0,
           metas_faturamento: 0,
-          metas_clientes: 0
+          metas_clientes: 0,
+          faturamento_couvert: 0,
+          faturamento_bar: 0,
+          cmv_total: 0,
+          cmo_percentual: 0,
+          atracao_faturamento: 0,
+          reservas_totais: 0,
+          reservas_presentes: 0
         });
       }
 
@@ -287,6 +314,23 @@ export async function GET(request: NextRequest) {
       semanaData.eventos_count += 1;
       semanaData.metas_faturamento += evento.m1_r || 0;
       semanaData.metas_clientes += evento.cl_plan || 0;
+      
+      // Novos indicadores de desempenho
+      const clientesReais = evento.cl_real || 0;
+      semanaData.faturamento_couvert += (evento.te_real || 0) * clientesReais;
+      semanaData.faturamento_bar += (evento.tb_real || 0) * clientesReais;
+      semanaData.atracao_faturamento += evento.c_art || 0;
+      
+      // CMV será calculado como percentual médio ponderado
+      if (faturamentoTotal > 0) {
+        const cmvEvento = (evento.c_prod || 0);
+        semanaData.cmv_total += cmvEvento;
+      }
+      
+      // Reservas (usando dados do Getin se disponível, senão usar cl_real)
+      const reservasGetin = getinMap.get(evento.data_evento) || 0;
+      semanaData.reservas_totais += reservasGetin > 0 ? reservasGetin : clientesReais;
+      semanaData.reservas_presentes += clientesReais;
     });
 
     // Obter semana atual
@@ -328,6 +372,9 @@ export async function GET(request: NextRequest) {
     semanasConsolidadas = semanasConsolidadas.map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
       
+      // Calcular CMO% (CMV sobre faturamento)
+      const cmoPercentual = semana.faturamento_total > 0 ? (semana.cmv_total / semana.faturamento_total) * 100 : 0;
+      
       // Calcular performance geral da semana
       let performanceGeral = 0;
       let indicadores = 0;
@@ -360,7 +407,14 @@ export async function GET(request: NextRequest) {
         metas_faturamento: Math.round(semana.metas_faturamento * 100) / 100,
         metas_clientes: semana.metas_clientes,
         ticket_medio: Math.round(ticketMedio * 100) / 100,
-        performance_geral: Math.round(performanceGeral * 100) / 100
+        performance_geral: Math.round(performanceGeral * 100) / 100,
+        faturamento_couvert: Math.round(semana.faturamento_couvert * 100) / 100,
+        faturamento_bar: Math.round(semana.faturamento_bar * 100) / 100,
+        cmv_total: Math.round(semana.cmv_total * 100) / 100,
+        cmo_percentual: Math.round(cmoPercentual * 100) / 100,
+        atracao_faturamento: Math.round(semana.atracao_faturamento * 100) / 100,
+        reservas_totais: semana.reservas_totais,
+        reservas_presentes: semana.reservas_presentes
       };
     }).sort((a, b) => b.semana - a.semana); // Ordenar decrescente (semana atual primeiro)
 
