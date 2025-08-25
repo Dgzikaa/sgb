@@ -128,8 +128,8 @@ export async function GET(request: NextRequest) {
 				const vrPagamentos = parseFloat(r.vr_pagamentos || '0') || 0
 				
 				// Log para debug - apenas para Laura Galvão quando há filtro de dia
-				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão'))) {
-					console.log('✅ Laura Galvão - Registro aceito:', { nome, fone: rawFone, data: r.dt_gerencial, diaSemana: diaSemanaData })
+				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão') || nome.toLowerCase().includes('laura'))) {
+					console.log('✅ Laura Galvão - Registro aceito:', { nome, fone: rawFone, foneNormalizado: fone, data: r.dt_gerencial, diaSemana: diaSemanaData, filtroAtivo: diaSemanaFiltro })
 				}
 				
 
@@ -147,6 +147,11 @@ export async function GET(request: NextRequest) {
 						totalConsumo: vrConsumo,
 						totalGasto: vrPagamentos
 					})
+					
+					// Log para debug - Laura Galvão adicionada ao mapa
+					if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão') || nome.toLowerCase().includes('laura'))) {
+						console.log('🆕 Laura Galvão - NOVO cliente adicionado ao mapa:', { nome, fone, visitas: 1 })
+					}
 				} else {
 
 					prev.visitas += 1
@@ -154,6 +159,11 @@ export async function GET(request: NextRequest) {
 					prev.totalConsumo += vrConsumo
 					prev.totalGasto += vrPagamentos
 					if (ultima > prev.ultima) prev.ultima = ultima
+					
+					// Log para debug - Laura Galvão visita incrementada
+					if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão') || nome.toLowerCase().includes('laura'))) {
+						console.log('📈 Laura Galvão - Visita incrementada:', { nome, fone, visitasAtuais: prev.visitas, nomeAnterior: prev.nome })
+					}
 					// Usar sempre o nome mais completo (maior length) e que não seja 'Sem nome'
 					// Priorizar nomes com acentos e mais completos
 					if (nome && nome !== 'Sem nome') {
@@ -184,10 +194,13 @@ export async function GET(request: NextRequest) {
 			.sort((a, b) => b.visitas - a.visitas)
 			.slice(0, 100)
 			
-		// Log para debug - mostrar dados da Laura Galvão
+		// Log para debug - mostrar dados da Laura Galvão no mapa antes da ordenação
 		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-			const lauraClientes = clientes.filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão'))
-			console.log('🔍 Laura Galvão no resultado final:', lauraClientes)
+			const lauraNoMapa = Array.from(map.values()).filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão') || c.nome.toLowerCase().includes('laura'))
+			console.log('🗺️ Laura Galvão no mapa antes da ordenação:', lauraNoMapa)
+			
+			const lauraClientes = clientes.filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão') || c.nome.toLowerCase().includes('laura'))
+			console.log('🔍 Laura Galvão no resultado final (top 100):', lauraClientes)
 		}
 		
 		const clientesFormatados = clientes.map((c) => ({
