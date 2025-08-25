@@ -175,10 +175,10 @@ export default function VisaoGeralEstrategica() {
 
   // useEffect para carregar dados quando bar ou trimestre mudar
   useEffect(() => {
-    if (selectedBar) {
+    if (selectedBar && !requestInProgress) {
       carregarIndicadores();
     }
-  }, [selectedBar, trimestreAtual, carregarIndicadores]);
+  }, [selectedBar?.id, trimestreAtual]); // Removido carregarIndicadores das dependências
 
   // Função para recarregar dados
   const recarregarDados = useCallback(() => {
