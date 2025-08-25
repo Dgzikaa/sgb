@@ -39,8 +39,10 @@ export async function POST(request: Request) {
         .eq('bar_id', parseInt(bar_id))
         .gte('data_competencia', `${ano}-01-01`)
         .lte('data_competencia', `${ano}-12-31`)
-        .not('categoria_nome', 'is', null)
         .range(from, from + pageSize - 1);
+      
+      console.log(`🔍 Query executada: bar_id=${parseInt(bar_id)}, data entre ${ano}-01-01 e ${ano}-12-31`);
+      console.log(`📊 Página ${Math.floor(from / pageSize) + 1}: ${pageData?.length || 0} registros encontrados`);
 
       if (pageError) {
         console.error('❌ Erro ao buscar página de dados NIBO:', pageError);
@@ -283,7 +285,11 @@ export async function POST(request: Request) {
     
     console.log(`🔍 Processando ${niboData?.length || 0} registros do Nibo...`);
     
-    niboData?.forEach((item, index) => {
+    // Filtrar registros com categoria_nome válida
+    const dadosValidos = niboData?.filter(item => item.categoria_nome && item.categoria_nome.trim() !== '') || [];
+    console.log(`✅ Registros com categoria válida: ${dadosValidos.length}`);
+    
+    dadosValidos.forEach((item, index) => {
       const mes = new Date(item.data_competencia).getMonth() + 1;
       const categoriaNormalizada = encontrarCategoria(item.categoria_nome);
       
