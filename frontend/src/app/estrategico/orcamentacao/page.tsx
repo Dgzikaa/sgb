@@ -29,6 +29,9 @@ import {
   BarChart3,
   Download,
   Upload,
+  ArrowUp,
+  ArrowDown,
+  Minus,
 } from 'lucide-react';
 
 interface CategoriaOrcamento {
@@ -385,6 +388,42 @@ export default function OrcamentacaoPage() {
     return `${valor.toFixed(1)}%`;
   };
 
+  // Função para obter indicador de performance
+  const obterIndicadorPerformance = (realizado: number, planejado: number, isPercentage: boolean = false) => {
+    if (realizado === 0) {
+      return { icon: Minus, color: 'text-gray-400 dark:text-gray-500', tooltip: 'Sem dados' };
+    }
+
+    const diferenca = realizado - planejado;
+    const percentualDiferenca = planejado !== 0 ? (diferenca / planejado) * 100 : 0;
+
+    // Para receitas, acima do planejado é bom (verde)
+    // Para despesas, abaixo do planejado é bom (verde)
+    const isReceita = planejado > 50000; // Assumindo que receitas são valores altos
+    
+    if (Math.abs(percentualDiferenca) < 5) {
+      return { 
+        icon: Minus, 
+        color: 'text-yellow-500 dark:text-yellow-400', 
+        tooltip: `Dentro da meta (${percentualDiferenca.toFixed(1)}%)` 
+      };
+    }
+
+    if ((isReceita && diferenca > 0) || (!isReceita && diferenca < 0)) {
+      return { 
+        icon: ArrowUp, 
+        color: 'text-green-500 dark:text-green-400', 
+        tooltip: `Acima da meta (+${Math.abs(percentualDiferenca).toFixed(1)}%)` 
+      };
+    } else {
+      return { 
+        icon: ArrowDown, 
+        color: 'text-red-500 dark:text-red-400', 
+        tooltip: `Abaixo da meta (-${Math.abs(percentualDiferenca).toFixed(1)}%)` 
+      };
+    }
+  };
+
   // Cálculos automáticos
   const calcularValores = () => {
     const totalReceitaPlanejado = categorias.find(cat => cat.nome === 'Receitas')?.subcategorias.reduce((acc, sub) => acc + sub.planejado, 0) || 0;
@@ -617,12 +656,12 @@ export default function OrcamentacaoPage() {
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-gray-200 dark:border-gray-700">
-                          <TableHead className="text-gray-900 dark:text-white font-semibold">Categoria</TableHead>
-                          <TableHead className="text-gray-900 dark:text-white text-right font-semibold">Planejado</TableHead>
-                          <TableHead className="text-gray-900 dark:text-white text-right font-semibold">Projeção</TableHead>
-                          <TableHead className="text-gray-900 dark:text-white text-right font-semibold">Realizado</TableHead>
-                          <TableHead className="text-gray-900 dark:text-white text-center font-semibold">Ações</TableHead>
+                        <TableRow className="border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                          <TableHead className="text-gray-900 dark:text-white font-semibold text-left">Categoria</TableHead>
+                          <TableHead className="text-gray-900 dark:text-white font-semibold text-center">Planejado</TableHead>
+                          <TableHead className="text-gray-900 dark:text-white font-semibold text-center">Projeção</TableHead>
+                          <TableHead className="text-gray-900 dark:text-white font-semibold text-center">Realizado</TableHead>
+                          <TableHead className="text-gray-900 dark:text-white font-semibold text-center">Ações</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -645,12 +684,12 @@ export default function OrcamentacaoPage() {
                                   <TableCell className="text-gray-900 dark:text-white pl-8 font-medium">
                                     {sub.nome}
                                   </TableCell>
-                                  <TableCell className="text-right">
+                                  <TableCell className="text-center">
                                     {isEditing ? (
                                       <Input
                                         value={editedValues[key] || ''}
                                         onChange={(e) => setEditedValues(prev => ({ ...prev, [key]: e.target.value }))}
-                                        className="w-32 text-right bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                                        className="w-32 text-center bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mx-auto"
                                         autoFocus
                                       />
                                     ) : (
@@ -659,11 +698,27 @@ export default function OrcamentacaoPage() {
                                       </span>
                                     )}
                                   </TableCell>
-                                  <TableCell className="text-right text-gray-900 dark:text-white font-mono">
+                                  <TableCell className="text-center text-gray-900 dark:text-white font-mono">
                                     {sub.isPercentage ? formatarPorcentagem(sub.projecao) : formatarMoeda(sub.projecao)}
                                   </TableCell>
-                                  <TableCell className="text-right text-gray-900 dark:text-white font-mono">
-                                    {sub.isPercentage ? formatarPorcentagem(sub.realizado) : formatarMoeda(sub.realizado)}
+                                  <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-2">
+                                      <span className="text-gray-900 dark:text-white font-mono">
+                                        {sub.isPercentage ? formatarPorcentagem(sub.realizado) : formatarMoeda(sub.realizado)}
+                                      </span>
+                                      {(() => {
+                                        const indicador = obterIndicadorPerformance(sub.realizado, sub.planejado, sub.isPercentage);
+                                        const IconComponent = indicador.icon;
+                                        return (
+                                          <div className="relative group">
+                                            <IconComponent className={`h-4 w-4 ${indicador.color}`} />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                              {indicador.tooltip}
+                                            </div>
+                                          </div>
+                                        );
+                                      })()}
+                                    </div>
                                   </TableCell>
                                   <TableCell className="text-center">
                                     {sub.editavel && (

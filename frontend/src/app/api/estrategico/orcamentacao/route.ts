@@ -55,7 +55,7 @@ export async function GET(request: Request) {
       mes: item.mes,
       categoria: item.categoria_nome,
       subcategoria: item.subcategoria,
-      valor_previsto: Number(item.valor_planejado),
+      valor_planejado: Number(item.valor_planejado),
       valor_realizado: Number(item.valor_realizado),
       percentual_realizado: Number(item.percentual_realizado),
       observacoes: item.observacoes,
