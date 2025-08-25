@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
 		const diaSemanaFiltro = searchParams.get('dia_semana')
 		
 		console.log('🔍 API: Filtro dia da semana recebido:', diaSemanaFiltro)
+		
+		let totalRegistrosProcessados = 0
 
 	// Removido teste - implementando paginação SQL direta
 
@@ -40,13 +42,13 @@ export async function GET(request: NextRequest) {
 	let totalLinhas = 0
 	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
-	const MAX_ITERATIONS = 100 // Aumentar para processar todas as páginas
+	const MAX_ITERATIONS = 200 // Aumentar para processar todas as páginas
 	let iterations = 0
 	let telefonesProcessados = 0
 	let telefonesDescartados = 0
 	
 	const startTime = Date.now()
-	const MAX_PROCESSING_TIME = 20000 // 20 segundos máximo para processar todas as páginas
+	const MAX_PROCESSING_TIME = 30000 // 30 segundos máximo para processar todas as páginas
 	
 	while (iterations < MAX_ITERATIONS) {
 		iterations++
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
 			break
 		}
 		
-		// Query Supabase SEM ordenação específica (deixar o Supabase decidir)
+		// Query Supabase com filtro de dia da semana aplicado no SQL
 		let query = supabase
 			.from('contahub_periodo')
 			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
@@ -68,7 +70,9 @@ export async function GET(request: NextRequest) {
 		const finalBarId = barIdFilter || 3
 		query = query.eq('bar_id', finalBarId)
 		
-		// Aplicar filtro de dia da semana se especificado (será feito no processamento)
+		// Não aplicar filtro aqui - será feito no processamento JavaScript
+		// para manter a mesma lógica de "todos os dias"
+		
 		const { data, error } = await query
 		
 		if (error) {
@@ -79,6 +83,9 @@ export async function GET(request: NextRequest) {
 		if (!data || data.length === 0) {
 			break
 		}
+		
+		totalRegistrosProcessados += data.length
+		console.log(`📄 Página ${iterations}: ${data.length} registros (Total: ${totalRegistrosProcessados})`)
 
 		// Processar todos os dados
 		
@@ -196,11 +203,19 @@ export async function GET(request: NextRequest) {
 			
 		// Log para debug - mostrar dados da Laura Galvão no mapa antes da ordenação
 		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
+			const todosClientes = Array.from(map.values()).sort((a, b) => b.visitas - a.visitas)
+			console.log('📊 Estatísticas gerais:', {
+				totalClientes: todosClientes.length,
+				primeiroColocado: { nome: todosClientes[0]?.nome, visitas: todosClientes[0]?.visitas },
+				centesimoColocado: { nome: todosClientes[99]?.nome, visitas: todosClientes[99]?.visitas },
+				ultimoColocado: { nome: todosClientes[todosClientes.length - 1]?.nome, visitas: todosClientes[todosClientes.length - 1]?.visitas }
+			})
+			
 			const lauraNoMapa = Array.from(map.values()).filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão') || c.nome.toLowerCase().includes('laura'))
-			console.log('🗺️ Laura Galvão no mapa antes da ordenação:', lauraNoMapa)
+			console.log('🗺️ Laura Galvão no mapa antes da ordenação:', lauraNoMapa.length, 'clientes')
 			
 			const lauraClientes = clientes.filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão') || c.nome.toLowerCase().includes('laura'))
-			console.log('🔍 Laura Galvão no resultado final (top 100):', lauraClientes)
+			console.log('🔍 Laura Galvão no resultado final (top 100):', lauraClientes.length, 'clientes')
 		}
 		
 		const clientesFormatados = clientes.map((c) => ({
