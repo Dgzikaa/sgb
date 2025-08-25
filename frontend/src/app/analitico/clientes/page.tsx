@@ -53,6 +53,8 @@ interface Reservante {
   nome_principal: string
   telefone: string | null
   total_reservas: number
+  total_visitas: number
+  percentual_reservas: number
   reservas_seated: number
   reservas_confirmed: number
   reservas_pending: number
@@ -352,11 +354,14 @@ export default function ClientesPage() {
           'Nome': reservante.nome_principal,
           'Telefone': reservante.telefone || '',
           'Total Reservas': reservante.total_reservas,
+          'Total Visitas': reservante.total_visitas,
+          '% Reservas': reservante.percentual_reservas.toFixed(1) + '%',
           'Reservas Seated': reservante.reservas_seated,
           'Reservas Confirmed': reservante.reservas_confirmed,
           'Reservas Pending': reservante.reservas_pending,
           'Reservas Cancelled': reservante.reservas_cancelled,
           'Reservas No-Show': reservante.reservas_noshow,
+          '% Presença': reservante.percentual_presenca.toFixed(1) + '%',
           'Última Reserva': formatDate(reservante.ultima_reserva),
         }))
         
@@ -990,6 +995,18 @@ export default function ClientesPage() {
                     </TableHead>
                     <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
                       <div className="flex items-center gap-2 justify-center">
+                        <Users className="h-4 w-4" />
+                        Visitas
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
+                        <span className="text-lg">📊</span>
+                        % Reservas
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
                         <span className="text-lg">✅</span>
                         Seated
                       </div>
@@ -1058,6 +1075,30 @@ export default function ClientesPage() {
                         <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                           {reservante.total_reservas}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
+                          {reservante.total_visitas}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex flex-col gap-1 items-center">
+                          <Badge 
+                            variant="outline" 
+                            className={`${
+                              reservante.percentual_reservas >= 50 
+                                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800'
+                                : reservante.percentual_reservas >= 25
+                                ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800'
+                                : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
+                            }`}
+                          >
+                            {reservante.percentual_reservas.toFixed(1)}%
+                          </Badge>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {reservante.total_reservas}/{reservante.total_visitas}
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">

@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
 			nome: string; 
 			fone: string; 
 			totalReservas: number;
+			totalVisitas: number;
 			seated: number;
 			confirmed: number;
 			pending: number;
@@ -52,6 +53,9 @@ export async function GET(request: NextRequest) {
 			noshow: number;
 			ultimaReserva: string;
 		}>()
+		
+		// Mapa para contar visitas totais (da tabela contahub_periodo)
+		const mapVisitas = new Map<string, number>()
 
 		const MAX_ITERATIONS = 100; // Prevenir loop infinito
 		let iterations = 0;
@@ -135,8 +139,50 @@ export async function GET(request: NextRequest) {
 			from += pageSize
 		}
 
+		// Buscar visitas totais para cada reservante
+		console.log('🔍 API Reservantes: Buscando visitas totais dos reservantes...')
+		const telefonesReservantes = Array.from(map.keys())
+		
+		if (telefonesReservantes.length > 0) {
+			// Buscar visitas em lotes para evitar problemas de performance
+			const batchSize = 100
+			for (let i = 0; i < telefonesReservantes.length; i += batchSize) {
+				const batch = telefonesReservantes.slice(i, i + batchSize)
+				
+				const { data: visitasData, error: visitasError } = await supabase
+					.from('contahub_periodo')
+					.select('cli_fone')
+					.in('cli_fone', batch.map(fone => {
+						// Converter telefone normalizado de volta para formato com hífen
+						if (fone.length === 11) {
+							return fone.substring(0, 2) + '-' + fone.substring(2)
+						}
+						return fone
+					}))
+					.eq('bar_id', barIdFilter || 3)
+				
+				if (!visitasError && visitasData) {
+					visitasData.forEach(visita => {
+						const foneNormalizado = (visita.cli_fone || '').replace(/\D/g, '')
+						if (foneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(foneNormalizado.substring(0, 2))) {
+							const foneComNove = foneNormalizado.substring(0, 2) + '9' + foneNormalizado.substring(2)
+							mapVisitas.set(foneComNove, (mapVisitas.get(foneComNove) || 0) + 1)
+						} else {
+							mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
+						}
+					})
+				}
+			}
+		}
+
+		console.log(`📊 API Reservantes: Visitas processadas para ${mapVisitas.size} reservantes`)
+
 		// Ordenar por reservas 'seated' (efetivamente sentaram) e depois por total de reservas
 		const reservantes = Array.from(map.values())
+			.map(r => ({
+				...r,
+				totalVisitas: mapVisitas.get(r.fone) || 0
+			}))
 			.sort((a, b) => {
 				// Primeiro critério: mais reservas 'seated'
 				if (b.seated !== a.seated) return b.seated - a.seated
@@ -147,12 +193,16 @@ export async function GET(request: NextRequest) {
 			.map((r) => {
 				// Calcular percentual de presença (seated / total)
 				const percentualPresenca = r.totalReservas > 0 ? (r.seated / r.totalReservas) * 100 : 0
+				// Calcular percentual de reservas (reservas / visitas totais)
+				const percentualReservas = r.totalVisitas > 0 ? (r.totalReservas / r.totalVisitas) * 100 : 0
 				
 				return {
 					identificador_principal: r.fone,
 					nome_principal: r.nome,
 					telefone: r.fone,
 					total_reservas: r.totalReservas,
+					total_visitas: r.totalVisitas,
+					percentual_reservas: Math.round(percentualReservas * 100) / 100, // Arredondar para 2 casas decimais
 					reservas_seated: r.seated,
 					reservas_confirmed: r.confirmed,
 					reservas_pending: r.pending,
