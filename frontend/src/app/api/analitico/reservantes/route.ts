@@ -145,62 +145,68 @@ export async function GET(request: NextRequest) {
 			from += pageSize
 		}
 
-		// Buscar visitas totais para cada reservante
-		console.log('🔍 API Reservantes: Buscando visitas totais dos reservantes...')
-		const telefonesReservantes = Array.from(map.keys())
+		// Buscar TODAS as visitas do bar e depois fazer match com os reservantes
+		console.log('🔍 API Reservantes: Buscando todas as visitas do bar...')
 		
-		if (telefonesReservantes.length > 0) {
-			// Buscar visitas em lotes para evitar problemas de performance
-			const batchSize = 100
-			for (let i = 0; i < telefonesReservantes.length; i += batchSize) {
-				const batch = telefonesReservantes.slice(i, i + batchSize)
-				
-				// Buscar todas as visitas para estes telefones (com diferentes formatos)
-				const telefonesParaBuscar = []
-				for (const fone of batch) {
-					// Formato com hífen: 61-992053013
-					if (fone.length === 11) {
-						telefonesParaBuscar.push(fone.substring(0, 2) + '-' + fone.substring(2))
-					}
-					// Formato sem hífen: 61992053013
-					telefonesParaBuscar.push(fone)
-					// Formato sem o 9 (caso seja celular antigo): 61-99205301 -> 61-92053013
-					if (fone.length === 11 && fone.charAt(2) === '9') {
-						const foneAntigo = fone.substring(0, 2) + '-' + fone.substring(3)
-						telefonesParaBuscar.push(foneAntigo)
-					}
-				}
-				
-				const { data: visitasData, error: visitasError } = await supabase
-					.from('contahub_periodo')
-					.select('cli_fone')
-					.in('cli_fone', telefonesParaBuscar)
-					.eq('bar_id', barIdFilter || 3)
-				
-				if (!visitasError && visitasData) {
-					visitasData.forEach(visita => {
-						let foneNormalizado = (visita.cli_fone || '').replace(/\D/g, '')
-						if (!foneNormalizado) return
-						
-						// Aplicar a mesma normalização usada nos reservantes
-						if (foneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(foneNormalizado.substring(0, 2))) {
-							foneNormalizado = foneNormalizado.substring(0, 2) + '9' + foneNormalizado.substring(2)
-						}
-						
-						mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
-					})
-				}
+		let offsetVisitas = 0
+		const pageSizeVisitas = 1000
+		let totalVisitasProcessadas = 0
+		
+		while (true) {
+			const { data: visitasData, error: visitasError } = await supabase
+				.from('contahub_periodo')
+				.select('cli_fone')
+				.not('cli_fone', 'is', null)
+				.neq('cli_fone', '')
+				.eq('bar_id', barIdFilter || 3)
+				.range(offsetVisitas, offsetVisitas + pageSizeVisitas - 1)
+			
+			if (visitasError) {
+				console.error('❌ Erro ao buscar visitas:', visitasError)
+				break
 			}
+			
+			if (!visitasData || visitasData.length === 0) break
+			
+			totalVisitasProcessadas += visitasData.length
+			
+			visitasData.forEach(visita => {
+				let foneNormalizado = (visita.cli_fone || '').replace(/\D/g, '')
+				if (!foneNormalizado) return
+				
+				// Aplicar a mesma normalização usada nos reservantes
+				if (foneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(foneNormalizado.substring(0, 2))) {
+					foneNormalizado = foneNormalizado.substring(0, 2) + '9' + foneNormalizado.substring(2)
+				}
+				
+				mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
+			})
+			
+			if (visitasData.length < pageSizeVisitas) break
+			offsetVisitas += pageSizeVisitas
 		}
 
-		console.log(`📊 API Reservantes: Visitas processadas para ${mapVisitas.size} reservantes`)
+		console.log(`📊 API Reservantes: ${totalVisitasProcessadas} visitas processadas, ${mapVisitas.size} telefones únicos com visitas`)
 
-		// Ordenar por reservas 'seated' (efetivamente sentaram) e depois por total de reservas
+		// Fazer match entre reservantes e visitas
+		console.log('🔗 API Reservantes: Fazendo match entre reservantes e visitas...')
+		let matchesEncontrados = 0
+		
 		const reservantes = Array.from(map.values())
-			.map(r => ({
-				...r,
-				totalVisitas: mapVisitas.get(r.fone) || 0
-			}))
+			.map(r => {
+				const visitas = mapVisitas.get(r.fone) || 0
+				if (visitas > 0) matchesEncontrados++
+				
+				// Log para os primeiros 5 reservantes para debug
+				if (matchesEncontrados <= 5) {
+					console.log(`🔍 Match: ${r.nome} (${r.fone}) -> ${visitas} visitas`)
+				}
+				
+				return {
+					...r,
+					totalVisitas: visitas
+				}
+			})
 			.sort((a, b) => {
 				// Ordenar por total de reservas (decrescente)
 				return b.totalReservas - a.totalReservas
@@ -229,7 +235,7 @@ export async function GET(request: NextRequest) {
 				}
 			})
 
-		console.log(`✅ API Reservantes: ${reservantes.length} no ranking • ${map.size} únicos • ${totalLinhas} reservas`)
+		console.log(`✅ API Reservantes: ${reservantes.length} no ranking • ${map.size} únicos • ${totalLinhas} reservas • ${matchesEncontrados} matches com visitas`)
 
 		return NextResponse.json({
 			reservantes,
