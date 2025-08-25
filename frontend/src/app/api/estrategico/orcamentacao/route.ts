@@ -243,7 +243,7 @@ export async function GET(request: Request) {
     ];
 
     // 6. Combinar dados planejados + realizados
-    const dadosFinais = [];
+    const dadosFinais: any[] = [];
     const categoriasProcessadas = new Set();
 
     // Processar dados planejados existentes

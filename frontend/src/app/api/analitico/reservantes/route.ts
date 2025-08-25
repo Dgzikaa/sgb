@@ -45,7 +45,6 @@ export async function GET(request: NextRequest) {
 			nome: string; 
 			fone: string; 
 			totalReservas: number;
-			totalVisitas: number;
 			seated: number;
 			confirmed: number;
 			pending: number;
