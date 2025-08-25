@@ -103,21 +103,15 @@ export async function GET(request: NextRequest) {
     };
 
     // Função de fallback (método original) caso RPC não esteja disponível
-    const fetchAllDataFallback = async (table: string, columns: string, dateColumn: string, useGroupBy = false) => {
-      let query = supabase
+    const fetchAllDataFallback = async (table: string, columns: string, dateColumn: string) => {
+      const { data, error } = await supabase
         .from(table)
         .select(columns)
         .gte(dateColumn, `${ano}-01-01`)
         .lt(dateColumn, `${ano + 1}-01-01`)
-        .eq('bar_id', user.bar_id);
-
-      if (useGroupBy) {
-        query = query.group(dateColumn).order(dateColumn);
-      } else {
-        query = query.limit(10000); // Limite maior para reduzir chamadas
-      }
-
-      const { data, error } = await query;
+        .eq('bar_id', user.bar_id)
+        .limit(10000) // Limite maior para reduzir chamadas
+        .order(dateColumn);
 
       if (error) {
         console.error(`❌ Erro ao buscar dados de ${table}:`, error);
@@ -127,34 +121,30 @@ export async function GET(request: NextRequest) {
       return data || [];
     };
 
-    // Função otimizada para buscar dados do ContaHub agregados por data
+    // Função para buscar dados do ContaHub (agregação será feita no código)
     const fetchContaHubData = async () => {
       const { data, error } = await supabase
         .from('contahub_pagamentos')
-        .select('dt_gerencial, sum(liquido)')
+        .select('dt_gerencial, liquido')
         .gte('dt_gerencial', `${ano}-01-01`)
         .lt('dt_gerencial', `${ano + 1}-01-01`)
         .neq('meio', 'Conta Assinada')  // Excluir consumo de sócios
         .eq('bar_id', user.bar_id)
-        .group('dt_gerencial')
+        .limit(10000)
         .order('dt_gerencial');
 
       if (error) {
-        console.error('❌ Erro ao buscar dados agregados do ContaHub:', error);
+        console.error('❌ Erro ao buscar dados do ContaHub:', error);
         return [];
       }
 
-      // Transformar resultado para formato esperado
-      return (data || []).map(row => ({
-        dt_gerencial: row.dt_gerencial,
-        liquido: row.sum || 0
-      }));
+      return data || [];
     };
 
-    // Buscar dados otimizados com agregação SQL
+    // Buscar dados otimizados - sem agregação SQL no cliente (será feita no código)
     const [yuzerData, symplaData, contahubData] = await Promise.all([
-      fetchAllDataFallback('yuzer_pagamento', 'data_evento, sum(valor_liquido) as valor_liquido', 'data_evento', true),
-      fetchAllDataFallback('sympla_resumo', 'data_evento, sum(total_liquido) as total_liquido', 'data_evento', true), 
+      fetchAllDataFallback('yuzer_pagamento', 'data_evento, valor_liquido', 'data_evento'),
+      fetchAllDataFallback('sympla_resumo', 'data_evento, total_liquido', 'data_evento'), 
       fetchContaHubData()
     ]);
 
@@ -168,35 +158,42 @@ export async function GET(request: NextRequest) {
       console.log('🔍 Debug ContaHub - Primeiros 5 registros:', contahubData.slice(0, 5));
     }
 
-    // Criar mapas otimizados (dados já vêm agregados)
+    // Criar mapas agregados (somar valores por data)
     const yuzerMap = new Map();
     yuzerData?.forEach(item => {
-      yuzerMap.set(item.data_evento, item.valor_liquido || 0);
+      const data = item.data_evento;
+      const valor = item.valor_liquido || 0;
+      yuzerMap.set(data, (yuzerMap.get(data) || 0) + valor);
     });
 
     const symplaMap = new Map();
     symplaData?.forEach(item => {
-      symplaMap.set(item.data_evento, item.total_liquido || 0);
+      const data = item.data_evento;
+      const valor = item.total_liquido || 0;
+      symplaMap.set(data, (symplaMap.get(data) || 0) + valor);
     });
 
     const contahubMap = new Map();
     contahubData?.forEach(item => {
-      contahubMap.set(item.dt_gerencial, item.liquido || 0);
+      const data = item.dt_gerencial;
+      const valor = item.liquido || 0;
+      contahubMap.set(data, (contahubMap.get(data) || 0) + valor);
     });
 
-    // Buscar dados do Getin para reservas (otimizado)
+    // Buscar dados do Getin para reservas (agregação será feita no código)
     const { data: getinData } = await supabase
       .from('getin_reservations')
-      .select('reservation_date, count(*)')
+      .select('reservation_date')
       .gte('reservation_date', `${ano}-01-01`)
       .lt('reservation_date', `${ano + 1}-01-01`)
       .eq('bar_id', user.bar_id)
-      .group('reservation_date')
+      .limit(10000)
       .order('reservation_date');
 
     const getinMap = new Map();
     getinData?.forEach(item => {
-      getinMap.set(item.reservation_date, item.count || 0);
+      const data = item.reservation_date;
+      getinMap.set(data, (getinMap.get(data) || 0) + 1);
     });
 
     // Debug específico removido para reduzir logs desnecessários

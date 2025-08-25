@@ -125,7 +125,8 @@ export async function GET(request: NextRequest) {
         res_tot,
         res_p,
         calculado_em,
-        precisa_recalculo
+        precisa_recalculo,
+        versao_calculo
       `)
       .eq('bar_id', user.bar_id)
       .gte('data_evento', dataInicio)
@@ -170,9 +171,15 @@ export async function GET(request: NextRequest) {
     console.log(`✅ ${eventosFiltrados.length} eventos encontrados após filtro`);
 
     // Verificar se há eventos que precisam de recálculo
-    const eventosParaRecalcular = eventosFiltrados.filter(e => e.precisa_recalculo);
+    // NOVA LÓGICA: Só recalcular se não há valores salvos manualmente (versao_calculo != 999)
+    const eventosParaRecalcular = eventosFiltrados.filter(e => 
+      e.precisa_recalculo && 
+      (e.versao_calculo !== 999) && // 999 = editado manualmente
+      (e.real_r === 0 || e.real_r === null) // Só recalcular se não há valor real salvo
+    );
+    
     if (eventosParaRecalcular.length > 0) {
-      console.log(`🔄 ${eventosParaRecalcular.length} eventos precisam de recálculo`);
+      console.log(`🔄 ${eventosParaRecalcular.length} eventos precisam de recálculo (excluindo editados manualmente)`);
       
       // Trigger recálculo assíncrono usando a função completa
       for (const evento of eventosParaRecalcular) {
@@ -185,6 +192,12 @@ export async function GET(request: NextRequest) {
             }
           });
       }
+    }
+
+    // Log de eventos com valores editados manualmente
+    const eventosEditadosManualmente = eventosFiltrados.filter(e => e.versao_calculo === 999);
+    if (eventosEditadosManualmente.length > 0) {
+      console.log(`📝 ${eventosEditadosManualmente.length} eventos com valores editados manualmente (não serão recalculados)`);
     }
 
     // Processar dados para o formato esperado pelo frontend

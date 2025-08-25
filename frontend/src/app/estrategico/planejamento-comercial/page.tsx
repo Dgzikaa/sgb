@@ -96,6 +96,26 @@ interface EventoEdicao {
   observacoes: string;
 }
 
+interface EventoEdicaoReal {
+  id: number;
+  nome: string;
+  real_r: number;
+  cl_real: number;
+  te_real: number;
+  tb_real: number;
+  t_medio: number;
+  res_tot: number;
+  res_p: number;
+  c_art: number;
+  c_prod: number;
+  percent_b: number;
+  percent_d: number;
+  percent_c: number;
+  t_coz: number;
+  t_bar: number;
+  observacoes: string;
+}
+
 export default function PlanejamentoComercialPage() {
   const { user } = useUser();
   
@@ -111,8 +131,10 @@ export default function PlanejamentoComercialPage() {
   
   // Estados do modal
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalRealOpen, setModalRealOpen] = useState(false);
   const [eventoSelecionado, setEventoSelecionado] = useState<PlanejamentoData | null>(null);
   const [eventoEdicao, setEventoEdicao] = useState<EventoEdicao | null>(null);
+  const [eventoEdicaoReal, setEventoEdicaoReal] = useState<EventoEdicaoReal | null>(null);
   const [salvando, setSalvando] = useState(false);
   
   // Estado para sincronização Getin
@@ -290,11 +312,43 @@ export default function PlanejamentoComercialPage() {
     setModalOpen(true);
   };
 
+  // Abrir modal de edição dos valores reais
+  const abrirModalReal = (evento: PlanejamentoData) => {
+    setEventoSelecionado(evento);
+    setEventoEdicaoReal({
+      id: evento.evento_id,
+      nome: evento.evento_nome,
+      real_r: evento.real_receita || 0,
+      cl_real: evento.clientes_real || 0,
+      te_real: evento.te_real || 0,
+      tb_real: evento.tb_real || 0,
+      t_medio: evento.t_medio || 0,
+      res_tot: evento.res_tot || 0,
+      res_p: evento.res_p || 0,
+      c_art: evento.c_art || 0,
+      c_prod: evento.c_prod || 0,
+      percent_b: evento.percent_b || 0,
+      percent_d: evento.percent_d || 0,
+      percent_c: evento.percent_c || 0,
+      t_coz: evento.t_coz || 0,
+      t_bar: evento.t_bar || 0,
+      observacoes: ''
+    });
+    setModalRealOpen(true);
+  };
+
   // Fechar modal
   const fecharModal = () => {
     setModalOpen(false);
     setEventoSelecionado(null);
     setEventoEdicao(null);
+  };
+
+  // Fechar modal real
+  const fecharModalReal = () => {
+    setModalRealOpen(false);
+    setEventoSelecionado(null);
+    setEventoEdicaoReal(null);
   };
 
   // Salvar edição
@@ -332,6 +386,54 @@ export default function PlanejamentoComercialPage() {
     } catch (err) {
       console.error('❌ Erro ao salvar:', err);
       alert('Erro ao salvar alterações');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  // Salvar edição dos valores reais
+  const salvarEdicaoReal = async () => {
+    if (!eventoEdicaoReal) return;
+
+    try {
+      setSalvando(true);
+      
+      const response = await apiCall(`/api/eventos/${eventoEdicaoReal.id}/valores-reais`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        },
+        body: JSON.stringify({
+          real_r: eventoEdicaoReal.real_r,
+          cl_real: eventoEdicaoReal.cl_real,
+          te_real: eventoEdicaoReal.te_real,
+          tb_real: eventoEdicaoReal.tb_real,
+          t_medio: eventoEdicaoReal.t_medio,
+          res_tot: eventoEdicaoReal.res_tot,
+          res_p: eventoEdicaoReal.res_p,
+          c_art: eventoEdicaoReal.c_art,
+          c_prod: eventoEdicaoReal.c_prod,
+          percent_b: eventoEdicaoReal.percent_b,
+          percent_d: eventoEdicaoReal.percent_d,
+          percent_c: eventoEdicaoReal.percent_c,
+          t_coz: eventoEdicaoReal.t_coz,
+          t_bar: eventoEdicaoReal.t_bar,
+          observacoes: eventoEdicaoReal.observacoes
+        })
+      });
+
+      if (response.success) {
+        console.log('✅ Valores reais atualizados com sucesso');
+        fecharModalReal();
+        // Recarregar dados
+        await buscarDados();
+      } else {
+        throw new Error(response.error || 'Erro ao salvar valores reais');
+      }
+    } catch (err) {
+      console.error('❌ Erro ao salvar valores reais:', err);
+      alert('Erro ao salvar valores reais');
     } finally {
       setSalvando(false);
     }
@@ -555,14 +657,26 @@ export default function PlanejamentoComercialPage() {
                           </span>
                         </td>
                         <td className="px-1 py-1 text-center">
-                          <Button
-                            onClick={() => abrirModal(evento)}
-                            size="sm"
-                            variant="outline"
-                            className="h-6 w-6 p-0 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
+                          <div className="flex gap-1 justify-center">
+                            <Button
+                              onClick={() => abrirModal(evento)}
+                              size="sm"
+                              variant="outline"
+                              className="h-6 w-6 p-0 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              title="Editar planejamento"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              onClick={() => abrirModalReal(evento)}
+                              size="sm"
+                              variant="outline"
+                              className="h-6 w-6 p-0 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-400"
+                              title="Editar valores reais"
+                            >
+                              <Database className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -737,24 +851,24 @@ export default function PlanejamentoComercialPage() {
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-gray-600 dark:text-gray-400">T.M Entrada:</span>
                           <span className="font-medium text-gray-900 dark:text-white">
-                            {formatarMoeda(dados.filter(e => e.dia_semana !== 'Domingo' && e.te_plan > 0)
+                            {formatarMoeda(dados.filter(e => e.te_plan > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.te_plan || 0) / arr.length, 0))}
                           </span>
                         </div>
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-gray-600 dark:text-gray-400">T.M Entrada Real:</span>
                           <span className={`font-medium flex items-center gap-1 ${
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.te_real > 0)
+                            (dados.filter(e => e.te_real > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.te_real || 0) / arr.length, 0)) >=
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.te_plan > 0)
+                            (dados.filter(e => e.te_plan > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.te_plan || 0) / arr.length, 0))
                               ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {formatarMoeda(dados.filter(e => e.dia_semana !== 'Domingo' && e.te_real > 0)
+                            {formatarMoeda(dados.filter(e => e.te_real > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.te_real || 0) / arr.length, 0))}
-                            {(dados.filter(e => e.dia_semana !== 'Domingo' && e.te_real > 0)
+                            {(dados.filter(e => e.te_real > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.te_real || 0) / arr.length, 0)) >=
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.te_plan > 0)
+                            (dados.filter(e => e.te_plan > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.te_plan || 0) / arr.length, 0))
                               ? '📈' : '📉'}
                           </span>
@@ -766,24 +880,24 @@ export default function PlanejamentoComercialPage() {
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-gray-600 dark:text-gray-400">T.M Bar:</span>
                           <span className="font-medium text-gray-900 dark:text-white">
-                            {formatarMoeda(dados.filter(e => e.dia_semana !== 'Domingo' && e.tb_plan > 0)
+                            {formatarMoeda(dados.filter(e => e.tb_plan > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.tb_plan || 0) / arr.length, 0))}
                           </span>
                         </div>
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-gray-600 dark:text-gray-400">T.M Bar Real:</span>
                           <span className={`font-medium flex items-center gap-1 ${
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.tb_real > 0)
+                            (dados.filter(e => e.tb_real > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.tb_real || 0) / arr.length, 0)) >=
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.tb_plan > 0)
+                            (dados.filter(e => e.tb_plan > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.tb_plan || 0) / arr.length, 0))
                               ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {formatarMoeda(dados.filter(e => e.dia_semana !== 'Domingo' && e.tb_real > 0)
+                            {formatarMoeda(dados.filter(e => e.tb_real > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.tb_real || 0) / arr.length, 0))}
-                            {(dados.filter(e => e.dia_semana !== 'Domingo' && e.tb_real > 0)
+                            {(dados.filter(e => e.tb_real > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.tb_real || 0) / arr.length, 0)) >=
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.tb_plan > 0)
+                            (dados.filter(e => e.tb_plan > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.tb_plan || 0) / arr.length, 0))
                               ? '📈' : '📉'}
                           </span>
@@ -799,13 +913,13 @@ export default function PlanejamentoComercialPage() {
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-gray-600 dark:text-gray-400">T.Coz Real:</span>
                           <span className={`font-medium flex items-center gap-1 ${
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.t_coz > 0)
+                            (dados.filter(e => e.t_coz > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.t_coz || 0) / arr.length, 0)) <= 12
                               ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {(dados.filter(e => e.dia_semana !== 'Domingo' && e.t_coz > 0)
+                            {(dados.filter(e => e.t_coz > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.t_coz || 0) / arr.length, 0)).toFixed(1)}min
-                            {(dados.filter(e => e.dia_semana !== 'Domingo' && e.t_coz > 0)
+                            {(dados.filter(e => e.t_coz > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.t_coz || 0) / arr.length, 0)) <= 12
                               ? '📈' : '📉'}
                           </span>
@@ -821,13 +935,13 @@ export default function PlanejamentoComercialPage() {
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-gray-600 dark:text-gray-400">T.Bar Real:</span>
                           <span className={`font-medium flex items-center gap-1 ${
-                            (dados.filter(e => e.dia_semana !== 'Domingo' && e.t_bar > 0)
+                            (dados.filter(e => e.t_bar > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.t_bar || 0) / arr.length, 0)) <= 4
                               ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {(dados.filter(e => e.dia_semana !== 'Domingo' && e.t_bar > 0)
+                            {(dados.filter(e => e.t_bar > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.t_bar || 0) / arr.length, 0)).toFixed(1)}min
-                            {(dados.filter(e => e.dia_semana !== 'Domingo' && e.t_bar > 0)
+                            {(dados.filter(e => e.t_bar > 0)
                               .reduce((sum, evento, _, arr) => sum + (evento.t_bar || 0) / arr.length, 0)) <= 4
                               ? '📈' : '📉'}
                           </span>
@@ -1049,6 +1163,287 @@ export default function PlanejamentoComercialPage() {
                 ) : (
                   <>
                     <Save className="h-4 w-4" /> Salvar Alterações
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de edição dos valores reais */}
+        <Dialog open={modalRealOpen} onOpenChange={setModalRealOpen}>
+          <DialogContent className="max-w-6xl p-0 overflow-hidden rounded-xl shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 text-white border border-gray-700 backdrop-blur-sm">
+            <DialogHeader className="bg-gradient-to-r from-green-700 to-blue-600 p-6 text-white shadow-lg">
+              <DialogTitle className="flex items-center gap-3 text-2xl font-bold">
+                <Database className="h-7 w-7 text-green-200" />
+                Editar Valores Reais - {eventoSelecionado?.dia_formatado}/{filtroMes}/{filtroAno}
+              </DialogTitle>
+              <p className="text-green-100 text-sm mt-1">Edite manualmente os valores reais quando há problemas com as APIs externas.</p>
+            </DialogHeader>
+            
+            {eventoEdicaoReal && eventoSelecionado && (
+              <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                {/* Seção de Receitas e Clientes */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-green-300 flex items-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Receitas e Clientes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Receita Real (R$)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicaoReal.real_r}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, real_r: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Clientes Real</label>
+                        <Input
+                          type="number"
+                          value={eventoEdicaoReal.cl_real}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, cl_real: parseInt(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Médio (R$)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicaoReal.t_medio}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, t_medio: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Seção de Tickets */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-blue-300 flex items-center gap-2">
+                      <Wine className="h-5 w-5" />
+                      Tickets Entrada e Bar
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Entrada Real (R$)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicaoReal.te_real}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, te_real: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Bar Real (R$)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicaoReal.tb_real}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, tb_real: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Seção de Reservas */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-purple-300 flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Reservas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Reservas Totais</label>
+                        <Input
+                          type="number"
+                          value={eventoEdicaoReal.res_tot}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, res_tot: parseInt(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Reservas Presentes</label>
+                        <Input
+                          type="number"
+                          value={eventoEdicaoReal.res_p}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, res_p: parseInt(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Seção de Custos */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-red-300 flex items-center gap-2">
+                      <Target className="h-5 w-5" />
+                      Custos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Custo Artístico (R$)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicaoReal.c_art}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, c_art: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Custo Produção (R$)</label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={eventoEdicaoReal.c_prod}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, c_prod: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Seção de Percentuais */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-yellow-300 flex items-center gap-2">
+                      <ChefHat className="h-5 w-5" />
+                      Percentuais de Vendas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">% Bebidas</label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={eventoEdicaoReal.percent_b}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, percent_b: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">% Drinks</label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={eventoEdicaoReal.percent_d}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, percent_d: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">% Comidas</label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={eventoEdicaoReal.percent_c}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, percent_c: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Seção de Tempos */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-orange-300 flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Tempos de Atendimento
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Tempo Cozinha (min)</label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={eventoEdicaoReal.t_coz}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, t_coz: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Tempo Bar (min)</label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={eventoEdicaoReal.t_bar}
+                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, t_bar: parseFloat(e.target.value) || 0})}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Seção de Observações */}
+                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg text-gray-300 flex items-center gap-2">
+                      <Edit className="h-5 w-5" />
+                      Observações sobre os Valores Reais
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      value={eventoEdicaoReal.observacoes}
+                      onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, observacoes: e.target.value})}
+                      placeholder="Observações sobre os valores reais editados, motivos, ajustes..."
+                      className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-gray-500 min-h-[100px]"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            
+            <DialogFooter className="bg-gray-900/50 p-4 border-t border-gray-700 flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={fecharModalReal} 
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center gap-2"
+              >
+                <X className="h-4 w-4" /> Cancelar
+              </Button>
+              <Button 
+                onClick={salvarEdicaoReal} 
+                disabled={salvando} 
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2"
+              >
+                {salvando ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 animate-spin" /> Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" /> Salvar Valores Reais
                   </>
                 )}
               </Button>

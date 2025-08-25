@@ -235,6 +235,7 @@ export async function GET(request: Request) {
     // Log principal apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
       console.log(`📊 Visão Geral: Calculando ${periodo}${trimestre ? ` T${trimestre}` : ''} - Bar ${barId}`);
+      console.log(`🔍 DEBUG: mesRetencao recebido: "${mesRetencao}"`);
     }
     
     if (!barId) {
@@ -466,14 +467,14 @@ export async function GET(request: Request) {
       // Trimestre selecionado
 
       // Clientes Ativos (visitaram 2+ vezes nos últimos 90 dias) - COM PAGINAÇÃO
-      // Clientes ativos últimos 90 dias
+      // Clientes ativos últimos 90 dias baseado no final do trimestre selecionado
       
-      // Calcular data de 90 dias atrás
-      const hoje = new Date();
-      const dataInicio90Dias = new Date(hoje);
-      dataInicio90Dias.setDate(hoje.getDate() - 90);
+      // Usar o final do trimestre como referência, não a data atual
+      const fimTrimestre = new Date(endDate + 'T23:59:59Z'); // Final do trimestre selecionado
+      const dataInicio90Dias = new Date(fimTrimestre);
+      dataInicio90Dias.setDate(fimTrimestre.getDate() - 90);
       const startDate90Dias = dataInicio90Dias.toISOString().split('T')[0];
-      const endDate90Dias = hoje.toISOString().split('T')[0];
+      const endDate90Dias = fimTrimestre.toISOString().split('T')[0];
       
       // Período de 90 dias
       
@@ -500,11 +501,11 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivos++;
       });
       
-      // ✅ COMPARAÇÃO COM TRIMESTRE ANTERIOR (90 dias anteriores)
-      const dataInicio180Dias = new Date(hoje);
-      dataInicio180Dias.setDate(hoje.getDate() - 180);
-      const dataFim90DiasAntes = new Date(hoje);
-      dataFim90DiasAntes.setDate(hoje.getDate() - 90);
+      // ✅ COMPARAÇÃO COM TRIMESTRE ANTERIOR (90 dias anteriores baseado no trimestre)
+      const dataInicio180Dias = new Date(fimTrimestre);
+      dataInicio180Dias.setDate(fimTrimestre.getDate() - 180);
+      const dataFim90DiasAntes = new Date(fimTrimestre);
+      dataFim90DiasAntes.setDate(fimTrimestre.getDate() - 90);
       
       const startDate180Dias = dataInicio180Dias.toISOString().split('T')[0];
       const endDate90DiasAntes = dataFim90DiasAntes.toISOString().split('T')[0];
@@ -531,8 +532,10 @@ export async function GET(request: Request) {
       // Logs detalhados apenas em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
         console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO:');
-        console.log(`Período atual (${startDate90Dias} a ${endDate90Dias}): ${clientesAtivos} clientes ativos`);
-        console.log(`Período anterior (${startDate180Dias} a ${endDate90DiasAntes}): ${clientesAtivosAnterior} clientes ativos`);
+        console.log(`Trimestre selecionado: T${trimestre} (${startDate} a ${endDate})`);
+        console.log(`Final do trimestre usado como referência: ${fimTrimestre.toISOString().split('T')[0]}`);
+        console.log(`Período atual (90d): ${startDate90Dias} a ${endDate90Dias} = ${clientesAtivos} clientes ativos`);
+        console.log(`Período anterior (90d): ${startDate180Dias} a ${endDate90DiasAntes} = ${clientesAtivosAnterior} clientes ativos`);
       }
       const variacaoClientesAtivos = clientesAtivosAnterior > 0 ? ((clientesAtivos - clientesAtivosAnterior) / clientesAtivosAnterior * 100) : 0;
       if (process.env.NODE_ENV === 'development') {
