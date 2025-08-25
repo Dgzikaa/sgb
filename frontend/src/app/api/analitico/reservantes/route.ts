@@ -98,8 +98,14 @@ export async function GET(request: NextRequest) {
 
 				const rawFone = (r.customer_phone || '').toString().trim()
 				if (!rawFone) continue
-				const fone = rawFone.replace(/\D/g, '')
+				let fone = rawFone.replace(/\D/g, '')
 				if (!fone) continue
+				
+				// Padronizar telefone: se tem 10 dígitos, adicionar 9 após o DDD (celular antigo)
+				if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
+					// Adicionar 9 após o DDD para celulares antigos
+					fone = fone.substring(0, 2) + '9' + fone.substring(2)
+				}
 				const nome = (r.customer_name || '').toString().trim() || 'Sem nome'
 				const ultimaReserva = r.reservation_date as string
 				
@@ -149,27 +155,39 @@ export async function GET(request: NextRequest) {
 			for (let i = 0; i < telefonesReservantes.length; i += batchSize) {
 				const batch = telefonesReservantes.slice(i, i + batchSize)
 				
+				// Buscar todas as visitas para estes telefones (com diferentes formatos)
+				const telefonesParaBuscar = []
+				for (const fone of batch) {
+					// Formato com hífen: 61-992053013
+					if (fone.length === 11) {
+						telefonesParaBuscar.push(fone.substring(0, 2) + '-' + fone.substring(2))
+					}
+					// Formato sem hífen: 61992053013
+					telefonesParaBuscar.push(fone)
+					// Formato sem o 9 (caso seja celular antigo): 61-99205301 -> 61-92053013
+					if (fone.length === 11 && fone.charAt(2) === '9') {
+						const foneAntigo = fone.substring(0, 2) + '-' + fone.substring(3)
+						telefonesParaBuscar.push(foneAntigo)
+					}
+				}
+				
 				const { data: visitasData, error: visitasError } = await supabase
 					.from('contahub_periodo')
 					.select('cli_fone')
-					.in('cli_fone', batch.map(fone => {
-						// Converter telefone normalizado de volta para formato com hífen
-						if (fone.length === 11) {
-							return fone.substring(0, 2) + '-' + fone.substring(2)
-						}
-						return fone
-					}))
+					.in('cli_fone', telefonesParaBuscar)
 					.eq('bar_id', barIdFilter || 3)
 				
 				if (!visitasError && visitasData) {
 					visitasData.forEach(visita => {
-						const foneNormalizado = (visita.cli_fone || '').replace(/\D/g, '')
+						let foneNormalizado = (visita.cli_fone || '').replace(/\D/g, '')
+						if (!foneNormalizado) return
+						
+						// Aplicar a mesma normalização usada nos reservantes
 						if (foneNormalizado.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(foneNormalizado.substring(0, 2))) {
-							const foneComNove = foneNormalizado.substring(0, 2) + '9' + foneNormalizado.substring(2)
-							mapVisitas.set(foneComNove, (mapVisitas.get(foneComNove) || 0) + 1)
-						} else {
-							mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
+							foneNormalizado = foneNormalizado.substring(0, 2) + '9' + foneNormalizado.substring(2)
 						}
+						
+						mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
 					})
 				}
 			}
@@ -184,9 +202,7 @@ export async function GET(request: NextRequest) {
 				totalVisitas: mapVisitas.get(r.fone) || 0
 			}))
 			.sort((a, b) => {
-				// Primeiro critério: mais reservas 'seated'
-				if (b.seated !== a.seated) return b.seated - a.seated
-				// Segundo critério: mais reservas totais
+				// Ordenar por total de reservas (decrescente)
 				return b.totalReservas - a.totalReservas
 			})
 			.slice(0, 100)
