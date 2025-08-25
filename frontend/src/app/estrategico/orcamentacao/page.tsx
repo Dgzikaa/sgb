@@ -623,7 +623,7 @@ export default function OrcamentacaoPage() {
           <Card className={`bg-gradient-to-br ${valoresCalculados.margemPlanejada >= 0 ? 'from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700' : 'from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-700'}`}>
             <CardHeader className="pb-2">
               <CardTitle className={`text-sm font-medium flex items-center gap-2 ${valoresCalculados.margemPlanejada >= 0 ? 'text-blue-700 dark:text-blue-300' : 'text-red-700 dark:text-red-300'}`}>
-                <PieChart className="h-4 w-4" />
+                <TrendingDown className="h-4 w-4" />
                 Margem Planejada
               </CardTitle>
             </CardHeader>
