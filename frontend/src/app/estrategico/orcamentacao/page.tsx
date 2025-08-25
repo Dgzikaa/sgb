@@ -74,8 +74,8 @@ export default function OrcamentacaoPage() {
     return () => setPageTitle('');
   }, [setPageTitle]);
 
-  // Dados baseados na estrutura padrão do orçamento
-  const getCategoriasEstruturadas = useCallback((): CategoriaOrcamento[] => [
+  // Função para obter estrutura base das categorias (sem useCallback para evitar loops)
+  const getCategoriasEstruturadas = (): CategoriaOrcamento[] => [
     {
       nome: 'Despesas Variáveis (%)',
       cor: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
@@ -130,7 +130,7 @@ export default function OrcamentacaoPage() {
         { nome: 'CONTRATOS', planejado: 0, projecao: 15700, realizado: 0, editavel: true }
       ]
     }
-  ], [despesasVariaveis, cmv]);
+  ];
 
   const carregarDados = useCallback(async () => {
     if (!selectedBar) return;
@@ -218,7 +218,7 @@ export default function OrcamentacaoPage() {
       setLoading(false);
       hideLoading();
     }
-  }, [selectedBar, anoSelecionado, mesSelecionado, toast, showLoading, hideLoading, getCategoriasEstruturadas]);
+  }, [selectedBar, anoSelecionado, mesSelecionado, toast, showLoading, hideLoading]);
 
   useEffect(() => {
     if (selectedBar) {
