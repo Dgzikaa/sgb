@@ -173,6 +173,13 @@ export default function VisaoGeralEstrategica() {
     }
   }, [selectedBar?.id, trimestreAtual, requestInProgress, toast, showLoading, hideLoading]);
 
+  // useEffect para carregar dados quando bar ou trimestre mudar
+  useEffect(() => {
+    if (selectedBar) {
+      carregarIndicadores();
+    }
+  }, [selectedBar, trimestreAtual, carregarIndicadores]);
+
   // Função para recarregar dados
   const recarregarDados = useCallback(() => {
     try {

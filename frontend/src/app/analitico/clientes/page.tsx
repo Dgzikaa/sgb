@@ -1065,8 +1065,9 @@ export default function ClientesPage() {
                       <TableCell className="py-4">
                         <div className="flex flex-col gap-1">
                           {reservante.telefone && (
-                            <span className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1">
-                              📱 {reservante.telefone}
+                            <span className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                              <Phone className="h-3 w-3" />
+                              {reservante.telefone}
                             </span>
                           )}
                         </div>

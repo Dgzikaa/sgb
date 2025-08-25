@@ -937,6 +937,126 @@ export async function GET(request: Request) {
       return resp;
     }
 
+    // Buscar dados mensais
+    if (periodo === 'mensal') {
+      const mes = searchParams.get('mes'); // formato YYYY-MM
+      
+      if (!mes) {
+        return NextResponse.json(
+          { success: false, error: 'Mês não especificado' },
+          { status: 400 }
+        );
+      }
+
+      const [ano, mesNum] = mes.split('-').map(Number);
+      const startDate = `${ano}-${mesNum.toString().padStart(2, '0')}-01`;
+      const endDate = new Date(ano, mesNum, 0).toISOString().split('T')[0]; // Último dia do mês
+
+      // Clientes Ativos (visitaram 2+ vezes nos últimos 30 dias)
+      const dataLimite30Dias = new Date();
+      dataLimite30Dias.setDate(dataLimite30Dias.getDate() - 30);
+      const dataLimite30DiasStr = dataLimite30Dias.toISOString().split('T')[0];
+
+      const { data: clientesAtivosData, error: clientesAtivosError } = await supabase
+        .from('contahub_periodo')
+        .select('cli_fone')
+        .eq('bar_id', barIdNum)
+        .gte('dt_gerencial', dataLimite30DiasStr)
+        .not('cli_fone', 'is', null);
+
+      if (clientesAtivosError) {
+        console.error('Erro ao buscar clientes ativos mensais:', clientesAtivosError);
+      }
+
+      // Contar clientes únicos com 2+ visitas
+      const clientesMap = new Map<string, number>();
+      (clientesAtivosData || []).forEach(row => {
+        const fone = (row.cli_fone || '').toString().trim();
+        if (fone) {
+          clientesMap.set(fone, (clientesMap.get(fone) || 0) + 1);
+        }
+      });
+
+      const clientesAtivos = Array.from(clientesMap.values()).filter(count => count >= 2).length;
+
+      // Clientes Totais do mês
+      const { data: clientesTotaisData, error: clientesTotaisError } = await supabase
+        .from('contahub_periodo')
+        .select('cli_fone')
+        .eq('bar_id', barIdNum)
+        .gte('dt_gerencial', startDate)
+        .lte('dt_gerencial', endDate)
+        .not('cli_fone', 'is', null);
+
+      if (clientesTotaisError) {
+        console.error('Erro ao buscar clientes totais mensais:', clientesTotaisError);
+      }
+
+      const clientesTotaisUnicos = new Set(
+        (clientesTotaisData || []).map(row => (row.cli_fone || '').toString().trim()).filter(Boolean)
+      ).size;
+
+      // Faturamento Total do mês
+      const { data: faturamentoData, error: faturamentoError } = await supabase
+        .from('contahub_periodo')
+        .select('vr_total')
+        .eq('bar_id', barIdNum)
+        .gte('dt_gerencial', startDate)
+        .lte('dt_gerencial', endDate);
+
+      if (faturamentoError) {
+        console.error('Erro ao buscar faturamento mensal:', faturamentoError);
+      }
+
+      const faturamentoTotal = (faturamentoData || []).reduce((sum, row) => sum + (row.vr_total || 0), 0);
+
+      // Taxa de Retenção (clientes ativos / clientes totais)
+      const taxaRetencao = clientesTotaisUnicos > 0 ? (clientesAtivos / clientesTotaisUnicos) * 100 : 0;
+
+      // CMV e Artística (valores simulados para o mês)
+      const cmvLimpo = 25; // Percentual padrão
+      const artistica = faturamentoTotal * 0.05; // 5% do faturamento
+
+      const resp = NextResponse.json({
+        success: true,
+        data: {
+          faturamentoTotal: {
+            valor: faturamentoTotal,
+            meta: 800000, // Meta mensal
+            variacao: 0 // TODO: Calcular variação vs mês anterior
+          },
+          clientesAtivos: {
+            valor: clientesAtivos,
+            meta: 250, // Meta mensal
+            variacao: 0
+          },
+          clientesTotais: {
+            valor: clientesTotaisUnicos,
+            meta: 1000, // Meta mensal
+            variacao: 0
+          },
+          retencao: {
+            valor: taxaRetencao,
+            meta: 25, // Meta de 25%
+            variacao: 0
+          },
+          cmvLimpo: {
+            valor: cmvLimpo,
+            meta: 30, // Meta de 30%
+            variacao: 0
+          },
+          artistica: {
+            valor: artistica,
+            meta: faturamentoTotal * 0.08, // Meta de 8%
+            variacao: 0
+          }
+        }
+      });
+
+      resp.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+      return resp;
+    }
+
     const resp = NextResponse.json({ error: 'Período inválido' }, { status: 400 });
     resp.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     return resp;

@@ -47,14 +47,11 @@ BEGIN
         RETURN;
     END IF;
     
-    -- Verificar se é domingo ou data especial (09/08/2025)
-    is_domingo_or_special := (
-        UPPER(evento_record.dia_semana) = 'DOMINGO' OR 
-        evento_record.data_evento = '2025-08-09'::date
-    );
+    -- REGRAS ESPECIAIS DO DOMINGO REMOVIDAS - TODOS OS EVENTOS USAM AS MESMAS REGRAS
+    is_domingo_or_special := FALSE;
     
-    RAISE NOTICE 'Calculando métricas para evento % - Data: % - Domingo/Especial: %', 
-        evento_id, evento_record.data_evento, is_domingo_or_special;
+    RAISE NOTICE 'Calculando métricas para evento % - Data: %', 
+        evento_id, evento_record.data_evento;
     
     -- =================================================
     -- 1. BUSCAR DADOS YUZER
@@ -224,7 +221,9 @@ BEGIN
         END IF;
     ELSE
         IF COALESCE(contahub_per.total_pessoas_pagantes, 0) > 0 THEN
-            calculated_tb_real := (COALESCE(contahub_per.total_pagamentos, 0) - calculated_te_real) / contahub_per.total_pessoas_pagantes;
+            -- CORREÇÃO: tb_real deve ser (total_pagamentos - couvert) / pessoas
+            -- total_pagamentos já inclui couvert, então subtraímos o couvert total, não o te_real
+            calculated_tb_real := (COALESCE(contahub_per.total_pagamentos, 0) - COALESCE(contahub_per.total_couvert, 0)) / contahub_per.total_pessoas_pagantes;
         ELSE
             calculated_tb_real := 0;
         END IF;

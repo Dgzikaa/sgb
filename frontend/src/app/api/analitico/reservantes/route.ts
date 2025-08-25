@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
 			for (const r of data) {
 				// Aplicar filtro por dia da semana se especificado
 				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-					const dataReserva = new Date(r.reservation_date as string)
-					const diaSemanaData = dataReserva.getDay() // 0=domingo, 1=segunda, etc.
+					const dataReserva = new Date(r.reservation_date + 'T12:00:00Z') // Forçar UTC
+					const diaSemanaData = dataReserva.getUTCDay() // 0=domingo, 1=segunda, etc. - UTC
 					if (diaSemanaData.toString() !== diaSemanaFiltro) {
 						continue // Pular este registro se não for do dia da semana desejado
 					}
