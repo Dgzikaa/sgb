@@ -91,29 +91,12 @@ export async function GET(request: NextRequest) {
 		// Processar todos os dados
 		
 		for (const r of data) {
-			// Processar data uma única vez
-			const dataGerencial = new Date(r.dt_gerencial as string)
-			const diaSemanaData = dataGerencial.getDay() // 0=domingo, 1=segunda, etc.
+			// Processar data uma única vez - USAR UTC para compatibilidade com PostgreSQL
+			const dataGerencial = new Date(r.dt_gerencial + 'T12:00:00Z') // Forçar UTC
+			const diaSemanaData = dataGerencial.getUTCDay() // 0=domingo, 1=segunda, etc. - UTC
 			
 			// Aplicar filtro por dia da semana se especificado
 			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-				// DEBUG: Log detalhado para entender o problema
-				const rawFone = (r.cli_fone || '').toString().trim()
-				const nome = (r.cli_nome || '').toString().trim() || 'Sem nome'
-				
-				if (rawFone === '21-999811048' || rawFone === '61-992053013') { // Luciano Marcelo ou Laura Galvão
-					const dataOriginal = r.dt_gerencial
-					const dataJS = new Date(dataOriginal)
-					const diaSemanaJS = dataJS.getDay()
-					const dataUTC = new Date(dataOriginal + 'T12:00:00Z')
-					const diaSemanaUTC = dataUTC.getUTCDay()
-					
-					console.log(`🔍 ${nome} (${rawFone}):`)
-					console.log(`   Data original: ${dataOriginal}`)
-					console.log(`   JS getDay(): ${diaSemanaJS} | UTC getUTCDay(): ${diaSemanaUTC}`)
-					console.log(`   Filtro: ${diaSemanaFiltro} | Aceito: ${diaSemanaJS.toString() === diaSemanaFiltro}`)
-				}
-				
 				if (diaSemanaData.toString() !== diaSemanaFiltro) {
 					continue // Pular este registro se não for do dia da semana desejado
 				}
@@ -213,19 +196,7 @@ export async function GET(request: NextRequest) {
 			.sort((a, b) => b.visitas - a.visitas)
 			.slice(0, 100)
 			
-		// Log final para debug - comparar Laura com top 5
-		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-			console.log(`🎯 Laura Galvão (61992053013) processados: ${contadorLauraGalvao} registros`)
-			const lauraGalvaoEspecifica = map.get('61992053013')
-			console.log('🎯 Laura Galvão (61992053013) resultado final:', lauraGalvaoEspecifica)
-			
-			// Debug: Verificar top 5 clientes e quantos dias eles realmente foram
-			const top5 = Array.from(map.values()).sort((a, b) => b.visitas - a.visitas).slice(0, 5)
-			console.log('🏆 TOP 5 CLIENTES COM FILTRO DE QUARTA:')
-			top5.forEach((cliente, index) => {
-				console.log(`${index + 1}. ${cliente.nome} (${cliente.fone}): ${cliente.visitas} visitas`)
-			})
-		}
+		// Remover logs de debug - problema resolvido
 		
 		const clientesFormatados = clientes.map((c) => ({
 				identificador_principal: c.fone,
