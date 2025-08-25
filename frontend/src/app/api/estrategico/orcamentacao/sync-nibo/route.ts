@@ -373,7 +373,8 @@ export async function POST(request: Request) {
 
       if (existing) {
         // Atualizar valor realizado apenas
-        await supabase
+        console.log(`🔄 Atualizando registro existente: ${orcamento.categoria_nome} - Valor: ${orcamento.valor_realizado}`);
+        const { error: updateError } = await supabase
           .from('orcamentacao')
           .update({
             valor_realizado: orcamento.valor_realizado,
@@ -381,10 +382,15 @@ export async function POST(request: Request) {
           })
           .eq('id', existing.id);
         
-        atualizados++;
+        if (updateError) {
+          console.error(`❌ Erro ao atualizar ${orcamento.categoria_nome}:`, updateError);
+        } else {
+          atualizados++;
+        }
       } else {
         // Inserir novo registro
-        await supabase
+        console.log(`➕ Inserindo novo registro: ${orcamento.categoria_nome} - Planejado: ${orcamento.valor_planejado}, Realizado: ${orcamento.valor_realizado}`);
+        const { error: insertError } = await supabase
           .from('orcamentacao')
           .insert({
             ...orcamento,
@@ -392,7 +398,11 @@ export async function POST(request: Request) {
             atualizado_em: new Date().toISOString()
           });
         
-        importados++;
+        if (insertError) {
+          console.error(`❌ Erro ao inserir ${orcamento.categoria_nome}:`, insertError);
+        } else {
+          importados++;
+        }
       }
     }
 
