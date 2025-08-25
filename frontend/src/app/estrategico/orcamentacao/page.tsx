@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,9 @@ export default function OrcamentacaoPage() {
   const [despesasVariaveis, setDespesasVariaveis] = useState({ planejado: 11.5, projecao: 11.5, realizado: 0 });
   const [cmv, setCmv] = useState({ planejado: 27, projecao: 27, realizado: 0 });
 
+  // Ref para evitar dependências desnecessárias
+  const isLoadingRef = useRef(false);
+
   useEffect(() => {
     setPageTitle('💰 Orçamentação');
     return () => setPageTitle('');
@@ -132,9 +135,11 @@ export default function OrcamentacaoPage() {
     }
   ];
 
-  const carregarDados = useCallback(async () => {
-    if (!selectedBar) return;
+  // Função para carregar dados sem useCallback para evitar loops
+  const carregarDados = async () => {
+    if (!selectedBar || isLoadingRef.current) return;
 
+    isLoadingRef.current = true;
     setLoading(true);
     showLoading('Carregando dados orçamentários...');
     
@@ -217,14 +222,15 @@ export default function OrcamentacaoPage() {
     } finally {
       setLoading(false);
       hideLoading();
+      isLoadingRef.current = false;
     }
-  }, [selectedBar, anoSelecionado, mesSelecionado, toast, showLoading, hideLoading]);
+  };
 
   useEffect(() => {
     if (selectedBar) {
       carregarDados();
     }
-  }, [selectedBar, carregarDados]);
+  }, [selectedBar, anoSelecionado, mesSelecionado]); // Removido carregarDados das dependências
 
   const sincronizarManualmente = async () => {
     if (!selectedBar) return;
