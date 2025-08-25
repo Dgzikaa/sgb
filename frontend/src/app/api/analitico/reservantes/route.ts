@@ -233,10 +233,17 @@ export async function GET(request: NextRequest) {
 				const visitas = mapVisitas.get(r.fone) || 0
 				if (visitas > 0) matchesEncontrados++
 				
-				// Log para os primeiros 10 reservantes (com e sem match) para debug
-				if (debugCount < 10) {
-					console.log(`🔍 Debug ${debugCount + 1}: ${r.nome} (${r.fone}) -> ${visitas} visitas`)
+				// Log detalhado para os primeiros 5 reservantes
+				if (debugCount < 5) {
+					console.log(`🔍 Debug ${debugCount + 1}: ${r.nome} (${r.fone})`)
+					console.log(`   📞 Reservas: ${r.totalReservas} | 🏠 Visitas: ${visitas}`)
+					console.log(`   📊 Ratio: ${visitas > 0 ? (r.totalReservas / visitas * 100).toFixed(1) : 'N/A'}% reservas/visitas`)
 					debugCount++
+				}
+				
+				// Detectar anomalias (mais reservas que visitas)
+				if (visitas > 0 && r.totalReservas > visitas) {
+					console.log(`⚠️  ANOMALIA: ${r.nome} tem ${r.totalReservas} reservas mas apenas ${visitas} visitas!`)
 				}
 				
 				return {
