@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
 		
 		console.log('🔍 API: Filtro dia da semana recebido:', diaSemanaFiltro)
 		
-		let totalRegistrosProcessados = 0
 		let contadorLauraGalvao = 0 // Contador específico para Laura Galvão (61992053013)
 
 	// Removido teste - implementando paginação SQL direta
@@ -60,14 +59,12 @@ export async function GET(request: NextRequest) {
 			break
 		}
 		
-		// Query Supabase com ordenação estável para garantir processamento completo
+		// Query Supabase SEM ordenação específica - deixar o Supabase decidir
 		let query = supabase
 			.from('contahub_periodo')
 			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
 			.not('cli_fone', 'is', null)
 			.neq('cli_fone', '')
-			.order('dt_gerencial', { ascending: true }) // Ordenação estável por data
-			.order('cli_fone', { ascending: true }) // Ordenação secundária por telefone
 			.range(offset, offset + pageSize - 1)
 		
 		// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
@@ -89,8 +86,7 @@ export async function GET(request: NextRequest) {
 			break
 		}
 		
-		totalRegistrosProcessados += data.length
-		console.log(`📄 Página ${iterations}: ${data.length} registros (Total: ${totalRegistrosProcessados})`)
+		// Remover logs excessivos - manter apenas contador Laura Galvão
 
 		// Processar todos os dados
 		
@@ -142,12 +138,6 @@ export async function GET(request: NextRequest) {
 				// Contador específico para Laura Galvão (61992053013)
 				if (rawFone === '61-992053013') {
 					contadorLauraGalvao++
-					console.log(`🎯 Laura Galvão (61992053013) - Registro ${contadorLauraGalvao}:`, { nome, data: r.dt_gerencial, diaSemana: diaSemanaData, filtroAtivo: diaSemanaFiltro })
-				}
-				
-				// Log para debug - apenas para Laura Galvão quando há filtro de dia
-				if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão') || nome.toLowerCase().includes('laura'))) {
-					console.log('✅ Laura Galvão - Registro aceito:', { nome, fone: rawFone, foneNormalizado: fone, data: r.dt_gerencial, diaSemana: diaSemanaData, filtroAtivo: diaSemanaFiltro })
 				}
 				
 
@@ -166,10 +156,7 @@ export async function GET(request: NextRequest) {
 						totalGasto: vrPagamentos
 					})
 					
-					// Log para debug - Laura Galvão adicionada ao mapa
-					if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão') || nome.toLowerCase().includes('laura'))) {
-						console.log('🆕 Laura Galvão - NOVO cliente adicionado ao mapa:', { nome, fone, visitas: 1 })
-					}
+					// Remover log desnecessário
 				} else {
 
 					prev.visitas += 1
@@ -178,10 +165,7 @@ export async function GET(request: NextRequest) {
 					prev.totalGasto += vrPagamentos
 					if (ultima > prev.ultima) prev.ultima = ultima
 					
-					// Log para debug - Laura Galvão visita incrementada
-					if (diaSemanaFiltro && diaSemanaFiltro !== 'todos' && (nome.toLowerCase().includes('laura galvao') || nome.toLowerCase().includes('laura galvão') || nome.toLowerCase().includes('laura'))) {
-						console.log('📈 Laura Galvão - Visita incrementada:', { nome, fone, visitasAtuais: prev.visitas, nomeAnterior: prev.nome })
-					}
+					// Remover log desnecessário
 					// Usar sempre o nome mais completo (maior length) e que não seja 'Sem nome'
 					// Priorizar nomes com acentos e mais completos
 					if (nome && nome !== 'Sem nome') {
@@ -212,27 +196,11 @@ export async function GET(request: NextRequest) {
 			.sort((a, b) => b.visitas - a.visitas)
 			.slice(0, 100)
 			
-		// Log para debug - mostrar dados da Laura Galvão no mapa antes da ordenação
+		// Log final apenas para Laura Galvão específica
 		if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-			console.log(`🎯 TOTAL de registros da Laura Galvão (61992053013) processados: ${contadorLauraGalvao}`)
-			
-			const todosClientes = Array.from(map.values()).sort((a, b) => b.visitas - a.visitas)
-			console.log('📊 Estatísticas gerais:', {
-				totalClientes: todosClientes.length,
-				primeiroColocado: { nome: todosClientes[0]?.nome, visitas: todosClientes[0]?.visitas },
-				centesimoColocado: { nome: todosClientes[99]?.nome, visitas: todosClientes[99]?.visitas },
-				ultimoColocado: { nome: todosClientes[todosClientes.length - 1]?.nome, visitas: todosClientes[todosClientes.length - 1]?.visitas }
-			})
-			
-			// Buscar especificamente a Laura Galvão (61992053013) no mapa
+			console.log(`🎯 Laura Galvão (61992053013) processados: ${contadorLauraGalvao} registros`)
 			const lauraGalvaoEspecifica = map.get('61992053013')
-			console.log('🎯 Laura Galvão (61992053013) no mapa final:', lauraGalvaoEspecifica)
-			
-			const lauraNoMapa = Array.from(map.values()).filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão') || c.nome.toLowerCase().includes('laura'))
-			console.log('🗺️ Todas as Lauras no mapa antes da ordenação:', lauraNoMapa.length, 'clientes')
-			
-			const lauraClientes = clientes.filter(c => c.nome.toLowerCase().includes('laura galvao') || c.nome.toLowerCase().includes('laura galvão') || c.nome.toLowerCase().includes('laura'))
-			console.log('🔍 Todas as Lauras no resultado final (top 100):', lauraClientes.length, 'clientes')
+			console.log('🎯 Laura Galvão (61992053013) resultado final:', lauraGalvaoEspecifica)
 		}
 		
 		const clientesFormatados = clientes.map((c) => ({
