@@ -43,19 +43,20 @@ export async function GET(request: NextRequest) {
 	let totalLinhas = 0
 	const map = new Map<string, { nome: string; fone: string; visitas: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
 
-	const MAX_ITERATIONS = 200 // Aumentar para processar todas as páginas
+	const MAX_ITERATIONS = 500 // Aumentar drasticamente para garantir processamento completo
 	let iterations = 0
 	let telefonesProcessados = 0
 	let telefonesDescartados = 0
 	
 	const startTime = Date.now()
-	const MAX_PROCESSING_TIME = 30000 // 30 segundos máximo para processar todas as páginas
+	const MAX_PROCESSING_TIME = 60000 // 60 segundos máximo - tempo suficiente para processar tudo
 	
 	while (iterations < MAX_ITERATIONS) {
 		iterations++
 		
 		// Verificar timeout
 		if (Date.now() - startTime > MAX_PROCESSING_TIME) {
+			console.log(`⏰ TIMEOUT: Processamento interrompido após ${iterations} páginas por limite de tempo`)
 			break
 		}
 		
@@ -84,6 +85,7 @@ export async function GET(request: NextRequest) {
 		}
 		
 		if (!data || data.length === 0) {
+			console.log(`✅ PROCESSAMENTO COMPLETO: Todas as páginas processadas após ${iterations} iterações`)
 			break
 		}
 		
