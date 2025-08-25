@@ -97,9 +97,18 @@ export async function GET(request: NextRequest) {
 			
 			// Aplicar filtro por dia da semana se especificado
 			if (diaSemanaFiltro && diaSemanaFiltro !== 'todos') {
-				// DEBUG: Log para ver se o filtro está funcionando
-				if (rawFone === '21-999811048') { // Luciano Marcelo
-					console.log(`🔍 Luciano Marcelo: data=${r.dt_gerencial}, diaSemana=${diaSemanaData}, filtro=${diaSemanaFiltro}, aceito=${diaSemanaData.toString() === diaSemanaFiltro}`)
+				// DEBUG: Log detalhado para entender o problema
+				if (rawFone === '21-999811048' || rawFone === '61-992053013') { // Luciano Marcelo ou Laura Galvão
+					const dataOriginal = r.dt_gerencial
+					const dataJS = new Date(dataOriginal)
+					const diaSemanaJS = dataJS.getDay()
+					const dataUTC = new Date(dataOriginal + 'T12:00:00Z')
+					const diaSemanaUTC = dataUTC.getUTCDay()
+					
+					console.log(`🔍 ${nome} (${rawFone}):`)
+					console.log(`   Data original: ${dataOriginal}`)
+					console.log(`   JS getDay(): ${diaSemanaJS} | UTC getUTCDay(): ${diaSemanaUTC}`)
+					console.log(`   Filtro: ${diaSemanaFiltro} | Aceito: ${diaSemanaJS.toString() === diaSemanaFiltro}`)
 				}
 				
 				if (diaSemanaData.toString() !== diaSemanaFiltro) {
