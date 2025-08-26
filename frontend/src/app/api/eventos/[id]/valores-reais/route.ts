@@ -26,23 +26,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Dados do corpo da requisição
     const body = await request.json();
-    const {
-      real_r,
-      cl_real,
-      te_real,
-      tb_real,
-      t_medio,
-      res_tot,
-      res_p,
-      c_art,
-      c_prod,
-      percent_b,
-      percent_d,
-      percent_c,
-      t_coz,
-      t_bar,
-      observacoes
-    } = body;
+    
+    // Extrair valores diretamente do body para evitar problemas de desestruturação
+    const real_r = body.real_r;
+    const cl_real = body.cl_real;
+    const te_real = body.te_real;
+    const tb_real = body.tb_real;
+    const t_medio = body.t_medio;
+    const res_tot = body.res_tot;
+    const res_p = body.res_p;
+    const c_art = body.c_art;
+    const c_prod = body.c_prod;
+    const percent_b = body.percent_b;
+    const percent_d = body.percent_d;
+    const percent_c = body.percent_c;
+    const t_coz = body.t_coz;
+    const t_bar = body.t_bar;
+    const observacoes = body.observacoes;
 
     console.log('📝 Dados recebidos para edição:', {
       eventoId,
