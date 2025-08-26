@@ -25,7 +25,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Dados do corpo da requisição
-    const body = await request.json();
+    const rawBody = await request.text();
+    console.log('🔍 Debug - Raw body (texto):', rawBody);
+    console.log('🔍 Debug - Tipo do raw body:', typeof rawBody);
+    
+    const body = JSON.parse(rawBody);
+    console.log('🔍 Debug - Body após JSON.parse:', body);
+    console.log('🔍 Debug - Tipo do body após parse:', typeof body);
     
     // Extrair valores diretamente do body para evitar problemas de desestruturação
     const real_r = body.real_r;
