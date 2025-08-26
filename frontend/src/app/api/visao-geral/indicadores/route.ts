@@ -753,8 +753,8 @@ export async function GET(request: Request) {
       }
       
       // ✅ COMPARAÇÃO CMO COM TRIMESTRE ANTERIOR
-      const cmoTrimestreAnteriorStart = trimestreAnteriorStart.toISOString().split('T')[0];
-      const cmoTrimestreAnteriorEnd = trimestreAnteriorEnd.toISOString().split('T')[0];
+      const cmoTrimestreAnteriorStart = startDateAnterior;
+      const cmoTrimestreAnteriorEnd = endDateAnterior;
       
       // Buscar CMO do trimestre anterior
       const cmoAnteriorData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
