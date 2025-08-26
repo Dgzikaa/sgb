@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    console.log('🔄 API Edição Valores Reais - Evento ID:', params.id);
+    console.log('🔄 API Edição Valores Reais - VERSÃO CORRIGIDA - Evento ID:', params.id);
 
     // Autenticação
     const user = await authenticateUser(request);
