@@ -314,8 +314,11 @@ export default function PlanejamentoComercialPage() {
 
   // Abrir modal de edição dos valores reais
   const abrirModalReal = (evento: PlanejamentoData) => {
+    console.log('🔍 Debug - Evento selecionado para edição:', evento);
+    
     setEventoSelecionado(evento);
-    setEventoEdicaoReal({
+    
+    const dadosIniciais = {
       id: evento.evento_id,
       nome: evento.evento_nome,
       real_r: evento.real_receita || 0,
@@ -333,7 +336,11 @@ export default function PlanejamentoComercialPage() {
       t_coz: evento.t_coz || 0,
       t_bar: evento.t_bar || 0,
       observacoes: ''
-    });
+    };
+    
+    console.log('🔍 Debug - Dados iniciais do modal:', dadosIniciais);
+    
+    setEventoEdicaoReal(dadosIniciais);
     setModalRealOpen(true);
   };
 
@@ -398,29 +405,36 @@ export default function PlanejamentoComercialPage() {
     try {
       setSalvando(true);
       
+      // Debug: Log dos dados antes de enviar
+      console.log('🔍 Debug - Estado eventoEdicaoReal antes de enviar:', eventoEdicaoReal);
+      
+      const dadosParaEnviar = {
+        real_r: eventoEdicaoReal.real_r || 0,
+        cl_real: eventoEdicaoReal.cl_real || 0,
+        te_real: eventoEdicaoReal.te_real || 0,
+        tb_real: eventoEdicaoReal.tb_real || 0,
+        t_medio: eventoEdicaoReal.t_medio || 0,
+        res_tot: eventoEdicaoReal.res_tot || 0,
+        res_p: eventoEdicaoReal.res_p || 0,
+        c_art: eventoEdicaoReal.c_art || 0,
+        c_prod: eventoEdicaoReal.c_prod || 0,
+        percent_b: eventoEdicaoReal.percent_b || 0,
+        percent_d: eventoEdicaoReal.percent_d || 0,
+        percent_c: eventoEdicaoReal.percent_c || 0,
+        t_coz: eventoEdicaoReal.t_coz || 0,
+        t_bar: eventoEdicaoReal.t_bar || 0,
+        observacoes: eventoEdicaoReal.observacoes || ''
+      };
+      
+      console.log('📤 Debug - Dados que serão enviados:', dadosParaEnviar);
+      
       const response = await apiCall(`/api/eventos/${eventoEdicaoReal.id}/valores-reais`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'x-user-data': encodeURIComponent(JSON.stringify(user))
         },
-        body: JSON.stringify({
-          real_r: eventoEdicaoReal.real_r,
-          cl_real: eventoEdicaoReal.cl_real,
-          te_real: eventoEdicaoReal.te_real,
-          tb_real: eventoEdicaoReal.tb_real,
-          t_medio: eventoEdicaoReal.t_medio,
-          res_tot: eventoEdicaoReal.res_tot,
-          res_p: eventoEdicaoReal.res_p,
-          c_art: eventoEdicaoReal.c_art,
-          c_prod: eventoEdicaoReal.c_prod,
-          percent_b: eventoEdicaoReal.percent_b,
-          percent_d: eventoEdicaoReal.percent_d,
-          percent_c: eventoEdicaoReal.percent_c,
-          t_coz: eventoEdicaoReal.t_coz,
-          t_bar: eventoEdicaoReal.t_bar,
-          observacoes: eventoEdicaoReal.observacoes
-        })
+        body: JSON.stringify(dadosParaEnviar)
       });
 
       if (response.success) {
@@ -1199,7 +1213,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.01"
                           value={eventoEdicaoReal.real_r}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, real_r: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, real_r: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
                         />
                       </div>
@@ -1208,7 +1225,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           value={eventoEdicaoReal.cl_real}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, cl_real: parseInt(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, cl_real: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
                         />
                       </div>
@@ -1218,7 +1238,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.01"
                           value={eventoEdicaoReal.t_medio}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, t_medio: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, t_medio: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
                         />
                       </div>
@@ -1242,7 +1265,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.01"
                           value={eventoEdicaoReal.te_real}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, te_real: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, te_real: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                         />
                       </div>
@@ -1252,7 +1278,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.01"
                           value={eventoEdicaoReal.tb_real}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, tb_real: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, tb_real: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                         />
                       </div>
@@ -1275,7 +1304,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           value={eventoEdicaoReal.res_tot}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, res_tot: parseInt(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, res_tot: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                         />
                       </div>
@@ -1284,7 +1316,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           value={eventoEdicaoReal.res_p}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, res_p: parseInt(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, res_p: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                         />
                       </div>
@@ -1308,7 +1343,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.01"
                           value={eventoEdicaoReal.c_art}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, c_art: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, c_art: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
                         />
                       </div>
@@ -1318,7 +1356,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.01"
                           value={eventoEdicaoReal.c_prod}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, c_prod: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, c_prod: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
                         />
                       </div>
@@ -1342,7 +1383,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.1"
                           value={eventoEdicaoReal.percent_b}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, percent_b: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, percent_b: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
                         />
                       </div>
@@ -1352,7 +1396,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.1"
                           value={eventoEdicaoReal.percent_d}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, percent_d: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, percent_d: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
                         />
                       </div>
@@ -1362,7 +1409,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.1"
                           value={eventoEdicaoReal.percent_c}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, percent_c: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, percent_c: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
                         />
                       </div>
@@ -1386,7 +1436,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.1"
                           value={eventoEdicaoReal.t_coz}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, t_coz: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, t_coz: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
                         />
                       </div>
@@ -1396,7 +1449,10 @@ export default function PlanejamentoComercialPage() {
                           type="number"
                           step="0.1"
                           value={eventoEdicaoReal.t_bar}
-                          onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, t_bar: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => {
+                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setEventoEdicaoReal({...eventoEdicaoReal, t_bar: isNaN(valor) ? 0 : valor});
+                          }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
                         />
                       </div>

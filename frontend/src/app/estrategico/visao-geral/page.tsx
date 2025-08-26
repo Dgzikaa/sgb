@@ -119,14 +119,14 @@ export default function VisaoGeralEstrategica() {
     showLoading('Carregando dados da visão geral...');
     
     // Calcular o mês de retenção baseado no trimestre selecionado
-    // Usar o último mês do trimestre (mesmo que não tenha dados completos)
+    // Usar o mês atual disponível para cada trimestre
     const getMesRetencao = (trimestre: number) => {
-      const ultimoMesTrimestre = {
-        2: '2025-06', // T2 (Abr-Jun): usar Junho
-        3: '2025-09', // T3 (Jul-Set): usar Setembro 
+      const mesAtualTrimestre = {
+        2: '2025-06', // T2 (Abr-Jun): usar Junho (último mês completo)
+        3: '2025-08', // T3 (Jul-Set): usar Agosto (mês atual) 
         4: '2025-12'  // T4 (Out-Dez): usar Dezembro
       };
-      return ultimoMesTrimestre[trimestre as keyof typeof ultimoMesTrimestre] || '2025-09';
+      return mesAtualTrimestre[trimestre as keyof typeof mesAtualTrimestre] || '2025-08';
     };
     
     const mesRetencao = getMesRetencao(trimestreAtual);
