@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, Target } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 interface IndicadorRetencaoProps {
   valor?: number;
   meta: number;
   variacao?: number;
   mesSelected?: string;
+  periodoAnalisado?: string;
 }
 
-export function IndicadorRetencao({ valor = 0, meta, variacao = 0, mesSelected: initialMesSelected }: IndicadorRetencaoProps) {
+export function IndicadorRetencao({ valor = 0, meta, variacao = 0, mesSelected: initialMesSelected, periodoAnalisado }: IndicadorRetencaoProps) {
   const [mesSelected, setMesSelected] = useState<string>(initialMesSelected || '');
 
   // Usar dados recebidos via props
@@ -59,9 +60,6 @@ export function IndicadorRetencao({ valor = 0, meta, variacao = 0, mesSelected: 
               <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
                 Taxa de Retenção
               </CardTitle>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                Fidelização de clientes
-              </p>
             </div>
           </div>
           
@@ -69,57 +67,50 @@ export function IndicadorRetencao({ valor = 0, meta, variacao = 0, mesSelected: 
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-3">
-        {/* Valor principal compacto */}
-        <div className="text-center">
-          <div className="flex items-baseline justify-center gap-2 mb-2">
-            <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-              {formatarValor(data.valor)}
+      <CardContent className="space-y-4">
+        {/* Seção de comparação - ACIMA do valor principal */}
+        <div className="flex items-center justify-center mb-2">
+          <div className="flex items-center gap-1">
+            <span className={`text-xs font-medium ${
+              data.comparacao > 0 
+                ? 'text-green-600 dark:text-green-400' 
+                : data.comparacao < 0 
+                  ? 'text-red-600 dark:text-red-400' 
+                  : 'text-gray-500 dark:text-gray-500'
+            }`}>
+              vs trimestre anterior {data.comparacao > 0 ? '+' : ''}{formatarValor(data.comparacao)}
             </span>
-            <Badge 
-              variant="secondary" 
-              className="bg-purple-100 dark:bg-purple-900/30 border-purple-200 dark:border-purple-700 text-xs"
-            >
-              <Target className="w-3 h-3 mr-1" />
-              Meta: {formatarValor(data.meta)}
-            </Badge>
           </div>
-          
-          {/* Progress bar compacto */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600 dark:text-gray-400">Progresso</span>
-              <span className="font-medium text-gray-900 dark:text-white">
+        </div>
+        
+        <div>
+          <div className="flex items-baseline justify-between mb-1">
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {formatarValor(data.valor)}
+            </p>
+            <Badge variant="secondary" className="bg-purple-100 dark:bg-purple-900/30">
+              <span className="text-purple-600 dark:text-purple-400">
                 {progresso.toFixed(0)}%
               </span>
-            </div>
-            <Progress 
-              value={progresso} 
-              className="h-2 bg-gray-200 dark:bg-gray-700"
-            />
+            </Badge>
           </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Meta: {formatarValor(data.meta)}
+          </p>
         </div>
 
-        {/* Informações em linha única */}
-        <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200/50 dark:border-gray-600/50">
-          <div className="text-center">
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-              vs mês anterior
-            </p>
-            <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-              {formatarValor(data.comparacao)}
-            </p>
-          </div>
+        <Progress value={progresso} className="h-2" />
 
-          <div className="text-center">
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-              Clientes Ativos
+        {periodoAnalisado && (
+          <div className="space-y-1 pt-2 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1">
+              Período Analisado
             </p>
-            <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-              {formatarNumero(data.clientesAtivos)} / {formatarNumero(data.clientesTotais)}
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              {periodoAnalisado}
             </p>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

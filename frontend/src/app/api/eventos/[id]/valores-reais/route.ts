@@ -55,6 +55,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       res_p
     });
 
+    console.log('🔍 Debug - Body completo recebido:', body);
+    console.log('🔍 Debug - Tipo de cada valor:', {
+      real_r: typeof real_r,
+      cl_real: typeof cl_real,
+      te_real: typeof te_real,
+      tb_real: typeof tb_real,
+      t_medio: typeof t_medio,
+      res_tot: typeof res_tot,
+      res_p: typeof res_p
+    });
+
     // Verificar se o evento existe e pertence ao bar do usuário
     const { data: evento, error: eventoError } = await supabase
       .from('eventos_base')

@@ -428,6 +428,9 @@ export default function PlanejamentoComercialPage() {
       
       console.log('📤 Debug - Dados que serão enviados:', dadosParaEnviar);
       
+      // Alert temporário para debug
+      alert(`Debug Frontend:\nEstado: ${JSON.stringify(eventoEdicaoReal, null, 2)}\n\nDados para enviar: ${JSON.stringify(dadosParaEnviar, null, 2)}`);
+      
       const response = await apiCall(`/api/eventos/${eventoEdicaoReal.id}/valores-reais`, {
         method: 'PUT',
         headers: {

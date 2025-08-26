@@ -448,7 +448,7 @@ export default function VisaoGeralEstrategica() {
                     meta={indicadoresTrimestraisMemo?.clientesAtivos?.meta || 3000}
                     formato="numero"
                     cor="green"
-                    periodoAnalisado="Últimos 90 dias (2+ visitas)"
+                    periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
                     comparacao={{
                       valor: indicadoresTrimestraisMemo?.clientesAtivos?.variacao || 0,
                       label: "vs trimestre anterior"
@@ -472,7 +472,7 @@ export default function VisaoGeralEstrategica() {
                     valor={indicadoresTrimestraisMemo?.retencao?.valor || 0}
                     meta={indicadoresTrimestraisMemo?.retencao?.meta || 10}
                     variacao={indicadoresTrimestraisMemo?.retencao?.variacao || 0}
-                    mesSelected={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`}
+                    periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
                   />
                   
                   <IndicadorCard
