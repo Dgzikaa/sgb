@@ -29,14 +29,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     console.log('🔍 Debug - Raw body (texto):', rawBody);
     console.log('🔍 Debug - Tipo do raw body:', typeof rawBody);
     
-    // Forçar parse com eval (temporário para debug)
+    // Forçar double parse para resolver double encoding
     let body;
     try {
-      body = JSON.parse(rawBody);
-      console.log('🔍 Debug - JSON.parse funcionou, tipo:', typeof body);
+      const firstParse = JSON.parse(rawBody);
+      console.log('🔍 Debug - Primeiro parse, tipo:', typeof firstParse);
+      
+      if (typeof firstParse === 'string') {
+        // Double encoding detectado! Fazer segundo parse
+        body = JSON.parse(firstParse);
+        console.log('🔍 Debug - DOUBLE ENCODING! Segundo parse, tipo:', typeof body);
+      } else {
+        body = firstParse;
+        console.log('🔍 Debug - Parse normal, tipo:', typeof body);
+      }
     } catch (e) {
-      console.log('🔍 Debug - JSON.parse falhou:', e);
-      // Fallback: usar eval (APENAS PARA DEBUG)
+      console.log('🔍 Debug - Parse falhou:', e);
+      // Fallback: usar eval
       body = eval('(' + rawBody + ')');
       console.log('🔍 Debug - Eval funcionou, tipo:', typeof body);
     }
