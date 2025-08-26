@@ -56,6 +56,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     });
 
     console.log('🔍 Debug - Body completo recebido:', body);
+    console.log('🔍 Debug - JSON.stringify do body:', JSON.stringify(body));
+    console.log('🔍 Debug - Object.keys do body:', Object.keys(body));
+    console.log('🔍 Debug - body.real_r diretamente:', body.real_r);
+    console.log('🔍 Debug - body["real_r"] com colchetes:', body["real_r"]);
     console.log('🔍 Debug - Tipo de cada valor:', {
       real_r: typeof body.real_r,
       cl_real: typeof body.cl_real,
