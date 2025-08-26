@@ -46,24 +46,24 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     console.log('📝 Dados recebidos para edição:', {
       eventoId,
-      real_r,
-      cl_real,
-      te_real,
-      tb_real,
-      t_medio,
-      res_tot,
-      res_p
+      real_r: body.real_r,
+      cl_real: body.cl_real,
+      te_real: body.te_real,
+      tb_real: body.tb_real,
+      t_medio: body.t_medio,
+      res_tot: body.res_tot,
+      res_p: body.res_p
     });
 
     console.log('🔍 Debug - Body completo recebido:', body);
     console.log('🔍 Debug - Tipo de cada valor:', {
-      real_r: typeof real_r,
-      cl_real: typeof cl_real,
-      te_real: typeof te_real,
-      tb_real: typeof tb_real,
-      t_medio: typeof t_medio,
-      res_tot: typeof res_tot,
-      res_p: typeof res_p
+      real_r: typeof body.real_r,
+      cl_real: typeof body.cl_real,
+      te_real: typeof body.te_real,
+      tb_real: typeof body.tb_real,
+      t_medio: typeof body.t_medio,
+      res_tot: typeof body.res_tot,
+      res_p: typeof body.res_p
     });
 
     // Verificar se o evento existe e pertence ao bar do usuário
@@ -85,21 +85,21 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const { data: eventoAtualizado, error: updateError } = await supabase
       .from('eventos_base')
       .update({
-        real_r: real_r || 0,
-        cl_real: cl_real || 0,
-        te_real: te_real || 0,
-        tb_real: tb_real || 0,
-        t_medio: t_medio || 0,
-        res_tot: res_tot || 0,
-        res_p: res_p || 0,
-        c_art: c_art || 0,
-        c_prod: c_prod || 0,
-        percent_b: percent_b || 0,
-        percent_d: percent_d || 0,
-        percent_c: percent_c || 0,
-        t_coz: t_coz || 0,
-        t_bar: t_bar || 0,
-        observacoes: observacoes || '',
+        real_r: body.real_r || 0,
+        cl_real: body.cl_real || 0,
+        te_real: body.te_real || 0,
+        tb_real: body.tb_real || 0,
+        t_medio: body.t_medio || 0,
+        res_tot: body.res_tot || 0,
+        res_p: body.res_p || 0,
+        c_art: body.c_art || 0,
+        c_prod: body.c_prod || 0,
+        percent_b: body.percent_b || 0,
+        percent_d: body.percent_d || 0,
+        percent_c: body.percent_c || 0,
+        t_coz: body.t_coz || 0,
+        t_bar: body.t_bar || 0,
+        observacoes: body.observacoes || '',
         atualizado_em: new Date().toISOString(),
         // Marcar que os valores foram editados manualmente
         calculado_em: new Date().toISOString(),
@@ -125,11 +125,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     console.log('📊 Valores salvos:', {
       evento_id: eventoId,
       evento_nome: evento.nome,
-      real_r,
-      cl_real,
-      te_real,
-      tb_real,
-      t_medio,
+      real_r: body.real_r,
+      cl_real: body.cl_real,
+      te_real: body.te_real,
+      tb_real: body.tb_real,
+      t_medio: body.t_medio,
       usuario: user.email,
       timestamp: new Date().toISOString()
     });
