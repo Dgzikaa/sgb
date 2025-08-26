@@ -71,13 +71,14 @@ BEGIN
     AND bar_id = evento_record.bar_id;
     
     -- =================================================
-    -- 2. BUSCAR DADOS CONTAHUB PAGAMENTOS
+    -- 2. BUSCAR DADOS CONTAHUB PAGAMENTOS (EXCLUINDO CONTA ASSINADA)
     -- =================================================
     SELECT SUM(liquido) as total_liquido
     INTO contahub_pag
     FROM contahub_pagamentos
     WHERE dt_gerencial = evento_record.data_evento 
-    AND bar_id = evento_record.bar_id;
+    AND bar_id = evento_record.bar_id
+    AND meio != 'Conta Assinada';
     
     -- =================================================
     -- 3. BUSCAR DADOS CONTAHUB PERÍODO

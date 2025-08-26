@@ -407,6 +407,15 @@ export default function PlanejamentoComercialPage() {
       
       // Debug: Log dos dados antes de enviar
       console.log('🔍 Debug - Estado eventoEdicaoReal antes de enviar:', eventoEdicaoReal);
+      console.log('🔍 Debug - Valores específicos do estado:', {
+        real_r: eventoEdicaoReal.real_r,
+        cl_real: eventoEdicaoReal.cl_real,
+        te_real: eventoEdicaoReal.te_real,
+        tb_real: eventoEdicaoReal.tb_real,
+        t_medio: eventoEdicaoReal.t_medio,
+        res_tot: eventoEdicaoReal.res_tot,
+        res_p: eventoEdicaoReal.res_p
+      });
       
       const dadosParaEnviar = {
         real_r: eventoEdicaoReal.real_r || 0,
@@ -427,9 +436,15 @@ export default function PlanejamentoComercialPage() {
       };
       
       console.log('📤 Debug - Dados que serão enviados:', dadosParaEnviar);
-      
-      // Alert temporário para debug
-      alert(`Debug Frontend:\nEstado: ${JSON.stringify(eventoEdicaoReal, null, 2)}\n\nDados para enviar: ${JSON.stringify(dadosParaEnviar, null, 2)}`);
+      console.log('📤 Debug - Valores específicos que serão enviados:', {
+        real_r: dadosParaEnviar.real_r,
+        cl_real: dadosParaEnviar.cl_real,
+        te_real: dadosParaEnviar.te_real,
+        tb_real: dadosParaEnviar.tb_real,
+        t_medio: dadosParaEnviar.t_medio,
+        res_tot: dadosParaEnviar.res_tot,
+        res_p: dadosParaEnviar.res_p
+      });
       
       const response = await apiCall(`/api/eventos/${eventoEdicaoReal.id}/valores-reais`, {
         method: 'PUT',

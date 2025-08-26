@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    console.log('🔄 API Edição Valores Reais - VERSÃO CORRIGIDA - Evento ID:', params.id);
+    console.log('🔄 API Edição Valores Reais - Evento ID:', params.id);
 
     // Autenticação
     const user = await authenticateUser(request);
@@ -24,35 +24,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'ID do evento inválido' }, { status: 400 });
     }
 
-    // Dados do corpo da requisição
+    // Dados do corpo da requisição - com correção para double encoding
     const rawBody = await request.text();
-    console.log('🔍 Debug - Raw body (texto):', rawBody);
-    console.log('🔍 Debug - Tipo do raw body:', typeof rawBody);
     
-    // Forçar double parse para resolver double encoding
     let body;
     try {
       const firstParse = JSON.parse(rawBody);
-      console.log('🔍 Debug - Primeiro parse, tipo:', typeof firstParse);
       
       if (typeof firstParse === 'string') {
-        // Double encoding detectado! Fazer segundo parse
+        // Double encoding detectado - fazer segundo parse
         body = JSON.parse(firstParse);
-        console.log('🔍 Debug - DOUBLE ENCODING! Segundo parse, tipo:', typeof body);
       } else {
         body = firstParse;
-        console.log('🔍 Debug - Parse normal, tipo:', typeof body);
       }
     } catch (e) {
-      console.log('🔍 Debug - Parse falhou:', e);
-      // Fallback: usar eval
-      body = eval('(' + rawBody + ')');
-      console.log('🔍 Debug - Eval funcionou, tipo:', typeof body);
+      console.error('❌ Erro ao fazer parse do JSON:', e);
+      return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 });
     }
-    
-    console.log('🔍 Debug - Body final:', body);
-    console.log('🔍 Debug - Tipo do body final:', typeof body);
-    console.log('🔍 Debug - Object.keys do body final:', Object.keys(body));
     
     // Extrair valores diretamente do body para evitar problemas de desestruturação
     const real_r = body.real_r;
