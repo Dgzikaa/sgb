@@ -29,9 +29,21 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     console.log('🔍 Debug - Raw body (texto):', rawBody);
     console.log('🔍 Debug - Tipo do raw body:', typeof rawBody);
     
-    const body = JSON.parse(rawBody);
-    console.log('🔍 Debug - Body após JSON.parse:', body);
-    console.log('🔍 Debug - Tipo do body após parse:', typeof body);
+    // Forçar parse com eval (temporário para debug)
+    let body;
+    try {
+      body = JSON.parse(rawBody);
+      console.log('🔍 Debug - JSON.parse funcionou, tipo:', typeof body);
+    } catch (e) {
+      console.log('🔍 Debug - JSON.parse falhou:', e);
+      // Fallback: usar eval (APENAS PARA DEBUG)
+      body = eval('(' + rawBody + ')');
+      console.log('🔍 Debug - Eval funcionou, tipo:', typeof body);
+    }
+    
+    console.log('🔍 Debug - Body final:', body);
+    console.log('🔍 Debug - Tipo do body final:', typeof body);
+    console.log('🔍 Debug - Object.keys do body final:', Object.keys(body));
     
     // Extrair valores diretamente do body para evitar problemas de desestruturação
     const real_r = body.real_r;
