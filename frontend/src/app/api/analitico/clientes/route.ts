@@ -255,20 +255,49 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				// Usar os períodos já processados na API principal
+				// Buscar períodos completos apenas para clientes que estão no mapa
 				const todosPeriodos = []
-				console.log('📄 Coletando períodos já processados na API principal...')
+				console.log('📄 Buscando períodos completos para clientes do mapa...')
 				
-				// Reprocessar os dados já coletados na API principal
-				for (const [fone, cliente] of map.entries()) {
-					// Simular estrutura de período para compatibilidade
-					todosPeriodos.push({
-						cli_nome: cliente.nome,
-						cli_fone: fone,
-						dt_gerencial: cliente.ultima, // Usar última visita como referência
-						vd_mesadesc: '' // Não temos essa info no mapa principal
+				// Criar lista de telefones para buscar
+				const telefonesParaBuscar = Array.from(map.keys())
+				console.log(`📞 Buscando períodos para ${telefonesParaBuscar.length} telefones únicos`)
+				
+				// Buscar em lotes para otimizar
+				const loteSize = 100
+				for (let i = 0; i < telefonesParaBuscar.length; i += loteSize) {
+					const lote = telefonesParaBuscar.slice(i, i + loteSize)
+					
+					// Converter telefones para formato com hífen para busca
+					const telefonesComHifen = lote.map(tel => {
+						if (tel.length === 11) {
+							return `${tel.substring(0, 2)}-${tel.substring(2)}`
+						}
+						return tel
 					})
+					
+					const { data: periodosLote, error: errorLote } = await supabase
+						.from('contahub_periodo')
+						.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
+						.eq('bar_id', finalBarId)
+						.in('cli_fone', telefonesComHifen)
+					
+					if (errorLote) {
+						console.warn(`⚠️ Erro ao buscar lote ${i}-${i + loteSize}:`, errorLote)
+						continue
+					}
+					
+					if (periodosLote && periodosLote.length > 0) {
+						todosPeriodos.push(...periodosLote)
+					}
+					
+					// Log de progresso
+					if ((i / loteSize + 1) % 10 === 0) {
+						console.log(`📄 Processados ${i + loteSize} telefones, ${todosPeriodos.length} períodos encontrados`)
+					}
 				}
+				
+				console.log(`📄 Total de períodos encontrados: ${todosPeriodos.length}`)
 				
 				console.log(`🔄 Iniciando cruzamento: ${todosPeriodos.length} períodos × ${todosPagamentos.length} pagamentos`)
 				
