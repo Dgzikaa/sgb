@@ -255,213 +255,130 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				// Buscar períodos completos apenas para clientes que estão no mapa
-				const todosPeriodos = []
-				console.log('📄 Buscando períodos completos para clientes do mapa...')
+				// Nova lógica: processar cliente por cliente individualmente
+				console.log('👥 Processando tempos de estadia cliente por cliente...')
 				
-				// Criar lista de telefones para buscar
-				const telefonesParaBuscar = Array.from(map.keys())
-				console.log(`📞 Buscando períodos para ${telefonesParaBuscar.length} telefones únicos`)
+				let clientesProcessados = 0
+				let totalTemposEncontrados = 0
 				
-				// Buscar em lotes para otimizar
-				const loteSize = 100
-				for (let i = 0; i < telefonesParaBuscar.length; i += loteSize) {
-					const lote = telefonesParaBuscar.slice(i, i + loteSize)
+				for (const [fone, cliente] of map.entries()) {
+					clientesProcessados++
 					
-					// Converter telefones para formato com hífen para busca
-					const telefonesComHifen = lote.map(tel => {
-						if (tel.length === 11) {
-							return `${tel.substring(0, 2)}-${tel.substring(2)}`
-						}
-						return tel
-					})
+					// Buscar TODOS os períodos deste cliente específico
+					const foneComHifen = fone.length === 11 
+						? `${fone.substring(0, 2)}-${fone.substring(2)}`
+						: fone
 					
-					const { data: periodosLote, error: errorLote } = await supabase
+					const { data: periodosCliente, error: errorPeriodos } = await supabase
 						.from('contahub_periodo')
 						.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
 						.eq('bar_id', finalBarId)
-						.in('cli_fone', telefonesComHifen)
+						.eq('cli_fone', foneComHifen)
 					
-					if (errorLote) {
-						console.warn(`⚠️ Erro ao buscar lote ${i}-${i + loteSize}:`, errorLote)
+					if (errorPeriodos) {
+						console.warn(`⚠️ Erro ao buscar períodos para ${cliente.nome}:`, errorPeriodos)
 						continue
 					}
 					
-					if (periodosLote && periodosLote.length > 0) {
-						todosPeriodos.push(...periodosLote)
+					if (!periodosCliente || periodosCliente.length === 0) {
+						continue
 					}
 					
-					// Log de progresso
-					if ((i / loteSize + 1) % 10 === 0) {
-						console.log(`📄 Processados ${i + loteSize} telefones, ${todosPeriodos.length} períodos encontrados`)
-					}
-				}
-				
-				console.log(`📄 Total de períodos encontrados: ${todosPeriodos.length}`)
-				
-				console.log(`🔄 Iniciando cruzamento: ${todosPeriodos.length} períodos × ${todosPagamentos.length} pagamentos`)
-				
-				// DEBUG: Verificar se temos dados da Laura Galvão
-				const lauraData = todosPeriodos.filter(p => p.cli_nome && p.cli_nome.toLowerCase().includes('laura') && p.cli_nome.toLowerCase().includes('galv'))
-				if (lauraData.length > 0) {
-					console.log(`🔍 DEBUG: Encontrados ${lauraData.length} registros da Laura Galvão`)
-					console.log(`🔍 DEBUG: Primeiro registro:`, JSON.stringify(lauraData[0], null, 2))
-					
-					// Verificar normalização do telefone
-					const foneNormalizado = (lauraData[0].cli_fone || '').toString().trim().replace(/\D/g, '')
-					let fone = foneNormalizado
-					if (fone.length === 10 && ['61'].includes(fone.substring(0, 2))) {
-						fone = fone.substring(0, 2) + '9' + fone.substring(2)
-					}
-					console.log(`🔍 DEBUG: Telefone original: ${lauraData[0].cli_fone}, normalizado: ${fone}`)
-					console.log(`🔍 DEBUG: Cliente está no mapa? ${map.has(fone)}`)
-				}
-				
-				// Fazer cruzamento manual dos dados
-				const temposPorCliente = new Map<string, number[]>()
-				let cruzamentosEncontrados = 0
-				let temposValidos = 0
-				let matchesPorTipo = {
-					nomeExato: 0,
-					mesaExata: 0,
-					mesaContida: 0,
-					primeiroNome: 0,
-					numeroMesa: 0
-				}
-				
-				let processedLaura = false
-				
-				for (const periodo of todosPeriodos) {
-					const foneNormalizado = (periodo.cli_fone || '').toString().trim().replace(/\D/g, '')
-					if (!foneNormalizado) continue
-					
-					// Normalizar telefone igual à lógica principal
-					let fone = foneNormalizado
-					if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
-						fone = fone.substring(0, 2) + '9' + fone.substring(2)
+					// DEBUG para Laura Galvão
+					if (cliente.nome.toLowerCase().includes('laura') && cliente.nome.toLowerCase().includes('galv')) {
+						console.log(`🔍 DEBUG Laura: Encontrados ${periodosCliente.length} períodos para ${cliente.nome}`)
+						console.log(`🔍 DEBUG Laura: Nomes encontrados:`, periodosCliente.map(p => p.cli_nome).slice(0, 5))
 					}
 					
-					// DEBUG específico para Laura Galvão
-					if (!processedLaura && periodo.cli_nome && periodo.cli_nome.toLowerCase().includes('laura') && periodo.cli_nome.toLowerCase().includes('galv')) {
-						console.log(`🔍 DEBUG Laura: Processando ${periodo.cli_nome}, fone: ${fone}, no mapa: ${map.has(fone)}`)
-						processedLaura = true
-					}
+					const temposDesteCliente = []
 					
-					// Verificar se é um cliente que temos no mapa
-					if (!map.has(fone)) continue
-					
-					// Buscar pagamentos correspondentes com lógica melhorada
-					const pagamentosCorrespondentes = []
-					
-					for (const pag of todosPagamentos) {
-						// Deve ser da mesma data
-						if (pag.dt_gerencial !== periodo.dt_gerencial) continue
-						
-						// Normalizar strings para comparação
-						const periodoNome = (periodo.cli_nome || '').toLowerCase().trim()
-						const periodoMesa = (periodo.vd_mesadesc || '').toLowerCase().trim()
-						const pagamentoCliente = (pag.cliente || '').toLowerCase().trim()
-						const pagamentoMesa = (pag.mesa || '').toLowerCase().trim()
-						
-						let matchEncontrado = false
-						
-						// 1. Match exato por nome
-						if (periodoNome && pagamentoCliente && periodoNome === pagamentoCliente) {
-							matchesPorTipo.nomeExato++
-							matchEncontrado = true
-						}
-						// 2. Match exato por mesa
-						else if (periodoMesa && pagamentoMesa && periodoMesa === pagamentoMesa) {
-							matchesPorTipo.mesaExata++
-							matchEncontrado = true
-						}
-						// 3. Mesa contém descrição (qualquer direção)
-						else if (periodoMesa && pagamentoMesa && 
+					// Para cada período deste cliente, buscar pagamento correspondente
+					for (const periodo of periodosCliente) {
+						// Buscar pagamentos correspondentes para este período específico
+						const pagamentosCorrespondentes = todosPagamentos.filter(pag => {
+							// Deve ser da mesma data
+							if (pag.dt_gerencial !== periodo.dt_gerencial) return false
+							
+							// Normalizar strings para comparação
+							const periodoNome = (periodo.cli_nome || '').toLowerCase().trim()
+							const periodoMesa = (periodo.vd_mesadesc || '').toLowerCase().trim()
+							const pagamentoCliente = (pag.cliente || '').toLowerCase().trim()
+							const pagamentoMesa = (pag.mesa || '').toLowerCase().trim()
+							
+							// 1. Match exato por nome
+							if (periodoNome && pagamentoCliente && periodoNome === pagamentoCliente) {
+								return true
+							}
+							
+							// 2. Match exato por mesa
+							if (periodoMesa && pagamentoMesa && periodoMesa === pagamentoMesa) {
+								return true
+							}
+							
+							// 3. Mesa contém descrição (qualquer direção)
+							if (periodoMesa && pagamentoMesa && 
 								(periodoMesa.includes(pagamentoMesa) || pagamentoMesa.includes(periodoMesa))) {
-							matchesPorTipo.mesaContida++
-							matchEncontrado = true
-						}
-						// 4. Nome parcial (primeiro nome)
-						else if (periodoNome && pagamentoCliente) {
-							const primeiroNomePeriodo = periodoNome.split(' ')[0]
-							const primeiroNomePagamento = pagamentoCliente.split(' ')[0]
-							if (primeiroNomePeriodo.length > 3 && primeiroNomePagamento.length > 3 && 
-								primeiroNomePeriodo === primeiroNomePagamento) {
-								matchesPorTipo.primeiroNome++
-								matchEncontrado = true
+								return true
 							}
-						}
-						// 5. Extrair números da mesa para comparação
-						else if (periodoMesa && pagamentoMesa) {
-							const numerosPeriodo = periodoMesa.match(/\d+/g)
-							const numerosPagamento = pagamentoMesa.match(/\d+/g)
-							if (numerosPeriodo && numerosPagamento) {
-								// Verificar se algum número coincide
-								for (const numP of numerosPeriodo) {
-									for (const numPg of numerosPagamento) {
-										if (numP === numPg && numP.length >= 2) { // Números com pelo menos 2 dígitos
-											matchesPorTipo.numeroMesa++
-											matchEncontrado = true
-											break
-										}
-									}
-									if (matchEncontrado) break
+							
+							// 4. Nome parcial (primeiro nome)
+							if (periodoNome && pagamentoCliente) {
+								const primeiroNomePeriodo = periodoNome.split(' ')[0]
+								const primeiroNomePagamento = pagamentoCliente.split(' ')[0]
+								if (primeiroNomePeriodo.length > 3 && primeiroNomePagamento.length > 3 && 
+									primeiroNomePeriodo === primeiroNomePagamento) {
+									return true
 								}
 							}
-						}
+							
+							return false
+						})
 						
-						if (matchEncontrado) {
-							pagamentosCorrespondentes.push(pag)
-						}
-					}
-					
-					if (pagamentosCorrespondentes.length > 0) {
-						cruzamentosEncontrados++
-					}
-					
-					for (const pagamento of pagamentosCorrespondentes) {
-						if (pagamento.hr_lancamento && pagamento.hr_transacao) {
-							try {
-								const hrLancamento = new Date(pagamento.hr_lancamento)
-								const hrTransacao = new Date(pagamento.hr_transacao)
-								const tempoMinutos = (hrTransacao.getTime() - hrLancamento.getTime()) / (1000 * 60)
-								
-								// Filtrar tempos válidos (15 minutos a 12 horas)
-								if (tempoMinutos > 15 && tempoMinutos < 720) {
-									if (!temposPorCliente.has(fone)) {
-										temposPorCliente.set(fone, [])
+						// Calcular tempos para este período
+						for (const pagamento of pagamentosCorrespondentes) {
+							if (pagamento.hr_lancamento && pagamento.hr_transacao) {
+								try {
+									const hrLancamento = new Date(pagamento.hr_lancamento)
+									const hrTransacao = new Date(pagamento.hr_transacao)
+									const tempoMinutos = (hrTransacao.getTime() - hrLancamento.getTime()) / (1000 * 60)
+									
+									// Filtrar tempos válidos (15 minutos a 12 horas)
+									if (tempoMinutos > 15 && tempoMinutos < 720) {
+										temposDesteCliente.push(tempoMinutos)
+										totalTemposEncontrados++
 									}
-									temposPorCliente.get(fone)!.push(tempoMinutos)
-									temposValidos++
+								} catch (error) {
+									console.warn('Erro ao calcular tempo:', error)
 								}
-							} catch (error) {
-								console.warn('Erro ao calcular tempo:', error)
 							}
 						}
 					}
-				}
-				
-				// Atualizar clientes com tempos de estadia
-				for (const [fone, tempos] of temposPorCliente.entries()) {
-					const cliente = map.get(fone)
-					if (cliente && tempos.length > 0) {
-						cliente.temposEstadia = tempos
-						cliente.tempoMedioEstadia = tempos.reduce((sum, t) => sum + t, 0) / tempos.length
+					
+					// Atualizar cliente com todos os tempos encontrados
+					if (temposDesteCliente.length > 0) {
+						cliente.temposEstadia = temposDesteCliente
+						cliente.tempoMedioEstadia = temposDesteCliente.reduce((sum, t) => sum + t, 0) / temposDesteCliente.length
+						
+						// DEBUG para Laura Galvão
+						if (cliente.nome.toLowerCase().includes('laura') && cliente.nome.toLowerCase().includes('galv')) {
+							console.log(`🔍 DEBUG Laura: ${temposDesteCliente.length} tempos calculados, média: ${cliente.tempoMedioEstadia.toFixed(1)} min`)
+						}
+					}
+					
+					// Log de progresso a cada 1000 clientes
+					if (clientesProcessados % 1000 === 0) {
+						console.log(`👥 Processados ${clientesProcessados}/${map.size} clientes, ${totalTemposEncontrados} tempos encontrados`)
 					}
 				}
 				
 				console.log(`✅ Processamento completo:`)
-				console.log(`   📊 ${todosPeriodos.length} períodos processados`)
+				console.log(`   👥 ${clientesProcessados} clientes processados`)
 				console.log(`   💳 ${todosPagamentos.length} pagamentos processados`)
-				console.log(`   🔗 ${cruzamentosEncontrados} cruzamentos encontrados`)
-				console.log(`   ⏱️ ${temposValidos} tempos válidos calculados`)
-				console.log(`   👥 ${temposPorCliente.size} clientes com tempo de estadia`)
-				console.log(`   📈 Matches por tipo:`)
-				console.log(`      🎯 Nome exato: ${matchesPorTipo.nomeExato}`)
-				console.log(`      🏠 Mesa exata: ${matchesPorTipo.mesaExata}`)
-				console.log(`      📝 Mesa contida: ${matchesPorTipo.mesaContida}`)
-				console.log(`      👤 Primeiro nome: ${matchesPorTipo.primeiroNome}`)
-				console.log(`      🔢 Número mesa: ${matchesPorTipo.numeroMesa}`)
+				console.log(`   ⏱️ ${totalTemposEncontrados} tempos válidos calculados`)
+				
+				// Contar clientes com tempo de estadia
+				const clientesComTempo = Array.from(map.values()).filter(c => c.temposEstadia && c.temposEstadia.length > 0)
+				console.log(`   🎯 ${clientesComTempo.length} clientes com tempo de estadia`)
 			}
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
