@@ -203,6 +203,8 @@ export async function GET(request: NextRequest) {
 
 		// Buscar tempos de estadia para todos os clientes usando query SQL direta
 		console.log('🕐 Buscando tempos de estadia para', map.size, 'clientes únicos...')
+		console.log('🔍 DEBUG: Primeiro cliente no map:', Array.from(map.entries())[0])
+		console.log('🔍 DEBUG: Laura está no map?', map.has('61992053013'))
 		
 		try {
 			// Usar método manual direto seguindo padrão da API principal
