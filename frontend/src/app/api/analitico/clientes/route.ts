@@ -283,6 +283,22 @@ export async function GET(request: NextRequest) {
 				
 				console.log(`🔄 Iniciando cruzamento: ${todosPeriodos.length} períodos × ${todosPagamentos.length} pagamentos`)
 				
+				// DEBUG: Verificar se temos dados da Laura Galvão
+				const lauraData = todosPeriodos.filter(p => p.cli_nome && p.cli_nome.toLowerCase().includes('laura') && p.cli_nome.toLowerCase().includes('galv'))
+				if (lauraData.length > 0) {
+					console.log(`🔍 DEBUG: Encontrados ${lauraData.length} registros da Laura Galvão`)
+					console.log(`🔍 DEBUG: Primeiro registro:`, JSON.stringify(lauraData[0], null, 2))
+					
+					// Verificar normalização do telefone
+					const foneNormalizado = (lauraData[0].cli_fone || '').toString().trim().replace(/\D/g, '')
+					let fone = foneNormalizado
+					if (fone.length === 10 && ['61'].includes(fone.substring(0, 2))) {
+						fone = fone.substring(0, 2) + '9' + fone.substring(2)
+					}
+					console.log(`🔍 DEBUG: Telefone original: ${lauraData[0].cli_fone}, normalizado: ${fone}`)
+					console.log(`🔍 DEBUG: Cliente está no mapa? ${map.has(fone)}`)
+				}
+				
 				// Fazer cruzamento manual dos dados
 				const temposPorCliente = new Map<string, number[]>()
 				let cruzamentosEncontrados = 0
@@ -295,6 +311,8 @@ export async function GET(request: NextRequest) {
 					numeroMesa: 0
 				}
 				
+				let processedLaura = false
+				
 				for (const periodo of todosPeriodos) {
 					const foneNormalizado = (periodo.cli_fone || '').toString().trim().replace(/\D/g, '')
 					if (!foneNormalizado) continue
@@ -303,6 +321,12 @@ export async function GET(request: NextRequest) {
 					let fone = foneNormalizado
 					if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
 						fone = fone.substring(0, 2) + '9' + fone.substring(2)
+					}
+					
+					// DEBUG específico para Laura Galvão
+					if (!processedLaura && periodo.cli_nome && periodo.cli_nome.toLowerCase().includes('laura') && periodo.cli_nome.toLowerCase().includes('galv')) {
+						console.log(`🔍 DEBUG Laura: Processando ${periodo.cli_nome}, fone: ${fone}, no mapa: ${map.has(fone)}`)
+						processedLaura = true
 					}
 					
 					// Verificar se é um cliente que temos no mapa
