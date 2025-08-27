@@ -1401,6 +1401,12 @@ export default function ClientesPage() {
                                 Total
                               </div>
                             </TableHead>
+                            <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                              <div className="flex items-center gap-2 justify-center">
+                                <span className="text-lg">⏱️</span>
+                                Tempo de Estadia
+                              </div>
+                            </TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -1426,6 +1432,28 @@ export default function ClientesPage() {
                                 <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 font-semibold">
                                   {formatCurrency(visita.total)}
                                 </Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {(() => {
+                                  // Buscar tempo correspondente a esta visita
+                                  if (clienteSelecionado?.tempos_estadia_detalhados && clienteSelecionado.tempos_estadia_detalhados[index]) {
+                                    const tempo = clienteSelecionado.tempos_estadia_detalhados[index]
+                                    const horas = Math.floor(tempo / 60)
+                                    const minutos = Math.round(tempo % 60)
+                                    const tempoFormatado = `${horas}h ${minutos}min`
+                                    
+                                    return (
+                                      <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
+                                        {tempoFormatado}
+                                      </Badge>
+                                    )
+                                  }
+                                  return (
+                                    <span className="text-gray-400 dark:text-gray-500 text-sm">
+                                      N/A
+                                    </span>
+                                  )
+                                })()}
                               </TableCell>
                             </TableRow>
                           ))}
