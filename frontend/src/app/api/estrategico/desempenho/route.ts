@@ -149,26 +149,21 @@ export async function GET(request: NextRequest) {
       fetchContaHubData()
     ]);
 
-    // Logs detalhados apenas em desenvolvimento
+    // Logs básicos apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
-      console.log(`📊 Yuzer: ${yuzerData.length} registros encontrados`);
-      console.log('🔍 Debug Yuzer - Primeiros 5 registros:', yuzerData.slice(0, 5));
-      console.log(`📊 Sympla: ${symplaData.length} registros encontrados`);
-      console.log('🔍 Debug Sympla - Primeiros 5 registros:', symplaData.slice(0, 5));
-      console.log(`📊 ContaHub: ${contahubData.length} registros encontrados (excluindo Conta Assinada)`);
-      console.log('🔍 Debug ContaHub - Primeiros 5 registros:', contahubData.slice(0, 5));
+      console.log(`📊 Dados carregados - Yuzer: ${yuzerData.length}, Sympla: ${symplaData.length}, ContaHub: ${contahubData.length}`);
     }
 
     // Criar mapas agregados (somar valores por data)
     const yuzerMap = new Map();
-    yuzerData?.forEach(item => {
+    yuzerData?.forEach((item: any) => {
       const data = item.data_evento;
       const valor = item.valor_liquido || 0;
       yuzerMap.set(data, (yuzerMap.get(data) || 0) + valor);
     });
 
     const symplaMap = new Map();
-    symplaData?.forEach(item => {
+    symplaData?.forEach((item: any) => {
       const data = item.data_evento;
       const valor = item.total_liquido || 0;
       symplaMap.set(data, (symplaMap.get(data) || 0) + valor);
@@ -270,10 +265,10 @@ export async function GET(request: NextRequest) {
       const semana = evento.semana;
       
       if (!semanaMap.has(semana)) {
-        const { inicio, fim } = getWeekPeriod(semana, ano);
+        // NÃO recalcular período - será definido dinamicamente baseado nas datas reais dos eventos
         semanaMap.set(semana, {
           semana,
-          periodo: `${inicio.getDate().toString().padStart(2, '0')}.${(inicio.getMonth() + 1).toString().padStart(2, '0')} - ${fim.getDate().toString().padStart(2, '0')}.${(fim.getMonth() + 1).toString().padStart(2, '0')}`,
+          periodo: '', // Será calculado depois baseado nas datas reais dos eventos
           faturamento_total: 0,
           clientes_total: 0,
           eventos_count: 0,
@@ -300,18 +295,7 @@ export async function GET(request: NextRequest) {
       const faturamenteSympla = symplaMap.get(evento.data_evento) || 0;
       const faturamentoManual = faturamentoContaHub + faturamentoYuzer + faturamenteSympla;
       
-      // Debug detalhado para semanas recentes
-      // Debug apenas em desenvolvimento
-      if (process.env.NODE_ENV === 'development' && semana >= 31 && semana <= 34) {
-        console.log(`🔍 Semana ${semana} - Evento ${evento.nome} (${evento.data_evento}):`, {
-          real_r_tabela: faturamentoTotal,
-          calculo_manual: faturamentoManual,
-          diferenca: Math.abs(faturamentoTotal - faturamentoManual),
-          contahub: faturamentoContaHub,
-          yuzer: faturamentoYuzer,
-          sympla: faturamenteSympla
-        });
-      }
+
       
       semanaData.faturamento_total += faturamentoTotal;
       semanaData.clientes_total += evento.cl_real || 0;
@@ -341,37 +325,35 @@ export async function GET(request: NextRequest) {
     const hoje = new Date();
     const semanaAtual = getWeekNumber(hoje);
 
-    // Debug: Log das semanas disponíveis
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🗓️ Semana atual calculada: ${semanaAtual}`);
-      console.log(`📋 Semanas disponíveis no mapa:`, Array.from(semanaMap.keys()).sort((a, b) => a - b));
-      console.log(`🔍 Filtro aplicado: semana.eventos_count > 0 (semanas com eventos)`);
-    }
 
-    // Debug: Verificar conteúdo do mapa de semanas
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔍 Primeiras 3 semanas do mapa:`, Array.from(semanaMap.values()).slice(0, 3));
-    }
+
+    // Buscar períodos da tabela de referência
+    const { data: semanasReferencia } = await supabase
+      .from('semanas_referencia')
+      .select('semana, periodo_formatado')
+      .in('semana', Array.from(semanaMap.keys()));
+
+    // Aplicar períodos corretos da tabela de referência
+    semanaMap.forEach((semanaData, numeroSemana) => {
+      const referenciaEncontrada = semanasReferencia?.find(ref => ref.semana === numeroSemana);
+      if (referenciaEncontrada) {
+        semanaData.periodo = referenciaEncontrada.periodo_formatado;
+      } else {
+        // Fallback: calcular baseado nas datas dos eventos (caso não encontre na referência)
+        const eventosDesaSemana = eventos.filter(e => e.semana === numeroSemana);
+        if (eventosDesaSemana.length > 0) {
+          const datas = eventosDesaSemana.map(e => new Date(e.data_evento)).sort((a, b) => a.getTime() - b.getTime());
+          const dataInicio = datas[0];
+          const dataFim = datas[datas.length - 1];
+          
+          semanaData.periodo = `${dataInicio.getDate().toString().padStart(2, '0')}.${(dataInicio.getMonth() + 1).toString().padStart(2, '0')} - ${dataFim.getDate().toString().padStart(2, '0')}.${(dataFim.getMonth() + 1).toString().padStart(2, '0')}`;
+        }
+      }
+    });
 
     // Converter para array e calcular métricas (mostrar desde semana 6)
     let semanasConsolidadas = Array.from(semanaMap.values())
-      .filter(semana => {
-        // Mostrar semanas >= 6 que têm eventos
-        const passa = semana.eventos_count > 0 && semana.semana >= 6;
-        if (process.env.NODE_ENV === 'development') {
-          if (!passa) {
-            console.log(`❌ Semana ${semana.semana} filtrada (eventos_count: ${semana.eventos_count}, semana < 6: ${semana.semana < 6})`);
-          } else {
-            console.log(`✅ Semana ${semana.semana} aceita (eventos_count: ${semana.eventos_count})`);
-          }
-        }
-        return passa;
-      });
-
-    // Debug: Verificar quantas semanas passaram no filtro
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🎯 Semanas após filtro: ${semanasConsolidadas.length}`);
-    }
+      .filter(semana => semana.eventos_count > 0 && semana.semana >= 6);
 
     semanasConsolidadas = semanasConsolidadas.map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
@@ -422,15 +404,7 @@ export async function GET(request: NextRequest) {
       };
     }).sort((a, b) => b.semana - a.semana); // Ordenar decrescente (semana atual primeiro)
 
-    // Debug: Verificar quantas semanas após processamento
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`📈 Semanas após processamento: ${semanasConsolidadas.length}`);
-    }
 
-    // Debug: Verificar parâmetros recebidos
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔍 Parâmetros recebidos - mes: ${mes}, ano: ${ano}, mesAtual: ${new Date().getMonth() + 1}`);
-    }
 
     // CORREÇÃO: Aplicar filtro mensal SEMPRE quando mes é especificado
     if (mes !== null && mes !== undefined) {
@@ -442,28 +416,12 @@ export async function GET(request: NextRequest) {
       
       const semanasDoMes = new Set(eventosDoMes.map(evento => evento.semana));
       semanasConsolidadas = semanasConsolidadas.filter(semana => semanasDoMes.has(semana.semana));
-      
-      // Debug: Log do filtro mensal
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🗓️ Filtro mensal aplicado para mês ${mes}: ${semanasConsolidadas.length} semanas restantes`);
-        console.log(`📅 Eventos do mês ${mes}: ${eventosDoMes.length}`);
-        console.log(`🔢 Semanas do mês: [${Array.from(semanasDoMes).sort((a, b) => a - b).join(', ')}]`);
-      }
-    } else {
-      // Visualização anual - ordenar por semana decrescente (mais recente primeiro)
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📊 Visualização anual - sem filtro mensal aplicado`);
-      }
     }
 
     // Ordenar semanas em ordem decrescente (mais recente primeiro)
     semanasConsolidadas.sort((a, b) => b.semana - a.semana);
 
-    // Log apenas em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`📊 Dados consolidados FINAL: ${semanasConsolidadas.length} semanas`);
-      console.log(`🔢 Ordem das semanas: [${semanasConsolidadas.map(s => s.semana).join(', ')}]`);
-    }
+
 
     // Calcular totais mensais
     const totaisMensais = semanasConsolidadas.reduce((acc, semana) => ({

@@ -50,6 +50,22 @@ interface IndicadoresMensais {
 }
 
 export default function VisaoMensalPage() {
+  // Temporariamente desabilitado para debug
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6">
+        <div className="card-dark p-6">
+          <h1 className="card-title-dark mb-4">Visão Mensal</h1>
+          <p className="card-description-dark">
+            Página temporariamente desabilitada para manutenção.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisaoMensalPageOriginal() {
   const { selectedBar } = useBar();
   const { toast } = useToast();
   const { showLoading, hideLoading, GlobalLoadingComponent } = useGlobalLoading();
@@ -106,7 +122,7 @@ export default function VisaoMensalPage() {
 
     setLoading(true);
     setRequestInProgress(true);
-    showLoading('Carregando dados mensais...');
+    showLoading();
     
     const timestamp = Date.now();
     const mensalUrl = `/api/visao-geral/indicadores?periodo=mensal&mes=${mesAtual}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
@@ -292,7 +308,7 @@ export default function VisaoMensalPage() {
                 valor={indicadoresMensaisMemo.clientesTotais.valor}
                 meta={indicadoresMensaisMemo.clientesTotais.meta}
                 formato="numero"
-                cor="indigo"
+                cor="purple"
                 periodoAnalisado={mesInfo.nomeCompleto}
                 comparacao={{
                   valor: indicadoresMensaisMemo.clientesTotais.variacao || 0,

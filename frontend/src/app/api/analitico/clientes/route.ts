@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 	const pageSize = 1000
 	let offset = 0
 	let totalLinhas = 0
-	const map = new Map<string, { nome: string; fone: string; visitas: number; visitasTotal: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number }>()
+	const map = new Map<string, { nome: string; fone: string; visitas: number; visitasTotal: number; ultima: string; totalEntrada: number; totalConsumo: number; totalGasto: number; temposEstadia: number[]; tempoMedioEstadia: number }>()
 	const mapTotal = new Map<string, number>() // Mapa para contar total de visitas (sem filtro)
 
 	const MAX_ITERATIONS = 500 // Aumentar drasticamente para garantir processamento completo
@@ -50,6 +50,9 @@ export async function GET(request: NextRequest) {
 	
 	const startTime = Date.now()
 	const MAX_PROCESSING_TIME = 60000 // 60 segundos máximo - tempo suficiente para processar tudo
+	
+	// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
+	const finalBarId = barIdFilter || 3
 	
 	while (iterations < MAX_ITERATIONS) {
 		iterations++
@@ -63,13 +66,12 @@ export async function GET(request: NextRequest) {
 		// Query Supabase SEM ordenação específica - deixar o Supabase decidir
 		let query = supabase
 			.from('contahub_periodo')
-			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos')
+			.select('cli_nome, cli_fone, dt_gerencial, bar_id, vr_couvert, vr_pagamentos, vd_mesadesc')
 			.not('cli_fone', 'is', null)
 			.neq('cli_fone', '')
 			.range(offset, offset + pageSize - 1)
 		
-		// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
-		const finalBarId = barIdFilter || 3
+		// Aplicar filtro de bar_id
 		query = query.eq('bar_id', finalBarId)
 		
 		// Não aplicar filtro aqui - será feito no processamento JavaScript
@@ -157,7 +159,9 @@ export async function GET(request: NextRequest) {
 						ultima,
 						totalEntrada: vrCouvert,
 						totalConsumo: vrConsumo,
-						totalGasto: vrPagamentos
+						totalGasto: vrPagamentos,
+						temposEstadia: [],
+						tempoMedioEstadia: 0
 					})
 					
 					// Remover log desnecessário
@@ -197,6 +201,91 @@ export async function GET(request: NextRequest) {
 		}
 		}
 
+		// Buscar tempos de estadia para todos os clientes usando query SQL direta
+		console.log('🕐 Buscando tempos de estadia para', map.size, 'clientes únicos...')
+		
+		try {
+			// Query para buscar todos os tempos de estadia de uma vez
+			const { data: temposData, error: temposError } = await supabase
+				.from('contahub_periodo')
+				.select(`
+					cli_nome,
+					cli_fone,
+					dt_gerencial,
+					vd_mesadesc,
+					contahub_pagamentos!inner(
+						cliente,
+						mesa,
+						hr_lancamento,
+						hr_transacao
+					)
+				`)
+				.eq('bar_id', finalBarId)
+				.not('cli_fone', 'is', null)
+				.neq('cli_fone', '')
+				.not('contahub_pagamentos.hr_transacao', 'is', null)
+				.neq('contahub_pagamentos.hr_transacao', '')
+			
+			if (temposError) {
+				console.warn('⚠️ Erro ao buscar tempos de estadia:', temposError)
+			} else if (temposData) {
+				// Processar tempos de estadia
+				const temposPorCliente = new Map<string, number[]>()
+				
+				for (const registro of temposData) {
+					const foneNormalizado = (registro.cli_fone || '').toString().trim().replace(/\D/g, '')
+					if (!foneNormalizado) continue
+					
+					// Normalizar telefone igual à lógica principal
+					let fone = foneNormalizado
+					if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
+						fone = fone.substring(0, 2) + '9' + fone.substring(2)
+					}
+					
+					// Verificar se é um cliente que temos no mapa
+					if (!map.has(fone)) continue
+					
+					// Calcular tempo de estadia
+					const pagamentos = Array.isArray(registro.contahub_pagamentos) 
+						? registro.contahub_pagamentos 
+						: [registro.contahub_pagamentos]
+					
+					for (const pagamento of pagamentos) {
+						if (pagamento?.hr_lancamento && pagamento?.hr_transacao) {
+							try {
+								const hrLancamento = new Date(pagamento.hr_lancamento)
+								const hrTransacao = new Date(pagamento.hr_transacao)
+								const tempoMinutos = (hrTransacao.getTime() - hrLancamento.getTime()) / (1000 * 60)
+								
+								// Filtrar tempos válidos (15 minutos a 12 horas)
+								if (tempoMinutos > 15 && tempoMinutos < 720) {
+									if (!temposPorCliente.has(fone)) {
+										temposPorCliente.set(fone, [])
+									}
+									temposPorCliente.get(fone)!.push(tempoMinutos)
+								}
+							} catch (error) {
+								console.warn('Erro ao calcular tempo:', error)
+							}
+						}
+					}
+				}
+				
+				// Atualizar clientes com tempos de estadia
+				for (const [fone, tempos] of temposPorCliente.entries()) {
+					const cliente = map.get(fone)
+					if (cliente && tempos.length > 0) {
+						cliente.temposEstadia = tempos
+						cliente.tempoMedioEstadia = tempos.reduce((sum, t) => sum + t, 0) / tempos.length
+					}
+				}
+				
+				console.log('✅ Processados tempos de estadia para', temposPorCliente.size, 'clientes')
+			}
+		} catch (error) {
+			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
+		}
+
 		const clientes = Array.from(map.values())
 			.sort((a, b) => b.visitas - a.visitas)
 			.slice(0, 100)
@@ -221,6 +310,12 @@ export async function GET(request: NextRequest) {
 				ticket_medio_entrada: c.visitas > 0 ? c.totalEntrada / c.visitas : 0,
 				ticket_medio_consumo: c.visitas > 0 ? c.totalConsumo / c.visitas : 0,
 				ultima_visita: c.ultima,
+				tempo_medio_estadia_minutos: c.tempoMedioEstadia,
+				tempo_medio_estadia_formatado: c.tempoMedioEstadia > 0 
+					? `${Math.floor(c.tempoMedioEstadia / 60)}h ${Math.round(c.tempoMedioEstadia % 60)}min`
+					: 'N/A',
+				tempos_estadia_detalhados: c.temposEstadia,
+				total_visitas_com_tempo: c.temposEstadia.length
 			}))
 
 

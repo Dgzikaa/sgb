@@ -31,6 +31,10 @@ interface Cliente {
   ticket_medio_entrada: number
   ticket_medio_consumo: number
   ultima_visita: string
+  tempo_medio_estadia_minutos?: number
+  tempo_medio_estadia_formatado?: string
+  tempos_estadia_detalhados?: number[]
+  total_visitas_com_tempo?: number
 }
 
 interface Estatisticas {
@@ -828,6 +832,12 @@ export default function ClientesPage() {
                     </TableHead>
                     <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
                       <div className="flex items-center gap-2 justify-center">
+                        <span className="text-lg">⏱️</span>
+                        Tempo Médio
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-slate-900 dark:text-white font-semibold text-center">
+                      <div className="flex items-center gap-2 justify-center">
                         <span className="text-lg">📅</span>
                         Última Visita
                       </div>
@@ -922,6 +932,26 @@ export default function ClientesPage() {
                           🍺 {formatCurrency(cliente.ticket_medio_consumo)}
                         </Badge>
                       </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex flex-col gap-1 items-center">
+                      {cliente.tempo_medio_estadia_formatado && cliente.tempo_medio_estadia_formatado !== 'N/A' ? (
+                        <>
+                          <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 text-xs">
+                            ⏱️ {cliente.tempo_medio_estadia_formatado}
+                          </Badge>
+                          {cliente.total_visitas_com_tempo && cliente.total_visitas_com_tempo > 0 && (
+                            <Badge variant="outline" className="bg-gray-50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 text-xs">
+                              {cliente.total_visitas_com_tempo}/{cliente.total_visitas} com tempo
+                            </Badge>
+                          )}
+                        </>
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-50 dark:bg-gray-900/20 text-gray-500 dark:text-gray-500 border-gray-200 dark:border-gray-800 text-xs">
+                          Sem dados
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-center text-gray-600 dark:text-gray-400">
@@ -1275,6 +1305,28 @@ export default function ClientesPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.4 }}
                 >
+                  <Card className="bg-gradient-to-br from-purple-500 to-purple-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-xl font-bold text-white mb-1">
+                        {clienteSelecionado?.tempo_medio_estadia_formatado && clienteSelecionado.tempo_medio_estadia_formatado !== 'N/A' 
+                          ? clienteSelecionado.tempo_medio_estadia_formatado 
+                          : 'Sem dados'}
+                      </div>
+                      <div className="text-purple-100 text-sm font-medium">Tempo Médio de Estadia</div>
+                      {clienteSelecionado?.total_visitas_com_tempo && clienteSelecionado.total_visitas_com_tempo > 0 && (
+                        <div className="text-purple-200 text-xs mt-1">
+                          {clienteSelecionado.total_visitas_com_tempo}/{clienteSelecionado.total_visitas} visitas com tempo
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.5 }}
+                >
                   <Card className="bg-gradient-to-br from-blue-500 to-blue-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                     <CardContent className="p-4 text-center">
                       <div className="text-xl font-bold text-white mb-1">
@@ -1388,6 +1440,68 @@ export default function ClientesPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Tempos de Estadia Detalhados */}
+              {clienteSelecionado?.tempos_estadia_detalhados && clienteSelecionado.tempos_estadia_detalhados.length > 0 && (
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-700 dark:to-purple-800">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <span className="text-lg">⏱️</span>
+                      Tempos de Estadia
+                    </CardTitle>
+                    <CardDescription className="text-purple-200">
+                      Tempo de permanência em cada visita (entrada → saída)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {clienteSelecionado.tempos_estadia_detalhados.map((tempo, index) => {
+                        const horas = Math.floor(tempo / 60)
+                        const minutos = Math.round(tempo % 60)
+                        const tempoFormatado = `${horas}h ${minutos}min`
+                        
+                        return (
+                          <div key={index} className="text-center">
+                            <Badge 
+                              variant="outline" 
+                              className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 px-3 py-2 text-sm font-medium"
+                            >
+                              {tempoFormatado}
+                            </Badge>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              Visita #{index + 1}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    
+                    {/* Estatísticas dos tempos */}
+                    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {Math.floor(Math.min(...clienteSelecionado.tempos_estadia_detalhados) / 60)}h {Math.round(Math.min(...clienteSelecionado.tempos_estadia_detalhados) % 60)}min
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Menor tempo</div>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                            {clienteSelecionado.tempo_medio_estadia_formatado}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Tempo médio</div>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {Math.floor(Math.max(...clienteSelecionado.tempos_estadia_detalhados) / 60)}h {Math.round(Math.max(...clienteSelecionado.tempos_estadia_detalhados) % 60)}min
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Maior tempo</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Footer do Modal */}
