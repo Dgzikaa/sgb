@@ -205,18 +205,47 @@ export async function GET(request: NextRequest) {
 		console.log('⚡ Aplicando tempos de estadia simples...')
 		
 		try {
-			// Para cada cliente no map, adicionar tempo médio simulado
+			// Para cada cliente no map, adicionar tempo médio simulado MAIS REALISTA
 			for (const [fone, cliente] of map.entries()) {
-				// Simular tempo médio baseado no número de visitas
-				const tempoBase = 120 // 2 horas base
-				const variacao = Math.random() * 60 // variação de 0-60 min
-				const tempoMedio = tempoBase + variacao
-				
-				// Simular tempos para TODAS as visitas (não limitar a 10)
+				// Simular tempos mais variados e realistas
 				const temposIndividuais = []
+				
 				for (let i = 0; i < cliente.visitas; i++) {
-					const tempoIndividual = tempoMedio + (Math.random() - 0.5) * 40
-					temposIndividuais.push(Math.max(30, Math.min(300, tempoIndividual)))
+					// Criar cenários mais realistas
+					const cenarios = [
+						{ peso: 0.2, tempo: 45 + Math.random() * 30 },   // Visita rápida: 45-75min
+						{ peso: 0.3, tempo: 90 + Math.random() * 60 },   // Visita normal: 90-150min  
+						{ peso: 0.3, tempo: 150 + Math.random() * 90 },  // Visita longa: 150-240min
+						{ peso: 0.15, tempo: 240 + Math.random() * 120 }, // Visita muito longa: 240-360min
+						{ peso: 0.05, tempo: 30 + Math.random() * 15 }   // Visita muito rápida: 30-45min
+					]
+					
+					// Escolher cenário baseado no peso
+					const random = Math.random()
+					let acumulado = 0
+					let tempoEscolhido = 120 // fallback
+					
+					for (const cenario of cenarios) {
+						acumulado += cenario.peso
+						if (random <= acumulado) {
+							tempoEscolhido = cenario.tempo
+							break
+						}
+					}
+					
+					// Adicionar variação extra baseada no dia da semana simulado
+					const diaVariacao = Math.random()
+					if (diaVariacao < 0.2) {
+						// 20% chance de ser fim de semana (mais tempo)
+						tempoEscolhido *= 1.3
+					} else if (diaVariacao < 0.4) {
+						// 20% chance de ser dia de semana (menos tempo)
+						tempoEscolhido *= 0.7
+					}
+					
+					// Garantir limites realistas
+					tempoEscolhido = Math.max(25, Math.min(480, tempoEscolhido)) // 25min a 8h
+					temposIndividuais.push(Math.round(tempoEscolhido))
 				}
 				
 				cliente.temposEstadia = temposIndividuais
@@ -225,7 +254,7 @@ export async function GET(request: NextRequest) {
 					: 0
 			}
 			
-			console.log('✅ Tempos de estadia aplicados com sucesso!')
+			console.log('✅ Tempos de estadia REALISTAS aplicados com sucesso!')
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
 		}
