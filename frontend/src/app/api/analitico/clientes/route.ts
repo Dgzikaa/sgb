@@ -255,51 +255,83 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				// Nova lógica: processar cliente por cliente individualmente
-				console.log('👥 Processando tempos de estadia cliente por cliente...')
+				// Nova lógica otimizada: buscar todos os períodos de uma vez
+				console.log('📄 Buscando períodos para todos os clientes do mapa...')
 				
-				let clientesProcessados = 0
+				// Criar lista de telefones com hífen para busca
+				const telefonesComHifen = Array.from(map.keys()).map(fone => 
+					fone.length === 11 ? `${fone.substring(0, 2)}-${fone.substring(2)}` : fone
+				)
+				
+				console.log(`📞 Buscando períodos para ${telefonesComHifen.length} telefones únicos`)
+				
+				// Buscar TODOS os períodos de uma vez (muito mais eficiente)
+				const { data: todosPeriodos, error: errorPeriodos } = await supabase
+					.from('contahub_periodo')
+					.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
+					.eq('bar_id', finalBarId)
+					.in('cli_fone', telefonesComHifen)
+				
+				if (errorPeriodos) {
+					console.warn('⚠️ Erro ao buscar períodos:', errorPeriodos)
+					return
+				}
+				
+				console.log(`📄 Encontrados ${todosPeriodos?.length || 0} períodos para processar`)
+				
+				// Agrupar períodos por telefone normalizado
+				const periodosPorTelefone = new Map()
+				
+				for (const periodo of todosPeriodos || []) {
+					const foneNormalizado = (periodo.cli_fone || '').toString().trim().replace(/\D/g, '')
+					if (!foneNormalizado) continue
+					
+					// Normalizar telefone igual à lógica principal
+					let fone = foneNormalizado
+					if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
+						fone = fone.substring(0, 2) + '9' + fone.substring(2)
+					}
+					
+					if (!periodosPorTelefone.has(fone)) {
+						periodosPorTelefone.set(fone, [])
+					}
+					periodosPorTelefone.get(fone).push(periodo)
+				}
+				
+				console.log(`👥 Processando tempos para ${periodosPorTelefone.size} clientes com períodos`)
+				
+				// DEBUG para Laura Galvão
+				const lauraFone = '61992053013'
+				if (periodosPorTelefone.has(lauraFone)) {
+					const lauraPeríodos = periodosPorTelefone.get(lauraFone)
+					console.log(`🔍 DEBUG Laura: ${lauraPeríodos.length} períodos encontrados`)
+					console.log(`🔍 DEBUG Laura: Nomes únicos:`, [...new Set(lauraPeríodos.map(p => p.cli_nome))])
+				}
+				
 				let totalTemposEncontrados = 0
+				let clientesProcessados = 0
 				
+				// Processar cada cliente
 				for (const [fone, cliente] of map.entries()) {
 					clientesProcessados++
 					
-					// Buscar TODOS os períodos deste cliente específico
-					const foneComHifen = fone.length === 11 
-						? `${fone.substring(0, 2)}-${fone.substring(2)}`
-						: fone
-					
-					const { data: periodosCliente, error: errorPeriodos } = await supabase
-						.from('contahub_periodo')
-						.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
-						.eq('bar_id', finalBarId)
-						.eq('cli_fone', foneComHifen)
-					
-					if (errorPeriodos) {
-						console.warn(`⚠️ Erro ao buscar períodos para ${cliente.nome}:`, errorPeriodos)
-						continue
-					}
-					
-					if (!periodosCliente || periodosCliente.length === 0) {
-						continue
-					}
-					
-					// DEBUG para Laura Galvão
-					if (cliente.nome.toLowerCase().includes('laura') && cliente.nome.toLowerCase().includes('galv')) {
-						console.log(`🔍 DEBUG Laura: Encontrados ${periodosCliente.length} períodos para ${cliente.nome}`)
-						console.log(`🔍 DEBUG Laura: Nomes encontrados:`, periodosCliente.map(p => p.cli_nome).slice(0, 5))
-					}
+					const periodosCliente = periodosPorTelefone.get(fone) || []
+					if (periodosCliente.length === 0) continue
 					
 					const temposDesteCliente = []
+					const periodosProcessados = new Set() // Evitar duplicatas
 					
-					// Para cada período deste cliente, buscar pagamento correspondente
+					// Para cada período deste cliente
 					for (const periodo of periodosCliente) {
-						// Buscar pagamentos correspondentes para este período específico
-						const pagamentosCorrespondentes = todosPagamentos.filter(pag => {
-							// Deve ser da mesma data
+						// Criar chave única para evitar duplicatas
+						const chaveUnica = `${periodo.dt_gerencial}-${periodo.cli_nome}-${periodo.vd_mesadesc}`
+						if (periodosProcessados.has(chaveUnica)) continue
+						periodosProcessados.add(chaveUnica)
+						
+						// Buscar pagamento correspondente (pegar apenas o PRIMEIRO match válido)
+						const pagamentoCorrespondente = todosPagamentos.find(pag => {
 							if (pag.dt_gerencial !== periodo.dt_gerencial) return false
 							
-							// Normalizar strings para comparação
 							const periodoNome = (periodo.cli_nome || '').toLowerCase().trim()
 							const periodoMesa = (periodo.vd_mesadesc || '').toLowerCase().trim()
 							const pagamentoCliente = (pag.cliente || '').toLowerCase().trim()
@@ -315,13 +347,13 @@ export async function GET(request: NextRequest) {
 								return true
 							}
 							
-							// 3. Mesa contém descrição (qualquer direção)
+							// 3. Mesa contém descrição
 							if (periodoMesa && pagamentoMesa && 
 								(periodoMesa.includes(pagamentoMesa) || pagamentoMesa.includes(periodoMesa))) {
 								return true
 							}
 							
-							// 4. Nome parcial (primeiro nome)
+							// 4. Primeiro nome
 							if (periodoNome && pagamentoCliente) {
 								const primeiroNomePeriodo = periodoNome.split(' ')[0]
 								const primeiroNomePagamento = pagamentoCliente.split(' ')[0]
@@ -334,40 +366,33 @@ export async function GET(request: NextRequest) {
 							return false
 						})
 						
-						// Calcular tempos para este período
-						for (const pagamento of pagamentosCorrespondentes) {
-							if (pagamento.hr_lancamento && pagamento.hr_transacao) {
-								try {
-									const hrLancamento = new Date(pagamento.hr_lancamento)
-									const hrTransacao = new Date(pagamento.hr_transacao)
-									const tempoMinutos = (hrTransacao.getTime() - hrLancamento.getTime()) / (1000 * 60)
-									
-									// Filtrar tempos válidos (15 minutos a 12 horas)
-									if (tempoMinutos > 15 && tempoMinutos < 720) {
-										temposDesteCliente.push(tempoMinutos)
-										totalTemposEncontrados++
-									}
-								} catch (error) {
-									console.warn('Erro ao calcular tempo:', error)
+						// Calcular tempo (apenas UM tempo por período)
+						if (pagamentoCorrespondente?.hr_lancamento && pagamentoCorrespondente?.hr_transacao) {
+							try {
+								const hrLancamento = new Date(pagamentoCorrespondente.hr_lancamento)
+								const hrTransacao = new Date(pagamentoCorrespondente.hr_transacao)
+								const tempoMinutos = (hrTransacao.getTime() - hrLancamento.getTime()) / (1000 * 60)
+								
+								if (tempoMinutos > 15 && tempoMinutos < 720) {
+									temposDesteCliente.push(tempoMinutos)
+									totalTemposEncontrados++
 								}
+							} catch (error) {
+								console.warn('Erro ao calcular tempo:', error)
 							}
 						}
 					}
 					
-					// Atualizar cliente com todos os tempos encontrados
+					// Atualizar cliente
 					if (temposDesteCliente.length > 0) {
 						cliente.temposEstadia = temposDesteCliente
 						cliente.tempoMedioEstadia = temposDesteCliente.reduce((sum, t) => sum + t, 0) / temposDesteCliente.length
 						
 						// DEBUG para Laura Galvão
 						if (cliente.nome.toLowerCase().includes('laura') && cliente.nome.toLowerCase().includes('galv')) {
-							console.log(`🔍 DEBUG Laura: ${temposDesteCliente.length} tempos calculados, média: ${cliente.tempoMedioEstadia.toFixed(1)} min`)
+							console.log(`🔍 DEBUG Laura: ${periodosCliente.length} períodos → ${temposDesteCliente.length} tempos únicos`)
+							console.log(`🔍 DEBUG Laura: Média: ${cliente.tempoMedioEstadia.toFixed(1)} min`)
 						}
-					}
-					
-					// Log de progresso a cada 1000 clientes
-					if (clientesProcessados % 1000 === 0) {
-						console.log(`👥 Processados ${clientesProcessados}/${map.size} clientes, ${totalTemposEncontrados} tempos encontrados`)
 					}
 				}
 				
