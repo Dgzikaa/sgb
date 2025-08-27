@@ -205,35 +205,40 @@ export async function GET(request: NextRequest) {
 		console.log('🕐 Buscando tempos de estadia para', map.size, 'clientes únicos...')
 		
 		try {
-			// Query para buscar todos os tempos de estadia de uma vez
-			const { data: temposData, error: temposError } = await supabase
-				.from('contahub_periodo')
-				.select(`
-					cli_nome,
-					cli_fone,
-					dt_gerencial,
-					vd_mesadesc,
-					contahub_pagamentos!inner(
-						cliente,
-						mesa,
-						hr_lancamento,
-						hr_transacao
-					)
-				`)
-				.eq('bar_id', finalBarId)
-				.not('cli_fone', 'is', null)
-				.neq('cli_fone', '')
-				.not('contahub_pagamentos.hr_transacao', 'is', null)
-				.neq('contahub_pagamentos.hr_transacao', '')
-			
-			if (temposError) {
-				console.warn('⚠️ Erro ao buscar tempos de estadia:', temposError)
-			} else if (temposData) {
-				// Processar tempos de estadia
+			// Usar método manual direto (mais confiável)
+			{
+				const { data: temposDataSQL, error: temposErrorSQL } = await supabase
+					.from('contahub_periodo')
+					.select('*')
+					.eq('bar_id', finalBarId)
+					.not('cli_fone', 'is', null)
+					.neq('cli_fone', '')
+					.limit(1000) // Limitar para teste inicial
+				
+				if (temposErrorSQL) {
+					console.warn('⚠️ Erro ao buscar dados do período:', temposErrorSQL)
+					return
+				}
+				
+				// Buscar pagamentos separadamente e fazer o cruzamento manualmente
+				const { data: pagamentosData, error: pagamentosError } = await supabase
+					.from('contahub_pagamentos')
+					.select('cliente, mesa, hr_lancamento, hr_transacao, dt_gerencial')
+					.eq('bar_id', finalBarId)
+					.not('hr_transacao', 'is', null)
+					.neq('hr_transacao', '')
+					.limit(5000) // Limitar para performance
+				
+				if (pagamentosError) {
+					console.warn('⚠️ Erro ao buscar pagamentos:', pagamentosError)
+					return
+				}
+				
+				// Fazer cruzamento manual dos dados
 				const temposPorCliente = new Map<string, number[]>()
 				
-				for (const registro of temposData) {
-					const foneNormalizado = (registro.cli_fone || '').toString().trim().replace(/\D/g, '')
+				for (const periodo of temposDataSQL || []) {
+					const foneNormalizado = (periodo.cli_fone || '').toString().trim().replace(/\D/g, '')
 					if (!foneNormalizado) continue
 					
 					// Normalizar telefone igual à lógica principal
@@ -245,13 +250,18 @@ export async function GET(request: NextRequest) {
 					// Verificar se é um cliente que temos no mapa
 					if (!map.has(fone)) continue
 					
-					// Calcular tempo de estadia
-					const pagamentos = Array.isArray(registro.contahub_pagamentos) 
-						? registro.contahub_pagamentos 
-						: [registro.contahub_pagamentos]
+					// Buscar pagamentos correspondentes
+					const pagamentosCorrespondentes = pagamentosData?.filter(pag => 
+						pag.dt_gerencial === periodo.dt_gerencial && (
+							(pag.cliente && periodo.cli_nome && 
+							 pag.cliente.toLowerCase().trim() === periodo.cli_nome.toLowerCase().trim()) ||
+							(pag.mesa && periodo.vd_mesadesc && 
+							 pag.mesa.toLowerCase().trim().includes(periodo.vd_mesadesc.toLowerCase().trim()))
+						)
+					) || []
 					
-					for (const pagamento of pagamentos) {
-						if (pagamento?.hr_lancamento && pagamento?.hr_transacao) {
+					for (const pagamento of pagamentosCorrespondentes) {
+						if (pagamento.hr_lancamento && pagamento.hr_transacao) {
 							try {
 								const hrLancamento = new Date(pagamento.hr_lancamento)
 								const hrTransacao = new Date(pagamento.hr_transacao)
@@ -280,7 +290,7 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				console.log('✅ Processados tempos de estadia para', temposPorCliente.size, 'clientes')
+				console.log('✅ Processados tempos de estadia para', temposPorCliente.size, 'clientes (método manual)')
 			}
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
