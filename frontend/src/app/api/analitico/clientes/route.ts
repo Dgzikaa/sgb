@@ -205,39 +205,90 @@ export async function GET(request: NextRequest) {
 		console.log('🕐 Buscando tempos de estadia para', map.size, 'clientes únicos...')
 		
 		try {
-			// Usar método manual direto (mais confiável)
+			// Usar método manual direto com paginação completa
 			{
-				const { data: temposDataSQL, error: temposErrorSQL } = await supabase
-					.from('contahub_periodo')
-					.select('*')
-					.eq('bar_id', finalBarId)
-					.not('cli_fone', 'is', null)
-					.neq('cli_fone', '')
-					.limit(1000) // Limitar para teste inicial
+				// PAGINAÇÃO PARA PERÍODOS
+				let offsetPeriodos = 0
+				const pageSizePeriodos = 1000
+				const todosPeriodos = []
 				
-				if (temposErrorSQL) {
-					console.warn('⚠️ Erro ao buscar dados do período:', temposErrorSQL)
-					return
+				console.log('📄 Buscando todos os períodos com paginação...')
+				
+				while (true) {
+					const { data: temposDataSQL, error: temposErrorSQL } = await supabase
+						.from('contahub_periodo')
+						.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
+						.eq('bar_id', finalBarId)
+						.not('cli_fone', 'is', null)
+						.neq('cli_fone', '')
+						.range(offsetPeriodos, offsetPeriodos + pageSizePeriodos - 1)
+					
+					if (temposErrorSQL) {
+						console.warn('⚠️ Erro ao buscar dados do período:', temposErrorSQL)
+						break
+					}
+					
+					if (!temposDataSQL || temposDataSQL.length === 0) {
+						console.log(`✅ Períodos: Processadas todas as páginas (${Math.ceil(todosPeriodos.length / pageSizePeriodos)} páginas)`)
+						break
+					}
+					
+					todosPeriodos.push(...temposDataSQL)
+					offsetPeriodos += pageSizePeriodos
+					
+					// Log de progresso a cada 10 páginas
+					if (Math.ceil(offsetPeriodos / pageSizePeriodos) % 10 === 0) {
+						console.log(`📄 Períodos: Processadas ${Math.ceil(offsetPeriodos / pageSizePeriodos)} páginas, ${todosPeriodos.length} registros`)
+					}
+					
+					if (temposDataSQL.length < pageSizePeriodos) break
 				}
 				
-				// Buscar pagamentos separadamente e fazer o cruzamento manualmente
-				const { data: pagamentosData, error: pagamentosError } = await supabase
-					.from('contahub_pagamentos')
-					.select('cliente, mesa, hr_lancamento, hr_transacao, dt_gerencial')
-					.eq('bar_id', finalBarId)
-					.not('hr_transacao', 'is', null)
-					.neq('hr_transacao', '')
-					.limit(5000) // Limitar para performance
+				// PAGINAÇÃO PARA PAGAMENTOS
+				let offsetPagamentos = 0
+				const pageSizePagamentos = 2000
+				const todosPagamentos = []
 				
-				if (pagamentosError) {
-					console.warn('⚠️ Erro ao buscar pagamentos:', pagamentosError)
-					return
+				console.log('💳 Buscando todos os pagamentos com paginação...')
+				
+				while (true) {
+					const { data: pagamentosData, error: pagamentosError } = await supabase
+						.from('contahub_pagamentos')
+						.select('cliente, mesa, hr_lancamento, hr_transacao, dt_gerencial')
+						.eq('bar_id', finalBarId)
+						.not('hr_transacao', 'is', null)
+						.neq('hr_transacao', '')
+						.range(offsetPagamentos, offsetPagamentos + pageSizePagamentos - 1)
+					
+					if (pagamentosError) {
+						console.warn('⚠️ Erro ao buscar pagamentos:', pagamentosError)
+						break
+					}
+					
+					if (!pagamentosData || pagamentosData.length === 0) {
+						console.log(`✅ Pagamentos: Processadas todas as páginas (${Math.ceil(todosPagamentos.length / pageSizePagamentos)} páginas)`)
+						break
+					}
+					
+					todosPagamentos.push(...pagamentosData)
+					offsetPagamentos += pageSizePagamentos
+					
+					// Log de progresso a cada 10 páginas
+					if (Math.ceil(offsetPagamentos / pageSizePagamentos) % 10 === 0) {
+						console.log(`💳 Pagamentos: Processadas ${Math.ceil(offsetPagamentos / pageSizePagamentos)} páginas, ${todosPagamentos.length} registros`)
+					}
+					
+					if (pagamentosData.length < pageSizePagamentos) break
 				}
+				
+				console.log(`🔄 Iniciando cruzamento: ${todosPeriodos.length} períodos × ${todosPagamentos.length} pagamentos`)
 				
 				// Fazer cruzamento manual dos dados
 				const temposPorCliente = new Map<string, number[]>()
+				let cruzamentosEncontrados = 0
+				let temposValidos = 0
 				
-				for (const periodo of temposDataSQL || []) {
+				for (const periodo of todosPeriodos) {
 					const foneNormalizado = (periodo.cli_fone || '').toString().trim().replace(/\D/g, '')
 					if (!foneNormalizado) continue
 					
@@ -251,14 +302,18 @@ export async function GET(request: NextRequest) {
 					if (!map.has(fone)) continue
 					
 					// Buscar pagamentos correspondentes
-					const pagamentosCorrespondentes = pagamentosData?.filter(pag => 
+					const pagamentosCorrespondentes = todosPagamentos.filter(pag => 
 						pag.dt_gerencial === periodo.dt_gerencial && (
 							(pag.cliente && periodo.cli_nome && 
 							 pag.cliente.toLowerCase().trim() === periodo.cli_nome.toLowerCase().trim()) ||
 							(pag.mesa && periodo.vd_mesadesc && 
 							 pag.mesa.toLowerCase().trim().includes(periodo.vd_mesadesc.toLowerCase().trim()))
 						)
-					) || []
+					)
+					
+					if (pagamentosCorrespondentes.length > 0) {
+						cruzamentosEncontrados++
+					}
 					
 					for (const pagamento of pagamentosCorrespondentes) {
 						if (pagamento.hr_lancamento && pagamento.hr_transacao) {
@@ -273,6 +328,7 @@ export async function GET(request: NextRequest) {
 										temposPorCliente.set(fone, [])
 									}
 									temposPorCliente.get(fone)!.push(tempoMinutos)
+									temposValidos++
 								}
 							} catch (error) {
 								console.warn('Erro ao calcular tempo:', error)
@@ -290,7 +346,12 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				console.log('✅ Processados tempos de estadia para', temposPorCliente.size, 'clientes (método manual)')
+				console.log(`✅ Processamento completo:`)
+				console.log(`   📊 ${todosPeriodos.length} períodos processados`)
+				console.log(`   💳 ${todosPagamentos.length} pagamentos processados`)
+				console.log(`   🔗 ${cruzamentosEncontrados} cruzamentos encontrados`)
+				console.log(`   ⏱️ ${temposValidos} tempos válidos calculados`)
+				console.log(`   👥 ${temposPorCliente.size} clientes com tempo de estadia`)
 			}
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
