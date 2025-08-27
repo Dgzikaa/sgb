@@ -287,6 +287,13 @@ export async function GET(request: NextRequest) {
 				const temposPorCliente = new Map<string, number[]>()
 				let cruzamentosEncontrados = 0
 				let temposValidos = 0
+				let matchesPorTipo = {
+					nomeExato: 0,
+					mesaExata: 0,
+					mesaContida: 0,
+					primeiroNome: 0,
+					numeroMesa: 0
+				}
 				
 				for (const periodo of todosPeriodos) {
 					const foneNormalizado = (periodo.cli_fone || '').toString().trim().replace(/\D/g, '')
@@ -301,15 +308,70 @@ export async function GET(request: NextRequest) {
 					// Verificar se é um cliente que temos no mapa
 					if (!map.has(fone)) continue
 					
-					// Buscar pagamentos correspondentes
-					const pagamentosCorrespondentes = todosPagamentos.filter(pag => 
-						pag.dt_gerencial === periodo.dt_gerencial && (
-							(pag.cliente && periodo.cli_nome && 
-							 pag.cliente.toLowerCase().trim() === periodo.cli_nome.toLowerCase().trim()) ||
-							(pag.mesa && periodo.vd_mesadesc && 
-							 pag.mesa.toLowerCase().trim().includes(periodo.vd_mesadesc.toLowerCase().trim()))
-						)
-					)
+					// Buscar pagamentos correspondentes com lógica melhorada
+					const pagamentosCorrespondentes = []
+					
+					for (const pag of todosPagamentos) {
+						// Deve ser da mesma data
+						if (pag.dt_gerencial !== periodo.dt_gerencial) continue
+						
+						// Normalizar strings para comparação
+						const periodoNome = (periodo.cli_nome || '').toLowerCase().trim()
+						const periodoMesa = (periodo.vd_mesadesc || '').toLowerCase().trim()
+						const pagamentoCliente = (pag.cliente || '').toLowerCase().trim()
+						const pagamentoMesa = (pag.mesa || '').toLowerCase().trim()
+						
+						let matchEncontrado = false
+						
+						// 1. Match exato por nome
+						if (periodoNome && pagamentoCliente && periodoNome === pagamentoCliente) {
+							matchesPorTipo.nomeExato++
+							matchEncontrado = true
+						}
+						// 2. Match exato por mesa
+						else if (periodoMesa && pagamentoMesa && periodoMesa === pagamentoMesa) {
+							matchesPorTipo.mesaExata++
+							matchEncontrado = true
+						}
+						// 3. Mesa contém descrição (qualquer direção)
+						else if (periodoMesa && pagamentoMesa && 
+								(periodoMesa.includes(pagamentoMesa) || pagamentoMesa.includes(periodoMesa))) {
+							matchesPorTipo.mesaContida++
+							matchEncontrado = true
+						}
+						// 4. Nome parcial (primeiro nome)
+						else if (periodoNome && pagamentoCliente) {
+							const primeiroNomePeriodo = periodoNome.split(' ')[0]
+							const primeiroNomePagamento = pagamentoCliente.split(' ')[0]
+							if (primeiroNomePeriodo.length > 3 && primeiroNomePagamento.length > 3 && 
+								primeiroNomePeriodo === primeiroNomePagamento) {
+								matchesPorTipo.primeiroNome++
+								matchEncontrado = true
+							}
+						}
+						// 5. Extrair números da mesa para comparação
+						else if (periodoMesa && pagamentoMesa) {
+							const numerosPeriodo = periodoMesa.match(/\d+/g)
+							const numerosPagamento = pagamentoMesa.match(/\d+/g)
+							if (numerosPeriodo && numerosPagamento) {
+								// Verificar se algum número coincide
+								for (const numP of numerosPeriodo) {
+									for (const numPg of numerosPagamento) {
+										if (numP === numPg && numP.length >= 2) { // Números com pelo menos 2 dígitos
+											matchesPorTipo.numeroMesa++
+											matchEncontrado = true
+											break
+										}
+									}
+									if (matchEncontrado) break
+								}
+							}
+						}
+						
+						if (matchEncontrado) {
+							pagamentosCorrespondentes.push(pag)
+						}
+					}
 					
 					if (pagamentosCorrespondentes.length > 0) {
 						cruzamentosEncontrados++
@@ -352,6 +414,12 @@ export async function GET(request: NextRequest) {
 				console.log(`   🔗 ${cruzamentosEncontrados} cruzamentos encontrados`)
 				console.log(`   ⏱️ ${temposValidos} tempos válidos calculados`)
 				console.log(`   👥 ${temposPorCliente.size} clientes com tempo de estadia`)
+				console.log(`   📈 Matches por tipo:`)
+				console.log(`      🎯 Nome exato: ${matchesPorTipo.nomeExato}`)
+				console.log(`      🏠 Mesa exata: ${matchesPorTipo.mesaExata}`)
+				console.log(`      📝 Mesa contida: ${matchesPorTipo.mesaContida}`)
+				console.log(`      👤 Primeiro nome: ${matchesPorTipo.primeiroNome}`)
+				console.log(`      🔢 Número mesa: ${matchesPorTipo.numeroMesa}`)
 			}
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
