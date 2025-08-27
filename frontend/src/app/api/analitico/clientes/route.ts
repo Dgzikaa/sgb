@@ -251,7 +251,8 @@ export async function GET(request: NextRequest) {
 				
 				console.log('💳 Buscando todos os pagamentos com paginação...')
 				
-				while (true) {
+				let paginasPagamentos = 0
+				while (paginasPagamentos < 200) { // Máximo 200 páginas = 400k registros
 					const { data: pagamentosData, error: pagamentosError } = await supabase
 						.from('contahub_pagamentos')
 						.select('cliente, mesa, hr_lancamento, hr_transacao, dt_gerencial')
@@ -266,19 +267,27 @@ export async function GET(request: NextRequest) {
 					}
 					
 					if (!pagamentosData || pagamentosData.length === 0) {
-						console.log(`✅ Pagamentos: Processadas todas as páginas (${Math.ceil(todosPagamentos.length / pageSizePagamentos)} páginas)`)
+						console.log(`✅ Pagamentos: Processadas todas as páginas (${paginasPagamentos + 1} páginas)`)
 						break
 					}
 					
 					todosPagamentos.push(...pagamentosData)
 					offsetPagamentos += pageSizePagamentos
+					paginasPagamentos++
 					
-					// Log de progresso a cada 10 páginas
-					if (Math.ceil(offsetPagamentos / pageSizePagamentos) % 10 === 0) {
-						console.log(`💳 Pagamentos: Processadas ${Math.ceil(offsetPagamentos / pageSizePagamentos)} páginas, ${todosPagamentos.length} registros`)
+					// Log de progresso a cada 5 páginas
+					if (paginasPagamentos % 5 === 0) {
+						console.log(`💳 Pagamentos: Processadas ${paginasPagamentos} páginas, ${todosPagamentos.length} registros`)
 					}
 					
-					if (pagamentosData.length < pageSizePagamentos) break
+					if (pagamentosData.length < pageSizePagamentos) {
+						console.log(`✅ Pagamentos: Última página com ${pagamentosData.length} registros`)
+						break
+					}
+				}
+				
+				if (paginasPagamentos >= 200) {
+					console.log(`⚠️ Pagamentos: Atingiu limite máximo de páginas (${paginasPagamentos})`)
 				}
 				
 				console.log(`🔄 Iniciando cruzamento: ${todosPeriodos.length} períodos × ${todosPagamentos.length} pagamentos`)
