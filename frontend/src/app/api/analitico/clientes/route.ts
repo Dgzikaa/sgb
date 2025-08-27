@@ -255,7 +255,7 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				// Nova lógica otimizada: buscar todos os períodos de uma vez
+				// Nova lógica otimizada: buscar períodos em lotes
 				console.log('📄 Buscando períodos para todos os clientes do mapa...')
 				
 				// Criar lista de telefones com hífen para busca
@@ -265,19 +265,35 @@ export async function GET(request: NextRequest) {
 				
 				console.log(`📞 Buscando períodos para ${telefonesComHifen.length} telefones únicos`)
 				
-				// Buscar TODOS os períodos de uma vez (muito mais eficiente)
-				const { data: todosPeriodos, error: errorPeriodos } = await supabase
-					.from('contahub_periodo')
-					.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
-					.eq('bar_id', finalBarId)
-					.in('cli_fone', telefonesComHifen)
+				// Buscar períodos em lotes para evitar 414 Request-URI Too Large
+				const todosPeriodos = []
+				const loteSize = 1000 // Lotes de 1000 telefones
 				
-				if (errorPeriodos) {
-					console.warn('⚠️ Erro ao buscar períodos:', errorPeriodos)
-					return
+				for (let i = 0; i < telefonesComHifen.length; i += loteSize) {
+					const lote = telefonesComHifen.slice(i, i + loteSize)
+					
+					const { data: periodosLote, error: errorLote } = await supabase
+						.from('contahub_periodo')
+						.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
+						.eq('bar_id', finalBarId)
+						.in('cli_fone', lote)
+					
+					if (errorLote) {
+						console.warn(`⚠️ Erro ao buscar lote ${i}-${i + loteSize}:`, errorLote)
+						continue
+					}
+					
+					if (periodosLote && periodosLote.length > 0) {
+						todosPeriodos.push(...periodosLote)
+					}
+					
+					// Log de progresso a cada 10 lotes
+					if ((i / loteSize + 1) % 10 === 0) {
+						console.log(`📄 Processados ${i + loteSize} telefones, ${todosPeriodos.length} períodos encontrados`)
+					}
 				}
 				
-				console.log(`📄 Encontrados ${todosPeriodos?.length || 0} períodos para processar`)
+				console.log(`📄 Total: ${todosPeriodos.length} períodos encontrados para processar`)
 				
 				// Agrupar períodos por telefone normalizado
 				const periodosPorTelefone = new Map()
@@ -407,6 +423,7 @@ export async function GET(request: NextRequest) {
 			}
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
+			// Continuar mesmo com erro nos tempos de estadia
 		}
 
 		const clientes = Array.from(map.values())
