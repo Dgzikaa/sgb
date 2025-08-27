@@ -130,18 +130,18 @@ export async function POST(request: NextRequest) {
         resultado.tipo_match = 'SEM_MATCH'
       }
       
-      resultados.push(resultado)
+      resultados.push(resultado as any)
     }
     
     console.log(`✅ Processados ${resultados.length} registros`)
-    console.log(`🎯 Matches encontrados: ${resultados.filter(r => r.tipo_match !== 'SEM_MATCH').length}`)
+    console.log(`🎯 Matches encontrados: ${resultados.filter((r: any) => r.tipo_match !== 'SEM_MATCH').length}`)
     
     return NextResponse.json({
       success: true,
       cliente,
       total_periodos: periodos?.length || 0,
       total_pagamentos: pagamentos?.length || 0,
-      total_matches: resultados.filter(r => r.tipo_match !== 'SEM_MATCH').length,
+      total_matches: resultados.filter((r: any) => r.tipo_match !== 'SEM_MATCH').length,
       dados: resultados
     })
     

@@ -245,7 +245,7 @@ export async function GET(request: NextRequest) {
 					
 					// Garantir limites realistas
 					tempoEscolhido = Math.max(25, Math.min(480, tempoEscolhido)) // 25min a 8h
-					temposIndividuais.push(Math.round(tempoEscolhido))
+					temposIndividuais.push(Math.round(tempoEscolhido) as number)
 				}
 				
 				cliente.temposEstadia = temposIndividuais
