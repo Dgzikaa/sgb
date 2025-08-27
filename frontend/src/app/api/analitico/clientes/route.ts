@@ -205,61 +205,31 @@ export async function GET(request: NextRequest) {
 		console.log('🕐 Buscando tempos de estadia para', map.size, 'clientes únicos...')
 		
 		try {
-			// Usar método manual direto com paginação completa
+			// Usar método manual direto seguindo padrão da API principal
 			{
-				// PAGINAÇÃO PARA PERÍODOS
-				let offsetPeriodos = 0
-				const pageSizePeriodos = 1000
-				const todosPeriodos = []
-				
-				console.log('📄 Buscando todos os períodos com paginação...')
-				
-				while (true) {
-					const { data: temposDataSQL, error: temposErrorSQL } = await supabase
-						.from('contahub_periodo')
-						.select('cli_nome, cli_fone, dt_gerencial, vd_mesadesc')
-						.eq('bar_id', finalBarId)
-						.not('cli_fone', 'is', null)
-						.neq('cli_fone', '')
-						.range(offsetPeriodos, offsetPeriodos + pageSizePeriodos - 1)
-					
-					if (temposErrorSQL) {
-						console.warn('⚠️ Erro ao buscar dados do período:', temposErrorSQL)
-						break
-					}
-					
-					if (!temposDataSQL || temposDataSQL.length === 0) {
-						console.log(`✅ Períodos: Processadas todas as páginas (${Math.ceil(todosPeriodos.length / pageSizePeriodos)} páginas)`)
-						break
-					}
-					
-					todosPeriodos.push(...temposDataSQL)
-					offsetPeriodos += pageSizePeriodos
-					
-					// Log de progresso a cada 10 páginas
-					if (Math.ceil(offsetPeriodos / pageSizePeriodos) % 10 === 0) {
-						console.log(`📄 Períodos: Processadas ${Math.ceil(offsetPeriodos / pageSizePeriodos)} páginas, ${todosPeriodos.length} registros`)
-					}
-					
-					if (temposDataSQL.length < pageSizePeriodos) break
-				}
-				
-				// PAGINAÇÃO PARA PAGAMENTOS
+				// PAGINAÇÃO PARA PAGAMENTOS (seguindo padrão da API principal)
 				let offsetPagamentos = 0
-				const pageSizePagamentos = 2000
+				const pageSizePagamentos = 1000
 				const todosPagamentos = []
 				
 				console.log('💳 Buscando todos os pagamentos com paginação...')
 				
-				let paginasPagamentos = 0
-				while (paginasPagamentos < 200) { // Máximo 200 páginas = 400k registros
-					const { data: pagamentosData, error: pagamentosError } = await supabase
+				const MAX_ITERATIONS_PAG = 100
+				let iterationsPag = 0
+				
+				while (iterationsPag < MAX_ITERATIONS_PAG) {
+					iterationsPag++
+					
+					let queryPag = supabase
 						.from('contahub_pagamentos')
 						.select('cliente, mesa, hr_lancamento, hr_transacao, dt_gerencial')
-						.eq('bar_id', finalBarId)
 						.not('hr_transacao', 'is', null)
 						.neq('hr_transacao', '')
 						.range(offsetPagamentos, offsetPagamentos + pageSizePagamentos - 1)
+					
+					queryPag = queryPag.eq('bar_id', finalBarId)
+					
+					const { data: pagamentosData, error: pagamentosError } = await queryPag
 					
 					if (pagamentosError) {
 						console.warn('⚠️ Erro ao buscar pagamentos:', pagamentosError)
@@ -267,17 +237,16 @@ export async function GET(request: NextRequest) {
 					}
 					
 					if (!pagamentosData || pagamentosData.length === 0) {
-						console.log(`✅ Pagamentos: Processadas todas as páginas (${paginasPagamentos + 1} páginas)`)
+						console.log(`✅ Pagamentos: Processadas todas as páginas após ${iterationsPag} iterações`)
 						break
 					}
 					
 					todosPagamentos.push(...pagamentosData)
 					offsetPagamentos += pageSizePagamentos
-					paginasPagamentos++
 					
-					// Log de progresso a cada 5 páginas
-					if (paginasPagamentos % 5 === 0) {
-						console.log(`💳 Pagamentos: Processadas ${paginasPagamentos} páginas, ${todosPagamentos.length} registros`)
+					// Log de progresso a cada 10 páginas
+					if (iterationsPag % 10 === 0) {
+						console.log(`💳 Pagamentos: Processadas ${iterationsPag} páginas, ${todosPagamentos.length} registros`)
 					}
 					
 					if (pagamentosData.length < pageSizePagamentos) {
@@ -286,8 +255,19 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				if (paginasPagamentos >= 200) {
-					console.log(`⚠️ Pagamentos: Atingiu limite máximo de páginas (${paginasPagamentos})`)
+				// Usar os períodos já processados na API principal
+				const todosPeriodos = []
+				console.log('📄 Coletando períodos já processados na API principal...')
+				
+				// Reprocessar os dados já coletados na API principal
+				for (const [fone, cliente] of map.entries()) {
+					// Simular estrutura de período para compatibilidade
+					todosPeriodos.push({
+						cli_nome: cliente.nome,
+						cli_fone: fone,
+						dt_gerencial: cliente.ultima, // Usar última visita como referência
+						vd_mesadesc: '' // Não temos essa info no mapa principal
+					})
 				}
 				
 				console.log(`🔄 Iniciando cruzamento: ${todosPeriodos.length} períodos × ${todosPagamentos.length} pagamentos`)
