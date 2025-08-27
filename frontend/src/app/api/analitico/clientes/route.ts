@@ -295,6 +295,9 @@ export async function GET(request: NextRequest) {
 				
 				console.log(`📄 Total: ${todosPeriodos.length} períodos encontrados para processar`)
 				
+				// Nova lógica: Match por NOME + VALOR (mais preciso)
+				console.log('🎯 Implementando match por NOME + VALOR...')
+				
 				// Agrupar períodos por telefone normalizado
 				const periodosPorTelefone = new Map()
 				
@@ -326,6 +329,13 @@ export async function GET(request: NextRequest) {
 				
 				let totalTemposEncontrados = 0
 				let clientesProcessados = 0
+				let matchesPorTipo = {
+					nomeValor: 0,
+					nomeApenas: 0,
+					valorApenas: 0,
+					mesa: 0,
+					semMatch: 0
+				}
 				
 				// Processar cada cliente
 				for (const [fone, cliente] of map.entries()) {
@@ -344,37 +354,27 @@ export async function GET(request: NextRequest) {
 						if (periodosProcessados.has(chaveUnica)) continue
 						periodosProcessados.add(chaveUnica)
 						
-						// Buscar pagamento correspondente (pegar apenas o PRIMEIRO match válido)
+						// Valores do período
+						const periodoNome = (periodo.cli_nome || '').toLowerCase().trim()
+						const periodoValor = parseFloat(periodo.vr_pagamentos || 0)
+						
+						// Buscar pagamento correspondente com PRIORIDADE para NOME + VALOR
 						const pagamentoCorrespondente = todosPagamentos.find(pag => {
 							if (pag.dt_gerencial !== periodo.dt_gerencial) return false
 							
-							const periodoNome = (periodo.cli_nome || '').toLowerCase().trim()
-							const periodoMesa = (periodo.vd_mesadesc || '').toLowerCase().trim()
 							const pagamentoCliente = (pag.cliente || '').toLowerCase().trim()
-							const pagamentoMesa = (pag.mesa || '').toLowerCase().trim()
+							const pagamentoValor = parseFloat(pag.valor || 0)
 							
-							// 1. Match exato por nome
-							if (periodoNome && pagamentoCliente && periodoNome === pagamentoCliente) {
-								return true
-							}
-							
-							// 2. Match exato por mesa
-							if (periodoMesa && pagamentoMesa && periodoMesa === pagamentoMesa) {
-								return true
-							}
-							
-							// 3. Mesa contém descrição
-							if (periodoMesa && pagamentoMesa && 
-								(periodoMesa.includes(pagamentoMesa) || pagamentoMesa.includes(periodoMesa))) {
-								return true
-							}
-							
-							// 4. Primeiro nome
-							if (periodoNome && pagamentoCliente) {
+							// 🎯 PRIORIDADE 1: Match NOME + VALOR (mais preciso)
+							if (periodoNome && pagamentoCliente && periodoValor > 0 && pagamentoValor > 0) {
+								// Match por primeiro nome + valor exato
 								const primeiroNomePeriodo = periodoNome.split(' ')[0]
 								const primeiroNomePagamento = pagamentoCliente.split(' ')[0]
-								if (primeiroNomePeriodo.length > 3 && primeiroNomePagamento.length > 3 && 
-									primeiroNomePeriodo === primeiroNomePagamento) {
+								
+								if (primeiroNomePeriodo.length > 2 && 
+									primeiroNomePagamento.includes(primeiroNomePeriodo) &&
+									Math.abs(periodoValor - pagamentoValor) < 0.01) {
+									matchesPorTipo.nomeValor++
 									return true
 								}
 							}
@@ -382,11 +382,43 @@ export async function GET(request: NextRequest) {
 							return false
 						})
 						
+						// Se não encontrou match por NOME+VALOR, tentar outras estratégias
+						let pagamentoFinal = pagamentoCorrespondente
+						
+						if (!pagamentoFinal) {
+							pagamentoFinal = todosPagamentos.find(pag => {
+								if (pag.dt_gerencial !== periodo.dt_gerencial) return false
+								
+								const pagamentoCliente = (pag.cliente || '').toLowerCase().trim()
+								const pagamentoMesa = (pag.mesa || '').toLowerCase().trim()
+								const periodoMesa = (periodo.vd_mesadesc || '').toLowerCase().trim()
+								
+								// 2. Match por nome apenas
+								if (periodoNome && pagamentoCliente) {
+									const primeiroNomePeriodo = periodoNome.split(' ')[0]
+									const primeiroNomePagamento = pagamentoCliente.split(' ')[0]
+									if (primeiroNomePeriodo.length > 3 && primeiroNomePagamento.length > 3 && 
+										primeiroNomePeriodo === primeiroNomePagamento) {
+										matchesPorTipo.nomeApenas++
+										return true
+									}
+								}
+								
+								// 3. Match por mesa
+								if (periodoMesa && pagamentoMesa && periodoMesa === pagamentoMesa) {
+									matchesPorTipo.mesa++
+									return true
+								}
+								
+								return false
+							})
+						}
+						
 						// Calcular tempo (apenas UM tempo por período)
-						if (pagamentoCorrespondente?.hr_lancamento && pagamentoCorrespondente?.hr_transacao) {
+						if (pagamentoFinal?.hr_lancamento && pagamentoFinal?.hr_transacao) {
 							try {
-								const hrLancamento = new Date(pagamentoCorrespondente.hr_lancamento)
-								const hrTransacao = new Date(pagamentoCorrespondente.hr_transacao)
+								const hrLancamento = new Date(pagamentoFinal.hr_lancamento)
+								const hrTransacao = new Date(pagamentoFinal.hr_transacao)
 								const tempoMinutos = (hrTransacao.getTime() - hrLancamento.getTime()) / (1000 * 60)
 								
 								if (tempoMinutos > 15 && tempoMinutos < 720) {
@@ -396,6 +428,8 @@ export async function GET(request: NextRequest) {
 							} catch (error) {
 								console.warn('Erro ao calcular tempo:', error)
 							}
+						} else {
+							matchesPorTipo.semMatch++
 						}
 					}
 					
@@ -416,6 +450,11 @@ export async function GET(request: NextRequest) {
 				console.log(`   👥 ${clientesProcessados} clientes processados`)
 				console.log(`   💳 ${todosPagamentos.length} pagamentos processados`)
 				console.log(`   ⏱️ ${totalTemposEncontrados} tempos válidos calculados`)
+				console.log(`📈 Matches por tipo:`)
+				console.log(`   🎯 Nome + Valor: ${matchesPorTipo.nomeValor}`)
+				console.log(`   👤 Nome apenas: ${matchesPorTipo.nomeApenas}`)
+				console.log(`   🏠 Mesa: ${matchesPorTipo.mesa}`)
+				console.log(`   ❌ Sem match: ${matchesPorTipo.semMatch}`)
 				
 				// Contar clientes com tempo de estadia
 				const clientesComTempo = Array.from(map.values()).filter(c => c.temposEstadia && c.temposEstadia.length > 0)
