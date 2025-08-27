@@ -212,9 +212,9 @@ export async function GET(request: NextRequest) {
 				const variacao = Math.random() * 60 // variação de 0-60 min
 				const tempoMedio = tempoBase + variacao
 				
-				// Simular alguns tempos individuais
+				// Simular tempos para TODAS as visitas (não limitar a 10)
 				const temposIndividuais = []
-				for (let i = 0; i < Math.min(cliente.visitas, 10); i++) {
+				for (let i = 0; i < cliente.visitas; i++) {
 					const tempoIndividual = tempoMedio + (Math.random() - 0.5) * 40
 					temposIndividuais.push(Math.max(30, Math.min(300, tempoIndividual)))
 				}

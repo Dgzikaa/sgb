@@ -1442,66 +1442,106 @@ export default function ClientesPage() {
               </Card>
 
               {/* Tempos de Estadia Detalhados */}
-              {clienteSelecionado?.tempos_estadia_detalhados && clienteSelecionado.tempos_estadia_detalhados.length > 0 && (
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-700 dark:to-purple-800">
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <span className="text-lg">⏱️</span>
-                      Tempos de Estadia
-                    </CardTitle>
-                    <CardDescription className="text-purple-200">
-                      Tempo de permanência em cada visita (entrada → saída)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {clienteSelecionado.tempos_estadia_detalhados.map((tempo, index) => {
-                        const horas = Math.floor(tempo / 60)
-                        const minutos = Math.round(tempo % 60)
-                        const tempoFormatado = `${horas}h ${minutos}min`
-                        
-                        return (
-                          <div key={index} className="text-center">
-                            <Badge 
-                              variant="outline" 
-                              className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 px-3 py-2 text-sm font-medium"
-                            >
-                              {tempoFormatado}
-                            </Badge>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              Visita #{index + 1}
+              {clienteSelecionado?.tempos_estadia_detalhados && clienteSelecionado.tempos_estadia_detalhados.length > 0 && (() => {
+                const [paginaTempos, setPaginaTempos] = useState(1)
+                const temposPorPagina = 20
+                const totalPaginas = Math.ceil(clienteSelecionado.tempos_estadia_detalhados.length / temposPorPagina)
+                const inicioIndex = (paginaTempos - 1) * temposPorPagina
+                const fimIndex = inicioIndex + temposPorPagina
+                const temposPaginados = clienteSelecionado.tempos_estadia_detalhados.slice(inicioIndex, fimIndex)
+                
+                return (
+                  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-700 dark:to-purple-800">
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <span className="text-lg">⏱️</span>
+                        Tempos de Estadia
+                        <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                          {clienteSelecionado.tempos_estadia_detalhados.length} visitas
+                        </Badge>
+                      </CardTitle>
+                      <CardDescription className="text-purple-200">
+                        Tempo de permanência em cada visita (entrada → saída)
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        {temposPaginados.map((tempo, index) => {
+                          const horas = Math.floor(tempo / 60)
+                          const minutos = Math.round(tempo % 60)
+                          const tempoFormatado = `${horas}h ${minutos}min`
+                          const visitaNumero = inicioIndex + index + 1
+                          
+                          return (
+                            <div key={inicioIndex + index} className="text-center">
+                              <Badge 
+                                variant="outline" 
+                                className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 px-3 py-2 text-sm font-medium w-full"
+                              >
+                                {tempoFormatado}
+                              </Badge>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Visita #{visitaNumero}
+                              </div>
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                    
-                    {/* Estatísticas dos tempos */}
-                    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {Math.floor(Math.min(...clienteSelecionado.tempos_estadia_detalhados) / 60)}h {Math.round(Math.min(...clienteSelecionado.tempos_estadia_detalhados) % 60)}min
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">Menor tempo</div>
+                          )
+                        })}
+                      </div>
+                      
+                      {/* Paginação */}
+                      {totalPaginas > 1 && (
+                        <div className="flex justify-center items-center gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPaginaTempos(Math.max(1, paginaTempos - 1))}
+                            disabled={paginaTempos === 1}
+                            className="h-8 px-3"
+                          >
+                            ←
+                          </Button>
+                          <span className="text-sm text-gray-600 dark:text-gray-400 px-3">
+                            {paginaTempos} de {totalPaginas}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPaginaTempos(Math.min(totalPaginas, paginaTempos + 1))}
+                            disabled={paginaTempos === totalPaginas}
+                            className="h-8 px-3"
+                          >
+                            →
+                          </Button>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium text-purple-600 dark:text-purple-400">
-                            {clienteSelecionado.tempo_medio_estadia_formatado}
+                      )}
+                      
+                      {/* Estatísticas dos tempos */}
+                      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {Math.floor(Math.min(...clienteSelecionado.tempos_estadia_detalhados) / 60)}h {Math.round(Math.min(...clienteSelecionado.tempos_estadia_detalhados) % 60)}min
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Menor tempo</div>
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">Tempo médio</div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {Math.floor(Math.max(...clienteSelecionado.tempos_estadia_detalhados) / 60)}h {Math.round(Math.max(...clienteSelecionado.tempos_estadia_detalhados) % 60)}min
+                          <div>
+                            <div className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                              {clienteSelecionado.tempo_medio_estadia_formatado}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Tempo médio</div>
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">Maior tempo</div>
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {Math.floor(Math.max(...clienteSelecionado.tempos_estadia_detalhados) / 60)}h {Math.round(Math.max(...clienteSelecionado.tempos_estadia_detalhados) % 60)}min
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Maior tempo</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                    </CardContent>
+                  </Card>
+                )
+              })()}
             </div>
 
             {/* Footer do Modal */}
