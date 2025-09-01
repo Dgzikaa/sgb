@@ -317,10 +317,11 @@ export default function PlanejamentoComercialPage() {
   };
 
   // Abrir modal de edição unificado (planejamento + valores reais)
-  const abrirModal = (evento: PlanejamentoData) => {
+  const abrirModal = (evento: PlanejamentoData, editMode: boolean = false) => {
     console.log('🔍 Debug - Evento selecionado para edição:', evento);
     
     setEventoSelecionado(evento);
+    setModoEdicao(editMode);
     
     const dadosIniciais: EventoEdicaoCompleta = {
       id: evento.evento_id,
@@ -659,21 +660,19 @@ export default function PlanejamentoComercialPage() {
                               onClick={() => abrirModal(evento, false)}
                               size="sm"
                               variant="outline"
-                              className="h-7 w-16 p-1 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-400 text-xs font-medium"
+                              className="h-7 w-7 p-0 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-400"
                               title="Visualizar evento"
                             >
-                              <Eye className="h-3 w-3 mr-1" />
-                              Ver
+                              <Eye className="h-3 w-3" />
                             </Button>
                             <Button
                               onClick={() => abrirModal(evento, true)}
                               size="sm"
                               variant="outline"
-                              className="h-7 w-16 p-1 border-green-300 dark:border-green-600 hover:bg-green-100 dark:hover:bg-green-700 text-green-600 dark:text-green-400 text-xs font-medium"
+                              className="h-7 w-7 p-0 border-green-300 dark:border-green-600 hover:bg-green-100 dark:hover:bg-green-700 text-green-600 dark:text-green-400"
                               title="Editar evento"
                             >
-                              <Edit className="h-3 w-3 mr-1" />
-                              Editar
+                              <Edit className="h-3 w-3" />
                             </Button>
                           </div>
                         </td>
@@ -993,174 +992,6 @@ export default function PlanejamentoComercialPage() {
           </div>
         )}
 
-
-            
-            {eventoEdicao && eventoSelecionado && (
-              <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-                {/* Seção de Planejamento */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-blue-300 flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      Dados de Planejamento
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Nome do Evento</label>
-                        <Input
-                          value={eventoEdicao.nome}
-                          onChange={(e) => setEventoEdicao({...eventoEdicao, nome: e.target.value})}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Meta Receita (M1)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.m1_r}
-                          onChange={(e) => setEventoEdicao({...eventoEdicao, m1_r: parseFloat(e.target.value) || 0})}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Clientes Planejados</label>
-                        <Input
-                          type="number"
-                          value={eventoEdicao.cl_plan}
-                          onChange={(e) => setEventoEdicao({...eventoEdicao, cl_plan: parseInt(e.target.value) || 0})}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Entrada Plan.</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.te_plan}
-                          onChange={(e) => setEventoEdicao({...eventoEdicao, te_plan: parseFloat(e.target.value) || 0})}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Bar Plan.</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.tb_plan}
-                          onChange={(e) => setEventoEdicao({...eventoEdicao, tb_plan: parseFloat(e.target.value) || 0})}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Custo Artístico Plan.</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.c_artistico_plan}
-                          onChange={(e) => setEventoEdicao({...eventoEdicao, c_artistico_plan: parseFloat(e.target.value) || 0})}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Seção de Observações */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-green-300 flex items-center gap-2">
-                      <Edit className="h-5 w-5" />
-                      Observações
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea
-                      value={eventoEdicao.observacoes}
-                      onChange={(e) => setEventoEdicao({...eventoEdicao, observacoes: e.target.value})}
-                      placeholder="Observações sobre o evento, ajustes, particularidades..."
-                      className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500 min-h-[100px]"
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Seção de Dados Atuais (Read-only) */}
-                <Card className="bg-gray-800/30 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-yellow-300 flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Dados Atuais do Sistema
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">Receita Real</div>
-                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.real_receita)}</div>
-                      </div>
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">Clientes Real</div>
-                        <div className="text-white font-semibold">{eventoSelecionado.clientes_real}</div>
-                      </div>
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">TE Real</div>
-                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.te_real)}</div>
-                      </div>
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">TB Real</div>
-                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.tb_real)}</div>
-                      </div>
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">T. Médio</div>
-                        <div className="text-white font-semibold">{formatarMoeda(eventoSelecionado.t_medio)}</div>
-                      </div>
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">% Bebidas</div>
-                        <div className="text-white font-semibold">{formatarPercentual(eventoSelecionado.percent_b)}</div>
-                      </div>
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">% Drinks</div>
-                        <div className="text-white font-semibold">{formatarPercentual(eventoSelecionado.percent_d)}</div>
-                      </div>
-                      <div className="bg-gray-700/30 p-3 rounded-lg">
-                        <div className="text-gray-400">% Comidas</div>
-                        <div className="text-white font-semibold">{formatarPercentual(eventoSelecionado.percent_c)}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            <DialogFooter className="bg-gray-900/50 p-4 border-t border-gray-700 flex justify-end gap-3">
-              <Button 
-                variant="outline" 
-                onClick={fecharModal} 
-                className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center gap-2"
-              >
-                <X className="h-4 w-4" /> Cancelar
-              </Button>
-              <Button 
-                onClick={salvarEdicao} 
-                disabled={salvando} 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2"
-              >
-                {salvando ? (
-                  <>
-                    <RefreshCcw className="h-4 w-4 animate-spin" /> Salvando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" /> Salvar Alterações
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
         {/* Modal Unificado - Planejado vs Realizado */}
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden rounded-xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
@@ -1191,303 +1022,400 @@ export default function PlanejamentoComercialPage() {
                       Receita
                     </h3>
                     <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Receita Real (R$)</label>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Meta Receita (R$)</Label>
                         <Input
                           type="number"
-                          step="0.01"
-                          value={eventoEdicao.real_r}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, real_r: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Clientes Real</label>
-                        <Input
-                          type="number"
-                          value={eventoEdicao.cl_real}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
-                            setEventoEdicao({...eventoEdicao, cl_real: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Médio (R$)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.t_medio}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, t_medio: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
+                          value={eventoEdicao?.m1_r || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, m1_r: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-blue-300 dark:border-blue-600"
+                          placeholder="0.00"
                         />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                {/* Seção de Tickets */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-blue-300 flex items-center gap-2">
-                      <Wine className="h-5 w-5" />
-                      Tickets Entrada e Bar
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Entrada Real (R$)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.te_real}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, te_real: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Bar Real (R$)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.tb_real}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, tb_real: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Seção de Reservas */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-purple-300 flex items-center gap-2">
+                  {/* Público Planejado */}
+                  <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border border-green-200 dark:border-green-800">
+                    <h3 className="text-lg font-semibold mb-4 text-green-700 dark:text-green-300 flex items-center gap-2">
                       <Users className="h-5 w-5" />
-                      Reservas
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      Público
+                    </h3>
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Reservas Totais</label>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Clientes Planejados</Label>
                         <Input
                           type="number"
-                          value={eventoEdicao.res_tot}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
-                            setEventoEdicao({...eventoEdicao, res_tot: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Reservas Presentes</label>
-                        <Input
-                          type="number"
-                          value={eventoEdicao.res_p}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
-                            setEventoEdicao({...eventoEdicao, res_p: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                          value={eventoEdicao?.cl_plan || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, cl_plan: parseInt(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-green-300 dark:border-green-600"
+                          placeholder="0"
                         />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                {/* Seção de Custos */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-red-300 flex items-center gap-2">
-                      <Target className="h-5 w-5" />
+                  {/* Tickets Planejados */}
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl border border-purple-200 dark:border-purple-800">
+                    <h3 className="text-lg font-semibold mb-4 text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                      <Ticket className="h-5 w-5" />
+                      Tickets
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Ticket Entrada Plan. (R$)</Label>
+                        <Input
+                          type="number"
+                          value={eventoEdicao?.te_plan || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, te_plan: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-purple-300 dark:border-purple-600"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Ticket Bar Plan. (R$)</Label>
+                        <Input
+                          type="number"
+                          value={eventoEdicao?.tb_plan || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, tb_plan: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-purple-300 dark:border-purple-600"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Custos Planejados */}
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-xl border border-orange-200 dark:border-orange-800">
+                    <h3 className="text-lg font-semibold mb-4 text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
                       Custos
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </h3>
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Custo Artístico (R$)</label>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Custo Artístico Plan. (R$)</Label>
                         <Input
                           type="number"
-                          step="0.01"
-                          value={eventoEdicao.c_art}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, c_art: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Custo Produção (R$)</label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={eventoEdicao.c_prod}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, c_prod: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
+                          value={eventoEdicao?.c_artistico_plan || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, c_artistico_plan: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                          placeholder="0.00"
                         />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                {/* Seção de Percentuais */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-yellow-300 flex items-center gap-2">
-                      <ChefHat className="h-5 w-5" />
-                      Percentuais de Vendas
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* COLUNA DIREITA - REALIZADO */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">REALIZADO</h2>
+                  </div>
+
+                  {/* Receita Real */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <h3 className="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Receita
+                    </h3>
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">% Bebidas</label>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Receita Real (R$)</Label>
                         <Input
                           type="number"
-                          step="0.1"
-                          value={eventoEdicao.percent_b}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, percent_b: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">% Drinks</label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={eventoEdicao.percent_d}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, percent_d: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">% Comidas</label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          value={eventoEdicao.percent_c}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, percent_c: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
+                          value={eventoEdicao?.real_r || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, real_r: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-blue-300 dark:border-blue-600"
+                          placeholder="0.00"
                         />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                {/* Seção de Tempos */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-orange-300 flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Tempos de Atendimento
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Público Real */}
+                  <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border border-green-200 dark:border-green-800">
+                    <h3 className="text-lg font-semibold mb-4 text-green-700 dark:text-green-300 flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Público
+                    </h3>
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Tempo Cozinha (min)</label>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Clientes Reais</Label>
                         <Input
                           type="number"
-                          step="0.1"
-                          value={eventoEdicao.t_coz}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, t_coz: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                          value={eventoEdicao?.cl_real || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, cl_real: parseInt(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-green-300 dark:border-green-600"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">Reservas Totais</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.res_tot || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, res_tot: parseInt(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-green-300 dark:border-green-600"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">Reservas Pagas</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.res_p || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, res_p: parseInt(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-green-300 dark:border-green-600"
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tickets Reais */}
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl border border-purple-200 dark:border-purple-800">
+                    <h3 className="text-lg font-semibold mb-4 text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                      <Ticket className="h-5 w-5" />
+                      Tickets
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Ticket Entrada Real (R$)</Label>
+                        <Input
+                          type="number"
+                          value={eventoEdicao?.te_real || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, te_real: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-purple-300 dark:border-purple-600"
+                          placeholder="0.00"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Tempo Bar (min)</label>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Ticket Bar Real (R$)</Label>
                         <Input
                           type="number"
-                          step="0.1"
-                          value={eventoEdicao.t_bar}
-                          onChange={(e) => {
-                            const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicao({...eventoEdicao, t_bar: isNaN(valor) ? 0 : valor});
-                          }}
-                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                          value={eventoEdicao?.tb_real || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, tb_real: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-purple-300 dark:border-purple-600"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-gray-700 dark:text-gray-300 font-medium">Tempo Médio (min)</Label>
+                        <Input
+                          type="number"
+                          value={eventoEdicao?.t_medio || 0}
+                          onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, t_medio: parseFloat(e.target.value) || 0} : null)}
+                          disabled={!modoEdicao}
+                          className="mt-2 bg-white dark:bg-gray-800 border-purple-300 dark:border-purple-600"
+                          placeholder="0"
                         />
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                {/* Seção de Observações */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-gray-300 flex items-center gap-2">
-                      <Edit className="h-5 w-5" />
-                      Observações sobre os Valores Reais
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Textarea
-                      value={eventoEdicao.observacoes}
-                      onChange={(e) => setEventoEdicao({...eventoEdicao, observacoes: e.target.value})}
-                      placeholder="Observações sobre os valores reais editados, motivos, ajustes..."
-                      className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-gray-500 min-h-[100px]"
-                    />
-                  </CardContent>
-                </Card>
+                  {/* Custos e Análises Reais */}
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-xl border border-orange-200 dark:border-orange-800">
+                    <h3 className="text-lg font-semibold mb-4 text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5" />
+                      Custos & Análises
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">Custo Artístico (R$)</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.c_art || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, c_art: parseFloat(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                            placeholder="0.00"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">Custo Produção (R$)</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.c_prod || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, c_prod: parseFloat(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                            placeholder="0.00"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">% Bebidas</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.percent_b || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, percent_b: parseFloat(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">% Comidas</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.percent_c || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, percent_c: parseFloat(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">% Drinks</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.percent_d || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, percent_d: parseFloat(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">Tempo Cozinha (min)</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.t_coz || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, t_coz: parseFloat(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">Tempo Bar (min)</Label>
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.t_bar || 0}
+                            onChange={(e) => modoEdicao && setEventoEdicao(prev => prev ? {...prev, t_bar: parseFloat(e.target.value) || 0} : null)}
+                            disabled={!modoEdicao}
+                            className="mt-2 bg-white dark:bg-gray-800 border-orange-300 dark:border-orange-600"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
-            
-            <DialogFooter className="bg-gray-900/50 p-4 border-t border-gray-700 flex justify-end gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setModalOpen(false)} 
-                className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center gap-2"
+
+              {/* SEÇÃO DE ANÁLISE DE PERFORMANCE */}
+              {!modoEdicao && eventoEdicao && (
+                <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
+                  <h3 className="text-xl font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+                    <BarChart3 className="h-6 w-6" />
+                    Análise de Performance
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Receita */}
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Receita</div>
+                      <div className={`text-2xl font-bold ${
+                        (eventoEdicao.real_r || 0) >= (eventoEdicao.m1_r || 0) 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {(eventoEdicao.real_r || 0) >= (eventoEdicao.m1_r || 0) ? '✓' : '✗'}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {eventoEdicao.m1_r > 0 
+                          ? `${(((eventoEdicao.real_r || 0) / eventoEdicao.m1_r) * 100).toFixed(1)}% da meta`
+                          : 'Meta não definida'
+                        }
+                      </div>
+                    </div>
+
+                    {/* Público */}
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Público</div>
+                      <div className={`text-2xl font-bold ${
+                        (eventoEdicao.cl_real || 0) >= (eventoEdicao.cl_plan || 0) 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {(eventoEdicao.cl_real || 0) >= (eventoEdicao.cl_plan || 0) ? '✓' : '✗'}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {eventoEdicao.cl_plan > 0 
+                          ? `${(((eventoEdicao.cl_real || 0) / eventoEdicao.cl_plan) * 100).toFixed(1)}% da meta`
+                          : 'Meta não definida'
+                        }
+                      </div>
+                    </div>
+
+                    {/* Ticket Médio */}
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Ticket Médio</div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                        R$ {eventoEdicao.cl_real > 0 
+                          ? ((eventoEdicao.real_r || 0) / eventoEdicao.cl_real).toFixed(2)
+                          : '0.00'
+                        }
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        por cliente
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="bg-gray-50 dark:bg-gray-800 p-6 border-t border-gray-200 dark:border-gray-700">
+              <Button
+                onClick={() => setModalOpen(false)}
+                variant="outline"
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <X className="h-4 w-4" /> Cancelar
+                <X className="h-4 w-4 mr-2" />
+                {modoEdicao ? 'Cancelar' : 'Fechar'}
               </Button>
-              <Button 
-                onClick={salvarEdicao} 
-                disabled={salvando} 
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2"
-              >
-                {salvando ? (
-                  <>
-                    <RefreshCcw className="h-4 w-4 animate-spin" /> Salvando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" /> Salvar Valores Reais
-                  </>
-                )}
-              </Button>
+              {modoEdicao && (
+                <Button
+                  onClick={salvarEdicao}
+                  disabled={salvando}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6"
+                >
+                  {salvando ? (
+                    <>
+                      <RefreshCcw className="h-4 w-4 animate-spin mr-2" /> Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" /> Salvar Alterações
+                    </>
+                  )}
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

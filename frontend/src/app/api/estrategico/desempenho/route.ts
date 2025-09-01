@@ -192,6 +192,47 @@ export async function GET(request: NextRequest) {
       getinMap.set(data, (getinMap.get(data) || 0) + 1);
     });
 
+    // Buscar dados do ContaHub Período para couvert
+    const { data: contahubPeriodoData } = await supabase
+      .from('contahub_periodo')
+      .select('dt_gerencial, vr_couvert')
+      .gte('dt_gerencial', `${ano}-01-01`)
+      .lt('dt_gerencial', `${ano + 1}-01-01`)
+      .eq('bar_id', user.bar_id)
+      .limit(10000)
+      .order('dt_gerencial');
+
+    const contahubCouvertMap = new Map();
+    contahubPeriodoData?.forEach(item => {
+      const data = item.dt_gerencial;
+      const valor = item.vr_couvert || 0;
+      contahubCouvertMap.set(data, (contahubCouvertMap.get(data) || 0) + valor);
+    });
+
+    // Buscar dados do Nibo para CMO
+    const categoriasCMO = [
+      'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTAÇÃO', 'ADICIONAIS',
+      'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA',
+      'FREELA SEGURANÇA', 'PRO LABORE', 'PROVISÃO TRABALHISTA'
+    ];
+
+    const { data: niboData } = await supabase
+      .from('nibo_agendamentos')
+      .select('data_competencia, valor')
+      .gte('data_competencia', `${ano}-01-01`)
+      .lt('data_competencia', `${ano + 1}-01-01`)
+      .eq('bar_id', user.bar_id)
+      .in('categoria_nome', categoriasCMO)
+      .limit(10000)
+      .order('data_competencia');
+
+    const niboMap = new Map();
+    niboData?.forEach(item => {
+      const data = item.data_competencia;
+      const valor = item.valor || 0;
+      niboMap.set(data, (niboMap.get(data) || 0) + valor);
+    });
+
     // Debug específico removido para reduzir logs desnecessários
 
     if (!eventos || eventos.length === 0) {
@@ -254,10 +295,14 @@ export async function GET(request: NextRequest) {
       faturamento_couvert: number;
       faturamento_bar: number;
       cmv_total: number;
+      cmo_valor: number;
       cmo_percentual: number;
       atracao_faturamento: number;
+      atracao_percentual: number;
+      clientes_atendidos: number;
       reservas_totais: number;
       reservas_presentes: number;
+      cmv_rs: number;
     }>();
 
     eventos.forEach(evento => {
@@ -277,10 +322,14 @@ export async function GET(request: NextRequest) {
           faturamento_couvert: 0,
           faturamento_bar: 0,
           cmv_total: 0,
+          cmo_valor: 0,
           cmo_percentual: 0,
           atracao_faturamento: 0,
+          atracao_percentual: 0,
+          clientes_atendidos: 0,
           reservas_totais: 0,
-          reservas_presentes: 0
+          reservas_presentes: 0,
+          cmv_rs: 0
         });
       }
 
@@ -303,22 +352,33 @@ export async function GET(request: NextRequest) {
       semanaData.metas_faturamento += evento.m1_r || 0;
       semanaData.metas_clientes += evento.cl_plan || 0;
       
-      // Novos indicadores de desempenho
+      // Novos indicadores de desempenho usando dados das tabelas corretas
       const clientesReais = evento.cl_real || 0;
-      semanaData.faturamento_couvert += (evento.te_real || 0) * clientesReais;
-      semanaData.faturamento_bar += (evento.tb_real || 0) * clientesReais;
-      semanaData.atracao_faturamento += evento.c_art || 0;
       
-      // CMV será calculado como percentual médio ponderado
-      if (faturamentoTotal > 0) {
-        const cmvEvento = (evento.c_prod || 0);
-        semanaData.cmv_total += cmvEvento;
-      }
+      // Faturamento Couvert (da tabela contahub_periodo)
+      const couvertDia = contahubCouvertMap.get(evento.data_evento) || 0;
+      semanaData.faturamento_couvert += couvertDia;
+      
+      // Faturamento Bar = Total - Couvert
+      semanaData.faturamento_bar += faturamentoTotal - couvertDia;
+      
+      // Atração/Faturamento (c_art + c_prod da eventos_base)
+      semanaData.atracao_faturamento += (evento.c_art || 0) + (evento.c_prod || 0);
+      
+      // CMO (da tabela nibo_agendamentos)
+      const cmoDia = niboMap.get(evento.data_evento) || 0;
+      semanaData.cmo_valor += cmoDia;
+      
+      // Clientes Atendidos (cl_real da eventos_base)
+      semanaData.clientes_atendidos += clientesReais;
       
       // Reservas (usando dados do Getin se disponível, senão usar cl_real)
       const reservasGetin = getinMap.get(evento.data_evento) || 0;
       semanaData.reservas_totais += reservasGetin > 0 ? reservasGetin : clientesReais;
       semanaData.reservas_presentes += clientesReais;
+      
+      // CMV R$ será manual (inicializado em 0)
+      // semanaData.cmv_rs permanece 0 para ser preenchido manualmente
     });
 
     // Obter semana atual
@@ -358,8 +418,11 @@ export async function GET(request: NextRequest) {
     semanasConsolidadas = semanasConsolidadas.map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
       
-      // Calcular CMO% (CMV sobre faturamento)
-      const cmoPercentual = semana.faturamento_total > 0 ? (semana.cmv_total / semana.faturamento_total) * 100 : 0;
+      // Calcular CMO% (CMO sobre faturamento)
+      const cmoPercentual = semana.faturamento_total > 0 ? (semana.cmo_valor / semana.faturamento_total) * 100 : 0;
+      
+      // Calcular Atração/Faturamento %
+      const atracaoPercentual = semana.faturamento_total > 0 ? (semana.atracao_faturamento / semana.faturamento_total) * 100 : 0;
       
       // Calcular performance geral da semana
       let performanceGeral = 0;
@@ -388,19 +451,22 @@ export async function GET(request: NextRequest) {
         semana: semana.semana,
         periodo: semana.periodo,
         faturamento_total: Math.round(semana.faturamento_total * 100) / 100,
+        faturamento_couvert: Math.round(semana.faturamento_couvert * 100) / 100,
+        faturamento_bar: Math.round(semana.faturamento_bar * 100) / 100,
+        cmo_percentual: Math.round(cmoPercentual * 100) / 100,
+        atracao_faturamento: Math.round(semana.atracao_faturamento * 100) / 100,
+        atracao_percentual: Math.round(atracaoPercentual * 100) / 100,
+        clientes_atendidos: semana.clientes_atendidos,
+        reservas_totais: semana.reservas_totais,
+        reservas_presentes: semana.reservas_presentes,
+        cmv_rs: semana.cmv_rs,
+        // Campos antigos mantidos para compatibilidade
         clientes_total: semana.clientes_total,
         eventos_count: semana.eventos_count,
         metas_faturamento: Math.round(semana.metas_faturamento * 100) / 100,
         metas_clientes: semana.metas_clientes,
         ticket_medio: Math.round(ticketMedio * 100) / 100,
-        performance_geral: Math.round(performanceGeral * 100) / 100,
-        faturamento_couvert: Math.round(semana.faturamento_couvert * 100) / 100,
-        faturamento_bar: Math.round(semana.faturamento_bar * 100) / 100,
-        cmv_total: Math.round(semana.cmv_total * 100) / 100,
-        cmo_percentual: Math.round(cmoPercentual * 100) / 100,
-        atracao_faturamento: Math.round(semana.atracao_faturamento * 100) / 100,
-        reservas_totais: semana.reservas_totais,
-        reservas_presentes: semana.reservas_presentes
+        performance_geral: Math.round(performanceGeral * 100) / 100
       };
     }).sort((a, b) => b.semana - a.semana); // Ordenar decrescente (semana atual primeiro)
 
