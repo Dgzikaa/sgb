@@ -288,21 +288,25 @@ export async function GET(request: NextRequest) {
       semana: number;
       periodo: string;
       faturamento_total: number;
-      clientes_total: number;
-      eventos_count: number;
-      metas_faturamento: number;
-      metas_clientes: number;
       faturamento_couvert: number;
       faturamento_bar: number;
-      cmv_total: number;
+      ticket_medio_contahub: number;
+      tm_entrada: number;
+      tm_bar: number;
+      cmv_limpo_percentual: number;
       cmo_valor: number;
       cmo_percentual: number;
       atracao_faturamento: number;
       atracao_percentual: number;
       clientes_atendidos: number;
+      clientes_ativos: number;
       reservas_totais: number;
       reservas_presentes: number;
-      cmv_rs: number;
+      // Campos antigos mantidos para compatibilidade
+      clientes_total: number;
+      eventos_count: number;
+      metas_faturamento: number;
+      metas_clientes: number;
     }>();
 
     eventos.forEach(evento => {
@@ -315,21 +319,25 @@ export async function GET(request: NextRequest) {
           semana,
           periodo: '', // Será calculado depois baseado nas datas reais dos eventos
           faturamento_total: 0,
-          clientes_total: 0,
-          eventos_count: 0,
-          metas_faturamento: 0,
-          metas_clientes: 0,
           faturamento_couvert: 0,
           faturamento_bar: 0,
-          cmv_total: 0,
+          ticket_medio_contahub: 0,
+          tm_entrada: 0,
+          tm_bar: 0,
+          cmv_limpo_percentual: 0,
           cmo_valor: 0,
           cmo_percentual: 0,
           atracao_faturamento: 0,
           atracao_percentual: 0,
           clientes_atendidos: 0,
+          clientes_ativos: 0,
           reservas_totais: 0,
           reservas_presentes: 0,
-          cmv_rs: 0
+          // Campos antigos mantidos para compatibilidade
+          clientes_total: 0,
+          eventos_count: 0,
+          metas_faturamento: 0,
+          metas_clientes: 0
         });
       }
 
@@ -347,10 +355,6 @@ export async function GET(request: NextRequest) {
 
       
       semanaData.faturamento_total += faturamentoTotal;
-      semanaData.clientes_total += evento.cl_real || 0;
-      semanaData.eventos_count += 1;
-      semanaData.metas_faturamento += evento.m1_r || 0;
-      semanaData.metas_clientes += evento.cl_plan || 0;
       
       // Novos indicadores de desempenho usando dados das tabelas corretas
       const clientesReais = evento.cl_real || 0;
@@ -362,23 +366,40 @@ export async function GET(request: NextRequest) {
       // Faturamento Bar = Total - Couvert
       semanaData.faturamento_bar += faturamentoTotal - couvertDia;
       
-      // Atração/Faturamento (c_art + c_prod da eventos_base)
-      semanaData.atracao_faturamento += (evento.c_art || 0) + (evento.c_prod || 0);
+      // Ticket Médio ContaHub = Faturamento Total / Clientes
+      // Será calculado no final da semana
+      
+      // TM Entrada (te_real da eventos_base)
+      semanaData.tm_entrada += evento.te_real || 0;
+      
+      // TM Bar (tb_real da eventos_base)
+      semanaData.tm_bar += evento.tb_real || 0;
+      
+      // CMV Limpo % será calculado no final
       
       // CMO (da tabela nibo_agendamentos)
       const cmoDia = niboMap.get(evento.data_evento) || 0;
       semanaData.cmo_valor += cmoDia;
       
+      // Atração/Faturamento (c_art + c_prod da eventos_base)
+      semanaData.atracao_faturamento += (evento.c_art || 0) + (evento.c_prod || 0);
+      
       // Clientes Atendidos (cl_real da eventos_base)
       semanaData.clientes_atendidos += clientesReais;
+      
+      // Clientes Ativos = Clientes Atendidos (por enquanto, pode ser ajustado)
+      semanaData.clientes_ativos += clientesReais;
       
       // Reservas (usando dados do Getin se disponível, senão usar cl_real)
       const reservasGetin = getinMap.get(evento.data_evento) || 0;
       semanaData.reservas_totais += reservasGetin > 0 ? reservasGetin : clientesReais;
       semanaData.reservas_presentes += clientesReais;
       
-      // CMV R$ será manual (inicializado em 0)
-      // semanaData.cmv_rs permanece 0 para ser preenchido manualmente
+      // Campos antigos mantidos para compatibilidade
+      semanaData.clientes_total += clientesReais;
+      semanaData.eventos_count += 1;
+      semanaData.metas_faturamento += evento.m1_r || 0;
+      semanaData.metas_clientes += evento.cl_plan || 0;
     });
 
     // Obter semana atual
@@ -418,6 +439,18 @@ export async function GET(request: NextRequest) {
     semanasConsolidadas = semanasConsolidadas.map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
       
+      // Calcular Ticket Médio ContaHub
+      const ticketMedioContahub = semana.clientes_atendidos > 0 ? semana.faturamento_total / semana.clientes_atendidos : 0;
+      
+      // Calcular TM Entrada médio (por evento)
+      const tmEntradaMedia = semana.eventos_count > 0 ? semana.tm_entrada / semana.eventos_count : 0;
+      
+      // Calcular TM Bar médio (por evento)
+      const tmBarMedia = semana.eventos_count > 0 ? semana.tm_bar / semana.eventos_count : 0;
+      
+      // CMV Limpo % (por enquanto 0, será implementado depois)
+      const cmvLimpoPercentual = 0;
+      
       // Calcular CMO% (CMO sobre faturamento)
       const cmoPercentual = semana.faturamento_total > 0 ? (semana.cmo_valor / semana.faturamento_total) * 100 : 0;
       
@@ -453,13 +486,30 @@ export async function GET(request: NextRequest) {
         faturamento_total: Math.round(semana.faturamento_total * 100) / 100,
         faturamento_couvert: Math.round(semana.faturamento_couvert * 100) / 100,
         faturamento_bar: Math.round(semana.faturamento_bar * 100) / 100,
+        ticket_medio_contahub: Math.round(ticketMedioContahub * 100) / 100,
+        tm_entrada: Math.round(tmEntradaMedia * 100) / 100,
+        tm_bar: Math.round(tmBarMedia * 100) / 100,
+        cmv_limpo_percentual: Math.round(cmvLimpoPercentual * 100) / 100,
         cmo_percentual: Math.round(cmoPercentual * 100) / 100,
-        atracao_faturamento: Math.round(semana.atracao_faturamento * 100) / 100,
         atracao_percentual: Math.round(atracaoPercentual * 100) / 100,
         clientes_atendidos: semana.clientes_atendidos,
+        clientes_ativos: semana.clientes_ativos,
         reservas_totais: semana.reservas_totais,
         reservas_presentes: semana.reservas_presentes,
-        cmv_rs: semana.cmv_rs,
+        // Metas padrão (podem ser configuráveis no futuro)
+        meta_faturamento_total: 263000,
+        meta_faturamento_couvert: 38000,
+        meta_faturamento_bar: 225000,
+        meta_ticket_medio_contahub: 103,
+        meta_tm_entrada: 15.5,
+        meta_tm_bar: 77.5,
+        meta_cmv_limpo_percentual: 33,
+        meta_cmo_percentual: 20,
+        meta_atracao_percentual: 17,
+        meta_clientes_atendidos: 2645,
+        meta_clientes_ativos: 3000,
+        meta_reservas_totais: 800,
+        meta_reservas_presentes: 650,
         // Campos antigos mantidos para compatibilidade
         clientes_total: semana.clientes_total,
         eventos_count: semana.eventos_count,

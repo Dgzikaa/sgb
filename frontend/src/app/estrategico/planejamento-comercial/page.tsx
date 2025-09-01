@@ -507,17 +507,7 @@ export default function PlanejamentoComercialPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header simplificado */}
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-                <TrendingUp className="h-7 w-7 text-blue-600" />
-                Planejamento Comercial
-              </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-                Gestão completa de metas e resultados dos eventos
-              </p>
-            </div>
+      <div className="container mx-auto px-4 py-2">
             
         {/* Layout principal com tabela e controles laterais */}
         {dados.length === 0 ? (
@@ -534,11 +524,6 @@ export default function PlanejamentoComercialPage() {
           <div className="flex gap-4">
             {/* Tabela principal */}
             <Card className="card-dark flex-1">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-                <CardTitle className="card-title-dark text-lg">
-                {meses.find(m => m.value === filtroMes)?.label} {filtroAno} - {dados.length} eventos
-              </CardTitle>
-            </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto border-x border-gray-200 dark:border-gray-700">
                 <table className="w-full text-xs border-collapse">

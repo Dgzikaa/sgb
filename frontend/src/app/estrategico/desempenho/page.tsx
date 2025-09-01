@@ -29,13 +29,30 @@ interface DadosSemana {
   faturamento_total: number;
   faturamento_couvert: number;
   faturamento_bar: number;
+  ticket_medio_contahub: number;
+  tm_entrada: number;
+  tm_bar: number;
+  cmv_limpo_percentual: number;
   cmo_percentual: number;
-  atracao_faturamento: number;
   atracao_percentual: number;
   clientes_atendidos: number;
+  clientes_ativos: number;
   reservas_totais: number;
   reservas_presentes: number;
-  cmv_rs: number;
+  // Metas para cada indicador
+  meta_faturamento_total: number;
+  meta_faturamento_couvert: number;
+  meta_faturamento_bar: number;
+  meta_ticket_medio_contahub: number;
+  meta_tm_entrada: number;
+  meta_tm_bar: number;
+  meta_cmv_limpo_percentual: number;
+  meta_cmo_percentual: number;
+  meta_atracao_percentual: number;
+  meta_clientes_atendidos: number;
+  meta_clientes_ativos: number;
+  meta_reservas_totais: number;
+  meta_reservas_presentes: number;
   // Campos antigos mantidos para compatibilidade
   clientes_total: number;
   ticket_medio: number;
@@ -343,11 +360,15 @@ export default function DesempenhoPage() {
                         <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Fat. Total</th>
                         <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Fat. Couvert</th>
                         <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Fat. Bar</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">TM ContaHub</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">TM Entrada</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">TM Bar</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">CMV %</th>
                         <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">CMO %</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Atração/Fat.</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Clientes</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Atração %</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Cli. Atendidos</th>
+                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Cli. Ativos</th>
                         <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Reservas</th>
-                        <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">CMV R$</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -362,45 +383,155 @@ export default function DesempenhoPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="py-3 px-4 text-right font-bold text-blue-600 dark:text-blue-400 text-sm">
-                            {formatarMoeda(semana.faturamento_total || 0)}
-                          </td>
-                          <td className="py-3 px-4 text-right font-bold text-green-600 dark:text-green-400 text-sm">
-                            {formatarMoeda(semana.faturamento_couvert || 0)}
-                          </td>
-                          <td className="py-3 px-4 text-right font-bold text-purple-600 dark:text-purple-400 text-sm">
-                            {formatarMoeda(semana.faturamento_bar || 0)}
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <Badge className="bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 font-bold px-2 py-1 text-xs">
-                              {(semana.cmo_percentual || 0).toFixed(1)}%
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4 text-right">
+                          
+                          {/* Faturamento Total */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
                             <div className="flex flex-col items-end">
-                              <span className="font-bold text-orange-600 dark:text-orange-400 text-sm">
-                                {formatarMoeda(semana.atracao_faturamento || 0)}
-                              </span>
-                              <span className="text-xs text-orange-500 dark:text-orange-400">
-                                {(semana.atracao_percentual || 0).toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-right font-semibold text-cyan-600 dark:text-cyan-400 text-sm">
-                            {(semana.clientes_atendidos || 0).toLocaleString()}
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex flex-col items-end">
-                              <span className="font-bold text-teal-600 dark:text-teal-400 text-sm">
-                                {(semana.reservas_presentes || 0).toLocaleString()}
+                              <span className={`text-sm font-bold ${(semana.faturamento_total || 0) >= (semana.meta_faturamento_total || 263000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatarMoeda(semana.faturamento_total || 0)}
                               </span>
                               <span className="text-xs text-gray-500 dark:text-gray-400">
-                                / {(semana.reservas_totais || 0).toLocaleString()}
+                                / {formatarMoeda(semana.meta_faturamento_total || 263000)}
                               </span>
                             </div>
                           </td>
-                          <td className="py-3 px-4 text-right font-bold text-gray-600 dark:text-gray-400 text-sm">
-                            {formatarMoeda(semana.cmv_rs || 0)}
+                          
+                          {/* Faturamento Couvert */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${(semana.faturamento_couvert || 0) >= (semana.meta_faturamento_couvert || 38000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatarMoeda(semana.faturamento_couvert || 0)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                / {formatarMoeda(semana.meta_faturamento_couvert || 38000)}
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* Faturamento Bar */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${(semana.faturamento_bar || 0) >= (semana.meta_faturamento_bar || 225000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatarMoeda(semana.faturamento_bar || 0)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                / {formatarMoeda(semana.meta_faturamento_bar || 225000)}
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* TM ContaHub */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${(semana.ticket_medio_contahub || 0) >= (semana.meta_ticket_medio_contahub || 103) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatarMoeda(semana.ticket_medio_contahub || 0)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                / {formatarMoeda(semana.meta_ticket_medio_contahub || 103)}
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* TM Entrada */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${(semana.tm_entrada || 0) >= (semana.meta_tm_entrada || 15.5) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatarMoeda(semana.tm_entrada || 0)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                / {formatarMoeda(semana.meta_tm_entrada || 15.5)}
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* TM Bar */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${(semana.tm_bar || 0) >= (semana.meta_tm_bar || 77.5) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {formatarMoeda(semana.tm_bar || 0)}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                / {formatarMoeda(semana.meta_tm_bar || 77.5)}
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* CMV % */}
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex flex-col items-end">
+                              <Badge className={`font-bold px-2 py-1 text-xs ${(semana.cmv_limpo_percentual || 0) <= (semana.meta_cmv_limpo_percentual || 33) ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
+                                {(semana.cmv_limpo_percentual || 0).toFixed(1)}%
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Meta: {(semana.meta_cmv_limpo_percentual || 33).toFixed(1)}%
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* CMO % */}
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex flex-col items-end">
+                              <Badge className={`font-bold px-2 py-1 text-xs ${(semana.cmo_percentual || 0) <= (semana.meta_cmo_percentual || 20) ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
+                                {(semana.cmo_percentual || 0).toFixed(1)}%
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Meta: {(semana.meta_cmo_percentual || 20).toFixed(1)}%
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* Atração % */}
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex flex-col items-end">
+                              <Badge className={`font-bold px-2 py-1 text-xs ${(semana.atracao_percentual || 0) >= (semana.meta_atracao_percentual || 17) ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
+                                {(semana.atracao_percentual || 0).toFixed(1)}%
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Meta: {(semana.meta_atracao_percentual || 17).toFixed(1)}%
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* Clientes Atendidos */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${(semana.clientes_atendidos || 0) >= (semana.meta_clientes_atendidos || 2645) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {(semana.clientes_atendidos || 0).toLocaleString()}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                / {(semana.meta_clientes_atendidos || 2645).toLocaleString()}
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* Clientes Ativos */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <span className={`text-sm font-bold ${(semana.clientes_ativos || 0) >= (semana.meta_clientes_ativos || 3000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                {(semana.clientes_ativos || 0).toLocaleString()}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                / {(semana.meta_clientes_ativos || 3000).toLocaleString()}
+                              </span>
+                            </div>
+                          </td>
+                          
+                          {/* Reservas */}
+                          <td className="py-3 px-4 text-right font-bold text-sm">
+                            <div className="flex flex-col items-end">
+                              <div className="flex items-center gap-1">
+                                <span className={`text-sm font-bold ${(semana.reservas_presentes || 0) >= (semana.meta_reservas_presentes || 650) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                  {(semana.reservas_presentes || 0).toLocaleString()}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">/</span>
+                                <span className={`text-sm font-bold ${(semana.reservas_totais || 0) >= (semana.meta_reservas_totais || 800) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                  {(semana.reservas_totais || 0).toLocaleString()}
+                                </span>
+                              </div>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                Meta: {(semana.meta_reservas_presentes || 650).toLocaleString()}/{(semana.meta_reservas_totais || 800).toLocaleString()}
+                              </span>
+                            </div>
                           </td>
                         </tr>
                       ))}
