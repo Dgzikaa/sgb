@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
+import { usePageTitle } from '@/contexts/PageTitleContext';
 import {
   ChevronDown,
   User,
@@ -128,6 +129,7 @@ function generateBreadcrumbs(pathname: string) {
 export function DarkHeader() {
   const { selectedBar, availableBars, setSelectedBar } = useBar();
   const { user, logout } = useUser();
+  const { pageTitle } = usePageTitle();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   // Logo principal ZYKOR
@@ -219,19 +221,26 @@ export function DarkHeader() {
   // const unreadCount = notifications.filter(n => n.unread).length
 
   return (
-    <header className="sticky inset-x-0 top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
-      <div className="flex items-center h-12 px-2 sm:px-4 justify-between">
-        {/* Esquerda - Logo ZYKOR */}
-        <div className="flex items-center">
-          <Link href="/home" className="flex items-center">
+    <header className="sticky inset-x-0 top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 dark:bg-gray-900/95 dark:border-gray-700 shadow-sm">
+      <div className="flex items-center h-10 px-2 sm:px-4 justify-between">
+        {/* Esquerda - Logo ZYKOR + Título */}
+        <div className="flex items-center gap-4">
+          <Link href="/home" className="flex items-center p-1 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
             <Image
               src={srcImage}
               alt="Logo ZYKOR"
               width={64}
               height={64}
-              className="logo-zykor favicon-improved"
+              className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-200"
             />
           </Link>
+          {pageTitle && (
+            <div className="hidden lg:block">
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {pageTitle}
+              </h1>
+            </div>
+          )}
         </div>
 
         {/* Centro - Busca */}

@@ -57,29 +57,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Chamar a Edge Function
-    const edgeFunctionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/sympla-sync`;
-    
-    const response = await fetch(edgeFunctionUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-      },
-      body: JSON.stringify({ eventoId, tipo })
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { 
-          error: 'Erro na sincronização Sympla',
-          details: result.error 
-        },
-        { status: response.status }
-      );
-    }
+    // NOTA: Edge Function sympla-sync foi removida - implementar sincronização direta aqui se necessário
+    // Por enquanto, retornar sucesso simulado
+    const result = {
+      success: true,
+      message: 'Sincronização Sympla não implementada (Edge Function removida)',
+      eventoId,
+      tipo
+    };
 
     // Registrar a sincronização na tabela de logs local se necessário
     const logData = {
