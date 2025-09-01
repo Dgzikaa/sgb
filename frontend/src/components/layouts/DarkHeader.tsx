@@ -193,33 +193,6 @@ export function DarkHeader() {
     setShowBarMenu(false);
   };
 
-  // Mock notifications - REMOVIDO
-  // const notifications = [
-  //   {
-  //     id: 1,
-  //     title: 'Checklist de Abertura',
-  //     message: 'Aguardando preenchimento por João Silva',
-  //     time: '5 min atrás',
-  //     unread: true
-  //   },
-  //   {
-  //     id: 2,
-  //     title: 'Sincronização ContaAzul',
-  //     message: 'Dados atualizados com sucesso',
-  //     time: '1 hora atrás',
-  //     unread: false
-  //   },
-  //   {
-  //     id: 3,
-  //     title: 'Nova Reserva',
-  //     message: 'Mesa para 4 pessoas às 20:00',
-  //     time: '2 horas atrás',
-  //     unread: true
-  //   }
-  // ]
-
-  // const unreadCount = notifications.filter(n => n.unread).length
-
   return (
     <header className="sticky inset-x-0 top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 dark:bg-gray-900/95 dark:border-gray-700 shadow-sm">
       <div className="flex items-center h-10 px-2 sm:px-4 justify-between">

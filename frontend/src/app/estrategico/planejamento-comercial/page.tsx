@@ -526,7 +526,7 @@ export default function PlanejamentoComercialPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-[calc(100vh-4px)] bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-2 py-1 max-w-[98vw]">
             
         {/* Layout principal com tabela e controles laterais */}
@@ -1279,7 +1279,7 @@ export default function PlanejamentoComercialPage() {
                         {modoEdicao ? (
                         <Input
                           type="number"
-                            value={eventoEdicao?.m1_r || 0}
+                            value={eventoEdicao?.m1_r ? Number(eventoEdicao.m1_r.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, m1_r: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
@@ -1331,7 +1331,7 @@ export default function PlanejamentoComercialPage() {
                         {modoEdicao ? (
                         <Input
                           type="number"
-                            value={eventoEdicao?.te_plan || 0}
+                            value={eventoEdicao?.te_plan ? Number(eventoEdicao.te_plan.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, te_plan: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
@@ -1347,7 +1347,7 @@ export default function PlanejamentoComercialPage() {
                         {modoEdicao ? (
                         <Input
                           type="number"
-                            value={eventoEdicao?.tb_plan || 0}
+                            value={eventoEdicao?.tb_plan ? Number(eventoEdicao.tb_plan.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, tb_plan: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
@@ -1373,7 +1373,7 @@ export default function PlanejamentoComercialPage() {
                         {modoEdicao ? (
                         <Input
                           type="number"
-                            value={eventoEdicao?.c_artistico_plan || 0}
+                            value={eventoEdicao?.c_artistico_plan ? Number(eventoEdicao.c_artistico_plan.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, c_artistico_plan: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
@@ -1407,7 +1407,7 @@ export default function PlanejamentoComercialPage() {
                         {modoEdicao ? (
                           <Input
                             type="number"
-                            value={eventoEdicao?.real_r || 0}
+                            value={eventoEdicao?.real_r ? Number(eventoEdicao.real_r.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, real_r: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
@@ -1493,7 +1493,7 @@ export default function PlanejamentoComercialPage() {
                         {modoEdicao ? (
                         <Input
                           type="number"
-                            value={eventoEdicao?.te_real || 0}
+                            value={eventoEdicao?.te_real ? Number(eventoEdicao.te_real.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, te_real: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
@@ -1509,7 +1509,7 @@ export default function PlanejamentoComercialPage() {
                         {modoEdicao ? (
                         <Input
                           type="number"
-                            value={eventoEdicao?.tb_real || 0}
+                            value={eventoEdicao?.tb_real ? Number(eventoEdicao.tb_real.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, tb_real: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
@@ -1521,19 +1521,19 @@ export default function PlanejamentoComercialPage() {
                         )}
                     </div>
                       <div>
-                        <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Tempo Médio</Label>
+                                                <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Ticket Médio</Label>
                         {modoEdicao ? (
                         <Input
                           type="number"
-                            value={eventoEdicao?.t_medio || 0}
+                            value={eventoEdicao?.t_medio ? Number(eventoEdicao.t_medio.toFixed(2)) : 0}
                             onChange={(e) => setEventoEdicao(prev => prev ? {...prev, t_medio: parseFloat(e.target.value) || 0} : null)}
                             className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                             placeholder="0.00"
                           />
                         ) : (
                           <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
-                            {formatarTempo(eventoEdicao?.t_medio)}
-                      </div>
+                            {formatarMoeda(eventoEdicao?.t_medio)}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1552,7 +1552,7 @@ export default function PlanejamentoComercialPage() {
                           {modoEdicao ? (
                         <Input
                           type="number"
-                              value={eventoEdicao?.c_art || 0}
+                              value={eventoEdicao?.c_art ? Number(eventoEdicao.c_art.toFixed(2)) : 0}
                               onChange={(e) => setEventoEdicao(prev => prev ? {...prev, c_art: parseFloat(e.target.value) || 0} : null)}
                               className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                               placeholder="0.00"
@@ -1568,7 +1568,7 @@ export default function PlanejamentoComercialPage() {
                           {modoEdicao ? (
                         <Input
                           type="number"
-                              value={eventoEdicao?.c_prod || 0}
+                              value={eventoEdicao?.c_prod ? Number(eventoEdicao.c_prod.toFixed(2)) : 0}
                               onChange={(e) => setEventoEdicao(prev => prev ? {...prev, c_prod: parseFloat(e.target.value) || 0} : null)}
                               className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
                               placeholder="0.00"
