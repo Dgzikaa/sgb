@@ -647,9 +647,9 @@ serve(async (req) => {
     
     if (authHeader && authHeader.includes(serviceRoleKey || '')) {
       console.log('✅ Acesso autorizado via SERVICE_ROLE_KEY')
-    } else if (cronSecret === 'pgcron_nibo') {
-      console.log('✅ Acesso autorizado via pgcron')
-    } else if (cronSecret && !['pgcron_nibo', 'manual_test'].includes(cronSecret)) {
+    } else if (cronSecret === 'pgcron_nibo' || cronSecret === 'manual_test') {
+      console.log('✅ Acesso autorizado via cronSecret')
+    } else {
       return new Response(
         JSON.stringify({ error: 'CRON_SECRET inválido' }),
         { 

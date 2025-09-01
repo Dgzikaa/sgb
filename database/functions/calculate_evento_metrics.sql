@@ -47,8 +47,14 @@ BEGIN
         RETURN;
     END IF;
     
-    -- REGRAS ESPECIAIS DO DOMINGO REMOVIDAS - TODOS OS EVENTOS USAM AS MESMAS REGRAS
-    is_domingo_or_special := FALSE;
+    -- DETECTAR SE É DOMINGO (não calcular nada para domingos)
+    is_domingo_or_special := (EXTRACT(dow FROM evento_record.data_evento) = 0);
+    
+    -- Se for domingo, não calcular nada
+    IF is_domingo_or_special THEN
+        RAISE NOTICE 'Evento % é domingo - pulando cálculos', evento_id;
+        RETURN;
+    END IF;
     
     RAISE NOTICE 'Calculando métricas para evento % - Data: %', 
         evento_id, evento_record.data_evento;
@@ -110,27 +116,29 @@ BEGIN
     -- =================================================
     SELECT 
         SUM(valorfinal) as total_valorfinal,
-        -- %B - Bebidas
-        CASE 
-            WHEN SUM(valorfinal) > 0 
-            THEN (SUM(CASE WHEN loc_desc IN ('Chopp','Baldes','Pegue e Pague','PP','Venda Volante','Bar') THEN valorfinal ELSE 0 END) / SUM(valorfinal)) * 100
-            ELSE 0 
-        END AS percent_bebidas,
-        -- %C - Comidas  
-        CASE 
-            WHEN SUM(valorfinal) > 0 
-            THEN (SUM(CASE WHEN loc_desc IN ('Cozinha','Cozinha 1','Cozinha 2') THEN valorfinal ELSE 0 END) / SUM(valorfinal)) * 100
-            ELSE 0 
-        END AS percent_comidas,
-        -- %D - Drinks
-        CASE 
-            WHEN SUM(valorfinal) > 0 
-            THEN (SUM(CASE WHEN loc_desc IN ('Preshh','Drinks','Drinks Autorais','Mexido','Shot e Dose','Batidos') THEN valorfinal ELSE 0 END) / SUM(valorfinal)) * 100
-            ELSE 0 
-        END AS percent_drinks,
-        -- Valores por categoria
+        -- Valores por categoria (incluindo TODAS as categorias)
         SUM(CASE WHEN loc_desc IN ('Chopp','Baldes','Pegue e Pague','PP','Venda Volante','Bar') THEN valorfinal ELSE 0 END) as valor_bebidas,
-        SUM(CASE WHEN loc_desc IN ('Cozinha','Cozinha 1','Cozinha 2') THEN valorfinal ELSE 0 END) as valor_comidas
+        SUM(CASE WHEN loc_desc IN ('Cozinha','Cozinha 1','Cozinha 2') THEN valorfinal ELSE 0 END) as valor_comidas,
+        SUM(CASE WHEN loc_desc IN ('Preshh','Drinks','Drinks Autorais','Mexido','Shot e Dose','Batidos') THEN valorfinal ELSE 0 END) as valor_drinks,
+        -- Outros (Montados, etc.) - tudo que não se encaixa nas categorias principais
+        SUM(CASE WHEN loc_desc NOT IN ('Chopp','Baldes','Pegue e Pague','PP','Venda Volante','Bar','Cozinha','Cozinha 1','Cozinha 2','Preshh','Drinks','Drinks Autorais','Mexido','Shot e Dose','Batidos') OR loc_desc IS NULL THEN valorfinal ELSE 0 END) as valor_outros,
+        
+        -- Percentuais calculados para somar exatamente 100%
+        CASE 
+            WHEN SUM(valorfinal) > 0 THEN
+                (SUM(CASE WHEN loc_desc IN ('Chopp','Baldes','Pegue e Pague','PP','Venda Volante','Bar') THEN valorfinal ELSE 0 END) / SUM(valorfinal)) * 100
+            ELSE 0 
+        END AS percent_bebidas_raw,
+        CASE 
+            WHEN SUM(valorfinal) > 0 THEN
+                (SUM(CASE WHEN loc_desc IN ('Cozinha','Cozinha 1','Cozinha 2') THEN valorfinal ELSE 0 END) / SUM(valorfinal)) * 100
+            ELSE 0 
+        END AS percent_comidas_raw,
+        CASE 
+            WHEN SUM(valorfinal) > 0 THEN
+                (SUM(CASE WHEN loc_desc IN ('Preshh','Drinks','Drinks Autorais','Mexido','Shot e Dose','Batidos') THEN valorfinal ELSE 0 END) / SUM(valorfinal)) * 100
+            ELSE 0 
+        END AS percent_drinks_raw
     INTO contahub_ana
     FROM contahub_analitico
     WHERE trn_dtgerencial = evento_record.data_evento 
@@ -180,55 +188,27 @@ BEGIN
     -- =================================================
     
     -- REGRA 1: CLIENTES REAIS
-    IF is_domingo_or_special THEN
-        calculated_cl_real := COALESCE(yuzer_data.quantidade_ingressos, 0) + 
-                             COALESCE(sympla_data.sympla_checkins, 0) + 
-                             COALESCE(contahub_per.total_pessoas, 0);
-    ELSE
-        calculated_cl_real := COALESCE(contahub_per.total_pessoas_pagantes, 0);
-    END IF;
+    -- Como não é domingo, usar pessoas pagantes do ContaHub
+    calculated_cl_real := COALESCE(contahub_per.total_pessoas_pagantes, 0);
     
     -- REGRA 2: REAL RECEITA
-    IF is_domingo_or_special THEN
-        calculated_real_r := COALESCE(contahub_pag.total_liquido, 0) + 
-                            COALESCE(yuzer_data.faturamento_liquido, 0);
-    ELSE
-        calculated_real_r := COALESCE(contahub_pag.total_liquido, 0);
-    END IF;
+    -- Como não é domingo, usar apenas ContaHub
+    calculated_real_r := COALESCE(contahub_pag.total_liquido, 0);
     
     -- REGRA 3: TICKET MÉDIO REAL (TE_REAL)
-    IF is_domingo_or_special THEN
-        IF calculated_cl_real > 0 THEN
-            calculated_te_real := (COALESCE(contahub_per.total_couvert, 0) + 
-                                 COALESCE(sympla_data.sympla_checkins, 0) + 
-                                 COALESCE(yuzer_data.receita_ingressos, 0)) / calculated_cl_real;
-        ELSE
-            calculated_te_real := 0;
-        END IF;
+    -- Como não é domingo, usar couvert / pessoas pagantes
+    IF COALESCE(contahub_per.total_pessoas_pagantes, 0) > 0 THEN
+        calculated_te_real := COALESCE(contahub_per.total_couvert, 0) / contahub_per.total_pessoas_pagantes;
     ELSE
-        IF COALESCE(contahub_per.total_pessoas_pagantes, 0) > 0 THEN
-            calculated_te_real := COALESCE(contahub_per.total_couvert, 0) / contahub_per.total_pessoas_pagantes;
-        ELSE
-            calculated_te_real := 0;
-        END IF;
+        calculated_te_real := 0;
     END IF;
     
     -- REGRA 4: TICKET BAR REAL (TB_REAL)
-    IF is_domingo_or_special THEN
-        IF calculated_cl_real > 0 THEN
-            calculated_tb_real := (COALESCE(contahub_per.total_pagamentos, 0) + 
-                                 (COALESCE(yuzer_data.faturamento_liquido, 0) - COALESCE(yuzer_data.receita_ingressos, 0))) / calculated_cl_real;
-        ELSE
-            calculated_tb_real := 0;
-        END IF;
+    -- Como não é domingo, usar (total_pagamentos - couvert) / pessoas
+    IF COALESCE(contahub_per.total_pessoas_pagantes, 0) > 0 THEN
+        calculated_tb_real := (COALESCE(contahub_per.total_pagamentos, 0) - COALESCE(contahub_per.total_couvert, 0)) / contahub_per.total_pessoas_pagantes;
     ELSE
-        IF COALESCE(contahub_per.total_pessoas_pagantes, 0) > 0 THEN
-            -- CORREÇÃO: tb_real deve ser (total_pagamentos - couvert) / pessoas
-            -- total_pagamentos já inclui couvert, então subtraímos o couvert total, não o te_real
-            calculated_tb_real := (COALESCE(contahub_per.total_pagamentos, 0) - COALESCE(contahub_per.total_couvert, 0)) / contahub_per.total_pessoas_pagantes;
-        ELSE
-            calculated_tb_real := 0;
-        END IF;
+        calculated_tb_real := 0;
     END IF;
     
     -- REGRA 5: TICKET MÉDIO TOTAL
@@ -241,44 +221,37 @@ BEGIN
         calculated_lot_max := 0;
     END IF;
     
-    -- REGRA 7: PERCENTUAIS (%B, %D, %C)
-    IF is_domingo_or_special THEN
-        calculated_percent_b := COALESCE(yuzer_data.percent_bebidas, 0);
-        calculated_percent_d := COALESCE(yuzer_data.percent_drinks, 0);
-        calculated_percent_c := COALESCE(yuzer_data.percent_comidas, 0);
+    -- REGRA 7: PERCENTUAIS (%B, %D, %C) - GARANTIR QUE SOMEM 100%
+    -- Como não é domingo, usar dados do ContaHub Analítico
+    -- Calcular percentuais que somem exatamente 100% (incluindo "outros" em bebidas)
+    IF COALESCE(contahub_ana.total_valorfinal, 0) > 0 THEN
+        -- Incluir "outros" na categoria bebidas para manter compatibilidade
+        calculated_percent_b := ((COALESCE(contahub_ana.valor_bebidas, 0) + COALESCE(contahub_ana.valor_outros, 0)) / contahub_ana.total_valorfinal) * 100;
+        calculated_percent_c := (COALESCE(contahub_ana.valor_comidas, 0) / contahub_ana.total_valorfinal) * 100;
+        calculated_percent_d := (COALESCE(contahub_ana.valor_drinks, 0) / contahub_ana.total_valorfinal) * 100;
     ELSE
-        calculated_percent_b := COALESCE(contahub_ana.percent_bebidas, 0);
-        calculated_percent_d := COALESCE(contahub_ana.percent_drinks, 0);
-        calculated_percent_c := COALESCE(contahub_ana.percent_comidas, 0);
+        calculated_percent_b := 0;
+        calculated_percent_c := 0;
+        calculated_percent_d := 0;
     END IF;
     
     -- REGRA 8: T.COZ E T.BAR
-    IF is_domingo_or_special THEN
+    -- Como não é domingo, calcular normalmente
+    IF COALESCE(contahub_per.total_pessoas_pagantes, 0) > 0 THEN
+        calculated_t_coz := COALESCE(contahub_ana.valor_comidas, 0) / contahub_per.total_pessoas_pagantes;
+        -- t_bar inclui bebidas + outros (mesma lógica dos percentuais)
+        calculated_t_bar := (COALESCE(contahub_ana.valor_bebidas, 0) + COALESCE(contahub_ana.valor_outros, 0)) / contahub_per.total_pessoas_pagantes;
+    ELSE
         calculated_t_coz := 0;
         calculated_t_bar := 0;
-    ELSE
-        IF COALESCE(contahub_per.total_pessoas_pagantes, 0) > 0 THEN
-            calculated_t_coz := COALESCE(contahub_ana.valor_comidas, 0) / contahub_per.total_pessoas_pagantes;
-            calculated_t_bar := COALESCE(contahub_ana.valor_bebidas, 0) / contahub_per.total_pessoas_pagantes;
-        ELSE
-            calculated_t_coz := 0;
-            calculated_t_bar := 0;
-        END IF;
     END IF;
     
     -- REGRA 9: FAT.19H PERCENTUAL
-    IF is_domingo_or_special THEN
-        IF COALESCE(yuzer_fatporhora.fat_total, 0) > 0 THEN
-            calculated_fat_19h_percent := (COALESCE(yuzer_fatporhora.fat_14_18h, 0) / yuzer_fatporhora.fat_total) * 100;
-        ELSE
-            calculated_fat_19h_percent := 0;
-        END IF;
+    -- Como não é domingo, usar dados do ContaHub
+    IF calculated_real_r > 0 THEN
+        calculated_fat_19h_percent := (COALESCE(contahub_fat.fat_ate_19h, 0) / calculated_real_r) * 100;
     ELSE
-        IF calculated_real_r > 0 THEN
-            calculated_fat_19h_percent := (COALESCE(contahub_fat.fat_ate_19h, 0) / calculated_real_r) * 100;
-        ELSE
-            calculated_fat_19h_percent := 0;
-        END IF;
+        calculated_fat_19h_percent := 0;
     END IF;
     
     -- REGRA 10: CUSTOS E %ART/FAT

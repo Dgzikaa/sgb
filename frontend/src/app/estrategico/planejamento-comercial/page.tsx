@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
@@ -26,8 +27,11 @@ import {
   Target,
   AlertCircle,
   CheckCircle,
+  Eye,
   Filter,
-  Database
+  Database,
+  BarChart3,
+  Ticket
 } from 'lucide-react';
 
 interface PlanejamentoData {
@@ -86,20 +90,16 @@ interface PlanejamentoData {
   fat_19h_green: boolean;
 }
 
-interface EventoEdicao {
+interface EventoEdicaoCompleta {
   id: number;
   nome: string;
+  // Dados de planejamento
   m1_r: number;
   cl_plan: number;
   te_plan: number;
   tb_plan: number;
   c_artistico_plan: number;
-  observacoes: string;
-}
-
-interface EventoEdicaoReal {
-  id: number;
-  nome: string;
+  // Dados reais
   real_r: number;
   cl_real: number;
   te_real: number;
@@ -133,12 +133,11 @@ export default function PlanejamentoComercialPage() {
   const [filtroMes, setFiltroMes] = useState(mesFromUrl ? parseInt(mesFromUrl) : 8); // Agosto
   const [filtroAno, setFiltroAno] = useState(anoFromUrl ? parseInt(anoFromUrl) : 2025);
   
-  // Estados do modal
+  // Estados do modal unificado
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalRealOpen, setModalRealOpen] = useState(false);
+  const [modoEdicao, setModoEdicao] = useState(false); // true = editar, false = visualizar
   const [eventoSelecionado, setEventoSelecionado] = useState<PlanejamentoData | null>(null);
-  const [eventoEdicao, setEventoEdicao] = useState<EventoEdicao | null>(null);
-  const [eventoEdicaoReal, setEventoEdicaoReal] = useState<EventoEdicaoReal | null>(null);
+  const [eventoEdicao, setEventoEdicao] = useState<EventoEdicaoCompleta | null>(null);
   const [salvando, setSalvando] = useState(false);
   
   // Estado para sincronização Getin
@@ -317,31 +316,22 @@ export default function PlanejamentoComercialPage() {
     }
   };
 
-  // Abrir modal de edição
+  // Abrir modal de edição unificado (planejamento + valores reais)
   const abrirModal = (evento: PlanejamentoData) => {
-    setEventoSelecionado(evento);
-    setEventoEdicao({
-      id: evento.evento_id,
-      nome: evento.evento_nome,
-      m1_r: evento.m1_receita,
-      cl_plan: evento.clientes_plan,
-      te_plan: evento.te_plan,
-      tb_plan: evento.tb_plan,
-      c_artistico_plan: evento.c_art || 0,
-      observacoes: ''
-    });
-    setModalOpen(true);
-  };
-
-  // Abrir modal de edição dos valores reais
-  const abrirModalReal = (evento: PlanejamentoData) => {
     console.log('🔍 Debug - Evento selecionado para edição:', evento);
     
     setEventoSelecionado(evento);
     
-    const dadosIniciais = {
+    const dadosIniciais: EventoEdicaoCompleta = {
       id: evento.evento_id,
       nome: evento.evento_nome,
+      // Dados de planejamento
+      m1_r: evento.m1_receita || 0,
+      cl_plan: evento.clientes_plan || 0,
+      te_plan: evento.te_plan || 0,
+      tb_plan: evento.tb_plan || 0,
+      c_artistico_plan: evento.c_art || 0,
+      // Dados reais
       real_r: evento.real_receita || 0,
       cl_real: evento.clientes_real || 0,
       te_real: evento.te_real || 0,
@@ -359,34 +349,28 @@ export default function PlanejamentoComercialPage() {
       observacoes: ''
     };
     
-    console.log('🔍 Debug - Dados iniciais do modal:', dadosIniciais);
+    console.log('🔍 Debug - Dados iniciais do modal unificado:', dadosIniciais);
     
-    setEventoEdicaoReal(dadosIniciais);
-    setModalRealOpen(true);
+    setEventoEdicao(dadosIniciais);
+    setModalOpen(true);
   };
 
-  // Fechar modal
+  // Fechar modal unificado
   const fecharModal = () => {
     setModalOpen(false);
     setEventoSelecionado(null);
     setEventoEdicao(null);
   };
 
-  // Fechar modal real
-  const fecharModalReal = () => {
-    setModalRealOpen(false);
-    setEventoSelecionado(null);
-    setEventoEdicaoReal(null);
-  };
-
-  // Salvar edição
+  // Salvar edição unificada (planejamento + valores reais)
   const salvarEdicao = async () => {
     if (!eventoEdicao) return;
 
     try {
       setSalvando(true);
       
-      const response = await apiCall(`/api/eventos/${eventoEdicao.id}`, {
+      // Salvar dados de planejamento
+      const responsePlanejamento = await apiCall(`/api/eventos/${eventoEdicao.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -403,94 +387,54 @@ export default function PlanejamentoComercialPage() {
         })
       });
 
-      if (response.success) {
-        console.log('✅ Evento atualizado com sucesso');
-        fecharModal();
-        // Recarregar dados
-        await buscarDados();
-      } else {
-        throw new Error(response.error || 'Erro ao salvar');
+      if (!responsePlanejamento.success) {
+        throw new Error(responsePlanejamento.error || 'Erro ao salvar planejamento');
       }
-    } catch (err) {
-      console.error('❌ Erro ao salvar:', err);
-      alert('Erro ao salvar alterações');
-    } finally {
-      setSalvando(false);
-    }
-  };
 
-  // Salvar edição dos valores reais
-  const salvarEdicaoReal = async () => {
-    if (!eventoEdicaoReal) return;
-
-    try {
-      setSalvando(true);
-      
-      // Debug: Log dos dados antes de enviar
-      console.log('🔍 Debug - Estado eventoEdicaoReal antes de enviar:', eventoEdicaoReal);
-      console.log('🔍 Debug - Valores específicos do estado:', {
-        real_r: eventoEdicaoReal.real_r,
-        cl_real: eventoEdicaoReal.cl_real,
-        te_real: eventoEdicaoReal.te_real,
-        tb_real: eventoEdicaoReal.tb_real,
-        t_medio: eventoEdicaoReal.t_medio,
-        res_tot: eventoEdicaoReal.res_tot,
-        res_p: eventoEdicaoReal.res_p
-      });
-      
-      const dadosParaEnviar = {
-        real_r: eventoEdicaoReal.real_r || 0,
-        cl_real: eventoEdicaoReal.cl_real || 0,
-        te_real: eventoEdicaoReal.te_real || 0,
-        tb_real: eventoEdicaoReal.tb_real || 0,
-        t_medio: eventoEdicaoReal.t_medio || 0,
-        res_tot: eventoEdicaoReal.res_tot || 0,
-        res_p: eventoEdicaoReal.res_p || 0,
-        c_art: eventoEdicaoReal.c_art || 0,
-        c_prod: eventoEdicaoReal.c_prod || 0,
-        percent_b: eventoEdicaoReal.percent_b || 0,
-        percent_d: eventoEdicaoReal.percent_d || 0,
-        percent_c: eventoEdicaoReal.percent_c || 0,
-        t_coz: eventoEdicaoReal.t_coz || 0,
-        t_bar: eventoEdicaoReal.t_bar || 0,
-        observacoes: eventoEdicaoReal.observacoes || ''
-      };
-      
-      console.log('📤 Debug - Dados que serão enviados:', dadosParaEnviar);
-      console.log('📤 Debug - Valores específicos que serão enviados:', {
-        real_r: dadosParaEnviar.real_r,
-        cl_real: dadosParaEnviar.cl_real,
-        te_real: dadosParaEnviar.te_real,
-        tb_real: dadosParaEnviar.tb_real,
-        t_medio: dadosParaEnviar.t_medio,
-        res_tot: dadosParaEnviar.res_tot,
-        res_p: dadosParaEnviar.res_p
-      });
-      
-      const response = await apiCall(`/api/eventos/${eventoEdicaoReal.id}/valores-reais`, {
+      // Salvar valores reais
+      const responseReais = await apiCall(`/api/eventos/${eventoEdicao.id}/valores-reais`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'x-user-data': encodeURIComponent(JSON.stringify(user))
         },
-        body: JSON.stringify(dadosParaEnviar)
+        body: JSON.stringify({
+          real_r: eventoEdicao.real_r || 0,
+          cl_real: eventoEdicao.cl_real || 0,
+          te_real: eventoEdicao.te_real || 0,
+          tb_real: eventoEdicao.tb_real || 0,
+          t_medio: eventoEdicao.t_medio || 0,
+          res_tot: eventoEdicao.res_tot || 0,
+          res_p: eventoEdicao.res_p || 0,
+          c_art: eventoEdicao.c_art || 0,
+          c_prod: eventoEdicao.c_prod || 0,
+          percent_b: eventoEdicao.percent_b || 0,
+          percent_d: eventoEdicao.percent_d || 0,
+          percent_c: eventoEdicao.percent_c || 0,
+          t_coz: eventoEdicao.t_coz || 0,
+          t_bar: eventoEdicao.t_bar || 0,
+          observacoes: eventoEdicao.observacoes || ''
+        })
       });
 
-      if (response.success) {
-        console.log('✅ Valores reais atualizados com sucesso');
-        fecharModalReal();
-        // Recarregar dados
-        await buscarDados();
-      } else {
-        throw new Error(response.error || 'Erro ao salvar valores reais');
+      if (!responseReais.success) {
+        throw new Error(responseReais.error || 'Erro ao salvar valores reais');
       }
+
+      console.log('✅ Evento atualizado com sucesso (planejamento + valores reais)');
+      fecharModal();
+      // Recarregar dados
+      await buscarDados();
+      
     } catch (err) {
-      console.error('❌ Erro ao salvar valores reais:', err);
-      alert('Erro ao salvar valores reais');
+      console.error('❌ Erro ao salvar:', err);
+      alert('Erro ao salvar alterações: ' + (err instanceof Error ? err.message : 'Erro desconhecido'));
     } finally {
       setSalvando(false);
     }
   };
+
+
 
   // Formatação de valores
   const formatarMoeda = (valor: number) => {
@@ -595,8 +539,8 @@ export default function PlanejamentoComercialPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+              <div className="overflow-x-auto border-x border-gray-200 dark:border-gray-700">
+                <table className="w-full text-xs border-collapse">
                   <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                     <tr>
                       <th className="px-1 py-1 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight border-r border-gray-200 dark:border-gray-700">Data</th>
@@ -712,22 +656,24 @@ export default function PlanejamentoComercialPage() {
                         <td className="px-1 py-1 text-center">
                           <div className="flex gap-1 justify-center">
                             <Button
-                              onClick={() => abrirModal(evento)}
+                              onClick={() => abrirModal(evento, false)}
                               size="sm"
                               variant="outline"
-                              className="h-6 w-6 p-0 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                              title="Editar planejamento"
+                              className="h-7 w-16 p-1 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-400 text-xs font-medium"
+                              title="Visualizar evento"
                             >
-                              <Edit className="h-3 w-3" />
+                              <Eye className="h-3 w-3 mr-1" />
+                              Ver
                             </Button>
                             <Button
-                              onClick={() => abrirModalReal(evento)}
+                              onClick={() => abrirModal(evento, true)}
                               size="sm"
                               variant="outline"
-                              className="h-6 w-6 p-0 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-400"
-                              title="Editar valores reais"
+                              className="h-7 w-16 p-1 border-green-300 dark:border-green-600 hover:bg-green-100 dark:hover:bg-green-700 text-green-600 dark:text-green-400 text-xs font-medium"
+                              title="Editar evento"
                             >
-                              <Database className="h-3 w-3" />
+                              <Edit className="h-3 w-3 mr-1" />
+                              Editar
                             </Button>
                           </div>
                         </td>
@@ -736,6 +682,7 @@ export default function PlanejamentoComercialPage() {
                   </tbody>
                 </table>
               </div>
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
             </CardContent>
           </Card>
             
@@ -1046,16 +993,7 @@ export default function PlanejamentoComercialPage() {
           </div>
         )}
 
-        {/* Modal de edição */}
-        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-          <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-xl shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 text-white border border-gray-700 backdrop-blur-sm">
-            <DialogHeader className="bg-gradient-to-r from-blue-700 to-purple-600 p-6 text-white shadow-lg">
-              <DialogTitle className="flex items-center gap-3 text-2xl font-bold">
-                <Edit className="h-7 w-7 text-blue-200" />
-                Editar Planejamento - {eventoSelecionado?.dia_formatado}/{filtroMes}/{filtroAno}
-              </DialogTitle>
-              <p className="text-blue-100 text-sm mt-1">Ajuste os dados de planejamento e orçamentação para este evento.</p>
-            </DialogHeader>
+
             
             {eventoEdicao && eventoSelecionado && (
               <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
@@ -1223,38 +1161,46 @@ export default function PlanejamentoComercialPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Modal de edição dos valores reais */}
-        <Dialog open={modalRealOpen} onOpenChange={setModalRealOpen}>
-          <DialogContent className="max-w-6xl p-0 overflow-hidden rounded-xl shadow-2xl bg-gradient-to-br from-gray-900 to-gray-800 text-white border border-gray-700 backdrop-blur-sm">
-            <DialogHeader className="bg-gradient-to-r from-green-700 to-blue-600 p-6 text-white shadow-lg">
+        {/* Modal Unificado - Planejado vs Realizado */}
+        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden rounded-xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+            <DialogHeader className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700 p-6 text-white shadow-lg">
               <DialogTitle className="flex items-center gap-3 text-2xl font-bold">
-                <Database className="h-7 w-7 text-green-200" />
-                Editar Valores Reais - {eventoSelecionado?.dia_formatado}/{filtroMes}/{filtroAno}
+                <BarChart3 className="h-7 w-7 text-blue-200" />
+                {modoEdicao ? 'Editar Evento' : 'Visualizar Evento'} - {eventoEdicao?.nome}
               </DialogTitle>
-              <p className="text-green-100 text-sm mt-1">Edite manualmente os valores reais quando há problemas com as APIs externas.</p>
+              <DialogDescription className="text-blue-100 text-lg mt-2">
+                {modoEdicao ? 'Edite os dados planejados e reais do evento' : 'Análise comparativa: Planejado vs Realizado'}
+              </DialogDescription>
             </DialogHeader>
             
-            {eventoEdicaoReal && eventoSelecionado && (
-              <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-                {/* Seção de Receitas e Clientes */}
-                <Card className="bg-gray-800/50 border-gray-600 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-green-300 flex items-center gap-2">
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                
+                {/* COLUNA ESQUERDA - PLANEJADO */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">PLANEJADO</h2>
+                  </div>
+
+                  {/* Receita Planejada */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <h3 className="text-lg font-semibold mb-4 text-blue-700 dark:text-blue-300 flex items-center gap-2">
                       <DollarSign className="h-5 w-5" />
-                      Receitas e Clientes
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                      Receita
+                    </h3>
+                    <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">Receita Real (R$)</label>
                         <Input
                           type="number"
                           step="0.01"
-                          value={eventoEdicaoReal.real_r}
+                          value={eventoEdicao.real_r}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, real_r: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, real_r: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
                         />
@@ -1263,10 +1209,10 @@ export default function PlanejamentoComercialPage() {
                         <label className="block text-sm font-medium text-gray-300 mb-2">Clientes Real</label>
                         <Input
                           type="number"
-                          value={eventoEdicaoReal.cl_real}
+                          value={eventoEdicao.cl_real}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, cl_real: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, cl_real: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
                         />
@@ -1276,10 +1222,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.01"
-                          value={eventoEdicaoReal.t_medio}
+                          value={eventoEdicao.t_medio}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, t_medio: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, t_medio: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-green-500"
                         />
@@ -1303,10 +1249,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.01"
-                          value={eventoEdicaoReal.te_real}
+                          value={eventoEdicao.te_real}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, te_real: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, te_real: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                         />
@@ -1316,10 +1262,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.01"
-                          value={eventoEdicaoReal.tb_real}
+                          value={eventoEdicao.tb_real}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, tb_real: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, tb_real: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                         />
@@ -1342,10 +1288,10 @@ export default function PlanejamentoComercialPage() {
                         <label className="block text-sm font-medium text-gray-300 mb-2">Reservas Totais</label>
                         <Input
                           type="number"
-                          value={eventoEdicaoReal.res_tot}
+                          value={eventoEdicao.res_tot}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, res_tot: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, res_tot: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                         />
@@ -1354,10 +1300,10 @@ export default function PlanejamentoComercialPage() {
                         <label className="block text-sm font-medium text-gray-300 mb-2">Reservas Presentes</label>
                         <Input
                           type="number"
-                          value={eventoEdicaoReal.res_p}
+                          value={eventoEdicao.res_p}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseInt(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, res_p: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, res_p: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                         />
@@ -1381,10 +1327,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.01"
-                          value={eventoEdicaoReal.c_art}
+                          value={eventoEdicao.c_art}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, c_art: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, c_art: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
                         />
@@ -1394,10 +1340,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.01"
-                          value={eventoEdicaoReal.c_prod}
+                          value={eventoEdicao.c_prod}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, c_prod: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, c_prod: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-red-500"
                         />
@@ -1421,10 +1367,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.1"
-                          value={eventoEdicaoReal.percent_b}
+                          value={eventoEdicao.percent_b}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, percent_b: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, percent_b: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
                         />
@@ -1434,10 +1380,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.1"
-                          value={eventoEdicaoReal.percent_d}
+                          value={eventoEdicao.percent_d}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, percent_d: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, percent_d: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
                         />
@@ -1447,10 +1393,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.1"
-                          value={eventoEdicaoReal.percent_c}
+                          value={eventoEdicao.percent_c}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, percent_c: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, percent_c: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-500"
                         />
@@ -1474,10 +1420,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.1"
-                          value={eventoEdicaoReal.t_coz}
+                          value={eventoEdicao.t_coz}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, t_coz: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, t_coz: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
                         />
@@ -1487,10 +1433,10 @@ export default function PlanejamentoComercialPage() {
                         <Input
                           type="number"
                           step="0.1"
-                          value={eventoEdicaoReal.t_bar}
+                          value={eventoEdicao.t_bar}
                           onChange={(e) => {
                             const valor = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                            setEventoEdicaoReal({...eventoEdicaoReal, t_bar: isNaN(valor) ? 0 : valor});
+                            setEventoEdicao({...eventoEdicao, t_bar: isNaN(valor) ? 0 : valor});
                           }}
                           className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
                         />
@@ -1509,8 +1455,8 @@ export default function PlanejamentoComercialPage() {
                   </CardHeader>
                   <CardContent>
                     <Textarea
-                      value={eventoEdicaoReal.observacoes}
-                      onChange={(e) => setEventoEdicaoReal({...eventoEdicaoReal, observacoes: e.target.value})}
+                      value={eventoEdicao.observacoes}
+                      onChange={(e) => setEventoEdicao({...eventoEdicao, observacoes: e.target.value})}
                       placeholder="Observações sobre os valores reais editados, motivos, ajustes..."
                       className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-gray-500 min-h-[100px]"
                     />
@@ -1522,13 +1468,13 @@ export default function PlanejamentoComercialPage() {
             <DialogFooter className="bg-gray-900/50 p-4 border-t border-gray-700 flex justify-end gap-3">
               <Button 
                 variant="outline" 
-                onClick={fecharModalReal} 
+                onClick={() => setModalOpen(false)} 
                 className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center gap-2"
               >
                 <X className="h-4 w-4" /> Cancelar
               </Button>
               <Button 
-                onClick={salvarEdicaoReal} 
+                onClick={salvarEdicao} 
                 disabled={salvando} 
                 className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2"
               >

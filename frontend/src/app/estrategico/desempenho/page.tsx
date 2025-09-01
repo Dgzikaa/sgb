@@ -15,7 +15,9 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCcw,
-  Activity
+  Activity,
+  Target,
+  PieChart
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
@@ -53,6 +55,27 @@ interface DadosMes {
   performance_media: number;
 }
 
+interface IndicadoresSemanais {
+  semana: number;
+  ano: number;
+  periodo: string;
+  data_inicio: string;
+  data_fim: string;
+  indicadores: {
+    faturamento_total: number;
+    faturamento_couvert: number;
+    faturamento_bar: number;
+    cmo_valor: number;
+    cmo_percentual: number;
+    atracao_faturamento: number;
+    atracao_percentual: number;
+    clientes_atendidos: number;
+    reservas_totais: number;
+    reservas_presentes: number;
+    cmv_rs: number;
+  };
+}
+
 export default function DesempenhoPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
@@ -61,15 +84,56 @@ export default function DesempenhoPage() {
   const [activeTab, setActiveTab] = useState('semanal');
   const [loading, setLoading] = useState(true);
   const [loadingMensal, setLoadingMensal] = useState(false);
+  const [loadingIndicadores, setLoadingIndicadores] = useState(false);
   const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
+  const [semanaAtual, setSemanaAtual] = useState(() => {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const pastDaysOfYear = (now.getTime() - startOfYear.getTime()) / 86400000;
+    return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+  });
   const [dadosSemanas, setDadosSemanas] = useState<DadosSemana[]>([]);
   const [totaisAnuais, setTotaisAnuais] = useState<TotaisMensais | null>(null);
   const [dadosMensais, setDadosMensais] = useState<DadosMes[]>([]);
+  const [indicadoresSemanais, setIndicadoresSemanais] = useState<IndicadoresSemanais | null>(null);
 
   const mesesNomes = useMemo(() => [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ], []);
+
+  // Carregar indicadores semanais
+  const carregarIndicadoresSemanais = useCallback(async (semana: number, ano: number) => {
+    if (!selectedBar || !user) return;
+
+    setLoadingIndicadores(true);
+    
+    try {
+      const response = await fetch(`/api/desempenho/indicadores-semanais?semana=${semana}&ano=${ano}`, {
+        headers: {
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setIndicadoresSemanais(data.data);
+        }
+      } else {
+        throw new Error('Erro ao carregar indicadores semanais');
+      }
+    } catch (error) {
+      console.error('Erro ao carregar indicadores semanais:', error);
+      toast({
+        title: "Erro ao carregar indicadores",
+        description: "Não foi possível carregar os indicadores semanais",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingIndicadores(false);
+    }
+  }, [selectedBar, user, toast]);
 
   // Carregar dados mensais consolidados (fevereiro 2025 até atual)
   const carregarDadosMensais = useCallback(async () => {
@@ -218,6 +282,13 @@ export default function DesempenhoPage() {
     }
   }, [activeTab, selectedBar, user, anoAtual, dadosMensais.length, carregarDadosMensais]);
 
+  // Carregar indicadores semanais quando mudar para aba indicadores
+  useEffect(() => {
+    if (activeTab === 'indicadores' && selectedBar && user && !indicadoresSemanais) {
+      carregarIndicadoresSemanais(semanaAtual, anoAtual);
+    }
+  }, [activeTab, selectedBar, user, semanaAtual, anoAtual, indicadoresSemanais, carregarIndicadoresSemanais]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -298,6 +369,13 @@ export default function DesempenhoPage() {
             >
               <Calendar className="h-4 w-4 mr-2" />
               Visão Mensal
+            </TabsTrigger>
+            <TabsTrigger 
+              value="indicadores" 
+              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/25 !rounded-xl"
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Indicadores
             </TabsTrigger>
           </TabsList>
 
@@ -469,6 +547,246 @@ export default function DesempenhoPage() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
+          </TabsContent>
+
+          {/* Indicadores Semanais */}
+          <TabsContent value="indicadores" className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              {/* Seletor de Semana */}
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg mb-4">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg">
+                        <Target className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Indicadores de Desempenho</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Selecione a semana para análise</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSemanaAtual(prev => Math.max(1, prev - 1))}
+                        className="border-gray-200 dark:border-gray-700"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <div className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-bold text-sm min-w-[120px] text-center">
+                        Semana {semanaAtual}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSemanaAtual(prev => Math.min(53, prev + 1))}
+                        className="border-gray-200 dark:border-gray-700"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => carregarIndicadoresSemanais(semanaAtual, anoAtual)}
+                        className="border-gray-200 dark:border-gray-700"
+                      >
+                        <RefreshCcw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Tabela de Indicadores */}
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
+                  <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg">
+                      <PieChart className="h-5 w-5 text-white" />
+                    </div>
+                    Indicadores da Semana {semanaAtual} - {anoAtual}
+                    {indicadoresSemanais && (
+                      <span className="text-sm font-normal text-gray-600 dark:text-gray-400">
+                        ({indicadoresSemanais.periodo})
+                      </span>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {loadingIndicadores ? (
+                    <div className="py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <RefreshCcw className="h-8 w-8 animate-spin text-emerald-600 dark:text-emerald-400 mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando indicadores...</p>
+                      </div>
+                    </div>
+                  ) : !indicadoresSemanais ? (
+                    <div className="py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Target className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400 font-medium">Clique em atualizar para carregar os dados</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                            <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Indicador</th>
+                            <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Valor</th>
+                            <th className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-white text-sm">Percentual</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Faturamento Total</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-blue-600 dark:text-blue-400 text-sm">
+                              {formatarMoeda(indicadoresSemanais.indicadores.faturamento_total)}
+                            </td>
+                            <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-400 text-sm">-</td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Faturamento Couvert</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-green-600 dark:text-green-400 text-sm">
+                              {formatarMoeda(indicadoresSemanais.indicadores.faturamento_couvert)}
+                            </td>
+                            <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-400 text-sm">
+                              {indicadoresSemanais.indicadores.faturamento_total > 0 
+                                ? ((indicadoresSemanais.indicadores.faturamento_couvert / indicadoresSemanais.indicadores.faturamento_total) * 100).toFixed(1) + '%'
+                                : '-'
+                              }
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-violet-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Faturamento Bar</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-purple-600 dark:text-purple-400 text-sm">
+                              {formatarMoeda(indicadoresSemanais.indicadores.faturamento_bar)}
+                            </td>
+                            <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-400 text-sm">
+                              {indicadoresSemanais.indicadores.faturamento_total > 0 
+                                ? ((indicadoresSemanais.indicadores.faturamento_bar / indicadoresSemanais.indicadores.faturamento_total) * 100).toFixed(1) + '%'
+                                : '-'
+                              }
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-red-500 to-rose-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">CMO (Custo Mão de Obra)</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-red-600 dark:text-red-400 text-sm">
+                              {formatarMoeda(indicadoresSemanais.indicadores.cmo_valor)}
+                            </td>
+                            <td className="py-3 px-4 text-right text-red-600 dark:text-red-400 text-sm font-semibold">
+                              {indicadoresSemanais.indicadores.cmo_percentual.toFixed(1)}%
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-orange-500 to-amber-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Atração/Faturamento</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-orange-600 dark:text-orange-400 text-sm">
+                              {formatarMoeda(indicadoresSemanais.indicadores.atracao_faturamento)}
+                            </td>
+                            <td className="py-3 px-4 text-right text-orange-600 dark:text-orange-400 text-sm font-semibold">
+                              {indicadoresSemanais.indicadores.atracao_percentual.toFixed(1)}%
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-cyan-500 to-blue-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Clientes Atendidos</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-cyan-600 dark:text-cyan-400 text-sm">
+                              {indicadoresSemanais.indicadores.clientes_atendidos.toLocaleString()}
+                            </td>
+                            <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-400 text-sm">-</td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-teal-500 to-green-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Reservas Totais</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-teal-600 dark:text-teal-400 text-sm">
+                              {indicadoresSemanais.indicadores.reservas_totais.toLocaleString()}
+                            </td>
+                            <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-400 text-sm">-</td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">Reservas Presentes</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                              {indicadoresSemanais.indicadores.reservas_presentes.toLocaleString()}
+                            </td>
+                            <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400 text-sm font-semibold">
+                              {indicadoresSemanais.indicadores.reservas_totais > 0 
+                                ? ((indicadoresSemanais.indicadores.reservas_presentes / indicadoresSemanais.indicadores.reservas_totais) * 100).toFixed(1) + '%'
+                                : '-'
+                              }
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-1 h-6 bg-gradient-to-b from-gray-500 to-slate-600 rounded-full"></div>
+                                <span className="font-semibold text-gray-900 dark:text-white text-sm">CMV R$ (Manual)</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-gray-600 dark:text-gray-400 text-sm">
+                              {formatarMoeda(indicadoresSemanais.indicadores.cmv_rs)}
+                            </td>
+                            <td className="py-3 px-4 text-right text-gray-500 dark:text-gray-400 text-sm">
+                              <Badge variant="outline" className="text-xs">Manual</Badge>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </motion.div>
           </TabsContent>
         </Tabs>
