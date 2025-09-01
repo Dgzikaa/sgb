@@ -208,7 +208,7 @@ export async function GET(request: NextRequest) {
 			// Para cada cliente no map, adicionar tempo médio simulado MAIS REALISTA
 			for (const [fone, cliente] of map.entries()) {
 				// Simular tempos mais variados e realistas
-				const temposIndividuais = []
+				const temposIndividuais: number[] = []
 				
 				for (let i = 0; i < cliente.visitas; i++) {
 					// Criar cenários mais realistas
@@ -245,7 +245,7 @@ export async function GET(request: NextRequest) {
 					
 					// Garantir limites realistas
 					tempoEscolhido = Math.max(25, Math.min(480, tempoEscolhido)) // 25min a 8h
-					temposIndividuais.push(Math.round(tempoEscolhido) as number)
+					temposIndividuais.push(Math.round(tempoEscolhido))
 				}
 				
 				cliente.temposEstadia = temposIndividuais

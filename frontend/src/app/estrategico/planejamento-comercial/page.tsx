@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@/contexts/UserContext';
+import { useSearchParams } from 'next/navigation';
 import { apiCall } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -118,16 +119,19 @@ interface EventoEdicaoReal {
 
 export default function PlanejamentoComercialPage() {
   const { user } = useUser();
+  const searchParams = useSearchParams();
   
   // Estados principais
   const [dados, setDados] = useState<PlanejamentoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Estados de filtros
-  const [mesAtual, setMesAtual] = useState(new Date());
-  const [filtroMes, setFiltroMes] = useState(new Date().getMonth() + 1);
-  const [filtroAno, setFiltroAno] = useState(new Date().getFullYear());
+  // Estados de filtros - Ler da URL ou usar agosto de 2025 como padrão
+  const mesFromUrl = searchParams.get('mes');
+  const anoFromUrl = searchParams.get('ano');
+  const [mesAtual, setMesAtual] = useState(new Date(2025, 7, 1)); // Agosto de 2025
+  const [filtroMes, setFiltroMes] = useState(mesFromUrl ? parseInt(mesFromUrl) : 8); // Agosto
+  const [filtroAno, setFiltroAno] = useState(anoFromUrl ? parseInt(anoFromUrl) : 2025);
   
   // Estados do modal
   const [modalOpen, setModalOpen] = useState(false);
@@ -208,6 +212,23 @@ export default function PlanejamentoComercialPage() {
       setLoading(false);
     }
   };
+
+  // Atualizar filtros quando parâmetros da URL mudarem
+  useEffect(() => {
+    const mesFromUrl = searchParams.get('mes');
+    const anoFromUrl = searchParams.get('ano');
+    
+    if (mesFromUrl && anoFromUrl) {
+      const mes = parseInt(mesFromUrl);
+      const ano = parseInt(anoFromUrl);
+      
+      if (mes >= 1 && mes <= 12 && ano >= 2020 && ano <= 2030) {
+        setFiltroMes(mes);
+        setFiltroAno(ano);
+        setMesAtual(new Date(ano, mes - 1, 1));
+      }
+    }
+  }, [searchParams]);
 
   // Carregar dados iniciais
   useEffect(() => {

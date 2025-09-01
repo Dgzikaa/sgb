@@ -22,8 +22,15 @@ serve(async (req) => {
     
     const { barId, cronSecret, days = 7 } = JSON.parse(requestBody || '{}')
     
-    // Verificar autorização
-    if (cronSecret !== 'manual_test' && cronSecret !== 'pgcron_nibo') {
+    // Verificar autenticação - aceitar SERVICE_ROLE_KEY ou cronSecret
+    const authHeader = req.headers.get('authorization')
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (authHeader && authHeader.includes(serviceRoleKey || '')) {
+      console.log('✅ Acesso autorizado via SERVICE_ROLE_KEY')
+    } else if (cronSecret === 'manual_test' || cronSecret === 'pgcron_nibo') {
+      console.log('✅ Acesso autorizado via cronSecret')
+    } else {
       return new Response(
         JSON.stringify({ error: 'CRON_SECRET inválido' }),
         { 

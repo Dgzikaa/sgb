@@ -40,7 +40,7 @@ const gestaoCards: GestaoCard[] = [
     title: 'Tabela de Desempenho',
     description: 'Acompanhe o desempenho da equipe com métricas detalhadas, rankings e análises de produtividade.',
     icon: TrendingUp,
-    href: '/gestao/desempenho',
+    href: '/estrategico/desempenho',
     color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     badge: 'Novo',
     features: [
@@ -58,7 +58,7 @@ const gestaoCards: GestaoCard[] = [
     title: 'Calendário de Eventos',
     description: 'Gerencie eventos, agendamentos e planejamento da equipe com visualização em calendário.',
     icon: Calendar,
-    href: '/gestao/calendario',
+    href: '/ferramentas/calendario',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     badge: 'Em Breve',
     features: [

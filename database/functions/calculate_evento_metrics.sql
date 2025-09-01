@@ -71,14 +71,15 @@ BEGIN
     AND bar_id = evento_record.bar_id;
     
     -- =================================================
-    -- 2. BUSCAR DADOS CONTAHUB PAGAMENTOS (EXCLUINDO CONTA ASSINADA)
+    -- 2. BUSCAR DADOS CONTAHUB PAGAMENTOS (EXCLUINDO CONTA ASSINADA E PIX MANUAL)
     -- =================================================
     SELECT SUM(liquido) as total_liquido
     INTO contahub_pag
     FROM contahub_pagamentos
     WHERE dt_gerencial = evento_record.data_evento 
     AND bar_id = evento_record.bar_id
-    AND meio != 'Conta Assinada';
+    AND meio != 'Conta Assinada'
+    AND meio != 'Pix Manual';
     
     -- =================================================
     -- 3. BUSCAR DADOS CONTAHUB PERÍODO
@@ -292,36 +293,61 @@ BEGIN
     
     -- =================================================
     -- ATUALIZAR TABELA EVENTOS_BASE
+    -- REGRA: NÃO SOBRESCREVER VALORES EDITADOS MANUALMENTE
     -- =================================================
-    UPDATE eventos_base SET
-        -- Dados calculados
-        cl_real = calculated_cl_real,
-        real_r = calculated_real_r,
-        te_real = calculated_te_real,
-        tb_real = calculated_tb_real,
-        t_medio = calculated_t_medio,
-        lot_max = calculated_lot_max,
-        percent_b = calculated_percent_b,
-        percent_d = calculated_percent_d,
-        percent_c = calculated_percent_c,
-        t_coz = calculated_t_coz,
-        t_bar = calculated_t_bar,
-        fat_19h_percent = calculated_fat_19h_percent,
-        c_art = calculated_c_art,
-        c_prod = calculated_c_prod,
-        percent_art_fat = calculated_percent_art_fat,
+    
+    -- Verificar se foi editado manualmente (versao_calculo = 999)
+    IF evento_record.versao_calculo = 999 THEN
+        -- VALORES EDITADOS MANUALMENTE - APENAS ATUALIZAR CONTROLES
+        UPDATE eventos_base SET
+            -- Apenas dados de integração (sempre atualizados)
+            sympla_liquido = COALESCE(sympla_data.sympla_liquido, 0),
+            sympla_checkins = COALESCE(sympla_data.sympla_checkins, 0),
+            yuzer_liquido = COALESCE(yuzer_data.faturamento_liquido, 0),
+            yuzer_ingressos = COALESCE(yuzer_data.receita_ingressos, 0),
+            
+            -- Controle
+            calculado_em = NOW(),
+            precisa_recalculo = FALSE,
+            atualizado_em = NOW()
+        WHERE id = evento_id;
         
-        -- Dados de integração
-        sympla_liquido = COALESCE(sympla_data.sympla_liquido, 0),
-        sympla_checkins = COALESCE(sympla_data.sympla_checkins, 0),
-        yuzer_liquido = COALESCE(yuzer_data.faturamento_liquido, 0),
-        yuzer_ingressos = COALESCE(yuzer_data.receita_ingressos, 0),
+        RAISE NOTICE 'Evento % tem valores manuais - preservando edições do usuário', evento_id;
+    ELSE
+        -- VALORES AUTOMÁTICOS - ATUALIZAR TUDO
+        UPDATE eventos_base SET
+            -- Dados calculados
+            cl_real = calculated_cl_real,
+            real_r = calculated_real_r,
+            te_real = calculated_te_real,
+            tb_real = calculated_tb_real,
+            t_medio = calculated_t_medio,
+            lot_max = calculated_lot_max,
+            percent_b = calculated_percent_b,
+            percent_d = calculated_percent_d,
+            percent_c = calculated_percent_c,
+            t_coz = calculated_t_coz,
+            t_bar = calculated_t_bar,
+            fat_19h_percent = calculated_fat_19h_percent,
+            c_art = calculated_c_art,
+            c_prod = calculated_c_prod,
+            percent_art_fat = calculated_percent_art_fat,
+            
+            -- Dados de integração
+            sympla_liquido = COALESCE(sympla_data.sympla_liquido, 0),
+            sympla_checkins = COALESCE(sympla_data.sympla_checkins, 0),
+            yuzer_liquido = COALESCE(yuzer_data.faturamento_liquido, 0),
+            yuzer_ingressos = COALESCE(yuzer_data.receita_ingressos, 0),
+            
+            -- Controle
+            calculado_em = NOW(),
+            precisa_recalculo = FALSE,
+            atualizado_em = NOW(),
+            versao_calculo = 1  -- Versão automática
+        WHERE id = evento_id;
         
-        -- Controle
-        calculado_em = NOW(),
-        precisa_recalculo = FALSE,
-        atualizado_em = NOW()
-    WHERE id = evento_id;
+        RAISE NOTICE 'Evento % atualizado automaticamente', evento_id;
+    END IF;
     
     RAISE NOTICE 'Métricas calculadas para evento %: Real=% | Clientes=% | TE=% | TB=% | T.Médio=%', 
         evento_id, calculated_real_r, calculated_cl_real, calculated_te_real, calculated_tb_real, calculated_t_medio;

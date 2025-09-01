@@ -425,7 +425,7 @@ export default function HomeModernPage() {
           {[
             { icon: Utensils, label: 'Operações', href: '/operacoes', color: 'text-orange-500' },
             { icon: BarChart3, label: 'Analytics', href: '/relatorios', color: 'text-blue-500' },
-            { icon: Calendar, label: 'Eventos', href: '/gestao/eventos', color: 'text-purple-500' },
+            { icon: Calendar, label: 'Eventos', href: '/ferramentas/calendario', color: 'text-purple-500' },
             { icon: Settings, label: 'Configurações', href: '/configuracoes', color: 'text-gray-500' },
             { icon: Users, label: 'Clientes', href: '/analitico/clientes', color: 'text-green-500' },
             { icon: DollarSign, label: 'Financeiro', href: '/estrategico/orcamentacao', color: 'text-emerald-500' },

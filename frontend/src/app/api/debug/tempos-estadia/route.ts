@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     console.log(`💳 Encontrados ${pagamentos?.length || 0} pagamentos`)
     
     // 3. Fazer o cruzamento e calcular tempos
-    const resultados = []
+    const resultados: any[] = []
     
     for (const periodo of periodos || []) {
       const resultado: any = {
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
         resultado.tipo_match = 'SEM_MATCH'
       }
       
-      resultados.push(resultado as any)
+      resultados.push(resultado)
     }
     
     console.log(`✅ Processados ${resultados.length} registros`)
