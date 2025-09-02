@@ -7,17 +7,11 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userDataHeader = request.headers.get('x-user-data');
-    console.log('🔍 Debug - userDataHeader:', userDataHeader);
-    
-    const barId = userDataHeader
-      ? JSON.parse(userDataHeader).bar_id
+    const barId = request.headers.get('x-user-data')
+      ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id
       : null;
-    
-    console.log('🔍 Debug - barId:', barId);
 
     if (!barId) {
-      console.log('❌ Bar não selecionado');
       return NextResponse.json(
         { success: false, error: 'Bar não selecionado' },
         { status: 400 }
@@ -33,39 +27,34 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Construir query base - MOSTRAR TODAS AS SEMANAS COM DADOS
+    // Obter semana atual baseada na data (método mais preciso)
+    const { data: semanaAtualTabela } = await supabase
+      .from('desempenho_semanal')
+      .select('numero_semana')
+      .eq('bar_id', barId)
+      .eq('ano', parseInt(ano))
+      .lte('data_inicio::date', 'CURRENT_DATE')
+      .gte('data_fim::date', 'CURRENT_DATE')
+      .single();
+    
+    const semanaAtual = semanaAtualTabela?.numero_semana || 31;
+    console.log(`📅 Semana atual: ${semanaAtual} - Filtrando exibição até esta semana`);
+
+    // Construir query base - FILTRAR ATÉ SEMANA ATUAL
     let query = supabase
       .from('desempenho_semanal')
       .select('*')
       .eq('bar_id', barId)
       .eq('ano', parseInt(ano))
-      .gte('numero_semana', 5) // 🎯 MOSTRAR A PARTIR DA SEMANA 5 (quando abrimos)
+      .lte('numero_semana', semanaAtual) // 🎯 MOSTRAR SÓ ATÉ SEMANA ATUAL
       .order('numero_semana', { ascending: false });
 
-    // Filtrar por mês se especificado (simplificado)
+    // Filtrar por mês se especificado
     if (mes && mes !== 'todos') {
       const mesInt = parseInt(mes);
-      
-      // Mapeamento simples das semanas por mês
-      let semanaInicio, semanaFim;
-      
-      if (mesInt === 2) { // Fevereiro - semanas 5-8
-        semanaInicio = 5;
-        semanaFim = 8;
-      } else if (mesInt === 3) { // Março - semanas 9-12
-        semanaInicio = 9;
-        semanaFim = 12;
-      } else if (mesInt === 4) { // Abril - semanas 13-16
-        semanaInicio = 13;
-        semanaFim = 16;
-      } else if (mesInt === 5) { // Maio - semanas 17-20
-        semanaInicio = 17;
-        semanaFim = 20;
-      } else {
-        // Para outros meses, usar lógica padrão
-        semanaInicio = (mesInt - 1) * 4 + 1;
-        semanaFim = mesInt * 4;
-      }
+      // Aproximação: considerar semanas 1-4 como mês 1, 5-8 como mês 2, etc.
+      const semanaInicio = (mesInt - 1) * 4 + 1;
+      const semanaFim = mesInt * 4 + 4;
       
       query = query
         .gte('numero_semana', semanaInicio)
@@ -73,10 +62,6 @@ export async function GET(request: Request) {
     }
 
     const { data, error } = await query;
-    
-    console.log('🔍 Debug - Query executada para bar_id:', barId, 'ano:', ano);
-    console.log('🔍 Debug - Dados retornados:', data?.length || 0, 'registros');
-    console.log('🔍 Debug - Erro:', error);
 
     if (error) {
       console.error('Erro ao buscar dados:', error);

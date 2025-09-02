@@ -493,14 +493,10 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Converter para array e calcular métricas (mostrar todas as semanas com dados até a semana atual)
+    // Converter para array e calcular métricas (mostrar todas as semanas com dados)
     let semanasConsolidadas = Array.from(semanaMap.values())
       .filter(semana => {
-        // Se é o ano atual, mostrar apenas até a semana atual
-        if (ano === hoje.getFullYear()) {
-          return semana.eventos_count > 0 && semana.semana <= semanaAtual;
-        }
-        // Para anos anteriores, mostrar todas as semanas com dados
+        // Mostrar todas as semanas com dados, independente do ano
         return semana.eventos_count > 0;
       });
 
