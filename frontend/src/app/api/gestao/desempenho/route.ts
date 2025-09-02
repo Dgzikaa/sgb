@@ -27,26 +27,12 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Obter semana atual baseada na data (método mais preciso)
-    const { data: semanaAtualTabela } = await supabase
-      .from('desempenho_semanal')
-      .select('numero_semana')
-      .eq('bar_id', barId)
-      .eq('ano', parseInt(ano))
-      .lte('data_inicio::date', 'CURRENT_DATE')
-      .gte('data_fim::date', 'CURRENT_DATE')
-      .single();
-    
-    const semanaAtual = semanaAtualTabela?.numero_semana || 31;
-    console.log(`📅 Semana atual: ${semanaAtual} - Filtrando exibição até esta semana`);
-
-    // Construir query base - FILTRAR ATÉ SEMANA ATUAL
+    // Construir query base - MOSTRAR TODAS AS SEMANAS DO ANO
     let query = supabase
       .from('desempenho_semanal')
       .select('*')
       .eq('bar_id', barId)
       .eq('ano', parseInt(ano))
-      .lte('numero_semana', semanaAtual) // 🎯 MOSTRAR SÓ ATÉ SEMANA ATUAL
       .order('numero_semana', { ascending: false });
 
     // Filtrar por mês se especificado
