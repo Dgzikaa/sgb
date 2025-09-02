@@ -262,6 +262,10 @@ export async function GET(request: NextRequest) {
         t_bar: evento.t_bar || 0,
         fat_19h: evento.fat_19h_percent || 0,
         
+        // Campos manuais para domingos
+        faturamento_couvert_manual: evento.faturamento_couvert_manual || undefined,
+        faturamento_bar_manual: evento.faturamento_bar_manual || undefined,
+        
         // Flags de performance
         real_vs_m1_green: realVsM1Green,
         ci_real_vs_plan_green: ciRealVsPlanGreen,
