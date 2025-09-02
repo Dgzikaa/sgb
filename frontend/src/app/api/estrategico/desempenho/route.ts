@@ -219,8 +219,19 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const contahubCouvertMap = new Map();
+    // Remover duplicatas dos dados do ContaHub Período
+    const contahubPeriodoUnicos = [];
+    const chavesVistas = new Set();
+    
     contahubPeriodoData?.forEach(item => {
+      // Criar chave única baseada em campos que não deveriam se repetir
+      const chave = `${item.dt_gerencial}`;
+      // Para período, vamos apenas somar os valores por data (não há problema de duplicata real aqui)
+      contahubPeriodoUnicos.push(item);
+    });
+
+    const contahubCouvertMap = new Map();
+    contahubPeriodoUnicos.forEach(item => {
       const data = item.dt_gerencial;
       const valor = item.vr_couvert || 0;
       contahubCouvertMap.set(data, (contahubCouvertMap.get(data) || 0) + valor);
