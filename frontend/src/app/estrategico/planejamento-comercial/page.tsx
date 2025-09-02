@@ -82,6 +82,10 @@ interface PlanejamentoData {
   t_bar: number;
   fat_19h: number;
   
+  // Campos manuais para domingos
+  faturamento_couvert_manual?: number;
+  faturamento_bar_manual?: number;
+  
   // Flags de performance
   real_vs_m1_green: boolean;
   ci_real_vs_plan_green: boolean;
@@ -118,6 +122,9 @@ interface EventoEdicaoCompleta {
   percent_c: number;
   t_coz: number;
   t_bar: number;
+  // Campos manuais para domingos
+  faturamento_couvert_manual?: number;
+  faturamento_bar_manual?: number;
   observacoes: string;
 }
 
@@ -359,6 +366,9 @@ export default function PlanejamentoComercialPage() {
       percent_c: evento.percent_c || 0,
       t_coz: evento.t_coz || 0,
       t_bar: evento.t_bar || 0,
+      // Campos manuais para domingos
+      faturamento_couvert_manual: evento.faturamento_couvert_manual || undefined,
+      faturamento_bar_manual: evento.faturamento_bar_manual || undefined,
       observacoes: ''
     };
     
@@ -426,6 +436,9 @@ export default function PlanejamentoComercialPage() {
           percent_c: eventoEdicao.percent_c || 0,
           t_coz: eventoEdicao.t_coz || 0,
           t_bar: eventoEdicao.t_bar || 0,
+          // Campos manuais para domingos
+          faturamento_couvert_manual: eventoEdicao.faturamento_couvert_manual || null,
+          faturamento_bar_manual: eventoEdicao.faturamento_bar_manual || null,
           observacoes: eventoEdicao.observacoes || ''
         })
       });
@@ -526,8 +539,8 @@ export default function PlanejamentoComercialPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4px)] bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-2 py-1 max-w-[98vw]">
+    <div className="min-h-[calc(100vh-8px)] bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-2 py-1 pb-6 max-w-[98vw]">
             
         {/* Layout principal com tabela e controles laterais */}
         {dados.length === 0 ? (
@@ -1536,6 +1549,66 @@ export default function PlanejamentoComercialPage() {
                           </div>
                         )}
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Faturamento Manual (para domingos) */}
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <h3 className="text-base font-medium mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                      <Edit className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                      Faturamento Manual (Domingos)
+                    </h3>
+                    <div className="text-xs text-yellow-700 dark:text-yellow-300 mb-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded">
+                      💡 Use estes campos para domingos com te_real = 0. Os valores de te_real e tb_real serão calculados automaticamente.
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Faturamento Couvert Manual</Label>
+                        {modoEdicao ? (
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.faturamento_couvert_manual || ''}
+                            onChange={(e) => setEventoEdicao(prev => prev ? {...prev, faturamento_couvert_manual: parseFloat(e.target.value) || undefined} : null)}
+                            className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        ) : (
+                          <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
+                            {eventoEdicao?.faturamento_couvert_manual ? formatarMoeda(eventoEdicao.faturamento_couvert_manual) : 'Não definido'}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Faturamento Bar Manual</Label>
+                        {modoEdicao ? (
+                          <Input
+                            type="number"
+                            value={eventoEdicao?.faturamento_bar_manual || ''}
+                            onChange={(e) => setEventoEdicao(prev => prev ? {...prev, faturamento_bar_manual: parseFloat(e.target.value) || undefined} : null)}
+                            className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
+                            placeholder="0.00"
+                            step="0.01"
+                          />
+                        ) : (
+                          <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
+                            {eventoEdicao?.faturamento_bar_manual ? formatarMoeda(eventoEdicao.faturamento_bar_manual) : 'Não definido'}
+                          </div>
+                        )}
+                      </div>
+                      {eventoEdicao?.faturamento_couvert_manual && eventoEdicao?.cl_real && (
+                        <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+                          <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Valores Calculados:</div>
+                          <div className="text-xs text-blue-600 dark:text-blue-400">
+                            TE Real: {formatarMoeda(eventoEdicao.faturamento_couvert_manual / eventoEdicao.cl_real)}
+                          </div>
+                          {eventoEdicao?.faturamento_bar_manual && (
+                            <div className="text-xs text-blue-600 dark:text-blue-400">
+                              TB Real: {formatarMoeda(eventoEdicao.faturamento_bar_manual / eventoEdicao.cl_real)}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 

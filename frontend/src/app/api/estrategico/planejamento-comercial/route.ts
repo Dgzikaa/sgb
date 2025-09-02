@@ -124,6 +124,8 @@ export async function GET(request: NextRequest) {
         yuzer_ingressos,
         res_tot,
         res_p,
+        faturamento_couvert_manual,
+        faturamento_bar_manual,
         calculado_em,
         precisa_recalculo,
         versao_calculo

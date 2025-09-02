@@ -101,30 +101,40 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     console.log('✅ Evento encontrado:', evento.nome);
 
     // Atualizar os valores reais na tabela eventos_base
+    const updateData: any = {
+      real_r: body.real_r || 0,
+      cl_real: body.cl_real || 0,
+      te_real: body.te_real || 0,
+      tb_real: body.tb_real || 0,
+      t_medio: body.t_medio || 0,
+      res_tot: body.res_tot || 0,
+      res_p: body.res_p || 0,
+      c_art: body.c_art || 0,
+      c_prod: body.c_prod || 0,
+      percent_b: body.percent_b || 0,
+      percent_d: body.percent_d || 0,
+      percent_c: body.percent_c || 0,
+      t_coz: body.t_coz || 0,
+      t_bar: body.t_bar || 0,
+      observacoes: body.observacoes || '',
+      atualizado_em: new Date().toISOString(),
+      // Marcar que os valores foram editados manualmente
+      calculado_em: new Date().toISOString(),
+      precisa_recalculo: false, // Não precisa recalcular pois foi editado manualmente
+      versao_calculo: 999 // Versão especial para indicar edição manual
+    };
+
+    // Adicionar campos manuais se fornecidos
+    if (body.faturamento_couvert_manual !== undefined) {
+      updateData.faturamento_couvert_manual = body.faturamento_couvert_manual;
+    }
+    if (body.faturamento_bar_manual !== undefined) {
+      updateData.faturamento_bar_manual = body.faturamento_bar_manual;
+    }
+
     const { data: eventoAtualizado, error: updateError } = await supabase
       .from('eventos_base')
-      .update({
-        real_r: body.real_r || 0,
-        cl_real: body.cl_real || 0,
-        te_real: body.te_real || 0,
-        tb_real: body.tb_real || 0,
-        t_medio: body.t_medio || 0,
-        res_tot: body.res_tot || 0,
-        res_p: body.res_p || 0,
-        c_art: body.c_art || 0,
-        c_prod: body.c_prod || 0,
-        percent_b: body.percent_b || 0,
-        percent_d: body.percent_d || 0,
-        percent_c: body.percent_c || 0,
-        t_coz: body.t_coz || 0,
-        t_bar: body.t_bar || 0,
-        observacoes: body.observacoes || '',
-        atualizado_em: new Date().toISOString(),
-        // Marcar que os valores foram editados manualmente
-        calculado_em: new Date().toISOString(),
-        precisa_recalculo: false, // Não precisa recalcular pois foi editado manualmente
-        versao_calculo: 999 // Versão especial para indicar edição manual
-      })
+      .update(updateData)
       .eq('id', eventoId)
       .eq('bar_id', user.bar_id)
       .select()

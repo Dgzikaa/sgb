@@ -67,7 +67,9 @@ export async function GET(request: NextRequest) {
         tb_real,
         percent_art_fat,
         c_art,
-        c_prod
+        c_prod,
+        res_tot,
+        res_p
       `)
       .eq('bar_id', user.bar_id)
       .gte('data_evento', `${ano}-01-01`)
@@ -192,22 +194,63 @@ export async function GET(request: NextRequest) {
       getinMap.set(data, (getinMap.get(data) || 0) + 1);
     });
 
-    // Buscar dados do ContaHub Período para couvert
-    const { data: contahubPeriodoData } = await supabase
-      .from('contahub_periodo')
-      .select('dt_gerencial, vr_couvert')
-      .gte('dt_gerencial', `${ano}-01-01`)
-      .lt('dt_gerencial', `${ano + 1}-01-01`)
-      .eq('bar_id', user.bar_id)
-      .limit(10000)
-      .order('dt_gerencial');
+    // Buscar dados do ContaHub Pagamentos para couvert (com paginação) - excluindo "Conta Assinada"
+    let contahubPagamentosData = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data: pageData } = await supabase
+        .from('contahub_pagamentos')
+        .select('dt_gerencial, liquido, meio')
+        .gte('dt_gerencial', `${ano}-01-01`)
+        .lt('dt_gerencial', `${ano + 1}-01-01`)
+        .eq('bar_id', user.bar_id)
+        .order('dt_gerencial')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (pageData && pageData.length > 0) {
+        contahubPagamentosData = [...contahubPagamentosData, ...pageData];
+        hasMore = pageData.length === pageSize;
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
 
     const contahubCouvertMap = new Map();
-    contahubPeriodoData?.forEach(item => {
+    contahubPagamentosData?.forEach(item => {
       const data = item.dt_gerencial;
-      const valor = item.vr_couvert || 0;
+      // Excluir "Conta Assinada" conforme fórmula do Excel
+      const valor = (item.meio !== 'Conta Assinada') ? (item.liquido || 0) : 0;
       contahubCouvertMap.set(data, (contahubCouvertMap.get(data) || 0) + valor);
     });
+
+    // Buscar dados do ContaHub para calcular clientes ativos (2+ visitas) - com paginação
+    let contahubClientesData = [];
+    page = 0;
+    hasMore = true;
+
+    while (hasMore) {
+      const { data: pageData } = await supabase
+        .from('contahub_periodo')
+        .select('cli_fone, dt_gerencial')
+        .eq('bar_id', user.bar_id)
+        .gte('dt_gerencial', `${ano}-01-01`)
+        .lt('dt_gerencial', `${ano + 1}-01-01`)
+        .not('cli_fone', 'is', null)
+        .order('dt_gerencial')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (pageData && pageData.length > 0) {
+        contahubClientesData = [...contahubClientesData, ...pageData];
+        hasMore = pageData.length === pageSize;
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
 
     // Buscar dados do Nibo para CMO
     const categoriasCMO = [
@@ -216,21 +259,38 @@ export async function GET(request: NextRequest) {
       'FREELA SEGURANÇA', 'PRO LABORE', 'PROVISÃO TRABALHISTA'
     ];
 
-    const { data: niboData } = await supabase
-      .from('nibo_agendamentos')
-      .select('data_competencia, valor')
-      .gte('data_competencia', `${ano}-01-01`)
-      .lt('data_competencia', `${ano + 1}-01-01`)
-      .eq('bar_id', user.bar_id)
-      .in('categoria_nome', categoriasCMO)
-      .limit(10000)
-      .order('data_competencia');
+    // Buscar dados do Nibo para CMO - com paginação
+    let niboData = [];
+    page = 0;
+    hasMore = true;
 
+    while (hasMore) {
+      const { data: pageData } = await supabase
+        .from('nibo_agendamentos')
+        .select('data_competencia, valor')
+        .gte('data_competencia', `${ano}-01-01`)
+        .lt('data_competencia', `${ano + 1}-01-01`)
+        .eq('bar_id', user.bar_id)
+        .in('categoria_nome', categoriasCMO)
+        .order('data_competencia')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (pageData && pageData.length > 0) {
+        niboData = [...niboData, ...pageData];
+        hasMore = pageData.length === pageSize;
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    // Mapear CMO por mês/ano (competência mensal)
     const niboMap = new Map();
     niboData?.forEach(item => {
-      const data = item.data_competencia;
+      const competencia = new Date(item.data_competencia);
+      const chaveCompetencia = `${competencia.getFullYear()}-${(competencia.getMonth() + 1).toString().padStart(2, '0')}`;
       const valor = item.valor || 0;
-      niboMap.set(data, (niboMap.get(data) || 0) + valor);
+      niboMap.set(chaveCompetencia, (niboMap.get(chaveCompetencia) || 0) + valor);
     });
 
     // Debug específico removido para reduzir logs desnecessários
@@ -359,12 +419,9 @@ export async function GET(request: NextRequest) {
       // Novos indicadores de desempenho usando dados das tabelas corretas
       const clientesReais = evento.cl_real || 0;
       
-      // Faturamento Couvert (da tabela contahub_periodo)
-      const couvertDia = contahubCouvertMap.get(evento.data_evento) || 0;
-      semanaData.faturamento_couvert += couvertDia;
+      // Faturamento Couvert será calculado no final da semana
       
-      // Faturamento Bar = Total - Couvert
-      semanaData.faturamento_bar += faturamentoTotal - couvertDia;
+      // Faturamento Bar será calculado no final (Total - Couvert)
       
       // Ticket Médio ContaHub = Faturamento Total / Clientes
       // Será calculado no final da semana
@@ -377,9 +434,7 @@ export async function GET(request: NextRequest) {
       
       // CMV Limpo % será calculado no final
       
-      // CMO (da tabela nibo_agendamentos)
-      const cmoDia = niboMap.get(evento.data_evento) || 0;
-      semanaData.cmo_valor += cmoDia;
+      // CMO será calculado no final da semana
       
       // Atração/Faturamento (c_art + c_prod da eventos_base)
       semanaData.atracao_faturamento += (evento.c_art || 0) + (evento.c_prod || 0);
@@ -387,13 +442,11 @@ export async function GET(request: NextRequest) {
       // Clientes Atendidos (cl_real da eventos_base)
       semanaData.clientes_atendidos += clientesReais;
       
-      // Clientes Ativos = Clientes Atendidos (por enquanto, pode ser ajustado)
-      semanaData.clientes_ativos += clientesReais;
+      // Clientes Ativos será calculado no final (2+ visitas na semana)
       
-      // Reservas (usando dados do Getin se disponível, senão usar cl_real)
-      const reservasGetin = getinMap.get(evento.data_evento) || 0;
-      semanaData.reservas_totais += reservasGetin > 0 ? reservasGetin : clientesReais;
-      semanaData.reservas_presentes += clientesReais;
+      // Reservas (usando dados corretos da eventos_base)
+      semanaData.reservas_totais += evento.res_tot || 0;
+      semanaData.reservas_presentes += evento.res_p || 0;
       
       // Campos antigos mantidos para compatibilidade
       semanaData.clientes_total += clientesReais;
@@ -405,8 +458,6 @@ export async function GET(request: NextRequest) {
     // Obter semana atual
     const hoje = new Date();
     const semanaAtual = getWeekNumber(hoje);
-
-
 
     // Buscar períodos da tabela de referência
     const { data: semanasReferencia } = await supabase
@@ -432,9 +483,172 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Converter para array e calcular métricas (mostrar desde semana 6)
+    // Converter para array e calcular métricas (mostrar todas as semanas com dados até a semana atual)
     let semanasConsolidadas = Array.from(semanaMap.values())
-      .filter(semana => semana.eventos_count > 0 && semana.semana >= 6);
+      .filter(semana => {
+        // Se é o ano atual, mostrar apenas até a semana atual
+        if (ano === hoje.getFullYear()) {
+          return semana.eventos_count > 0 && semana.semana <= semanaAtual;
+        }
+        // Para anos anteriores, mostrar todas as semanas com dados
+        return semana.eventos_count > 0;
+      });
+
+    // Debug: Verificar se chegou até aqui
+    console.log(`🔍 Iniciando cálculo de Couvert e CMO para ${semanasConsolidadas.length} semanas`);
+    console.log(`🔍 Total contahubPagamentosData: ${contahubPagamentosData?.length || 0} registros`);
+    console.log(`🔍 Total contahubClientesData: ${contahubClientesData?.length || 0} registros`);
+    console.log(`🔍 Total niboData: ${niboData?.length || 0} registros`);
+
+    // Calcular clientes ativos por semana (2+ visitas nos últimos 90 dias)
+    semanasConsolidadas.forEach(semana => {
+      // Buscar dados de clientes para esta semana específica
+      const periodoSemana = getWeekPeriod(semana.semana, ano);
+      const inicioSemana = periodoSemana.inicio;
+      const fimSemana = periodoSemana.fim;
+      
+      // Calcular data de 90 dias atrás a partir do fim da semana
+      const data90DiasAtras = new Date(fimSemana);
+      data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
+      
+      const clientesUltimos90Dias = contahubClientesData?.filter(item => {
+        const dataItem = new Date(item.dt_gerencial);
+        return dataItem >= data90DiasAtras && dataItem <= fimSemana;
+      }) || [];
+      
+      // Agrupar por telefone e contar visitas nos últimos 90 dias
+      const clientesMap90Dias = new Map();
+      clientesUltimos90Dias.forEach(item => {
+        const count = clientesMap90Dias.get(item.cli_fone) || 0;
+        clientesMap90Dias.set(item.cli_fone, count + 1);
+      });
+      
+      // Contar clientes com 2+ visitas nos últimos 90 dias
+      let clientesAtivosSemana = 0;
+      clientesMap90Dias.forEach(count => {
+        if (count >= 2) clientesAtivosSemana++;
+      });
+      
+      semana.clientes_ativos = clientesAtivosSemana;
+      
+      // Calcular Faturamento Couvert da semana
+      let couvertSemana = 0;
+      const inicioSemanaStr = inicioSemana.toISOString().split('T')[0];
+      const fimSemanaStr = fimSemana.toISOString().split('T')[0];
+      
+      const pagamentosCouvertDaSemana = contahubPagamentosData?.filter(item => {
+        return item.dt_gerencial >= inicioSemanaStr && item.dt_gerencial <= fimSemanaStr;
+      }) || [];
+      
+      pagamentosCouvertDaSemana.forEach(item => {
+        // Excluir "Conta Assinada" conforme fórmula do Excel
+        if (item.meio !== 'Conta Assinada') {
+          couvertSemana += item.liquido || 0;
+        }
+      });
+      
+      // Debug log (sempre ativo para investigação)
+      if (semana.semana === 35) {
+        console.log(`🔍 Semana ${semana.semana} - Período calculado:`, {
+          inicioSemana: inicioSemana.toISOString(),
+          fimSemana: fimSemana.toISOString(),
+          inicioSemanaStr,
+          fimSemanaStr
+        });
+        
+        // Verificar alguns registros de contahub_periodo para debug
+        const amostraPagamentos = contahubPagamentosData?.slice(0, 5).map(item => ({
+          dt_gerencial: item.dt_gerencial,
+          liquido: item.liquido,
+          meio: item.meio
+        })) || [];
+        
+        console.log(`🔍 Semana ${semana.semana} - Couvert:`, {
+          registrosPagamentos: pagamentosCouvertDaSemana.length,
+          couvertTotal: couvertSemana,
+          totalContahubPagamentos: contahubPagamentosData?.length || 0,
+          amostraPagamentos,
+          primeiros3Registros: pagamentosCouvertDaSemana.slice(0, 3).map(item => ({
+            dt_gerencial: item.dt_gerencial,
+            liquido: item.liquido,
+            meio: item.meio
+          }))
+        });
+      }
+      
+      semana.faturamento_couvert = couvertSemana;
+      semana.faturamento_bar = semana.faturamento_total - couvertSemana;
+      
+      // Calcular CMO da semana (agendamentos do mês da semana, dividido proporcionalmente)
+      let cmoSemana = 0;
+      const mesInicio = inicioSemana.getMonth() + 1;
+      const anoInicio = inicioSemana.getFullYear();
+      const mesFim = fimSemana.getMonth() + 1;
+      const anoFim = fimSemana.getFullYear();
+      
+      // Buscar agendamentos do(s) mês(es) da semana
+      const agendamentosDaSemana = niboData?.filter(item => {
+        const dataCompetencia = new Date(item.data_competencia);
+        const mesCompetencia = dataCompetencia.getMonth() + 1;
+        const anoCompetencia = dataCompetencia.getFullYear();
+        
+        return (anoCompetencia === anoInicio && mesCompetencia === mesInicio) ||
+               (anoCompetencia === anoFim && mesCompetencia === mesFim);
+      }) || [];
+      
+      // Calcular proporção da semana no mês e aplicar ao CMO
+      if (agendamentosDaSemana.length > 0) {
+        const totalCmoMes = agendamentosDaSemana.reduce((sum, item) => sum + (item.valor || 0), 0);
+        
+        // Para semanas que cruzam meses, usar proporção simples de 7 dias no mês
+        // Para semanas dentro do mesmo mês, calcular dias exatos
+        let diasSemanaNoMes, diasTotalMes, proporcao;
+        
+        if (mesInicio !== mesFim) {
+          // Semana cruza meses - usar proporção de 7 dias no mês principal (início)
+          diasSemanaNoMes = 7;
+          diasTotalMes = new Date(anoInicio, mesInicio, 0).getDate();
+          proporcao = diasSemanaNoMes / diasTotalMes;
+        } else {
+          // Semana dentro do mesmo mês - calcular dias exatos
+          diasSemanaNoMes = Math.min(7, fimSemana.getDate() - Math.max(1, inicioSemana.getDate()) + 1);
+          diasTotalMes = new Date(anoInicio, mesInicio, 0).getDate();
+          proporcao = diasSemanaNoMes / diasTotalMes;
+        }
+        
+        cmoSemana = totalCmoMes * proporcao;
+      }
+      
+      // Debug log (sempre ativo para investigação)
+      if (semana.semana === 35 || semana.semana === 31) {
+        const totalCmoMes = agendamentosDaSemana.reduce((sum, item) => sum + (item.valor || 0), 0);
+        const diasSemanaNoMes = Math.min(7, fimSemana.getDate() - Math.max(1, inicioSemana.getDate()) + 1);
+        const diasTotalMes = new Date(anoInicio, mesInicio, 0).getDate();
+        const proporcao = diasSemanaNoMes / diasTotalMes;
+        
+        console.log(`🔍 Semana ${semana.semana} - CMO:`, {
+          mesInicio,
+          anoInicio,
+          mesFim,
+          anoFim,
+          inicioSemana: inicioSemana.toISOString().split('T')[0],
+          fimSemana: fimSemana.toISOString().split('T')[0],
+          agendamentosEncontrados: agendamentosDaSemana.length,
+          totalCmoMes,
+          diasSemanaNoMes,
+          diasTotalMes,
+          proporcao,
+          cmoSemana,
+          primeiros3Agendamentos: agendamentosDaSemana.slice(0, 3).map(item => ({
+            data_competencia: item.data_competencia,
+            valor: item.valor,
+            categoria_nome: item.categoria_nome
+          }))
+        });
+      }
+      
+      semana.cmo_valor = cmoSemana;
+    });
 
     semanasConsolidadas = semanasConsolidadas.map(semana => {
       const ticketMedio = semana.clientes_total > 0 ? semana.faturamento_total / semana.clientes_total : 0;
