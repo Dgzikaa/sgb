@@ -27,34 +27,6 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Obter semana atual baseada na data (método mais preciso)
-    const { data: semanaAtualTabela } = await supabase
-      .from('desempenho_semanal')
-      .select('numero_semana')
-      .eq('bar_id', barId)
-      .eq('ano', parseInt(ano))
-      .lte('data_inicio::date', 'CURRENT_DATE')
-      .gte('data_fim::date', 'CURRENT_DATE')
-      .single();
-    
-    // Se não encontrar a semana atual, usar a última semana disponível
-    let semanaAtual = semanaAtualTabela?.numero_semana;
-    
-    if (!semanaAtual) {
-      const { data: ultimaSemana } = await supabase
-        .from('desempenho_semanal')
-        .select('numero_semana')
-        .eq('bar_id', barId)
-        .eq('ano', parseInt(ano))
-        .order('numero_semana', { ascending: false })
-        .limit(1)
-        .single();
-      
-      semanaAtual = ultimaSemana?.numero_semana || 52;
-    }
-    
-    console.log(`📅 Semana atual: ${semanaAtual} - Filtrando exibição até esta semana`);
-
     // Construir query base - MOSTRAR TODAS AS SEMANAS COM DADOS
     let query = supabase
       .from('desempenho_semanal')
@@ -64,66 +36,29 @@ export async function GET(request: Request) {
       .gte('numero_semana', 5) // 🎯 MOSTRAR A PARTIR DA SEMANA 5 (quando abrimos)
       .order('numero_semana', { ascending: false });
 
-    // Filtrar por mês se especificado
+    // Filtrar por mês se especificado (simplificado)
     if (mes && mes !== 'todos') {
       const mesInt = parseInt(mes);
       
-      // Mapeamento correto das semanas por mês baseado nas datas reais
+      // Mapeamento simples das semanas por mês
       let semanaInicio, semanaFim;
       
-      switch (mesInt) {
-        case 1: // Janeiro - não temos dados (semanas 1-4)
-          semanaInicio = 1;
-          semanaFim = 4;
-          break;
-        case 2: // Fevereiro - semanas 5-8 (03/02 a 02/03)
-          semanaInicio = 5;
-          semanaFim = 8;
-          break;
-        case 3: // Março - semanas 9-12 (03/03 a 30/03)
-          semanaInicio = 9;
-          semanaFim = 12;
-          break;
-        case 4: // Abril - semanas 13-16 (31/03 a 27/04)
-          semanaInicio = 13;
-          semanaFim = 16;
-          break;
-        case 5: // Maio - semanas 17-20
-          semanaInicio = 17;
-          semanaFim = 20;
-          break;
-        case 6: // Junho - semanas 21-24
-          semanaInicio = 21;
-          semanaFim = 24;
-          break;
-        case 7: // Julho - semanas 25-28
-          semanaInicio = 25;
-          semanaFim = 28;
-          break;
-        case 8: // Agosto - semanas 29-32
-          semanaInicio = 29;
-          semanaFim = 32;
-          break;
-        case 9: // Setembro - semanas 33-36
-          semanaInicio = 33;
-          semanaFim = 36;
-          break;
-        case 10: // Outubro - semanas 37-40
-          semanaInicio = 37;
-          semanaFim = 40;
-          break;
-        case 11: // Novembro - semanas 41-44
-          semanaInicio = 41;
-          semanaFim = 44;
-          break;
-        case 12: // Dezembro - semanas 45-52
-          semanaInicio = 45;
-          semanaFim = 52;
-          break;
-        default:
-          // Fallback para lógica antiga
-          semanaInicio = (mesInt - 1) * 4 + 1;
-          semanaFim = mesInt * 4;
+      if (mesInt === 2) { // Fevereiro - semanas 5-8
+        semanaInicio = 5;
+        semanaFim = 8;
+      } else if (mesInt === 3) { // Março - semanas 9-12
+        semanaInicio = 9;
+        semanaFim = 12;
+      } else if (mesInt === 4) { // Abril - semanas 13-16
+        semanaInicio = 13;
+        semanaFim = 16;
+      } else if (mesInt === 5) { // Maio - semanas 17-20
+        semanaInicio = 17;
+        semanaFim = 20;
+      } else {
+        // Para outros meses, usar lógica padrão
+        semanaInicio = (mesInt - 1) * 4 + 1;
+        semanaFim = mesInt * 4;
       }
       
       query = query

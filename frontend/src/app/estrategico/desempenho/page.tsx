@@ -213,11 +213,14 @@ export default function DesempenhoPage() {
         return;
       }
 
-      // Para visualização semanal, não passar parâmetro 'mes'
-      const response = await fetch(`/api/estrategico/desempenho?ano=${anoAtual}`, {
+      // Para visualização semanal, usar a API de gestão
+      const response = await fetch(`/api/gestao/desempenho?ano=${anoAtual}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
-        }
+          'x-user-data': JSON.stringify({
+            bar_id: selectedBar.id,
+            permissao: 'admin',
+          }),
+        },
       });
 
       if (!response.ok) {
@@ -225,8 +228,53 @@ export default function DesempenhoPage() {
       }
 
       const data = await response.json();
-      setDadosSemanas(data.semanas || []);
-      setTotaisAnuais(data.totais_mensais || null);
+      if (data.success) {
+        // Converter dados da API de gestão para o formato esperado pela página
+        const semanasConvertidas = data.data?.map((semana: any) => ({
+          semana: semana.numero_semana,
+          periodo: `${semana.data_inicio} a ${semana.data_fim}`,
+          faturamento_total: semana.faturamento_total || 0,
+          faturamento_couvert: semana.faturamento_entrada || 0,
+          faturamento_bar: semana.faturamento_bar || 0,
+          clientes_atendidos: semana.clientes_atendidos || 0,
+          clientes_ativos: semana.clientes_atendidos || 0,
+          ticket_medio: semana.ticket_medio || 0,
+          ticket_medio_contahub: semana.ticket_medio || 0,
+          tm_entrada: semana.faturamento_entrada > 0 ? semana.faturamento_entrada / (semana.clientes_atendidos || 1) : 0,
+          tm_bar: semana.faturamento_bar > 0 ? semana.faturamento_bar / (semana.clientes_atendidos || 1) : 0,
+          cmv_limpo_percentual: semana.cmv_limpo_percentual || 0,
+          cmo_percentual: semana.cmo_percentual || 0,
+          atracao_percentual: semana.custo_atracao_faturamento || 0,
+          reservas_totais: semana.reservas_totais || 0,
+          reservas_presentes: semana.reservas_presentes || 0,
+          performance_geral: semana.atingimento || 0,
+          meta_faturamento_total: semana.meta_semanal || 0,
+          meta_faturamento_couvert: 0,
+          meta_faturamento_bar: 0,
+          meta_ticket_medio_contahub: 0,
+          meta_tm_entrada: 0,
+          meta_tm_bar: 0,
+          meta_cmv_limpo_percentual: 0,
+          meta_cmo_percentual: 0,
+          meta_atracao_percentual: 0,
+          meta_clientes_atendidos: 0,
+          meta_clientes_ativos: 0,
+          meta_reservas_totais: 0,
+          meta_reservas_presentes: 0
+        })) || [];
+        
+        setDadosSemanas(semanasConvertidas);
+        setTotaisAnuais(data.resumo ? {
+          faturamento_total: data.resumo.faturamento_total_ano || 0,
+          clientes_total: data.resumo.clientes_total_ano || 0,
+          ticket_medio: data.resumo.ticket_medio_geral || 0,
+          performance_media: data.resumo.atingimento_medio || 0
+        } : null);
+      } else {
+        console.error('Erro na API:', data.error);
+        setDadosSemanas([]);
+        setTotaisAnuais(null);
+      }
       
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -330,7 +378,7 @@ export default function DesempenhoPage() {
     if (selectedBar && user) {
       carregarDados();
     }
-  }, [selectedBar, user, anoAtual]);
+  }, [selectedBar, user, anoAtual, carregarDados]);
 
   // Carregar dados mensais quando mudar para aba mensal ou ano
   useEffect(() => {
