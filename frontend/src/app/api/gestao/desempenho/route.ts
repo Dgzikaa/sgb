@@ -3,6 +3,15 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic'
 
+// Função para calcular número da semana ISO
+function getWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
 // GET - Buscar dados de desempenho
 export async function GET(request: Request) {
   try {
@@ -26,6 +35,10 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
+
+    // Calcular semana atual
+    const hoje = new Date();
+    const semanaAtual = getWeekNumber(hoje);
 
     // Construir query base - MOSTRAR APENAS ATÉ A SEMANA ATUAL
     let query = supabase
