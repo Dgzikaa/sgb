@@ -194,16 +194,16 @@ export async function GET(request: NextRequest) {
       getinMap.set(data, (getinMap.get(data) || 0) + 1);
     });
 
-    // Buscar dados do ContaHub Pagamentos para couvert (com paginação) - excluindo "Conta Assinada"
-    let contahubPagamentosData = [];
+    // Buscar dados do ContaHub Período para couvert (com paginação) - usar vr_couvert específico
+    let contahubPeriodoData = [];
     let page = 0;
     const pageSize = 1000;
     let hasMore = true;
 
     while (hasMore) {
       const { data: pageData } = await supabase
-        .from('contahub_pagamentos')
-        .select('dt_gerencial, liquido, meio')
+        .from('contahub_periodo')
+        .select('dt_gerencial, vr_couvert')
         .gte('dt_gerencial', `${ano}-01-01`)
         .lt('dt_gerencial', `${ano + 1}-01-01`)
         .eq('bar_id', user.bar_id)
@@ -211,7 +211,7 @@ export async function GET(request: NextRequest) {
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
       if (pageData && pageData.length > 0) {
-        contahubPagamentosData = [...contahubPagamentosData, ...pageData];
+        contahubPeriodoData = [...contahubPeriodoData, ...pageData];
         hasMore = pageData.length === pageSize;
         page++;
       } else {
@@ -220,10 +220,9 @@ export async function GET(request: NextRequest) {
     }
 
     const contahubCouvertMap = new Map();
-    contahubPagamentosData?.forEach(item => {
+    contahubPeriodoData?.forEach(item => {
       const data = item.dt_gerencial;
-      // Excluir "Conta Assinada" conforme fórmula do Excel
-      const valor = (item.meio !== 'Conta Assinada') ? (item.liquido || 0) : 0;
+      const valor = item.vr_couvert || 0;
       contahubCouvertMap.set(data, (contahubCouvertMap.get(data) || 0) + valor);
     });
 
@@ -496,7 +495,7 @@ export async function GET(request: NextRequest) {
 
     // Debug: Verificar se chegou até aqui
     console.log(`🔍 Iniciando cálculo de Couvert e CMO para ${semanasConsolidadas.length} semanas`);
-    console.log(`🔍 Total contahubPagamentosData: ${contahubPagamentosData?.length || 0} registros`);
+    console.log(`🔍 Total contahubPeriodoData: ${contahubPeriodoData?.length || 0} registros`);
     console.log(`🔍 Total contahubClientesData: ${contahubClientesData?.length || 0} registros`);
     console.log(`🔍 Total niboData: ${niboData?.length || 0} registros`);
 
@@ -536,15 +535,12 @@ export async function GET(request: NextRequest) {
       const inicioSemanaStr = inicioSemana.toISOString().split('T')[0];
       const fimSemanaStr = fimSemana.toISOString().split('T')[0];
       
-      const pagamentosCouvertDaSemana = contahubPagamentosData?.filter(item => {
+      const periodosCouvertDaSemana = contahubPeriodoData?.filter(item => {
         return item.dt_gerencial >= inicioSemanaStr && item.dt_gerencial <= fimSemanaStr;
       }) || [];
       
-      pagamentosCouvertDaSemana.forEach(item => {
-        // Excluir "Conta Assinada" conforme fórmula do Excel
-        if (item.meio !== 'Conta Assinada') {
-          couvertSemana += item.liquido || 0;
-        }
+      periodosCouvertDaSemana.forEach(item => {
+        couvertSemana += item.vr_couvert || 0;
       });
       
       // Debug log (sempre ativo para investigação)
@@ -557,21 +553,19 @@ export async function GET(request: NextRequest) {
         });
         
         // Verificar alguns registros de contahub_periodo para debug
-        const amostraPagamentos = contahubPagamentosData?.slice(0, 5).map(item => ({
+        const amostraPeriodo = contahubPeriodoData?.slice(0, 5).map(item => ({
           dt_gerencial: item.dt_gerencial,
-          liquido: item.liquido,
-          meio: item.meio
+          vr_couvert: item.vr_couvert
         })) || [];
         
         console.log(`🔍 Semana ${semana.semana} - Couvert:`, {
-          registrosPagamentos: pagamentosCouvertDaSemana.length,
+          registrosPeriodo: periodosCouvertDaSemana.length,
           couvertTotal: couvertSemana,
-          totalContahubPagamentos: contahubPagamentosData?.length || 0,
-          amostraPagamentos,
-          primeiros3Registros: pagamentosCouvertDaSemana.slice(0, 3).map(item => ({
+          totalContahubPeriodo: contahubPeriodoData?.length || 0,
+          amostraPeriodo,
+          primeiros3Registros: periodosCouvertDaSemana.slice(0, 3).map(item => ({
             dt_gerencial: item.dt_gerencial,
-            liquido: item.liquido,
-            meio: item.meio
+            vr_couvert: item.vr_couvert
           }))
         });
       }
