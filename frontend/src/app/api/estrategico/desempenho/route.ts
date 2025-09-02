@@ -493,11 +493,20 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Converter para array e calcular métricas (mostrar todas as semanas com dados)
+    // Converter para array e calcular métricas (mostrar semanas da atual até a 5)
     let semanasConsolidadas = Array.from(semanaMap.values())
       .filter(semana => {
-        // Mostrar todas as semanas com dados, independente do ano
-        return semana.eventos_count > 0;
+        // Mostrar apenas semanas com dados E dentro do range correto (36 até 5)
+        if (semana.eventos_count === 0) return false;
+        
+        // Semana atual é 36, queremos mostrar da 36 até a 5
+        // Para semanas que cruzam o ano (36, 37, 38...), mostrar apenas até a atual
+        if (semana.semana > semanaAtual) return false;
+        
+        // Para semanas do ano atual, mostrar da atual até a 5
+        if (semana.semana >= 5) return true;
+        
+        return false;
       });
 
     // Debug: Verificar se chegou até aqui

@@ -393,6 +393,17 @@ export default function PlanejamentoComercialPage() {
       setSalvando(true);
       
       // Salvar dados de planejamento
+      console.log('🔄 Salvando dados de planejamento:', {
+        id: eventoEdicao.id,
+        nome: eventoEdicao.nome,
+        m1_r: eventoEdicao.m1_r,
+        cl_plan: eventoEdicao.cl_plan,
+        te_plan: eventoEdicao.te_plan,
+        tb_plan: eventoEdicao.tb_plan,
+        c_artistico_plan: eventoEdicao.c_artistico_plan,
+        observacoes: eventoEdicao.observacoes
+      });
+      
       const responsePlanejamento = await apiCall(`/api/eventos/${eventoEdicao.id}`, {
         method: 'PUT',
         headers: {
@@ -409,6 +420,8 @@ export default function PlanejamentoComercialPage() {
           observacoes: eventoEdicao.observacoes
         })
       });
+      
+      console.log('📝 Resposta da API de planejamento:', responsePlanejamento);
 
       if (!responsePlanejamento.success) {
         throw new Error(responsePlanejamento.error || 'Erro ao salvar planejamento');

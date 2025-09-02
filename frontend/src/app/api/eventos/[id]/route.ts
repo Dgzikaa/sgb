@@ -37,17 +37,29 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'ID do evento inválido' }, { status: 400 });
     }
 
-    // Dados do corpo da requisição
-    const body = await request.json();
-    const {
-      nome,
-      m1_r,
-      cl_plan,
-      te_plan,
-      tb_plan,
-      c_artistico_plan,
-      observacoes
-    } = body;
+    // SOLUÇÃO FORÇADA - O request.json() está retornando STRING!
+    let body;
+    try {
+      const rawBody = await request.json();
+      // Se for string, fazer parse
+      if (typeof rawBody === 'string') {
+        body = JSON.parse(rawBody);
+      } else {
+        body = rawBody;
+      }
+    } catch (e) {
+      console.error('❌ Erro no parsing:', e);
+      body = {};
+    }
+    
+    // Acessar valores diretamente
+    const nome = body.nome;
+    const m1_r = body.m1_r;
+    const cl_plan = body.cl_plan;
+    const te_plan = body.te_plan;
+    const tb_plan = body.tb_plan;
+    const c_artistico_plan = body.c_artistico_plan;
+    const observacoes = body.observacoes;
 
     console.log('📝 Dados recebidos para edição de planejamento:', {
       eventoId,
@@ -59,6 +71,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       c_artistico_plan,
       observacoes
     });
+    
+    console.log('🔍 Debug - Body completo recebido:', body);
+    console.log('🔍 Debug - JSON.stringify do body:', JSON.stringify(body));
+    console.log('🔍 Debug - Object.keys do body:', Object.keys(body));
 
     // Verificar se o evento existe e pertence ao bar do usuário
     const { data: evento, error: eventoError } = await supabase
@@ -75,25 +91,49 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     console.log('✅ Evento encontrado:', evento.nome);
 
+    // Verificar se o evento já tem versão manual (999)
+    const { data: eventoAtual } = await supabase
+      .from('eventos_base')
+      .select('versao_calculo')
+      .eq('id', eventoId)
+      .single();
+
     // Atualizar os dados de planejamento na tabela eventos_base
+    // SEMPRE salvar os dados de planejamento, independente da versão
+    // Usar valores diretos das variáveis
+    const updateData: any = {
+      nome: nome || evento.nome,
+      m1_r: m1_r !== undefined && m1_r !== null && !isNaN(m1_r) ? m1_r : null,
+      cl_plan: cl_plan !== undefined && cl_plan !== null && !isNaN(cl_plan) ? cl_plan : null,
+      te_plan: te_plan !== undefined && te_plan !== null && !isNaN(te_plan) ? te_plan : null,
+      tb_plan: tb_plan !== undefined && tb_plan !== null && !isNaN(tb_plan) ? tb_plan : null,
+      c_artistico_plan: c_artistico_plan !== undefined && c_artistico_plan !== null && !isNaN(c_artistico_plan) ? c_artistico_plan : null,
+      observacoes: observacoes || null,
+      atualizado_em: new Date().toISOString()
+    };
+    
+    console.log('🔍 Debug - Update data preparado:', updateData);
+
+    // Só alterar versao_calculo se não for manual (999)
+    if (eventoAtual?.versao_calculo !== 999) {
+      updateData.precisa_recalculo = true;
+      updateData.versao_calculo = 1;
+      console.log('📝 Evento automático - definindo versão 1 e precisa_recalculo');
+    } else {
+      // Se for manual (999), manter como manual mas SEMPRE salvar planejamento
+      console.log('📝 Evento manual (999) - mantendo versão mas salvando planejamento');
+    }
+
+    console.log('🔄 Executando UPDATE no Supabase...');
     const { data: eventoAtualizado, error: updateError } = await supabase
       .from('eventos_base')
-      .update({
-        nome: nome || evento.nome,
-        m1_r: m1_r !== undefined ? m1_r : null,
-        cl_plan: cl_plan !== undefined ? cl_plan : null,
-        te_plan: te_plan !== undefined ? te_plan : null,
-        tb_plan: tb_plan !== undefined ? tb_plan : null,
-        c_artistico_plan: c_artistico_plan !== undefined ? c_artistico_plan : null,
-        observacoes: observacoes || null,
-        atualizado_em: new Date().toISOString(),
-        precisa_recalculo: true,
-        versao_calculo: 1 // Marcar como automático para permitir recálculos
-      })
+      .update(updateData)
       .eq('id', eventoId)
       .eq('bar_id', user.bar_id)
       .select()
       .single();
+
+    console.log('📊 Resultado do UPDATE:', { eventoAtualizado, updateError });
 
     if (updateError) {
       console.error('❌ Erro ao atualizar evento:', updateError);
@@ -101,6 +141,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         error: 'Erro ao atualizar evento',
         details: updateError.message 
       }, { status: 500 });
+    }
+
+    if (!eventoAtualizado) {
+      console.error('❌ Nenhum evento foi atualizado - possível problema de permissão');
+      return NextResponse.json({ 
+        error: 'Nenhum evento foi atualizado',
+        details: 'Verifique se o evento existe e pertence ao usuário' 
+      }, { status: 404 });
     }
 
     console.log('✅ Evento atualizado com sucesso:', eventoAtualizado);

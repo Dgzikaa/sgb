@@ -27,12 +27,13 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Construir query base - MOSTRAR TODAS AS SEMANAS DO ANO
+    // Construir query base - MOSTRAR APENAS ATÉ A SEMANA ATUAL
     let query = supabase
       .from('desempenho_semanal')
       .select('*')
       .eq('bar_id', barId)
       .eq('ano', parseInt(ano))
+      .lte('numero_semana', semanaAtual) // 🎯 MOSTRAR SÓ ATÉ SEMANA ATUAL
       .order('numero_semana', { ascending: false });
 
     // Filtrar por mês se especificado
