@@ -7,11 +7,17 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const barId = request.headers.get('x-user-data')
-      ? JSON.parse(request.headers.get('x-user-data') || '{}').bar_id
+    const userDataHeader = request.headers.get('x-user-data');
+    console.log('🔍 Debug - userDataHeader:', userDataHeader);
+    
+    const barId = userDataHeader
+      ? JSON.parse(userDataHeader).bar_id
       : null;
+    
+    console.log('🔍 Debug - barId:', barId);
 
     if (!barId) {
+      console.log('❌ Bar não selecionado');
       return NextResponse.json(
         { success: false, error: 'Bar não selecionado' },
         { status: 400 }
@@ -67,6 +73,10 @@ export async function GET(request: Request) {
     }
 
     const { data, error } = await query;
+    
+    console.log('🔍 Debug - Query executada para bar_id:', barId, 'ano:', ano);
+    console.log('🔍 Debug - Dados retornados:', data?.length || 0, 'registros');
+    console.log('🔍 Debug - Erro:', error);
 
     if (error) {
       console.error('Erro ao buscar dados:', error);
