@@ -157,10 +157,24 @@ export default function DesempenhoPage() {
                   mes,
                   ano,
                   nome_mes: mesesNomes[mes - 1],
-                  faturamento_total: data.totais_mensais.faturamento_total,
-                  clientes_total: data.totais_mensais.clientes_total,
-                  ticket_medio: data.totais_mensais.ticket_medio,
-                  performance_media: data.totais_mensais.performance_media
+                  faturamento_total: data.totais_mensais.faturamento_total || 0,
+                  faturamento_couvert: 0, // Será calculado se necessário
+                  faturamento_bar: 0, // Será calculado se necessário
+                  clientes_total: data.totais_mensais.clientes_total || 0,
+                  clientes_atendidos: 0, // Será calculado se necessário
+                  clientes_ativos: 0, // Será calculado se necessário
+                  ticket_medio: data.totais_mensais.ticket_medio || 0,
+                  ticket_medio_contahub: 0, // Será calculado se necessário
+                  tm_entrada: 0, // Será calculado se necessário
+                  tm_bar: 0, // Será calculado se necessário
+                  cmv_limpo_percentual: 0, // Será calculado se necessário
+                  cmo_valor: 0, // Será calculado se necessário
+                  cmo_percentual: 0, // Será calculado se necessário
+                  atracao_faturamento: 0, // Será calculado se necessário
+                  atracao_percentual: 0, // Será calculado se necessário
+                  reservas_totais: 0, // Será calculado se necessário
+                  reservas_presentes: 0, // Será calculado se necessário
+                  performance_media: data.totais_mensais.performance_media || 0
                 });
               }
             }

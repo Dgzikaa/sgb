@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Remover duplicatas dos dados do ContaHub Período
-    const contahubPeriodoUnicos = [];
+    const contahubPeriodoUnicos: { dt_gerencial: any; vr_couvert: any; }[] = [];
     const chavesVistas = new Set();
     
     contahubPeriodoData?.forEach(item => {
@@ -270,14 +270,14 @@ export async function GET(request: NextRequest) {
     ];
 
     // Buscar dados do Nibo para CMO - com paginação
-    let niboData: { data_competencia: any; valor: any; }[] = [];
+    let niboData: { data_competencia: any; valor: any; categoria_nome?: any; }[] = [];
     page = 0;
     hasMore = true;
 
     while (hasMore) {
       const { data: pageData } = await supabase
         .from('nibo_agendamentos')
-        .select('data_competencia, valor')
+        .select('data_competencia, valor, categoria_nome')
         .gte('data_competencia', `${ano}-01-01`)
         .lt('data_competencia', `${ano + 1}-01-01`)
         .eq('bar_id', user.bar_id)
