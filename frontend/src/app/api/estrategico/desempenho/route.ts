@@ -195,7 +195,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Buscar dados do ContaHub Período para couvert (com paginação) - usar vr_couvert específico
-    let contahubPeriodoData = [];
+    let contahubPeriodoData: { dt_gerencial: any; vr_couvert: any; }[] = [];
     let page = 0;
     const pageSize = 1000;
     let hasMore = true;
@@ -238,7 +238,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Buscar dados do ContaHub para calcular clientes ativos (2+ visitas) - com paginação
-    let contahubClientesData = [];
+    let contahubClientesData: { cli_fone: any; dt_gerencial: any; }[] = [];
     page = 0;
     hasMore = true;
 
@@ -270,7 +270,7 @@ export async function GET(request: NextRequest) {
     ];
 
     // Buscar dados do Nibo para CMO - com paginação
-    let niboData = [];
+    let niboData: { data_competencia: any; valor: any; }[] = [];
     page = 0;
     hasMore = true;
 
@@ -709,7 +709,9 @@ export async function GET(request: NextRequest) {
         tm_entrada: Math.round(tmEntradaMedia * 100) / 100,
         tm_bar: Math.round(tmBarMedia * 100) / 100,
         cmv_limpo_percentual: Math.round(cmvLimpoPercentual * 100) / 100,
+        cmo_valor: Math.round(semana.cmo_valor * 100) / 100,
         cmo_percentual: Math.round(cmoPercentual * 100) / 100,
+        atracao_faturamento: Math.round(semana.atracao_faturamento * 100) / 100,
         atracao_percentual: Math.round(atracaoPercentual * 100) / 100,
         clientes_atendidos: semana.clientes_atendidos,
         clientes_ativos: semana.clientes_ativos,

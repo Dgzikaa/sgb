@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -90,7 +90,9 @@ interface DadosMes {
   tm_entrada: number;
   tm_bar: number;
   cmv_limpo_percentual: number;
+  cmo_valor: number;
   cmo_percentual: number;
+  atracao_faturamento: number;
   atracao_percentual: number;
   reservas_totais: number;
   reservas_presentes: number;
