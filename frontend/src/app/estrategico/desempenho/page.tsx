@@ -378,7 +378,7 @@ export default function DesempenhoPage() {
     if (selectedBar && user) {
       carregarDados();
     }
-  }, [selectedBar, user, anoAtual, carregarDados]);
+  }, [selectedBar, user, anoAtual]);
 
   // Carregar dados mensais quando mudar para aba mensal ou ano
   useEffect(() => {
