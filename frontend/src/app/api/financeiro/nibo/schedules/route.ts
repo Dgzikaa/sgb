@@ -494,11 +494,15 @@ async function createScheduleInNibo(
               // Tentar criar sem chave PIX para evitar conflito
               const newStakeholder = await createStakeholderWithoutPix(localStakeholder);
               
-              if (newStakeholder) {
+              if (newStakeholder && newStakeholder.id) {
+                console.log('🔄 Usando novo stakeholder ID:', newStakeholder.id);
+                
                 const newPayload = {
                   ...niboPayload,
                   stakeholderId: newStakeholder.id
                 };
+                
+                console.log('📤 Payload com novo stakeholder:', JSON.stringify(newPayload, null, 2));
                 
                 const retryResponse = await fetch(url, {
                   method: 'POST',
@@ -508,16 +512,25 @@ async function createScheduleInNibo(
                 
                 if (retryResponse.ok) {
                   const retryData = await retryResponse.json();
-                  console.log('✅ Agendamento criado com stakeholder sem PIX');
+                  console.log('✅ Agendamento criado com sucesso usando novo stakeholder');
                   
                   // Atualizar o nibo_id no banco local
                   await supabase
                     .from('nibo_stakeholders')
-                    .update({ nibo_id: newStakeholder.id })
+                    .update({ 
+                      nibo_id: newStakeholder.id,
+                      atualizado_em: new Date().toISOString(),
+                      usuario_atualizacao: 'Sistema - Novo Stakeholder NIBO'
+                    })
                     .eq('id', localStakeholder.id);
                     
                   return retryData;
+                } else {
+                  const retryErrorData = await retryResponse.json();
+                  console.error('❌ Erro no retry com novo stakeholder:', retryErrorData);
                 }
+              } else {
+                console.error('❌ Falha ao criar novo stakeholder ou ID inválido');
               }
             }
           }
@@ -1084,7 +1097,8 @@ async function findStakeholderByDocument(documento: string): Promise<any> {
 
   // Buscar em suppliers (mais provável para agendamentos)
   try {
-    const response = await fetch(`${NIBO_CONFIG.BASE_URL}/suppliers?document=${documento}`, {
+    console.log('🔍 Buscando em suppliers...');
+    const response = await fetch(`${NIBO_CONFIG.BASE_URL}/suppliers`, {
       method: 'GET',
       headers,
     });
@@ -1092,11 +1106,24 @@ async function findStakeholderByDocument(documento: string): Promise<any> {
     if (response.ok) {
       const data = await response.json();
       const suppliers = data.data || data || [];
+      console.log(`📊 Encontrados ${suppliers.length} suppliers no total`);
       
-      if (suppliers.length > 0) {
-        console.log('✅ Stakeholder encontrado em suppliers:', suppliers[0].id);
-        return suppliers[0];
+      // Buscar por documento
+      const found = suppliers.find((s: any) => 
+        s.document?.number === documento || 
+        s.document === documento ||
+        s.documentNumber === documento
+      );
+      
+      if (found) {
+        console.log('✅ Stakeholder encontrado em suppliers:', found.id);
+        console.log('📋 Dados do stakeholder:', JSON.stringify(found, null, 2));
+        return found;
+      } else {
+        console.log('⚠️ Documento não encontrado em suppliers');
       }
+    } else {
+      console.log('❌ Erro ao buscar suppliers:', response.status, response.statusText);
     }
   } catch (error) {
     console.log('⚠️ Erro ao buscar em suppliers:', error);
@@ -1104,7 +1131,8 @@ async function findStakeholderByDocument(documento: string): Promise<any> {
 
   // Se não encontrou em suppliers, buscar em customers
   try {
-    const response = await fetch(`${NIBO_CONFIG.BASE_URL}/customers?document=${documento}`, {
+    console.log('🔍 Buscando em customers...');
+    const response = await fetch(`${NIBO_CONFIG.BASE_URL}/customers`, {
       method: 'GET',
       headers,
     });
@@ -1112,11 +1140,24 @@ async function findStakeholderByDocument(documento: string): Promise<any> {
     if (response.ok) {
       const data = await response.json();
       const customers = data.data || data || [];
+      console.log(`📊 Encontrados ${customers.length} customers no total`);
       
-      if (customers.length > 0) {
-        console.log('✅ Stakeholder encontrado em customers:', customers[0].id);
-        return customers[0];
+      // Buscar por documento
+      const found = customers.find((c: any) => 
+        c.document?.number === documento || 
+        c.document === documento ||
+        c.documentNumber === documento
+      );
+      
+      if (found) {
+        console.log('✅ Stakeholder encontrado em customers:', found.id);
+        console.log('📋 Dados do stakeholder:', JSON.stringify(found, null, 2));
+        return found;
+      } else {
+        console.log('⚠️ Documento não encontrado em customers');
       }
+    } else {
+      console.log('❌ Erro ao buscar customers:', response.status, response.statusText);
     }
   } catch (error) {
     console.log('⚠️ Erro ao buscar em customers:', error);
@@ -1170,7 +1211,13 @@ async function createStakeholderWithoutPix(localStakeholder: any): Promise<any> 
   }
 
   const newStakeholder = await response.json();
-  console.log('✅ Stakeholder criado sem PIX:', newStakeholder.id);
+  console.log('✅ Stakeholder criado sem PIX - Resposta completa:', JSON.stringify(newStakeholder, null, 2));
+  console.log('✅ ID do novo stakeholder:', newStakeholder.id);
+
+  if (!newStakeholder.id) {
+    console.error('❌ ERRO: Stakeholder criado mas sem ID válido!');
+    throw new Error('Stakeholder criado mas ID não retornado pelo NIBO');
+  }
 
   return newStakeholder;
 }
