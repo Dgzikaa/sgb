@@ -108,6 +108,17 @@ export async function POST(request: NextRequest) {
       value,
     } = body;
 
+    console.log('🔍 Dados recebidos na API:', {
+      stakeholderId,
+      dueDate,
+      scheduleDate,
+      categoria_id,
+      centro_custo_id,
+      categories,
+      accrualDate,
+      value,
+    });
+
     // Validações básicas
     if (
       !stakeholderId ||
@@ -118,11 +129,22 @@ export async function POST(request: NextRequest) {
       !categories ||
       categories.length === 0
     ) {
+      console.log('❌ Validação básica falhou:', {
+        stakeholderId: !!stakeholderId,
+        dueDate: !!dueDate,
+        scheduleDate: !!scheduleDate,
+        categoria_id: !!categoria_id,
+        centro_custo_id: !!centro_custo_id,
+        categories: !!categories,
+        categoriesLength: categories?.length,
+      });
       return NextResponse.json(
         { success: false, error: 'Campos obrigatórios não preenchidos' },
         { status: 400 }
       );
     }
+
+    console.log('✅ Validações básicas passaram, prosseguindo...');
 
     // Buscar categoria para validar tipo
     const categoriaValidacao = await getCategoriaById(categoria_id.toString());
@@ -208,9 +230,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se stakeholder existe no NIBO e criar se necessário
-    console.log('Verificando se stakeholder existe no NIBO...');
+    console.log('🔍 Verificando se stakeholder existe no NIBO...');
+    console.log('📋 Dados do stakeholder para verificação:', stakeholderValidation.stakeholder);
+    
     const stakeholderNiboCheck = await ensureStakeholderExistsInNibo(stakeholderValidation.stakeholder);
+    
+    console.log('📊 Resultado da verificação NIBO:', stakeholderNiboCheck);
+    
     if (!stakeholderNiboCheck.success) {
+      console.log('❌ Falha na verificação/criação do stakeholder no NIBO');
       return NextResponse.json(
         { 
           success: false, 
@@ -220,6 +248,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+    
+    console.log('✅ Stakeholder verificado/criado no NIBO com sucesso');
 
     // Criar agendamento no NIBO
     const niboResponse = await createScheduleInNibo(body);
@@ -385,6 +415,8 @@ async function createScheduleInNibo(
 
     if (!response.ok) {
       let errorMessage = `Erro ${response.status} ao criar agendamento`;
+      let shouldRetryWithNewStakeholder = false;
+      
       try {
         const errorData = await response.json();
         console.error('Erro detalhado do NIBO:', errorData);
@@ -393,11 +425,107 @@ async function createScheduleInNibo(
           errorData.message ||
           errorData.error ||
           errorMessage;
+          
+        // Verificar se é erro de stakeholder incompatível
+        if (errorMessage.includes('Stakeholder is not compatible')) {
+          shouldRetryWithNewStakeholder = true;
+          console.log('🔄 Erro de stakeholder incompatível detectado, tentando recriar...');
+        }
       } catch (parseError) {
         console.error('Erro ao fazer parse da resposta de erro:', parseError);
         const errorText = await response.text();
         console.error('Resposta de erro como texto:', errorText);
       }
+      
+      // Se for erro de stakeholder, tentar encontrar o correto no NIBO
+      if (shouldRetryWithNewStakeholder) {
+        console.log('🔍 Tentando encontrar stakeholder correto no NIBO...');
+        try {
+          // Buscar dados do stakeholder no banco local
+          const { data: localStakeholder } = await supabase
+            .from('nibo_stakeholders')
+            .select('*')
+            .eq('nibo_id', schedule.stakeholderId)
+            .single();
+            
+          if (localStakeholder) {
+            console.log('🔎 Buscando stakeholder por documento/PIX no NIBO...');
+            
+            // Tentar encontrar o stakeholder correto no NIBO
+            const correctStakeholder = await findStakeholderByDocument(localStakeholder.documento_numero);
+            
+            if (correctStakeholder) {
+              console.log('✅ Stakeholder encontrado no NIBO:', correctStakeholder.id);
+              
+              // Atualizar o payload com o ID correto
+              const newPayload = {
+                ...niboPayload,
+                stakeholderId: correctStakeholder.id
+              };
+              
+              console.log('🔄 Tentando agendamento com stakeholder correto:', correctStakeholder.id);
+              
+              // Tentar novamente com o stakeholder correto
+              const retryResponse = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(newPayload),
+              });
+              
+              if (retryResponse.ok) {
+                const retryData = await retryResponse.json();
+                console.log('✅ Agendamento criado com sucesso com stakeholder correto');
+                
+                // Atualizar o nibo_id no banco local
+                await supabase
+                  .from('nibo_stakeholders')
+                  .update({ 
+                    nibo_id: correctStakeholder.id,
+                    atualizado_em: new Date().toISOString(),
+                    usuario_atualizacao: 'Sistema - Correção ID NIBO'
+                  })
+                  .eq('id', localStakeholder.id);
+                  
+                return retryData;
+              }
+            } else {
+              console.log('⚠️ Stakeholder não encontrado no NIBO, tentando criar sem PIX...');
+              
+              // Tentar criar sem chave PIX para evitar conflito
+              const newStakeholder = await createStakeholderWithoutPix(localStakeholder);
+              
+              if (newStakeholder) {
+                const newPayload = {
+                  ...niboPayload,
+                  stakeholderId: newStakeholder.id
+                };
+                
+                const retryResponse = await fetch(url, {
+                  method: 'POST',
+                  headers,
+                  body: JSON.stringify(newPayload),
+                });
+                
+                if (retryResponse.ok) {
+                  const retryData = await retryResponse.json();
+                  console.log('✅ Agendamento criado com stakeholder sem PIX');
+                  
+                  // Atualizar o nibo_id no banco local
+                  await supabase
+                    .from('nibo_stakeholders')
+                    .update({ nibo_id: newStakeholder.id })
+                    .eq('id', localStakeholder.id);
+                    
+                  return retryData;
+                }
+              }
+            }
+          }
+        } catch (retryError) {
+          console.error('❌ Erro na tentativa de correção:', retryError);
+        }
+      }
+      
       throw new Error(errorMessage);
     }
 
@@ -789,13 +917,22 @@ async function ensureStakeholderExistsInNibo(localStakeholder: any): Promise<{
     }
 
     // Se não existe, criar no NIBO
-    console.log('Stakeholder não existe no NIBO, criando...');
-    const createResult = await createStakeholderInNibo(localStakeholder);
-    
-    return {
-      success: true,
-      stakeholder: createResult
-    };
+    console.log('🔧 Stakeholder não existe no NIBO, criando...');
+    try {
+      const createResult = await createStakeholderInNibo(localStakeholder);
+      console.log('✅ Stakeholder criado no NIBO com sucesso:', createResult.id);
+      
+      return {
+        success: true,
+        stakeholder: createResult
+      };
+    } catch (createError) {
+      console.error('❌ Erro ao criar stakeholder no NIBO:', createError);
+      return {
+        success: false,
+        error: `Erro ao criar stakeholder: ${createError instanceof Error ? createError.message : 'Erro desconhecido'}`
+      };
+    }
 
   } catch (error) {
     console.error('Erro ao verificar/criar stakeholder no NIBO:', error);
@@ -808,7 +945,7 @@ async function ensureStakeholderExistsInNibo(localStakeholder: any): Promise<{
 
 // Função para criar stakeholder no NIBO baseado nos dados locais
 async function createStakeholderInNibo(localStakeholder: any): Promise<any> {
-  console.log('Criando stakeholder no NIBO:', localStakeholder);
+  console.log('🔧 Criando stakeholder no NIBO:', localStakeholder);
 
   const headers = {
     accept: 'application/json',
@@ -816,13 +953,9 @@ async function createStakeholderInNibo(localStakeholder: any): Promise<any> {
     'content-type': 'application/json',
   };
 
-  // Determinar endpoint baseado no tipo
-  let endpoint = 'suppliers'; // Padrão para fornecedor
-  if (localStakeholder.tipo === 'Partner') {
-    endpoint = 'partners';
-  } else if (localStakeholder.tipo === 'Employee') {
-    endpoint = 'employees';
-  }
+  // SEMPRE usar suppliers para agendamentos de débito
+  let endpoint = 'suppliers';
+  console.log(`📍 Usando endpoint: ${endpoint} (forçado para compatibilidade com débitos)`);
 
   // Preparar payload
   const niboPayload = {
@@ -881,4 +1014,163 @@ async function createStakeholderInNibo(localStakeholder: any): Promise<any> {
   }
 
   return createdStakeholder;
+}
+
+// Função para forçar criação de novo stakeholder quando há incompatibilidade
+async function forceCreateNewStakeholder(localStakeholder: any): Promise<any> {
+  console.log('🔧 Forçando criação de novo stakeholder no NIBO');
+  
+  const headers = {
+    accept: 'application/json',
+    apitoken: NIBO_CONFIG.API_TOKEN!,
+    'content-type': 'application/json',
+  };
+
+  // Preparar payload com dados limpos
+  const niboPayload = {
+    name: localStakeholder.nome,
+    document: {
+      number: localStakeholder.documento_numero,
+      type: localStakeholder.documento_numero.length === 11 ? 'CPF' : 'CNPJ',
+    },
+    communication: {
+      email: localStakeholder.email || '',
+      phone: localStakeholder.telefone || '',
+    },
+    address: localStakeholder.endereco || {},
+  };
+
+  // Adicionar dados de PIX se existirem
+  if (localStakeholder.pix_chave) {
+    niboPayload.bankAccountInformation = {
+      pixKey: localStakeholder.pix_chave,
+      pixKeyType: localStakeholder.pix_tipo || 3,
+    };
+  }
+
+  console.log('📤 Criando novo stakeholder com payload:', JSON.stringify(niboPayload, null, 2));
+
+  // SEMPRE usar suppliers para compatibilidade com débitos
+  const response = await fetch(`${NIBO_CONFIG.BASE_URL}/suppliers`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(niboPayload),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('❌ Erro ao forçar criação do stakeholder:', errorData);
+    throw new Error(
+      errorData.error_description ||
+        errorData.message ||
+        `Erro ${response.status} ao criar stakeholder`
+    );
+  }
+
+  const newStakeholder = await response.json();
+  console.log('✅ Novo stakeholder criado com sucesso:', newStakeholder.id);
+
+  return newStakeholder;
+}
+
+// Função para encontrar stakeholder no NIBO por documento
+async function findStakeholderByDocument(documento: string): Promise<any> {
+  console.log('🔍 Buscando stakeholder por documento:', documento);
+  
+  const headers = {
+    accept: 'application/json',
+    apitoken: NIBO_CONFIG.API_TOKEN!,
+  };
+
+  // Buscar em suppliers (mais provável para agendamentos)
+  try {
+    const response = await fetch(`${NIBO_CONFIG.BASE_URL}/suppliers?document=${documento}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const suppliers = data.data || data || [];
+      
+      if (suppliers.length > 0) {
+        console.log('✅ Stakeholder encontrado em suppliers:', suppliers[0].id);
+        return suppliers[0];
+      }
+    }
+  } catch (error) {
+    console.log('⚠️ Erro ao buscar em suppliers:', error);
+  }
+
+  // Se não encontrou em suppliers, buscar em customers
+  try {
+    const response = await fetch(`${NIBO_CONFIG.BASE_URL}/customers?document=${documento}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const customers = data.data || data || [];
+      
+      if (customers.length > 0) {
+        console.log('✅ Stakeholder encontrado em customers:', customers[0].id);
+        return customers[0];
+      }
+    }
+  } catch (error) {
+    console.log('⚠️ Erro ao buscar em customers:', error);
+  }
+
+  console.log('❌ Stakeholder não encontrado no NIBO');
+  return null;
+}
+
+// Função para criar stakeholder sem PIX para evitar conflitos
+async function createStakeholderWithoutPix(localStakeholder: any): Promise<any> {
+  console.log('🔧 Criando stakeholder sem PIX para evitar conflitos');
+  
+  const headers = {
+    accept: 'application/json',
+    apitoken: NIBO_CONFIG.API_TOKEN!,
+    'content-type': 'application/json',
+  };
+
+  // Preparar payload SEM chave PIX
+  const niboPayload = {
+    name: localStakeholder.nome,
+    document: {
+      number: localStakeholder.documento_numero,
+      type: localStakeholder.documento_numero.length === 11 ? 'CPF' : 'CNPJ',
+    },
+    communication: {
+      email: localStakeholder.email || '',
+      phone: localStakeholder.telefone || '',
+    },
+    address: localStakeholder.endereco || {},
+    // NÃO incluir bankAccountInformation para evitar conflito de PIX
+  };
+
+  console.log('📤 Criando stakeholder sem PIX:', JSON.stringify(niboPayload, null, 2));
+
+  const response = await fetch(`${NIBO_CONFIG.BASE_URL}/suppliers`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(niboPayload),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('❌ Erro ao criar stakeholder sem PIX:', errorData);
+    throw new Error(
+      errorData.error_description ||
+        errorData.message ||
+        `Erro ${response.status} ao criar stakeholder`
+    );
+  }
+
+  const newStakeholder = await response.json();
+  console.log('✅ Stakeholder criado sem PIX:', newStakeholder.id);
+
+  return newStakeholder;
 }
