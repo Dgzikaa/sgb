@@ -696,23 +696,54 @@ export default function AgendamentoPage() {
       if (data.success && data.data.length > 0) {
         const stakeholder = data.data[0];
 
-        // Stakeholder encontrado
-        setNovoPagamento(prev => ({
-          ...prev,
-          nome_beneficiario: stakeholder.name,
-          cpf_cnpj: formatarDocumento(stakeholder.document), // Formatar para exibição
-          chave_pix: stakeholder.pixKey || '',
-        }));
+        // Stakeholder encontrado - verificar se tem chave PIX
+        if (stakeholder.pixKey && stakeholder.pixKey.trim() !== '') {
+          // Tem chave PIX - preencher tudo
+          setNovoPagamento(prev => ({
+            ...prev,
+            nome_beneficiario: stakeholder.name,
+            cpf_cnpj: formatarDocumento(stakeholder.document),
+            chave_pix: stakeholder.pixKey,
+          }));
+
+          toast({
+            title: '✅ Stakeholder encontrado!',
+            description: `${stakeholder.name} foi encontrado com chave PIX`,
+          });
+        } else {
+          // Não tem chave PIX - preencher dados e abrir modal para cadastrar PIX
+          setNovoPagamento(prev => ({
+            ...prev,
+            nome_beneficiario: stakeholder.name,
+            cpf_cnpj: formatarDocumento(stakeholder.document),
+            chave_pix: '',
+          }));
+
+          // Preparar dados para modal de PIX
+          setStakeholderParaPix(stakeholder);
+          setPixKeyData({
+            pixKey: '',
+            pixKeyType: 3, // CPF/CNPJ por padrão
+            isSameAsDocument: false,
+          });
+          setModalPixKey(true);
+
+          toast({
+            title: '⚠️ Stakeholder sem chave PIX',
+            description: `${stakeholder.name} foi encontrado, mas precisa cadastrar chave PIX`,
+          });
+        }
+      } else {
+        // Stakeholder não encontrado - abrir modal para cadastrar
+        setStakeholderEmCadastro({
+          document: documentoLimpo,
+          name: '',
+        });
+        setModalStakeholder(true);
 
         toast({
-          title: '✅ Stakeholder encontrado!',
-          description: `${stakeholder.name} foi encontrado no sistema`,
-        });
-      } else {
-        // Stakeholder não encontrado
-        toast({
           title: '❌ Stakeholder não encontrado',
-          description: 'Preencha manualmente ou cadastre um novo stakeholder',
+          description: 'Cadastre um novo stakeholder para continuar',
           variant: 'destructive',
         });
       }
@@ -1082,6 +1113,57 @@ export default function AgendamentoPage() {
                           />
                         </div>
                       </div>
+                      
+                      {/* Campos obrigatórios: Categoria e Centro de Custo */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label
+                            htmlFor="categoria"
+                            className="text-gray-700 dark:text-gray-300"
+                          >
+                            Categoria *
+                          </Label>
+                          <SelectWithSearch
+                            value={novoPagamento.categoria_id}
+                            onValueChange={(value) =>
+                              setNovoPagamento(prev => ({
+                                ...prev,
+                                categoria_id: value,
+                              }))
+                            }
+                            placeholder="Selecione uma categoria"
+                            options={categorias.map(cat => ({
+                              value: cat.id,
+                              label: cat.nome,
+                            }))}
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label
+                            htmlFor="centro_custo"
+                            className="text-gray-700 dark:text-gray-300"
+                          >
+                            Centro de Custo *
+                          </Label>
+                          <SelectWithSearch
+                            value={novoPagamento.centro_custo_id}
+                            onValueChange={(value) =>
+                              setNovoPagamento(prev => ({
+                                ...prev,
+                                centro_custo_id: value,
+                              }))
+                            }
+                            placeholder="Selecione um centro de custo"
+                            options={centrosCusto.map(cc => ({
+                              value: cc.id,
+                              label: cc.nome,
+                            }))}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                      
                       <div>
                         <Label
                           htmlFor="descricao"
@@ -1225,6 +1307,266 @@ export default function AgendamentoPage() {
             </div>
           </div>
         </div>
+
+        {/* Modal para cadastrar stakeholder */}
+        <Dialog open={modalStakeholder} onOpenChange={setModalStakeholder}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">
+                Cadastrar Novo Stakeholder
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  CPF/CNPJ
+                </Label>
+                <Input
+                  value={formatarDocumento(stakeholderEmCadastro.document)}
+                  disabled
+                  className="mt-1 bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  Nome Completo *
+                </Label>
+                <Input
+                  value={stakeholderEmCadastro.name}
+                  onChange={(e) =>
+                    setStakeholderEmCadastro(prev => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                  placeholder="Nome completo do stakeholder"
+                  className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setModalStakeholder(false)}
+                className="btn-outline"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!stakeholderEmCadastro.name.trim()) {
+                    toast({
+                      title: 'Nome obrigatório',
+                      description: 'Digite o nome do stakeholder',
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+
+                  setIsCadastrandoStakeholder(true);
+                  try {
+                    const response = await fetch('/api/financeiro/nibo/stakeholders', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        name: stakeholderEmCadastro.name,
+                        document: stakeholderEmCadastro.document,
+                        type: 'fornecedor',
+                      }),
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                      // Preencher formulário com dados do novo stakeholder
+                      setNovoPagamento(prev => ({
+                        ...prev,
+                        nome_beneficiario: stakeholderEmCadastro.name,
+                        cpf_cnpj: formatarDocumento(stakeholderEmCadastro.document),
+                        chave_pix: '',
+                      }));
+
+                      // Preparar para cadastrar chave PIX
+                      setStakeholderParaPix(data.data);
+                      setPixKeyData({
+                        pixKey: '',
+                        pixKeyType: 3,
+                        isSameAsDocument: false,
+                      });
+                      
+                      setModalStakeholder(false);
+                      setModalPixKey(true);
+
+                      toast({
+                        title: '✅ Stakeholder cadastrado!',
+                        description: 'Agora cadastre a chave PIX',
+                      });
+                    } else {
+                      throw new Error(data.error || 'Erro ao cadastrar');
+                    }
+                  } catch (error) {
+                    console.error('Erro ao cadastrar stakeholder:', error);
+                    toast({
+                      title: 'Erro no cadastro',
+                      description: 'Não foi possível cadastrar o stakeholder',
+                      variant: 'destructive',
+                    });
+                  } finally {
+                    setIsCadastrandoStakeholder(false);
+                  }
+                }}
+                disabled={isCadastrandoStakeholder}
+                className="btn-primary"
+              >
+                {isCadastrandoStakeholder ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Cadastrar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal para cadastrar chave PIX */}
+        <Dialog open={modalPixKey} onOpenChange={setModalPixKey}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">
+                Cadastrar Chave PIX
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  Stakeholder
+                </Label>
+                <Input
+                  value={stakeholderParaPix?.name || ''}
+                  disabled
+                  className="mt-1 bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  Usar CPF/CNPJ como chave PIX?
+                </Label>
+                <div className="flex items-center space-x-2 mt-2">
+                  <input
+                    type="checkbox"
+                    id="sameAsDocument"
+                    checked={pixKeyData.isSameAsDocument}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setPixKeyData(prev => ({
+                        ...prev,
+                        isSameAsDocument: checked,
+                        pixKey: checked ? (stakeholderParaPix?.document || '') : '',
+                        pixKeyType: checked ? 3 : 3, // 3 = CPF/CNPJ
+                      }));
+                    }}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <label htmlFor="sameAsDocument" className="text-sm text-gray-700 dark:text-gray-300">
+                    Sim, usar {formatarDocumento(stakeholderParaPix?.document || '')} como chave PIX
+                  </label>
+                </div>
+              </div>
+              {!pixKeyData.isSameAsDocument && (
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Chave PIX *
+                  </Label>
+                  <Input
+                    value={pixKeyData.pixKey}
+                    onChange={(e) =>
+                      setPixKeyData(prev => ({
+                        ...prev,
+                        pixKey: e.target.value,
+                      }))
+                    }
+                    placeholder="Digite a chave PIX (CPF, CNPJ, email, telefone ou chave aleatória)"
+                    className="mt-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setModalPixKey(false)}
+                className="btn-outline"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={async () => {
+                  const chavePixFinal = pixKeyData.isSameAsDocument 
+                    ? (stakeholderParaPix?.document || '')
+                    : pixKeyData.pixKey;
+
+                  if (!chavePixFinal.trim()) {
+                    toast({
+                      title: 'Chave PIX obrigatória',
+                      description: 'Digite uma chave PIX válida',
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+
+                  setIsAtualizandoPix(true);
+                  try {
+                    const response = await fetch(`/api/financeiro/nibo/stakeholders/${stakeholderParaPix?.id}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        name: stakeholderParaPix?.name || '',
+                        document: stakeholderParaPix?.document || '',
+                        pixKey: chavePixFinal,
+                        pixKeyType: pixKeyData.pixKeyType,
+                      }),
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                      // Atualizar formulário com a chave PIX
+                      setNovoPagamento(prev => ({
+                        ...prev,
+                        chave_pix: chavePixFinal,
+                      }));
+
+                      setModalPixKey(false);
+                      toast({
+                        title: '✅ Chave PIX cadastrada!',
+                        description: 'Agora você pode finalizar o pagamento',
+                      });
+                    } else {
+                      throw new Error(data.error || 'Erro ao atualizar');
+                    }
+                  } catch (error) {
+                    console.error('Erro ao atualizar chave PIX:', error);
+                    toast({
+                      title: 'Erro na atualização',
+                      description: 'Não foi possível cadastrar a chave PIX',
+                      variant: 'destructive',
+                    });
+                  } finally {
+                    setIsAtualizandoPix(false);
+                  }
+                }}
+                disabled={isAtualizandoPix}
+                className="btn-primary"
+              >
+                {isAtualizandoPix ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Cadastrar Chave PIX
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </ProtectedRoute>
   );

@@ -1,288 +1,160 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Configurações do NIBO
 const NIBO_CONFIG = {
   BASE_URL: 'https://api.nibo.com.br/empresas/v1',
-  API_TOKEN: process.env.NIBO_API_TOKEN || '02D8F9B964E74ADAA1A595909A67BA46',
+  API_TOKEN: process.env.NIBO_API_TOKEN,
 };
 
-interface NiboStakeholderUpdate {
-  name: string;
-  document: {
-    number: string;
-    type: 'CPF' | 'CNPJ';
-  };
-  communication?: {
-    contactName?: string;
-    email?: string;
-    phone?: string;
-    cellPhone?: string;
-    webSite?: string;
-  };
-  address?: {
-    line1?: string;
-    line2?: string;
-    number?: number;
-    district?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-    country?: string;
-  };
-  bankAccountInformation?: {
-    bankNumber?: string;
-    agency?: string;
-    accountNumber?: string;
-    bankAccountType?: number;
-    pixKey?: string;
-    pixKeyType?: number;
-  };
-  companyInformation?: {
-    companyName?: string;
-    municipalInscription?: string;
-  };
-}
-
-interface NiboStakeholderResponse {
-  id: string;
-  name: string;
-  document: {
-    number: string;
-    type: string;
-  };
-  communication?: {
-    email?: string;
-    phone?: string;
-  };
-  bankAccountInformation?: {
-    pixKey?: string;
-    pixKeyType?: number;
-  };
+interface UpdateStakeholderRequest {
+  name?: string;
+  document?: string;
+  email?: string;
+  phone?: string;
+  pixKey?: string;
+  pixKeyType?: number;
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const body: NiboStakeholderUpdate = await request.json();
-    const { id } = await params;
+    const { id } = params;
+    const body: UpdateStakeholderRequest = await request.json();
 
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'ID do stakeholder é obrigatório' },
-        { status: 400 }
-      );
-    }
+    console.log('Atualizando stakeholder:', { id, body });
 
     // Validações básicas
-    if (
-      !body.name ||
-      !body.document ||
-      !body.document.number ||
-      !body.document.type
-    ) {
+    if (!body.name || !body.document) {
       return NextResponse.json(
         { success: false, error: 'Nome e documento são obrigatórios' },
         { status: 400 }
       );
     }
 
-    // Validar tipo de documento
-    if (body.document.type === 'CPF' && body.document.number.length !== 11) {
+    // Buscar stakeholder no banco local primeiro
+    const { data: localStakeholder, error: localError } = await supabase
+      .from('nibo_stakeholders')
+      .select('*')
+      .eq('nibo_id', id)
+      .single();
+
+    if (localError || !localStakeholder) {
+      console.error('Stakeholder não encontrado:', localError);
       return NextResponse.json(
-        { success: false, error: 'CPF deve ter 11 dígitos' },
-        { status: 400 }
+        { success: false, error: 'Stakeholder não encontrado' },
+        { status: 404 }
       );
     }
 
-    if (body.document.type === 'CNPJ' && body.document.number.length !== 14) {
+    // Atualizar no banco local
+    const updateData: any = {};
+    
+    if (body.name) updateData.nome = body.name;
+    if (body.document) updateData.documento_numero = body.document.replace(/\D/g, '');
+    if (body.email) updateData.email = body.email;
+    if (body.phone) updateData.telefone = body.phone;
+    if (body.pixKey) updateData.pix_chave = body.pixKey;
+    if (body.pixKeyType !== undefined) updateData.pix_tipo = body.pixKeyType;
+
+    const { data: updatedStakeholder, error: updateError } = await supabase
+      .from('nibo_stakeholders')
+      .update(updateData)
+      .eq('nibo_id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Erro ao atualizar stakeholder:', updateError);
       return NextResponse.json(
-        { success: false, error: 'CNPJ deve ter 14 dígitos' },
-        { status: 400 }
+        { success: false, error: 'Erro ao atualizar stakeholder' },
+        { status: 500 }
       );
     }
 
-    const niboResponse = await updateStakeholderInNibo(id, body);
+    // Tentar atualizar no NIBO também (se o token estiver configurado)
+    if (NIBO_CONFIG.API_TOKEN) {
+      try {
+        await updateStakeholderInNibo(id, body, localStakeholder.tipo);
+      } catch (niboError) {
+        console.warn('Erro ao atualizar no NIBO (continuando):', niboError);
+        // Não falhar a operação se der erro no NIBO
+      }
+    }
+
+    // Retornar dados atualizados
+    const responseData = {
+      id: updatedStakeholder.nibo_id,
+      name: updatedStakeholder.nome,
+      document: updatedStakeholder.documento_numero,
+      email: updatedStakeholder.email || '',
+      phone: updatedStakeholder.telefone || '',
+      type: updatedStakeholder.tipo,
+      pixKey: updatedStakeholder.pix_chave || '',
+      pixKeyType: updatedStakeholder.pix_tipo || null,
+    };
 
     return NextResponse.json({
       success: true,
-      data: niboResponse,
-      message: 'Stakeholder atualizado com sucesso no NIBO',
+      data: responseData,
+      message: 'Stakeholder atualizado com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao atualizar stakeholder no NIBO:', error);
+    console.error('Erro ao atualizar stakeholder:', error);
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
     );
   }
-}
-
-async function updateStakeholderInNibo(
-  stakeholderId: string,
-  stakeholder: NiboStakeholderUpdate
-): Promise<NiboStakeholderResponse> {
-  const headers = {
-    accept: 'application/json',
-    apitoken: NIBO_CONFIG.API_TOKEN,
-    'content-type': 'application/json',
-  };
-
-  console.log('Atualizando stakeholder no NIBO:', stakeholderId);
-  console.log('Payload:', JSON.stringify(stakeholder, null, 2));
-
-  const response = await fetch(
-    `${NIBO_CONFIG.BASE_URL}/suppliers/${stakeholderId}`,
-    {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(stakeholder),
-    }
-  );
-
-  console.log('Status da resposta NIBO:', response.status);
-  console.log(
-    'Headers da resposta:',
-    Object.fromEntries(response.headers.entries())
-  );
-
-  if (!response.ok) {
-    let errorMessage = `Erro ${response.status} do NIBO`;
-    try {
-      const errorText = await response.text();
-      if (errorText) {
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.message || errorData.error || errorMessage;
-      }
-    } catch (e) {
-      // Ignorar erro de parse
-    }
-    throw new Error(errorMessage);
-  }
-
-  // SEMPRE atualizar o banco local, independente do tipo de resposta
-  console.log('Atualizando banco local com dados:', stakeholder);
-
-  // Remover formatação do documento para garantir consistência
-  const documentoLimpo = stakeholder.document.number.replace(/\D/g, '');
-
-  const updateData: any = {
-    nome: stakeholder.name,
-    documento_numero: documentoLimpo, // Sempre sem formatação
-    documento_tipo: stakeholder.document.type,
-    email: stakeholder.communication?.email,
-    telefone: stakeholder.communication?.phone,
-    endereco: stakeholder.address || {},
-    informacoes_bancarias: stakeholder.bankAccountInformation || {},
-    atualizado_em: new Date().toISOString(),
-  };
-
-  // Atualizar dados de PIX se fornecidos
-  if (stakeholder.bankAccountInformation?.pixKey) {
-    updateData.pix_chave = stakeholder.bankAccountInformation.pixKey;
-    updateData.pix_tipo = stakeholder.bankAccountInformation.pixKeyType;
-    console.log('Atualizando PIX no banco local:', {
-      pix_chave: updateData.pix_chave,
-      pix_tipo: updateData.pix_tipo,
-    });
-  } else {
-    console.log('Nenhum dado de PIX fornecido para atualização');
-  }
-
-  console.log('Dados completos para atualização no banco:', updateData);
-  console.log('Buscando stakeholder com nibo_id:', stakeholderId);
-
-  const { error: dbError } = await supabase
-    .from('nibo_stakeholders')
-    .update(updateData)
-    .eq('nibo_id', stakeholderId);
-
-  if (dbError) {
-    console.error('Erro ao atualizar stakeholder no banco local:', dbError);
-    throw new Error(`Erro ao atualizar banco local: ${dbError.message}`);
-  }
-
-  console.log('Banco local atualizado com sucesso!');
-
-  // Para status 204 (No Content), retornar dados do request
-  if (response.status === 204) {
-    return {
-      id: stakeholderId,
-      name: stakeholder.name,
-      document: stakeholder.document,
-      communication: stakeholder.communication,
-      bankAccountInformation: stakeholder.bankAccountInformation,
-    };
-  }
-
-  // Para outros status codes (200, 201), tentar parsear JSON
-  const responseText = await response.text();
-  console.log('Resposta do NIBO:', responseText);
-
-  if (!responseText.trim()) {
-    // Se não há resposta mas o status é OK, retornar dados do request
-    return {
-      id: stakeholderId,
-      name: stakeholder.name,
-      document: stakeholder.document,
-      communication: stakeholder.communication,
-      bankAccountInformation: stakeholder.bankAccountInformation,
-    };
-  }
-
-  let data;
-  try {
-    data = JSON.parse(responseText);
-  } catch (parseError) {
-    console.error('Erro ao parsear JSON da resposta:', parseError);
-    // Se não consegue parsear mas o status é OK, retornar dados do request
-    return {
-      id: stakeholderId,
-      name: stakeholder.name,
-      document: stakeholder.document,
-      communication: stakeholder.communication,
-      bankAccountInformation: stakeholder.bankAccountInformation,
-    };
-  }
-
-  return {
-    id: data.id || stakeholderId,
-    name: data.name || stakeholder.name,
-    document: data.document || stakeholder.document,
-    communication: data.communication || stakeholder.communication,
-    bankAccountInformation:
-      data.bankAccountInformation || stakeholder.bankAccountInformation,
-  };
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
 
-    if (!id) {
+    // Buscar stakeholder no banco local
+    const { data: localStakeholder, error: localError } = await supabase
+      .from('nibo_stakeholders')
+      .select('*')
+      .eq('nibo_id', id)
+      .single();
+
+    if (localError || !localStakeholder) {
       return NextResponse.json(
-        { success: false, error: 'ID do stakeholder é obrigatório' },
-        { status: 400 }
+        { success: false, error: 'Stakeholder não encontrado' },
+        { status: 404 }
       );
     }
 
-    const stakeholder = await getStakeholderFromNibo(id);
+    const responseData = {
+      id: localStakeholder.nibo_id,
+      name: localStakeholder.nome,
+      document: localStakeholder.documento_numero,
+      email: localStakeholder.email || '',
+      phone: localStakeholder.telefone || '',
+      type: localStakeholder.tipo,
+      pixKey: localStakeholder.pix_chave || '',
+      pixKeyType: localStakeholder.pix_tipo || null,
+    };
 
     return NextResponse.json({
       success: true,
-      data: stakeholder,
+      data: responseData,
     });
   } catch (error) {
-    console.error('Erro ao buscar stakeholder no NIBO:', error);
+    console.error('Erro ao buscar stakeholder:', error);
     return NextResponse.json(
       { success: false, error: 'Erro interno do servidor' },
       { status: 500 }
@@ -290,36 +162,71 @@ export async function GET(
   }
 }
 
-async function getStakeholderFromNibo(
-  stakeholderId: string
-): Promise<NiboStakeholderResponse> {
+// Função para atualizar stakeholder no NIBO
+async function updateStakeholderInNibo(
+  id: string,
+  updates: UpdateStakeholderRequest,
+  type: string
+): Promise<void> {
   const headers = {
     accept: 'application/json',
-    apitoken: NIBO_CONFIG.API_TOKEN,
+    apitoken: NIBO_CONFIG.API_TOKEN!,
+    'content-type': 'application/json',
   };
 
-  const response = await fetch(
-    `${NIBO_CONFIG.BASE_URL}/suppliers/${stakeholderId}`,
-    {
-      method: 'GET',
-      headers,
-    }
-  );
+  // Mapear tipo para endpoint correto do NIBO
+  let endpoint = '';
+  switch (type) {
+    case 'fornecedor':
+      endpoint = 'suppliers';
+      break;
+    case 'socio':
+      endpoint = 'partners';
+      break;
+    case 'funcionario':
+      endpoint = 'employees';
+      break;
+    default:
+      endpoint = 'suppliers'; // Fallback
+  }
+
+  // Preparar payload para o NIBO
+  const niboPayload: any = {};
+
+  if (updates.name) niboPayload.name = updates.name;
+  
+  if (updates.document) {
+    niboPayload.document = {
+      number: updates.document,
+      type: updates.document.length === 11 ? 'CPF' : 'CNPJ',
+    };
+  }
+
+  if (updates.email || updates.phone) {
+    niboPayload.communication = {};
+    if (updates.email) niboPayload.communication.email = updates.email;
+    if (updates.phone) niboPayload.communication.phone = updates.phone;
+  }
+
+  // Adicionar dados de PIX se fornecidos
+  if (updates.pixKey && updates.pixKeyType !== undefined) {
+    niboPayload.bankAccountInformation = {
+      pixKey: updates.pixKey,
+      pixKeyType: updates.pixKeyType,
+    };
+  }
+
+  const response = await fetch(`${NIBO_CONFIG.BASE_URL}/${endpoint}/${id}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(niboPayload),
+  });
 
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(
       errorData.error_description ||
-        `Erro ${response.status} ao buscar stakeholder`
+        `Erro ${response.status} ao atualizar stakeholder`
     );
   }
-
-  const data = await response.json();
-  return {
-    id: data.id,
-    name: data.name,
-    document: data.document,
-    communication: data.communication,
-    bankAccountInformation: data.bankAccountInformation,
-  };
 }
