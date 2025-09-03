@@ -61,7 +61,8 @@ interface PagamentoAgendamento {
     | 'agendado'
     | 'aguardando_aprovacao'
     | 'aprovado'
-    | 'erro';
+    | 'erro'
+    | 'erro_inter';
   stakeholder_id?: string;
   nibo_agendamento_id?: string;
   inter_aprovacao_id?: string;
@@ -470,7 +471,10 @@ export default function AgendamentoPage() {
             // 2. Agendar no NIBO
             await agendarNoNibo(pagamento, stakeholder);
 
-            // 3. Atualizar status para agendado
+            // 3. Enviar para o Inter
+            await enviarParaInter(pagamento);
+
+            // 4. Atualizar status para agendado
             setPagamentos(prev =>
               prev.map(p =>
                 p.id === pagamento.id
@@ -523,6 +527,88 @@ export default function AgendamentoPage() {
       });
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const enviarParaInter = async (pagamento: PagamentoAgendamento) => {
+    try {
+      console.log('💸 Enviando pagamento para o Inter:', pagamento.nome_beneficiario);
+
+      // Formatar valor corretamente (remover R$ e vírgulas)
+      const valorNumerico = parseFloat(
+        pagamento.valor.replace('R$', '').replace(',', '.').trim()
+      );
+
+      const dadosInter = {
+        valor: valorNumerico.toString(),
+        descricao: pagamento.descricao || `Pagamento PIX para ${pagamento.nome_beneficiario}`,
+        destinatario: pagamento.nome_beneficiario,
+        chave: pagamento.chave_pix,
+        data_pagamento: pagamento.data_pagamento,
+      };
+
+      console.log('📤 Dados sendo enviados para o Inter:', dadosInter);
+
+      const response = await fetch('/api/financeiro/inter/pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosInter),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Erro ${response.status}: ${response.statusText} - ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Atualizar pagamento com ID de aprovação do Inter
+        setPagamentos(prev =>
+          prev.map(p =>
+            p.id === pagamento.id
+              ? {
+                  ...p,
+                  inter_aprovacao_id: data.data?.codigoSolicitacao || '',
+                  updated_at: new Date().toISOString(),
+                }
+              : p
+          )
+        );
+
+        toast({
+          title: '✅ Enviado para o Inter!',
+          description: `Pagamento de ${pagamento.nome_beneficiario} enviado para aprovação`,
+        });
+
+        console.log('✅ Pagamento enviado para o Inter com sucesso:', data.data?.codigoSolicitacao);
+      } else {
+        throw new Error(data.error || 'Erro desconhecido do Inter');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar para o Inter:', error);
+      
+      // Não falhar o processo todo, apenas mostrar aviso
+      toast({
+        title: '⚠️ Aviso: Erro no Inter',
+        description: `NIBO: ✅ | Inter: ❌ - ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+        variant: 'destructive',
+      });
+      
+      // Marcar como erro no Inter mas manter agendado no NIBO
+      setPagamentos(prev =>
+        prev.map(p =>
+          p.id === pagamento.id
+            ? {
+                ...p,
+                status: 'erro_inter' as any, // Status customizado para erro apenas no Inter
+                updated_at: new Date().toISOString(),
+              }
+            : p
+        )
+      );
     }
   };
 
@@ -802,6 +888,15 @@ export default function AgendamentoPage() {
             className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
           >
             Erro
+          </Badge>
+        );
+      case 'erro_inter':
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
+          >
+            NIBO ✅ | Inter ❌
           </Badge>
         );
       default:
