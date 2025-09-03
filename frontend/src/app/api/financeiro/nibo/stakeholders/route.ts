@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
             stakeholder.tipo === 'Supplier'
               ? 'fornecedor'
               : stakeholder.tipo === 'Customer'
-                ? 'cliente'
+                ? 'fornecedor' // Mapear Customer para fornecedor para compatibilidade com agendamentos
                 : stakeholder.tipo === 'Partner'
                   ? 'socio'
                   : 'fornecedor',

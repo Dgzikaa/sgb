@@ -193,6 +193,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validar stakeholder antes de criar agendamento
+    console.log('Validando stakeholder:', stakeholderId);
+    const stakeholderValidation = await validateStakeholder(stakeholderId);
+    if (!stakeholderValidation.isValid) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: `Stakeholder is not compatible: ${stakeholderValidation.reason}`,
+          stakeholder: stakeholderValidation.stakeholder
+        },
+        { status: 400 }
+      );
+    }
+
     // Criar agendamento no NIBO
     const niboResponse = await createScheduleInNibo(body);
 
@@ -610,5 +624,95 @@ async function getCentroCustoById(centroCustoId: string) {
   } catch (error) {
     console.error('Erro ao buscar centro de custo:', error);
     return null;
+  }
+}
+
+// Função para validar se o stakeholder é compatível com agendamentos
+async function validateStakeholder(stakeholderId: string): Promise<{
+  isValid: boolean;
+  reason?: string;
+  stakeholder?: any;
+}> {
+  try {
+    console.log('Validando stakeholder ID:', stakeholderId);
+
+    // Buscar stakeholder no banco local
+    const { data: localStakeholder, error: localError } = await supabase
+      .from('nibo_stakeholders')
+      .select('*')
+      .eq('nibo_id', stakeholderId)
+      .single();
+
+    if (localError || !localStakeholder) {
+      console.log('Stakeholder não encontrado no banco local:', localError?.message);
+      return {
+        isValid: false,
+        reason: 'Stakeholder não encontrado no banco local',
+        stakeholder: null
+      };
+    }
+
+    console.log('Stakeholder encontrado:', {
+      id: localStakeholder.nibo_id,
+      nome: localStakeholder.nome,
+      tipo: localStakeholder.tipo,
+      documento: localStakeholder.documento_numero
+    });
+
+    // Verificar se o tipo é válido para agendamentos
+    // No NIBO: Supplier, Customer e Partner podem ser usados para agendamentos
+    const tiposValidos = ['fornecedor', 'socio', 'funcionario', 'Supplier', 'Customer', 'Partner'];
+    if (!tiposValidos.includes(localStakeholder.tipo)) {
+      return {
+        isValid: false,
+        reason: `Tipo de stakeholder '${localStakeholder.tipo}' não é válido para agendamentos. Tipos válidos: ${tiposValidos.join(', ')}`,
+        stakeholder: localStakeholder
+      };
+    }
+
+    // Se for Customer, converter para Supplier para compatibilidade com agendamentos de débito
+    if (localStakeholder.tipo === 'Customer') {
+      console.log('Convertendo stakeholder Customer para Supplier para compatibilidade');
+      await supabase
+        .from('nibo_stakeholders')
+        .update({ 
+          tipo: 'Supplier',
+          atualizado_em: new Date().toISOString(),
+          usuario_atualizacao: 'Sistema - Conversão automática'
+        })
+        .eq('nibo_id', stakeholderId);
+    }
+
+    // Verificar se tem documento válido
+    if (!localStakeholder.documento_numero || localStakeholder.documento_numero.length < 11) {
+      return {
+        isValid: false,
+        reason: 'Stakeholder não possui documento válido',
+        stakeholder: localStakeholder
+      };
+    }
+
+    // Verificar se não está marcado como deletado
+    if (localStakeholder.deletado) {
+      return {
+        isValid: false,
+        reason: 'Stakeholder está marcado como deletado',
+        stakeholder: localStakeholder
+      };
+    }
+
+    console.log('Stakeholder validado com sucesso');
+    return {
+      isValid: true,
+      stakeholder: localStakeholder
+    };
+
+  } catch (error) {
+    console.error('Erro ao validar stakeholder:', error);
+    return {
+      isValid: false,
+      reason: `Erro na validação: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+      stakeholder: null
+    };
   }
 }
