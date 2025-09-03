@@ -172,7 +172,7 @@ export default function UnifiedSearch({
       description: 'Interface para gerenciamento da produção',
       category: 'feature',
       icon: Cpu,
-      href: '/producao/terminal',
+      href: '/future/operacoes/terminal',
       keywords: ['terminal', 'produção', 'cozinha', 'pedidos'],
       priority: 85,
       shortcut: 'Ctrl+P',

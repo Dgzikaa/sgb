@@ -283,7 +283,7 @@ export default function OperacoesPage() {
                   </span>
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 </div>
-                <Link href="/operacoes/terminal">
+                <Link href="/future/operacoes/terminal">
                   <Button className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white">
                     Acessar Terminal
                   </Button>

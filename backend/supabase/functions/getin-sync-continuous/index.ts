@@ -161,6 +161,12 @@ serve(async (req) => {
 
       console.log(`✅ ${data.data.length} reservas encontradas na página ${currentPage}`)
       console.log(`📊 Paginação: ${data.pagination.current_page}/${data.pagination.total_pages} (total: ${data.pagination.total_items})`)
+      console.log(`🔍 Debug paginação:`, {
+        current_page: data.pagination.current_page,
+        total_pages: data.pagination.total_pages,
+        total_items: data.pagination.total_items,
+        hasMorePages: data.pagination.current_page < data.pagination.total_pages
+      })
 
       totalReservas += data.data.length
 

@@ -194,7 +194,7 @@ export function SmartSidebar({
           id: 'terminal',
           title: 'Terminal de Produção',
           icon: Package,
-          href: '/producao/terminal',
+          href: '/future/operacoes/terminal',
           category: 'operations',
           importance: 'high',
           keywords: ['terminal', 'produção', 'cozinha'],
