@@ -144,8 +144,8 @@ export default function AgendamentoPage() {
     descricao: '',
     data_pagamento: '',
     data_competencia: '',
-    categoria_id: '',
-    centro_custo_id: '',
+    categoria_id: '' as string,
+    centro_custo_id: '' as string,
   });
 
   // Estados para categorias e centros de custo
@@ -1223,7 +1223,7 @@ export default function AgendamentoPage() {
                             onValueChange={(value) =>
                               setNovoPagamento(prev => ({
                                 ...prev,
-                                categoria_id: value,
+                                categoria_id: value || '',
                               }))
                             }
                             placeholder="Selecione uma categoria"
@@ -1246,7 +1246,7 @@ export default function AgendamentoPage() {
                             onValueChange={(value) =>
                               setNovoPagamento(prev => ({
                                 ...prev,
-                                centro_custo_id: value,
+                                centro_custo_id: value || '',
                               }))
                             }
                             placeholder="Selecione um centro de custo"

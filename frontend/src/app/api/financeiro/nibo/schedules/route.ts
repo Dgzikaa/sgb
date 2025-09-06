@@ -909,7 +909,7 @@ async function ensureStakeholderExistsInNibo(localStakeholder: any): Promise<{
         if (response.ok) {
           stakeholderData = await response.json();
           stakeholderExists = true;
-          console.log(`Stakeholder encontrado no NIBO como ${endpoint}:`, stakeholderData.id);
+          console.log(`Stakeholder encontrado no NIBO como ${endpoint}:`, stakeholderData?.id);
           break;
         } else if (response.status === 404) {
           console.log(`Stakeholder não encontrado em ${endpoint}`);
@@ -986,7 +986,7 @@ async function createStakeholderInNibo(localStakeholder: any): Promise<any> {
 
   // Adicionar dados de PIX se existirem
   if (localStakeholder.pix_chave) {
-    niboPayload.bankAccountInformation = {
+    (niboPayload as any).bankAccountInformation = {
       pixKey: localStakeholder.pix_chave,
       pixKeyType: localStakeholder.pix_tipo || 3,
     };
@@ -1055,7 +1055,7 @@ async function forceCreateNewStakeholder(localStakeholder: any): Promise<any> {
 
   // Adicionar dados de PIX se existirem
   if (localStakeholder.pix_chave) {
-    niboPayload.bankAccountInformation = {
+    (niboPayload as any).bankAccountInformation = {
       pixKey: localStakeholder.pix_chave,
       pixKeyType: localStakeholder.pix_tipo || 3,
     };
