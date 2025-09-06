@@ -896,7 +896,7 @@ async function ensureStakeholderExistsInNibo(localStakeholder: any): Promise<{
     // Tentar buscar o stakeholder no NIBO usando diferentes endpoints
     const endpoints = ['suppliers', 'customers', 'partners'];
     let stakeholderExists = false;
-    let stakeholderData = null;
+    let stakeholderData: any = null;
 
     for (const endpoint of endpoints) {
       try {
