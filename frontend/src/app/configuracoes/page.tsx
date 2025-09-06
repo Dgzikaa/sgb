@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Settings,
   CheckSquare,
@@ -29,6 +30,7 @@ import {
   Key,
   CreditCard,
   UserCog,
+  Search,
 } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/layouts/PageHeader';
@@ -38,8 +40,30 @@ export default function ConfiguracoesPage() {
 
   return (
     <ProtectedRoute requiredModule="configuracoes">
-      <div className="space-y-6 p-4">
-        <PageHeader title="Configurações do Sistema" description="Gerencie todas as configurações e integrações do sistema" />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-6">
+          {/* Header com busca */}
+          <div className="card-dark p-6 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Configurações do Sistema
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Gerencie todas as configurações e integrações do sistema
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Buscar configurações..."
+                    className="pl-10 w-64 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
         {/* Métricas Rápidas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -475,6 +499,7 @@ export default function ConfiguracoesPage() {
               </Link>
             </CardContent>
           </Card>
+          </div>
         </div>
       </div>
     </ProtectedRoute>
