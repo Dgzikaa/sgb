@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
       
       // Trigger recálculo assíncrono usando a função completa
       for (const evento of eventosParaRecalcular) {
-        supabase.rpc('calculate_evento_metrics_complete', { p_evento_id: evento.id })
+        supabase.rpc('calculate_evento_metrics', { evento_id: evento.id })
           .then((result) => {
             if (result.error) {
               console.error(`❌ Erro ao recalcular evento ${evento.id}:`, result.error);
@@ -323,8 +323,8 @@ export async function POST(request: NextRequest) {
     if (evento_ids && Array.isArray(evento_ids)) {
       // Recalcular eventos específicos
       for (const eventoId of evento_ids) {
-        const { error } = await supabase.rpc('calculate_evento_metrics_complete', { 
-          p_evento_id: eventoId 
+        const { error } = await supabase.rpc('calculate_evento_metrics', { 
+          evento_id: eventoId 
         });
         if (!error) totalRecalculados++;
       }
