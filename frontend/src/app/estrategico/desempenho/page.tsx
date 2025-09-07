@@ -888,19 +888,19 @@ export default function DesempenhoPage() {
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                variant="outline"
+              <button
                 onClick={() => setModalAberto(false)}
+                className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg font-medium transition-colors flex flex-row items-center justify-center gap-2"
               >
-                Cancelar
-              </Button>
-              <Button
+                <span className="whitespace-nowrap">Cancelar</span>
+              </button>
+              <button
                 onClick={salvarValoresEditados}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex flex-row items-center justify-center gap-2"
               >
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
+                <Save className="h-4 w-4 flex-shrink-0" />
+                <span className="whitespace-nowrap">Salvar</span>
+              </button>
             </div>
           </DialogContent>
         </Dialog>

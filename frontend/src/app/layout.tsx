@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 import { ToastProvider, GlobalToastListener } from '@/components/ui/toast';
+import { Toaster } from 'sonner';
 // import {
 //   ConfirmDialogProvider,
 //   GlobalConfirmListener,
@@ -56,6 +57,7 @@ export default function RootLayout({
                     <CommandPaletteWrapper />
                     <AuthSync />
                     <GlobalToastListener />
+                    <Toaster position="top-right" richColors />
                     {/* <AssistantWrapper /> */}
                     {/* <ZykorPWABanner /> */}
                   </ToastProvider>

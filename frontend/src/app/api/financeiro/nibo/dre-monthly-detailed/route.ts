@@ -107,10 +107,12 @@ const MACRO_CATEGORIAS = [
     nome: "Investimentos",
     tipo: "saida",
     categorias: [
-      "Despesas Financeiras",
-      "Obras",
-      "Outros Investimentos",
-      "Equipamentos",
+      "[Investimento] Despesas Financeiras",
+      "[Investimento] Obras", 
+      "[Investimento] Consultoria",
+      "[Investimento] Outros Investimentos",
+      "[Investimento] Equipamentos R",
+      "[Investimento] Equipamentos",
     ],
   },
   {
@@ -199,7 +201,7 @@ export async function GET(request: Request) {
         : categoriasContratos.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0); // Só contratos se não for entrada
 
       const totalSaidas = macro.tipo === 'saida'
-        ? categoriasNormais.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0) // Excluir contratos das saídas
+        ? categoriasNormais.reduce((sum, item) => sum + parseFloat(item.valor || '0'), 0) // Manter valor original (já positivo no Nibo)
         : 0;
 
       // Processar categorias individuais
@@ -213,7 +215,7 @@ export async function GET(request: Request) {
         return {
           nome: catNome,
           entradas: (macro.tipo === 'entrada' || isContrato) ? total : 0,
-          saidas: (macro.tipo === 'saida' && !isContrato) ? total : 0
+          saidas: (macro.tipo === 'saida' && !isContrato) ? total : 0 // Manter valor original
         };
       }); // Incluir TODAS as categorias, mesmo com valor 0
 

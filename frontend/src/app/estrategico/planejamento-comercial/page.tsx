@@ -1824,30 +1824,31 @@ export default function PlanejamentoComercialPage() {
             </div>
             
             <DialogFooter className="bg-gray-50 dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-700">
-              <Button 
+              <button 
                 onClick={() => setModalOpen(false)}
-                variant="outline" 
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg font-medium transition-colors flex flex-row items-center justify-center gap-2"
               >
-                <X className="h-4 w-4 mr-2" />
-                {modoEdicao ? 'Cancelar' : 'Fechar'}
-              </Button>
+                <X className="h-4 w-4 flex-shrink-0" />
+                <span className="whitespace-nowrap">{modoEdicao ? 'Cancelar' : 'Fechar'}</span>
+              </button>
               {modoEdicao && (
-              <Button 
+              <button 
                   onClick={salvarEdicao}
                 disabled={salvando} 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2"
               >
                 {salvando ? (
                   <>
-                      <RefreshCcw className="h-4 w-4 animate-spin mr-2" /> Salvando...
+                      <RefreshCcw className="h-4 w-4 animate-spin flex-shrink-0" />
+                      <span className="whitespace-nowrap">Salvando...</span>
                   </>
                 ) : (
                   <>
-                      <Save className="h-4 w-4 mr-2" /> Salvar Alterações
+                      <Save className="h-4 w-4 flex-shrink-0" />
+                      <span className="whitespace-nowrap">Salvar Alterações</span>
                   </>
                 )}
-              </Button>
+              </button>
               )}
             </DialogFooter>
           </DialogContent>

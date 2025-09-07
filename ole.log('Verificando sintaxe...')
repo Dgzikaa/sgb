@@ -1,5 +1,0 @@
-[33m3743efb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m feat(configuracoes): melhora interface e integra criação de usuários com Supabase Auth
-[33mcacc24e[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m fix: corrige chamadas para função calculate_evento_metrics (remove _complete do nome)
-[33m869aa1a[m fix: adiciona tipo explícito para stakeholderData para resolver erro TS2339
-[33m952b2bf[m fix: corrige erros TypeScript no build - stakeholder null check e tipos SelectWithSearch
-[33m00897c7[m fix: corrigir links do terminal de produção para /future/operacoes/terminal
