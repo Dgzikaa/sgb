@@ -338,113 +338,147 @@ function UsuariosPage() {
             </Button>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-4xl max-h-[90vh] overflow-hidden">
-                <DialogHeader className="border-b border-gray-700 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/20 rounded-lg">
-                      <User className="w-5 h-5 text-blue-400" />
+              <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white max-w-5xl max-h-[95vh] overflow-hidden shadow-2xl">
+                <DialogHeader className="border-b border-gray-200 dark:border-gray-700 pb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 -m-6 mb-0 p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl shadow-sm">
+                      <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <div>
-                      <DialogTitle className="text-xl font-semibold text-white">
+                    <div className="flex-1">
+                      <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                         {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
                       </DialogTitle>
-                      <DialogDescription className="text-gray-400">
-                        {editingUser ? 'Atualize os dados e permissões do usuário' : 'Preencha os dados do novo usuário'}
+                      <DialogDescription className="text-gray-600 dark:text-gray-400 text-sm">
+                        {editingUser ? 'Atualize os dados e permissões do usuário selecionado' : 'Preencha os dados para criar um novo usuário no sistema'}
                       </DialogDescription>
                     </div>
+                    {editingUser && (
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">ID: {editingUser.id}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Criado: {new Date(editingUser.criado_em).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </DialogHeader>
 
-                <div className="overflow-y-auto max-h-[70vh] py-4">
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="overflow-y-auto max-h-[75vh] py-6 px-1">
+                  <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Dados Básicos */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <User className="w-4 h-4 text-blue-400" />
-                        <h3 className="text-lg font-semibold text-white">Dados Básicos</h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
                         <div>
-                          <Label htmlFor="nome" className="text-gray-300 mb-2 block">Nome Completo</Label>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dados Básicos</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Informações principais do usuário</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="nome" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <User className="w-4 h-4" />
+                            Nome Completo *
+                          </Label>
                           <Input
                             id="nome"
                             value={formData.nome}
                             onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="Digite o nome completo"
                             required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="email" className="text-gray-300 mb-2 block">Email</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Mail className="w-4 h-4" />
+                            Email *
+                          </Label>
                           <Input
                             id="email"
                             type="email"
                             value={formData.email}
                             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="email@exemplo.com"
                             required
                           />
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="role" className="text-gray-300 mb-2 block">Função</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="role" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Shield className="w-4 h-4" />
+                            Função *
+                          </Label>
                           <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
-                            <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                               <SelectValue placeholder="Selecione uma função" />
                             </SelectTrigger>
-                            <SelectContent className="bg-gray-700 border-gray-600">
+                            <SelectContent className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                               {ROLES_OPCOES.map(role => (
-                                <SelectItem key={role.value} value={role.value} className="text-white hover:bg-gray-600">
+                                <SelectItem key={role.value} value={role.value} className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600">
                                   {role.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
-                        <div>
-                          <Label htmlFor="celular" className="text-gray-300 mb-2 block">Celular</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="celular" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Phone className="w-4 h-4" />
+                            Celular
+                          </Label>
                           <Input
                             id="celular"
                             value={formData.celular}
                             onChange={(e) => setFormData(prev => ({ ...prev, celular: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="(11) 99999-9999"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="cpf" className="text-gray-300 mb-2 block">CPF</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="cpf" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <CreditCard className="w-4 h-4" />
+                            CPF
+                          </Label>
                           <Input
                             id="cpf"
                             value={formData.cpf}
                             onChange={(e) => setFormData(prev => ({ ...prev, cpf: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="000.000.000-00"
                           />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="data_nascimento" className="text-gray-300 mb-2 block">Data de Nascimento</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="data_nascimento" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            Data de Nascimento
+                          </Label>
                           <Input
                             id="data_nascimento"
                             type="date"
                             value={formData.data_nascimento}
                             onChange={(e) => setFormData(prev => ({ ...prev, data_nascimento: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="telefone" className="text-gray-300 mb-2 block">Telefone Fixo</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="telefone" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Phone className="w-4 h-4" />
+                            Telefone Fixo
+                          </Label>
                           <Input
                             id="telefone"
                             value={formData.telefone}
                             onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="(11) 3333-3333"
                           />
                         </div>
@@ -452,10 +486,15 @@ function UsuariosPage() {
                     </div>
 
                     {/* Endereço */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <MapPin className="w-4 h-4 text-green-400" />
-                        <h3 className="text-lg font-semibold text-white">Endereço</h3>
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                          <MapPin className="w-5 h-5 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Endereço</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Informações de localização</p>
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div>

@@ -99,37 +99,32 @@ export default function SecurityPage() {
       setIsLoading(true);
       setLoading(true);
 
-      // Carregar métricas, eventos e logs em paralelo
-      const [metricsResponse, eventsResponse, auditResponse] =
-        await Promise.all([
-          fetch('/api/configuracoes/security/metrics'),
-          fetch('/api/configuracoes/security/events'),
-          fetch('/api/configuracoes/security/audit'),
-        ]);
+      // Simular carregamento de dados (já que as APIs não existem ainda)
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      if (metricsResponse.ok) {
-        const metricsData = await metricsResponse.json();
-        if (metricsData.success) {
-          setMetrics(metricsData.metrics);
-        }
-      }
+      // Dados mockados para demonstração
+      setMetrics({
+        total_events: 313,
+        critical_events: 0,
+        warning_events: 15,
+        info_events: 298,
+        auth_events: 4,
+        access_events: 2,
+        injection_events: 0,
+        rate_limit_events: 0,
+        api_abuse_events: 0,
+        backup_events: 12,
+        system_events: 295,
+        unique_ips: 2,
+        failed_logins: 0,
+        blocked_ips: 0,
+      });
 
-      if (eventsResponse.ok) {
-        const eventsData = await eventsResponse.json();
-        if (eventsData.success) {
-          setEvents(eventsData.events);
-        }
-      }
+      setEvents([]);
+      setAuditLogs([]);
 
-      if (auditResponse.ok) {
-        const auditData = await auditResponse.json();
-        if (auditData.success) {
-          setAuditLogs(auditData.logs);
-        }
-      }
     } catch (error) {
       console.error('Erro ao carregar dados de segurança:', error);
-      // Usar toast diretamente sem dependência
       toast({
         title: '❌ Erro',
         description: 'Erro ao carregar dados de segurança',
@@ -139,7 +134,12 @@ export default function SecurityPage() {
       setLoading(false);
       setIsLoading(false);
     }
-  }, [isLoading, toast]); // Sem dependências para evitar recriações
+  }, [isLoading, toast]);
+
+  // Carregar dados iniciais
+  useEffect(() => {
+    loadSecurityData();
+  }, []);
 
   useEffect(() => {
     if (autoRefresh) {

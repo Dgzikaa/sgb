@@ -108,10 +108,10 @@ serve(async (req) => {
       username: credenciais.username 
     })
 
-    // Calculate date range: (today - 1) to (today + 60)
+    // Calculate date range: (today - 7) to (today + 60)
     const hoje = new Date()
     const dataInicio = new Date(hoje)
-    dataInicio.setDate(hoje.getDate() - 1) // Ontem
+    dataInicio.setDate(hoje.getDate() - 7) // 1 semana atrás
     
     const dataFim = new Date(hoje)
     dataFim.setDate(hoje.getDate() + 60) // Hoje + 60 dias
@@ -119,7 +119,7 @@ serve(async (req) => {
     const startDate = dataInicio.toISOString().split('T')[0]
     const endDate = dataFim.toISOString().split('T')[0]
 
-    console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (61 dias)`)
+    console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (67 dias)`)
     console.log(`📋 Modo: Sincronização contínua (mantém histórico completo)`)
 
     let totalReservas = 0
@@ -136,7 +136,7 @@ serve(async (req) => {
       getinUrl.searchParams.set('start_date', startDate)
       getinUrl.searchParams.set('end_date', endDate)
       getinUrl.searchParams.set('page', currentPage.toString())
-      getinUrl.searchParams.set('per_page', '50')
+      getinUrl.searchParams.set('per_page', '1000')
 
       const response = await fetch(getinUrl.toString(), {
         method: 'GET',
@@ -160,12 +160,12 @@ serve(async (req) => {
       }
 
       console.log(`✅ ${data.data.length} reservas encontradas na página ${currentPage}`)
-      console.log(`📊 Paginação: ${data.pagination.current_page}/${data.pagination.total_pages} (total: ${data.pagination.total_items})`)
+      console.log(`📊 Paginação: ${data.pagination?.current_page || currentPage}/${data.pagination?.total_pages || 'undefined'} (total: ${data.pagination?.total_items || 'undefined'})`)
       console.log(`🔍 Debug paginação:`, {
-        current_page: data.pagination.current_page,
-        total_pages: data.pagination.total_pages,
-        total_items: data.pagination.total_items,
-        hasMorePages: data.pagination.current_page < data.pagination.total_pages
+        current_page: data.pagination?.current_page || currentPage,
+        total_pages: data.pagination?.total_pages || 'undefined',
+        total_items: data.pagination?.total_items || 'undefined',
+        hasMorePages: data.pagination ? data.pagination.current_page < data.pagination.total_pages : false
       })
 
       totalReservas += data.data.length
@@ -233,7 +233,7 @@ serve(async (req) => {
       }
 
       // Check if there are more pages
-      hasMorePages = data.pagination.current_page < data.pagination.total_pages
+      hasMorePages = data.pagination ? data.pagination.current_page < data.pagination.total_pages : false
       currentPage++
 
       // Rate limiting - wait 2 seconds between pages
