@@ -112,7 +112,11 @@ async function obterAccessToken(config: any): Promise<string> {
 
   // Nota: Em produção, você precisará configurar os certificados SSL
   // Por enquanto, vamos simular o processo
-  console.log('🔑 Obtendo token Inter para:', config.CONTA_CORRENTE);
+    console.log('🔑 Obtendo token Inter para:', {
+      conta,
+      bar_id,
+      conta_corrente: config.CONTA_CORRENTE
+    });
   
   // Simulação - em produção, fazer request real para o Inter
   return 'token_simulado_' + Date.now();
@@ -179,6 +183,13 @@ export async function POST(request: NextRequest) {
     }
 
     const config = CONFIGS[conta as keyof typeof CONFIGS];
+    
+    // Mapear conta para bar_id
+    const barIdMap = {
+      'Ordinário': 3,
+      'Deboche': 4
+    };
+    const bar_id = barIdMap[conta as keyof typeof barIdMap];
 
     // Processar chave PIX
     const { tipo, chaveFormatada } = identificarTipoChave(chave_pix);
@@ -305,6 +316,8 @@ export async function POST(request: NextRequest) {
         niboAgendamentoId,
         message: `Agendamento NIBO criado e PIX enviado com sucesso para ${nome_beneficiario}`,
         detalhes: {
+          bar_id,
+          conta,
           agendamento_nibo: niboAgendamentoId,
           codigo_pix: resultado.codigoSolicitacao,
           data_pagamento: dataPagamentoFormatada,

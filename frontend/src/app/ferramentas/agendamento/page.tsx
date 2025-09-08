@@ -1036,7 +1036,7 @@ export default function AgendamentoPage() {
           if (data.success) {
             adicionarLog('sucesso', `${nome_beneficiario}: R$ ${valor} - Agendamento NIBO + PIX processados com sucesso`);
             if (data.detalhes) {
-              adicionarLog('info', `  → NIBO: ${data.detalhes.agendamento_nibo} | PIX: ${data.detalhes.codigo_pix}`);
+              adicionarLog('info', `  → Bar: ${data.detalhes.conta} (ID: ${data.detalhes.bar_id}) | NIBO: ${data.detalhes.agendamento_nibo} | PIX: ${data.detalhes.codigo_pix}`);
             }
             sucessos++;
           } else {
@@ -1616,11 +1616,26 @@ export default function AgendamentoPage() {
 
                       {/* Botões de Ação */}
                       {dadosPlanilha.length > 0 && (
+                        <>
+                          {/* Mensagem de Aviso */}
+                          {(!categoriaAutomatica || !centroCustoAutomatico) && (
+                            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400">
+                                  ⚠️
+                                </div>
+                                <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                                  Preencha a Categoria e Centro de Custo antes de processar os pagamentos
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                          
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <Button
                             onClick={() => processarDadosAutomatico('Ordinário')}
-                            disabled={isProcessing}
-                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors"
+                            disabled={isProcessing || !categoriaAutomatica || !centroCustoAutomatico}
+                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isProcessing ? (
                               <RefreshCw className="w-5 h-5 animate-spin" />
@@ -1632,8 +1647,8 @@ export default function AgendamentoPage() {
 
                           <Button
                             onClick={() => processarDadosAutomatico('Deboche')}
-                            disabled={isProcessing}
-                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors"
+                            disabled={isProcessing || !categoriaAutomatica || !centroCustoAutomatico}
+                            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isProcessing ? (
                               <RefreshCw className="w-5 h-5 animate-spin" />
