@@ -375,6 +375,21 @@ export default function DrePage() {
     setEditingLancamento(null);
   };
 
+  const handleNewLancamento = () => {
+    setEditingLancamento({ 
+      id: 0, 
+      data_competencia: `${year}-${month.toString().padStart(2, '0')}-01`,
+      descricao: '',
+      valor: 0,
+      categoria: '',
+      categoria_macro: '',
+      observacoes: '',
+      usuario_criacao: '',
+      criado_em: '',
+      atualizado_em: ''
+    });
+  };
+
   useEffect(() => {
     fetchData();
     fetchLancamentosManuais();
@@ -1217,65 +1232,67 @@ export default function DrePage() {
                   </div>
                 )}
                 
-                {/* Seção de Lançamentos Manuais - Colapsada */}
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                {/* Seção de Lançamentos Manuais - Mobile Optimized */}
+                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
                   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    {/* Header da Seção */}
-                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
+                    {/* Header da Seção - Mobile Responsive */}
+                    <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
                         <button
                           onClick={() => setShowManuais(!showManuais)}
-                          className="flex items-center gap-3 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg p-2 transition-colors"
+                          className="flex items-center gap-2 sm:gap-3 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg p-2 transition-colors w-full sm:w-auto"
                         >
-                          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-                            <Edit3 className="w-4 h-4" />
+                          <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                            <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
                           </div>
-                          <div className="text-left">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                          <div className="text-left flex-1">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
                               Lançamentos Manuais
                             </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                               {lancamentosManuais.length} lançamento{lancamentosManuais.length !== 1 ? 's' : ''} no mês
                             </p>
                           </div>
                           <div className="ml-auto">
                             {showManuais ? (
-                              <ChevronDown className="w-5 h-5 text-gray-500" />
+                              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
                             ) : (
-                              <ChevronRight className="w-5 h-5 text-gray-500" />
+                              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
                             )}
                           </div>
                         </button>
                         
-                        <DreManualModal 
-                          onLancamentoAdicionado={() => {
-                            fetchData();
-                            fetchLancamentosManuais();
-                          }}
-                          mesAno={{ mes: month, ano: year }}
-                        />
+                        <div className="w-full sm:w-auto">
+                          <button
+                            onClick={handleNewLancamento}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-xs sm:text-sm"
+                          >
+                            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span>Novo</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Conteúdo Colapsável */}
+                    {/* Conteúdo Colapsável - Mobile Optimized */}
                     {showManuais && (
-                      <div className="p-4">
+                      <div className="p-3 sm:p-4">
                         {loadingManuais ? (
-                          <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          <div className="flex items-center justify-center py-6 sm:py-8">
+                            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
                           </div>
                         ) : lancamentosManuais.length === 0 ? (
-                          <div className="text-center py-8">
-                            <Edit3 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                            <p className="text-gray-500 dark:text-gray-400 font-medium">
+                          <div className="text-center py-6 sm:py-8">
+                            <Edit3 className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-2 sm:mb-3" />
+                            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 font-medium">
                               Nenhum lançamento manual encontrado
                             </p>
-                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                            <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 mt-1">
                               Use o botão "Novo" para adicionar ajustes manuais
                             </p>
                           </div>
                         ) : (
-                          <div className="space-y-3">
+                          <div className="space-y-2 sm:space-y-3">
                             {lancamentosManuais
                               .sort((a, b) => {
                                 // Lista de prioridades em ordem alfabética
@@ -1309,36 +1326,36 @@ export default function DrePage() {
                               .map((lancamento) => (
                               <div
                                 key={lancamento.id}
-                                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors gap-3 sm:gap-0"
                               >
-                                <div className="flex items-center gap-3">
-                                  <div className={`p-2 rounded-lg ${
+                                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                  <div className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 ${
                                     lancamento.valor >= 0 
                                       ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
                                       : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                                   }`}>
                                     {lancamento.valor >= 0 ? (
-                                      <TrendingUp className="w-4 h-4" />
+                                      <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
                                     ) : (
-                                      <TrendingDown className="w-4 h-4" />
+                                      <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
                                     )}
                                   </div>
-                                  <div>
-                                    <p className="font-semibold text-gray-900 dark:text-white">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
                                       {lancamento.descricao}
                                     </p>
-                                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                      <span>{lancamento.categoria_macro}</span>
-                                      <span>•</span>
-                                      <span>{lancamento.categoria}</span>
-                                      <span>•</span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                                      <span className="truncate">{lancamento.categoria_macro}</span>
+                                      <span className="hidden sm:inline">•</span>
+                                      <span className="truncate">{lancamento.categoria}</span>
+                                      <span className="hidden sm:inline">•</span>
                                       <span>{new Date(lancamento.data_competencia).toLocaleDateString('pt-BR')}</span>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <div className="text-right">
-                                    <p className={`text-lg font-bold ${
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                                  <div className="text-left sm:text-right flex-1 sm:flex-initial">
+                                    <p className={`text-base sm:text-lg font-bold ${
                                       lancamento.valor >= 0 
                                         ? 'text-green-600 dark:text-green-400'
                                         : 'text-red-600 dark:text-red-400'
@@ -1346,27 +1363,27 @@ export default function DrePage() {
                                       {formatCurrency(lancamento.valor)}
                                     </p>
                                     {lancamento.observacoes && (
-                                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate">
                                         {lancamento.observacoes}
                                       </p>
                                     )}
                                   </div>
                                   
-                                  {/* Botões de Ação */}
-                                  <div className="flex items-center gap-2">
+                                  {/* Botões de Ação - Mobile Optimized */}
+                                  <div className="flex items-center gap-2 justify-end sm:justify-start">
                                     <button
                                       onClick={() => handleEditLancamento(lancamento)}
-                                      className="p-2 rounded-lg bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition-colors"
+                                      className="p-1.5 sm:p-2 rounded-lg bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition-colors"
                                       title="Editar lançamento"
                                     >
-                                      <Edit3 className="w-4 h-4" />
+                                      <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </button>
                                     <button
                                       onClick={() => handleDeleteLancamento(lancamento.id)}
-                                      className="p-2 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition-colors"
+                                      className="p-1.5 sm:p-2 rounded-lg bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 transition-colors"
                                       title="Excluir lançamento"
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </button>
                                   </div>
                                 </div>

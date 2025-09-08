@@ -251,7 +251,7 @@ export default function DreManualModal({
     setLoading(true)
 
     try {
-      const isEditing = !!editingLancamento
+      const isEditing = !!(editingLancamento && editingLancamento.id > 0)
       const url = isEditing 
         ? `/api/financeiro/dre-manual/${editingLancamento.id}`
         : '/api/financeiro/dre-simples'
