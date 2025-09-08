@@ -102,7 +102,7 @@ function identificarTipoChave(chave: string): { tipo: string | null; chaveFormat
 }
 
 // Função para obter token do Inter
-async function obterAccessToken(config: any): Promise<string> {
+async function obterAccessToken(config: any, conta: string, bar_id: number): Promise<string> {
   const body = new URLSearchParams({
     client_id: config.CLIENT_ID,
     client_secret: config.CLIENT_SECRET,
@@ -280,7 +280,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Obter token do Inter
-    const token = await obterAccessToken(config);
+    const token = await obterAccessToken(config, conta, bar_id);
 
     // 2. SEGUNDO: Preparar payload para o PIX
     const payload = {

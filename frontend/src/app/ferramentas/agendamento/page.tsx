@@ -1658,6 +1658,7 @@ export default function AgendamentoPage() {
                             Processar como "Deboche"
                           </Button>
                         </div>
+                        </>
                       )}
 
                       {/* Status do Processamento */}
