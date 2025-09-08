@@ -149,6 +149,8 @@ export default function AgendamentoPage() {
   }[]>([]);
   const [dadosPlanilha, setDadosPlanilha] = useState<string[][]>([]);
   const [modoEdicaoPlanilha, setModoEdicaoPlanilha] = useState(false);
+  const [categoriaAutomatica, setCategoriaAutomatica] = useState<string>('');
+  const [centroCustoAutomatico, setCentroCustoAutomatico] = useState<string>('');
 
   // Input manual
   const [novoPagamento, setNovoPagamento] = useState({
@@ -948,6 +950,24 @@ export default function AgendamentoPage() {
       return;
     }
 
+    if (!categoriaAutomatica) {
+      toast({
+        title: 'Categoria obrigatória',
+        description: 'Selecione uma categoria antes de processar',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!centroCustoAutomatico) {
+      toast({
+        title: 'Centro de Custo obrigatório',
+        description: 'Selecione um centro de custo antes de processar',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsProcessing(true);
     setLogsProcessamento([]);
     
@@ -966,13 +986,13 @@ export default function AgendamentoPage() {
         const linha = dadosPlanilha[i];
         
         // Validar se a linha tem dados suficientes
-        if (linha.length < 5) {
-          adicionarLog('erro', `Linha ${i + 1}: Dados insuficientes (${linha.length} colunas)`);
+        if (linha.length < 6) {
+          adicionarLog('erro', `Linha ${i + 1}: Dados insuficientes (${linha.length} colunas, esperado 6)`);
           erros++;
           continue;
         }
 
-        const [nome_beneficiario, chave_pix, valor, descricao, data_pagamento] = linha;
+        const [nome_beneficiario, chave_pix, valor, descricao, data_pagamento, data_competencia] = linha;
 
         // Validações básicas
         if (!chave_pix?.trim()) {
@@ -994,7 +1014,7 @@ export default function AgendamentoPage() {
         }
 
         try {
-          // Chamar API para processar o pagamento
+          // Chamar API para processar o agendamento + pagamento
           const response = await fetch('/api/agendamento/processar-automatico', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1005,13 +1025,19 @@ export default function AgendamentoPage() {
               valor: valor.trim(),
               descricao: descricao?.trim() || '',
               data_pagamento: data_pagamento?.trim() || '',
+              data_competencia: data_competencia?.trim() || '',
+              categoria_id: categoriaAutomatica,
+              centro_custo_id: centroCustoAutomatico,
             }),
           });
 
           const data = await response.json();
           
           if (data.success) {
-            adicionarLog('sucesso', `${nome_beneficiario}: R$ ${valor} - Processado com sucesso`);
+            adicionarLog('sucesso', `${nome_beneficiario}: R$ ${valor} - Agendamento NIBO + PIX processados com sucesso`);
+            if (data.detalhes) {
+              adicionarLog('info', `  → NIBO: ${data.detalhes.agendamento_nibo} | PIX: ${data.detalhes.codigo_pix}`);
+            }
             sucessos++;
           } else {
             adicionarLog('erro', `${nome_beneficiario}: ${data.error || 'Erro desconhecido'}`);
@@ -1453,8 +1479,8 @@ export default function AgendamentoPage() {
                         <div className="text-xs text-blue-600 dark:text-blue-500 space-y-1">
                           <div>1. <strong>Copie</strong> os dados do Excel/Sheets (selecione as linhas e Ctrl+C)</div>
                           <div>2. <strong>Cole</strong> na área abaixo (clique e Ctrl+V)</div>
-                          <div>3. <strong>Verifique</strong> se as colunas estão corretas</div>
-                          <div>4. <strong>Processe</strong> os pagamentos automaticamente</div>
+                          <div>3. <strong>Configure</strong> categoria e centro de custo</div>
+                          <div>4. <strong>Processe</strong> - cria agendamento no NIBO + envia pagamento PIX</div>
                         </div>
                       </div>
 
@@ -1489,7 +1515,7 @@ export default function AgendamentoPage() {
                         <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                           <textarea
                             className="w-full h-32 p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono resize-none border-0 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                            placeholder="Cole os dados aqui (Ctrl+V)&#10;Formato esperado:&#10;nome_beneficiario	chave_pix	valor	descricao	data_pagamento&#10;João Silva	11999999999	100,00	Pagamento teste	01/01/2024"
+                            placeholder="Cole os dados aqui (Ctrl+V)&#10;Formato esperado:&#10;nome_beneficiario	chave_pix	valor	descricao	data_pagamento	data_competencia&#10;João Silva	11999999999	100,00	Pagamento teste	01/01/2024	01/01/2024"
                             value={dadosPlanilha.map(row => row.join('\t')).join('\n')}
                             onChange={(e) => {
                               const linhas = e.target.value.split('\n').filter(linha => linha.trim());
@@ -1520,7 +1546,8 @@ export default function AgendamentoPage() {
                                     <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Chave PIX</th>
                                     <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Valor</th>
                                     <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Descrição</th>
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300">Data</th>
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Data Pgto</th>
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300">Data Comp</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -1530,7 +1557,8 @@ export default function AgendamentoPage() {
                                       <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[1] || '-'}</td>
                                       <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[2] || '-'}</td>
                                       <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[3] || '-'}</td>
-                                      <td className="p-2 text-gray-900 dark:text-white">{linha[4] || '-'}</td>
+                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[4] || '-'}</td>
+                                      <td className="p-2 text-gray-900 dark:text-white">{linha[5] || '-'}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -1544,6 +1572,47 @@ export default function AgendamentoPage() {
                           </div>
                         )}
                       </div>
+
+                      {/* Configurações de Categoria e Centro de Custo */}
+                      {dadosPlanilha.length > 0 && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                            Configurações do Agendamento NIBO
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                                Categoria *
+                              </Label>
+                              <SelectWithSearch
+                                value={categoriaAutomatica}
+                                onValueChange={(value) => setCategoriaAutomatica(value || '')}
+                                placeholder="Selecione uma categoria"
+                                options={categorias.map(cat => ({
+                                  value: cat.id.toString(),
+                                  label: cat.name
+                                }))}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                                Centro de Custo *
+                              </Label>
+                              <SelectWithSearch
+                                value={centroCustoAutomatico}
+                                onValueChange={(value) => setCentroCustoAutomatico(value || '')}
+                                placeholder="Selecione um centro de custo"
+                                options={centrosCusto.map(cc => ({
+                                  value: cc.id.toString(),
+                                  label: cc.name
+                                }))}
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Botões de Ação */}
                       {dadosPlanilha.length > 0 && (

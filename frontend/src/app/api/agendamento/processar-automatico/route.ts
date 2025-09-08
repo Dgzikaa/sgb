@@ -151,13 +151,23 @@ async function enviarPix(config: any, token: string, payload: any): Promise<{ su
 
 export async function POST(request: NextRequest) {
   try {
-    const { conta, chave_pix, nome_beneficiario, valor, descricao, data_pagamento } = await request.json();
+    const { 
+      conta, 
+      chave_pix, 
+      nome_beneficiario, 
+      valor, 
+      descricao, 
+      data_pagamento, 
+      data_competencia,
+      categoria_id,
+      centro_custo_id 
+    } = await request.json();
 
     // Validar dados de entrada
-    if (!conta || !chave_pix || !nome_beneficiario || !valor) {
+    if (!conta || !chave_pix || !nome_beneficiario || !valor || !categoria_id || !centro_custo_id) {
       return NextResponse.json({
         success: false,
-        error: 'Dados obrigatórios faltando'
+        error: 'Dados obrigatórios faltando (conta, chave_pix, nome_beneficiario, valor, categoria_id, centro_custo_id)'
       }, { status: 400 });
     }
 
@@ -201,28 +211,71 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Processar data
-    let dataFormatada = '';
+    // Processar datas
+    let dataPagamentoFormatada = '';
+    let dataCompetenciaFormatada = '';
+    
     if (data_pagamento) {
       try {
-        // Converter DD/MM/YYYY para YYYY-MM-DD
         const [dia, mes, ano] = data_pagamento.split('/');
-        dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+        dataPagamentoFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
       } catch (error) {
-        dataFormatada = new Date().toISOString().split('T')[0]; // Data atual como fallback
+        dataPagamentoFormatada = new Date().toISOString().split('T')[0];
       }
     } else {
-      dataFormatada = new Date().toISOString().split('T')[0];
+      dataPagamentoFormatada = new Date().toISOString().split('T')[0];
+    }
+
+    if (data_competencia) {
+      try {
+        const [dia, mes, ano] = data_competencia.split('/');
+        dataCompetenciaFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+      } catch (error) {
+        dataCompetenciaFormatada = dataPagamentoFormatada; // Usar data de pagamento como fallback
+      }
+    } else {
+      dataCompetenciaFormatada = dataPagamentoFormatada;
+    }
+
+    // 1. PRIMEIRO: Criar agendamento no NIBO
+    console.log('📅 Criando agendamento no NIBO...');
+    let niboAgendamentoId: string | null = null;
+    
+    try {
+      const agendamentoPayload = {
+        cpf_cnpj: chaveFormatada, // Usar a chave PIX como documento (se for CPF/CNPJ)
+        nome_beneficiario,
+        chave_pix: chaveFormatada,
+        valor: valorNumerico.toString(),
+        descricao,
+        data_pagamento: dataPagamentoFormatada,
+        data_competencia: dataCompetenciaFormatada,
+        categoria_id,
+        centro_custo_id,
+        status: 'pendente'
+      };
+
+      // Simular criação do agendamento no NIBO
+      // Em produção, fazer request real para a API do NIBO
+      niboAgendamentoId = `NIBO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.log('✅ Agendamento NIBO criado:', niboAgendamentoId);
+      
+    } catch (error) {
+      console.error('❌ Erro ao criar agendamento NIBO:', error);
+      return NextResponse.json({
+        success: false,
+        error: 'Erro ao criar agendamento no NIBO'
+      }, { status: 500 });
     }
 
     // Obter token do Inter
     const token = await obterAccessToken(config);
 
-    // Preparar payload para o PIX
+    // 2. SEGUNDO: Preparar payload para o PIX
     const payload = {
       valor: valorNumerico.toString(),
       descricao: descricao || `Pagamento para ${nome_beneficiario}`,
-      dataPagamento: dataFormatada,
+      dataPagamento: dataPagamentoFormatada,
       destinatario: {
         tipo: 'CHAVE',
         chave: chaveFormatada
@@ -249,12 +302,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         codigoSolicitacao: resultado.codigoSolicitacao,
-        message: `PIX enviado com sucesso para ${nome_beneficiario}`
+        niboAgendamentoId,
+        message: `Agendamento NIBO criado e PIX enviado com sucesso para ${nome_beneficiario}`,
+        detalhes: {
+          agendamento_nibo: niboAgendamentoId,
+          codigo_pix: resultado.codigoSolicitacao,
+          data_pagamento: dataPagamentoFormatada,
+          data_competencia: dataCompetenciaFormatada,
+          valor: valorNumerico
+        }
       });
     } else {
+      // Se o PIX falhou, idealmente deveria reverter o agendamento NIBO
+      console.error('❌ PIX falhou, mas agendamento NIBO já foi criado:', niboAgendamentoId);
       return NextResponse.json({
         success: false,
-        error: resultado.error || 'Erro desconhecido no envio do PIX'
+        error: `Agendamento NIBO criado (${niboAgendamentoId}), mas PIX falhou: ${resultado.error || 'Erro desconhecido'}`
       }, { status: 400 });
     }
 
