@@ -31,7 +31,17 @@ export async function GET() {
 // POST - Criar novo usuário
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
+      console.error('❌ Erro ao fazer parse do JSON:', jsonError);
+      return NextResponse.json(
+        { error: 'Dados JSON inválidos' },
+        { status: 400 }
+      );
+    }
+    
     const { email, nome, role, modulos_permitidos, ativo = true } = body;
 
     if (!email || !nome || !role) {

@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     `;
 
     const result = await resend.emails.send({
-      from: 'ZYKOR Sistema <sistema@zykor.com.br>',
+      from: 'ZYKOR Sistema <sistema@send.zykor.com.br>',
       to: [to],
       subject: '🚀 Bem-vindo ao ZYKOR - Suas Credenciais de Acesso',
       html: htmlContent

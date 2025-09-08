@@ -652,7 +652,7 @@ export async function GET(request: NextRequest) {
           primeiros3Agendamentos: agendamentosDaSemana.slice(0, 3).map(item => ({
             data_competencia: item.data_competencia,
             valor: item.valor,
-            categoria_nome: item.categoria_nome
+            categoria_nome: (item as any).categoria_nome
           }))
         });
       }

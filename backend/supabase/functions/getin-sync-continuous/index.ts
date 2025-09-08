@@ -124,6 +124,8 @@ serve(async (req) => {
 
     let totalReservas = 0
     let totalSalvas = 0
+    let totalNovas = 0
+    let totalAtualizadas = 0
     let totalErros = 0
     let currentPage = 1
     let hasMorePages = true
@@ -136,7 +138,7 @@ serve(async (req) => {
       getinUrl.searchParams.set('start_date', startDate)
       getinUrl.searchParams.set('end_date', endDate)
       getinUrl.searchParams.set('page', currentPage.toString())
-      getinUrl.searchParams.set('per_page', '1000')
+      getinUrl.searchParams.set('per_page', '1000') // Máximo permitido pela API
 
       const response = await fetch(getinUrl.toString(), {
         method: 'GET',
@@ -175,6 +177,15 @@ serve(async (req) => {
 
       for (const reserva of data.data) {
         try {
+          // Check if reservation already exists
+          const { data: existingReservation } = await supabase
+            .from('getin_reservations')
+            .select('reservation_id, updated_at')
+            .eq('reservation_id', reserva.id)
+            .single()
+
+          const isNewReservation = !existingReservation
+
           const reservaData = {
             reservation_id: reserva.id,
             unit_id: reserva.unit_id,
@@ -222,7 +233,13 @@ serve(async (req) => {
             console.error(`❌ Erro ao salvar ${reserva.id}:`, upsertError.message)
             totalErros++
           } else {
-            console.log(`✅ ${reserva.id} - ${reserva.customer_name} (${reserva.date})`)
+            if (isNewReservation) {
+              totalNovas++
+              console.log(`🆕 ${reserva.id} - ${reserva.customer_name} (${reserva.date}) - NOVA`)
+            } else {
+              totalAtualizadas++
+              console.log(`🔄 ${reserva.id} - ${reserva.customer_name} (${reserva.date}) - ATUALIZADA`)
+            }
             totalSalvas++
           }
 
@@ -250,29 +267,30 @@ serve(async (req) => {
     console.log('\n🎉 SINCRONIZAÇÃO CONTÍNUA CONCLUÍDA:')
     console.log('================================================================================')
     console.log(`📊 Reservas encontradas: ${totalReservas}`)
-    console.log(`✅ Reservas salvas/atualizadas: ${totalSalvas}`)
+    console.log(`🆕 Reservas novas: ${totalNovas}`)
+    console.log(`🔄 Reservas atualizadas: ${totalAtualizadas}`)
+    console.log(`✅ Total salvas: ${totalSalvas}`)
     console.log(`❌ Erros: ${totalErros}`)
     console.log(`⏱️  Duração: ${Math.round((Date.now() - agora.getTime()) / 1000)}s`)
     console.log(`📅 Período: ${startDate} a ${endDate}`)
     console.log(`🕐 Próxima execução: ${proximaExecucao.toLocaleString('pt-BR')}`)
     console.log('================================================================================')
 
-    // Try to log sync result (optional, don't fail if table doesn't exist)
+    // Log sync result to getin_sync_logs table
     try {
       await supabase
-        .from('sync_logs')
+        .from('getin_sync_logs')
         .insert({
-          sistema: 'getin',
-          tipo: 'continuous',
-          status: totalErros === 0 ? 'success' : 'partial',
-          total_encontrados: totalReservas,
-          total_salvos: totalSalvas,
-          total_erros: totalErros,
-          periodo_inicio: startDate,
-          periodo_fim: endDate,
+          status: totalErros === 0 ? 'sucesso' : 'erro_parcial',
+          reservas_extraidas: totalReservas,
+          reservas_novas: totalNovas,
+          reservas_atualizadas: totalAtualizadas,
           detalhes: {
-            proxima_execucao: proximaExecucao.toISOString(),
-            duracao_segundos: Math.round((Date.now() - agora.getTime()) / 1000)
+            periodo_inicio: startDate,
+            periodo_fim: endDate,
+            total_erros: totalErros,
+            duracao_segundos: Math.round((Date.now() - agora.getTime()) / 1000),
+            proxima_execucao: proximaExecucao.toISOString()
           }
         })
     } catch (logError) {
@@ -285,6 +303,8 @@ serve(async (req) => {
         message: 'Sincronização contínua GET IN concluída',
         stats: {
           total_encontrados: totalReservas,
+          total_novas: totalNovas,
+          total_atualizadas: totalAtualizadas,
           total_salvos: totalSalvas,
           total_erros: totalErros,
           periodo: `${startDate} a ${endDate}`,
