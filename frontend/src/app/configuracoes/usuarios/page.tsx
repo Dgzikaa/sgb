@@ -214,25 +214,38 @@ function UsuariosPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Tem certeza que deseja desativar este usuário?')) return;
+    if (!confirm('⚠️ ATENÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE este usuário?\n\nEsta ação:\n• Remove o usuário da tabela\n• Remove do sistema de autenticação\n• NÃO PODE SER DESFEITA\n\nDigite "CONFIRMAR" para prosseguir:')) return;
+
+    const confirmacao = prompt('Digite "CONFIRMAR" para excluir permanentemente:');
+    if (confirmacao !== 'CONFIRMAR') {
+      toast({
+        title: 'Cancelado',
+        description: 'Exclusão cancelada pelo usuário',
+      });
+      return;
+    }
 
     try {
       const response = await fetch(`/api/configuracoes/usuarios?id=${id}`, {
         method: 'DELETE',
       });
 
+      const result = await response.json();
+
       if (response.ok) {
         toast({
           title: 'Sucesso',
-          description: 'Usuário desativado com sucesso',
+          description: result.message || 'Usuário excluído permanentemente',
         });
         fetchUsuarios();
+      } else {
+        throw new Error(result.error || 'Erro ao excluir usuário');
       }
     } catch (error) {
-      console.error('Erro ao desativar usuário:', error);
+      console.error('Erro ao excluir usuário:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao desativar usuário',
+        description: error instanceof Error ? error.message : 'Erro ao excluir usuário',
         variant: 'destructive',
       });
     }

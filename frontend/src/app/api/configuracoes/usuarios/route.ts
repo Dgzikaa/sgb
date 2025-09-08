@@ -171,7 +171,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - Deletar usuário (desativar)
+// DELETE - Deletar usuário (exclusão completa)
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -184,16 +184,58 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase
+    // 1. Buscar dados do usuário para obter o user_id do Auth
+    const { data: usuario, error: fetchError } = await supabase
       .from('usuarios_bar')
-      .update({ ativo: false })
+      .select('user_id, email, nome')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !usuario) {
+      return NextResponse.json(
+        { error: 'Usuário não encontrado' },
+        { status: 404 }
+      );
+    }
+
+    console.log(`🗑️ Iniciando exclusão completa do usuário: ${usuario.email}`);
+
+    // 2. Excluir da tabela usuarios_bar
+    const { error: deleteTableError } = await supabase
+      .from('usuarios_bar')
+      .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (deleteTableError) {
+      console.error('❌ Erro ao excluir da tabela usuarios_bar:', deleteTableError);
+      throw deleteTableError;
+    }
 
-    return NextResponse.json({ success: true });
+    console.log('✅ Usuário removido da tabela usuarios_bar');
+
+    // 3. Excluir do Supabase Auth (se user_id existir)
+    if (usuario.user_id) {
+      try {
+        const { error: authDeleteError } = await supabase.auth.admin.deleteUser(usuario.user_id);
+        
+        if (authDeleteError) {
+          console.warn('⚠️ Erro ao excluir do Auth (usuário pode já ter sido removido):', authDeleteError.message);
+        } else {
+          console.log('✅ Usuário removido do Supabase Auth');
+        }
+      } catch (authError) {
+        console.warn('⚠️ Erro na exclusão do Auth:', authError);
+        // Não falhar a operação se o Auth der erro
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      message: `Usuário ${usuario.nome} (${usuario.email}) foi excluído completamente do sistema`
+    });
+
   } catch (error) {
-    console.error('Erro ao desativar usuário:', error);
+    console.error('❌ Erro ao excluir usuário:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
