@@ -10,12 +10,11 @@ export async function GET(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Buscar centros de custo ativos
-    const { data: centrosCusto, error } = await supabase
-      .from('nibo_centros_custo')
-      .select('id, nome, descricao')
-      .eq('ativo', true)
-      .order('nome');
+    // Buscar categorias macro distintas como centros de custo
+    const { data: categorias, error } = await supabase
+      .from('nibo_categorias')
+      .select('categoria_macro')
+      .eq('ativo', true);
 
     if (error) {
       console.error('Erro ao buscar centros de custo:', error);
@@ -24,6 +23,14 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Criar lista única de centros de custo baseada nas categorias macro
+    const centrosCustoUnicos = [...new Set(categorias?.map(c => c.categoria_macro) || [])];
+    const centrosCusto = centrosCustoUnicos.map((nome, index) => ({
+      id: index + 1,
+      nome: nome,
+      descricao: `Centro de custo: ${nome}`
+    }));
 
     return NextResponse.json({ centrosCusto });
   } catch (error) {

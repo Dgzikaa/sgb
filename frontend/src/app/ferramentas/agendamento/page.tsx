@@ -1392,7 +1392,7 @@ export default function AgendamentoPage() {
                             placeholder="Selecione uma categoria"
                             options={categorias.map(cat => ({
                               value: cat.id,
-                              label: cat.nome,
+                              label: cat.categoria_nome,
                             }))}
                             className="mt-1"
                           />
@@ -1588,10 +1588,10 @@ export default function AgendamentoPage() {
                                 value={categoriaAutomatica}
                                 onValueChange={(value) => setCategoriaAutomatica(value || '')}
                                 placeholder="Selecione uma categoria"
-                                options={categorias.map(cat => ({
-                                  value: cat.id.toString(),
-                                  label: cat.name
-                                }))}
+                            options={categorias.map(cat => ({
+                              value: cat.id.toString(),
+                              label: cat.categoria_nome
+                            }))}
                                 className="mt-1"
                               />
                             </div>
@@ -1605,7 +1605,7 @@ export default function AgendamentoPage() {
                                 placeholder="Selecione um centro de custo"
                                 options={centrosCusto.map(cc => ({
                                   value: cc.id.toString(),
-                                  label: cc.name
+                                  label: cc.nome
                                 }))}
                                 className="mt-1"
                               />

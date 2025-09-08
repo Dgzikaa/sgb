@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
     // Buscar categorias ativas
     const { data: categorias, error } = await supabase
       .from('nibo_categorias')
-      .select('id, nome, descricao, tipo')
+      .select('id, categoria_nome, categoria_macro')
       .eq('ativo', true)
-      .order('nome');
+      .order('categoria_nome');
 
     if (error) {
       console.error('Erro ao buscar categorias:', error);
