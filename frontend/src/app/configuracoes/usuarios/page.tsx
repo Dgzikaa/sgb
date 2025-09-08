@@ -25,7 +25,8 @@ import {
   Calendar,
   MapPin,
   User,
-  CreditCard
+  CreditCard,
+  Building
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import PageHeader from '@/components/layouts/PageHeader';
@@ -38,6 +39,7 @@ interface Usuario {
   email: string;
   nome: string;
   role: string;
+  bar_id?: number;
   modulos_permitidos: string[];
   ativo: boolean;
   criado_em: string;
@@ -229,6 +231,7 @@ function UsuariosPage() {
       email: usuario.email,
       nome: usuario.nome,
       role: usuario.role,
+      bar_id: usuario.bar_id?.toString() || '',
       modulos_permitidos: usuario.modulos_permitidos || [],
       ativo: usuario.ativo,
       celular: usuario.celular || '',
