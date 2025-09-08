@@ -364,7 +364,10 @@ export default function DreManualModal({
             {editingLancamento ? 'Editar Lançamento Manual' : 'Novo Lançamento Manual'}
           </DialogTitle>
           <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm">
-            Adicione um ajuste manual à DRE do mês selecionado
+            {editingLancamento 
+              ? 'Edite os dados do lançamento manual selecionado' 
+              : 'Adicione ajustes manuais à DRE do mês selecionado. Você pode adicionar múltiplos lançamentos.'
+            }
           </p>
           
           {/* Mensagem de Sucesso */}
@@ -375,7 +378,7 @@ export default function DreManualModal({
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
                 <p className="text-sm font-semibold text-green-800 dark:text-green-200">
-                  ✅ Lançamento salvo com sucesso! Você pode adicionar outro.
+                  ✅ Lançamento adicionado com sucesso! Adicione outro ou feche o modal.
                 </p>
               </div>
             </div>
@@ -565,17 +568,7 @@ export default function DreManualModal({
               className="flex-1 h-12 text-sm font-semibold border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2"
             >
               <X className="w-4 h-4 flex-shrink-0" />
-              <span className="whitespace-nowrap">Fechar</span>
-            </button>
-            
-            <button
-              type="button"
-              onClick={handleNovoLancamento}
-              disabled={loading}
-              className="h-12 px-4 text-sm font-semibold border-2 border-green-300 dark:border-green-600 hover:border-green-400 dark:hover:border-green-500 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 text-green-700 dark:text-green-300 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex flex-row items-center justify-center gap-2"
-            >
-              <Plus className="w-4 h-4 flex-shrink-0" />
-              <span className="whitespace-nowrap">Limpar</span>
+              <span className="whitespace-nowrap">Cancelar</span>
             </button>
             
             <button
@@ -592,7 +585,7 @@ export default function DreManualModal({
                 <>
                   <Save className="w-4 h-4 flex-shrink-0" />
                   <span className="whitespace-nowrap">
-                    {editingLancamento ? 'Salvar Alterações' : 'Salvar e Continuar'}
+                    {editingLancamento ? 'Salvar Alterações' : 'Adicionar Lançamento'}
                   </span>
                 </>
               )}
