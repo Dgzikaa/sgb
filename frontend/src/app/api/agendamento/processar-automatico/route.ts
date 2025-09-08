@@ -248,41 +248,101 @@ export async function POST(request: NextRequest) {
       dataCompetenciaFormatada = dataPagamentoFormatada;
     }
 
-    // 1. PRIMEIRO: Criar agendamento no NIBO
+    // 1. PRIMEIRO: Buscar/Criar stakeholder no NIBO
+    console.log('🔍 Verificando stakeholder no NIBO...');
+    let stakeholderId: string | null = null;
+    
+    try {
+      // Buscar stakeholder existente por CPF/CNPJ
+      const cpfCnpj = chaveFormatada;
+      const stakeholderResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/stakeholders?q=${cpfCnpj}`);
+      const stakeholderData = await stakeholderResponse.json();
+
+      if (stakeholderData.success && stakeholderData.data.length > 0) {
+        stakeholderId = stakeholderData.data[0].id;
+        console.log('✅ Stakeholder encontrado:', stakeholderId);
+      } else {
+        // Criar novo stakeholder
+        console.log('📝 Criando novo stakeholder...');
+        const novoStakeholder = {
+          name: nome_beneficiario,
+          document: cpfCnpj,
+          type: 'fornecedor' as const,
+        };
+
+        const createResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/stakeholders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(novoStakeholder),
+        });
+
+        const createData = await createResponse.json();
+        if (createData.success) {
+          stakeholderId = createData.data.id;
+          console.log('✅ Stakeholder criado:', stakeholderId);
+        } else {
+          throw new Error(`Erro ao criar stakeholder: ${createData.error}`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao verificar/criar stakeholder:', error);
+      return NextResponse.json({
+        success: false,
+        error: `Erro ao verificar/criar stakeholder no NIBO: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+      }, { status: 500 });
+    }
+
+    // 2. SEGUNDO: Criar agendamento no NIBO
     console.log('📅 Criando agendamento no NIBO...');
     let niboAgendamentoId: string | null = null;
     
     try {
-      const agendamentoPayload = {
-        cpf_cnpj: chaveFormatada, // Usar a chave PIX como documento (se for CPF/CNPJ)
-        nome_beneficiario,
-        chave_pix: chaveFormatada,
-        valor: valorNumerico.toString(),
-        descricao,
-        data_pagamento: dataPagamentoFormatada,
-        data_competencia: dataCompetenciaFormatada,
-        categoria_id,
-        centro_custo_id,
-        status: 'pendente'
+      // Usar a mesma estrutura do botão "Agendar no NIBO" funcional
+      const agendamento = {
+        stakeholderId: stakeholderId,
+        dueDate: dataPagamentoFormatada,
+        scheduleDate: dataPagamentoFormatada,
+        categoria_id: categoria_id || '',
+        centro_custo_id: centro_custo_id || '',
+        categories: [{ description: descricao || 'Pagamento PIX' }],
+        accrualDate: dataCompetenciaFormatada,
+        value: valorNumerico,
+        description: descricao || `Pagamento PIX para ${nome_beneficiario}`,
+        reference: `PIX_${Date.now()}`,
       };
 
-      // Simular criação do agendamento no NIBO
-      // Em produção, fazer request real para a API do NIBO
-      niboAgendamentoId = `NIBO_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      console.log('✅ Agendamento NIBO criado:', niboAgendamentoId);
+      console.log('📋 Payload para NIBO:', agendamento);
+
+      const niboResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/schedules`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(agendamento)
+      });
+
+      if (!niboResponse.ok) {
+        const errorText = await niboResponse.text();
+        throw new Error(`Erro HTTP ${niboResponse.status}: ${errorText}`);
+      }
+
+      const niboResult = await niboResponse.json();
+      niboAgendamentoId = niboResult.data?.id || niboResult.id;
+      
+      console.log('✅ Agendamento NIBO criado com sucesso:', niboAgendamentoId);
       
     } catch (error) {
       console.error('❌ Erro ao criar agendamento NIBO:', error);
       return NextResponse.json({
         success: false,
-        error: 'Erro ao criar agendamento no NIBO'
+        error: `Erro ao criar agendamento no NIBO: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
       }, { status: 500 });
     }
 
-    // Obter token do Inter
+    // 3. TERCEIRO: Obter token do Inter
     const token = await obterAccessToken(config, conta, bar_id);
 
-    // 2. SEGUNDO: Preparar payload para o PIX
+    // 4. QUARTO: Preparar payload para o PIX
     const payload = {
       valor: valorNumerico.toString(),
       descricao: descricao || `Pagamento para ${nome_beneficiario}`,

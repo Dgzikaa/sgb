@@ -1258,16 +1258,16 @@ export default function AgendamentoPage() {
                               placeholder="000.000.000-00 ou 00.000.000/0000-00"
                               className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                             />
-                            <Button
+                            <button
                               onClick={() =>
                                 buscarStakeholder(novoPagamento.cpf_cnpj)
                               }
                               type="button"
-                              size="sm"
-                              className="btn-primary"
+                              className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                             >
                               <Search className="w-4 h-4" />
-                            </Button>
+                              <span>Buscar</span>
+                            </button>
                           </div>
                         </div>
                         <div>
@@ -1443,17 +1443,20 @@ export default function AgendamentoPage() {
                         />
                       </div>
                       <div className="flex gap-3 pt-4">
-                        <Button
+                        <button
                           onClick={adicionarPagamento}
-                          className="btn-primary"
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                         >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Adicionar à Lista
-                        </Button>
-                        <Button onClick={limparLista} className="btn-outline">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Limpar Lista
-                        </Button>
+                          <Plus className="w-4 h-4" />
+                          <span>Adicionar à Lista</span>
+                        </button>
+                        <button 
+                          onClick={limparLista} 
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg font-medium transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Limpar Lista</span>
+                        </button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1491,24 +1494,20 @@ export default function AgendamentoPage() {
                             Área de Dados (Cole aqui com Ctrl+V)
                           </Label>
                           <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
+                            <button
                               onClick={() => setDadosPlanilha([])}
-                              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+                              className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg font-medium transition-colors"
                             >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Limpar
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
+                              <Trash2 className="w-4 h-4" />
+                              <span>Limpar</span>
+                            </button>
+                            <button
                               onClick={() => setModoEdicaoPlanilha(!modoEdicaoPlanilha)}
-                              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+                              className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg font-medium transition-colors"
                             >
-                              <Edit className="w-4 h-4 mr-1" />
-                              {modoEdicaoPlanilha ? 'Visualizar' : 'Editar'}
-                            </Button>
+                              <Edit className="w-4 h-4" />
+                              <span>{modoEdicaoPlanilha ? 'Visualizar' : 'Editar'}</span>
+                            </button>
                           </div>
                         </div>
 
@@ -1632,31 +1631,31 @@ export default function AgendamentoPage() {
                           )}
                           
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <Button
+                          <button
                             onClick={() => processarDadosAutomatico('Ordinário')}
                             disabled={isProcessing || !categoriaAutomatica || !centroCustoAutomatico}
-                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isProcessing ? (
                               <RefreshCw className="w-5 h-5 animate-spin" />
                             ) : (
                               <Play className="w-5 h-5" />
                             )}
-                            Processar como "Ordinário"
-                          </Button>
+                            <span>Processar como "Ordinário"</span>
+                          </button>
 
-                          <Button
+                          <button
                             onClick={() => processarDadosAutomatico('Deboche')}
                             disabled={isProcessing || !categoriaAutomatica || !centroCustoAutomatico}
-                            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 h-12 flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isProcessing ? (
                               <RefreshCw className="w-5 h-5 animate-spin" />
                             ) : (
                               <Play className="w-5 h-5" />
                             )}
-                            Processar como "Deboche"
-                          </Button>
+                            <span>Processar como "Deboche"</span>
+                          </button>
                         </div>
                         </>
                       )}
@@ -1710,14 +1709,13 @@ export default function AgendamentoPage() {
                               </div>
                             ))}
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
+                          <button
                             onClick={() => setLogsProcessamento([])}
-                            className="mt-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1"
+                            className="mt-3 flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg font-medium transition-colors"
                           >
-                            Limpar Logs
-                          </Button>
+                            <Trash2 className="w-4 h-4" />
+                            <span>Limpar Logs</span>
+                          </button>
                         </div>
                       )}
                     </CardContent>
