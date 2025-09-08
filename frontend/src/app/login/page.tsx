@@ -115,12 +115,26 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // Simulação de envio de email de recuperação
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: forgotEmail
+        })
+      });
 
-      console.log('Solicitation para recuperação de senha:', forgotEmail);
-      setForgotSuccess(true);
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log('✅ Solicitação de reset enviada para:', forgotEmail);
+        setForgotSuccess(true);
+      } else {
+        throw new Error(result.error || 'Erro ao processar solicitação');
+      }
     } catch (error: unknown) {
+      console.error('❌ Erro no reset de senha:', error);
       setError(
         'Erro ao enviar email de recuperação: ' + (error as Error).message
       );
@@ -633,11 +647,11 @@ export default function LoginPage() {
                   </span>
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-2">
-                  E-mail Enviado!
+                  Nova Senha Enviada!
                 </h3>
                 <p className="text-slate-600 dark:text-gray-400 mb-4">
-                  Verifique sua caixa de entrada e siga as instruções para
-                  redefinir sua senha.
+                  Se o email existir em nossa base, você receberá uma nova senha temporária. 
+                  Use-a para fazer login e o sistema solicitará a criação de uma nova senha.
                 </p>
                 <div className="text-sm text-slate-500 dark:text-gray-500">
                   Este modal será fechado automaticamente...
