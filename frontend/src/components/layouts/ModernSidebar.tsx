@@ -137,13 +137,6 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Demonstrativo de Resultado Operacional',
           permission: 'dashboard_financeiro_mensal',
         },
-        {
-          icon: Calendar,
-          label: 'Agendamentos',
-          href: '/operacional/agendamentos',
-          description: 'Gestão de agendamentos operacionais',
-          permission: 'financeiro_agendamento',
-        },
       ],
     },
     {

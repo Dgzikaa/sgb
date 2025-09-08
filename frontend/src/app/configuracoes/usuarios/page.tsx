@@ -68,6 +68,7 @@ function UsuariosPage() {
   const { user: currentUser, refreshUserData } = usePermissions();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [modulos, setModulos] = useState<Modulo[]>([]);
+  const [bares, setBares] = useState<{id: number, nome: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('todos');
@@ -77,6 +78,7 @@ function UsuariosPage() {
     email: '',
     nome: '',
     role: '',
+    bar_id: '',
     modulos_permitidos: [] as string[],
     ativo: true,
     celular: '',
@@ -122,9 +124,27 @@ function UsuariosPage() {
     }
   }, []);
 
+  const fetchBares = useCallback(async () => {
+    try {
+      const response = await fetch('/api/configuracoes/bars');
+      const data = await response.json();
+      if (data.bars) {
+        setBares(data.bars);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar bares:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao carregar bares',
+        variant: 'destructive',
+      });
+    }
+  }, [toast]);
+
   useEffect(() => {
     fetchUsuarios();
     fetchModulos();
+    fetchBares();
   }, []); // Remove as dependências para evitar loop infinito
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -267,6 +287,7 @@ function UsuariosPage() {
       email: '',
       nome: '',
       role: '',
+      bar_id: '',
       modulos_permitidos: [],
       ativo: true,
       celular: '',
@@ -432,6 +453,24 @@ function UsuariosPage() {
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="bar_id" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                            <Building className="w-4 h-4" />
+                            Bar *
+                          </Label>
+                          <Select value={formData.bar_id} onValueChange={(value) => setFormData(prev => ({ ...prev, bar_id: value }))}>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                              <SelectValue placeholder="Selecione o bar" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {bares.map((bar) => (
+                                <SelectItem key={bar.id} value={bar.id.toString()}>
+                                  {bar.nome}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <div className="space-y-2">
                           <Label htmlFor="role" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                             <Shield className="w-4 h-4" />

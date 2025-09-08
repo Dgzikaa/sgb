@@ -165,6 +165,12 @@ export default function LoginPage() {
         setTimeout(() => {
           router.push(destination);
         }, 2000);
+      } else if (response && response.requirePasswordReset) {
+        // Primeiro acesso - redirecionar para redefinição de senha
+        setSuccess('🔑 Primeiro acesso detectado. Redirecionando para redefinição de senha...');
+        setTimeout(() => {
+          window.location.href = response.redirectUrl;
+        }, 2000);
       } else {
         setError(response?.error || 'Erro no login');
       }

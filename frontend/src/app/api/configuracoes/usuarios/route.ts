@@ -42,11 +42,11 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { email, nome, role, modulos_permitidos, ativo = true } = body;
+    const { email, nome, role, bar_id, modulos_permitidos, ativo = true } = body;
 
-    if (!email || !nome || !role) {
+    if (!email || !nome || !role || !bar_id) {
       return NextResponse.json(
-        { error: 'Email, nome e role são obrigatórios' },
+        { error: 'Email, nome, role e bar são obrigatórios' },
         { status: 400 }
       );
     }
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
       .from('usuarios_bar')
       .insert({
         user_id: authUser.user.id, // UUID do usuário criado no Auth
+        bar_id: parseInt(bar_id),
         email,
         nome,
         role,

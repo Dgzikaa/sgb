@@ -98,12 +98,12 @@ export async function POST(request: NextRequest) {
         </div>
         
         <div class="content">
-            <div class="welcome-badge">🎉 Bem-vindo ao Sistema</div>
+            <div class="welcome-badge">✅ Conta Criada com Sucesso</div>
             
             <h1 style="color: #1f2937; margin-bottom: 20px;">Olá, ${nome}!</h1>
             
             <p style="color: #4b5563; line-height: 1.6;">
-                Sua conta foi criada com sucesso no sistema ZYKOR! Você foi cadastrado como <span class="role-badge">${roleDescription}</span> e já pode acessar o sistema.
+                Bem-vindo ao ZYKOR! Sua conta foi criada com sucesso e você foi cadastrado como <span class="role-badge">${roleDescription}</span>. Este email contém suas credenciais de acesso ao sistema.
             </p>
             
             <div class="credentials-box">
@@ -127,11 +127,11 @@ export async function POST(request: NextRequest) {
             </div>
             
             <div class="security-info">
-                <h3 style="color: #92400e; margin-top: 0;">🔐 Importante - Segurança:</h3>
-                <div class="security-item">⚠️ Esta é uma senha temporária - você DEVE alterá-la no primeiro acesso</div>
-                <div class="security-item">🔄 O sistema solicitará a redefinição da senha automaticamente</div>
-                <div class="security-item">🛡️ Nunca compartilhe suas credenciais com outras pessoas</div>
-                <div class="security-item">📱 Mantenha seus dados de acesso seguros</div>
+                <h3 style="color: #92400e; margin-top: 0;">🔐 Informações de Segurança:</h3>
+                <div class="security-item">• Esta é uma senha temporária que deve ser alterada no primeiro acesso</div>
+                <div class="security-item">• O sistema solicitará automaticamente a criação de uma nova senha</div>
+                <div class="security-item">• Nunca compartilhe suas credenciais com terceiros</div>
+                <div class="security-item">• Mantenha seus dados de acesso em local seguro</div>
             </div>
             
             <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -162,8 +162,17 @@ export async function POST(request: NextRequest) {
     const result = await resend.emails.send({
       from: 'ZYKOR Sistema <sistema@send.zykor.com.br>',
       to: [to],
-      subject: '🚀 Bem-vindo ao ZYKOR - Suas Credenciais de Acesso',
-      html: htmlContent
+      subject: 'Bem-vindo ao ZYKOR - Suas Credenciais de Acesso',
+      html: htmlContent,
+      headers: {
+        'X-Priority': '3',
+        'X-Mailer': 'ZYKOR Sistema v2.0',
+        'Reply-To': 'suporte@zykor.com.br',
+      },
+      tags: [
+        { name: 'category', value: 'user-onboarding' },
+        { name: 'environment', value: process.env.NODE_ENV || 'production' }
+      ]
     });
 
     console.log('📧 Email de boas-vindas enviado para novo usuário:', result);

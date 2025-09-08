@@ -108,19 +108,19 @@ serve(async (req) => {
       username: credenciais.username 
     })
 
-    // Calculate date range: (today - 7) to (today + 60)
+    // Calculate date range: (today - 30) to (today + 30) - SINCRONIZAÇÃO COMPLETA 60 DIAS
     const hoje = new Date()
     const dataInicio = new Date(hoje)
-    dataInicio.setDate(hoje.getDate() - 7) // 1 semana atrás
+    dataInicio.setDate(hoje.getDate() - 30) // 30 dias atrás
     
     const dataFim = new Date(hoje)
-    dataFim.setDate(hoje.getDate() + 60) // Hoje + 60 dias
+    dataFim.setDate(hoje.getDate() + 30) // Hoje + 30 dias
 
     const startDate = dataInicio.toISOString().split('T')[0]
     const endDate = dataFim.toISOString().split('T')[0]
 
-    console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (67 dias)`)
-    console.log(`📋 Modo: Sincronização contínua (mantém histórico completo)`)
+    console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (60 dias)`)
+    console.log(`📋 Modo: Sincronização COMPLETA - Últimos 30 dias + Próximos 30 dias`)
 
     let totalReservas = 0
     let totalSalvas = 0
