@@ -972,7 +972,7 @@ export default function AgendamentoPage() {
           continue;
         }
 
-        const [chave_pix, nome_beneficiario, valor, descricao, data_competencia] = linha;
+        const [nome_beneficiario, chave_pix, valor, descricao, data_pagamento] = linha;
 
         // Validações básicas
         if (!chave_pix?.trim()) {
@@ -1004,7 +1004,7 @@ export default function AgendamentoPage() {
               nome_beneficiario: nome_beneficiario.trim(),
               valor: valor.trim(),
               descricao: descricao?.trim() || '',
-              data_competencia: data_competencia?.trim() || '',
+              data_pagamento: data_pagamento?.trim() || '',
             }),
           });
 
@@ -1489,7 +1489,7 @@ export default function AgendamentoPage() {
                         <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                           <textarea
                             className="w-full h-32 p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono resize-none border-0 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                            placeholder="Cole os dados aqui (Ctrl+V)&#10;Formato esperado:&#10;chave_pix	nome_beneficiario	valor	descricao	data_competencia&#10;11999999999	João Silva	100,00	Pagamento teste	01/01/2024"
+                            placeholder="Cole os dados aqui (Ctrl+V)&#10;Formato esperado:&#10;nome_beneficiario	chave_pix	valor	descricao	data_pagamento&#10;João Silva	11999999999	100,00	Pagamento teste	01/01/2024"
                             value={dadosPlanilha.map(row => row.join('\t')).join('\n')}
                             onChange={(e) => {
                               const linhas = e.target.value.split('\n').filter(linha => linha.trim());
@@ -1516,8 +1516,8 @@ export default function AgendamentoPage() {
                               <table className="w-full text-xs">
                                 <thead>
                                   <tr className="bg-gray-100 dark:bg-gray-700">
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Chave PIX</th>
                                     <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Nome</th>
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Chave PIX</th>
                                     <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Valor</th>
                                     <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Descrição</th>
                                     <th className="p-2 text-left text-gray-700 dark:text-gray-300">Data</th>

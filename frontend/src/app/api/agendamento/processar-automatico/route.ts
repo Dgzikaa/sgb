@@ -151,7 +151,7 @@ async function enviarPix(config: any, token: string, payload: any): Promise<{ su
 
 export async function POST(request: NextRequest) {
   try {
-    const { conta, chave_pix, nome_beneficiario, valor, descricao, data_competencia } = await request.json();
+    const { conta, chave_pix, nome_beneficiario, valor, descricao, data_pagamento } = await request.json();
 
     // Validar dados de entrada
     if (!conta || !chave_pix || !nome_beneficiario || !valor) {
@@ -173,10 +173,17 @@ export async function POST(request: NextRequest) {
     // Processar chave PIX
     const { tipo, chaveFormatada } = identificarTipoChave(chave_pix);
     
+    console.log('🔍 Debug chave PIX:', {
+      chave_original: chave_pix,
+      chave_limpa: chave_pix.replace(/\D/g, ''),
+      tipo_identificado: tipo,
+      chave_formatada: chaveFormatada
+    });
+    
     if (!tipo) {
       return NextResponse.json({
         success: false,
-        error: 'Chave PIX inválida'
+        error: `Chave PIX inválida: ${chave_pix} (${chave_pix.replace(/\D/g, '')})`
       }, { status: 400 });
     }
 
@@ -196,10 +203,10 @@ export async function POST(request: NextRequest) {
 
     // Processar data
     let dataFormatada = '';
-    if (data_competencia) {
+    if (data_pagamento) {
       try {
         // Converter DD/MM/YYYY para YYYY-MM-DD
-        const [dia, mes, ano] = data_competencia.split('/');
+        const [dia, mes, ano] = data_pagamento.split('/');
         dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
       } catch (error) {
         dataFormatada = new Date().toISOString().split('T')[0]; // Data atual como fallback
