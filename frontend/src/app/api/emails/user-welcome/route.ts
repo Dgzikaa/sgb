@@ -20,8 +20,12 @@ export async function POST(request: NextRequest) {
   try {
     // Verificar se a API está configurada
     if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'dummy-key') {
+      console.warn('⚠️ RESEND_API_KEY não configurado');
       return NextResponse.json(
-        { error: 'Serviço de email não configurado' },
+        { 
+          error: 'Serviço de email não configurado',
+          details: 'RESEND_API_KEY não está definido nas variáveis de ambiente'
+        },
         { status: 503 }
       );
     }

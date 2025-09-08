@@ -90,8 +90,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Enviar email de boas-vindas com credenciais
+    let emailSent = false;
     try {
-      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app'}/api/emails/user-welcome`, {
+      // Verificar se estamos em desenvolvimento local
+      const baseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : (process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app');
+
+      const emailResponse = await fetch(`${baseUrl}/api/emails/user-welcome`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,16 +108,25 @@ export async function POST(request: NextRequest) {
           email,
           senha_temporaria: 'TempPassword123!',
           role,
-          loginUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app'
+          loginUrl: baseUrl
         })
       });
 
-      const emailResult = await emailResponse.json();
-      
-      if (!emailResponse.ok) {
-        console.warn('⚠️ Falha ao enviar email de boas-vindas:', emailResult.error);
+      // Verificar se a resposta é JSON válida
+      const contentType = emailResponse.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const emailResult = await emailResponse.json();
+        
+        if (!emailResponse.ok) {
+          console.warn('⚠️ Falha ao enviar email de boas-vindas:', emailResult.error);
+        } else {
+          console.log('✅ Email de boas-vindas enviado com sucesso');
+          emailSent = true;
+        }
       } else {
-        console.log('✅ Email de boas-vindas enviado com sucesso');
+        // Resposta não é JSON (provavelmente HTML de erro)
+        const textResponse = await emailResponse.text();
+        console.warn('⚠️ Resposta não-JSON da API de email:', textResponse.substring(0, 200));
       }
     } catch (emailError) {
       console.warn('⚠️ Erro ao enviar email de boas-vindas:', emailError);
@@ -120,8 +135,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       usuario,
-      message: 'Usuário criado com sucesso! Email com credenciais de acesso foi enviado.',
-      emailSent: true
+      message: emailSent 
+        ? 'Usuário criado com sucesso! Email com credenciais de acesso foi enviado.' 
+        : 'Usuário criado com sucesso! ⚠️ Email não pôde ser enviado - verifique configurações.',
+      emailSent,
+      credentials: emailSent ? undefined : {
+        email,
+        senha_temporaria: 'TempPassword123!',
+        message: 'Como o email não foi enviado, aqui estão as credenciais:'
+      }
     }, { status: 201 });
   } catch (error) {
     console.error('Erro ao criar usuário:', error);

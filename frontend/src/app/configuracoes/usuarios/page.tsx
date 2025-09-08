@@ -143,10 +143,21 @@ function UsuariosPage() {
       });
 
       if (response.ok) {
-        toast({
-          title: 'Sucesso',
-          description: `Usuário ${editingUser ? 'atualizado' : 'criado'} com sucesso`,
-        });
+        const result = await response.json();
+        
+        // Verificar se é criação de usuário e se há credenciais para mostrar
+        if (!editingUser && result.credentials) {
+          toast({
+            title: '⚠️ Usuário Criado - Email Não Enviado',
+            description: `Usuário criado, mas email não pôde ser enviado. Credenciais: ${result.credentials.email} / ${result.credentials.senha_temporaria}`,
+            duration: 10000, // 10 segundos para dar tempo de ler
+          });
+        } else {
+          toast({
+            title: 'Sucesso',
+            description: result.message || `Usuário ${editingUser ? 'atualizado' : 'criado'} com sucesso`,
+          });
+        }
         
         // Se o usuário editou a si mesmo, atualizar localStorage
         if (editingUser && currentUser && editingUser.id === currentUser.id) {
