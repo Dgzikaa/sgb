@@ -19,6 +19,7 @@ DECLARE
     nibo_custos RECORD;
     sympla_data RECORD;
     yuzer_fatporhora RECORD;
+    getin_reservas RECORD;
     
     -- Valores calculados
     calculated_cl_real INTEGER;
@@ -36,6 +37,8 @@ DECLARE
     calculated_percent_art_fat NUMERIC;
     calculated_c_art NUMERIC;
     calculated_c_prod NUMERIC;
+    calculated_res_tot INTEGER;
+    calculated_res_p INTEGER;
 BEGIN
     -- Buscar dados do evento
     SELECT * INTO evento_record 
@@ -184,6 +187,16 @@ BEGIN
     AND bar_id = evento_record.bar_id;
     
     -- =================================================
+    -- 9. BUSCAR DADOS GETIN RESERVAS
+    -- =================================================
+    SELECT 
+        SUM(people) as total_reservas,
+        SUM(CASE WHEN status = 'seated' THEN people ELSE 0 END) as reservas_presentes
+    INTO getin_reservas
+    FROM getin_reservations
+    WHERE reservation_date = evento_record.data_evento;
+    
+    -- =================================================
     -- APLICAR REGRAS DE CÁLCULO
     -- =================================================
     
@@ -264,6 +277,10 @@ BEGIN
         calculated_percent_art_fat := 0;
     END IF;
     
+    -- REGRA 11: RESERVAS GETIN
+    calculated_res_tot := COALESCE(getin_reservas.total_reservas, 0);
+    calculated_res_p := COALESCE(getin_reservas.reservas_presentes, 0);
+    
     -- =================================================
     -- ATUALIZAR TABELA EVENTOS_BASE
     -- REGRA: NÃO SOBRESCREVER VALORES EDITADOS MANUALMENTE
@@ -306,6 +323,10 @@ BEGIN
             c_prod = calculated_c_prod,
             percent_art_fat = calculated_percent_art_fat,
             
+            -- Reservas Getin
+            res_tot = calculated_res_tot,
+            res_p = calculated_res_p,
+            
             -- Dados de integração
             sympla_liquido = COALESCE(sympla_data.sympla_liquido, 0),
             sympla_checkins = COALESCE(sympla_data.sympla_checkins, 0),
@@ -322,8 +343,8 @@ BEGIN
         RAISE NOTICE 'Evento % atualizado automaticamente', evento_id;
     END IF;
     
-    RAISE NOTICE 'Métricas calculadas para evento %: Real=% | Clientes=% | TE=% | TB=% | T.Médio=%', 
-        evento_id, calculated_real_r, calculated_cl_real, calculated_te_real, calculated_tb_real, calculated_t_medio;
+    RAISE NOTICE 'Métricas calculadas para evento %: Real=% | Clientes=% | TE=% | TB=% | T.Médio=% | Reservas=%/%', 
+        evento_id, calculated_real_r, calculated_cl_real, calculated_te_real, calculated_tb_real, calculated_t_medio, calculated_res_p, calculated_res_tot;
         
 END;
 $$;
