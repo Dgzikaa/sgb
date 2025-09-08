@@ -226,7 +226,7 @@ export default function DrePage() {
         const isEntrada = valorMacro > 0;
         
         // Buscar dados detalhados do Nibo para esta macro-categoria
-        const niboMacro = niboResult?.macroCategorias?.find((m: any) => m.nome === macroNome);
+        const niboMacro = (niboResult as any)?.macroCategorias?.find((m: any) => m.nome === macroNome);
         
         // Mapear subcategorias com valores reais do Nibo + dados manuais
         const subcategorias = categoriasDetalhe.map(cat => {

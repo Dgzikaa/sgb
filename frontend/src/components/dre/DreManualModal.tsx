@@ -19,7 +19,7 @@ interface LancamentoManual {
   observacoes?: string
   usuario_criacao: string
   criado_em: string
-  atualizado_em: string
+  atualizado_em?: string
 }
 
 interface DreManualModalProps {
@@ -111,10 +111,10 @@ export default function DreManualModal({
 
   // Carregar categorias quando o modal abrir
   React.useEffect(() => {
-    if (open && !categorias) {
+    if (isOpen && !categorias) {
       fetchCategorias()
     }
-  }, [open, categorias, fetchCategorias])
+  }, [isOpen, categorias, fetchCategorias])
 
   // Fechar dropdown quando clicar fora
   React.useEffect(() => {
