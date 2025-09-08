@@ -176,9 +176,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 3. Enviar email de boas-vindas com credenciais
+    try {
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app'}/api/emails/user-welcome`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: email,
+          nome,
+          email,
+          senha_temporaria: password,
+          role: role || 'funcionario',
+          loginUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app'
+        })
+      });
+
+      const emailResult = await emailResponse.json();
+      
+      if (!emailResponse.ok) {
+        console.warn('⚠️ Falha ao enviar email de boas-vindas:', emailResult.error);
+      } else {
+        console.log('✅ Email de boas-vindas enviado com sucesso');
+      }
+    } catch (emailError) {
+      console.warn('⚠️ Erro ao enviar email de boas-vindas:', emailError);
+      // Não falhar o cadastro por causa do email
+    }
+
     return NextResponse.json({
       success: true,
       usuario: novoUsuario,
+      message: 'Usuário criado com sucesso! Email com credenciais de acesso foi enviado.',
+      emailSent: true
     });
   } catch (error) {
     console.error('❌ Erro na API de criação de usuário:', error);
