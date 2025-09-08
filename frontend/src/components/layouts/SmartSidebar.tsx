@@ -86,7 +86,7 @@ export function SmartSidebar({
     return {
       currentPath: pathname,
       userRole: user?.role || 'user',
-      barId: selectedBar?.id || '',
+      barId: String(selectedBar?.id || ''),
       recentPages,
       favorites,
       workflowState,

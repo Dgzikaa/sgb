@@ -177,6 +177,8 @@ export default function DreManualTab({ year, month }: DreManualTabProps) {
         </div>
         
         <DreManualModal 
+          isOpen={false}
+          onClose={() => {}}
           onLancamentoAdicionado={handleLancamentoAdicionado}
           mesAno={{ mes: month, ano: year }}
         />
@@ -326,6 +328,8 @@ export default function DreManualTab({ year, month }: DreManualTabProps) {
                 Nenhum lançamento manual encontrado para este período
               </p>
               <DreManualModal 
+                isOpen={false}
+                onClose={() => {}}
                 onLancamentoAdicionado={handleLancamentoAdicionado}
                 mesAno={{ mes: month, ano: year }}
               />

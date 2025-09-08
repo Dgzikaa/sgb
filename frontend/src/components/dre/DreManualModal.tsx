@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Plus, Save, X, Search } from 'lucide-react'
+import { Plus, Save, X, Search, Edit3 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface LancamentoManual {
@@ -114,7 +114,7 @@ export default function DreManualModal({
     if (open && !categorias) {
       fetchCategorias()
     }
-  }, [open, categorias])
+  }, [open, categorias, fetchCategorias])
 
   // Fechar dropdown quando clicar fora
   React.useEffect(() => {
@@ -331,7 +331,7 @@ export default function DreManualModal({
     setCategoriaFilter('')
     setShowCategoriaDropdown(false)
     setShowSuccessMessage(false)
-    setOpen(false)
+    onClose()
   }
   
   const handleNovoLancamento = () => {
