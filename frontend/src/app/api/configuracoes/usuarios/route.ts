@@ -41,22 +41,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 1. Primeiro criar usuário no Supabase Auth
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password: 'TempPassword123!', // Senha temporária - usuário deve redefinir
+      email_confirm: true, // Auto-confirmar email
+      user_metadata: {
+        nome,
+        role,
+      }
+    });
+
+    if (authError) {
+      console.error('Erro ao criar usuário no Auth:', authError);
+      return NextResponse.json(
+        { error: `Erro ao criar usuário: ${authError.message}` },
+        { status: 400 }
+      );
+    }
+
+    if (!authUser.user) {
+      return NextResponse.json(
+        { error: 'Falha ao criar usuário no sistema de autenticação' },
+        { status: 500 }
+      );
+    }
+
+    // 2. Depois criar registro na tabela usuarios_bar
     const { data: usuario, error } = await supabase
       .from('usuarios_bar')
       .insert({
+        user_id: authUser.user.id, // UUID do usuário criado no Auth
         email,
         nome,
         role,
         modulos_permitidos: modulos_permitidos || [],
         ativo,
+        senha_redefinida: false, // Marcar que precisa redefinir senha
         criado_em: new Date().toISOString(),
       })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // Se falhar ao criar na tabela usuarios_bar, remover usuário do Auth
+      await supabase.auth.admin.deleteUser(authUser.user.id);
+      throw error;
+    }
 
-    return NextResponse.json({ usuario }, { status: 201 });
+    return NextResponse.json({ 
+      usuario,
+      message: 'Usuário criado com sucesso. Senha temporária: TempPassword123!'
+    }, { status: 201 });
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
     return NextResponse.json(

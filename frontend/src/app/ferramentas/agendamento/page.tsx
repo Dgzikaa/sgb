@@ -135,6 +135,21 @@ export default function AgendamentoPage() {
   });
   const [isAtualizandoPix, setIsAtualizandoPix] = useState(false);
 
+  // Estados para Agendamento Automático
+  const [statusProcessamento, setStatusProcessamento] = useState<{
+    aba: string;
+    totalLinhas: number;
+    sucessos: number;
+    erros: number;
+  } | null>(null);
+  const [logsProcessamento, setLogsProcessamento] = useState<{
+    timestamp: string;
+    tipo: 'sucesso' | 'erro' | 'info';
+    mensagem: string;
+  }[]>([]);
+  const [dadosPlanilha, setDadosPlanilha] = useState<string[][]>([]);
+  const [modoEdicaoPlanilha, setModoEdicaoPlanilha] = useState(false);
+
   // Input manual
   const [novoPagamento, setNovoPagamento] = useState({
     cpf_cnpj: '',
@@ -922,6 +937,122 @@ export default function AgendamentoPage() {
     });
   };
 
+  // Função para processar dados colados automaticamente
+  const processarDadosAutomatico = async (conta: 'Ordinário' | 'Deboche') => {
+    if (dadosPlanilha.length === 0) {
+      toast({
+        title: 'Nenhum dado encontrado',
+        description: 'Cole os dados na área acima antes de processar',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    setLogsProcessamento([]);
+    
+    const adicionarLog = (tipo: 'sucesso' | 'erro' | 'info', mensagem: string) => {
+      const timestamp = new Date().toLocaleTimeString();
+      setLogsProcessamento(prev => [...prev, { timestamp, tipo, mensagem }]);
+    };
+
+    let sucessos = 0;
+    let erros = 0;
+
+    adicionarLog('info', `Iniciando processamento de ${dadosPlanilha.length} linhas para conta "${conta}"`);
+
+    try {
+      for (let i = 0; i < dadosPlanilha.length; i++) {
+        const linha = dadosPlanilha[i];
+        
+        // Validar se a linha tem dados suficientes
+        if (linha.length < 5) {
+          adicionarLog('erro', `Linha ${i + 1}: Dados insuficientes (${linha.length} colunas)`);
+          erros++;
+          continue;
+        }
+
+        const [chave_pix, nome_beneficiario, valor, descricao, data_competencia] = linha;
+
+        // Validações básicas
+        if (!chave_pix?.trim()) {
+          adicionarLog('erro', `Linha ${i + 1}: Chave PIX vazia`);
+          erros++;
+          continue;
+        }
+
+        if (!nome_beneficiario?.trim()) {
+          adicionarLog('erro', `Linha ${i + 1}: Nome do beneficiário vazio`);
+          erros++;
+          continue;
+        }
+
+        if (!valor?.trim()) {
+          adicionarLog('erro', `Linha ${i + 1}: Valor vazio`);
+          erros++;
+          continue;
+        }
+
+        try {
+          // Chamar API para processar o pagamento
+          const response = await fetch('/api/agendamento/processar-automatico', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              conta,
+              chave_pix: chave_pix.trim(),
+              nome_beneficiario: nome_beneficiario.trim(),
+              valor: valor.trim(),
+              descricao: descricao?.trim() || '',
+              data_competencia: data_competencia?.trim() || '',
+            }),
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            adicionarLog('sucesso', `${nome_beneficiario}: R$ ${valor} - Processado com sucesso`);
+            sucessos++;
+          } else {
+            adicionarLog('erro', `${nome_beneficiario}: ${data.error || 'Erro desconhecido'}`);
+            erros++;
+          }
+        } catch (error) {
+          adicionarLog('erro', `${nome_beneficiario}: Erro de comunicação - ${error}`);
+          erros++;
+        }
+
+        // Pequena pausa entre requests para não sobrecarregar
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Atualizar status final
+      setStatusProcessamento({
+        aba: conta,
+        totalLinhas: dadosPlanilha.length,
+        sucessos,
+        erros,
+      });
+
+      adicionarLog('info', `Processamento concluído: ${sucessos} sucessos, ${erros} erros`);
+
+      toast({
+        title: '🎉 Processamento concluído!',
+        description: `${sucessos} pagamentos processados com sucesso, ${erros} erros`,
+      });
+
+    } catch (error) {
+      adicionarLog('erro', `Erro geral no processamento: ${error}`);
+      toast({
+        title: 'Erro no processamento',
+        description: 'Ocorreu um erro durante o processamento dos dados',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <ProtectedRoute requiredModule="financeiro">
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -1047,12 +1178,18 @@ export default function AgendamentoPage() {
             <div className="flex-1">
               {/* Tabs de Funcionalidades */}
               <Tabs defaultValue="manual" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                   <TabsTrigger
                     value="manual"
                     className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 rounded-md"
                   >
                     Adicionar Manual
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="automatico"
+                    className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-600 dark:data-[state=active]:text-white dark:text-gray-300 rounded-md"
+                  >
+                    Agendamento Automático
                   </TabsTrigger>
                   <TabsTrigger
                     value="lista"
@@ -1292,6 +1429,212 @@ export default function AgendamentoPage() {
                           Limpar Lista
                         </Button>
                       </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab: Agendamento Automático */}
+                <TabsContent value="automatico">
+                  <Card className="card-dark border-0 shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="text-gray-900 dark:text-white">
+                        Agendamento Automático
+                      </CardTitle>
+                      <CardDescription className="text-gray-600 dark:text-gray-400">
+                        Cole dados diretamente do Excel/Sheets (Ctrl+C/Ctrl+V) e processe automaticamente
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Instruções */}
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                          📋 Como usar
+                        </h3>
+                        <div className="text-xs text-blue-600 dark:text-blue-500 space-y-1">
+                          <div>1. <strong>Copie</strong> os dados do Excel/Sheets (selecione as linhas e Ctrl+C)</div>
+                          <div>2. <strong>Cole</strong> na área abaixo (clique e Ctrl+V)</div>
+                          <div>3. <strong>Verifique</strong> se as colunas estão corretas</div>
+                          <div>4. <strong>Processe</strong> os pagamentos automaticamente</div>
+                        </div>
+                      </div>
+
+                      {/* Área de Cole dos Dados */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-gray-700 dark:text-gray-300 font-medium">
+                            Área de Dados (Cole aqui com Ctrl+V)
+                          </Label>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setDadosPlanilha([])}
+                              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Limpar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setModoEdicaoPlanilha(!modoEdicaoPlanilha)}
+                              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600"
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              {modoEdicaoPlanilha ? 'Visualizar' : 'Editar'}
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                          <textarea
+                            className="w-full h-32 p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono resize-none border-0 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                            placeholder="Cole os dados aqui (Ctrl+V)&#10;Formato esperado:&#10;chave_pix	nome_beneficiario	valor	descricao	data_competencia&#10;11999999999	João Silva	100,00	Pagamento teste	01/01/2024"
+                            value={dadosPlanilha.map(row => row.join('\t')).join('\n')}
+                            onChange={(e) => {
+                              const linhas = e.target.value.split('\n').filter(linha => linha.trim());
+                              const dados = linhas.map(linha => linha.split('\t'));
+                              setDadosPlanilha(dados);
+                            }}
+                            onPaste={(e) => {
+                              e.preventDefault();
+                              const texto = e.clipboardData.getData('text');
+                              const linhas = texto.split('\n').filter(linha => linha.trim());
+                              const dados = linhas.map(linha => linha.split('\t'));
+                              setDadosPlanilha(dados);
+                            }}
+                          />
+                        </div>
+
+                        {/* Preview da Planilha */}
+                        {dadosPlanilha.length > 0 && (
+                          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                              Preview dos Dados ({dadosPlanilha.length} linhas)
+                            </h4>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-xs">
+                                <thead>
+                                  <tr className="bg-gray-100 dark:bg-gray-700">
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Chave PIX</th>
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Nome</th>
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Valor</th>
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Descrição</th>
+                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300">Data</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {dadosPlanilha.slice(0, 10).map((linha, index) => (
+                                    <tr key={index} className="border-b border-gray-200 dark:border-gray-600">
+                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[0] || '-'}</td>
+                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[1] || '-'}</td>
+                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[2] || '-'}</td>
+                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[3] || '-'}</td>
+                                      <td className="p-2 text-gray-900 dark:text-white">{linha[4] || '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              {dadosPlanilha.length > 10 && (
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 text-center">
+                                  ... e mais {dadosPlanilha.length - 10} linhas
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Botões de Ação */}
+                      {dadosPlanilha.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Button
+                            onClick={() => processarDadosAutomatico('Ordinário')}
+                            disabled={isProcessing}
+                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors"
+                          >
+                            {isProcessing ? (
+                              <RefreshCw className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <Play className="w-5 h-5" />
+                            )}
+                            Processar como "Ordinário"
+                          </Button>
+
+                          <Button
+                            onClick={() => processarDadosAutomatico('Deboche')}
+                            disabled={isProcessing}
+                            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-3 rounded-lg font-medium transition-colors"
+                          >
+                            {isProcessing ? (
+                              <RefreshCw className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <Play className="w-5 h-5" />
+                            )}
+                            Processar como "Deboche"
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Status do Processamento */}
+                      {statusProcessamento && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                            Status do Processamento
+                          </h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Conta processada:</span>
+                              <span className="font-medium text-gray-900 dark:text-white">{statusProcessamento.aba}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Linhas encontradas:</span>
+                              <span className="font-medium text-gray-900 dark:text-white">{statusProcessamento.totalLinhas}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Pagamentos processados:</span>
+                              <span className="font-medium text-green-600 dark:text-green-400">{statusProcessamento.sucessos}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Erros encontrados:</span>
+                              <span className="font-medium text-red-600 dark:text-red-400">{statusProcessamento.erros}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Logs do Processamento */}
+                      {logsProcessamento.length > 0 && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                            Logs do Processamento
+                          </h4>
+                          <div className="max-h-64 overflow-y-auto space-y-2">
+                            {logsProcessamento.map((log, index) => (
+                              <div
+                                key={index}
+                                className={`text-xs p-2 rounded ${
+                                  log.tipo === 'sucesso'
+                                    ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300'
+                                    : log.tipo === 'erro'
+                                    ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300'
+                                    : 'bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300'
+                                }`}
+                              >
+                                <span className="font-medium">[{log.timestamp}]</span> {log.mensagem}
+                              </div>
+                            ))}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLogsProcessamento([])}
+                            className="mt-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1"
+                          >
+                            Limpar Logs
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </TabsContent>

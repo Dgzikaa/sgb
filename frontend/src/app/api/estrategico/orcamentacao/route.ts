@@ -39,14 +39,14 @@ export async function GET(request: Request) {
       console.error('Erro ao buscar dados planejados:', errorPlanejado);
     }
 
-    // 2. Buscar dados realizados do NIBO
+    // 2. Buscar dados realizados do NIBO (por competência, não por pagamento)
     let queryNibo = supabase
       .from('nibo_agendamentos')
       .select('categoria_nome, status, valor, data_competencia')
       .eq('bar_id', parseInt(barId))
       .gte('data_competencia', `${ano}-01-01`)
-      .lte('data_competencia', `${ano}-12-31`)
-      .in('status', ['Paid', 'Pago']); // Apenas pagos (ambos os status)
+      .lte('data_competencia', `${ano}-12-31`);
+      // REMOVIDO: filtro por status - para orçamentação usamos competência, não pagamento
 
     if (mes && mes !== 'todos') {
       const mesFormatado = mes.padStart(2, '0');
@@ -59,6 +59,26 @@ export async function GET(request: Request) {
 
     if (errorNibo) {
       console.error('Erro ao buscar dados NIBO:', errorNibo);
+    }
+
+    // 2.1. Buscar lançamentos manuais da DRE (não tem bar_id - são globais)
+    let queryManuais = supabase
+      .from('dre_manual')
+      .select('categoria, categoria_macro, valor, data_competencia, descricao')
+      .gte('data_competencia', `${ano}-01-01`)
+      .lte('data_competencia', `${ano}-12-31`);
+
+    if (mes && mes !== 'todos') {
+      const mesFormatado = mes.padStart(2, '0');
+      queryManuais = queryManuais
+        .gte('data_competencia', `${ano}-${mesFormatado}-01`)
+        .lte('data_competencia', `${ano}-${mesFormatado}-31`);
+    }
+
+    const { data: dadosManuais, error: errorManuais } = await queryManuais;
+
+    if (errorManuais) {
+      console.error('Erro ao buscar lançamentos manuais:', errorManuais);
     }
 
     // 3. Mapear categorias NIBO para categorias do orçamento
@@ -155,7 +175,7 @@ export async function GET(request: Request) {
     const valoresRealizados = new Map<string, number>();
     let receitaTotal = 0;
     
-    // Primeiro, calcular receita total para porcentagens
+    // Primeiro, calcular receita total para porcentagens (Nibo + Manuais)
     dadosNibo?.forEach(item => {
       if (!item.categoria_nome) return;
       
@@ -163,6 +183,14 @@ export async function GET(request: Request) {
       
       // Categorias que são receita
       if (['Receita de Eventos', 'Stone Crédito', 'Stone Débito', 'Stone Pix', 'Dinheiro', 'Pix Direto na Conta', 'RECEITA BRUTA'].includes(item.categoria_nome)) {
+        receitaTotal += valor;
+      }
+    });
+
+    // Adicionar receitas dos lançamentos manuais
+    dadosManuais?.forEach(item => {
+      if (item.categoria_macro === 'Receita') {
+        const valor = Math.abs(parseFloat(item.valor) || 0);
         receitaTotal += valor;
       }
     });
@@ -176,6 +204,32 @@ export async function GET(request: Request) {
       
       // Mapear categoria normalmente
       const categoriaNormalizada = categoriasMap.get(item.categoria_nome) || item.categoria_nome;
+      
+      if (!valoresRealizados.has(categoriaNormalizada)) {
+        valoresRealizados.set(categoriaNormalizada, 0);
+      }
+      
+      valoresRealizados.set(categoriaNormalizada, 
+        valoresRealizados.get(categoriaNormalizada)! + valor
+      );
+    });
+
+    // 4.1. Processar lançamentos manuais
+    dadosManuais?.forEach(item => {
+      if (!item.categoria) return;
+      
+      const valorOriginal = parseFloat(item.valor) || 0;
+      const valor = Math.abs(valorOriginal);
+      
+      // Para lançamentos manuais, usar a categoria diretamente ou mapear pela categoria_macro
+      let categoriaNormalizada = item.categoria;
+      
+      // Se não encontrar a categoria específica, tentar mapear pela categoria_macro
+      if (!categoriasMap.has(item.categoria) && item.categoria_macro) {
+        categoriaNormalizada = categoriasMap.get(item.categoria_macro) || item.categoria_macro;
+      }
+      
+      // Receita manual já foi contabilizada no cálculo inicial
       
       if (!valoresRealizados.has(categoriaNormalizada)) {
         valoresRealizados.set(categoriaNormalizada, 0);
