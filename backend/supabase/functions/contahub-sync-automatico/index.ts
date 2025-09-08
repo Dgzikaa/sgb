@@ -320,7 +320,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     
     try {
       // Chamar o orchestrator para processar todos os dados coletados
-      const orchestratorUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub-orchestrator';
+      const orchestratorUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub_orchestrator';
       
       const orchestratorResponse = await fetch(orchestratorUrl, {
         method: 'POST',
