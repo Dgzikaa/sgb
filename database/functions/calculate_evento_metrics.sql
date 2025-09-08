@@ -190,10 +190,10 @@ BEGIN
     -- 9. BUSCAR DADOS GETIN RESERVAS
     -- =================================================
     SELECT 
-        -- Total: todos exceto cancelados
-        SUM(CASE WHEN status NOT IN ('canceled-user', 'canceled-agent') THEN people ELSE 0 END) as total_reservas,
-        -- Presentes: seated + confirmed (confirmados que compareceram)
-        SUM(CASE WHEN status IN ('seated', 'confirmed') THEN people ELSE 0 END) as reservas_presentes
+        -- Total: presentes + faltantes (seated + pending + no-show + canceled)
+        SUM(CASE WHEN status IN ('seated', 'pending', 'no-show', 'canceled-user', 'canceled-agent') THEN people ELSE 0 END) as total_reservas,
+        -- Presentes: seated + pending (confirmados e pendentes são considerados presentes)
+        SUM(CASE WHEN status IN ('seated', 'pending') THEN people ELSE 0 END) as reservas_presentes
     INTO getin_reservas
     FROM getin_reservations
     WHERE reservation_date = evento_record.data_evento;
