@@ -43,11 +43,15 @@ interface GetinReservation {
 }
 
 interface GetinResponse {
+  success: boolean
   data: GetinReservation[]
   pagination: {
+    total: number
     current_page: number
-    total_pages: number
-    total_items: number
+    next_page: number | null
+    last_page: number
+    per_page: number
+    is_last_page: boolean
   }
 }
 
@@ -138,7 +142,7 @@ serve(async (req) => {
       getinUrl.searchParams.set('start_date', startDate)
       getinUrl.searchParams.set('end_date', endDate)
       getinUrl.searchParams.set('page', currentPage.toString())
-      getinUrl.searchParams.set('per_page', '1000') // Máximo permitido pela API
+      getinUrl.searchParams.set('per_page', '50') // Máximo real da API
 
       const response = await fetch(getinUrl.toString(), {
         method: 'GET',
@@ -156,18 +160,25 @@ serve(async (req) => {
 
       const data: GetinResponse = await response.json()
       
+      if (!data.success) {
+        console.error('❌ API Getin retornou erro:', data)
+        break
+      }
+      
       if (!data.data || data.data.length === 0) {
         console.log('📭 Nenhuma reserva encontrada nesta página')
         break
       }
 
       console.log(`✅ ${data.data.length} reservas encontradas na página ${currentPage}`)
-      console.log(`📊 Paginação: ${data.pagination?.current_page || currentPage}/${data.pagination?.total_pages || 'undefined'} (total: ${data.pagination?.total_items || 'undefined'})`)
+      console.log(`📊 Paginação: ${data.pagination?.current_page || currentPage}/${data.pagination?.last_page || 'undefined'} (total: ${data.pagination?.total || 'undefined'})`)
       console.log(`🔍 Debug paginação:`, {
         current_page: data.pagination?.current_page || currentPage,
-        total_pages: data.pagination?.total_pages || 'undefined',
-        total_items: data.pagination?.total_items || 'undefined',
-        hasMorePages: data.pagination ? data.pagination.current_page < data.pagination.total_pages : false
+        last_page: data.pagination?.last_page || 'undefined',
+        total: data.pagination?.total || 'undefined',
+        per_page: data.pagination?.per_page || 'undefined',
+        is_last_page: data.pagination?.is_last_page || false,
+        hasMorePages: data.pagination ? !data.pagination.is_last_page : false
       })
 
       totalReservas += data.data.length
@@ -177,14 +188,18 @@ serve(async (req) => {
 
       for (const reserva of data.data) {
         try {
-          // Check if reservation already exists
+          // Check if reservation already exists and when it was created
           const { data: existingReservation } = await supabase
             .from('getin_reservations')
-            .select('reservation_id, updated_at')
+            .select('reservation_id, created_at, updated_at')
             .eq('reservation_id', reserva.id)
             .single()
 
-          const isNewReservation = !existingReservation
+          // Consider as new if: doesn't exist OR was created today
+          const today = new Date().toISOString().split('T')[0]
+          const isNewReservation = !existingReservation || 
+            (existingReservation.created_at && 
+             existingReservation.created_at.split('T')[0] === today)
 
           const reservaData = {
             reservation_id: reserva.id,
@@ -249,14 +264,24 @@ serve(async (req) => {
         }
       }
 
-      // Check if there are more pages
-      hasMorePages = data.pagination ? data.pagination.current_page < data.pagination.total_pages : false
+      // Check if there are more pages using correct API response
+      hasMorePages = data.pagination ? !data.pagination.is_last_page : false
+      
+      console.log(`🔍 Debug paginação detalhada:`, {
+        is_last_page: data.pagination?.is_last_page,
+        hasMorePages: hasMorePages,
+        currentPage: currentPage,
+        nextPage: currentPage + 1
+      })
+      
       currentPage++
 
       // Rate limiting - wait 2 seconds between pages
       if (hasMorePages) {
-        console.log('⏳ Aguardando próxima página...')
+        console.log(`⏳ Aguardando próxima página... (${currentPage} -> ${currentPage + 1})`)
         await new Promise(resolve => setTimeout(resolve, 2000))
+      } else {
+        console.log(`🏁 Última página processada: ${currentPage}`)
       }
     }
 
