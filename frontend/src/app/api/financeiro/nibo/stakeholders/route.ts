@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
         .from('nibo_stakeholders')
         .select('*')
         .eq('documento_numero', searchTermLimpo)
-        .eq('deletado', false);
+        .eq('ativo', true);
 
       if (localError) {
         console.error('Erro na consulta local:', localError);
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
           .from('nibo_stakeholders')
           .select('*')
           .ilike('nome', `%${searchTerm}%`)
-          .eq('deletado', false)
+          .eq('ativo', true)
           .limit(10);
         if (!nomeError && nomeData) {
           localData = nomeData;
