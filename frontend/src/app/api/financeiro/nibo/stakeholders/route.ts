@@ -49,6 +49,13 @@ const NIBO_CONFIG = {
 
 export async function POST(request: NextRequest) {
   try {
+    // Debug: verificar se o token está sendo lido
+    console.log('🔍 Debug NIBO_API_TOKEN:', {
+      exists: !!process.env.NIBO_API_TOKEN,
+      length: process.env.NIBO_API_TOKEN?.length || 0,
+      firstChars: process.env.NIBO_API_TOKEN?.substring(0, 10) || 'N/A'
+    });
+
     // Validar se o token do NIBO está configurado
     if (!NIBO_CONFIG.API_TOKEN) {
       return NextResponse.json(

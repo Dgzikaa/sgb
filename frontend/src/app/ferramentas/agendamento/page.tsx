@@ -149,8 +149,17 @@ export default function AgendamentoPage() {
   }[]>([]);
   const [dadosPlanilha, setDadosPlanilha] = useState<string[][]>([]);
   const [modoEdicaoPlanilha, setModoEdicaoPlanilha] = useState(false);
-  const [categoriaAutomatica, setCategoriaAutomatica] = useState<string>('');
-  const [centroCustoAutomatico, setCentroCustoAutomatico] = useState<string>('');
+  
+  // Estado para configurações individuais de cada linha
+  const [configuracoesIndividuais, setConfiguracoesIndividuais] = useState<{
+    [index: number]: {
+      categoria_id: string;
+      centro_custo_id: string;
+    }
+  }>({});
+  
+  // Modal de configuração de categorias
+  const [modalConfiguracoes, setModalConfiguracoes] = useState(false);
 
   // Input manual
   const [novoPagamento, setNovoPagamento] = useState({
@@ -950,19 +959,16 @@ export default function AgendamentoPage() {
       return;
     }
 
-    if (!categoriaAutomatica) {
-      toast({
-        title: 'Categoria obrigatória',
-        description: 'Selecione uma categoria antes de processar',
-        variant: 'destructive',
-      });
-      return;
-    }
+    // Verificar se todas as linhas têm categoria e centro de custo configurados
+    const linhasSemConfiguracao = dadosPlanilha.filter((_, index) => 
+      !configuracoesIndividuais[index]?.categoria_id || 
+      !configuracoesIndividuais[index]?.centro_custo_id
+    );
 
-    if (!centroCustoAutomatico) {
+    if (linhasSemConfiguracao.length > 0) {
       toast({
-        title: 'Centro de Custo obrigatório',
-        description: 'Selecione um centro de custo antes de processar',
+        title: 'Configurações incompletas',
+        description: `${linhasSemConfiguracao.length} linha(s) sem categoria/centro de custo configurados`,
         variant: 'destructive',
       });
       return;
@@ -1014,6 +1020,15 @@ export default function AgendamentoPage() {
         }
 
         try {
+          // Obter configurações individuais desta linha
+          const configLinha = configuracoesIndividuais[i];
+          
+          if (!configLinha?.categoria_id || !configLinha?.centro_custo_id) {
+            adicionarLog('erro', `Linha ${i + 1}: Configurações de categoria/centro de custo não encontradas`);
+            erros++;
+            continue;
+          }
+
           // Chamar API para processar o agendamento + pagamento
           const response = await fetch('/api/agendamento/processar-automatico', {
             method: 'POST',
@@ -1026,8 +1041,8 @@ export default function AgendamentoPage() {
               descricao: descricao?.trim() || '',
               data_pagamento: data_pagamento?.trim() || '',
               data_competencia: data_competencia?.trim() || '',
-              categoria_id: categoriaAutomatica,
-              centro_custo_id: centroCustoAutomatico,
+              categoria_id: configLinha.categoria_id,
+              centro_custo_id: configLinha.centro_custo_id,
             }),
           });
 
@@ -1534,30 +1549,41 @@ export default function AgendamentoPage() {
                         {/* Preview da Planilha */}
                         {dadosPlanilha.length > 0 && (
                           <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
-                              Preview dos Dados ({dadosPlanilha.length} linhas)
-                            </h4>
+                            <div className="flex items-center justify-between mb-4">
+                              <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                Preview dos Dados ({dadosPlanilha.length} linhas)
+                              </h4>
+                              
+                              {/* Botão Configurar Categorias */}
+                              <button
+                                onClick={() => setModalConfiguracoes(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                              >
+                                <Wrench className="w-4 h-4" />
+                                <span>Configurar Categorias</span>
+                              </button>
+                            </div>
                             <div className="overflow-x-auto">
-                              <table className="w-full text-xs">
+                              <table className="w-full text-sm">
                                 <thead>
                                   <tr className="bg-gray-100 dark:bg-gray-700">
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Nome</th>
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Chave PIX</th>
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Valor</th>
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Descrição</th>
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Data Pgto</th>
-                                    <th className="p-2 text-left text-gray-700 dark:text-gray-300">Data Comp</th>
+                                    <th className="p-3 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Nome</th>
+                                    <th className="p-3 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Chave PIX</th>
+                                    <th className="p-3 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Valor</th>
+                                    <th className="p-3 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Descrição</th>
+                                    <th className="p-3 text-left text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-600">Data Pgto</th>
+                                    <th className="p-3 text-left text-gray-700 dark:text-gray-300">Data Comp</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {dadosPlanilha.slice(0, 10).map((linha, index) => (
-                                    <tr key={index} className="border-b border-gray-200 dark:border-gray-600">
-                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[0] || '-'}</td>
-                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[1] || '-'}</td>
-                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[2] || '-'}</td>
-                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[3] || '-'}</td>
-                                      <td className="p-2 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600">{linha[4] || '-'}</td>
-                                      <td className="p-2 text-gray-900 dark:text-white">{linha[5] || '-'}</td>
+                                    <tr key={index} className="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                      <td className="p-3 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 text-sm">{linha[0] || '-'}</td>
+                                      <td className="p-3 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 text-sm font-mono">{linha[1] || '-'}</td>
+                                      <td className="p-3 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 text-sm font-semibold">{linha[2] || '-'}</td>
+                                      <td className="p-3 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 text-sm">{linha[3] || '-'}</td>
+                                      <td className="p-3 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-600 text-sm">{linha[4] || '-'}</td>
+                                      <td className="p-3 text-gray-900 dark:text-white text-sm">{linha[5] || '-'}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -1572,68 +1598,37 @@ export default function AgendamentoPage() {
                         )}
                       </div>
 
-                      {/* Configurações de Categoria e Centro de Custo */}
-                      {dadosPlanilha.length > 0 && (
-                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
-                            Configurações do Agendamento NIBO
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
-                                Categoria *
-                              </Label>
-                              <SelectWithSearch
-                                value={categoriaAutomatica}
-                                onValueChange={(value) => setCategoriaAutomatica(value || '')}
-                                placeholder="Selecione uma categoria"
-                            options={categorias.map(cat => ({
-                              value: cat.id.toString(),
-                              label: cat.categoria_nome
-                            }))}
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
-                                Centro de Custo *
-                              </Label>
-                              <SelectWithSearch
-                                value={centroCustoAutomatico}
-                                onValueChange={(value) => setCentroCustoAutomatico(value || '')}
-                                placeholder="Selecione um centro de custo"
-                                options={centrosCusto.map(cc => ({
-                                  value: cc.id.toString(),
-                                  label: cc.nome
-                                }))}
-                                className="mt-1"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
 
                       {/* Botões de Ação */}
                       {dadosPlanilha.length > 0 && (
                         <>
                           {/* Mensagem de Aviso */}
-                          {(!categoriaAutomatica || !centroCustoAutomatico) && (
-                            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                              <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400">
-                                  ⚠️
+                          {(() => {
+                            const linhasSemConfiguracao = dadosPlanilha.filter((_, index) => 
+                              !configuracoesIndividuais[index]?.categoria_id || 
+                              !configuracoesIndividuais[index]?.centro_custo_id
+                            );
+                            return linhasSemConfiguracao.length > 0 && (
+                              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-5 h-5 text-yellow-600 dark:text-yellow-400">
+                                    ⚠️
+                                  </div>
+                                  <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                                    {linhasSemConfiguracao.length} linha(s) sem categoria/centro de custo configurados
+                                  </p>
                                 </div>
-                                <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
-                                  Preencha a Categoria e Centro de Custo antes de processar os pagamentos
-                                </p>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
                           
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <button
                             onClick={() => processarDadosAutomatico('Ordinário')}
-                            disabled={isProcessing || !categoriaAutomatica || !centroCustoAutomatico}
+                            disabled={isProcessing || dadosPlanilha.some((_, index) => 
+                              !configuracoesIndividuais[index]?.categoria_id || 
+                              !configuracoesIndividuais[index]?.centro_custo_id
+                            )}
                             className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white h-12 flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isProcessing ? (
@@ -1646,7 +1641,10 @@ export default function AgendamentoPage() {
 
                           <button
                             onClick={() => processarDadosAutomatico('Deboche')}
-                            disabled={isProcessing || !categoriaAutomatica || !centroCustoAutomatico}
+                            disabled={isProcessing || dadosPlanilha.some((_, index) => 
+                              !configuracoesIndividuais[index]?.categoria_id || 
+                              !configuracoesIndividuais[index]?.centro_custo_id
+                            )}
                             className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 h-12 flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isProcessing ? (
@@ -2085,6 +2083,210 @@ export default function AgendamentoPage() {
                 )}
                 Cadastrar Chave PIX
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Configuração de Categorias */}
+        <Dialog open={modalConfiguracoes} onOpenChange={setModalConfiguracoes}>
+          <DialogContent className="max-w-6xl max-h-[90vh] bg-white dark:bg-gray-800">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">
+                Configurar Categorias e Centros de Custo ({dadosPlanilha.length} linhas)
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Configuração Rápida */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3">
+                  ⚡ Configuração Rápida - Aplicar para todas as linhas
+                </h4>
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <Label className="text-blue-800 dark:text-blue-200 text-sm mb-1 block">Categoria</Label>
+                    <SelectWithSearch
+                      value=""
+                      onValueChange={(value) => {
+                        if (value) {
+                          const novasConfiguracoes: any = {};
+                          dadosPlanilha.forEach((_, index) => {
+                            novasConfiguracoes[index] = {
+                              categoria_id: value,
+                              centro_custo_id: configuracoesIndividuais[index]?.centro_custo_id || ''
+                            };
+                          });
+                          setConfiguracoesIndividuais(novasConfiguracoes);
+                        }
+                      }}
+                      placeholder="Escolher categoria..."
+                      options={categorias.map(cat => ({
+                        value: cat.id.toString(),
+                        label: cat.categoria_nome
+                      }))}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-blue-800 dark:text-blue-200 text-sm mb-1 block">Centro de Custo</Label>
+                    <SelectWithSearch
+                      value=""
+                      onValueChange={(value) => {
+                        if (value) {
+                          const novasConfiguracoes: any = {};
+                          dadosPlanilha.forEach((_, index) => {
+                            novasConfiguracoes[index] = {
+                              categoria_id: configuracoesIndividuais[index]?.categoria_id || '',
+                              centro_custo_id: value
+                            };
+                          });
+                          setConfiguracoesIndividuais(novasConfiguracoes);
+                        }
+                      }}
+                      placeholder="Escolher centro..."
+                      options={centrosCusto.map(cc => ({
+                        value: cc.id.toString(),
+                        label: cc.nome
+                      }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Seções Individuais de Configuração */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                  Configurações Individuais
+                </h4>
+                
+                <div className="max-h-[450px] overflow-y-auto space-y-4 pr-2" style={{ overflowX: 'visible' }}>
+                  {dadosPlanilha.map((linha, index) => (
+                    <div key={index} className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      {/* Header do Pagamento */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-semibold rounded-full">
+                              {index + 1}
+                            </span>
+                            <h5 className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {linha[0] || 'Nome não informado'}
+                            </h5>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                            <span className="font-mono">{linha[1] || 'PIX não informado'}</span>
+                            <span className="font-semibold text-green-600 dark:text-green-400">{linha[2] || 'Valor não informado'}</span>
+                            <span>{linha[3] || 'Sem descrição'}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Status da Configuração */}
+                        <div className="ml-4">
+                          {configuracoesIndividuais[index]?.categoria_id && configuracoesIndividuais[index]?.centro_custo_id ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs font-medium rounded-full">
+                              <CheckCircle className="w-3 h-3" />
+                              Configurado
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-xs font-medium rounded-full">
+                              <AlertCircle className="w-3 h-3" />
+                              Pendente
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Dropdowns de Configuração */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                            Categoria *
+                          </Label>
+                          <SelectWithSearch
+                            value={configuracoesIndividuais[index]?.categoria_id || ''}
+                            onValueChange={(value) => {
+                              setConfiguracoesIndividuais(prev => ({
+                                ...prev,
+                                [index]: {
+                                  ...prev[index],
+                                  categoria_id: value || '',
+                                  centro_custo_id: prev[index]?.centro_custo_id || ''
+                                }
+                              }));
+                            }}
+                            placeholder="Selecionar categoria..."
+                            searchPlaceholder="Buscar categoria..."
+                            options={categorias.map(cat => ({
+                              value: cat.id.toString(),
+                              label: cat.categoria_nome
+                            }))}
+                            className="w-full"
+                            dropdownDirection="up"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                            Centro de Custo *
+                          </Label>
+                          <SelectWithSearch
+                            value={configuracoesIndividuais[index]?.centro_custo_id || ''}
+                            onValueChange={(value) => {
+                              setConfiguracoesIndividuais(prev => ({
+                                ...prev,
+                                [index]: {
+                                  categoria_id: prev[index]?.categoria_id || '',
+                                  centro_custo_id: value || '',
+                                  ...prev[index]
+                                }
+                              }));
+                            }}
+                            placeholder="Selecionar centro de custo..."
+                            searchPlaceholder="Buscar centro de custo..."
+                            options={centrosCusto.map(cc => ({
+                              value: cc.id.toString(),
+                              label: cc.nome
+                            }))}
+                            className="w-full"
+                            dropdownDirection="up"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="flex justify-between">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {(() => {
+                  const configuradas = dadosPlanilha.filter((_, index) => 
+                    configuracoesIndividuais[index]?.categoria_id && 
+                    configuracoesIndividuais[index]?.centro_custo_id
+                  ).length;
+                  return `${configuradas}/${dadosPlanilha.length} linhas configuradas`;
+                })()}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setModalConfiguracoes(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    setModalConfiguracoes(false);
+                    toast({
+                      title: 'Configurações salvas',
+                      description: 'Categorias e centros de custo configurados com sucesso'
+                    });
+                  }}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg transition-colors font-medium"
+                >
+                  Salvar Configurações
+                </button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>

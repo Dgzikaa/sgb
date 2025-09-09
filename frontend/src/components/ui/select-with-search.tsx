@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, ChevronDown, User } from 'lucide-react';
 import Image from 'next/image';
 
@@ -18,6 +19,7 @@ interface SelectWithSearchProps {
   searchPlaceholder?: string;
   disabled?: boolean;
   className?: string;
+  dropdownDirection?: 'up' | 'down' | 'auto';
 }
 
 export function SelectWithSearch({
@@ -28,10 +30,12 @@ export function SelectWithSearch({
   searchPlaceholder = 'Pesquisar...',
   disabled = false,
   className = '',
+  dropdownDirection = 'down',
 }: SelectWithSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -44,6 +48,26 @@ export function SelectWithSearch({
 
   // Encontrar a opção selecionada
   const selectedOption = options.find(option => option.value === value);
+
+  // Calcular posição do dropdown
+  const calculateDropdownPosition = () => {
+    if (!containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const dropdownHeight = 320; // max-h-80 = 320px
+    
+    let top = rect.bottom + window.scrollY;
+    
+    if (dropdownDirection === 'up') {
+      top = rect.top + window.scrollY - dropdownHeight;
+    }
+    
+    setDropdownPosition({
+      top,
+      left: rect.left + window.scrollX,
+      width: rect.width
+    });
+  };
 
   // Fechar dropdown quando clicar fora
   useEffect(() => {
@@ -74,6 +98,7 @@ export function SelectWithSearch({
     if (!isOpen) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        calculateDropdownPosition();
         setIsOpen(true);
       }
       return;
@@ -132,7 +157,13 @@ export function SelectWithSearch({
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
           transition-colors duration-200
         `}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={() => {
+          if (disabled) return;
+          if (!isOpen) {
+            calculateDropdownPosition();
+          }
+          setIsOpen(!isOpen);
+        }}
         onKeyDown={handleKeyDown}
         disabled={disabled}
       >
@@ -172,9 +203,16 @@ export function SelectWithSearch({
         />
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-80 overflow-hidden">
+      {/* Dropdown usando Portal */}
+      {isOpen && dropdownPosition && typeof window !== 'undefined' && createPortal(
+        <div 
+          className="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl max-h-80 overflow-hidden"
+          style={{
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+          }}
+        >
           {/* Search Input */}
           <div className="p-3 border-b border-gray-200 dark:border-gray-700">
             <div className="relative">
@@ -261,7 +299,8 @@ export function SelectWithSearch({
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
