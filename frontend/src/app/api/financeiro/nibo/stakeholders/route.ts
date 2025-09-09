@@ -14,6 +14,7 @@ interface NiboStakeholderRequest {
   email?: string;
   phone?: string;
   type: 'fornecedor' | 'socio' | 'funcionario';
+  bar_id?: number;
   address?: {
     line1?: string;
     city?: string;
@@ -262,11 +263,19 @@ async function createStakeholderInNibo(
   }
 
   const data = await response.json();
+  console.log('🔍 Resposta completa do NIBO ao criar stakeholder:', JSON.stringify(data, null, 2));
+
+  // Verificar se o ID foi retornado
+  if (!data.id) {
+    console.error('❌ ERRO: Stakeholder criado no NIBO mas ID não retornado!');
+    console.error('Resposta do NIBO:', data);
+    throw new Error('Stakeholder criado no NIBO mas ID não foi retornado');
+  }
 
   // Salvar no banco local
   const { error: dbError } = await supabase.from('nibo_stakeholders').insert({
     nibo_id: data.id,
-    bar_id: 1, // TODO: Pegar do contexto do usuário
+    bar_id: stakeholder.bar_id || 3, // Usar bar_id do request ou Ordinário como padrão
     nome: data.name,
     documento_numero: data.document?.number || stakeholder.document,
     documento_tipo:

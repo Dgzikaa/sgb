@@ -294,6 +294,7 @@ export async function POST(request: NextRequest) {
           name: nome_beneficiario,
           document: cpfCnpj,
           type: 'fornecedor' as const,
+          bar_id: bar_id,
         };
 
         const createResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/stakeholders`, {
