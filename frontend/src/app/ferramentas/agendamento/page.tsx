@@ -2202,16 +2202,23 @@ export default function AgendamentoPage() {
                             Categoria *
                           </Label>
                           <SelectWithSearch
+                            key={`categoria-${index}`}
                             value={configuracoesIndividuais[index]?.categoria_id || ''}
                             onValueChange={(value) => {
-                              setConfiguracoesIndividuais(prev => ({
-                                ...prev,
-                                [index]: {
-                                  ...prev[index],
-                                  categoria_id: value || '',
-                                  centro_custo_id: prev[index]?.centro_custo_id || ''
-                                }
-                              }));
+                              console.log(`🔍 Categoria selecionada para linha ${index}:`, value);
+                              setConfiguracoesIndividuais(prev => {
+                                console.log('📋 Estado anterior:', prev);
+                                const novoEstado = {
+                                  ...prev,
+                                  [index]: {
+                                    ...prev[index],
+                                    categoria_id: value || '',
+                                    centro_custo_id: prev[index]?.centro_custo_id || ''
+                                  }
+                                };
+                                console.log('📋 Novo estado:', novoEstado);
+                                return novoEstado;
+                              });
                             }}
                             placeholder="Selecionar categoria..."
                             searchPlaceholder="Buscar categoria..."
@@ -2229,16 +2236,23 @@ export default function AgendamentoPage() {
                             Centro de Custo *
                           </Label>
                           <SelectWithSearch
+                            key={`centro-custo-${index}`}
                             value={configuracoesIndividuais[index]?.centro_custo_id || ''}
                             onValueChange={(value) => {
-                              setConfiguracoesIndividuais(prev => ({
-                                ...prev,
-                                [index]: {
-                                  categoria_id: prev[index]?.categoria_id || '',
-                                  centro_custo_id: value || '',
-                                  ...prev[index]
-                                }
-                              }));
+                              console.log(`🔍 Centro de custo selecionado para linha ${index}:`, value);
+                              setConfiguracoesIndividuais(prev => {
+                                console.log('📋 Estado anterior (CC):', prev);
+                                const novoEstado = {
+                                  ...prev,
+                                  [index]: {
+                                    categoria_id: prev[index]?.categoria_id || '',
+                                    centro_custo_id: value || '',
+                                    ...prev[index]
+                                  }
+                                };
+                                console.log('📋 Novo estado (CC):', novoEstado);
+                                return novoEstado;
+                              });
                             }}
                             placeholder="Selecionar centro de custo..."
                             searchPlaceholder="Buscar centro de custo..."

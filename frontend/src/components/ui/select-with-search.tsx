@@ -38,6 +38,7 @@ export function SelectWithSearch({
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Filtrar opções baseado no termo de busca
   const filteredOptions = options.filter(
@@ -72,10 +73,13 @@ export function SelectWithSearch({
   // Fechar dropdown quando clicar fora
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      
+      // Verificar se o clique foi dentro do container ou do dropdown
+      const isInsideContainer = containerRef.current && containerRef.current.contains(target);
+      const isInsideDropdown = dropdownRef.current && dropdownRef.current.contains(target);
+      
+      if (!isInsideContainer && !isInsideDropdown) {
         setIsOpen(false);
         setSearchTerm('');
         setHighlightedIndex(-1);
@@ -139,6 +143,7 @@ export function SelectWithSearch({
   };
 
   const handleOptionClick = (option: Option) => {
+    console.log('🔍 Clique na opção:', option);
     onValueChange(option.value);
     setIsOpen(false);
     setSearchTerm('');
@@ -206,6 +211,7 @@ export function SelectWithSearch({
       {/* Dropdown usando Portal */}
       {isOpen && dropdownPosition && typeof window !== 'undefined' && createPortal(
         <div 
+          ref={dropdownRef}
           className="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl max-h-80 overflow-hidden"
           style={{
             top: dropdownPosition.top,
@@ -250,7 +256,15 @@ export function SelectWithSearch({
                     ${option.value === value ? 'bg-indigo-100 dark:bg-indigo-900/50' : ''}
                     transition-colors duration-150
                   `}
-                  onClick={() => handleOptionClick(option)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleOptionClick(option);
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleOptionClick(option);
+                  }}
                 >
                   <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center flex-shrink-0">
                     {option.avatar ? (
