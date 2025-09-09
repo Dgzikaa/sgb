@@ -18,12 +18,10 @@ import {
   Edit, 
   Save, 
   X, 
-  RefreshCcw, 
   TrendingUp, 
   TrendingDown,
   ArrowUp,
   ArrowDown,
-  Users, 
   DollarSign,
   Clock,
   ChefHat,
@@ -33,7 +31,6 @@ import {
   CheckCircle,
   Eye,
   Filter,
-  Database,
   BarChart3,
   Ticket
 } from 'lucide-react';
@@ -153,8 +150,6 @@ export default function PlanejamentoComercialPage() {
   const [eventoEdicao, setEventoEdicao] = useState<EventoEdicaoCompleta | null>(null);
   const [salvando, setSalvando] = useState(false);
   
-  // Estado para sincronização Getin
-  const [sincronizandoGetin, setSincronizandoGetin] = useState(false);
 
   // Buscar dados da API
   const buscarDados = async (mes?: number, ano?: number) => {
@@ -262,78 +257,7 @@ export default function PlanejamentoComercialPage() {
     setMesAtual(new Date(novoAno, novoMes - 1, 1));
   };
 
-  // Sincronizar dados do Getin
-  const sincronizarGetin = async () => {
-    try {
-      setSincronizandoGetin(true);
-      console.log('🔄 Iniciando sincronização forçada do Getin...');
-      
-      const response = await apiCall('/api/trigger-getin-sync', {
-        method: 'GET',
-        headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
-        }
-      });
 
-      if (response.success) {
-        console.log('✅ Sincronização Getin concluída:', response.stats);
-        
-        // Mostrar feedback de sucesso
-        alert(`✅ Sincronização concluída!\n\n📊 Reservas processadas: ${response.stats?.total_encontrados || 0}\n✅ Reservas salvas: ${response.stats?.total_salvos || 0}\n❌ Erros: ${response.stats?.total_erros || 0}`);
-        
-        // Recarregar dados da página após sincronização
-        await buscarDados();
-      } else {
-        throw new Error(response.error || 'Erro na sincronização');
-      }
-    } catch (err) {
-      console.error('❌ Erro na sincronização Getin:', err);
-      alert('❌ Erro ao sincronizar dados do Getin. Tente novamente.');
-    } finally {
-      setSincronizandoGetin(false);
-    }
-  };
-
-  // Forçar recálculo da tabela eventos_base
-  const [recalculandoEventos, setRecalculandoEventos] = useState(false);
-  
-  const recalcularEventosBase = async () => {
-    try {
-      setRecalculandoEventos(true);
-      console.log('🔄 Iniciando recálculo forçado da eventos_base...');
-      
-      const response = await apiCall('/api/eventos/recalcular-eventos-base', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
-        },
-        body: JSON.stringify({
-          data_inicio: `${filtroAno}-${filtroMes.toString().padStart(2, '0')}-01`,
-          data_fim: filtroMes === 12 
-            ? `${filtroAno + 1}-01-31` 
-            : `${filtroAno}-${(filtroMes + 1).toString().padStart(2, '0')}-01`
-        })
-      });
-
-      if (response.success) {
-        console.log('✅ Recálculo eventos_base concluído:', response);
-        
-        // Mostrar feedback de sucesso
-        alert(`✅ Recálculo concluído!\n\n📊 Eventos recalculados: ${response.total_recalculados || 0}\n🔄 Dados atualizados com sucesso!`);
-        
-        // Recarregar dados da página após recálculo
-        await buscarDados();
-      } else {
-        throw new Error(response.error || 'Erro no recálculo');
-      }
-    } catch (err) {
-      console.error('❌ Erro no recálculo eventos_base:', err);
-      alert('❌ Erro ao recalcular dados dos eventos. Tente novamente.');
-    } finally {
-      setRecalculandoEventos(false);
-    }
-  };
 
   // Abrir modal de edição unificado (planejamento + valores reais)
   const abrirModal = (evento: PlanejamentoData, editMode: boolean = false) => {
@@ -1003,46 +927,6 @@ export default function PlanejamentoComercialPage() {
                     </div>
                   </div>
                   
-                  {/* Ações */}
-                  <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <button 
-                      onClick={recalcularEventosBase} 
-                      disabled={recalculandoEventos}
-                      className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                      title="Forçar recálculo dos dados dos eventos"
-                    >
-                      {recalculandoEventos ? (
-                        <>
-                          <RefreshCcw className="h-4 w-4 animate-spin" />
-                          Recalculando...
-                        </>
-                      ) : (
-                        <>
-                          <Database className="h-4 w-4" />
-                          Atualizar Eventos
-                        </>
-                      )}
-                    </button>
-                    
-                    <button 
-                      onClick={sincronizarGetin} 
-                      disabled={sincronizandoGetin}
-                      className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                      title="Sincronizar dados do Getin (reservas)"
-                    >
-                      {sincronizandoGetin ? (
-                        <>
-                          <RefreshCcw className="h-4 w-4 animate-spin" />
-                          Sincronizando...
-                        </>
-                      ) : (
-                        <>
-                          <Users className="h-4 w-4" />
-                          Sync Getin
-                        </>
-                      )}
-                    </button>
-                  </div>
                   
                   {/* Informações do período */}
                   <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -1119,6 +1003,22 @@ export default function PlanejamentoComercialPage() {
                             {formatarMoeda(Math.max(0, dados.reduce((sum, evento) => sum + (evento.m1_receita || 0), 0) - 
                               dados.reduce((sum, evento) => sum + (evento.real_receita || 0), 0)))}
                           </span>
+                        </div>
+                      </div>
+
+                      {/* Empilhamento em M1 */}
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-blue-700 dark:text-blue-300 font-medium">Empilhamento em M1:</span>
+                          <span className="font-bold text-blue-800 dark:text-blue-200">
+                            {formatarMoeda(
+                              dados.reduce((sum, evento) => sum + (evento.real_receita || 0), 0) + 
+                              dados.reduce((sum, evento) => sum + (evento.m1_receita || 0), 0)
+                            )}
+                          </span>
+                        </div>
+                        <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                          Realizado + M1 = Projeção total
                         </div>
                       </div>
 
