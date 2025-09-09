@@ -167,8 +167,34 @@ export async function POST(request: NextRequest) {
       centro_custo_id 
     } = await request.json();
 
+    console.log('🔍 Dados recebidos na API:', {
+      conta: conta + ' (tipo: ' + typeof conta + ')',
+      chave_pix: chave_pix + ' (tipo: ' + typeof chave_pix + ')',
+      nome_beneficiario: nome_beneficiario + ' (tipo: ' + typeof nome_beneficiario + ')',
+      valor: valor + ' (tipo: ' + typeof valor + ')',
+      categoria_id: categoria_id + ' (tipo: ' + typeof categoria_id + ')',
+      centro_custo_id: centro_custo_id + ' (tipo: ' + typeof centro_custo_id + ')',
+    });
+
+    console.log('🔍 Validação individual de campos:', {
+      conta_ok: !!conta,
+      chave_pix_ok: !!chave_pix,
+      nome_beneficiario_ok: !!nome_beneficiario,
+      valor_ok: !!valor,
+      categoria_id_ok: !!categoria_id,
+      centro_custo_id_ok: !!centro_custo_id,
+    });
+
     // Validar dados de entrada
     if (!conta || !chave_pix || !nome_beneficiario || !valor || !categoria_id || !centro_custo_id) {
+      console.log('❌ Validação falhou - campos faltando:', {
+        conta: !conta ? 'FALTANDO' : 'OK',
+        chave_pix: !chave_pix ? 'FALTANDO' : 'OK',
+        nome_beneficiario: !nome_beneficiario ? 'FALTANDO' : 'OK',
+        valor: !valor ? 'FALTANDO' : 'OK',
+        categoria_id: !categoria_id ? 'FALTANDO' : 'OK',
+        centro_custo_id: !centro_custo_id ? 'FALTANDO' : 'OK',
+      });
       return NextResponse.json({
         success: false,
         error: 'Dados obrigatórios faltando (conta, chave_pix, nome_beneficiario, valor, categoria_id, centro_custo_id)'
@@ -312,6 +338,15 @@ export async function POST(request: NextRequest) {
       };
 
       console.log('📋 Payload para NIBO:', agendamento);
+      console.log('🔍 Validação de campos obrigatórios:', {
+        stakeholderId: !!stakeholderId,
+        dueDate: !!dataPagamentoFormatada,
+        scheduleDate: !!dataPagamentoFormatada,
+        categoria_id: !!categoria_id,
+        centro_custo_id: !!centro_custo_id,
+        categories: !!agendamento.categories && agendamento.categories.length > 0,
+        value: !!valorNumerico
+      });
 
       const niboResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/schedules`, {
         method: 'POST',
