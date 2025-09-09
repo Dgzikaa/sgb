@@ -2205,18 +2205,21 @@ export default function AgendamentoPage() {
                             key={`categoria-${index}`}
                             value={configuracoesIndividuais[index]?.categoria_id || ''}
                             onValueChange={(value) => {
-                              console.log(`🔍 Categoria selecionada para linha ${index}:`, value);
+                              const currentIndex = index; // Capturar o índice atual
+                              console.log(`🔍 Categoria selecionada para linha ${currentIndex}:`, value);
                               setConfiguracoesIndividuais(prev => {
                                 console.log('📋 Estado anterior:', prev);
+                                console.log('📋 Atualizando linha:', currentIndex);
                                 const novoEstado = {
                                   ...prev,
-                                  [index]: {
-                                    ...prev[index],
+                                  [currentIndex]: {
+                                    ...prev[currentIndex],
                                     categoria_id: value || '',
-                                    centro_custo_id: prev[index]?.centro_custo_id || ''
+                                    centro_custo_id: prev[currentIndex]?.centro_custo_id || ''
                                   }
                                 };
                                 console.log('📋 Novo estado:', novoEstado);
+                                console.log('📋 Linha atualizada:', currentIndex, novoEstado[currentIndex]);
                                 return novoEstado;
                               });
                             }}
@@ -2239,18 +2242,21 @@ export default function AgendamentoPage() {
                             key={`centro-custo-${index}`}
                             value={configuracoesIndividuais[index]?.centro_custo_id || ''}
                             onValueChange={(value) => {
-                              console.log(`🔍 Centro de custo selecionado para linha ${index}:`, value);
+                              const currentIndex = index; // Capturar o índice atual
+                              console.log(`🔍 Centro de custo selecionado para linha ${currentIndex}:`, value);
                               setConfiguracoesIndividuais(prev => {
                                 console.log('📋 Estado anterior (CC):', prev);
+                                console.log('📋 Atualizando linha:', currentIndex);
                                 const novoEstado = {
                                   ...prev,
-                                  [index]: {
-                                    categoria_id: prev[index]?.categoria_id || '',
-                                    centro_custo_id: value || '',
-                                    ...prev[index]
+                                  [currentIndex]: {
+                                    ...prev[currentIndex],
+                                    categoria_id: prev[currentIndex]?.categoria_id || '',
+                                    centro_custo_id: value || ''
                                   }
                                 };
                                 console.log('📋 Novo estado (CC):', novoEstado);
+                                console.log('📋 Linha atualizada:', currentIndex, novoEstado[currentIndex]);
                                 return novoEstado;
                               });
                             }}
