@@ -22,6 +22,7 @@ import {
   TrendingDown,
   ArrowUp,
   ArrowDown,
+  Users,
   DollarSign,
   Clock,
   ChefHat,
@@ -1006,20 +1007,49 @@ export default function PlanejamentoComercialPage() {
                         </div>
                       </div>
 
-                      {/* Empilhamento em M1 */}
+                      {/* Empilhamento M1 */}
                       <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-blue-700 dark:text-blue-300 font-medium">Empilhamento em M1:</span>
+                          <span className="text-blue-700 dark:text-blue-300 font-medium">Empilhamento M1:</span>
                           <span className="font-bold text-blue-800 dark:text-blue-200">
                             {formatarMoeda(
-                              dados.reduce((sum, evento) => sum + (evento.real_receita || 0), 0) + 
-                              dados.reduce((sum, evento) => sum + (evento.m1_receita || 0), 0)
+                              dados.reduce((sum, evento) => {
+                                // Se tem faturamento real, usa o real
+                                if (evento.real_receita && evento.real_receita > 0) {
+                                  return sum + evento.real_receita;
+                                }
+                                // Se não tem real, usa M1
+                                return sum + (evento.m1_receita || 0);
+                              }, 0)
                             )}
                           </span>
                         </div>
-                        <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                          Realizado + M1 = Projeção total
-                        </div>
+                        
+                        {/* GAP para Meta M1 */}
+                        {(() => {
+                          const empilhamento = dados.reduce((sum, evento) => {
+                            if (evento.real_receita && evento.real_receita > 0) {
+                              return sum + evento.real_receita;
+                            }
+                            return sum + (evento.m1_receita || 0);
+                          }, 0);
+                          
+                          const metaM1 = dados.reduce((sum, evento) => sum + (evento.m1_receita || 0), 0);
+                          const gap = empilhamento - metaM1;
+                          const gapPercent = metaM1 > 0 ? (gap / metaM1) * 100 : 0;
+                          const isPositive = gap >= 0;
+                          
+                          return (
+                            <div className="flex justify-between items-center mt-1 pt-1 border-t border-blue-200 dark:border-blue-700">
+                              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">GAP:</span>
+                              <div className="text-xs font-medium">
+                                <span className={isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                                  {isPositive ? "+" : ""}{formatarMoeda(gap)} ({isPositive ? "+" : ""}{gapPercent.toFixed(1)}%)
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       {/* T.M Entrada */}
