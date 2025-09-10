@@ -177,6 +177,20 @@ const defaultSidebarItems: SidebarItem[] = [
       permission: 'relatorios',
       subItems: [
         {
+          icon: Clock,
+          label: 'Eventos',
+          href: '/analitico/eventos',
+          description: 'Análise de horários de pico e produtos por evento',
+          permission: 'relatorios',
+        },
+        {
+          icon: TrendingUp,
+          label: 'Resumo',
+          href: '/analitico/resumo',
+          description: 'Resumo semanal e análises comparativas',
+          permission: 'relatorios',
+        },
+        {
           icon: Users,
           label: 'Clientes',
           href: '/analitico/clientes',

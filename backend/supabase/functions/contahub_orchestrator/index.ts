@@ -60,7 +60,7 @@ class ContaHubOrchestrator {
   private baseUrl: string
   private headers: Record<string, string>
   
-  private dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo']
+  private dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'prodporhora']
 
   constructor() {
     this.baseUrl = `${SUPABASE_URL}/functions/v1`

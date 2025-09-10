@@ -19,7 +19,7 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
         <input
           type="checkbox"
           ref={ref}
-          className="sr-only peer"
+          className="absolute opacity-0 pointer-events-none w-0 h-0 peer"
           checked={checked}
           onChange={handleChange}
           {...props}

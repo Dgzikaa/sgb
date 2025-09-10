@@ -101,6 +101,18 @@ function identificarTipoChave(chave: string): { tipo: string | null; chaveFormat
   return { tipo: null, chaveFormatada: chave };
 }
 
+// Função para converter tipo de chave PIX para formato NIBO
+function getTipoPixNibo(tipo: string): number {
+  switch (tipo) {
+    case 'CPF': return 1;
+    case 'CNPJ': return 2;
+    case 'EMAIL': return 3;
+    case 'TELEFONE': return 4;
+    case 'ALEATORIA': return 5;
+    default: return 3; // Email como padrão
+  }
+}
+
 // Função para obter token do Inter
 async function obterAccessToken(config: any, conta: string, bar_id: number): Promise<string> {
   const body = new URLSearchParams({
@@ -285,17 +297,43 @@ export async function POST(request: NextRequest) {
       const stakeholderData = await stakeholderResponse.json();
 
       if (stakeholderData.success && stakeholderData.data.length > 0) {
-        stakeholderId = stakeholderData.data[0].id;
-        console.log('✅ Stakeholder encontrado:', stakeholderId);
+        const stakeholder = stakeholderData.data[0];
+        stakeholderId = stakeholder.id;
+        console.log('✅ Stakeholder encontrado no NIBO:', stakeholderId);
+        
+        // Verificar se precisa atualizar chave PIX
+        if (stakeholder.pixKey !== chaveFormatada) {
+          console.log('🔄 Atualizando chave PIX do stakeholder...');
+          const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/stakeholders/${stakeholderId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pixKey: chaveFormatada,
+              pixKeyType: getTipoPixNibo(tipo)
+            }),
+          });
+          
+          if (updateResponse.ok) {
+            console.log('✅ Chave PIX atualizada com sucesso');
+          } else {
+            console.log('⚠️ Erro ao atualizar chave PIX, mas continuando...');
+          }
+        } else {
+          console.log('✅ Chave PIX já está correta');
+        }
       } else {
-        // Criar novo stakeholder
-        console.log('📝 Criando novo stakeholder...');
+        // Criar novo stakeholder COM chave PIX
+        console.log('📝 Criando novo stakeholder com chave PIX...');
         const novoStakeholder = {
           name: nome_beneficiario,
           document: cpfCnpj,
           type: 'fornecedor' as const,
-          bar_id: bar_id,
+          bar_id: 3,
+          pixKey: chaveFormatada,
+          pixKeyType: getTipoPixNibo(tipo)
         };
+
+        console.log('📤 Payload do novo stakeholder:', novoStakeholder);
 
         const createResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/stakeholders`, {
           method: 'POST',
@@ -306,7 +344,7 @@ export async function POST(request: NextRequest) {
         const createData = await createResponse.json();
         if (createData.success) {
           stakeholderId = createData.data.id;
-          console.log('✅ Stakeholder criado:', stakeholderId);
+          console.log('✅ Stakeholder criado com chave PIX:', stakeholderId);
         } else {
           throw new Error(`Erro ao criar stakeholder: ${createData.error}`);
         }

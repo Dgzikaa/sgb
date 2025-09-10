@@ -2,11 +2,19 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import PageHeader from '@/components/layouts/PageHeader'
-import { Users, TrendingUp, BarChart3, PieChart } from 'lucide-react'
+import { Users, TrendingUp, BarChart3, PieChart, Clock } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AnaliticoPage() {
   const cards = [
+    {
+      title: 'Eventos',
+      description: 'Análise de horários de pico, produtos e resumos semanais',
+      icon: Clock,
+      href: '/analitico/eventos',
+      color: 'bg-blue-500',
+      implemented: true
+    },
     {
       title: 'Clientes',
       description: 'Análise de clientes mais recorrentes',

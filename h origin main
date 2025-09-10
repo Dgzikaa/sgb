@@ -1,5 +1,0 @@
-[33m3d08de6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: otimiza sync Getin e corrige cálculos de eventos
-[33m7677cdd[m fix: substitui RefreshCcw por spinner CSS para corrigir erro de import
-[33m3a74b26[m feat: implementa recálculo automático de eventos pós-sync ContaHub
-[33m2f5968a[m fix(api): corrige consultas na tabela nibo_stakeholders
-[33m179d6a7[m fix(ui): corrige bug do índice nas configurações individuais dos dropdowns

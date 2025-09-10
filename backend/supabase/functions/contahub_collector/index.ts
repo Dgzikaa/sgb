@@ -197,6 +197,10 @@ class ContaHubCollector {
         url = `${CONTAHUB_BASE_URL}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=81&d0=${dataDate}&d1=${dataDate}&prod=&grupo=&local=&emp=${emp_id}&nfe=${nfe}`
         break
         
+      case 'prodporhora':
+        url = `${CONTAHUB_BASE_URL}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=95&d0=${dataDate}&d1=${dataDate}&prod=&grupo=&turno=&emp=${emp_id}&nfe=${nfe}`
+        break
+        
       default:
         throw new Error(`Tipo de dados não suportado: ${dataType}`)
     }
@@ -291,7 +295,7 @@ serve(async (req) => {
     }
 
     // Validar data_type
-    const validDataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo']
+    const validDataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'prodporhora']
     if (!validDataTypes.includes(request.data_type)) {
       return new Response(
         JSON.stringify({ 

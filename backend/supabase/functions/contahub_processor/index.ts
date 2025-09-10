@@ -33,7 +33,8 @@ class ContaHubProcessor {
     'fatporhora': { batch_size: 500, table: 'contahub_fatporhora' },
     'pagamentos': { batch_size: 500, table: 'contahub_pagamentos' },
     'periodo': { batch_size: 500, table: 'contahub_periodo' },
-    'tempo': { batch_size: 500, table: 'contahub_tempo' }
+    'tempo': { batch_size: 500, table: 'contahub_tempo' },
+    'prodporhora': { batch_size: 500, table: 'contahub_prodporhora' }
   }
 
   constructor() {
@@ -97,6 +98,9 @@ class ContaHubProcessor {
           break
         case 'analitico':
           records = this.parseAnaliticoData(rawDataRecord.raw_json as any)
+          break
+        case 'prodporhora':
+          records = this.parseProdporhoraData(rawDataRecord.raw_json as any, rawDataRecord)
           break
         default:
           throw new Error(`Processamento não implementado para: ${dataType}`)
@@ -573,6 +577,37 @@ class ContaHubProcessor {
     return records.map((record, index) => {
       return {
         ...record,
+        bar_id: rawDataRecord.bar_id
+      }
+    })
+  }
+
+  private parseProdporhoraData(rawData: any, rawDataRecord: any): Record<string, unknown>[] {
+    const data = rawData?.list || rawData
+    if (!Array.isArray(data)) {
+      console.log(`⚠️ [PROCESSOR] Dados de prodporhora não são um array`)
+      return []
+    }
+
+    return data.map((item: any) => {
+      // Converter hora "22:00" -> 22, "24:00" -> 0 (meia-noite)
+      let hora = 0
+      if (item.hora) {
+        const horaNum = parseInt(item.hora.split(':')[0])
+        hora = horaNum === 24 ? 0 : horaNum
+      }
+
+      return {
+        data_gerencial: rawDataRecord.data_date,
+        hora: hora,
+        produto_id: String(item.prd || 'unknown'),
+        produto_descricao: String(item.prd_desc || 'Produto não identificado'),
+        grupo_descricao: item.grp_desc || null,
+        quantidade: parseFloat(item.qtd) || 0,
+        valor_unitario: item.$valorpago && item.qtd ? parseFloat(item.$valorpago) / parseFloat(item.qtd) : 0,
+        valor_total: parseFloat(item.$valorpago) || 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         bar_id: rawDataRecord.bar_id
       }
     })
