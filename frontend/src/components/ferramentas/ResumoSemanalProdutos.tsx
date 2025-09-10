@@ -26,6 +26,13 @@ interface ResumoSemanalItem {
   produtos_unicos: number;
 }
 
+interface SemanaReferencia {
+  semana: number;
+  data_inicio: string;
+  data_fim: string;
+  periodo_formatado: string;
+}
+
 const diasSemana = [
   'Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'
 ];
@@ -44,20 +51,57 @@ export default function ResumoSemanalProdutos() {
   const [dados, setDados] = useState<ResumoSemanalItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [periodoSemanas, setPeriodoSemanas] = useState<number>(4);
+  const [semanas, setSemanas] = useState<SemanaReferencia[]>([]);
+  const [semanaSelecionada, setSemanaSelecionada] = useState<string>(''); // semana_id ou 'ultima_completa'
+  const [loadingSemanas, setLoadingSemanas] = useState(false);
+
+  // Buscar semanas disponíveis
+  const buscarSemanas = async () => {
+    setLoadingSemanas(true);
+    try {
+      const response = await fetch('/api/semanas/listar');
+      if (!response.ok) throw new Error('Erro ao buscar semanas');
+      
+      const result = await response.json();
+      setSemanas(result.semanas || []);
+      
+      // Define última semana completa como padrão se não há seleção
+      if (!semanaSelecionada && result.semanas?.length > 0) {
+        // Encontra a última semana completa (data_fim < hoje)
+        const hoje = new Date().toISOString().split('T')[0];
+        const ultimaCompleta = result.semanas.find((s: SemanaReferencia) => s.data_fim < hoje);
+        if (ultimaCompleta) {
+          setSemanaSelecionada(ultimaCompleta.semana.toString());
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar semanas:', error);
+    } finally {
+      setLoadingSemanas(false);
+    }
+  };
 
   const buscarDados = async () => {
+    if (!semanaSelecionada) return;
+    
     setLoading(true);
     setError(null);
     
     try {
+      // Encontra os dados da semana selecionada
+      const semanaData = semanas.find(s => s.semana.toString() === semanaSelecionada);
+      if (!semanaData) {
+        throw new Error('Semana não encontrada');
+      }
+
       const response = await fetch('/api/ferramentas/resumo-semanal-produtos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          periodo_semanas: periodoSemanas,
+          data_inicio: semanaData.data_inicio,
+          data_fim: semanaData.data_fim,
           bar_id: 3
         }),
       });
@@ -76,9 +120,17 @@ export default function ResumoSemanalProdutos() {
     }
   };
 
+  // Carrega semanas na inicialização
   useEffect(() => {
-    buscarDados();
-  }, [periodoSemanas]);
+    buscarSemanas();
+  }, []);
+
+  // Busca dados quando semana muda
+  useEffect(() => {
+    if (semanaSelecionada && semanas.length > 0) {
+      buscarDados();
+    }
+  }, [semanaSelecionada, semanas]);
 
   const formatarHora = (hora: number) => `${hora.toString().padStart(2, '0')}:00`;
   
@@ -128,28 +180,33 @@ export default function ResumoSemanalProdutos() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Período:
-              </label>
-              <Select value={periodoSemanas.toString()} onValueChange={(v) => setPeriodoSemanas(parseInt(v))}>
-                <SelectTrigger className="w-40 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <SelectItem value="2">Últimas 2 semanas</SelectItem>
-                  <SelectItem value="4">Últimas 4 semanas</SelectItem>
-                  <SelectItem value="8">Últimas 8 semanas</SelectItem>
-                  <SelectItem value="12">Últimas 12 semanas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
+          <div className="flex items-center justify-between">
             <Button onClick={buscarDados} variant="outline" size="sm">
               <RefreshCwIcon className="w-4 h-4 mr-2" />
               Atualizar
             </Button>
+            
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                Semana:
+              </label>
+              <Select 
+                value={semanaSelecionada} 
+                onValueChange={setSemanaSelecionada}
+                disabled={loadingSemanas}
+              >
+                <SelectTrigger className="w-48 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                  <SelectValue placeholder="Selecione uma semana" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  {semanas.map((semana) => (
+                    <SelectItem key={semana.semana} value={semana.semana.toString()}>
+                      Semana {semana.semana} • {semana.periodo_formatado}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

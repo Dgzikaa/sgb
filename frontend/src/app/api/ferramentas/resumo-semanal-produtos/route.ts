@@ -8,17 +8,28 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { periodo_semanas = 4, bar_id = 3 } = await request.json();
+    const { data_inicio, data_fim, periodo_semanas, bar_id = 3 } = await request.json();
 
-    console.log(`🔍 Buscando resumo semanal de produtos - ${periodo_semanas} semanas`);
+    let dataInicialStr: string;
+    let dataFinalStr: string;
 
-    // Calcular data inicial (X semanas atrás)
-    const dataFinal = new Date();
-    const dataInicial = new Date();
-    dataInicial.setDate(dataFinal.getDate() - (periodo_semanas * 7));
+    // Se recebeu data_inicio e data_fim (novo formato), usa elas
+    if (data_inicio && data_fim) {
+      dataInicialStr = data_inicio;
+      dataFinalStr = data_fim;
+      console.log(`🔍 Buscando resumo semanal de produtos - Semana específica`);
+    } else {
+      // Fallback para o formato antigo (periodo_semanas)
+      const periodoSemanas = periodo_semanas || 4;
+      console.log(`🔍 Buscando resumo semanal de produtos - ${periodoSemanas} semanas`);
+      
+      const dataFinal = new Date();
+      const dataInicial = new Date();
+      dataInicial.setDate(dataFinal.getDate() - (periodoSemanas * 7));
 
-    const dataInicialStr = dataInicial.toISOString().split('T')[0];
-    const dataFinalStr = dataFinal.toISOString().split('T')[0];
+      dataInicialStr = dataInicial.toISOString().split('T')[0];
+      dataFinalStr = dataFinal.toISOString().split('T')[0];
+    }
 
     console.log(`📅 Período: ${dataInicialStr} até ${dataFinalStr}`);
 
