@@ -434,7 +434,7 @@ async function searchStakeholdersByPixKey(pixKey: string): Promise<NiboStakehold
     const data = await response.json();
     console.log('🔍 Resposta busca PIX:', JSON.stringify(data, null, 2));
     
-    let stakeholders = [];
+    let stakeholders: any[] = [];
     if (Array.isArray(data)) {
       stakeholders = data;
     } else if (data.data && Array.isArray(data.data)) {
@@ -493,7 +493,7 @@ async function searchStakeholdersByType(
   const data = await response.json();
   console.log('🔍 Resposta da API NIBO para tipo', type, ':', JSON.stringify(data, null, 2));
   
-  let stakeholders = [];
+  let stakeholders: any[] = [];
   if (Array.isArray(data)) {
     stakeholders = data;
   } else if (data.data && Array.isArray(data.data)) {

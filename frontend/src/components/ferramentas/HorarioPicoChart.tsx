@@ -110,24 +110,38 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
     };
   }, []);
 
-  // Função para lidar com mudança de data no input
-  const handleInputDataChange = (novaData: string) => {
+  // Função para detectar se foi navegação de mês ou seleção de data
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const novaData = event.target.value;
+    
+    // Sempre atualiza o estado local (para mostrar no input)
     setDataInput(novaData);
     
-    // Limpar timer anterior
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
+    console.log('📅 onChange disparado:', novaData);
     
-    // Se a data está completa, é válida e diferente da atual
-    if (novaData && novaData.length === 10) {
-      const dataObj = new Date(novaData + 'T00:00:00');
-      if (!isNaN(dataObj.getTime()) && novaData !== dataSelecionada) {
-        // Debounce bem curto - funciona para navegação e seleção
-        timerRef.current = setTimeout(() => {
-          onDataChange?.(novaData);
-        }, 300);
+    // Só processa se é uma data válida e completa
+    if (novaData && 
+        novaData.length === 10 && 
+        !isNaN(Date.parse(novaData)) && 
+        novaData !== dataSelecionada) {
+      
+      // Verifica se foi apenas mudança de mês (mesmo dia)
+      const dataAtual = new Date(dataSelecionada);
+      const novaDataObj = new Date(novaData);
+      
+      const mesmoDia = dataAtual.getDate() === novaDataObj.getDate();
+      const mesmoAno = dataAtual.getFullYear() === novaDataObj.getFullYear();
+      const mesDiferente = dataAtual.getMonth() !== novaDataObj.getMonth();
+      
+      if (mesmoDia && mesmoAno && mesDiferente) {
+        console.log('🔄 Navegação de mês detectada - ignorando');
+        return;
       }
+      
+      console.log('✅ Seleção de data real - aplicando:', novaData);
+      onDataChange?.(novaData);
+    } else {
+      console.log('❌ Data inválida ou incompleta, ignorando');
     }
   };
 
@@ -289,7 +303,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                 id="data-grafico"
                 type="date"
                 value={dataInput}
-                onChange={(e) => handleInputDataChange(e.target.value)}
+                onChange={handleDateChange}
                 className="w-40 input-dark"
               />
             </div>
