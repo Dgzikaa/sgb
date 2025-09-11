@@ -6,15 +6,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Mapeamento dos sócios
-const SOCIOS_MAP: Record<string, string> = {
-  'Digão': 'digao|rodrigo|digão',
-  'Corbal': 'gabriel|corbal|eduardo',
-  'Cadu': 'cadu',
-  'Gonza': 'pedro|gonza|gonzalez',
-  'Augusto': 'augusto',
-  'Diogo': 'diogo',
-  'Vinicius': 'vini|vinicius'
+// Mapeamento completo dos sócios com todas as variações
+const SOCIOS_MAP: Record<string, string[]> = {
+  'Digão': ['digao', 'digão', 'rodrigo'],
+  'Corbal': ['gabriel', 'corbal', 'eduardo', 'xcorbal', 'corbalt'],
+  'Cadu': ['cadu', 'xcadu'],
+  'Gonza': ['pedro', 'gonza', 'gonzalez', 'xgonza'],
+  'Augusto': ['augusto', 'xaugusto'],
+  'Diogo': ['diogo', 'xdiogo'],
+  'Vinicius': ['vini', 'vinicius', 'vinícius', 'xvinicius']
 };
 
 export async function GET(request: NextRequest) {
@@ -106,23 +106,53 @@ function processarDadosSocios(dados: any[]) {
 }
 
 function identificarSocio(mesaDesc: string, motivo: string): string | null {
-  const textoCompleto = `${mesaDesc || ''} ${motivo || ''}`.toLowerCase();
+  const mesa = (mesaDesc || '').toLowerCase();
+  const motivoLower = (motivo || '').toLowerCase();
+  const textoCompleto = `${mesa} ${motivoLower}`;
 
-  // Verificar cada sócio
+  // 1. Primeiro: verificar se o motivo já especifica o sócio diretamente
+  // Ex: "Sócio Digão", "sócio vini", "Socio Cadu", etc.
   for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
-    const nomesArray = nomes.split('|');
-    
-    for (const nome of nomesArray) {
-      if (textoCompleto.includes(nome.toLowerCase())) {
-        console.log(`✅ Sócio identificado: ${socio} - Texto: "${textoCompleto}" - Nome encontrado: "${nome}"`);
+    for (const nome of nomes) {
+      // Verificar padrões como "sócio digão", "socio vini", etc.
+      if (motivoLower.includes(`sócio ${nome}`) || 
+          motivoLower.includes(`socio ${nome}`) ||
+          motivoLower.includes(`sócio${nome}`) ||
+          motivoLower.includes(`socio${nome}`)) {
+        console.log(`✅ Sócio identificado no motivo: ${socio} - Motivo: "${motivo}" - Nome: "${nome}"`);
+        return socio;
+      }
+    }
+  }
+
+  // 2. Segundo: se o motivo for genérico ("sócio", "socio", "consumação sócio", etc.)
+  // verificar o vd_mesadesc para identificar o sócio
+  const motivoGenerico = motivoLower.includes('sócio') || motivoLower.includes('socio');
+  
+  if (motivoGenerico) {
+    for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
+      for (const nome of nomes) {
+        if (mesa.includes(nome)) {
+          console.log(`✅ Sócio identificado na mesa (motivo genérico): ${socio} - Mesa: "${mesaDesc}" - Motivo: "${motivo}" - Nome: "${nome}"`);
+          return socio;
+        }
+      }
+    }
+  }
+
+  // 3. Terceiro: verificar qualquer lugar no texto completo
+  for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
+    for (const nome of nomes) {
+      if (textoCompleto.includes(nome)) {
+        console.log(`✅ Sócio identificado no texto completo: ${socio} - Texto: "${textoCompleto}" - Nome: "${nome}"`);
         return socio;
       }
     }
   }
 
   // Log para registros não identificados que podem ser sócios
-  if (textoCompleto.includes('socio') || textoCompleto.includes('sócio')) {
-    console.log(`⚠️ Registro não identificado: "${textoCompleto}"`);
+  if (motivoLower.includes('socio') || motivoLower.includes('sócio')) {
+    console.log(`⚠️ Registro de sócio não identificado: Mesa: "${mesaDesc}" - Motivo: "${motivo}"`);
   }
 
   return null;
@@ -144,7 +174,7 @@ async function buscarTodosOsRegistros(ano: string, mes: string) {
     
     // Filtros por vd_mesadesc para cada sócio
     Object.values(SOCIOS_MAP).forEach(nomes => {
-      nomes.split('|').forEach(nome => {
+      nomes.forEach(nome => {
         filtros.push(`vd_mesadesc.ilike.%${nome}%`);
       });
     });
