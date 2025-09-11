@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     // 🎯 Calcular horário de pico usando prodporhora (mais preciso para horários)
     // Mas apenas para produtos não-banda
-    let horarioPico = null;
+    let horarioPico: VendaPorHorario | null = null;
     
     if (produtosPorHora && produtosPorHora.length > 0) {
       // Usar dados do prodporhora para horário de pico (mais preciso)
@@ -166,8 +166,9 @@ export async function POST(request: NextRequest) {
         return acc;
       }, {} as Record<number, VendaPorHorario>);
 
-      horarioPico = Object.values(vendasPorHorarioProdPorHora)
-        .sort((a, b) => b.total_quantidade - a.total_quantidade)[0];
+      const horariosSorted = Object.values(vendasPorHorarioProdPorHora)
+        .sort((a, b) => b.total_quantidade - a.total_quantidade);
+      horarioPico = horariosSorted.length > 0 ? horariosSorted[0] : null;
         
       console.log(`🕐 Horário de pico calculado via prodporhora: ${horarioPico?.hora}h`);
     } else {
@@ -189,8 +190,9 @@ export async function POST(request: NextRequest) {
         return acc;
       }, {} as Record<number, VendaPorHorario>);
 
-      horarioPico = Object.values(vendasPorHorario)
-        .sort((a, b) => b.total_quantidade - a.total_quantidade)[0];
+      const horariosSortedAnalytico = Object.values(vendasPorHorario)
+        .sort((a, b) => b.total_quantidade - a.total_quantidade);
+      horarioPico = horariosSortedAnalytico.length > 0 ? horariosSortedAnalytico[0] : null;
         
       console.log(`🕐 Horário de pico calculado via analítico (sem banda): ${horarioPico?.hora}h`);
     }
