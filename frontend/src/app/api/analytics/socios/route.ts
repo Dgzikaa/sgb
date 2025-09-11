@@ -13,7 +13,8 @@ const SOCIOS_MAP: Record<string, string> = {
   'Cadu': 'cadu',
   'Gonza': 'pedro|gonza',
   'Augusto': 'augusto',
-  'Diogo': 'diogo'
+  'Diogo': 'diogo',
+  'Vinicius': 'vini|vinicius'
 };
 
 export async function GET(request: NextRequest) {
