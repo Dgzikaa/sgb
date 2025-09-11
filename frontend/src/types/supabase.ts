@@ -30,6 +30,8 @@ export type Database = {
           qtd: number | null
           prd_desc: string | null
           grp_desc: string | null
+          itm_qtd: number | null
+          itm_valorfinal: number | null
         }
         Insert: {
           id?: number
@@ -46,6 +48,8 @@ export type Database = {
           qtd?: number | null
           prd_desc?: string | null
           grp_desc?: string | null
+          itm_qtd?: number | null
+          itm_valorfinal?: number | null
         }
         Update: {
           id?: number
@@ -62,6 +66,8 @@ export type Database = {
           qtd?: number | null
           prd_desc?: string | null
           grp_desc?: string | null
+          itm_qtd?: number | null
+          itm_valorfinal?: number | null
         }
         Relationships: []
       }
@@ -74,9 +80,18 @@ export type Database = {
           t1_prodini: string | null
           t2_prodfim: string | null
           t3_entrega: string | null
+          t0_t1: number | null
+          t0_t2: number | null
+          t0_t3: number | null
+          t1_t2: number | null
+          t1_t3: number | null
+          t2_t3: number | null
           usr_lancou: string | null
           usr_produziu: string | null
           usr_entregou: string | null
+          itm_qtd: number | null
+          prd_desc: string | null
+          grp_desc: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -88,9 +103,18 @@ export type Database = {
           t1_prodini?: string | null
           t2_prodfim?: string | null
           t3_entrega?: string | null
+          t0_t1?: number | null
+          t0_t2?: number | null
+          t0_t3?: number | null
+          t1_t2?: number | null
+          t1_t3?: number | null
+          t2_t3?: number | null
           usr_lancou?: string | null
           usr_produziu?: string | null
           usr_entregou?: string | null
+          itm_qtd?: number | null
+          prd_desc?: string | null
+          grp_desc?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -102,9 +126,18 @@ export type Database = {
           t1_prodini?: string | null
           t2_prodfim?: string | null
           t3_entrega?: string | null
+          t0_t1?: number | null
+          t0_t2?: number | null
+          t0_t3?: number | null
+          t1_t2?: number | null
+          t1_t3?: number | null
+          t2_t3?: number | null
           usr_lancou?: string | null
           usr_produziu?: string | null
           usr_entregou?: string | null
+          itm_qtd?: number | null
+          prd_desc?: string | null
+          grp_desc?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -115,7 +148,15 @@ export type Database = {
           id: number
           bar_id: number | null
           data: string | null
+          dt_contabil: string | null
+          dt_gerencial: string | null
           pessoas: number | null
+          vr_pagamentos: number | null
+          vr_couvert: number | null
+          vr_taxa: number | null
+          vr_desconto: number | null
+          vr_acrescimo: number | null
+          vr_total: number | null
           valor: number | null
           created_at: string | null
           updated_at: string | null
@@ -124,7 +165,15 @@ export type Database = {
           id?: number
           bar_id?: number | null
           data?: string | null
+          dt_contabil?: string | null
+          dt_gerencial?: string | null
           pessoas?: number | null
+          vr_pagamentos?: number | null
+          vr_couvert?: number | null
+          vr_taxa?: number | null
+          vr_desconto?: number | null
+          vr_acrescimo?: number | null
+          vr_total?: number | null
           valor?: number | null
           created_at?: string | null
           updated_at?: string | null
@@ -133,7 +182,15 @@ export type Database = {
           id?: number
           bar_id?: number | null
           data?: string | null
+          dt_contabil?: string | null
+          dt_gerencial?: string | null
           pessoas?: number | null
+          vr_pagamentos?: number | null
+          vr_couvert?: number | null
+          vr_taxa?: number | null
+          vr_desconto?: number | null
+          vr_acrescimo?: number | null
+          vr_total?: number | null
           valor?: number | null
           created_at?: string | null
           updated_at?: string | null
@@ -783,6 +840,8 @@ export type Database = {
           nome: string | null
           preco: number | null
           categoria: string | null
+          codigo: string | null
+          tipo: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -792,6 +851,8 @@ export type Database = {
           nome?: string | null
           preco?: number | null
           categoria?: string | null
+          codigo?: string | null
+          tipo?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -801,6 +862,8 @@ export type Database = {
           nome?: string | null
           preco?: number | null
           categoria?: string | null
+          codigo?: string | null
+          tipo?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -842,6 +905,15 @@ export type Database = {
           produto_id: number | null
           insumo_id: number | null
           quantidade: number | null
+          receita_codigo: string | null
+          receita_nome: string | null
+          receita_categoria: string | null
+          insumo_chefe_id: number | null
+          rendimento_esperado: number | null
+          quantidade_necessaria: number | null
+          ativo: boolean | null
+          tipo_local: string | null
+          insumos: Json | null
           created_at: string | null
           updated_at: string | null
         }
@@ -850,6 +922,15 @@ export type Database = {
           produto_id?: number | null
           insumo_id?: number | null
           quantidade?: number | null
+          receita_codigo?: string | null
+          receita_nome?: string | null
+          receita_categoria?: string | null
+          insumo_chefe_id?: number | null
+          rendimento_esperado?: number | null
+          quantidade_necessaria?: number | null
+          ativo?: boolean | null
+          tipo_local?: string | null
+          insumos?: Json | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -858,6 +939,15 @@ export type Database = {
           produto_id?: number | null
           insumo_id?: number | null
           quantidade?: number | null
+          receita_codigo?: string | null
+          receita_nome?: string | null
+          receita_categoria?: string | null
+          insumo_chefe_id?: number | null
+          rendimento_esperado?: number | null
+          quantidade_necessaria?: number | null
+          ativo?: boolean | null
+          tipo_local?: string | null
+          insumos?: Json | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1085,6 +1175,8 @@ export type Database = {
           updated_at: string | null
           usr_lancou: string | null
           valorfinal: number | null
+          itm_qtd: number | null
+          itm_valorfinal: number | null
           vd_localizacao: string | null
           vd_mesadesc: string | null
         }
@@ -1114,6 +1206,8 @@ export type Database = {
           updated_at?: string | null
           usr_lancou?: string | null
           valorfinal?: number | null
+          itm_qtd?: number | null
+          itm_valorfinal?: number | null
           vd_localizacao?: string | null
           vd_mesadesc?: string | null
         }
@@ -1143,6 +1237,8 @@ export type Database = {
           updated_at?: string | null
           usr_lancou?: string | null
           valorfinal?: number | null
+          itm_qtd?: number | null
+          itm_valorfinal?: number | null
           vd_localizacao?: string | null
           vd_mesadesc?: string | null
         }
