@@ -48,7 +48,7 @@ export default function EventosAnaliticoPage() {
   return (
     <div className="min-h-[calc(100vh-8px)] bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-2 py-1 pb-6 max-w-[98vw]">
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Gráfico de Horário de Pico - Primeiro */}
           <HorarioPicoChart 
             dataSelecionada={dataSelecionada} 
