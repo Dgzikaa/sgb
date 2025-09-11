@@ -3,13 +3,14 @@ import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
 export async function GET(request: NextRequest) {
   try {
+    // Criar cliente Supabase dentro da função para evitar erro no build
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    
     console.log('🔍 [API] Iniciando busca de eventos...')
     console.log('🔧 [API] URL Supabase:', process.env.NEXT_PUBLIC_SUPABASE_URL)
     console.log('🔑 [API] Anon Key configurada:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)

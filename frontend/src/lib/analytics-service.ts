@@ -52,8 +52,6 @@ interface WhatsAppMensagem {
   created_at: string;
 }
 
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-
 // ========================================
 // ✅ ANÁLISES DE CHECKLISTS
 // ========================================
@@ -63,6 +61,8 @@ export async function getStatusChecklists(
   inicio?: string,
   fim?: string
 ) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  
   const dataInicio =
     inicio ||
     new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -104,6 +104,8 @@ export async function getPerformanceFuncionarios(
   fim?: string,
   limite = 10
 ): Promise<PerformanceResult> {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  
   const dataInicio =
     inicio ||
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -190,6 +192,8 @@ export async function getWhatsAppStats(
   inicio?: string,
   fim?: string
 ) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  
   const dataInicio =
     inicio ||
     new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -240,6 +244,8 @@ export async function getTempoProducao(
   inicio?: string,
   fim?: string
 ) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  
   const dataInicio =
     inicio ||
     new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -308,6 +314,8 @@ export async function getTempoProducao(
 // ========================================
 
 export async function getScoreSaudeGeral(bar_id: number) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  
   // Score simplificado baseado em dados disponíveis
   const hoje = new Date().toISOString().split('T')[0];
   const ontem = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -372,6 +380,8 @@ export async function getDashboardExecutivo(
   inicio?: string,
   fim?: string
 ) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  
   const dataInicio =
     inicio ||
     new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -425,6 +435,8 @@ export async function getVisao360(
   inicio?: string,
   fim?: string
 ) {
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  
   const dashboard = await getDashboardExecutivo(bar_id, inicio, fim);
   const performance = await getPerformanceFuncionarios(bar_id, inicio, fim, 5);
 

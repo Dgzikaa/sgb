@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     semanaPassada.setDate(semanaPassada.getDate() - 7);
     
     // Últimas 4 ocorrências do mesmo dia da semana
-    const ultimas4Datas: string[] = [];
+    const ultimas4Datas = [] as string[];
     for (let i = 1; i <= 4; i++) {
       const data = new Date(dataAtual);
       data.setDate(data.getDate() - (7 * i));
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Horários de operação: 17:00 às 03:00
-    const horariosOperacao: number[] = [];
+    const horariosOperacao = [] as number[];
     // 17:00 às 23:59
     for (let h = 17; h <= 23; h++) {
       horariosOperacao.push(h);
