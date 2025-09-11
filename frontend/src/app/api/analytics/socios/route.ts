@@ -8,10 +8,10 @@ const supabase = createClient(
 
 // Mapeamento dos sócios
 const SOCIOS_MAP: Record<string, string> = {
-  'Digão': 'digao|rodrigo',
-  'Corbal': 'gabriel|corbal',
+  'Digão': 'digao|rodrigo|digão',
+  'Corbal': 'gabriel|corbal|eduardo',
   'Cadu': 'cadu',
-  'Gonza': 'pedro|gonza',
+  'Gonza': 'pedro|gonza|gonzalez',
   'Augusto': 'augusto',
   'Diogo': 'diogo',
   'Vinicius': 'vini|vinicius'
@@ -106,7 +106,7 @@ function processarDadosSocios(dados: any[]) {
 }
 
 function identificarSocio(mesaDesc: string, motivo: string): string | null {
-  const textoCompleto = `${mesaDesc} ${motivo}`.toLowerCase();
+  const textoCompleto = `${mesaDesc || ''} ${motivo || ''}`.toLowerCase();
 
   // Verificar cada sócio
   for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
@@ -114,9 +114,15 @@ function identificarSocio(mesaDesc: string, motivo: string): string | null {
     
     for (const nome of nomesArray) {
       if (textoCompleto.includes(nome.toLowerCase())) {
+        console.log(`✅ Sócio identificado: ${socio} - Texto: "${textoCompleto}" - Nome encontrado: "${nome}"`);
         return socio;
       }
     }
+  }
+
+  // Log para registros não identificados que podem ser sócios
+  if (textoCompleto.includes('socio') || textoCompleto.includes('sócio')) {
+    console.log(`⚠️ Registro não identificado: "${textoCompleto}"`);
   }
 
   return null;
