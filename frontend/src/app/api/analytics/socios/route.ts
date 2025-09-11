@@ -214,6 +214,14 @@ async function buscarTodosOsRegistros(ano: string, mes: string) {
     }
 
     console.log(`Total de registros encontrados: ${todosOsDados.length}`);
+    
+    // Log detalhado dos registros para debug
+    console.log('=== REGISTROS ENCONTRADOS ===');
+    todosOsDados.forEach((registro, index) => {
+      console.log(`${index + 1}. Mesa: "${registro.vd_mesadesc}" | Motivo: "${registro.motivo}" | Valor: ${registro.vr_desconto}`);
+    });
+    console.log('=== FIM DOS REGISTROS ===');
+    
     return { success: true, data: todosOsDados };
 
   } catch (error) {
