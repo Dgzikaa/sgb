@@ -19,8 +19,34 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔍 Buscando produtos por hora para ${data_selecionada}`);
 
-    // Buscar dados da tabela contahub_prodporhora
-    const { data: produtosPorHora, error } = await supabase
+    // 🎯 MUDANÇA: Usar contahub_analitico como fonte principal para contagem de produtos
+    const { data: dadosAnaliticos, error: errorAnalitico } = await supabase
+      .from('contahub_analitico')
+      .select(`
+        prd_desc,
+        grp_desc,
+        qtd,
+        valorfinal,
+        trn_hora,
+        vd_mesadesc
+      `)
+      .eq('trn_dtgerencial', data_selecionada)
+      .eq('bar_id', bar_id)
+      .order('trn_hora', { ascending: true })
+      .order('qtd', { ascending: false });
+
+    if (errorAnalitico) {
+      console.error('Erro ao buscar dados analíticos:', errorAnalitico);
+      return NextResponse.json(
+        { error: 'Erro ao buscar dados do banco' },
+        { status: 500 }
+      );
+    }
+
+    console.log(`📊 Dados analíticos encontrados: ${dadosAnaliticos?.length || 0} registros`);
+
+    // 🍽️ Buscar dados do prodporhora APENAS para happy hour e horários de pico
+    const { data: produtosPorHora, error: errorProdPorHora } = await supabase
       .from('contahub_prodporhora')
       .select(`
         hora,
@@ -33,48 +59,89 @@ export async function POST(request: NextRequest) {
       `)
       .eq('data_gerencial', data_selecionada)
       .eq('bar_id', bar_id)
-      .order('hora', { ascending: true })
-      .order('quantidade', { ascending: false });
+      .order('hora', { ascending: true });
 
-    if (error) {
-      console.error('Erro ao buscar produtos por hora:', error);
-      return NextResponse.json(
-        { error: 'Erro ao buscar dados do banco' },
-        { status: 500 }
-      );
-    }
+    console.log(`🍽️ Dados prodporhora encontrados: ${produtosPorHora?.length || 0} registros (apenas para happy hour)`);
+
+    // Processar dados do contahub_analitico para formato padrão
+    const produtosPorHoraEnriquecidos = dadosAnaliticos?.map(item => {
+      const mesaDesc = item.vd_mesadesc?.toLowerCase() || '';
+      const isBanda = mesaDesc.includes('banda') || mesaDesc.includes('dj');
+      
+      return {
+        hora: parseInt(item.trn_hora) || 0,
+        produto_id: item.prd_desc || '', // Usando descrição como ID
+        produto_descricao: item.prd_desc || '',
+        grupo_descricao: item.grp_desc || '',
+        quantidade: parseFloat(item.qtd) || 0,
+        valor_unitario: parseFloat(item.valorfinal) || 0,
+        valor_total: parseFloat(item.valorfinal) || 0,
+        is_banda: isBanda
+      };
+    }) || [];
 
     // Calcular estatísticas
-    const totalProdutos = produtosPorHora?.reduce((sum, item) => sum + item.quantidade, 0) || 0;
-    const totalValor = produtosPorHora?.reduce((sum, item) => sum + item.valor_total, 0) || 0;
-    const produtosUnicos = new Set(produtosPorHora?.map(item => item.produto_id) || []).size;
-    const gruposUnicos = new Set(produtosPorHora?.map(item => item.grupo_descricao).filter(Boolean) || []).size;
+    const totalProdutos = produtosPorHoraEnriquecidos?.reduce((sum, item) => sum + item.quantidade, 0) || 0;
+    const totalValor = produtosPorHoraEnriquecidos?.reduce((sum, item) => sum + item.valor_total, 0) || 0;
+    const produtosUnicos = new Set(produtosPorHoraEnriquecidos?.map(item => item.produto_id) || []).size;
+    const gruposUnicos = new Set(produtosPorHoraEnriquecidos?.map(item => item.grupo_descricao).filter(Boolean) || []).size;
 
     // Encontrar horário e produto de pico
-    const produtosPorQuantidade = [...(produtosPorHora || [])].sort((a, b) => b.quantidade - a.quantidade);
+    const produtosPorQuantidade = [...(produtosPorHoraEnriquecidos || [])].sort((a, b) => b.quantidade - a.quantidade);
     const produtoPico = produtosPorQuantidade[0];
 
-    // Vendas por horário (agregado)
-    const vendasPorHorario = produtosPorHora?.reduce((acc, item) => {
-      if (!acc[item.hora]) {
-        acc[item.hora] = {
-          hora: item.hora,
-          total_quantidade: 0,
-          total_valor: 0,
-          produtos_diferentes: new Set()
-        };
-      }
-      acc[item.hora].total_quantidade += item.quantidade;
-      acc[item.hora].total_valor += item.valor_total;
-      acc[item.hora].produtos_diferentes.add(item.produto_id);
-      return acc;
-    }, {} as Record<number, any>) || {};
+    // 🎯 Calcular horário de pico usando prodporhora (mais preciso para horários)
+    // Mas apenas para produtos não-banda
+    let horarioPico = null;
+    
+    if (produtosPorHora && produtosPorHora.length > 0) {
+      // Usar dados do prodporhora para horário de pico (mais preciso)
+      const vendasPorHorarioProdPorHora = produtosPorHora.reduce((acc, item) => {
+        if (!acc[item.hora]) {
+          acc[item.hora] = {
+            hora: item.hora,
+            total_quantidade: 0,
+            total_valor: 0,
+            produtos_diferentes: new Set()
+          };
+        }
+        acc[item.hora].total_quantidade += item.quantidade;
+        acc[item.hora].total_valor += item.valor_total;
+        acc[item.hora].produtos_diferentes.add(item.produto_id);
+        return acc;
+      }, {} as Record<number, any>);
 
-    const horarioPico = Object.values(vendasPorHorario)
-      .sort((a: any, b: any) => b.total_quantidade - a.total_quantidade)[0];
+      horarioPico = Object.values(vendasPorHorarioProdPorHora)
+        .sort((a: any, b: any) => b.total_quantidade - a.total_quantidade)[0];
+        
+      console.log(`🕐 Horário de pico calculado via prodporhora: ${horarioPico?.hora}h`);
+    } else {
+      // Fallback: usar dados do analítico, mas apenas para produtos não-banda
+      const produtosNaoBanda = produtosPorHoraEnriquecidos?.filter(item => !item.is_banda) || [];
+      
+      const vendasPorHorario = produtosNaoBanda.reduce((acc, item) => {
+        if (!acc[item.hora]) {
+          acc[item.hora] = {
+            hora: item.hora,
+            total_quantidade: 0,
+            total_valor: 0,
+            produtos_diferentes: new Set()
+          };
+        }
+        acc[item.hora].total_quantidade += item.quantidade;
+        acc[item.hora].total_valor += item.valor_total;
+        acc[item.hora].produtos_diferentes.add(item.produto_id);
+        return acc;
+      }, {} as Record<number, any>);
+
+      horarioPico = Object.values(vendasPorHorario)
+        .sort((a: any, b: any) => b.total_quantidade - a.total_quantidade)[0];
+        
+      console.log(`🕐 Horário de pico calculado via analítico (sem banda): ${horarioPico?.hora}h`);
+    }
 
     // Top 5 produtos
-    const topProdutos = produtosPorHora?.reduce((acc, item) => {
+    const topProdutos = produtosPorHoraEnriquecidos?.reduce((acc, item) => {
       const key = item.produto_descricao;
       if (!acc[key]) {
         acc[key] = {
@@ -93,12 +160,13 @@ export async function POST(request: NextRequest) {
       .sort((a: any, b: any) => b.total_quantidade - a.total_quantidade)
       .slice(0, 5);
 
-    console.log(`✅ Encontrados ${produtosPorHora?.length || 0} registros de produtos por hora`);
+    console.log(`✅ Encontrados ${produtosPorHoraEnriquecidos?.length || 0} registros de produtos por hora`);
+    console.log(`🎵 Produtos identificados como banda: ${produtosPorHoraEnriquecidos?.filter(item => item.is_banda).length || 0}`);
 
     return NextResponse.json({
       success: true,
       data_selecionada,
-      dados: produtosPorHora || [],
+      dados: produtosPorHoraEnriquecidos || [],
       estatisticas: {
         total_produtos_vendidos: totalProdutos,
         total_valor_vendas: totalValor,

@@ -22,6 +22,7 @@ interface ProdutoDoDia {
   hora_pico: number;
   quantidade_pico: number;
   categoria: 'normal' | 'happy_hour' | 'banda';
+  is_banda?: boolean; // Campo adicional do contahub_analitico
 }
 
 interface ResumoDoDia {
@@ -90,11 +91,15 @@ export default function ProdutosDoDiaDataTable({ dataSelecionada }: ProdutosDoDi
       totalFaturamento += item.valor_total;
       totalProdutosVendidos += item.quantidade;
 
-      // Categorizar produto
+      // Categorizar produto usando dados do contahub_analitico
       let categoria: 'normal' | 'happy_hour' | 'banda' = 'normal';
-      if (item.produto_descricao.includes('[DD]')) {
+      if (item.is_banda) {
+        // Usar informação do vd_mesadesc (banda/dj) do contahub_analitico
+        categoria = 'banda';
+      } else if (item.produto_descricao.includes('[DD]') || item.produto_descricao.includes('[HH]')) {
         categoria = 'happy_hour';
       } else if (item.produto_descricao.includes('[') && item.produto_descricao.includes(']')) {
+        // Fallback para produtos com prefixo [Banda] no nome
         categoria = 'banda';
       }
       
@@ -169,7 +174,7 @@ export default function ProdutosDoDiaDataTable({ dataSelecionada }: ProdutosDoDi
           <PackageIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           <div>
             <p className="font-semibold text-gray-900 dark:text-white text-sm">
-              {value.replace(/\[DD\]|\[.*?\]/g, '').trim()}
+              {value.replace(/\[DD\]|\[HH\]|\[.*?\]/g, '').trim()}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-300">
               {row.grupo_descricao}

@@ -208,7 +208,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // 1. COLETA E ARMAZENAMENTO DE JSON BRUTO
     console.log('\n📥 FASE 1: Coletando e salvando JSONs brutos...');
     
-    const dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'prodporhora'];
+    const dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo'];
     
     for (const dataType of dataTypes) {
       try {
@@ -242,10 +242,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
             
           case 'periodo':
             url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${data_date}&d1=${data_date}&emp=${emp_id}&nfe=1`;
-            break;
-            
-          case 'prodporhora':
-            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=102&d0=${data_date}&d1=${data_date}&emp=${emp_id}&nfe=1`;
             break;
             
           default:
@@ -287,7 +283,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     };
     
     console.log('\n📊 RESUMO FINAL:');
-    console.log(`- Coletados: ${summary.collected_count}/6 tipos`);
+    console.log(`- Coletados: ${summary.collected_count}/5 tipos`);
     console.log(`- Registros coletados: ${summary.total_records_collected}`);
     console.log(`- Erros: ${summary.error_count}`);
     console.log(`- Processamento: Automático via pg_cron`);
@@ -306,7 +302,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           processed_records: summary.total_records_collected,
           bar_id: parseInt(bar_id),
           execution_time: `Dados: ${data_date}`,
-          custom_message: `📊 **Coleta ContaHub concluída**\n\n📈 **Resultados:**\n• Coletados: ${summary.collected_count}/6 tipos\n• Registros coletados: ${summary.total_records_collected}\n• Erros: ${summary.error_count}\n\n🔄 **Processamento:** Iniciado automaticamente via pg_cron\n⏰ **Fim:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
+          custom_message: `📊 **Coleta ContaHub concluída**\n\n📈 **Resultados:**\n• Coletados: ${summary.collected_count}/5 tipos\n• Registros coletados: ${summary.total_records_collected}\n• Erros: ${summary.error_count}\n\n🔄 **Processamento:** Iniciado automaticamente via pg_cron\n⏰ **Fim:** ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`
         })
       });
 

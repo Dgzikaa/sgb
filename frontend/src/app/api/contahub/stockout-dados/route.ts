@@ -28,8 +28,8 @@ export async function GET(request: NextRequest) {
       .from('contahub_stockout')
       .select('*')
       .eq('bar_id', parseInt(barId))
-      .eq('data_referencia', dataReferencia)
-      .order('produto_descricao');
+      .eq('data_consulta', dataReferencia)
+      .order('produto_nome');
     
     if (error) {
       console.error('❌ Erro ao buscar dados de stockout:', error);
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         success: true,
         message: 'Nenhum dado de stockout encontrado para esta data',
         data: {
-          data_referencia: dataReferencia,
+          data_consulta: dataReferencia,
           bar_id: parseInt(barId),
           total_produtos: 0,
           produtos_ativos: 0,
@@ -54,31 +54,31 @@ export async function GET(request: NextRequest) {
     
     // Calcular estatísticas
     const totalProdutos = stockoutData.length;
-    const produtosAtivos = stockoutData.filter(p => p.ativo_contahub).length;
+    const produtosAtivos = stockoutData.filter(p => p.produto_ativo).length;
     const produtosInativos = totalProdutos - produtosAtivos;
     const percentualStockout = totalProdutos > 0 ? ((produtosInativos / totalProdutos) * 100).toFixed(2) : '0.00';
     
     // Separar produtos por status
-    const produtosAtivosList = stockoutData.filter(p => p.ativo_contahub);
-    const produtosInativosList = stockoutData.filter(p => !p.ativo_contahub);
+    const produtosAtivosList = stockoutData.filter(p => p.produto_ativo);
+    const produtosInativosList = stockoutData.filter(p => !p.produto_ativo);
     
     // Agrupar por grupo/categoria
     const gruposAtivos = produtosAtivosList.reduce((acc, produto) => {
-      const grupo = produto.grupo_descricao || 'Sem grupo';
+      const grupo = produto.grupo_produto || 'Sem grupo';
       if (!acc[grupo]) acc[grupo] = [];
       acc[grupo].push(produto);
       return acc;
     }, {} as Record<string, any[]>);
     
     const gruposInativos = produtosInativosList.reduce((acc, produto) => {
-      const grupo = produto.grupo_descricao || 'Sem grupo';
+      const grupo = produto.grupo_produto || 'Sem grupo';
       if (!acc[grupo]) acc[grupo] = [];
       acc[grupo].push(produto);
       return acc;
     }, {} as Record<string, any[]>);
     
     const resultado = {
-      data_referencia: dataReferencia,
+      data_consulta: dataReferencia,
       bar_id: parseInt(barId),
       timestamp_consulta: new Date().toISOString(),
       estatisticas: {
@@ -91,27 +91,31 @@ export async function GET(request: NextRequest) {
       produtos: {
         ativos: produtosAtivosList.map(p => ({
           produto_id: p.produto_id,
-          produto_descricao: p.produto_descricao,
-          grupo_descricao: p.grupo_descricao,
-          timestamp_coleta: p.timestamp_coleta
+          produto_nome: p.produto_nome,
+          grupo_produto: p.grupo_produto,
+          categoria_produto: p.categoria_produto,
+          data_consulta: p.data_consulta,
+          hora_consulta: p.hora_consulta
         })),
         inativos: produtosInativosList.map(p => ({
           produto_id: p.produto_id,
-          produto_descricao: p.produto_descricao,
-          grupo_descricao: p.grupo_descricao,
-          timestamp_coleta: p.timestamp_coleta
+          produto_nome: p.produto_nome,
+          grupo_produto: p.grupo_produto,
+          categoria_produto: p.categoria_produto,
+          data_consulta: p.data_consulta,
+          hora_consulta: p.hora_consulta
         }))
       },
       grupos: {
         ativos: Object.keys(gruposAtivos).map(grupo => ({
           grupo: grupo,
           quantidade: gruposAtivos[grupo].length,
-          produtos: gruposAtivos[grupo].map(p => p.produto_descricao)
+          produtos: gruposAtivos[grupo].map(p => p.produto_nome)
         })),
         inativos: Object.keys(gruposInativos).map(grupo => ({
           grupo: grupo,
           quantidade: gruposInativos[grupo].length,
-          produtos: gruposInativos[grupo].map(p => p.produto_descricao)
+          produtos: gruposInativos[grupo].map(p => p.produto_nome)
         }))
       }
     };
@@ -151,11 +155,11 @@ export async function POST(request: NextRequest) {
     // Buscar dados de stockout para o período
     const { data: stockoutData, error } = await supabase
       .from('contahub_stockout')
-      .select('data_referencia, ativo_contahub, produto_id, produto_descricao, grupo_descricao')
+      .select('data_consulta, produto_ativo, produto_id, produto_nome, grupo_produto')
       .eq('bar_id', bar_id)
-      .gte('data_referencia', data_inicio)
-      .lte('data_referencia', data_fim)
-      .order('data_referencia', { ascending: false });
+      .gte('data_consulta', data_inicio)
+      .lte('data_consulta', data_fim)
+      .order('data_consulta', { ascending: false });
     
     if (error) {
       console.error('❌ Erro ao buscar histórico de stockout:', error);
@@ -176,12 +180,12 @@ export async function POST(request: NextRequest) {
     
     // Agrupar por data
     const dadosPorData = stockoutData.reduce((acc, item) => {
-      const data = item.data_referencia;
+      const data = item.data_consulta;
       if (!acc[data]) {
         acc[data] = { ativos: [], inativos: [] };
       }
       
-      if (item.ativo_contahub) {
+      if (item.produto_ativo) {
         acc[data].ativos.push(item);
       } else {
         acc[data].inativos.push(item);
@@ -199,7 +203,7 @@ export async function POST(request: NextRequest) {
       const percentualStockout = totalProdutos > 0 ? ((produtosInativos / totalProdutos) * 100).toFixed(2) : '0.00';
       
       return {
-        data_referencia: data,
+        data_consulta: data,
         total_produtos: totalProdutos,
         produtos_ativos: produtosAtivos,
         produtos_inativos: produtosInativos,
