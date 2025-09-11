@@ -751,6 +751,9 @@ export type Database = {
           data_evento: string | null
           artista: string | null
           faturamento: number | null
+          publico_real: number | null
+          faturamento_liquido: number | null
+          capacidade_estimada: number | null
           created_at: string | null
           updated_at: string | null
         }
@@ -761,6 +764,9 @@ export type Database = {
           data_evento?: string | null
           artista?: string | null
           faturamento?: number | null
+          publico_real?: number | null
+          faturamento_liquido?: number | null
+          capacidade_estimada?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -771,6 +777,9 @@ export type Database = {
           data_evento?: string | null
           artista?: string | null
           faturamento?: number | null
+          publico_real?: number | null
+          faturamento_liquido?: number | null
+          capacidade_estimada?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -781,8 +790,17 @@ export type Database = {
           id: number
           bar_id: number | null
           nome: string | null
+          receita_codigo: string | null
+          receita_nome: string | null
+          receita_categoria: string | null
+          criado_por_nome: string | null
           data_producao: string | null
           quantidade: number | null
+          quantidade_esperada: number | null
+          desvio: number | null
+          percentual_desvio: number | null
+          status: string | null
+          observacoes: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -790,8 +808,17 @@ export type Database = {
           id?: number
           bar_id?: number | null
           nome?: string | null
+          receita_codigo?: string | null
+          receita_nome?: string | null
+          receita_categoria?: string | null
+          criado_por_nome?: string | null
           data_producao?: string | null
           quantidade?: number | null
+          quantidade_esperada?: number | null
+          desvio?: number | null
+          percentual_desvio?: number | null
+          status?: string | null
+          observacoes?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -799,8 +826,17 @@ export type Database = {
           id?: number
           bar_id?: number | null
           nome?: string | null
+          receita_codigo?: string | null
+          receita_nome?: string | null
+          receita_categoria?: string | null
+          criado_por_nome?: string | null
           data_producao?: string | null
           quantidade?: number | null
+          quantidade_esperada?: number | null
+          desvio?: number | null
+          percentual_desvio?: number | null
+          status?: string | null
+          observacoes?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -842,6 +878,11 @@ export type Database = {
           categoria: string | null
           codigo: string | null
           tipo: string | null
+          grupo: string | null
+          quantidade_base: number | null
+          rendimento_percentual: number | null
+          unidade_final: string | null
+          ativo: boolean | null
           created_at: string | null
           updated_at: string | null
         }
@@ -853,6 +894,11 @@ export type Database = {
           categoria?: string | null
           codigo?: string | null
           tipo?: string | null
+          grupo?: string | null
+          quantidade_base?: number | null
+          rendimento_percentual?: number | null
+          unidade_final?: string | null
+          ativo?: boolean | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -864,6 +910,11 @@ export type Database = {
           categoria?: string | null
           codigo?: string | null
           tipo?: string | null
+          grupo?: string | null
+          quantidade_base?: number | null
+          rendimento_percentual?: number | null
+          unidade_final?: string | null
+          ativo?: boolean | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1066,7 +1117,9 @@ export type Database = {
           id: string
           funcionario_id: string | null
           checklist_id: string | null
+          titulo: string | null
           status: string | null
+          prazo: string | null
           dados: Json | null
           created_at: string | null
           updated_at: string | null
@@ -1075,7 +1128,9 @@ export type Database = {
           id?: string
           funcionario_id?: string | null
           checklist_id?: string | null
+          titulo?: string | null
           status?: string | null
+          prazo?: string | null
           dados?: Json | null
           created_at?: string | null
           updated_at?: string | null
@@ -1084,7 +1139,9 @@ export type Database = {
           id?: string
           funcionario_id?: string | null
           checklist_id?: string | null
+          titulo?: string | null
           status?: string | null
+          prazo?: string | null
           dados?: Json | null
           created_at?: string | null
           updated_at?: string | null
@@ -1127,6 +1184,7 @@ export type Database = {
           email: string | null
           nome: string | null
           role: string | null
+          nivel_acesso: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -1135,6 +1193,7 @@ export type Database = {
           email?: string | null
           nome?: string | null
           role?: string | null
+          nivel_acesso?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1143,6 +1202,7 @@ export type Database = {
           email?: string | null
           nome?: string | null
           role?: string | null
+          nivel_acesso?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1637,6 +1697,8 @@ export type Database = {
           id: number
           metas: Json | null
           nome: string
+          created_at: string | null
+          updated_at: string | null
         }
         Insert: {
           ativo?: boolean | null
@@ -1648,6 +1710,8 @@ export type Database = {
           id?: number
           metas?: Json | null
           nome: string
+          created_at?: string | null
+          updated_at?: string | null
         }
         Update: {
           ativo?: boolean | null
@@ -1659,6 +1723,8 @@ export type Database = {
           id?: number
           metas?: Json | null
           nome?: string
+          created_at?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1857,6 +1923,107 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "api_credentials_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          id: number
+          bar_id: number | null
+          autorizacao: string | null
+          cartao: string | null
+          cli: number | null
+          cliente: string | null
+          created_at: string | null
+          dt_credito: string | null
+          dt_gerencial: string | null
+          dt_transacao: string | null
+          hr_lancamento: string | null
+          hr_transacao: string | null
+          liquido: number | null
+          meio: string | null
+          mesa: string | null
+          motivodesconto: string | null
+          pag: string | null
+          perc: number | null
+          taxa: number | null
+          tipo: string | null
+          trn: string | null
+          updated_at: string | null
+          usr_abriu: string | null
+          usr_aceitou: string | null
+          usr_lancou: string | null
+          valor: number | null
+          vd: string | null
+          vr_pagamentos: number | null
+        }
+        Insert: {
+          id?: number
+          bar_id?: number | null
+          autorizacao?: string | null
+          cartao?: string | null
+          cli?: number | null
+          cliente?: string | null
+          created_at?: string | null
+          dt_credito?: string | null
+          dt_gerencial?: string | null
+          dt_transacao?: string | null
+          hr_lancamento?: string | null
+          hr_transacao?: string | null
+          liquido?: number | null
+          meio?: string | null
+          mesa?: string | null
+          motivodesconto?: string | null
+          pag?: string | null
+          perc?: number | null
+          taxa?: number | null
+          tipo?: string | null
+          trn?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          usr_aceitou?: string | null
+          usr_lancou?: string | null
+          valor?: number | null
+          vd?: string | null
+          vr_pagamentos?: number | null
+        }
+        Update: {
+          id?: number
+          bar_id?: number | null
+          autorizacao?: string | null
+          cartao?: string | null
+          cli?: number | null
+          cliente?: string | null
+          created_at?: string | null
+          dt_credito?: string | null
+          dt_gerencial?: string | null
+          dt_transacao?: string | null
+          hr_lancamento?: string | null
+          hr_transacao?: string | null
+          liquido?: number | null
+          meio?: string | null
+          mesa?: string | null
+          motivodesconto?: string | null
+          pag?: string | null
+          perc?: number | null
+          taxa?: number | null
+          tipo?: string | null
+          trn?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          usr_aceitou?: string | null
+          usr_lancou?: string | null
+          valor?: number | null
+          vd?: string | null
+          vr_pagamentos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_pagamentos_bar_id"
             columns: ["bar_id"]
             isOneToOne: false
             referencedRelation: "bars"
