@@ -27,12 +27,10 @@ export async function POST(request: NextRequest) {
         grp_desc,
         qtd,
         valorfinal,
-        trn_hora,
         vd_mesadesc
       `)
       .eq('trn_dtgerencial', data_selecionada)
       .eq('bar_id', bar_id)
-      .order('trn_hora', { ascending: true })
       .order('qtd', { ascending: false });
 
     if (errorAnalitico) {
@@ -63,22 +61,59 @@ export async function POST(request: NextRequest) {
 
     console.log(`🍽️ Dados prodporhora encontrados: ${produtosPorHora?.length || 0} registros (apenas para happy hour)`);
 
-    // Processar dados do contahub_analitico para formato padrão
-    const produtosPorHoraEnriquecidos = dadosAnaliticos?.map(item => {
-      const mesaDesc = item.vd_mesadesc?.toLowerCase() || '';
-      const isBanda = mesaDesc.includes('banda') || mesaDesc.includes('dj');
+    // 🔄 Combinar dados: prodporhora (com horários) + analitico (produtos completos)
+    let produtosPorHoraEnriquecidos = [];
+
+    // Se temos dados do prodporhora, usar como base e enriquecer com analítico
+    if (produtosPorHora && produtosPorHora.length > 0) {
+      // Criar mapa de produtos da banda baseado no analítico
+      const produtosBandaMap = new Map();
+      if (dadosAnaliticos) {
+        dadosAnaliticos.forEach(item => {
+          const mesaDesc = item.vd_mesadesc?.toLowerCase() || '';
+          if (mesaDesc.includes('banda') || mesaDesc.includes('dj')) {
+            produtosBandaMap.set(item.prd_desc, true);
+          }
+        });
+      }
+
+      // Usar dados do prodporhora com informação de banda
+      produtosPorHoraEnriquecidos = produtosPorHora.map(item => ({
+        ...item,
+        is_banda: produtosBandaMap.has(item.produto_descricao) || false
+      }));
+
+      console.log(`🍽️ Usando ${produtosPorHora.length} produtos do prodporhora com info de banda`);
+    } else {
+      // Fallback: usar apenas dados do analítico (sem horário específico)
+      const produtosAgregados = new Map();
       
-      return {
-        hora: parseInt(item.trn_hora) || 0,
-        produto_id: item.prd_desc || '', // Usando descrição como ID
-        produto_descricao: item.prd_desc || '',
-        grupo_descricao: item.grp_desc || '',
-        quantidade: parseFloat(item.qtd) || 0,
-        valor_unitario: parseFloat(item.valorfinal) || 0,
-        valor_total: parseFloat(item.valorfinal) || 0,
-        is_banda: isBanda
-      };
-    }) || [];
+      dadosAnaliticos?.forEach(item => {
+        const mesaDesc = item.vd_mesadesc?.toLowerCase() || '';
+        const isBanda = mesaDesc.includes('banda') || mesaDesc.includes('dj');
+        const key = item.prd_desc;
+        
+        if (produtosAgregados.has(key)) {
+          const existing = produtosAgregados.get(key);
+          existing.quantidade += parseFloat(item.qtd) || 0;
+          existing.valor_total += parseFloat(item.valorfinal) || 0;
+        } else {
+          produtosAgregados.set(key, {
+            hora: 0, // Sem hora específica
+            produto_id: item.prd_desc || '',
+            produto_descricao: item.prd_desc || '',
+            grupo_descricao: item.grp_desc || '',
+            quantidade: parseFloat(item.qtd) || 0,
+            valor_unitario: parseFloat(item.valorfinal) || 0,
+            valor_total: parseFloat(item.valorfinal) || 0,
+            is_banda: isBanda
+          });
+        }
+      });
+
+      produtosPorHoraEnriquecidos = Array.from(produtosAgregados.values());
+      console.log(`📊 Usando ${produtosPorHoraEnriquecidos.length} produtos agregados do analítico`);
+    }
 
     // Calcular estatísticas
     const totalProdutos = produtosPorHoraEnriquecidos?.reduce((sum, item) => sum + item.quantidade, 0) || 0;
