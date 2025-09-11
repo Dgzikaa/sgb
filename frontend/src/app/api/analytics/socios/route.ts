@@ -81,7 +81,7 @@ function processarDadosSocios(dados: any[]) {
   });
 
   dados.forEach(item => {
-    const socioIdentificado = identificarSocio(item.vd_mesadesc, item.motivo);
+    const socioIdentificado = identificarSocio(item.vd_mesadesc, item.motivo, item.cli_nome);
     
     if (socioIdentificado) {
       sociosData[socioIdentificado].totalGasto += parseFloat(item.vr_desconto) || 0;
@@ -105,10 +105,11 @@ function processarDadosSocios(dados: any[]) {
     .sort((a, b) => b.totalGasto - a.totalGasto);
 }
 
-function identificarSocio(mesaDesc: string, motivo: string): string | null {
+function identificarSocio(mesaDesc: string, motivo: string, cliNome?: string): string | null {
   const mesa = (mesaDesc || '').toLowerCase();
   const motivoLower = (motivo || '').toLowerCase();
-  const textoCompleto = `${mesa} ${motivoLower}`;
+  const cliente = (cliNome || '').toLowerCase();
+  const textoCompleto = `${mesa} ${motivoLower} ${cliente}`;
 
   // 1. Primeiro: verificar se o motivo já especifica o sócio diretamente
   // Ex: "Sócio Digão", "sócio vini", "Socio Cadu", etc.
@@ -125,7 +126,19 @@ function identificarSocio(mesaDesc: string, motivo: string): string | null {
     }
   }
 
-  // 2. Segundo: se o motivo for genérico ("sócio", "socio", "consumação sócio", etc.)
+  // 2. Segundo: verificar cli_nome diretamente
+  if (cliente) {
+    for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
+      for (const nome of nomes) {
+        if (cliente.includes(nome)) {
+          console.log(`✅ Sócio identificado no cli_nome: ${socio} - Cliente: "${cliNome}" - Nome: "${nome}"`);
+          return socio;
+        }
+      }
+    }
+  }
+
+  // 3. Terceiro: se o motivo for genérico ("sócio", "socio", "consumação sócio", etc.)
   // verificar o vd_mesadesc para identificar o sócio
   const motivoGenerico = motivoLower.includes('sócio') || motivoLower.includes('socio');
   
@@ -140,7 +153,7 @@ function identificarSocio(mesaDesc: string, motivo: string): string | null {
     }
   }
 
-  // 3. Terceiro: verificar qualquer lugar no texto completo
+  // 4. Quarto: verificar qualquer lugar no texto completo
   for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
     for (const nome of nomes) {
       if (textoCompleto.includes(nome)) {
@@ -179,10 +192,17 @@ async function buscarTodosOsRegistros(ano: string, mes: string) {
       });
     });
 
+    // Filtros por cli_nome para cada sócio
+    Object.values(SOCIOS_MAP).forEach(nomes => {
+      nomes.forEach(nome => {
+        filtros.push(`cli_nome.ilike.%${nome}%`);
+      });
+    });
+
     while (hasMore) {
       const { data, error, count } = await supabase
         .from('contahub_periodo')
-        .select('vd_mesadesc, motivo, vr_desconto, dt_gerencial', { count: 'exact' })
+        .select('vd_mesadesc, motivo, vr_desconto, dt_gerencial, cli_nome', { count: 'exact' })
         .gt('vr_desconto', 0)
         .gte('dt_gerencial', `${ano}-${mes.padStart(2, '0')}-01`)
         .lt('dt_gerencial', `${ano}-${(parseInt(mes) + 1).toString().padStart(2, '0')}-01`)
@@ -218,7 +238,7 @@ async function buscarTodosOsRegistros(ano: string, mes: string) {
     // Log detalhado dos registros para debug
     console.log('=== REGISTROS ENCONTRADOS ===');
     todosOsDados.forEach((registro, index) => {
-      console.log(`${index + 1}. Mesa: "${registro.vd_mesadesc}" | Motivo: "${registro.motivo}" | Valor: ${registro.vr_desconto}`);
+      console.log(`${index + 1}. Mesa: "${registro.vd_mesadesc}" | Motivo: "${registro.motivo}" | Cliente: "${registro.cli_nome}" | Valor: ${registro.vr_desconto}`);
     });
     console.log('=== FIM DOS REGISTROS ===');
     
