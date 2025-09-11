@@ -102,13 +102,15 @@ const nextConfig = {
   // ✅ Configurações experimentais (simplificadas para evitar travamentos)
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    serverComponentsExternalPackages: [],
     esmExternals: true,
     webpackBuildWorker: false, // Desabilitar para evitar problemas
     // Testar otimizações individualmente
-    optimizeCss: true, // Testar se funciona com critters instalado
+    // optimizeCss: true, // Desabilitado - causa erro com critters
     // turbotrace causa travamento - manter desabilitado
   },
+  
+  // ✅ Pacotes externos do servidor (movido de experimental)
+  serverExternalPackages: [],
   
   // ✅ Configurações de compilação
   compiler: {
