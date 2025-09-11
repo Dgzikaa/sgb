@@ -444,7 +444,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar se o bar existe
     console.log('🔍 Verificando se bar existe...');
-    let query = supabase.from('bar').select('id, nome');
+    let query = supabase.from('bars').select('id, nome');
 
     if (bar_id) {
       query = query.eq('id', bar_id);

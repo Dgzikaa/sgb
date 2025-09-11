@@ -60,9 +60,9 @@ export async function GET(request: NextRequest) {
     // Calcular estatísticas
     const estatisticas = {
       total_registros: data?.length || 0,
-      total_valor: data?.reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0,
-      total_valor_bruto: data?.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0) || 0,
-      total_taxas: data?.reduce((sum, item) => sum + (parseFloat(item.taxa) || 0), 0) || 0,
+      total_valor: data?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0,
+      total_valor_bruto: data?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0,
+      total_taxas: data?.reduce((sum, item) => sum + (item.taxa || 0), 0) || 0,
       clientes_unicos: [...new Set(data?.map(item => item.cliente).filter(Boolean))].length,
       meios_unicos: [...new Set(data?.map(item => item.meio).filter(Boolean))].length,
       usuarios_unicos: [...new Set(data?.map(item => item.usr_lancou).filter(Boolean))].length
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       if (!acc[meio]) {
         acc[meio] = { valor: 0, transacoes: 0 };
       }
-      acc[meio].valor += parseFloat(item.liquido) || 0;
+      acc[meio].valor += item.liquido || 0;
       acc[meio].transacoes += 1;
       return acc;
     }, {} as Record<string, { valor: number; transacoes: number }>);
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       if (!acc[cliente]) {
         acc[cliente] = { valor: 0, transacoes: 0 };
       }
-      acc[cliente].valor += parseFloat(item.liquido) || 0;
+      acc[cliente].valor += item.liquido || 0;
       acc[cliente].transacoes += 1;
       return acc;
     }, {} as Record<string, { valor: number; transacoes: number }>);
@@ -110,11 +110,11 @@ export async function GET(request: NextRequest) {
 
     // Faturamento por dia
     const faturamentoPorDia = data?.reduce((acc, item) => {
-      const dia = item.dt_gerencial;
+      const dia = item.dt_gerencial || 'Sem data';
       if (!acc[dia]) {
         acc[dia] = { valor: 0, transacoes: 0 };
       }
-      acc[dia].valor += parseFloat(item.liquido) || 0;
+      acc[dia].valor += item.liquido || 0;
       acc[dia].transacoes += 1;
       return acc;
     }, {} as Record<string, { valor: number; transacoes: number }>);

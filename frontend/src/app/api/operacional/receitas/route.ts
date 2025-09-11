@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     for (const receita of todasReceitas || []) {
       const codigo = receita.receita_codigo;
 
-      if (!receitasAgrupadas.has(codigo)) {
+      if (codigo && !receitasAgrupadas.has(codigo)) {
         receitasAgrupadas.set(codigo, {
           receita_codigo: codigo,
           receita_nome: receita.receita_nome,
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
 
       // Adicionar insumo à receita
       if (receita.insumos && Array.isArray(receita.insumos) && receita.insumos[0]) {
-        const receitaObj = receitasAgrupadas.get(codigo);
+        const receitaObj = codigo ? receitasAgrupadas.get(codigo) : null;
         if (receitaObj) {
           const insumo = receita.insumos[0];
           const isChefe = receita.insumo_chefe_id === insumo.id;

@@ -49,7 +49,9 @@ export async function POST(request: NextRequest) {
         .select('*')
         .eq('bar_id', bar_id)
         .gte('data_gerencial', dataInicialStr)
-        .lte('data_gerencial', dataFinalStr);
+        .lte('data_gerencial', dataFinalStr)
+        .order('data_gerencial', { ascending: true })
+        .limit(10000); // Limite alto para garantir que pegue todos os dados
 
       if (errorFallback) {
         console.error('Erro no fallback:', errorFallback);

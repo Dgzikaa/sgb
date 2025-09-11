@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .order('created_at', { ascending: false });
 
     // Aplicar filtros
@@ -191,7 +191,7 @@ export async function GET(request: NextRequest) {
     const { data: stats } = await supabase
       .from('whatsapp_mensagens')
       .select('status')
-      .eq('bar_id', bar_id);
+      .eq('bar_id', parseInt(bar_id));
 
     const estatisticas = {
       total: stats?.length || 0,
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
     const { data: config, error: configError } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .eq('ativo', true)
       .single();
 
@@ -324,7 +324,7 @@ export async function POST(request: NextRequest) {
 
     // Preparar dados da mensagem
     const messageData = {
-      bar_id: bar_id,
+      bar_id: parseInt(bar_id),
       contato_id: contato.id,
       tipo_mensagem: validatedData.tipo_mensagem,
       template_name: validatedData.template_name,
@@ -432,7 +432,7 @@ async function getOrCreateContact(
   const { data: contato } = await supabase
     .from('whatsapp_contatos')
     .select('*')
-    .eq('bar_id', barId)
+    .eq('bar_id', parseInt(barId))
     .eq('numero_whatsapp', numeroWhatsapp)
     .single();
 
@@ -453,7 +453,7 @@ async function getOrCreateContact(
       const { data: novoContato } = await supabase
         .from('whatsapp_contatos')
         .insert({
-          bar_id: barId,
+          bar_id: parseInt(barId),
           usuario_id: usuarioId,
           numero_whatsapp: numeroWhatsapp,
           nome_contato: usuario.nome,

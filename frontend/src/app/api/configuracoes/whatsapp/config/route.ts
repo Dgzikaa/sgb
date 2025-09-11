@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .single();
 
     if (error) {
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await supabase
       .from('whatsapp_configuracoes')
       .select('id')
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .single();
 
     if (existing) {
@@ -334,7 +334,7 @@ export async function PUT(request: NextRequest) {
     const { data: existing, error: fetchError } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .single();
 
     if (fetchError || !existing) {
@@ -376,7 +376,7 @@ export async function PUT(request: NextRequest) {
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .update(updateData)
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .select()
       .single();
 
@@ -450,7 +450,7 @@ export async function DELETE(request: NextRequest) {
     const { data: pendingMessages } = await supabase
       .from('whatsapp_mensagens')
       .select('id')
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .eq('status', 'pending')
       .limit(1);
 
@@ -467,7 +467,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .from('whatsapp_configuracoes')
       .delete()
-      .eq('bar_id', bar_id);
+      .eq('bar_id', parseInt(bar_id));
 
     if (error) {
       console.error('Erro ao deletar configuração WhatsApp:', error);

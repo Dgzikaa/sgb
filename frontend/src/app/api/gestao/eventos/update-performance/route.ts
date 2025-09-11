@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     const { data: evento, error } = await supabase
       .from('eventos')
       .select('*')
-      .eq('bar_id', bar_id)
+      .eq('bar_id', parseInt(bar_id))
       .eq('data_evento', data_evento)
       .single();
 

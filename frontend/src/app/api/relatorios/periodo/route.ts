@@ -56,13 +56,13 @@ export async function GET(request: NextRequest) {
     // Calcular estatísticas
     const estatisticas = {
       total_registros: data?.length || 0,
-      total_pessoas: data?.reduce((sum, item) => sum + (parseInt(item.pessoas) || 0), 0) || 0,
-      total_pagamentos: data?.reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0) || 0,
-      total_couvert: data?.reduce((sum, item) => sum + (parseFloat(item.vr_couvert) || 0), 0) || 0,
-      total_taxa: data?.reduce((sum, item) => sum + (parseFloat(item.vr_taxa) || 0), 0) || 0,
-      total_desconto: data?.reduce((sum, item) => sum + (parseFloat(item.vr_desconto) || 0), 0) || 0,
-      total_acrescimo: data?.reduce((sum, item) => sum + (parseFloat(item.vr_acrescimo) || 0), 0) || 0,
-      total_geral: data?.reduce((sum, item) => sum + (parseFloat(item.vr_total) || 0), 0) || 0,
+      total_pessoas: data?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0,
+      total_pagamentos: data?.reduce((sum, item) => sum + (item.vr_pagamentos || 0), 0) || 0,
+      total_couvert: data?.reduce((sum, item) => sum + (item.vr_couvert || 0), 0) || 0,
+      total_taxa: data?.reduce((sum, item) => sum + (item.vr_taxa || 0), 0) || 0,
+      total_desconto: data?.reduce((sum, item) => sum + (item.vr_desconto || 0), 0) || 0,
+      total_acrescimo: data?.reduce((sum, item) => sum + (item.vr_acrescimo || 0), 0) || 0,
+      total_geral: data?.reduce((sum, item) => sum + (item.vr_total || 0), 0) || 0,
       dias_unicos: [...new Set(data?.map(item => item.dt_gerencial).filter(Boolean))].length,
       tipos_venda_unicos: [...new Set(data?.map(item => item.tipovenda).filter(Boolean))].length,
       localizacoes_unicas: [...new Set(data?.map(item => item.vd_localizacao).filter(Boolean))].length
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     // Faturamento por dia
     const faturamentoPorDia = data?.reduce((acc, item) => {
-      const dia = item.dt_gerencial;
+      const dia = item.dt_gerencial || 'Sem data';
       if (!acc[dia]) {
         acc[dia] = { 
           pagamentos: 0, 
@@ -79,9 +79,9 @@ export async function GET(request: NextRequest) {
           transacoes: 0 
         };
       }
-      acc[dia].pagamentos += parseFloat(item.vr_pagamentos) || 0;
-      acc[dia].couvert += parseFloat(item.vr_couvert) || 0;
-      acc[dia].pessoas += parseInt(item.pessoas) || 0;
+      acc[dia].pagamentos += item.vr_pagamentos || 0;
+      acc[dia].couvert += item.vr_couvert || 0;
+      acc[dia].pessoas += item.pessoas || 0;
       acc[dia].transacoes += 1;
       return acc;
     }, {} as Record<string, { pagamentos: number; couvert: number; pessoas: number; transacoes: number }>);
@@ -104,8 +104,8 @@ export async function GET(request: NextRequest) {
       if (!acc[localizacao]) {
         acc[localizacao] = { valor: 0, pessoas: 0, transacoes: 0 };
       }
-      acc[localizacao].valor += parseFloat(item.vr_pagamentos) || 0;
-      acc[localizacao].pessoas += parseInt(item.pessoas) || 0;
+      acc[localizacao].valor += item.vr_pagamentos || 0;
+      acc[localizacao].pessoas += item.pessoas || 0;
       acc[localizacao].transacoes += 1;
       return acc;
     }, {} as Record<string, { valor: number; pessoas: number; transacoes: number }>);

@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     if (ultimaReceita && ultimaReceita.length > 0) {
       const ultimoCodigo = ultimaReceita[0].receita_codigo;
-      const numeroStr = ultimoCodigo.replace('pc', '').padStart(4, '0');
+      const numeroStr = (ultimoCodigo || '').replace('pc', '').padStart(4, '0');
       const numero = parseInt(numeroStr) + 1;
       proximoCodigo = `pc${numero.toString().padStart(4, '0')}`;
     }

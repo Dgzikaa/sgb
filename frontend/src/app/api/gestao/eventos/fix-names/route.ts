@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
 
     // Update events with correct names
     for (const evento of eventos || []) {
-      const correctName = dateNameMap[evento.data_evento];
+      const correctName = evento.data_evento ? dateNameMap[evento.data_evento] : null;
       console.log(
         `🔍 Event ${evento.data_evento}: current="${evento.nome_evento}", should be="${correctName}"`
       );

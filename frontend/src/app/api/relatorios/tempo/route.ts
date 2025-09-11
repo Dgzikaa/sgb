@@ -60,14 +60,14 @@ export async function GET(request: NextRequest) {
     // Calcular estatísticas
     const estatisticas = {
       total_registros: data?.length || 0,
-      tempo_medio_t0_t1: data?.reduce((sum, item) => sum + (parseInt(item.t0_t1) || 0), 0) / (data?.length || 1) || 0,
-      tempo_medio_t1_t2: data?.reduce((sum, item) => sum + (parseInt(item.t1_t2) || 0), 0) / (data?.length || 1) || 0,
-      tempo_medio_t2_t3: data?.reduce((sum, item) => sum + (parseInt(item.t2_t3) || 0), 0) / (data?.length || 1) || 0,
-      tempo_medio_total: data?.reduce((sum, item) => sum + (parseInt(item.t0_t3) || 0), 0) / (data?.length || 1) || 0,
+      tempo_medio_t0_t1: data?.reduce((sum, item) => sum + (item.t0_t1 || 0), 0) / (data?.length || 1) || 0,
+      tempo_medio_t1_t2: data?.reduce((sum, item) => sum + (item.t1_t2 || 0), 0) / (data?.length || 1) || 0,
+      tempo_medio_t2_t3: data?.reduce((sum, item) => sum + (item.t2_t3 || 0), 0) / (data?.length || 1) || 0,
+      tempo_medio_total: data?.reduce((sum, item) => sum + (item.t0_t3 || 0), 0) / (data?.length || 1) || 0,
       produtos_unicos: [...new Set(data?.map(item => item.prd_desc).filter(Boolean))].length,
       grupos_unicos: [...new Set(data?.map(item => item.grp_desc).filter(Boolean))].length,
       localizacoes_unicas: [...new Set(data?.map(item => item.loc_desc).filter(Boolean))].length,
-      total_itens: data?.reduce((sum, item) => sum + (parseInt(item.itm_qtd) || 0), 0) || 0
+      total_itens: data?.reduce((sum, item) => sum + (item.itm_qtd || 0), 0) || 0
     };
 
     // Top produtos por tempo médio
@@ -83,11 +83,11 @@ export async function GET(request: NextRequest) {
           t2_t3_total: 0
         };
       }
-      acc[produto].tempo_total += parseInt(item.t0_t3) || 0;
-      acc[produto].t0_t1_total += parseInt(item.t0_t1) || 0;
-      acc[produto].t1_t2_total += parseInt(item.t1_t2) || 0;
-      acc[produto].t2_t3_total += parseInt(item.t2_t3) || 0;
-      acc[produto].quantidade += parseInt(item.itm_qtd) || 0;
+      acc[produto].tempo_total += item.t0_t3 || 0;
+      acc[produto].t0_t1_total += item.t0_t1 || 0;
+      acc[produto].t1_t2_total += item.t1_t2 || 0;
+      acc[produto].t2_t3_total += item.t2_t3 || 0;
+      acc[produto].quantidade += item.itm_qtd || 0;
       acc[produto].registros += 1;
       return acc;
     }, {} as Record<string, { 
@@ -122,8 +122,8 @@ export async function GET(request: NextRequest) {
           registros: 0 
         };
       }
-      acc[grupo].tempo_total += parseInt(item.t0_t3) || 0;
-      acc[grupo].quantidade += parseInt(item.itm_qtd) || 0;
+      acc[grupo].tempo_total += item.t0_t3 || 0;
+      acc[grupo].quantidade += item.itm_qtd || 0;
       acc[grupo].registros += 1;
       return acc;
     }, {} as Record<string, { tempo_total: number; quantidade: number; registros: number }>);
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
 
     // Tempo médio por dia
     const tempoPorDia = data?.reduce((acc, item) => {
-      const dia = item.dia;
+      const dia = item.dia || 'Sem data';
       if (!acc[dia]) {
         acc[dia] = { 
           tempo_total: 0, 
@@ -150,8 +150,8 @@ export async function GET(request: NextRequest) {
           quantidade: 0
         };
       }
-      acc[dia].tempo_total += parseInt(item.t0_t3) || 0;
-      acc[dia].quantidade += parseInt(item.itm_qtd) || 0;
+      acc[dia].tempo_total += item.t0_t3 || 0;
+      acc[dia].quantidade += item.itm_qtd || 0;
       acc[dia].registros += 1;
       return acc;
     }, {} as Record<string, { tempo_total: number; registros: number; quantidade: number }>);

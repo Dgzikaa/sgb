@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       query = query.ilike('dia', `%${dia_semana}%`);
     }
     if (hora) {
-      query = query.eq('hora', hora);
+      query = query.eq('hora', parseInt(hora));
     }
 
     const { data, error } = await query;
@@ -56,13 +56,13 @@ export async function GET(request: NextRequest) {
     // Calcular estatísticas
     const estatisticas = {
       total_registros: data?.length || 0,
-      total_valor: data?.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0) || 0,
-      total_quantidade: data?.reduce((sum, item) => sum + (parseInt(item.qtd) || 0), 0) || 0,
+      total_valor: data?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0,
+      total_quantidade: data?.reduce((sum, item) => sum + (item.qtd || 0), 0) || 0,
       dias_unicos: [...new Set(data?.map(item => item.vd_dtgerencial).filter(Boolean))].length,
       horas_unicas: [...new Set(data?.map(item => item.hora).filter(Boolean))].length,
       dias_semana_unicos: [...new Set(data?.map(item => item.dia).filter(Boolean))].length,
       valor_medio_por_hora: data?.length ? 
-        data.reduce((sum, item) => sum + (parseFloat(item.valor) || 0), 0) / data.length : 0
+        data.reduce((sum, item) => sum + (item.valor || 0), 0) / data.length : 0
     };
 
     // Top horas por faturamento
@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
       if (!acc[hora]) {
         acc[hora] = { valor: 0, quantidade: 0, registros: 0 };
       }
-      acc[hora].valor += parseFloat(item.valor) || 0;
-      acc[hora].quantidade += parseInt(item.qtd) || 0;
+      acc[hora].valor += item.valor || 0;
+      acc[hora].quantidade += item.qtd || 0;
       acc[hora].registros += 1;
       return acc;
     }, {} as Record<string, { valor: number; quantidade: number; registros: number }>);
@@ -96,8 +96,8 @@ export async function GET(request: NextRequest) {
       if (!acc[dia]) {
         acc[dia] = { valor: 0, quantidade: 0, registros: 0 };
       }
-      acc[dia].valor += parseFloat(item.valor) || 0;
-      acc[dia].quantidade += parseInt(item.qtd) || 0;
+      acc[dia].valor += item.valor || 0;
+      acc[dia].quantidade += item.qtd || 0;
       acc[dia].registros += 1;
       return acc;
     }, {} as Record<string, { valor: number; quantidade: number; registros: number }>);
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
 
     // Faturamento por dia
     const faturamentoPorDia = data?.reduce((acc, item) => {
-      const dia = item.vd_dtgerencial;
+      const dia = item.vd_dtgerencial || 'Sem data';
       if (!acc[dia]) {
         acc[dia] = { 
           valor: 0, 
@@ -125,10 +125,10 @@ export async function GET(request: NextRequest) {
           horas_ativas: new Set()
         };
       }
-      acc[dia].valor += parseFloat(item.valor) || 0;
-      acc[dia].quantidade += parseInt(item.qtd) || 0;
+      acc[dia].valor += item.valor || 0;
+      acc[dia].quantidade += item.qtd || 0;
       acc[dia].registros += 1;
-      acc[dia].horas_ativas.add(item.hora);
+      if (item.hora !== null) acc[dia].horas_ativas.add(item.hora);
       return acc;
     }, {} as Record<string, { 
       valor: number; 
