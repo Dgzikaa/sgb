@@ -6,6 +6,17 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+interface ProdutoPorHora {
+  hora: number;
+  produto_id: string;
+  produto_descricao: string;
+  grupo_descricao: string;
+  quantidade: number;
+  valor_unitario: number;
+  valor_total: number;
+  is_banda: boolean;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { data_selecionada, bar_id = 3 } = await request.json();
@@ -62,12 +73,12 @@ export async function POST(request: NextRequest) {
     console.log(`🍽️ Dados prodporhora encontrados: ${produtosPorHora?.length || 0} registros (apenas para happy hour)`);
 
     // 🔄 Combinar dados: prodporhora (com horários) + analitico (produtos completos)
-    let produtosPorHoraEnriquecidos = [];
+    let produtosPorHoraEnriquecidos: ProdutoPorHora[] = [];
 
     // Se temos dados do prodporhora, usar como base e enriquecer com analítico
     if (produtosPorHora && produtosPorHora.length > 0) {
       // Criar mapa de produtos da banda baseado no analítico
-      const produtosBandaMap = new Map();
+      const produtosBandaMap = new Map<string, boolean>();
       if (dadosAnaliticos) {
         dadosAnaliticos.forEach(item => {
           const mesaDesc = item.vd_mesadesc?.toLowerCase() || '';
@@ -86,7 +97,7 @@ export async function POST(request: NextRequest) {
       console.log(`🍽️ Usando ${produtosPorHora.length} produtos do prodporhora com info de banda`);
     } else {
       // Fallback: usar apenas dados do analítico (sem horário específico)
-      const produtosAgregados = new Map();
+      const produtosAgregados = new Map<string, ProdutoPorHora>();
       
       dadosAnaliticos?.forEach(item => {
         const mesaDesc = item.vd_mesadesc?.toLowerCase() || '';

@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
         media_stockout: `${mediaStockout}%`,
         media_disponibilidade: `${(100 - parseFloat(mediaStockout)).toFixed(2)}%`
       },
-      historico: historico.sort((a, b) => b.data_referencia.localeCompare(a.data_referencia))
+      historico: historico.sort((a, b) => b.data_consulta.localeCompare(a.data_consulta))
     };
     
     console.log(`✅ Histórico de stockout encontrado: ${totalDias} dias, média ${mediaStockout}% stockout`);
