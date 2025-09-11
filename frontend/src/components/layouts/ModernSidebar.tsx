@@ -212,6 +212,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Controle de disponibilidade de produtos',
           permission: 'relatorios',
         },
+        {
+          icon: Users,
+          label: 'Sócios',
+          href: '/analytics/socios',
+          description: 'Gastos mensais dos sócios em aberto',
+          permission: 'relatorios',
+        },
       ],
     },
     {
