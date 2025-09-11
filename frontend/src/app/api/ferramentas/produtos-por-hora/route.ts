@@ -17,6 +17,13 @@ interface ProdutoPorHora {
   is_banda: boolean;
 }
 
+interface VendaPorHorario {
+  hora: number;
+  total_quantidade: number;
+  total_valor: number;
+  produtos_diferentes: Set<string>;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { data_selecionada, bar_id = 3 } = await request.json();
@@ -106,8 +113,10 @@ export async function POST(request: NextRequest) {
         
         if (produtosAgregados.has(key)) {
           const existing = produtosAgregados.get(key);
-          existing.quantidade += parseFloat(item.qtd) || 0;
-          existing.valor_total += parseFloat(item.valorfinal) || 0;
+          if (existing) {
+            existing.quantidade += parseFloat(item.qtd) || 0;
+            existing.valor_total += parseFloat(item.valorfinal) || 0;
+          }
         } else {
           produtosAgregados.set(key, {
             hora: 0, // Sem hora específica
@@ -148,17 +157,17 @@ export async function POST(request: NextRequest) {
             hora: item.hora,
             total_quantidade: 0,
             total_valor: 0,
-            produtos_diferentes: new Set()
+            produtos_diferentes: new Set<string>()
           };
         }
         acc[item.hora].total_quantidade += item.quantidade;
         acc[item.hora].total_valor += item.valor_total;
         acc[item.hora].produtos_diferentes.add(item.produto_id);
         return acc;
-      }, {} as Record<number, any>);
+      }, {} as Record<number, VendaPorHorario>);
 
       horarioPico = Object.values(vendasPorHorarioProdPorHora)
-        .sort((a: any, b: any) => b.total_quantidade - a.total_quantidade)[0];
+        .sort((a, b) => b.total_quantidade - a.total_quantidade)[0];
         
       console.log(`🕐 Horário de pico calculado via prodporhora: ${horarioPico?.hora}h`);
     } else {
@@ -171,17 +180,17 @@ export async function POST(request: NextRequest) {
             hora: item.hora,
             total_quantidade: 0,
             total_valor: 0,
-            produtos_diferentes: new Set()
+            produtos_diferentes: new Set<string>()
           };
         }
         acc[item.hora].total_quantidade += item.quantidade;
         acc[item.hora].total_valor += item.valor_total;
         acc[item.hora].produtos_diferentes.add(item.produto_id);
         return acc;
-      }, {} as Record<number, any>);
+      }, {} as Record<number, VendaPorHorario>);
 
       horarioPico = Object.values(vendasPorHorario)
-        .sort((a: any, b: any) => b.total_quantidade - a.total_quantidade)[0];
+        .sort((a, b) => b.total_quantidade - a.total_quantidade)[0];
         
       console.log(`🕐 Horário de pico calculado via analítico (sem banda): ${horarioPico?.hora}h`);
     }
