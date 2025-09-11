@@ -9,9 +9,10 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    console.log('🔄 API Edição Valores Reais - Evento ID:', params.id);
+    const { id } = await params;
+    console.log('🔄 API Edição Valores Reais - Evento ID:', id);
 
     // Autenticação
     const user = await authenticateUser(request);
@@ -19,7 +20,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const eventoId = parseInt(params.id);
+    const eventoId = parseInt(id);
     if (!eventoId) {
       return NextResponse.json({ error: 'ID do evento inválido' }, { status: 400 });
     }

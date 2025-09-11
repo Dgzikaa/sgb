@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       acc[dia].valor += item.valor || 0;
       acc[dia].quantidade += item.qtd || 0;
       acc[dia].registros += 1;
-      if (item.hora !== null) acc[dia].horas_ativas.add(item.hora);
+      if (item.hora !== null) acc[dia].horas_ativas.add(item.hora.toString());
       return acc;
     }, {} as Record<string, { 
       valor: number; 

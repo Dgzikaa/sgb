@@ -155,8 +155,8 @@ export async function GET(request: NextRequest) {
 
         // Calcular custo total da receita
         const custoTotal = (receitas || []).reduce(
-          (total: number, receita: Receita) =>
-            total + (receita.quantidade_receita * (receita.insumos?.custo_unitario || 0)),
+          (total: number, receita: any) =>
+            total + ((receita.quantidade || 0) * (receita.custo_unitario || 0)),
           0
         );
 
@@ -307,9 +307,10 @@ export async function POST(request: NextRequest) {
 
     // Inserir receitas
     const receitasParaInserir = receita.map((r: any) => ({
-      produto_codigo: codigo,
-      insumo_codigo: r.insumo_codigo,
-      quantidade_receita: parseFloat(r.quantidade_receita),
+      receita_codigo: codigo,
+      produto_id: null,
+      insumo_id: null,
+      quantidade: parseFloat(r.quantidade_receita),
     }));
 
     const { error: erroReceitas } = await supabase

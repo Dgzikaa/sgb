@@ -55,7 +55,7 @@ const supabaseProxy = new Proxy({} as SupabaseClient<Database>, {
           );
         }
         if (supabaseClient) {
-          return supabaseClient.from(table);
+          return supabaseClient.from(table as any);
         }
         return undefined;
       };
@@ -72,7 +72,7 @@ const supabaseProxy = new Proxy({} as SupabaseClient<Database>, {
             'Cliente Supabase não inicializado. Use await getSupabaseClient() primeiro.'
           );
         }
-        return supabaseClient.rpc(fn, params);
+        return (supabaseClient as any).rpc(fn, params);
       };
     }
 

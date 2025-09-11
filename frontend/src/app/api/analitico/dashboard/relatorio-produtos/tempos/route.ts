@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
         break;
       }
 
-      dadosPeriodo = [...dadosPeriodo, ...dadosPagina];
+      dadosPeriodo = [...dadosPeriodo, ...(dadosPagina as any)];
       console.log(
         `📄 Página ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosPeriodo.length})`
       );
@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
         `
         )
         .eq('bar_id', barId)
-        .eq('dia', diaEspecificoInt)
+        .eq('dia', diaEspecificoInt.toString())
         .not('prd_desc', 'is', null)
         .range(inicio, fim);
 
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
         break;
       }
 
-      dadosDia = [...dadosDia, ...dadosPagina];
+      dadosDia = [...dadosDia, ...(dadosPagina as any)];
       console.log(
         `📄 Dia - Página ${pagina + 1}: ${dadosPagina.length} registros (Total: ${dadosDia.length})`
       );
@@ -422,7 +422,7 @@ export async function GET(request: NextRequest) {
           break;
         }
 
-        dadosUltimos7Dias = [...dadosUltimos7Dias, ...dadosPagina];
+        dadosUltimos7Dias = [...dadosUltimos7Dias, ...(dadosPagina as any)];
         console.log(
           `📄 Últimos 7 dias - Página ${paginaRecente + 1}: ${dadosPagina.length} registros (Total: ${dadosUltimos7Dias.length})`
         );

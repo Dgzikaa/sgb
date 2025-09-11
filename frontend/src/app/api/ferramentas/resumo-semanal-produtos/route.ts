@@ -43,33 +43,70 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Erro ao buscar resumo semanal:', error);
       
-      // Fallback: buscar dados manualmente se a função não existir
-      const { data: dadosBrutos, error: errorFallback } = await supabase
-        .from('contahub_prodporhora')
-        .select('*')
-        .eq('bar_id', bar_id)
-        .gte('data_gerencial', dataInicialStr)
-        .lte('data_gerencial', dataFinalStr)
-        .order('data_gerencial', { ascending: true })
-        .limit(10000); // Limite alto para garantir que pegue todos os dados
+      // Fallback: buscar dados manualmente com paginação (limite do Supabase: 1000)
+      console.log('🔄 Função não encontrada, usando fallback com paginação...');
+      
+      let dadosBrutos: any[] = [];
+      let offset = 0;
+      const limit = 1000;
+      let hasMore = true;
 
-      if (errorFallback) {
-        console.error('Erro no fallback:', errorFallback);
-        return NextResponse.json(
-          { error: 'Erro ao buscar dados do banco' },
-          { status: 500 }
-        );
+      while (hasMore) {
+        console.log(`📄 Buscando página ${Math.floor(offset / limit) + 1} (offset: ${offset})`);
+        
+        const { data: pagina, error: errorPagina } = await supabase
+          .from('contahub_prodporhora')
+          .select('*')
+          .eq('bar_id', bar_id)
+          .gte('data_gerencial', dataInicialStr)
+          .lte('data_gerencial', dataFinalStr)
+          .order('data_gerencial', { ascending: true })
+          .range(offset, offset + limit - 1);
+
+        if (errorPagina) {
+          console.error(`❌ Erro na página ${Math.floor(offset / limit) + 1}:`, errorPagina);
+          return NextResponse.json(
+            { error: 'Erro ao buscar dados do banco', details: errorPagina.message },
+            { status: 500 }
+          );
+        }
+
+        if (pagina && pagina.length > 0) {
+          dadosBrutos.push(...pagina);
+          console.log(`✅ Página ${Math.floor(offset / limit) + 1}: ${pagina.length} registros`);
+          
+          // Se retornou menos que o limite, chegamos ao fim
+          hasMore = pagina.length === limit;
+          offset += limit;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      console.log(`🎯 Total de registros coletados: ${dadosBrutos.length}`);
+
+      if (dadosBrutos.length === 0) {
+        console.log('⚠️ Nenhum dado encontrado para o período');
+        return NextResponse.json({
+          success: true,
+          periodo_semanas,
+          periodo: `${dataInicialStr} a ${dataFinalStr}`,
+          dados: [],
+          metodo: 'fallback-paginado',
+          total_registros: 0
+        });
       }
 
       // Processar dados manualmente
-      const resumoProcessado = processarResumoSemanal(dadosBrutos || []);
+      const resumoProcessado = processarResumoSemanal(dadosBrutos);
       
       return NextResponse.json({
         success: true,
         periodo_semanas,
         periodo: `${dataInicialStr} a ${dataFinalStr}`,
         dados: resumoProcessado,
-        metodo: 'fallback'
+        metodo: 'fallback-paginado',
+        total_registros: dadosBrutos.length
       });
     }
 
@@ -80,7 +117,8 @@ export async function POST(request: NextRequest) {
       periodo_semanas,
       periodo: `${dataInicialStr} a ${dataFinalStr}`,
       dados: resumoSemanal || [],
-      metodo: 'function'
+      metodo: 'function',
+      total_registros: 'calculado_pela_funcao'
     });
 
   } catch (error) {

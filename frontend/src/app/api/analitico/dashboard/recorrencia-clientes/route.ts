@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     const { data: periodData1, error: periodError1 } = await supabase
       .from('periodo')
       .select('cli_email')
-      .eq('bar_id', barId)
+      .eq('bar_id', parseInt(barId))
       .eq('dt_gerencial', data1)
       .not('cli_email', 'is', null)
       .not('cli_email', 'eq', '');
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const { data: periodData2, error: periodError2 } = await supabase
       .from('periodo')
       .select('cli_email')
-      .eq('bar_id', barId)
+      .eq('bar_id', parseInt(barId))
       .eq('dt_gerencial', data2)
       .not('cli_email', 'is', null)
       .not('cli_email', 'eq', '');

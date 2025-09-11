@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
-      .eq('bar_id', parseInt(bar_id))
+      .eq('bar_id', bar_id)
       .single();
 
     if (error) {
@@ -152,18 +152,18 @@ export async function GET(request: NextRequest) {
     // Retornar configuração (sem tokens sensíveis)
     const safeConfig: Partial<WhatsAppConfig> = {
       id: config.id,
-      bar_id: config.bar_id,
-      phone_number_id: config.phone_number_id,
-      webhook_url: config.webhook_url,
-      ativo: config.ativo,
-      api_version: config.api_version,
-      rate_limit_per_minute: config.rate_limit_per_minute,
-      template_prefix: config.template_prefix,
-      idioma: config.idioma,
-      max_retry_attempts: config.max_retry_attempts,
-      retry_delay_seconds: config.retry_delay_seconds,
-      created_at: config.created_at,
-      updated_at: config.updated_at,
+      bar_id: config.bar_id as any,
+      phone_number_id: config.phone_number_id as any,
+      webhook_url: config.webhook_url as any,
+      ativo: config.ativo as any,
+      api_version: config.api_version as any,
+      rate_limit_per_minute: config.rate_limit_per_minute as any,
+      template_prefix: config.template_prefix as any,
+      idioma: config.idioma as any,
+      max_retry_attempts: config.max_retry_attempts as any,
+      retry_delay_seconds: config.retry_delay_seconds as any,
+      created_at: config.created_at as any,
+      updated_at: config.updated_at as any,
     };
 
     return NextResponse.json({
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await supabase
       .from('whatsapp_configuracoes')
       .select('id')
-      .eq('bar_id', parseInt(bar_id))
+      .eq('bar_id', bar_id)
       .single();
 
     if (existing) {
@@ -334,7 +334,7 @@ export async function PUT(request: NextRequest) {
     const { data: existing, error: fetchError } = await supabase
       .from('whatsapp_configuracoes')
       .select('*')
-      .eq('bar_id', parseInt(bar_id))
+      .eq('bar_id', bar_id)
       .single();
 
     if (fetchError || !existing) {
@@ -357,7 +357,7 @@ export async function PUT(request: NextRequest) {
     ) {
       const isTokenValid = await validateWhatsAppToken(
         validatedData.access_token,
-        existing.phone_number_id
+        existing.phone_number_id as any
       );
 
       if (!isTokenValid) {
@@ -376,7 +376,7 @@ export async function PUT(request: NextRequest) {
     const { data: config, error } = await supabase
       .from('whatsapp_configuracoes')
       .update(updateData)
-      .eq('bar_id', parseInt(bar_id))
+      .eq('bar_id', bar_id)
       .select()
       .single();
 
@@ -450,7 +450,7 @@ export async function DELETE(request: NextRequest) {
     const { data: pendingMessages } = await supabase
       .from('whatsapp_mensagens')
       .select('id')
-      .eq('bar_id', parseInt(bar_id))
+      .eq('bar_id', bar_id)
       .eq('status', 'pending')
       .limit(1);
 
@@ -467,7 +467,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .from('whatsapp_configuracoes')
       .delete()
-      .eq('bar_id', parseInt(bar_id));
+      .eq('bar_id', bar_id);
 
     if (error) {
       console.error('Erro ao deletar configuração WhatsApp:', error);

@@ -225,7 +225,7 @@ export async function GET(request: NextRequest) {
       let pedidosCozinha = 0;
       let pedidosBar = 0;
 
-      temposData.forEach((item: TempoData) => {
+      temposData.forEach((item: any) => {
         const produto = item.prd_desc || '';
         const grupo = item.grp_desc || '';
         const quantidade = parseInt(String(item.itm_qtd) || '1');

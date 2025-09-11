@@ -299,7 +299,7 @@ export class BackupSystem {
 
       // Aplicar compressão se habilitado
       if (this.config.compression) {
-        finalData = await this.compressData(finalData);
+        finalData = await this.compressData(finalData) as any;
         console.log(
           `🗜️ Dados comprimidos de ${jsonString.length} para ${finalData.length} bytes`
         );
@@ -307,7 +307,7 @@ export class BackupSystem {
 
       // Aplicar criptografia se habilitado
       if (this.config.encryption) {
-        finalData = await this.encryptData(finalData);
+        finalData = await this.encryptData(finalData) as any;
         console.log(`🔒 Dados criptografados`);
       }
 
@@ -364,13 +364,13 @@ export class BackupSystem {
       // Descomprimir se necessário
       let decompressedData = bytes;
       if (this.config.compression) {
-        decompressedData = await this.decompressData(bytes);
+        decompressedData = await this.decompressData(bytes) as any;
       }
 
       // Descriptografar se necessário
       let decryptedData = decompressedData;
       if (this.config.encryption) {
-        decryptedData = await this.decryptData(decompressedData);
+        decryptedData = await this.decryptData(decompressedData) as any;
       }
 
       // Converter de volta para objeto
@@ -425,7 +425,7 @@ export class BackupSystem {
       const encryptedData = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv: iv },
         key,
-        data
+        data as any
       );
 
       // Combinar salt + iv + dados criptografados
@@ -499,7 +499,7 @@ export class BackupSystem {
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
 
-        writer.write(data);
+        writer.write(data as any);
         writer.close();
 
         const chunks: Uint8Array[] = [];
@@ -543,7 +543,7 @@ export class BackupSystem {
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
 
-        writer.write(data);
+        writer.write(data as any);
         writer.close();
 
         const chunks: Uint8Array[] = [];

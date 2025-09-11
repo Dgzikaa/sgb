@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Separar por urgência baseado no prazo
     const agora = new Date();
     const urgentes =
-      checklists?.filter((c: ChecklistFuncionario) => {
+      checklists?.filter((c: any) => {
         if (!c.prazo) return false;
         const prazo = new Date(c.prazo);
         const horasRestantes =
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       }) || [];
 
     const atrasados =
-      checklists?.filter((c: ChecklistFuncionario) => {
+      checklists?.filter((c: any) => {
         if (!c.prazo) return false;
         const prazo = new Date(c.prazo);
         return prazo < agora;
@@ -73,10 +73,10 @@ export async function POST(request: NextRequest) {
       detalhes: {
         pending:
           checklists?.filter(
-            (c: ChecklistFuncionario) => c.status === 'pending'
+            (c: any) => c.status === 'pending'
           ).length || 0,
         doing:
-          checklists?.filter((c: ChecklistFuncionario) => c.status === 'doing')
+          checklists?.filter((c: any) => c.status === 'doing')
             .length || 0,
         urgentes: urgentes.length,
         atrasados: atrasados.length,

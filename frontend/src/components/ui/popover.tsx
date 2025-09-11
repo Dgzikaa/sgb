@@ -65,7 +65,7 @@ const PopoverTrigger: React.FC<PopoverTriggerProps> = ({
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       onClick: handleClick,
-      ...children.props,
+      ...(children.props as any),
     });
   }
 

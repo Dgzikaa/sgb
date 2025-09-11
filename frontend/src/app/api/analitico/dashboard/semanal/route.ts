@@ -142,7 +142,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         }
 
         if (data && data.length > 0) {
-          todosPagamentos = [...todosPagamentos, ...data];
+          todosPagamentos = [...todosPagamentos, ...(data as any)];
           if (data.length < limit) {
             hasMore = false;
           } else {
@@ -181,8 +181,8 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         .then((result) => result.data || []),
     ]);
 
-    const sympla = symplaResult as SymplaData[];
-    const periodo = periodoResult as PeriodoData[];
+    const sympla = symplaResult as any;
+    const periodo = periodoResult as any;
 
     console.log('📊 Dados encontrados (PAGINAÇÃO):', {
       pagamentos: pagamentos.length,
@@ -216,7 +216,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         }
 
         if (data && data.length > 0) {
-          todosYuzerBar = [...todosYuzerBar, ...data];
+          todosYuzerBar = [...todosYuzerBar, ...(data as any)];
           if (data.length < limit) {
             hasMore = false;
           } else {
@@ -256,7 +256,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         }
 
         if (data && data.length > 0) {
-          todosYuzerIngressos = [...todosYuzerIngressos, ...data];
+          todosYuzerIngressos = [...todosYuzerIngressos, ...(data as any)];
           if (data.length < limit) {
             hasMore = false;
           } else {
@@ -436,7 +436,7 @@ async function getDashboardSemanalCorrigido(request: NextRequest) {
         }
 
         if (data && data.length > 0) {
-          todasVisitas = [...todasVisitas, ...data];
+          todasVisitas = [...todasVisitas, ...(data as any)];
           if (data.length < limit) {
             hasMore = false;
           } else {

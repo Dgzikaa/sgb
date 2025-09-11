@@ -881,10 +881,10 @@ export type Database = {
           aceita_lembretes: boolean | null
           aceita_relatorios: boolean | null
           usuarios_bar: Json | null
+          total_mensagens_enviadas: number | null
           dias_semana: string | null
           horario_inicio: string | null
           horario_fim: string | null
-          total_mensagens_enviadas: number | null
           created_at: string | null
           updated_at: string | null
         }
@@ -899,10 +899,10 @@ export type Database = {
           aceita_lembretes?: boolean | null
           aceita_relatorios?: boolean | null
           usuarios_bar?: Json | null
+          total_mensagens_enviadas?: number | null
           dias_semana?: string | null
           horario_inicio?: string | null
           horario_fim?: string | null
-          total_mensagens_enviadas?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -917,10 +917,10 @@ export type Database = {
           aceita_lembretes?: boolean | null
           aceita_relatorios?: boolean | null
           usuarios_bar?: Json | null
+          total_mensagens_enviadas?: number | null
           dias_semana?: string | null
           horario_inicio?: string | null
           horario_fim?: string | null
-          total_mensagens_enviadas?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -976,7 +976,7 @@ export type Database = {
           tipo_mensagem: string | null
           template_name: string | null
           conteudo: string | null
-          template_parameters: string | null
+          template_parameters: Json | null
           modulo: string | null
           checklist_id: number | null
           checklist_execucao_id: number | null
@@ -1260,6 +1260,12 @@ export type Database = {
           t2_prodfim: string | null
           t2_t3: number | null
           t3_entrega: string | null
+          itm_qtd: number | null
+          dia: string | null
+          hora: number | null
+          valor: number | null
+          qtd: number | null
+          vd_dtgerencial: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -1281,6 +1287,12 @@ export type Database = {
           t2_prodfim?: string | null
           t2_t3?: number | null
           t3_entrega?: string | null
+          itm_qtd?: number | null
+          dia?: string | null
+          hora?: number | null
+          valor?: number | null
+          qtd?: number | null
+          vd_dtgerencial?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1302,6 +1314,12 @@ export type Database = {
           t2_prodfim?: string | null
           t2_t3?: number | null
           t3_entrega?: string | null
+          itm_qtd?: number | null
+          dia?: string | null
+          hora?: number | null
+          valor?: number | null
+          qtd?: number | null
+          vd_dtgerencial?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1362,6 +1380,12 @@ export type Database = {
           vr_couvert: number | null
           vr_pagamentos: number | null
           vr_desconto: number | null
+          data_pagamento: string | null
+          valor: number | null
+          taxa: number | null
+          meio_pagamento: string | null
+          cliente: string | null
+          dt_gerencial: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -1374,6 +1398,12 @@ export type Database = {
           vr_couvert?: number | null
           vr_pagamentos?: number | null
           vr_desconto?: number | null
+          data_pagamento?: string | null
+          valor?: number | null
+          taxa?: number | null
+          meio_pagamento?: string | null
+          cliente?: string | null
+          dt_gerencial?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1386,6 +1416,12 @@ export type Database = {
           vr_couvert?: number | null
           vr_pagamentos?: number | null
           vr_desconto?: number | null
+          data_pagamento?: string | null
+          valor?: number | null
+          taxa?: number | null
+          meio_pagamento?: string | null
+          cliente?: string | null
+          dt_gerencial?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1520,6 +1556,9 @@ export type Database = {
           artista: string | null
           faturamento: number | null
           nome_evento: string | null
+          publico_real: number | null
+          faturamento_liquido: number | null
+          capacidade_estimada: number | null
           created_at: string | null
           updated_at: string | null
         }
@@ -1531,6 +1570,9 @@ export type Database = {
           artista?: string | null
           faturamento?: number | null
           nome_evento?: string | null
+          publico_real?: number | null
+          faturamento_liquido?: number | null
+          capacidade_estimada?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -1542,6 +1584,9 @@ export type Database = {
           artista?: string | null
           faturamento?: number | null
           nome_evento?: string | null
+          publico_real?: number | null
+          faturamento_liquido?: number | null
+          capacidade_estimada?: number | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -2195,12 +2240,319 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          nome: string | null
+          email: string | null
+          avatar_url: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          nome?: string | null
+          email?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          nome?: string | null
+          email?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_lgpd_settings: {
+        Row: {
+          id: string
+          user_id: string | null
+          data_processing_consent: boolean | null
+          marketing_consent: boolean | null
+          analytics_consent: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          data_processing_consent?: boolean | null
+          marketing_consent?: boolean | null
+          analytics_consent?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          data_processing_consent?: boolean | null
+          marketing_consent?: boolean | null
+          analytics_consent?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          id: string
+          user_id: string | null
+          theme: string | null
+          language: string | null
+          notifications: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          theme?: string | null
+          language?: string | null
+          notifications?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          theme?: string | null
+          language?: string | null
+          notifications?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          id: string
+          user_id: string | null
+          session_token: string | null
+          expires_at: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          session_token?: string | null
+          expires_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          session_token?: string | null
+          expires_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      bar_api_configs: {
+        Row: {
+          id: number
+          bar_id: number | null
+          api_name: string | null
+          config: Json | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          bar_id?: number | null
+          api_name?: string | null
+          config?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          bar_id?: number | null
+          api_name?: string | null
+          config?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      bar_notification_configs: {
+        Row: {
+          id: number
+          bar_id: number | null
+          notification_type: string | null
+          config: Json | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          bar_id?: number | null
+          notification_type?: string | null
+          config?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          bar_id?: number | null
+          notification_type?: string | null
+          config?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      bar_stats: {
+        Row: {
+          id: number
+          bar_id: number | null
+          stats: Json | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          bar_id?: number | null
+          stats?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          bar_id?: number | null
+          stats?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {}
     Functions: {}
-    Enums: {}
+    Enums: {
+      checklist_status: "pendente" | "em_andamento" | "concluido" | "cancelado"
+      prioridade: "baixa" | "media" | "alta" | "critica"
+      user_role: "admin" | "gerente" | "funcionario" | "viewer"
+    }
     CompositeTypes: {}
   }
+}
+
+// Interfaces personalizadas para o sistema
+export interface ChecklistFuncionario {
+  id: number
+  titulo: string | null
+  status: string | null
+  prazo: string | null
+  created_at: string | null
+}
+
+export interface Producao {
+  id: number
+  bar_id: number | null
+  nome: string | null
+  receita_codigo: string | null
+  receita_nome: string | null
+  receita_categoria: string | null
+  criado_por_nome: string | null
+  desvio?: number
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface ReceitaProduto {
+  id: number
+  receita_codigo: string
+  produto_id: string
+  quantidade: number
+  unidade: string
+  custo_unitario?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface VendaData {
+  vd_dtgerencial: string | null
+  usr_lancou: string | null
+  valorfinal: number | null
+  qtd: number | null
+  prd_desc: string | null
+  grp_desc: string | null
+  vd_mesadesc: string | null
+}
+
+export interface TempoItem {
+  t1_t2: number | null
+  prd_desc: string | null
+  grp_desc: string | null
+  t0_lancamento: string | null
+  itm_qtd: number | null
+  loc_desc: string | null
+  t0_t1: number | null
+  t0_t2: number | null
+  t0_t3: number | null
+  t1_t3: number | null
+  t2_t3: number | null
+  dia: string | null
+  hora: number | null
+  valor: number | null
+  qtd: number | null
+  vd_dtgerencial: string | null
+}
+
+export interface TempoData {
+  prd_desc: string | null
+  grp_desc: string | null
+  loc_desc: string | null
+  t0_t1: number | null
+  t0_t2: number | null
+  t0_t3: number | null
+  t1_t2: number | null
+  t1_t3: number | null
+  t2_t3: number | null
+  itm_qtd: number | null
+  dia: string | null
+}
+
+export interface PagamentoData {
+  liquido: string | null
+  total_liquido: string | null
+  valor_total: string | null
+  vr_couvert: string | null
+  vr_pagamentos: string | null
+  data_pagamento: string | null
+}
+
+export interface SymplaData {
+  data_evento: string | null
+  total_liquido: string | null
+  qtd_checkins_realizados: string | null
+}
+
+export interface PeriodoData {
+  dt_gerencial: string | null
+  pessoas: string | null
+  vr_pagamentos: string | null
+  vr_couvert: string | null
+  cli_cel: string | null
+}
+
+export interface YuzerData {
+  data_pedido: string | null
+  valor_total: string | null
+  pedido_id: string | null
+  produto_nome: string | null
+}
+
+export interface VisitaSymplaData {
+  data_visita: string | null
+  pessoas_na_mesa: string | null
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">

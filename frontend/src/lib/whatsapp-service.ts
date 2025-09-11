@@ -196,7 +196,7 @@ export class WhatsAppNotificationService {
         .eq('usuario_id', usuarioId)
         .single();
 
-      return contato;
+      return contato as any;
     } catch (error) {
       console.error('Erro ao buscar contato por usuário:', error);
       return null;
@@ -222,7 +222,7 @@ export class WhatsAppNotificationService {
         .eq('numero_whatsapp', numeroWhatsapp)
         .single();
 
-      return contato;
+      return contato as any;
     } catch (error) {
       console.error('Erro ao buscar contato por número:', error);
       return null;
@@ -255,12 +255,12 @@ export class WhatsAppNotificationService {
           aceita_relatorios: true,
           horario_inicio: '08:00',
           horario_fim: '22:00',
-          dias_semana: [1, 2, 3, 4, 5, 6, 7],
+          dias_semana: JSON.stringify([1, 2, 3, 4, 5, 6, 7]),
         })
         .select()
         .single();
 
-      return contato;
+      return contato as any;
     } catch (error) {
       console.error('Erro ao criar contato:', error);
       return null;
@@ -289,7 +289,7 @@ export class WhatsAppNotificationService {
         .eq('ativo', true)
         .single();
 
-      return template;
+      return template as any;
     } catch (error) {
       console.error('Erro ao buscar template:', error);
       return null;
@@ -313,7 +313,7 @@ export class WhatsAppNotificationService {
         .eq('modulo', modulo)
         .eq('ativo', true);
 
-      return templates || [];
+      return (templates as any) || [];
     } catch (error) {
       console.error('Erro ao buscar templates por módulo:', error);
       return [];
@@ -376,7 +376,7 @@ export class WhatsAppNotificationService {
       const { data: mensagemSalva, error: saveError } = await supabase
         .from('whatsapp_mensagens')
         .insert({
-          ...mensagem,
+          ...(mensagem as any),
           bar_id: this.barId,
           destinatario: options.destinatario,
         })
@@ -455,7 +455,7 @@ export class WhatsAppNotificationService {
       const { data: usuario } = await supabase
         .from('usuarios')
         .select('id, nome, email')
-        .eq('id', notificacao.usuario_id)
+        .eq('id', notificacao.usuario_id.toString())
         .single();
 
       if (!usuario) {
@@ -477,7 +477,7 @@ export class WhatsAppNotificationService {
       // Preparar parâmetros
       const parameters = this.prepareTemplateParameters(
         notificacao,
-        usuario,
+        usuario as any,
         templateInfo.template
       );
 

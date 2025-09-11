@@ -28,6 +28,7 @@ import {
   Briefcase,
   Wrench,
   Package,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -202,6 +203,13 @@ const defaultSidebarItems: SidebarItem[] = [
           label: 'Produtos',
           href: '/analitico/produtos',
           description: 'Análise de produtos mais vendidos',
+          permission: 'relatorios',
+        },
+        {
+          icon: AlertTriangle,
+          label: 'Stockout',
+          href: '/analitico/stockout',
+          description: 'Controle de disponibilidade de produtos',
           permission: 'relatorios',
         },
       ],

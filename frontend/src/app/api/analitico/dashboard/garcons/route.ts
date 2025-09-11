@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
 
     // Processar vendas
     const validatedVendas = (vendasData || []).filter(isVendaData);
-    validatedVendas.forEach((venda: VendaData) => {
+    validatedVendas.forEach((venda: any) => {
       const garcom = venda.usr_lancou;
       if (!garconsMap.has(garcom)) {
         garconsMap.set(garcom, {

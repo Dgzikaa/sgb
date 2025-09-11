@@ -22,8 +22,9 @@ async function authenticateUser(request: NextRequest) {
 }
 
 // PUT - Atualizar dados de planejamento do evento
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  console.log('🔄 API Edição Planejamento - Evento ID:', params.id);
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  console.log('🔄 API Edição Planejamento - Evento ID:', id);
 
   try {
     // Autenticação
@@ -32,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const eventoId = parseInt(params.id);
+    const eventoId = parseInt(id);
     if (!eventoId) {
       return NextResponse.json({ error: 'ID do evento inválido' }, { status: 400 });
     }
@@ -169,14 +170,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // GET - Buscar evento específico por ID
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await authenticateUser(request);
     if (!user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const eventoId = parseInt(params.id);
+    const { id } = await params;
+    const eventoId = parseInt(id);
     if (!eventoId) {
       return NextResponse.json({ error: 'ID do evento inválido' }, { status: 400 });
     }

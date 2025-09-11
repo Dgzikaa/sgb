@@ -329,8 +329,8 @@ export async function GET(request: NextRequest) {
 
     if (producoes && producoes.length > 0) {
       const desvios = producoes
-        .filter((p: Producao) => p.desvio && p.desvio > 0)
-        .map((p: Producao) => p.desvio as number);
+        .filter((p: any) => p.desvio && p.desvio > 0)
+        .map((p: any) => p.desvio as number);
 
       if (desvios.length > 0) {
         estatisticas.desvio_medio =

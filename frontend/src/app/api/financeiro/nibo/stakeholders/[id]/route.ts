@@ -25,10 +25,10 @@ interface UpdateStakeholderRequest {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body: UpdateStakeholderRequest = await request.json();
 
     console.log('Atualizando stakeholder:', { id, body });
@@ -119,10 +119,10 @@ export async function PUT(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Buscar stakeholder no banco local
     const { data: localStakeholder, error: localError } = await supabase

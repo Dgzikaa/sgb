@@ -313,7 +313,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar horário permitido
-    if (!isWithinAllowedHours(contato)) {
+    if (!isWithinAllowedHours(contato as any)) {
       return NextResponse.json(
         {
           error: 'Fora do horário permitido para envio',
@@ -329,7 +329,7 @@ export async function POST(request: NextRequest) {
       tipo_mensagem: validatedData.tipo_mensagem,
       template_name: validatedData.template_name,
       conteudo: validatedData.conteudo,
-      template_parameters: validatedData.template_parameters || [],
+      template_parameters: JSON.stringify(validatedData.template_parameters || []),
       modulo: validatedData.modulo || 'manual',
       checklist_id: validatedData.checklist_id,
       checklist_execucao_id: validatedData.checklist_execucao_id,
@@ -352,7 +352,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Enviar mensagem via WhatsApp API
-    const sendResult = await sendWhatsAppMessage(config, contato, mensagem);
+    const sendResult = await sendWhatsAppMessage(config as any, contato as any, mensagem as any);
 
     // Atualizar status da mensagem
     const updateData = {
@@ -374,7 +374,7 @@ export async function POST(request: NextRequest) {
       await supabase
         .from('whatsapp_contatos')
         .update({
-          total_mensagens_enviadas: contato.total_mensagens_enviadas + 1,
+          total_mensagens_enviadas: (contato.total_mensagens_enviadas || 0) + 1,
           ultima_interacao: new Date().toISOString(),
         })
         .eq('id', contato.id);

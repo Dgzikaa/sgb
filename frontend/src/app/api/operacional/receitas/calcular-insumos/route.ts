@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     const pesoReferencia = produto.quantidade_base || 1000; // Base padrão 1kg
     const fatorProporcional = pesoLimpo / pesoReferencia;
 
-    const insumosCalculados = produto.receitas.map((receita: any) => {
+    const insumosCalculados = ((produto as any).receitas || []).map((receita: any) => {
       const quantidadePlanejada =
         receita.quantidade_necessaria * fatorProporcional;
 
