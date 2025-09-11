@@ -195,12 +195,16 @@ export default function ResumoSemanalProdutos() {
                 onValueChange={setSemanaSelecionada}
                 disabled={loadingSemanas}
               >
-                <SelectTrigger className="w-48 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
-                  <SelectValue placeholder="Selecione uma semana" />
+                <SelectTrigger className="w-48 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                  <SelectValue placeholder="Selecione uma semana" className="text-gray-900 dark:text-white" />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   {semanas.map((semana) => (
-                    <SelectItem key={semana.semana} value={semana.semana.toString()}>
+                    <SelectItem 
+                      key={semana.semana} 
+                      value={semana.semana.toString()}
+                      className="text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
                       Semana {semana.semana} • {semana.periodo_formatado}
                     </SelectItem>
                   ))}
