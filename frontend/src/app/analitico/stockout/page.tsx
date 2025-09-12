@@ -82,6 +82,10 @@ export default function StockoutPage() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('diario');
   
+  // Estados para filtros
+  const [filtrosAtivos, setFiltrosAtivos] = useState<string[]>([]);
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  
   // Datas para histórico
   const [dataInicio, setDataInicio] = useState(() => {
     const date = new Date();
@@ -95,15 +99,27 @@ export default function StockoutPage() {
     return yesterday.toISOString().split('T')[0];
   });
 
-  const buscarDadosStockout = async (data: string) => {
+  const buscarDadosStockout = async (data: string, filtros: string[] = []) => {
     setLoading(true);
+    
     try {
-      const response = await fetch(`/api/contahub/stockout-dados?data=${data}&bar_id=3`);
+      const response = await fetch('/api/analitico/stockout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data_selecionada: data,
+          filtros: filtros
+        }),
+      });
+      
       const result = await response.json();
       
       if (result.success) {
         setStockoutData(result.data);
-        toast.success(`Dados de stockout carregados para ${data}`);
+        const filtroTexto = filtros.length > 0 ? ` (${filtros.length} filtros aplicados)` : '';
+        toast.success(`Dados de stockout carregados para ${data}${filtroTexto}`);
       } else {
         toast.error(result.error || 'Erro ao buscar dados de stockout');
         setStockoutData(null);
@@ -180,9 +196,32 @@ export default function StockoutPage() {
     }
   };
 
+  // Funções para gerenciar filtros
+  const toggleFiltro = (filtro: string) => {
+    setFiltrosAtivos(prev => {
+      const novos = prev.includes(filtro) 
+        ? prev.filter(f => f !== filtro)
+        : [...prev, filtro];
+      
+      // Recarregar dados com novos filtros
+      if (selectedDate && activeTab === 'diario') {
+        buscarDadosStockout(selectedDate, novos);
+      }
+      
+      return novos;
+    });
+  };
+
+  const limparFiltros = () => {
+    setFiltrosAtivos([]);
+    if (selectedDate && activeTab === 'diario') {
+      buscarDadosStockout(selectedDate, []);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === 'diario') {
-      buscarDadosStockout(selectedDate);
+      buscarDadosStockout(selectedDate, filtrosAtivos);
     } else if (activeTab === 'historico') {
       buscarHistoricoStockout();
     }
@@ -252,28 +291,81 @@ export default function StockoutPage() {
             </TabsList>
 
             <TabsContent value="diario" className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Data:
-                  </label>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Data:
+                    </label>
+                  </div>
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="input-dark w-auto"
+                  />
+                  <Button
+                    onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
+                    disabled={loading}
+                    variant="outline"
+                    className="btn-outline-dark"
+                  >
+                    {loading ? 'Carregando...' : 'Buscar'}
+                  </Button>
                 </div>
-                <Input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="input-dark w-auto"
-                />
-                <Button
-                  onClick={() => buscarDadosStockout(selectedDate)}
-                  disabled={loading}
-                  variant="outline"
-                  className="btn-outline-dark"
-                >
-                  {loading ? 'Carregando...' : 'Buscar'}
-                </Button>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                    className="btn-outline-dark"
+                  >
+                    Filtros ({filtrosAtivos.length})
+                  </Button>
+                  {filtrosAtivos.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={limparFiltros}
+                      className="btn-outline-dark text-red-600 dark:text-red-400"
+                    >
+                      Limpar
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {/* Seção de Filtros */}
+              {mostrarFiltros && (
+                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                    Excluir da análise:
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant={filtrosAtivos.includes('Pegue e Pague') ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => toggleFiltro('Pegue e Pague')}
+                      className={filtrosAtivos.includes('Pegue e Pague') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}
+                    >
+                      Pegue e Pague
+                    </Button>
+                    <Button
+                      variant={filtrosAtivos.includes('sem_local') ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => toggleFiltro('sem_local')}
+                      className={filtrosAtivos.includes('sem_local') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}
+                    >
+                      Sem local definido
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                    Produtos dos locais selecionados serão excluídos do cálculo de stockout
+                  </p>
+                </div>
+              )}
 
               {stockoutData && (
                 <>
@@ -287,7 +379,7 @@ export default function StockoutPage() {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                          {stockoutData.estatisticas.total_produtos}
+                          {stockoutData?.estatisticas?.total_produtos || 0}
                         </div>
                       </CardContent>
                     </Card>
@@ -301,10 +393,10 @@ export default function StockoutPage() {
                       <CardContent>
                         <div className="text-2xl font-bold text-green-600 dark:text-green-400 flex items-center gap-2">
                           <CheckCircle className="h-5 w-5" />
-                          {stockoutData.estatisticas.produtos_ativos}
+                          {stockoutData?.estatisticas?.produtos_ativos || 0}
                         </div>
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          {stockoutData.estatisticas.percentual_disponibilidade} disponível
+                          {stockoutData?.estatisticas?.percentual_disponibilidade || '0%'} disponível
                         </p>
                       </CardContent>
                     </Card>
@@ -318,7 +410,7 @@ export default function StockoutPage() {
                       <CardContent>
                         <div className="text-2xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
                           <AlertTriangle className="h-5 w-5" />
-                          {stockoutData.estatisticas.produtos_inativos}
+                          {stockoutData?.estatisticas?.produtos_inativos || 0}
                         </div>
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                           Em stockout
@@ -333,39 +425,91 @@ export default function StockoutPage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className={`text-2xl font-bold ${getStockoutColor(stockoutData.estatisticas.percentual_stockout)}`}>
-                          {stockoutData.estatisticas.percentual_stockout}
+                        <div className={`text-2xl font-bold ${getStockoutColor(stockoutData?.estatisticas?.percentual_stockout || '0%')}`}>
+                          {stockoutData?.estatisticas?.percentual_stockout || '0%'}
                         </div>
-                        <Badge className={getStockoutBadgeVariant(stockoutData.estatisticas.percentual_stockout)}>
-                          {parseFloat(stockoutData.estatisticas.percentual_stockout.replace('%', '')) <= 10 ? 'Excelente' :
-                           parseFloat(stockoutData.estatisticas.percentual_stockout.replace('%', '')) <= 25 ? 'Atenção' : 'Crítico'}
+                        <Badge className={getStockoutBadgeVariant(stockoutData?.estatisticas?.percentual_stockout || '0%')}>
+                          {parseFloat((stockoutData?.estatisticas?.percentual_stockout || '0%').replace('%', '')) <= 10 ? 'Excelente' :
+                           parseFloat((stockoutData?.estatisticas?.percentual_stockout || '0%').replace('%', '')) <= 25 ? 'Atenção' : 'Crítico'}
                         </Badge>
                       </CardContent>
                     </Card>
                   </div>
 
                   {/* Lista de Produtos */}
+                  {/* Análise por Local de Produção */}
+                  {stockoutData?.analise_por_local && stockoutData.analise_por_local.length > 0 && (
+                    <Card className="card-dark">
+                      <CardHeader>
+                        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Package className="h-5 w-5" />
+                          Análise por Local de Produção
+                        </CardTitle>
+                        <CardDescription className="card-description-dark">
+                          Percentual de stockout por setor/local
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {stockoutData.analise_por_local.map((local, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900 dark:text-white">
+                                  {local.local_producao}
+                                </h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {local.total_produtos} produtos • {local.disponiveis} disponíveis • {local.indisponiveis} indisponíveis
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <div className={`text-lg font-bold ${
+                                  local.perc_stockout <= 10 ? 'text-green-600 dark:text-green-400' :
+                                  local.perc_stockout <= 25 ? 'text-yellow-600 dark:text-yellow-400' :
+                                  local.perc_stockout <= 50 ? 'text-orange-600 dark:text-orange-400' :
+                                  'text-red-600 dark:text-red-400'
+                                }`}>
+                                  {local.perc_stockout}%
+                                </div>
+                                <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+                                  <div 
+                                    className={`h-2 rounded-full ${
+                                      local.perc_stockout <= 10 ? 'bg-green-500' :
+                                      local.perc_stockout <= 25 ? 'bg-yellow-500' :
+                                      local.perc_stockout <= 50 ? 'bg-orange-500' :
+                                      'bg-red-500'
+                                    }`}
+                                    style={{ width: `${Math.min(local.perc_stockout, 100)}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Produtos Inativos */}
                     <Card className="card-dark">
                       <CardHeader>
                         <CardTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
                           <AlertTriangle className="h-5 w-5" />
-                          Produtos em Stockout ({stockoutData.estatisticas.produtos_inativos})
+                          Produtos em Stockout ({stockoutData?.estatisticas?.produtos_inativos || 0})
                         </CardTitle>
                         <CardDescription className="card-description-dark">
-                          Produtos que não estavam disponíveis em {formatarData(stockoutData.data_referencia)}
+                          Produtos que não estavam disponíveis em {formatarData(stockoutData?.data_analisada || '')}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        {stockoutData.produtos.inativos.length === 0 ? (
+                        {(stockoutData?.produtos?.inativos?.length || 0) === 0 ? (
                           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                             <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
                             <p>Nenhum produto em stockout!</p>
                           </div>
                         ) : (
                           <div className="space-y-3 max-h-96 overflow-y-auto">
-                            {stockoutData.grupos.inativos.map((grupo, index) => (
+                            {(stockoutData?.grupos?.inativos || []).map((grupo, index) => (
                               <div key={index} className="border-l-4 border-red-500 pl-4">
                                 <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                                   {grupo.grupo} ({grupo.quantidade})
@@ -389,15 +533,15 @@ export default function StockoutPage() {
                       <CardHeader>
                         <CardTitle className="text-green-600 dark:text-green-400 flex items-center gap-2">
                           <CheckCircle className="h-5 w-5" />
-                          Produtos Disponíveis ({stockoutData.estatisticas.produtos_ativos})
+                          Produtos Disponíveis ({stockoutData?.estatisticas?.produtos_ativos || 0})
                         </CardTitle>
                         <CardDescription className="card-description-dark">
-                          Produtos que estavam disponíveis em {formatarData(stockoutData.data_referencia)}
+                          Produtos que estavam disponíveis em {formatarData(stockoutData?.data_referencia || '')}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3 max-h-96 overflow-y-auto">
-                          {stockoutData.grupos.ativos.map((grupo, index) => (
+                          {(stockoutData?.grupos?.ativos || []).map((grupo, index) => (
                             <div key={index} className="border-l-4 border-green-500 pl-4">
                               <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                                 {grupo.grupo} ({grupo.quantidade})

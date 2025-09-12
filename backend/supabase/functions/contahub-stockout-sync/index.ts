@@ -127,26 +127,54 @@ async function processStockoutData(supabase: any, rawData: any, dataDate: string
 
   for (const item of rawData.list) {
     try {
-      // Extrair informações do produto (estrutura da API de produtos)
-      const produtoId = item.prd || item.produto_id || item.id || 'unknown';
-      const produtoDescricao = item.prd_desc || item.produto || item.descricao || item.nome || 'Produto sem nome';
-      const grupoDescricao = item.grp_desc || item.grupo || item.categoria || 'Sem grupo';
-      
-      // Determinar se o produto está ativo baseado na coluna 'prd_venda'
-      // Se prd_venda = "S", produto está ativo para venda
-      const ativoContahub = item.prd_venda === "S" || item.prd_venda === true;
-
+      // Mapear TODAS as colunas da API corretamente
       const stockoutRecord = {
         bar_id: barId,
         data_consulta: dataDate,
         hora_consulta: '20:00:00',
         
-        // Campos de produto
-        produto_id: String(produtoId),
-        produto_nome: produtoDescricao,
-        produto_ativo: ativoContahub,
-        grupo_produto: grupoDescricao,
-        categoria_produto: item.grp_desc || item.categoria || 'Sem categoria',
+        // Dados principais da API
+        emp: item.emp || null,
+        prd: item.prd || null,
+        loc: item.loc || null,
+        prd_desc: item.prd_desc || null,
+        prd_venda: item.prd_venda || null, // CAMPO PRINCIPAL - "S" ou "N"
+        prd_ativo: item.prd_ativo || null,
+        prd_produzido: item.prd_produzido || null,
+        prd_unid: item.prd_unid || null,
+        prd_precovenda: item.prd_precovenda || null,
+        prd_estoque: item.prd_estoque || null,
+        prd_controlaestoque: item.prd_controlaestoque || null,
+        prd_validaestoquevenda: item.prd_validaestoquevenda || null,
+        prd_opcoes: item.prd_opcoes || null,
+        prd_venda7: item.prd_venda7 || null,
+        prd_venda30: item.prd_venda30 || null,
+        prd_venda180: item.prd_venda180 || null,
+        prd_nfencm: item.prd_nfencm || null,
+        prd_nfeorigem: item.prd_nfeorigem || null,
+        prd_nfecsosn: item.prd_nfecsosn || null,
+        prd_nfecstpiscofins: item.prd_nfecstpiscofins || null,
+        prd_nfepis: item.prd_nfepis || null,
+        prd_nfecofins: item.prd_nfecofins || null,
+        prd_nfeicms: item.prd_nfeicms || null,
+        prd_qtddouble: item.prd_qtddouble || null,
+        prd_disponivelonline: item.prd_disponivelonline || null,
+        prd_cardapioonline: item.prd_cardapioonline || null,
+        prd_semcustoestoque: item.prd_semcustoestoque || null,
+        prd_balanca: item.prd_balanca || null,
+        prd_delivery: item.prd_delivery || null,
+        prd_entregaimediata: item.prd_entregaimediata || null,
+        prd_semrepique: item.prd_semrepique || null,
+        prd_naoimprimeproducao: item.prd_naoimprimeproducao || null,
+        prd_agrupaimpressao: item.prd_agrupaimpressao || null,
+        prd_contagemehperda: item.prd_contagemehperda || null,
+        prd_naodesmembra: item.prd_naodesmembra || null,
+        prd_naoimprimeficha: item.prd_naoimprimeficha || null,
+        prd_servico: item.prd_servico || null,
+        prd_zeraestoquenacompra: item.prd_zeraestoquenacompra || null,
+        loc_desc: item.loc_desc || null,
+        loc_inativo: item.loc_inativo || null,
+        loc_statusimpressao: item.loc_statusimpressao || null,
         
         // Dados completos do JSON original
         raw_data: item,
@@ -182,69 +210,6 @@ async function processStockoutData(supabase: any, rawData: any, dataDate: string
   return { processed, errors };
 }
 
-// Função para processar dados fornecidos diretamente (modo histórico)
-async function processStockoutDataDirect(supabase: any, produtosData: any[], dataDate: string, barId: number) {
-  console.log('📦 Processando dados fornecidos diretamente...');
-  
-  if (!produtosData || !Array.isArray(produtosData)) {
-    console.log('⚠️ Nenhum dado de produto fornecido');
-    return { processed: 0, errors: 0 };
-  }
-
-  let processed = 0;
-  let errors = 0;
-  const stockoutRecords = [];
-
-  for (const produto of produtosData) {
-    try {
-      // Mapear todos os campos da API ContaHub para a estrutura da tabela
-      const rawItem = produto.raw_data;
-      
-      const stockoutRecord = {
-        bar_id: barId,
-        data_consulta: dataDate,
-        hora_consulta: '20:00:00',
-        
-        // Campos de produto
-        produto_id: String(rawItem.prd || rawItem.produto_id || 'unknown'),
-        produto_nome: rawItem.prd_desc || produto.produto_descricao || 'Sem nome',
-        produto_ativo: produto.ativo_contahub,
-        grupo_produto: rawItem.loc_desc || produto.grupo_descricao || 'Sem grupo',
-        categoria_produto: rawItem.grp_desc || rawItem.categoria || 'Sem categoria',
-        
-        // Dados completos do JSON original
-        raw_data: rawItem,
-        
-        // Timestamps
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      stockoutRecords.push(stockoutRecord);
-      processed++;
-
-    } catch (error) {
-      console.error('❌ Erro ao processar produto:', error, produto);
-      errors++;
-    }
-  }
-
-  // Salvar todos os registros de uma vez
-  if (stockoutRecords.length > 0) {
-    const { data, error } = await supabase
-      .from('contahub_stockout')
-      .insert(stockoutRecords);
-
-    if (error) {
-      console.error('❌ Erro ao salvar dados de stockout:', error);
-      throw new Error(`Erro ao salvar stockout: ${error.message}`);
-    }
-
-    console.log(`✅ ${stockoutRecords.length} registros de stockout salvos`);
-  }
-
-  return { processed, errors };
-}
 
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
