@@ -127,17 +127,14 @@ async function processStockoutData(supabase: any, rawData: any, dataDate: string
 
   for (const item of rawData.list) {
     try {
-      // Extrair informações do produto
-      const produtoId = item.produto_id || item.prod_id || item.id || 'unknown';
-      const produtoDescricao = item.produto || item.descricao || item.nome || 'Produto sem nome';
-      const grupoDescricao = item.grupo || item.categoria || 'Sem grupo';
+      // Extrair informações do produto (estrutura da API de produtos)
+      const produtoId = item.prd || item.produto_id || item.id || 'unknown';
+      const produtoDescricao = item.prd_desc || item.produto || item.descricao || item.nome || 'Produto sem nome';
+      const grupoDescricao = item.grp_desc || item.grupo || item.categoria || 'Sem grupo';
       
-      // Determinar se o produto está ativo
-      // Assumindo que produtos ativos têm vendas/movimentação
-      const ativoContahub = item.ativo !== false && 
-                           item.status !== 'inativo' && 
-                           item.disponivel !== false &&
-                           (item.qtd_vendida > 0 || item.valor_vendido > 0 || item.movimentacao > 0);
+      // Determinar se o produto está ativo baseado na coluna 'prd_venda'
+      // Se prd_venda = "S", produto está ativo para venda
+      const ativoContahub = item.prd_venda === "S" || item.prd_venda === true;
 
       const stockoutRecord = {
         bar_id: barId,
@@ -310,8 +307,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // emp_id fixo para Ordinário (bar_id = 3)
       const emp_id = "3768";
       
-      // URL para buscar dados de stockout (query 7 - mesma dos pagamentos mas focando no status dos produtos)
-      const url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=7&d0=${data_date}&d1=${data_date}&meio=&emp=${emp_id}&nfe=1`;
+      // URL para buscar dados de produtos (API de produtos do ContaHub)
+      const url = `${contahubBaseUrl}/rest/contahub.cmds.ProdutoCmd/getProdutos/${queryTimestamp}?emp=${emp_id}&prd_desc=%20&grp=-29&nfe=1`;
       
       console.log(`🔗 URL Stockout: ${url}`);
       

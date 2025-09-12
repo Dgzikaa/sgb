@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpar Storage - SGB Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .button:hover { background: #0056b3; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Storage - SGB</h1>
+    
+    <div class="info">
+        <h3>Dados Atuais do localStorage:</h3>
+        <div id="current-data"></div>
+    </div>
+    
+    <button class="button" onclick="showCurrentData()">📋 Mostrar Dados Atuais</button>
+    <button class="button" onclick="clearStorage()">🗑️ Limpar localStorage</button>
+    <button class="button" onclick="clearCaches()">🔄 Limpar Caches</button>
+    <button class="button" onclick="forceReload()">⚡ Reload Forçado</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function showCurrentData() {
+            const result = document.getElementById('current-data');
+            const userData = localStorage.getItem('sgb_user');
+            
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    result.innerHTML = `
+                        <strong>Usuário:</strong> ${user.nome} (${user.email})<br>
+                        <strong>Role:</strong> ${user.role}<br>
+                        <strong>Ativo:</strong> ${user.ativo}<br>
+                        <strong>Permissões:</strong> ${JSON.stringify(user.modulos_permitidos)}<br>
+                        <strong>Raw Data:</strong><br>
+                        <pre style="background: #f0f0f0; padding: 10px; border-radius: 3px; overflow: auto;">${userData}</pre>
+                    `;
+                } catch (e) {
+                    result.innerHTML = `<span class="error">Erro ao parsear dados: ${e.message}</span>`;
+                }
+            } else {
+                result.innerHTML = '<span class="error">Nenhum dado encontrado no localStorage</span>';
+            }
+        }
+        
+        function clearStorage() {
+            const result = document.getElementById('result');
+            
+            // Limpar localStorage
+            localStorage.clear();
+            
+            // Limpar sessionStorage
+            sessionStorage.clear();
+            
+            result.innerHTML = '<span class="success">✅ localStorage e sessionStorage limpos!</span>';
+            
+            // Atualizar dados mostrados
+            showCurrentData();
+        }
+        
+        async function clearCaches() {
+            const result = document.getElementById('result');
+            
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                    result.innerHTML = '<span class="success">✅ Caches limpos!</span>';
+                } else {
+                    result.innerHTML = '<span class="error">Cache API não suportada</span>';
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">Erro ao limpar caches: ${error.message}</span>`;
+            }
+        }
+        
+        function forceReload() {
+            // Limpar tudo e recarregar
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Reload com cache bypass
+            window.location.reload(true);
+        }
+        
+        // Mostrar dados ao carregar
+        window.onload = showCurrentData;
+    </script>
+</body>
+</html>

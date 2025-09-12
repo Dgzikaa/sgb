@@ -329,11 +329,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
           'Authorization': req.headers.get('Authorization') || '' // Usar a mesma auth
         },
         body: JSON.stringify({
-          action: 'process_date',
-          date: data_date,
+          data_date: data_date,
           bar_id: bar_id,
-          data_types: dataTypes,
-          triggered_by: 'sync-automatico'
+          data_types: dataTypes
         })
       });
       

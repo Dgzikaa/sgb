@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { Badge } from '@/components/ui/badge';
+import { PermissionsDebug } from '@/components/debug/PermissionsDebug';
+import { EnvironmentDebug } from '@/components/debug/EnvironmentDebug';
+import { SidebarDebug } from '@/components/debug/SidebarDebug';
 import { 
   Users, 
   BarChart3,
@@ -207,6 +210,17 @@ export default function HomePage() {
           </div>
         </motion.div>
 
+        {/* Debug de Permissões - TEMPORÁRIO */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="mt-8 space-y-6"
+        >
+          <SidebarDebug />
+          <PermissionsDebug />
+          <EnvironmentDebug />
+        </motion.div>
 
       </div>
     </div>
