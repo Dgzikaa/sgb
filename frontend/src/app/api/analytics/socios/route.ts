@@ -109,67 +109,49 @@ function identificarSocio(mesaDesc: string, motivo: string, cliNome?: string): s
   const mesa = (mesaDesc || '').toLowerCase();
   const motivoLower = (motivo || '').toLowerCase();
   const cliente = (cliNome || '').toLowerCase();
-  const textoCompleto = `${mesa} ${motivoLower} ${cliente}`;
 
-  // 1. Primeiro: verificar se o motivo já especifica o sócio diretamente
-  // Ex: "Sócio Digão", "sócio vini", "Socio Cadu", etc.
+  // LÓGICA PRINCIPAL: Deve ter contexto de sócio + identificação do nome
+  
+  // 1. Verificar se tem contexto de sócio no motivo
+  const temContextoSocio = motivoLower.includes('sócio') || 
+                          motivoLower.includes('socio') || 
+                          motivoLower.includes('consumação') || 
+                          motivoLower.includes('consuma');
+
+  if (!temContextoSocio) {
+    // Se não tem contexto de sócio, não é um registro de sócio
+    return null;
+  }
+
+  // 2. Agora que confirmamos que é um registro de sócio, identificar qual sócio
   for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
     for (const nome of nomes) {
-      // Verificar padrões como "sócio digão", "socio vini", etc.
+      
+      // 2.1. Verificar se o motivo especifica o sócio diretamente
       if (motivoLower.includes(`sócio ${nome}`) || 
           motivoLower.includes(`socio ${nome}`) ||
-          motivoLower.includes(`sócio${nome}`) ||
-          motivoLower.includes(`socio${nome}`)) {
-        console.log(`✅ Sócio identificado no motivo: ${socio} - Motivo: "${motivo}" - Nome: "${nome}"`);
+          motivoLower.includes(`consumação ${nome}`) ||
+          motivoLower.includes(`consuma ${nome}`)) {
+        console.log(`✅ Sócio identificado no motivo direto: ${socio} - Motivo: "${motivo}" - Nome: "${nome}"`);
+        return socio;
+      }
+
+      // 2.2. Se motivo é genérico, verificar vd_mesadesc
+      if (mesa.includes(nome)) {
+        console.log(`✅ Sócio identificado na mesa (contexto sócio): ${socio} - Mesa: "${mesaDesc}" - Motivo: "${motivo}" - Nome: "${nome}"`);
+        return socio;
+      }
+
+      // 2.3. Se motivo é genérico, verificar cli_nome (nome exato para evitar falsos positivos)
+      if (cliente === nome) {
+        console.log(`✅ Sócio identificado no cli_nome exato: ${socio} - Cliente: "${cliNome}" - Nome: "${nome}"`);
         return socio;
       }
     }
   }
 
-  // 2. Segundo: verificar cli_nome diretamente (apenas nomes exatos ou com contexto de sócio)
-  if (cliente) {
-    for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
-      for (const nome of nomes) {
-        // Para evitar falsos positivos, verificar se é nome exato ou se tem contexto de sócio
-        if (cliente === nome || 
-            (cliente.includes(nome) && (motivoLower.includes('sócio') || motivoLower.includes('socio')))) {
-          console.log(`✅ Sócio identificado no cli_nome: ${socio} - Cliente: "${cliNome}" - Nome: "${nome}"`);
-          return socio;
-        }
-      }
-    }
-  }
-
-  // 3. Terceiro: se o motivo for genérico ("sócio", "socio", "consumação sócio", etc.)
-  // verificar o vd_mesadesc para identificar o sócio
-  const motivoGenerico = motivoLower.includes('sócio') || motivoLower.includes('socio');
-  
-  if (motivoGenerico) {
-    for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
-      for (const nome of nomes) {
-        if (mesa.includes(nome)) {
-          console.log(`✅ Sócio identificado na mesa (motivo genérico): ${socio} - Mesa: "${mesaDesc}" - Motivo: "${motivo}" - Nome: "${nome}"`);
-          return socio;
-        }
-      }
-    }
-  }
-
-  // 4. Quarto: verificar qualquer lugar no texto completo
-  for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
-    for (const nome of nomes) {
-      if (textoCompleto.includes(nome)) {
-        console.log(`✅ Sócio identificado no texto completo: ${socio} - Texto: "${textoCompleto}" - Nome: "${nome}"`);
-        return socio;
-      }
-    }
-  }
-
-  // Log para registros não identificados que podem ser sócios
-  if (motivoLower.includes('socio') || motivoLower.includes('sócio')) {
-    console.log(`⚠️ Registro de sócio não identificado: Mesa: "${mesaDesc}" - Motivo: "${motivo}"`);
-  }
-
+  // Log para registros de sócio não identificados
+  console.log(`⚠️ Registro de sócio não identificado: Mesa: "${mesaDesc}" - Motivo: "${motivo}" - Cliente: "${cliNome}"`);
   return null;
 }
 
