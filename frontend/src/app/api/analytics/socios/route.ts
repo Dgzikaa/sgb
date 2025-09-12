@@ -126,11 +126,13 @@ function identificarSocio(mesaDesc: string, motivo: string, cliNome?: string): s
     }
   }
 
-  // 2. Segundo: verificar cli_nome diretamente
+  // 2. Segundo: verificar cli_nome diretamente (apenas nomes exatos ou com contexto de sócio)
   if (cliente) {
     for (const [socio, nomes] of Object.entries(SOCIOS_MAP)) {
       for (const nome of nomes) {
-        if (cliente.includes(nome)) {
+        // Para evitar falsos positivos, verificar se é nome exato ou se tem contexto de sócio
+        if (cliente === nome || 
+            (cliente.includes(nome) && (motivoLower.includes('sócio') || motivoLower.includes('socio')))) {
           console.log(`✅ Sócio identificado no cli_nome: ${socio} - Cliente: "${cliNome}" - Nome: "${nome}"`);
           return socio;
         }
