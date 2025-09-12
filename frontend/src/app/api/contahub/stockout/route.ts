@@ -35,19 +35,18 @@ async function fetchContaHubStockout(
   date: string,
   timestamp: string
 ): Promise<any> {
-  const url = `${credentials.base_url}/rest/contahub.cmds.QueryCmd/execQuery/1757616291032`;
+  // URL CORRETA para buscar produtos (não vendas!)
+  const url = `${credentials.base_url}/rest/contahub.cmds.ProdutoCmd/getProdutos/${timestamp}`;
   
   const params = new URLSearchParams({
-    qry: '7', // Query ID para stockout
-    d0: date, // Data início
-    d1: date, // Data fim (mesmo dia)
-    meio: '',
     emp: '3768', // ID da empresa
-    nfe: '1',
-    timestamp: timestamp
+    prd_desc: ' ', // Buscar todos os produtos
+    grp: '-29', // Todos os grupos
+    nfe: '1'
   });
 
-  console.log(`🔍 Buscando dados de stockout do ContaHub para ${date} às ${timestamp}`);
+  console.log(`🔍 Buscando produtos do ContaHub para análise de stockout em ${date}`);
+  console.log(`🔗 URL: ${url}?${params}`);
   
   const response = await fetch(`${url}?${params}`, {
     method: 'GET',
@@ -70,33 +69,62 @@ async function saveStockoutData(barId: number, date: string, hour: string, data:
     bar_id: barId,
     data_consulta: date,
     hora_consulta: hour,
-    vd: item.vd,
-    trn: item.trn,
-    dt_gerencial: item.dt_gerencial,
-    hr_lancamento: item.hr_lancamento,
-    hr_transacao: item.hr_transacao,
-    dt_transacao: item.dt_transacao,
-    mesa: item.mesa,
-    cli: item.cli,
-    cliente: item.cliente,
-    vr_pagamentos: item.$vr_pagamentos || item.vr_pagamentos,
-    pag: item.pag,
-    valor: item.$valor || item.valor,
-    liquido: item.$liquido || item.liquido,
-    tipo: item.tipo,
-    meio: item.meio,
-    cartao: item.cartao,
-    autorizacao: item.autorizacao,
-    usr_abriu: item.usr_abriu,
-    usr_lancou: item.usr_lancou,
-    pos: item.pos,
-    raw_data: item
+    
+    // Mapear TODAS as colunas da API de produtos corretamente
+    emp: item.emp || null,
+    prd: item.prd || null,
+    loc: item.loc || null,
+    prd_desc: item.prd_desc || null,
+    prd_venda: item.prd_venda || null, // CAMPO PRINCIPAL - "S" ou "N"
+    prd_ativo: item.prd_ativo || null,
+    prd_produzido: item.prd_produzido || null,
+    prd_unid: item.prd_unid || null,
+    prd_precovenda: item.prd_precovenda || null,
+    prd_estoque: item.prd_estoque || null,
+    prd_controlaestoque: item.prd_controlaestoque || null,
+    prd_validaestoquevenda: item.prd_validaestoquevenda || null,
+    prd_opcoes: item.prd_opcoes || null,
+    prd_venda7: item.prd_venda7 || null,
+    prd_venda30: item.prd_venda30 || null,
+    prd_venda180: item.prd_venda180 || null,
+    prd_nfencm: item.prd_nfencm || null,
+    prd_nfeorigem: item.prd_nfeorigem || null,
+    prd_nfecsosn: item.prd_nfecsosn || null,
+    prd_nfecstpiscofins: item.prd_nfecstpiscofins || null,
+    prd_nfepis: item.prd_nfepis || null,
+    prd_nfecofins: item.prd_nfecofins || null,
+    prd_nfeicms: item.prd_nfeicms || null,
+    prd_qtddouble: item.prd_qtddouble || null,
+    prd_disponivelonline: item.prd_disponivelonline || null,
+    prd_cardapioonline: item.prd_cardapioonline || null,
+    prd_semcustoestoque: item.prd_semcustoestoque || null,
+    prd_balanca: item.prd_balanca || null,
+    prd_delivery: item.prd_delivery || null,
+    prd_entregaimediata: item.prd_entregaimediata || null,
+    prd_semrepique: item.prd_semrepique || null,
+    prd_naoimprimeproducao: item.prd_naoimprimeproducao || null,
+    prd_agrupaimpressao: item.prd_agrupaimpressao || null,
+    prd_contagemehperda: item.prd_contagemehperda || null,
+    prd_naodesmembra: item.prd_naodesmembra || null,
+    prd_naoimprimeficha: item.prd_naoimprimeficha || null,
+    prd_servico: item.prd_servico || null,
+    prd_zeraestoquenacompra: item.prd_zeraestoquenacompra || null,
+    loc_desc: item.loc_desc || null,
+    loc_inativo: item.loc_inativo || null,
+    loc_statusimpressao: item.loc_statusimpressao || null,
+    
+    // Dados completos do JSON original
+    raw_data: item,
+    
+    // Timestamps
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }));
 
   const { error } = await supabase
     .from('contahub_stockout')
     .upsert(records, {
-      onConflict: 'bar_id,data_consulta,hora_consulta,vd,trn',
+      onConflict: 'bar_id,data_consulta,prd',
       ignoreDuplicates: false
     });
 
