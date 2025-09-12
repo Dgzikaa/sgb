@@ -162,26 +162,13 @@ async function buscarTodosOsRegistros(ano: string, mes: string) {
     const pageSize = 1000; // Buscar 1000 registros por vez
     let hasMore = true;
 
-    // Construir filtros OR para cada sócio
-    const filtros = [];
-    
-    // Filtros por motivo
-    filtros.push('motivo.ilike.%socio%');
-    filtros.push('motivo.ilike.%sócio%');
-    
-    // Filtros por vd_mesadesc para cada sócio
-    Object.values(SOCIOS_MAP).forEach(nomes => {
-      nomes.forEach(nome => {
-        filtros.push(`vd_mesadesc.ilike.%${nome}%`);
-      });
-    });
-
-    // Filtros por cli_nome para cada sócio
-    Object.values(SOCIOS_MAP).forEach(nomes => {
-      nomes.forEach(nome => {
-        filtros.push(`cli_nome.ilike.%${nome}%`);
-      });
-    });
+    // Buscar TODOS os registros que podem ser de sócios (filtro amplo)
+    const filtros = [
+      'motivo.ilike.%socio%',
+      'motivo.ilike.%sócio%',
+      'motivo.ilike.%consuma%',
+      'motivo.ilike.%consumação%'
+    ];
 
     while (hasMore) {
       const { data, error, count } = await supabase
