@@ -35,8 +35,8 @@ export default function SociosPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Data padrão: setembro de 2025 (onde estão os dados)
-  const [mes, setMes] = useState(9); // Setembro
+  // Data padrão: agosto de 2025 (para testar Digão e Vinicius)
+  const [mes, setMes] = useState(8); // Agosto
   const [ano, setAno] = useState(2025); // Ano dos dados
 
   useEffect(() => {
