@@ -517,18 +517,30 @@ export default function StockoutPage() {
                             <p>Nenhum produto em stockout!</p>
                           </div>
                         ) : (
-                          <div className="space-y-3 max-h-96 overflow-y-auto">
-                            {(stockoutData?.grupos?.inativos || []).map((grupo, index) => (
-                              <div key={index} className="border-l-4 border-red-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                                  {grupo.grupo} ({grupo.quantidade})
-                                </h4>
-                                <div className="space-y-1">
-                                  {grupo.produtos.map((produto, prodIndex) => (
-                                    <div key={prodIndex} className="text-sm text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded">
-                                      {produto}
-                                    </div>
-                                  ))}
+                          <div className="space-y-2 max-h-96 overflow-y-auto">
+                            {(stockoutData?.produtos?.inativos || []).map((produto, index) => (
+                              <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/20 rounded">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                                      {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                    </h4>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                                      Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    {produto.prd_precovenda && (
+                                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        R$ {Number(produto.prd_precovenda).toFixed(2)}
+                                      </p>
+                                    )}
+                                    {produto.prd_estoque !== undefined && (
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        Estoque: {produto.prd_estoque}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             ))}
@@ -549,26 +561,40 @@ export default function StockoutPage() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-3 max-h-96 overflow-y-auto">
-                          {(stockoutData?.grupos?.ativos || []).map((grupo, index) => (
-                            <div key={index} className="border-l-4 border-green-500 pl-4">
-                              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                                {grupo.grupo} ({grupo.quantidade})
-                              </h4>
-                              <div className="space-y-1">
-                                {grupo.produtos.slice(0, 5).map((produto, prodIndex) => (
-                                  <div key={prodIndex} className="text-sm text-gray-600 dark:text-gray-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded">
-                                    {produto}
-                                  </div>
-                                ))}
-                                {grupo.produtos.length > 5 && (
-                                  <div className="text-xs text-gray-500 dark:text-gray-500 italic">
-                                    ... e mais {grupo.produtos.length - 5} produtos
-                                  </div>
-                                )}
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {(stockoutData?.produtos?.ativos || []).slice(0, 10).map((produto, index) => (
+                            <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/20 rounded">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                                    {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                  </h4>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  {produto.prd_precovenda && (
+                                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                      R$ {Number(produto.prd_precovenda).toFixed(2)}
+                                    </p>
+                                  )}
+                                  {produto.prd_estoque !== undefined && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                      Estoque: {produto.prd_estoque}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ))}
+                          {(stockoutData?.produtos?.ativos?.length || 0) > 10 && (
+                            <div className="text-center py-2">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                ... e mais {(stockoutData?.produtos?.ativos?.length || 0) - 10} produtos disponíveis
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
