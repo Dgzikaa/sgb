@@ -10,9 +10,11 @@ import { Calendar, Package, TrendingDown, TrendingUp, RefreshCw, AlertTriangle, 
 import { toast } from 'sonner';
 
 interface StockoutData {
-  data_referencia: string;
-  bar_id: number;
+  data_referencia?: string;
+  data_analisada?: string;
+  bar_id?: number;
   timestamp_consulta: string;
+  filtros_aplicados?: string[];
   estatisticas: {
     total_produtos: number;
     produtos_ativos: number;
@@ -22,16 +24,34 @@ interface StockoutData {
   };
   produtos: {
     ativos: Array<{
-      produto_id: string;
-      produto_descricao: string;
-      grupo_descricao: string;
-      timestamp_coleta: string;
+      produto_id?: string;
+      produto_descricao?: string;
+      prd_desc?: string;
+      grupo_descricao?: string;
+      loc_desc?: string;
+      local_producao?: string;
+      preco?: number;
+      prd_precovenda?: number;
+      estoque?: number;
+      prd_estoque?: number;
+      timestamp_coleta?: string;
     }>;
     inativos: Array<{
-      produto_id: string;
-      produto_descricao: string;
-      grupo_descricao: string;
-      timestamp_coleta: string;
+      produto_id?: string;
+      produto_descricao?: string;
+      prd_desc?: string;
+      grupo_descricao?: string;
+      loc_desc?: string;
+      local_producao?: string;
+      preco?: number;
+      prd_precovenda?: number;
+      estoque?: number;
+      prd_estoque?: number;
+      controla_estoque?: string;
+      prd_controlaestoque?: string;
+      valida_estoque_venda?: string;
+      prd_validaestoquevenda?: string;
+      timestamp_coleta?: string;
     }>;
   };
   grupos: {
@@ -46,6 +66,13 @@ interface StockoutData {
       produtos: string[];
     }>;
   };
+  analise_por_local?: Array<{
+    local_producao: string;
+    total_produtos: number;
+    disponiveis: number;
+    indisponiveis: number;
+    perc_stockout: number;
+  }>;
 }
 
 interface HistoricoData {
