@@ -163,27 +163,9 @@ export default function StockoutPage() {
   const buscarHistoricoStockout = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/contahub/stockout-dados', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          data_inicio: dataInicio,
-          data_fim: dataFim,
-          bar_id: 3
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setHistoricoData(result.data);
-        toast.success(`Histórico de stockout carregado (${result.data.resumo.total_dias} dias)`);
-      } else {
-        toast.error(result.error || 'Erro ao buscar histórico de stockout');
-        setHistoricoData(null);
-      }
+      // Por enquanto, vamos desabilitar o histórico até implementarmos a nova API
+      toast.info('Funcionalidade de histórico em desenvolvimento');
+      setHistoricoData(null);
     } catch (error) {
       console.error('Erro ao buscar histórico de stockout:', error);
       toast.error('Erro ao buscar histórico de stockout');
