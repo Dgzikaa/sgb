@@ -56,9 +56,9 @@ export async function POST(request: NextRequest) {
 
     // Calcular estatísticas
     const totalProdutos = dadosGerais?.length || 0;
-    const produtosDisponiveis = dadosGerais?.filter(p => p.prd_venda === 'S').length || 0;
-    const produtosIndisponiveis = totalProdutos - produtosDisponiveis;
-    const percentualStockout = totalProdutos > 0 ? ((produtosIndisponiveis / totalProdutos) * 100).toFixed(2) : '0.00';
+    const countProdutosDisponiveis = dadosGerais?.filter(p => p.prd_venda === 'S').length || 0;
+    const countProdutosIndisponiveis = totalProdutos - countProdutosDisponiveis;
+    const percentualStockout = totalProdutos > 0 ? ((countProdutosIndisponiveis / totalProdutos) * 100).toFixed(2) : '0.00';
 
     // 2. Análise por local de produção
     let queryLocais = supabase
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { data: produtosIndisponiveis, error: errorIndisponiveis } = await queryIndisponiveis;
+    const { data: listaProdutosIndisponiveis, error: errorIndisponiveis } = await queryIndisponiveis;
 
     // 4. Produtos disponíveis (amostra de 20)
     let queryDisponiveis = supabase
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { data: produtosDisponiveis, error: errorDisponiveis } = await queryDisponiveis;
+    const { data: listaProdutosDisponiveis, error: errorDisponiveis } = await queryDisponiveis;
 
     if (errorIndisponiveis || errorDisponiveis) {
       throw new Error('Erro ao buscar produtos');
@@ -164,14 +164,14 @@ export async function POST(request: NextRequest) {
         filtros_aplicados: filtros,
         estatisticas: {
           total_produtos: totalProdutos,
-          produtos_ativos: produtosDisponiveis,
-          produtos_inativos: produtosIndisponiveis,
+          produtos_ativos: countProdutosDisponiveis,
+          produtos_inativos: countProdutosIndisponiveis,
           percentual_stockout: `${percentualStockout}%`,
           percentual_disponibilidade: `${(100 - parseFloat(percentualStockout)).toFixed(2)}%`
         },
         produtos: {
-          inativos: produtosIndisponiveis || [],
-          ativos: produtosDisponiveis || []
+          inativos: listaProdutosIndisponiveis || [],
+          ativos: listaProdutosDisponiveis || []
         },
         grupos: {
           inativos: (analiseLocais || []).filter((local: any) => local.perc_stockout > 0),
