@@ -102,6 +102,13 @@ const defaultSidebarItems: SidebarItem[] = [
           permission: 'home',
         },
         {
+          icon: Calendar,
+          label: 'Visão Mensal',
+          href: '/estrategico/visao-mensal',
+          description: 'Comparativo mensal dos últimos 3 meses',
+          permission: 'home',
+        },
+        {
           icon: BarChart3,
           label: 'Desempenho',
           href: '/estrategico/desempenho',
@@ -189,6 +196,13 @@ const defaultSidebarItems: SidebarItem[] = [
           label: 'Resumo',
           href: '/analitico/resumo',
           description: 'Resumo semanal e análises comparativas',
+          permission: 'relatorios',
+        },
+        {
+          icon: Calendar,
+          label: 'Semanal',
+          href: '/analitico/semanal',
+          description: 'Comparativo das últimas 4 ocorrências por dia da semana',
           permission: 'relatorios',
         },
         {

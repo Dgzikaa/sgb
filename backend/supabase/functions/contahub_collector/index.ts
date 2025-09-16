@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // Configurações
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const CONTAHUB_BASE_URL = Deno.env.get('CONTAHUB_BASE_URL') || 'https://api.contahub.com.br'
+const CONTAHUB_BASE_URL = Deno.env.get('CONTAHUB_BASE_URL') || 'https://sp.contahub.com'
 const CONTAHUB_EMAIL = Deno.env.get('CONTAHUB_EMAIL')!
 const CONTAHUB_PASSWORD = Deno.env.get('CONTAHUB_PASSWORD')!
 
@@ -161,7 +161,46 @@ class ContaHubCollector {
     }
   }
 
+  // Lista de grupos para fallback do analítico
+  private readonly GRUPOS_ANALITICO = [
+    'Adicionais', 'Baldes', 'Bebidas Não Alcoólicas', 'Bebidas Prontas', 'Cervejas', 
+    'Combos', 'Dose Dupla', 'Doses', 'Drinks Autorais', 'Drinks Classicos', 
+    'Drinks sem Álcool', 'Espressos', 'Fest Moscow', 'Garrafas', 'Happy Hour', 
+    'Insumos', 'Pegue e Pague', 'Pratos Individuais', 'Pratos Para Compartilhar - P/ 4 Pessoas', 
+    'Sanduíches', 'Sobremesas', 'Venda Volante', 'Vinhos'
+  ]
+
   private async fetchContaHubData(dataType: string, dataDate: string) {
+    if (!this.userData) {
+      throw new Error('Dados do usuário não disponíveis')
+    }
+
+    // Para analítico, tentar primeiro normal, depois por grupos se der erro 500
+    if (dataType === 'analitico') {
+      // Para 13/09, usar diretamente coleta por grupos (sabemos que dá erro 500)
+      if (dataDate === '2025-09-13') {
+        console.log(`🔍 [COLLECTOR] Data 13/09 detectada, usando coleta por grupos diretamente...`)
+        return await this.fetchAnaliticoPorGrupos(dataDate)
+      }
+      
+      try {
+        console.log(`🔍 [COLLECTOR] Tentando coleta normal do analítico...`)
+        return await this.fetchSingleQuery(dataType, dataDate)
+      } catch (error) {
+        console.log(`❌ [COLLECTOR] Erro na coleta normal: ${error.message}`)
+        if (error.message.includes('500') || error.message.includes('Internal Server Error') || error.message.includes('HTTP 500')) {
+          console.log(`⚠️ [COLLECTOR] Erro 500 detectado, tentando coleta por grupos...`)
+          return await this.fetchAnaliticoPorGrupos(dataDate)
+        }
+        throw error
+      }
+    }
+
+    // Para outros tipos, usar método normal
+    return await this.fetchSingleQuery(dataType, dataDate)
+  }
+
+  private async fetchSingleQuery(dataType: string, dataDate: string) {
     if (!this.userData) {
       throw new Error('Dados do usuário não disponíveis')
     }
@@ -229,11 +268,83 @@ class ContaHubCollector {
     return await response.json()
   }
 
+  private async fetchAnaliticoPorGrupos(dataDate: string): Promise<Record<string, unknown>> {
+    console.log(`🔄 [COLLECTOR] Iniciando coleta analítico por grupos para ${dataDate}`)
+    
+    if (!this.userData) {
+      throw new Error('Dados do usuário não disponíveis')
+    }
+
+    const userData = this.userData as any
+    const emp_id = userData.emp_id || '3768'
+    const nfe = userData.nfe || '1'
+    
+    const allRecords: any[] = []
+    let totalRecords = 0
+    
+    // Coletar cada grupo separadamente
+    for (const grupo of this.GRUPOS_ANALITICO) {
+      try {
+        console.log(`📊 [COLLECTOR] Coletando grupo: ${grupo}`)
+        
+        const queryTimestamp = Date.now()
+        const grupoEncoded = encodeURIComponent(grupo)
+        const url = `${CONTAHUB_BASE_URL}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=77&d0=${dataDate}&d1=${dataDate}&produto=&grupo=${grupoEncoded}&local=&turno=&mesa=&emp=${emp_id}&nfe=${nfe}`
+        
+        // Preparar headers com cookies de sessão
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json'
+        }
+        
+        if (this.sessionCookies) {
+          headers['Cookie'] = this.sessionCookies
+        }
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers
+        })
+        
+        if (!response.ok) {
+          console.log(`⚠️ [COLLECTOR] Erro HTTP ${response.status} para grupo ${grupo}`)
+          continue
+        }
+        
+        const data = await response.json()
+        
+        if (data && data.list && Array.isArray(data.list) && data.list.length > 0) {
+          allRecords.push(...data.list)
+          totalRecords += data.list.length
+          console.log(`✅ [COLLECTOR] Grupo ${grupo}: ${data.list.length} registros`)
+        } else {
+          console.log(`⚠️ [COLLECTOR] Grupo ${grupo}: sem dados`)
+        }
+        
+        // Pequena pausa entre requests para evitar sobrecarga
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+      } catch (error) {
+        console.error(`❌ [COLLECTOR] Erro no grupo ${grupo}: ${error.message}`)
+        // Continuar com próximo grupo mesmo se um falhar
+      }
+    }
+    
+    console.log(`✅ [COLLECTOR] Coleta por grupos concluída: ${totalRecords} registros de ${this.GRUPOS_ANALITICO.length} grupos`)
+    
+    // Retornar no mesmo formato esperado
+    return {
+      list: allRecords,
+      total: totalRecords,
+      collected_by_groups: true
+    }
+  }
+
   private async saveRawData(dataType: string, rawData: Record<string, unknown>, dataDate: string, barId: number): Promise<number> {
     const list = rawData.list as unknown[] | undefined
     const recordCount = list ? list.length : 0
     
-    const { data, error } = await this.supabase
+    // Primeiro, tenta fazer upsert
+    const { data: upsertData, error: upsertError } = await this.supabase
       .from('contahub_raw_data')
       .upsert({
         data_type: dataType,
@@ -245,16 +356,33 @@ class ContaHubCollector {
         created_at: new Date().toISOString()
       }, {
         onConflict: 'bar_id,data_type,data_date',
-        ignoreDuplicates: true
+        ignoreDuplicates: false // Mudado para false para sempre retornar o registro
       })
       .select('id')
-      .single()
 
-    if (error) {
-      throw new Error(`Erro ao salvar raw_data: ${error.message}`)
+    if (upsertError) {
+      throw new Error(`Erro ao salvar raw_data: ${upsertError.message}`)
     }
 
-    return data.id as number
+    // Se o upsert retornou dados, usa o primeiro
+    if (upsertData && upsertData.length > 0) {
+      return upsertData[0].id as number
+    }
+
+    // Se não retornou dados (caso raro), busca o registro existente
+    const { data: existingData, error: selectError } = await this.supabase
+      .from('contahub_raw_data')
+      .select('id')
+      .eq('bar_id', barId)
+      .eq('data_type', dataType)
+      .eq('data_date', dataDate)
+      .single()
+
+    if (selectError) {
+      throw new Error(`Erro ao buscar raw_data existente: ${selectError.message}`)
+    }
+
+    return existingData.id as number
   }
 }
 
