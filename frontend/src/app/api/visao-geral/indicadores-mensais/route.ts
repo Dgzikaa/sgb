@@ -433,12 +433,14 @@ export async function GET(request: NextRequest) {
 
       indicadoresPorMes.push({
         mes: mesInfo.mes,
-        mesNome: mesInfo.mesAbrev,
+        mesNome: mesInfo.mesNome,
+        mesAbrev: mesInfo.mesAbrev,
         faturamentoTotal,
         clientesRecorrentes,
         clientesTotais: clientesTotaisUnicos,
         novosClientes,
         clientesAtivos,
+        taxaRetencao: clientesTotaisUnicos > 0 ? (clientesAtivos / clientesTotaisUnicos) * 100 : 0,
         percentualNovos,
         percentualRecorrentes,
         percentualAtivos,
