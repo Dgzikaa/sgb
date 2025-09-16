@@ -23,6 +23,7 @@ interface IndicadoresMes {
   cmoTotal: number;
   percentualArtistico: number;
   ticketMedio: number;
+  totalPessoas: number;
 }
 
 
