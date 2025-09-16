@@ -9,12 +9,20 @@ const supabase = createClient(
 interface IndicadoresMes {
   mes: string;
   mesNome: string;
+  mesAbrev: string;
   faturamentoTotal: number;
   clientesAtivos: number;
   clientesTotais: number;
   novosClientes: number;
+  clientesRecorrentes: number;
   taxaRetencao: number;
   reputacao: number;
+  percentualNovos: number;
+  percentualRecorrentes: number;
+  percentualAtivos: number;
+  cmoTotal: number;
+  percentualArtistico: number;
+  ticketMedio: number;
 }
 
 
@@ -37,7 +45,7 @@ export async function GET(request: NextRequest) {
     const dataRef = mesReferencia ? 
       new Date(parseInt(mesReferencia.split('-')[0]), parseInt(mesReferencia.split('-')[1]) - 1, 1) : 
       new Date(2025, 8, 1); // Setembro = mês 8 (base 0)
-    const meses = [];
+    const meses: { mes: string; mesNome: string; mesAbrev: string }[] = [];
     
     // Criar os 4 meses: 3 meses atrás, 2 meses atrás, 1 mês atrás, mês atual
     for (let i = 3; i >= 0; i--) {
