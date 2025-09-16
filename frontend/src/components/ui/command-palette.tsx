@@ -82,6 +82,15 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         category: 'navigation',
         keywords: ['funcionário', 'colaborador', 'checklist', 'trabalho'],
       },
+      {
+        id: 'nav-visao-mensal',
+        title: 'Estratégico - Visão Mensal',
+        description: 'Comparativo mensal dos últimos 3 meses',
+        icon: Calendar,
+        href: '/estrategico/visao-mensal',
+        category: 'navigation',
+        keywords: ['estratégico', 'visão', 'mensal', 'comparativo', 'mês', 'indicadores', 'evolução'],
+      },
 
       // Configurações
       {
@@ -150,6 +159,15 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         href: '/relatorios/analitico',
         category: 'navigation',
         keywords: ['analítico', 'análise', 'detalhado'],
+      },
+      {
+        id: 'nav-analitico-semanal',
+        title: 'Analítico - Semanal',
+        description: 'Comparativo das últimas 4 ocorrências por dia da semana',
+        icon: Calendar,
+        href: '/analitico/semanal',
+        category: 'navigation',
+        keywords: ['analítico', 'semanal', 'comparativo', 'dia', 'semana'],
       },
 
       // Operações

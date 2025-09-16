@@ -45,6 +45,7 @@ const routeMapping: Record<
   // Analítico
   '/analitico': { name: 'Analítico' },
   '/analitico/clientes': { name: 'Clientes' },
+  '/analitico/semanal': { name: 'Semanal' },
 
   // Marketing
   '/marketing': { name: 'Marketing' },
@@ -53,6 +54,7 @@ const routeMapping: Record<
   // Estratégico
   '/estrategico': { name: 'Estratégico' },
   '/estrategico/visao-geral': { name: 'Visão Geral' },
+  '/estrategico/visao-mensal': { name: 'Visão Mensal' },
   '/estrategico/desempenho': { name: 'Desempenho' },
   '/estrategico/planejamento-comercial': { name: 'Planejamento Comercial' },
   '/estrategico/orcamentacao': { name: 'Orçamentação' },

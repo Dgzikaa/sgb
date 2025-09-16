@@ -229,19 +229,21 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
             {`Horário: ${label}`}
           </p>
           <div className="space-y-1">
-            {payload.map((entry: any, index: number) => (
-              <div key={index} className="flex items-center justify-between text-sm">
-                <span style={{ color: entry.color }} className="font-medium">
-                  {entry.name}:
-                </span>
-                <span className="ml-2 font-semibold text-white">
-                  {entry.name === 'pessoas_presentes' 
-                    ? `${entry.value} pessoas`
-                    : formatarMoeda(entry.value)
-                  }
-                </span>
-              </div>
-            ))}
+            {payload
+              .sort((a: any, b: any) => b.value - a.value) // Ordenar por valor decrescente (maior primeiro)
+              .map((entry: any, index: number) => (
+                <div key={index} className="flex items-center justify-between text-sm">
+                  <span style={{ color: entry.color }} className="font-medium">
+                    {entry.name}:
+                  </span>
+                  <span className="ml-2 font-semibold text-white">
+                    {entry.name === 'pessoas_presentes' 
+                      ? `${entry.value} pessoas`
+                      : formatarMoeda(entry.value)
+                    }
+                  </span>
+                </div>
+              ))}
           </div>
         </div>
       );
