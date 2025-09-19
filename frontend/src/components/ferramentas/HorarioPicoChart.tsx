@@ -53,6 +53,7 @@ interface Estatisticas {
   total_pagamentos: number;
   total_repique: number;
   faturamento_total_calculado: number;
+  faturamento_bar: number;
   total_produtos_vendidos: number;
   produto_mais_vendido: string | null;
   produto_mais_vendido_qtd: number;
@@ -451,15 +452,16 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                   <p className="text-xs text-gray-600 dark:text-gray-400">Unidades totais</p>
                 </div>
 
-                {/* Faturamento Produto */}
+                {/* Faturamento Bar */}
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
                     <DollarSignIcon className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Produtos</p>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Bar</p>
                   </div>
                   <p className="text-sm font-bold text-blue-900 dark:text-blue-100">
-                    {formatarMoeda(estatisticas.total_faturamento)}
+                    {formatarMoeda(estatisticas.faturamento_bar || 0)}
                   </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Produtos/Bebidas</p>
                 </div>
 
                 {/* Couvert */}
@@ -471,6 +473,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                   <p className="text-sm font-bold text-green-900 dark:text-green-100">
                     {formatarMoeda(estatisticas.total_couvert || 0)}
                   </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Entrada</p>
                 </div>
 
                 {/* 10% Garçom */}
@@ -482,6 +485,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                   <p className="text-sm font-bold text-orange-900 dark:text-orange-100">
                     {formatarMoeda(estatisticas.total_repique || 0)}
                   </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Serviço</p>
                 </div>
 
                 {/* Total Pessoas */}

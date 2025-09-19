@@ -85,10 +85,10 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar faturamento por hora:', errorFaturamentoDia || errorFaturamentoMadrugada);
     }
 
-    // 2. Buscar dados do período (pessoas + couvert + pagamentos + repique)
-    const { data: dadosPeriodo, error: errorPeriodo } = await supabase
+    // 2. Buscar dados do período (pessoas + couvert + pagamentos + repique) - EVITAR DUPLICATAS
+    const { data: dadosPeriodoRaw, error: errorPeriodo } = await supabase
       .from('contahub_periodo')
-      .select('pessoas, vr_couvert, vr_pagamentos, vr_repique')
+      .select('vd_mesadesc, pessoas, vr_couvert, vr_pagamentos, vr_repique')
       .eq('dt_gerencial', data_selecionada)
       .eq('bar_id', bar_id);
 
@@ -96,12 +96,28 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar dados do período:', errorPeriodo);
     }
 
-    const totalPessoasDia = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.pessoas) || 0), 0) || 0;
-    const totalCouvert = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_couvert) || 0), 0) || 0;
-    const totalPagamentos = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0) || 0;
-    const totalRepique = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_repique) || 0), 0) || 0;
+    // Remover duplicatas agrupando por vd_mesadesc (mesa) e somando apenas uma vez cada mesa
+    const mesasUnicas = new Map();
+    dadosPeriodoRaw?.forEach(item => {
+      const mesa = item.vd_mesadesc;
+      if (!mesasUnicas.has(mesa)) {
+        mesasUnicas.set(mesa, {
+          pessoas: parseFloat(item.pessoas) || 0,
+          vr_couvert: parseFloat(item.vr_couvert) || 0,
+          vr_pagamentos: parseFloat(item.vr_pagamentos) || 0,
+          vr_repique: parseFloat(item.vr_repique) || 0
+        });
+      }
+    });
+
+    const dadosPeriodo = Array.from(mesasUnicas.values());
+
+    const totalPessoasDia = dadosPeriodo.reduce((sum, item) => sum + item.pessoas, 0);
+    const totalCouvert = dadosPeriodo.reduce((sum, item) => sum + item.vr_couvert, 0);
+    const totalPagamentos = dadosPeriodo.reduce((sum, item) => sum + item.vr_pagamentos, 0);
+    const totalRepique = dadosPeriodo.reduce((sum, item) => sum + item.vr_repique, 0);
     
-    // Buscar o valor correto do ContaHub (contahub_pagamentos - valor líquido real)
+    // Buscar o valor correto do ContaHub (contahub_pagamentos - valor líquido real = total do dia)
     const { data: pagamentosContaHub } = await supabase
       .from('contahub_pagamentos')
       .select('liquido')
@@ -109,6 +125,9 @@ export async function POST(request: NextRequest) {
       .eq('bar_id', bar_id);
     
     const faturamentoTotalCalculado = pagamentosContaHub?.reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0;
+    
+    // Calcular faturamento do bar (total - couvert)
+    const faturamentoBar = faturamentoTotalCalculado - totalCouvert;
 
     // 3. Buscar dados da semana passada (17-23h + 24-26h)
     const semanaPassadaStr = semanaPassada.toISOString().split('T')[0];
@@ -323,6 +342,7 @@ export async function POST(request: NextRequest) {
           total_pagamentos: totalPagamentos,
           total_repique: totalRepique,
           faturamento_total_calculado: faturamentoTotalCalculado,
+          faturamento_bar: faturamentoBar,
           total_produtos_vendidos: totalProdutosVendidos,
           produto_mais_vendido: produtoMaisVendido,
           produto_mais_vendido_qtd: produtoMaisVendido ? produtosPorQuantidade[produtoMaisVendido].quantidade : 0,
