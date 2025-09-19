@@ -281,7 +281,20 @@ export async function POST(request: NextRequest) {
     const totalFaturamento = dadosHorarioPico.reduce((sum, h) => sum + h.faturamento, 0);
     const totalFaturamentoSemanaPassada = dadosHorarioPico.reduce((sum, h) => sum + h.faturamento_semana_passada, 0);
     const totalMediaUltimas4 = dadosHorarioPico.reduce((sum, h) => sum + h.media_ultimas_4, 0);
-    const totalRecorde = dadosHorarioPico.reduce((sum, h) => sum + h.recorde_faturamento, 0);
+    
+    // CORREÇÃO: Buscar o total REAL do dia recorde (contahub_pagamentos - não fatporhora)
+    let totalRecordeReal = 0;
+    if (dataRecorde) {
+      const { data: pagamentosRecorde } = await supabase
+        .from('contahub_pagamentos')
+        .select('liquido')
+        .eq('dt_gerencial', dataRecorde)
+        .eq('bar_id', bar_id);
+      
+      totalRecordeReal = pagamentosRecorde?.reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0;
+    }
+    
+    const totalRecorde = dadosHorarioPico.reduce((sum, h) => sum + h.recorde_faturamento, 0); // Para o gráfico (produtos por hora)
     const totalProdutosVendidos = dadosHorarioPico.reduce((sum, h) => sum + h.transacoes, 0);
     
     
@@ -356,9 +369,10 @@ export async function POST(request: NextRequest) {
             }))
             .sort((a, b) => b.quantidade - a.quantidade),
           data_recorde: dataRecorde,
+          total_recorde_real: totalRecordeReal, // Valor real do recorde para comparação
           comparacao_semana_passada: totalFaturamento - totalFaturamentoSemanaPassada,
           comparacao_media_ultimas_4: totalFaturamento - totalMediaUltimas4,
-          comparacao_recorde: totalFaturamento - totalRecorde
+          comparacao_recorde: faturamentoTotalCalculado - totalRecordeReal // Usar valores reais (pagamentos) para comparação
         }
       }
     });
