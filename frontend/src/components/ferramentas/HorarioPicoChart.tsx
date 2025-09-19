@@ -222,6 +222,12 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
     recorde: '#F59E0B', // Amarelo/Laranja
   };
 
+  const formatarData = (dataStr: string) => {
+    if (!dataStr) return '';
+    const [ano, mes, dia] = dataStr.split('-');
+    return `${dia}/${mes}/${ano}`;
+  };
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -235,7 +241,10 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
               .map((entry: any, index: number) => (
                 <div key={index} className="flex items-center justify-between text-sm">
                   <span style={{ color: entry.color }} className="font-medium">
-                    {entry.name}:
+                    {entry.dataKey === 'recorde_faturamento' && estatisticas?.data_recorde 
+                      ? `Recorde (${formatarData(estatisticas.data_recorde)}):`
+                      : `${entry.name}:`
+                    }
                   </span>
                   <span className="ml-2 font-semibold text-white">
                     {entry.name === 'pessoas_presentes' 
@@ -360,7 +369,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                   onCheckedChange={() => toggleLinha('recorde')}
                 />
                 <Label htmlFor="recorde" className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                  ● Recorde ({diaSemana})
+                  ● Recorde ({estatisticas?.data_recorde ? formatarData(estatisticas.data_recorde) : diaSemana})
                 </Label>
               </div>
             </div>
@@ -572,7 +581,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                     stroke={cores.recorde}
                     strokeWidth={3}
                     strokeDasharray="4 4"
-                    name={`Recorde (${diaSemana})`}
+                    name={estatisticas?.data_recorde ? `Recorde (${formatarData(estatisticas.data_recorde)})` : `Recorde (${diaSemana})`}
                     dot={{ fill: cores.recorde, strokeWidth: 2, r: 4 }}
                     activeDot={{ r: 6, stroke: cores.recorde, strokeWidth: 2 }}
                   />
@@ -663,7 +672,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                         ? 'text-green-700 dark:text-green-300' 
                         : 'text-red-700 dark:text-red-300'
                     }`}>
-                      vs. Recorde ({diaSemana})
+                      vs. Recorde ({estatisticas.data_recorde ? formatarData(estatisticas.data_recorde) : diaSemana})
                     </p>
                     <p className={`text-lg font-bold ${
                       estatisticas.comparacao_recorde >= 0 
