@@ -422,7 +422,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                     <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Total do Dia</p>
                   </div>
                   <p className="text-sm font-bold text-purple-900 dark:text-purple-100">
-                    {formatarMoeda((estatisticas.total_faturamento || 0) + (estatisticas.total_couvert || 0) + (estatisticas.total_repique || 0))}
+                    {formatarMoeda(estatisticas.faturamento_total_calculado || 0)}
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Faturamento total</p>
                 </div>

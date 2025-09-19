@@ -100,7 +100,15 @@ export async function POST(request: NextRequest) {
     const totalCouvert = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_couvert) || 0), 0) || 0;
     const totalPagamentos = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0) || 0;
     const totalRepique = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_repique) || 0), 0) || 0;
-    const faturamentoTotalCalculado = totalCouvert + totalPagamentos + totalRepique;
+    
+    // Buscar o valor correto do ContaHub (contahub_pagamentos - valor líquido real)
+    const { data: pagamentosContaHub } = await supabase
+      .from('contahub_pagamentos')
+      .select('liquido')
+      .eq('dt_gerencial', data_selecionada)
+      .eq('bar_id', bar_id);
+    
+    const faturamentoTotalCalculado = pagamentosContaHub?.reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0;
 
     // 3. Buscar dados da semana passada (17-23h + 24-26h)
     const semanaPassadaStr = semanaPassada.toISOString().split('T')[0];
