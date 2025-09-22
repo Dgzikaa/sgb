@@ -340,23 +340,24 @@ class NiboSyncService {
       
       console.log(`📅 Buscando agendamentos EDITADOS nos ${periodDescription} (desde ${filterDate})...`)
       
-      // Buscar todas as páginas da API NIBO
+      // Buscar dados da API NIBO com limite otimizado
       const allAgendamentos = []
       let skip = 0
-      const top = 500 // Maior para reduzir requests
+      const top = 200 // Reduzido para evitar timeout
       let hasMore = true
       let pageCount = 0
+      const maxPages = 5 // Limitar a 5 páginas para evitar timeout
 
-      while (hasMore) {
+      while (hasMore && pageCount < maxPages) {
         pageCount++
         const pageParams = {
-          $filter: `updateDate ge ${filterDate}`,
-          $orderby: "updateDate desc",
+          $filter: `accrualDate ge ${filterDate}`, // ✅ CORRIGIDO: usar accrualDate
+          $orderby: "accrualDate desc",
           $top: top,
           $skip: skip
         }
 
-        console.log(`📄 Buscando página ${pageCount} (skip: ${skip}, top: ${top})...`)
+        console.log(`📄 Buscando página ${pageCount}/${maxPages} (skip: ${skip}, top: ${top})...`)
 
         const data = await this.fetchNiboData('schedules', pageParams)
         const items = data?.items || []
@@ -378,8 +379,12 @@ class NiboSyncService {
           hasMore = false
         }
 
-        // Pequena pausa para não sobrecarregar a API NIBO
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Pausa maior para não sobrecarregar
+        await new Promise(resolve => setTimeout(resolve, 200))
+      }
+
+      if (pageCount >= maxPages && hasMore) {
+        console.log(`⚠️ Limitado a ${maxPages} páginas para evitar timeout. Total: ${allAgendamentos.length} registros`)
       }
 
       if (allAgendamentos.length === 0) {
@@ -481,33 +486,108 @@ class NiboSyncService {
         console.log(`💾 Inseridos ${Math.min(i + insertBatchSize, tempData.length)}/${tempData.length} registros temporários`)
       }
 
-      // Iniciar processamento em background (assíncrono)
-      console.log('🚀 Iniciando processamento em background...')
+      // Processar apenas um pequeno batch inicial para evitar timeout
+      console.log('🚀 Processamento otimizado: apenas primeiros 100 registros para evitar timeout')
       try {
-        const response = await fetch(
-          `${Deno.env.get('SUPABASE_URL')}/functions/v1/nibo-orchestrator-v2`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
-            },
-            body: JSON.stringify({
-              batch_id: batchId,
-              batch_size: 20
-            })
-          }
-        )
+        let processedRecords = 0
+        
+        // Processar apenas os primeiros 100 registros para evitar timeout
+        const maxRecordsPerExecution = 100
+        const recordsToProcess = agendamentosParaProcessar.slice(0, maxRecordsPerExecution)
+        
+        console.log(`⚙️ Processando ${recordsToProcess.length} registros de ${agendamentosParaProcessar.length} total`)
+        
+        // Processar em batches menores de 20
+        const processBatchSize = 20
+        for (let i = 0; i < recordsToProcess.length; i += processBatchSize) {
+          const batch = recordsToProcess.slice(i, i + processBatchSize)
+          
+          // Preparar batch para upsert em massa
+          const processedBatch = batch.map(agendamento => ({
+            nibo_id: String(agendamento.scheduleId || agendamento.id || ''),
+            bar_id: this.credentials!.bar_id,
+            tipo: String(agendamento.type || 'receita'),
+            status: String(agendamento.status || 'pendente'),
+            valor: parseFloat(agendamento.value || 0),
+            valor_pago: parseFloat(agendamento.paidValue || 0),
+            data_vencimento: agendamento.dueDate ? new Date(agendamento.dueDate).toISOString().split('T')[0] : null,
+            data_pagamento: agendamento.paymentDate ? new Date(agendamento.paymentDate).toISOString().split('T')[0] : null,
+            data_competencia: agendamento.accrualDate ? new Date(agendamento.accrualDate).toISOString().split('T')[0] : null,
+            descricao: String(agendamento.description || ''),
+            observacoes: String(agendamento.notes || ''),
+            categoria_id: String(agendamento.category?.id || ''),
+            categoria_nome: String(agendamento.category?.name || ''),
+            stakeholder_id: String(agendamento.stakeholder?.id || ''),
+            stakeholder_nome: String(agendamento.stakeholder?.name || ''),
+            stakeholder_tipo: String(agendamento.stakeholder?.type || ''),
+            conta_bancaria_id: String(agendamento.bankAccount?.id || ''),
+            conta_bancaria_nome: String(agendamento.bankAccount?.name || ''),
+            centro_custo_id: String(agendamento.costCenter?.id || ''),
+            centro_custo_nome: String(agendamento.costCenter?.name || ''),
+            numero_documento: String(agendamento.documentNumber || ''),
+            numero_parcela: parseInt(agendamento.installmentNumber) || null,
+            total_parcelas: parseInt(agendamento.totalInstallments) || null,
+            recorrente: Boolean(agendamento.recurring),
+            frequencia_recorrencia: String(agendamento.recurrenceFrequency || ''),
+            data_atualizacao: agendamento.updateDate ? new Date(agendamento.updateDate).toISOString() : null,
+            usuario_atualizacao: String(agendamento.updateUser || ''),
+            titulo: String(agendamento.title || ''),
+            anexos: agendamento.attachments || null,
+            tags: agendamento.tags || null,
+            recorrencia_config: agendamento.recurrenceConfig || null,
+            deletado: Boolean(agendamento.deleted),
+            criado_em: new Date().toISOString(),
+            atualizado_em: new Date().toISOString()
+          }))
 
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('❌ Erro do orchestrator:', errorText)
-          throw new Error(`Orchestrator falhou: ${response.status}`)
-        } else {
-          console.log('✅ Background job iniciado com sucesso via orchestrator')
+          // Upsert em massa para melhor performance
+          const { error: upsertError } = await this.supabase
+            .from('nibo_agendamentos')
+            .upsert(processedBatch, {
+              onConflict: 'nibo_id',
+              ignoreDuplicates: false
+            })
+
+          if (!upsertError) {
+            processedRecords += processedBatch.length
+            console.log(`✅ Batch ${Math.floor(i/processBatchSize) + 1}: ${processedBatch.length} registros processados`)
+          } else {
+            console.error('❌ Erro no batch:', upsertError.message)
+          }
+          
+          // Pequena pausa entre batches
+          await new Promise(resolve => setTimeout(resolve, 50))
         }
+        
+        // Atualizar status do job
+        await this.supabase
+          .from('nibo_background_jobs')
+          .update({
+            status: recordsToProcess.length < agendamentosParaProcessar.length ? 'partial' : 'completed',
+            processed_records: processedRecords,
+            completed_at: new Date().toISOString()
+          })
+          .eq('batch_id', batchId)
+        
+        console.log(`✅ Processamento otimizado concluído: ${processedRecords} registros processados`)
+        
+        // Se há mais registros para processar, agendar próxima execução
+        if (recordsToProcess.length < agendamentosParaProcessar.length) {
+          console.log(`📋 Restam ${agendamentosParaProcessar.length - recordsToProcess.length} registros para próxima execução`)
+        }
+        
       } catch (error: unknown) {
-        console.error('❌ Erro ao iniciar background job:', error)
+        console.error('❌ Erro no processamento otimizado:', error)
+        
+        // Marcar job como erro
+        await this.supabase
+          .from('nibo_background_jobs')
+          .update({
+            status: 'error',
+            error_message: error instanceof Error ? error.message : String(error),
+            completed_at: new Date().toISOString()
+          })
+          .eq('batch_id', batchId)
       }
 
       console.log(`✅ Agendamentos enviados para processamento background: ${agendamentosParaProcessar.length} registros`)

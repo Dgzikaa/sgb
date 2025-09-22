@@ -6,8 +6,19 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Executando sincronização manual do Nibo...');
     
-    const body = await request.json();
-    const { sync_mode = 'daily_complete', bar_id = '3' } = body;
+    let body = {};
+    try {
+      const requestText = await request.text();
+      console.log('📥 Request body recebido:', requestText);
+      
+      if (requestText.trim()) {
+        body = JSON.parse(requestText);
+      }
+    } catch (parseError) {
+      console.log('⚠️ Erro ao fazer parse do JSON, usando valores padrão:', parseError);
+    }
+    
+    const { sync_mode = 'daily_complete', bar_id = '3' } = body as { sync_mode?: string; bar_id?: string };
     
     console.log(`📅 Modo de sincronização: ${sync_mode}`);
     console.log(`🏪 Bar ID: ${bar_id}`);
