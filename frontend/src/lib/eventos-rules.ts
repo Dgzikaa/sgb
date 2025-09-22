@@ -110,22 +110,20 @@ export interface CustosNibo {
 
 // Função para buscar custos no Nibo
 export async function buscarCustosNibo(dataEvento: Date, barId: number): Promise<CustosNibo> {
-  const dataFormatada = dataEvento.toLocaleDateString('pt-BR', { 
-    day: '2-digit', 
-    month: '2-digit' 
-  })
+  // CORREÇÃO: Usar data_competencia em vez de buscar na descrição
+  const dataCompetencia = dataEvento.toISOString().split('T')[0] // YYYY-MM-DD
   
   // Buscar custos de produção
-  const custoProducao = await buscarCustosPorCategoria(
+  const custoProducao = await buscarCustosPorDataCompetencia(
     EVENTOS_RULES.NIBO_CATEGORIAS.PRODUCAO_EVENTOS,
-    dataFormatada,
+    dataCompetencia,
     barId
   )
   
   // Buscar custos artísticos
-  const custoArtistico = await buscarCustosPorCategoria(
+  const custoArtistico = await buscarCustosPorDataCompetencia(
     EVENTOS_RULES.NIBO_CATEGORIAS.ATRACOES_PROGRAMACAO,
-    dataFormatada,
+    dataCompetencia,
     barId
   )
   
@@ -135,8 +133,8 @@ export async function buscarCustosNibo(dataEvento: Date, barId: number): Promise
   }
 }
 
-// Função auxiliar para buscar custos por categoria
-async function buscarCustosPorCategoria(categoria: string, dataFormatada: string, barId: number): Promise<number> {
+// Função auxiliar para buscar custos por data de competência
+async function buscarCustosPorDataCompetencia(categoria: string, dataCompetencia: string, barId: number): Promise<number> {
   // Esta função será implementada na Edge Function
   // Por enquanto retorna 0
   return 0
