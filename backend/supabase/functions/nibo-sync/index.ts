@@ -308,22 +308,37 @@ class NiboSyncService {
     }
   }
 
-  async syncAgendamentos() {
+  async syncAgendamentos(syncMode: string = 'continuous') {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
     try {
-      console.log('🔄 Sincronizando agendamentos (Background Job)...')
+      console.log(`🔄 Sincronizando agendamentos (${syncMode})...`)
 
       // Gerar batch ID único para este job
       const batchId = crypto.randomUUID()
       console.log(`📋 Batch ID: ${batchId}`)
 
-      // Buscar agendamentos dos últimos 7 dias
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      const filterDate = sevenDaysAgo.toISOString().split('T')[0]
+      // Calcular período baseado no modo de sincronização
+      let filterDate: string
+      let periodDescription: string
+
+      if (syncMode === 'daily_complete') {
+        // Sincronização diária completa: últimos 3 meses
+        const threeMonthsAgo = new Date()
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+        filterDate = threeMonthsAgo.toISOString().split('T')[0]
+        periodDescription = 'últimos 3 meses'
+        console.log('📅 MODO DIÁRIO COMPLETO: Sincronizando últimos 3 meses')
+      } else {
+        // Sincronização contínua: últimos 7 dias
+        const sevenDaysAgo = new Date()
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+        filterDate = sevenDaysAgo.toISOString().split('T')[0]
+        periodDescription = 'últimos 7 dias'
+        console.log('📅 MODO CONTÍNUO: Sincronizando últimos 7 dias')
+      }
       
-      console.log(`📅 Buscando agendamentos EDITADOS nos últimos 7 dias (desde ${filterDate})...`)
+      console.log(`📅 Buscando agendamentos EDITADOS nos ${periodDescription} (desde ${filterDate})...`)
       
       // Buscar todas as páginas da API NIBO
       const allAgendamentos = []
@@ -562,23 +577,25 @@ class NiboSyncService {
     }
   }
 
-  async syncAll() {
+  async syncAll(syncMode: string = 'continuous') {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
-    console.log('🚀 Iniciando sincronização completa NIBO...')
+    const modeDescription = syncMode === 'daily_complete' ? 'DIÁRIA COMPLETA (3 meses)' : 'CONTÍNUA (7 dias)'
+    console.log(`🚀 Iniciando sincronização ${modeDescription} NIBO...`)
     
     // Notificar início
     await this.sendDiscordNotification(
-      '🔄 Sincronização NIBO Iniciada',
-      `Iniciando sincronização automática para o bar ${this.credentials.bar_id}`,
+      `🔄 Sincronização NIBO ${modeDescription} Iniciada`,
+      `Iniciando sincronização ${modeDescription.toLowerCase()} para o bar ${this.credentials.bar_id}`,
       0x0099ff
     )
     
     const results = {
       stakeholders: await this.syncStakeholders(),
       categories: await this.syncCategories(),
-      agendamentos: await this.syncAgendamentos(),
-      timestamp: new Date().toISOString()
+      agendamentos: await this.syncAgendamentos(syncMode),
+      timestamp: new Date().toISOString(),
+      sync_mode: syncMode
     }
 
     // Registrar log de sincronização
@@ -639,7 +656,7 @@ serve(async (req) => {
     const requestBody = await req.text()
     console.log('📥 Recebido body:', requestBody)
     
-    const { barId, cronSecret } = JSON.parse(requestBody || '{}')
+    const { barId, cronSecret, sync_mode } = JSON.parse(requestBody || '{}')
     
     // Verificar autenticação - aceitar SERVICE_ROLE_KEY ou cronSecret
     const authHeader = req.headers.get('authorization')
@@ -659,6 +676,9 @@ serve(async (req) => {
       )
     }
     
+    const syncMode = sync_mode || 'continuous'
+    console.log(`🔧 Modo de sincronização: ${syncMode}`)
+    
     if (!barId) {
       return new Response(
         JSON.stringify({ error: 'Bar ID é obrigatório' }),
@@ -669,7 +689,7 @@ serve(async (req) => {
       )
     }
 
-    console.log(`🔄 Iniciando sincronização NIBO para bar ${barId}...`)
+    console.log(`🔄 Iniciando sincronização NIBO para bar ${barId} (modo: ${syncMode})...`)
 
     const niboSync = new NiboSyncService()
     
@@ -686,7 +706,7 @@ serve(async (req) => {
     }
 
     // Executar sincronização
-    const result = await niboSync.syncAll()
+    const result = await niboSync.syncAll(syncMode)
 
     return new Response(
       JSON.stringify(result),
