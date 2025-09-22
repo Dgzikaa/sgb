@@ -107,10 +107,8 @@ function calcularPercentArtFat(custoArtistico: number, custoProducao: number, fa
 
 // Função para buscar custos no Nibo
 async function buscarCustosNibo(supabase: any, dataEvento: Date, barId: number): Promise<{custoArtistico: number, custoProducao: number}> {
-  const dataFormatada = dataEvento.toLocaleDateString('pt-BR', { 
-    day: '2-digit', 
-    month: '2-digit' 
-  })
+  // CORREÇÃO: Usar data_competencia em vez de buscar na descrição
+  const dataCompetencia = dataEvento.toISOString().split('T')[0] // YYYY-MM-DD
   
   // Buscar custos de produção
   const { data: producaoData } = await supabase
@@ -118,7 +116,7 @@ async function buscarCustosNibo(supabase: any, dataEvento: Date, barId: number):
     .select('valor')
     .eq('bar_id', barId)
     .eq('categoria_nome', EVENTOS_RULES.NIBO_CATEGORIAS.PRODUCAO_EVENTOS)
-    .ilike('descricao', `%${dataFormatada}%`)
+    .eq('data_competencia', dataCompetencia)
 
   // Buscar custos artísticos
   const { data: atracoesData } = await supabase
@@ -126,7 +124,7 @@ async function buscarCustosNibo(supabase: any, dataEvento: Date, barId: number):
     .select('valor')
     .eq('bar_id', barId)
     .eq('categoria_nome', EVENTOS_RULES.NIBO_CATEGORIAS.ATRACOES_PROGRAMACAO)
-    .ilike('descricao', `%${dataFormatada}%`)
+    .eq('data_competencia', dataCompetencia)
 
   const custoProducao = producaoData?.reduce((sum: number, item: any) => sum + (item.valor || 0), 0) || 0
   const custoArtistico = atracoesData?.reduce((sum: number, item: any) => sum + (item.valor || 0), 0) || 0
@@ -251,7 +249,7 @@ serve(async (req) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
         },
         body: JSON.stringify({
           title: '✅ Sync Eventos Concluído',
