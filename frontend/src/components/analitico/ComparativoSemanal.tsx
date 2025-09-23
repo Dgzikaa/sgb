@@ -723,7 +723,7 @@ export function ComparativoSemanal() {
               <ResponsiveContainer width="100%" height="100%">
                 {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
                   // NOVO LAYOUT: Múltiplas barras por dia da semana
-                  <ComposedChart data={dadosValorTotal} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+                  <ComposedChart data={dadosValorTotal} margin={{ top: 60, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                     <XAxis 
                       dataKey="data_formatada" 
@@ -736,20 +736,33 @@ export function ComparativoSemanal() {
                     <Tooltip 
                       content={({ active, payload, label }) => {
                         if (active && payload && payload.length) {
+                          const dadosComValor = payload.filter((entry: any) => entry.value > 0);
+                          const totalMes = dadosComValor.reduce((sum: number, entry: any) => sum + entry.value, 0);
+                          
                           return (
-                            <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                            <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg min-w-[200px]">
                               <p className="font-semibold text-gray-900 dark:text-white mb-2">
-                                {label}
+                                {label} - Todos os Dias
                               </p>
-                              {payload
-                                .filter((entry: any) => entry.value > 0)
-                                .sort((a: any, b: any) => b.value - a.value)
-                                .map((entry: any, index: number) => (
-                                  <p key={index} className="text-xs text-gray-700 dark:text-gray-300">
-                                    <span style={{ color: entry.color }}>●</span> {entry.name}: {formatarMoeda(entry.value)}
-                                  </p>
-                                ))
-                              }
+                              
+                              <p className="text-sm text-blue-600 dark:text-blue-400 mb-2 font-medium">
+                                Total do Mês: {formatarMoeda(totalMes)}
+                              </p>
+                              
+                              <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Por dia da semana:</p>
+                                {dadosComValor
+                                  .sort((a: any, b: any) => b.value - a.value)
+                                  .map((entry: any, index: number) => (
+                                    <p key={index} className="text-xs text-gray-700 dark:text-gray-300 flex justify-between items-center">
+                                      <span>
+                                        <span style={{ color: entry.color }}>●</span> {entry.name}
+                                      </span>
+                                      <span className="font-medium">{formatarMoeda(entry.value)}</span>
+                                    </p>
+                                  ))
+                                }
+                              </div>
                             </div>
                           );
                         }
@@ -767,7 +780,14 @@ export function ComparativoSemanal() {
                           name={dia}
                           fill={cores[index]}
                           opacity={0.8}
-                        />
+                        >
+                          <LabelList 
+                            dataKey={dia.toLowerCase()}
+                            position="top" 
+                            formatter={(value: number) => value > 0 ? `R$ ${(value / 1000).toFixed(0)}k` : ''}
+                            className="text-xs fill-gray-600 dark:fill-gray-300"
+                          />
+                        </Bar>
                       );
                     })}
                   </ComposedChart>
