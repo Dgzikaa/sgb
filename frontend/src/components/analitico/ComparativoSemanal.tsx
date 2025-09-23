@@ -17,7 +17,9 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer
+  ResponsiveContainer,
+  Cell,
+  LabelList
 } from 'recharts';
 import { 
   Calendar,
@@ -88,6 +90,7 @@ interface DadosValorTotal {
   data_formatada: string;
   valor_total: number;
   cor_index: number;
+  cor: string;
 }
 
 interface LinhaVisibilidade {
@@ -130,7 +133,7 @@ export function ComparativoSemanal() {
   const [dadosValorTotal, setDadosValorTotal] = useState<DadosValorTotal[]>([]);
   const [loading, setLoading] = useState(true);
   const [diaSelecionado, setDiaSelecionado] = useState<string>('5'); // Sexta-feira por padrão
-  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09', '2025-08']); // Setembro e Agosto por padrão
+  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09', '2025-08', '2025-07', '2025-06', '2025-05', '2025-04']); // Desde abril por padrão
   const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('mes_x_mes'); // Novo modo
   const [linhasVisiveis, setLinhasVisiveis] = useState<LinhaVisibilidade>({
     atual: true,
@@ -663,9 +666,32 @@ export function ComparativoSemanal() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Legenda personalizada por mês */}
+            {dadosValorTotal.length > 0 && (
+              <div className="flex flex-wrap gap-4 mb-4 justify-center">
+                {Array.from(new Set(dadosValorTotal.map(d => d.mes_completo)))
+                  .sort()
+                  .map(mesCompleto => {
+                    const item = dadosValorTotal.find(d => d.mes_completo === mesCompleto);
+                    return (
+                      <div key={mesCompleto} className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded" 
+                          style={{ backgroundColor: item?.cor || '#3B82F6' }}
+                        ></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {item?.mes || mesCompleto}
+                        </span>
+                      </div>
+                    );
+                  })
+                }
+              </div>
+            )}
+            
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={dadosValorTotal} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <ComposedChart data={dadosValorTotal} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis 
                     dataKey="data_formatada" 
@@ -687,13 +713,21 @@ export function ComparativoSemanal() {
                       return label;
                     }}
                   />
-                  <Legend />
                   <Bar
                     dataKey="valor_total"
                     name={`${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Data`}
-                    fill="#3B82F6"
                     opacity={0.8}
-                  />
+                  >
+                    <LabelList 
+                      dataKey="valor_total" 
+                      position="top" 
+                      formatter={(value: number) => `R$ ${(value / 1000).toFixed(0)}k`}
+                      className="text-xs fill-gray-600 dark:fill-gray-300"
+                    />
+                    {dadosValorTotal.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.cor} />
+                    ))}
+                  </Bar>
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
