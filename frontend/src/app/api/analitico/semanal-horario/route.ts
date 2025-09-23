@@ -590,62 +590,115 @@ export async function GET(request: NextRequest) {
     console.log(`🎯 Criando dados valor total - Modo: ${modo}, Meses: ${mesesSelecionados.length}`);
     
     if (modo === 'mes_x_mes' && mesesSelecionados.length >= 2) {
-      // MODO MENSAL: Agrupar todas as sextas-feiras por mês
       const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      const coresPorMes = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4', '#84CC16', '#F97316'];
+      const diasSemanaLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const coresPorDiaSemana = ['#EF4444', '#F59E0B', '#84CC16', '#10B981', '#06B6D4', '#3B82F6', '#8B5CF6']; // Cores por dia da semana
       
-      // Agrupar dados por mês e somar totais
-      const totaisPorMes: { [mes: string]: number } = {};
-      
-      datasComDados.forEach(data => {
-        const [ano, mes, dia] = data.split('-');
-        const mesCompleto = `${ano}-${mes}`;
-        const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+      if (diaSemana === 'todos') {
+        // NOVO LAYOUT: Meses na esquerda, dias da semana em cores
+        // Agrupar dados por mês e dia da semana
+        const dadosPorMesEDia: { [mes: string]: { [diaSemana: number]: number } } = {};
         
-        if (!totaisPorMes[mesCompleto]) {
-          totaisPorMes[mesCompleto] = 0;
-        }
-        totaisPorMes[mesCompleto] += totalData;
-      });
-      
-      // Criar estrutura para o gráfico mensal (um ponto por mês)
-      mesesSelecionados.forEach((mesCompleto, index) => {
-        const [ano, mes] = mesCompleto.split('-');
-        const mesIndex = parseInt(mes) - 1;
-        const nomeMes = nomesMeses[mesIndex];
-        const totalMes = totaisPorMes[mesCompleto] || 0;
-        
-        // Coletar detalhes das sextas-feiras do mês para o tooltip
-        const sextasDoMes: { data: string, valor: number }[] = [];
         datasComDados.forEach(data => {
-          if (data.startsWith(mesCompleto)) {
-            const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
-            if (totalData > 0) {
-              const [, , dia] = data.split('-');
-              sextasDoMes.push({
-                data: `${dia}/${mes}`,
-                valor: totalData
-              });
+          const [ano, mes, dia] = data.split('-');
+          const mesCompleto = `${ano}-${mes}`;
+          const dataObj = new Date(data + 'T12:00:00');
+          const diaSemanaNum = dataObj.getDay();
+          const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+          
+          if (totalData > 0) {
+            if (!dadosPorMesEDia[mesCompleto]) {
+              dadosPorMesEDia[mesCompleto] = {};
             }
+            if (!dadosPorMesEDia[mesCompleto][diaSemanaNum]) {
+              dadosPorMesEDia[mesCompleto][diaSemanaNum] = 0;
+            }
+            dadosPorMesEDia[mesCompleto][diaSemanaNum] += totalData;
           }
         });
         
-        if (totalMes > 0) {
-          dadosValorTotal.push({
+        // Criar estrutura para o gráfico (um ponto por mês, com dados de todos os dias da semana)
+        mesesSelecionados.forEach((mesCompleto, index) => {
+          const [ano, mes] = mesCompleto.split('-');
+          const mesIndex = parseInt(mes) - 1;
+          const nomeMes = nomesMeses[mesIndex];
+          const dadosDoMes = dadosPorMesEDia[mesCompleto] || {};
+          
+          // Criar um objeto com todos os dias da semana
+          const dadosMes: any = {
             mes: nomeMes,
             mes_completo: mesCompleto,
-            dia_semana: NOMES_DIAS[diaSemanaNum],
-            data_completa: mesCompleto,
             data_formatada: nomeMes,
-            valor_total: totalMes,
-            cor_index: index,
-            cor: coresPorMes[index] || '#3B82F6',
-            sextas_detalhes: sextasDoMes // Para o tooltip
+            cor_index: index
+          };
+          
+          // Adicionar dados para cada dia da semana
+          for (let diaSem = 0; diaSem < 7; diaSem++) {
+            const labelDia = diasSemanaLabels[diaSem];
+            const valorDia = dadosDoMes[diaSem] || 0;
+            dadosMes[`dia_${diaSem}`] = valorDia;
+            dadosMes[`${labelDia.toLowerCase()}`] = valorDia;
+          }
+          
+          dadosValorTotal.push(dadosMes);
+        });
+        
+        console.log(`📊 Dados valor total NOVO LAYOUT criados:`, dadosValorTotal);
+      } else {
+        // LAYOUT ORIGINAL: Agrupar por dia da semana específico
+        const diaSemanaNum = parseInt(diaSemana);
+        const totaisPorMes: { [mes: string]: number } = {};
+        
+        datasComDados.forEach(data => {
+          const [ano, mes, dia] = data.split('-');
+          const mesCompleto = `${ano}-${mes}`;
+          const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+          
+          if (!totaisPorMes[mesCompleto]) {
+            totaisPorMes[mesCompleto] = 0;
+          }
+          totaisPorMes[mesCompleto] += totalData;
+        });
+        
+        // Criar estrutura para o gráfico mensal (um ponto por mês)
+        mesesSelecionados.forEach((mesCompleto, index) => {
+          const [ano, mes] = mesCompleto.split('-');
+          const mesIndex = parseInt(mes) - 1;
+          const nomeMes = nomesMeses[mesIndex];
+          const totalMes = totaisPorMes[mesCompleto] || 0;
+          
+          // Coletar detalhes das datas do mês para o tooltip
+          const datasDoMes: { data: string, valor: number }[] = [];
+          datasComDados.forEach(data => {
+            if (data.startsWith(mesCompleto)) {
+              const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+              if (totalData > 0) {
+                const [, , dia] = data.split('-');
+                datasDoMes.push({
+                  data: `${dia}/${mes}`,
+                  valor: totalData
+                });
+              }
+            }
           });
-        }
-      });
-      
-      console.log(`📊 Dados valor total MENSAL criados:`, dadosValorTotal);
+          
+          if (totalMes > 0) {
+            dadosValorTotal.push({
+              mes: nomeMes,
+              mes_completo: mesCompleto,
+              dia_semana: NOMES_DIAS[diaSemanaNum],
+              data_completa: mesCompleto,
+              data_formatada: nomeMes,
+              valor_total: totalMes,
+              cor_index: index,
+              cor: '#3B82F6',
+              sextas_detalhes: datasDoMes
+            });
+          }
+        });
+        
+        console.log(`📊 Dados valor total MENSAL criados:`, dadosValorTotal);
+      }
     } else if (modo === 'individual' && datasComDados.length > 0) {
       // MODO INDIVIDUAL: Cada sexta-feira individual com cores por mês
       const diasSemanaLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];

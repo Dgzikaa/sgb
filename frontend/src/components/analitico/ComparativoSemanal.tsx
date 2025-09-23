@@ -661,110 +661,185 @@ export function ComparativoSemanal() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <TrendingUp className="w-5 h-5" />
-              {modoComparacao === 'mes_x_mes' 
-                ? `Evolução Mensal - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
-                : `Evolução Individual - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
+              {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos'
+                ? 'Evolução por Dia da Semana'
+                : modoComparacao === 'mes_x_mes' 
+                  ? `Evolução Mensal - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
+                  : `Evolução Individual - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
               }
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400">
-              {modoComparacao === 'mes_x_mes'
-                ? `Total agrupado de todas as ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()}s por mês`
-                : `Valor individual de cada ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()} por data`
+              {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos'
+                ? 'Comparativo de todos os dias da semana por mês'
+                : modoComparacao === 'mes_x_mes'
+                  ? `Total agrupado de todas as ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()}s por mês`
+                  : `Valor individual de cada ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()} por data`
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Legenda personalizada por mês */}
+            {/* Legenda personalizada */}
             {dadosValorTotal.length > 0 && (
               <div className="flex flex-wrap gap-4 mb-4 justify-center">
-                {Array.from(new Set(dadosValorTotal.map(d => d.mes_completo)))
-                  .sort()
-                  .map(mesCompleto => {
-                    const item = dadosValorTotal.find(d => d.mes_completo === mesCompleto);
+                {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
+                  // Legenda para dias da semana
+                  ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia, index) => {
+                    const cores = ['#EF4444', '#F59E0B', '#84CC16', '#10B981', '#06B6D4', '#3B82F6', '#8B5CF6'];
                     return (
-                      <div key={mesCompleto} className="flex items-center gap-2">
+                      <div key={dia} className="flex items-center gap-2">
                         <div 
                           className="w-3 h-3 rounded" 
-                          style={{ backgroundColor: item?.cor || '#3B82F6' }}
+                          style={{ backgroundColor: cores[index] }}
                         ></div>
                         <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {item?.mes || mesCompleto}
+                          {dia}
                         </span>
                       </div>
                     );
                   })
-                }
+                ) : (
+                  // Legenda original por mês
+                  Array.from(new Set(dadosValorTotal.map(d => d.mes_completo)))
+                    .sort()
+                    .map(mesCompleto => {
+                      const item = dadosValorTotal.find(d => d.mes_completo === mesCompleto);
+                      return (
+                        <div key={mesCompleto} className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded" 
+                            style={{ backgroundColor: item?.cor || '#3B82F6' }}
+                          ></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {item?.mes || mesCompleto}
+                          </span>
+                        </div>
+                      );
+                    })
+                )}
               </div>
             )}
             
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={dadosValorTotal} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                  <XAxis 
-                    dataKey="data_formatada" 
-                    className="text-xs"
-                  />
-                  <YAxis 
-                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
-                    className="text-xs"
-                  />
-                  <Tooltip 
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        
-                        return (
-                          <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-                            <p className="font-semibold text-gray-900 dark:text-white mb-2">
-                              {modoComparacao === 'mes_x_mes' 
-                                ? `${data.mes} (Total do Mês)`
-                                : `${data.data_formatada} (${data.mes})`
-                              }
-                            </p>
-                            
-                            <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">
-                              <strong>Total: {formatarMoeda(data.valor_total)}</strong>
-                            </p>
-                            
-                            {modoComparacao === 'mes_x_mes' && data.sextas_detalhes && data.sextas_detalhes.length > 0 && (
-                              <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Detalhes por data:</p>
-                                {data.sextas_detalhes
-                                  .sort((a: any, b: any) => b.valor - a.valor)
-                                  .map((sexta: any, index: number) => (
-                                    <p key={index} className="text-xs text-gray-700 dark:text-gray-300">
-                                      {sexta.data} - {formatarMoeda(sexta.valor)}
-                                    </p>
-                                  ))
-                                }
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Bar
-                    dataKey="valor_total"
-                    name={modoComparacao === 'mes_x_mes' 
-                      ? `Total ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Mês`
-                      : `${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Data`
-                    }
-                    opacity={0.8}
-                  >
-                    <LabelList 
-                      dataKey="valor_total" 
-                      position="top" 
-                      formatter={(value: number) => `R$ ${(value / 1000).toFixed(0)}k`}
-                      className="text-xs fill-gray-600 dark:fill-gray-300"
+                {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
+                  // NOVO LAYOUT: Múltiplas barras por dia da semana
+                  <ComposedChart data={dadosValorTotal} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis 
+                      dataKey="data_formatada" 
+                      className="text-xs"
                     />
-                    {dadosValorTotal.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.cor} />
-                    ))}
-                  </Bar>
-                </ComposedChart>
+                    <YAxis 
+                      tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                      className="text-xs"
+                    />
+                    <Tooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                              <p className="font-semibold text-gray-900 dark:text-white mb-2">
+                                {label}
+                              </p>
+                              {payload
+                                .filter((entry: any) => entry.value > 0)
+                                .sort((a: any, b: any) => b.value - a.value)
+                                .map((entry: any, index: number) => (
+                                  <p key={index} className="text-xs text-gray-700 dark:text-gray-300">
+                                    <span style={{ color: entry.color }}>●</span> {entry.name}: {formatarMoeda(entry.value)}
+                                  </p>
+                                ))
+                              }
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    
+                    {/* Barras para cada dia da semana */}
+                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia, index) => {
+                      const cores = ['#EF4444', '#F59E0B', '#84CC16', '#10B981', '#06B6D4', '#3B82F6', '#8B5CF6'];
+                      return (
+                        <Bar
+                          key={dia}
+                          dataKey={dia.toLowerCase()}
+                          name={dia}
+                          fill={cores[index]}
+                          opacity={0.8}
+                        />
+                      );
+                    })}
+                  </ComposedChart>
+                ) : (
+                  // LAYOUT ORIGINAL: Uma barra por mês/data
+                  <ComposedChart data={dadosValorTotal} margin={{ top: 40, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis 
+                      dataKey="data_formatada" 
+                      className="text-xs"
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                      className="text-xs"
+                    />
+                    <Tooltip 
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          
+                          return (
+                            <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                              <p className="font-semibold text-gray-900 dark:text-white mb-2">
+                                {modoComparacao === 'mes_x_mes' 
+                                  ? `${data.mes} (Total do Mês)`
+                                  : `${data.data_formatada} (${data.mes})`
+                                }
+                              </p>
+                              
+                              <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">
+                                <strong>Total: {formatarMoeda(data.valor_total)}</strong>
+                              </p>
+                              
+                              {modoComparacao === 'mes_x_mes' && data.sextas_detalhes && data.sextas_detalhes.length > 0 && (
+                                <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Detalhes por data:</p>
+                                  {data.sextas_detalhes
+                                    .sort((a: any, b: any) => b.valor - a.valor)
+                                    .map((sexta: any, index: number) => (
+                                      <p key={index} className="text-xs text-gray-700 dark:text-gray-300">
+                                        {sexta.data} - {formatarMoeda(sexta.valor)}
+                                      </p>
+                                    ))
+                                  }
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar
+                      dataKey="valor_total"
+                      name={modoComparacao === 'mes_x_mes' 
+                        ? `Total ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Mês`
+                        : `${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Data`
+                      }
+                      opacity={0.8}
+                    >
+                      <LabelList 
+                        dataKey="valor_total" 
+                        position="top" 
+                        formatter={(value: number) => `R$ ${(value / 1000).toFixed(0)}k`}
+                        className="text-xs fill-gray-600 dark:fill-gray-300"
+                      />
+                      {dadosValorTotal.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.cor} />
+                      ))}
+                    </Bar>
+                  </ComposedChart>
+                )}
               </ResponsiveContainer>
             </div>
           </CardContent>
