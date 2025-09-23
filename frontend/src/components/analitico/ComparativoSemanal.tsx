@@ -80,6 +80,14 @@ interface ResumoPorData {
   produtos_unicos: number;
 }
 
+interface DadosValorTotal {
+  mes: string;
+  mes_completo: string;
+  dia_semana: string;
+  valor_total: number;
+  cor_index: number;
+}
+
 interface LinhaVisibilidade {
   atual: boolean;
   semana1: boolean;
@@ -117,6 +125,7 @@ export function ComparativoSemanal() {
   const [dados, setDados] = useState<HorarioSemanalData[]>([]);
   const [estatisticas, setEstatisticas] = useState<EstatisticasSemana | null>(null);
   const [resumoPorData, setResumoPorData] = useState<ResumoPorData[]>([]);
+  const [dadosValorTotal, setDadosValorTotal] = useState<DadosValorTotal[]>([]);
   const [loading, setLoading] = useState(true);
   const [diaSelecionado, setDiaSelecionado] = useState<string>('5'); // Sexta-feira por padrão
   const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09', '2025-08']); // Setembro e Agosto por padrão
@@ -169,6 +178,7 @@ export function ComparativoSemanal() {
         setDados(result.data.horarios);
         setEstatisticas(result.data.estatisticas);
         setResumoPorData(result.data.resumo_por_data || []);
+        setDadosValorTotal(result.data.valor_total_por_mes || []);
 
         // Inicializar estado dinâmico para modo individual
         if (modoComparacao === 'individual' && result.data.horarios.length > 0 && result.data.horarios[0].datas_ordenadas) {
@@ -638,13 +648,59 @@ export function ComparativoSemanal() {
         </CardContent>
       </Card>
 
-      {/* Gráfico Principal */}
+      {/* Gráfico de Valor Total por Mês (Modo Mês x Mês) */}
+      {modoComparacao === 'mes_x_mes' && dadosValorTotal.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <TrendingUp className="w-5 h-5" />
+              Evolução Mensal - {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
+              Comparativo do valor total de cada {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()} por mês
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={dadosValorTotal} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="mes" 
+                    className="text-xs"
+                  />
+                  <YAxis 
+                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                    className="text-xs"
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [formatarMoeda(value), `${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`]}
+                    labelFormatter={(label) => `${label}`}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="valor_total"
+                    name={`Total ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`}
+                    fill="#3B82F6"
+                    opacity={0.8}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Gráfico por Hora */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <BarChart3 className="w-5 h-5" />
-            Evolução do Faturamento - {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s
+            Evolução por Horário - {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s
           </CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-400">
+            Faturamento detalhado por hora (17h às 3h)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-96">
