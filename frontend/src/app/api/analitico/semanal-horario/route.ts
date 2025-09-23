@@ -596,6 +596,9 @@ export async function GET(request: NextRequest) {
         // Calcular total da data
         const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
         
+        console.log(`💰 ${data}: Total calculado = R$ ${totalData.toLocaleString('pt-BR')}`);
+        console.log(`💰 ${data}: Valores por hora:`, dadosPorSemana[data]);
+        
         if (!dadosPorMes[mesCompleto]) {
           dadosPorMes[mesCompleto] = [];
         }
