@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
 
     const barIdNum = parseInt(barId);
     const mesesSelecionados = meses.split(',');
+    const diaSemanaNum = diaSemana === 'todos' ? null : parseInt(diaSemana);
     
     console.log(`🔍 Buscando dados de horário para ${diaSemana === 'todos' ? 'TODOS OS DIAS' : NOMES_DIAS[parseInt(diaSemana)]} nos meses:`, mesesSelecionados);
     console.log(`🎯 Modo de comparação: ${modo}`);
@@ -110,7 +111,6 @@ export async function GET(request: NextRequest) {
         }
       } else {
         // Buscar apenas o dia da semana específico
-        const diaSemanaNum = parseInt(diaSemana);
         const primeiroDiaMes = new Date(ano, mes - 1, 1);
         const ultimoDiaMes = new Date(ano, mes, 0);
         
@@ -118,15 +118,15 @@ export async function GET(request: NextRequest) {
         
         // Encontrar a primeira ocorrência do dia da semana no mês
         let dataAtual = new Date(primeiroDiaMes);
-        const diasParaAvancar = (diaSemanaNum - dataAtual.getDay() + 7) % 7;
+        const diasParaAvancar = (diaSemanaNum! - dataAtual.getDay() + 7) % 7;
         dataAtual.setDate(dataAtual.getDate() + diasParaAvancar);
         
-        console.log(`🔍 Primeira ${NOMES_DIAS[diaSemanaNum]} de ${mesAno}: ${dataAtual.toISOString().split('T')[0]} (dia da semana: ${dataAtual.getDay()})`);
+        console.log(`🔍 Primeira ${NOMES_DIAS[diaSemanaNum!]} de ${mesAno}: ${dataAtual.toISOString().split('T')[0]} (dia da semana: ${dataAtual.getDay()})`);
         
         // Adicionar todas as ocorrências do dia da semana no mês
         while (dataAtual.getMonth() === mes - 1) {
           const dataFormatada = dataAtual.toISOString().split('T')[0];
-          console.log(`➕ Adicionando ${NOMES_DIAS[diaSemanaNum]}: ${dataFormatada} (dia da semana: ${dataAtual.getDay()})`);
+          console.log(`➕ Adicionando ${NOMES_DIAS[diaSemanaNum!]}: ${dataFormatada} (dia da semana: ${dataAtual.getDay()})`);
           datasParaBuscar.push(dataFormatada);
           dataAtual.setDate(dataAtual.getDate() + 7); // Próxima semana
         }
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
     // Ordenar datas (mais recente primeiro)
     datasParaBuscar.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
     
-    console.log(`🔍 Datas encontradas para ${NOMES_DIAS[diaSemanaNum]}:`, datasParaBuscar);
+    console.log(`🔍 Datas encontradas para ${diaSemana === 'todos' ? 'TODOS OS DIAS' : NOMES_DIAS[diaSemanaNum!]}:`, datasParaBuscar);
 
     // Buscar dados de faturamento por hora para cada data
     const dadosPorSemana: { [data: string]: { [hora: number]: number } } = {};
@@ -646,7 +646,6 @@ export async function GET(request: NextRequest) {
         console.log(`📊 Dados valor total NOVO LAYOUT criados:`, dadosValorTotal);
       } else {
         // LAYOUT ORIGINAL: Agrupar por dia da semana específico
-        const diaSemanaNum = parseInt(diaSemana);
         const totaisPorMes: { [mes: string]: number } = {};
         
         datasComDados.forEach(data => {
@@ -686,7 +685,7 @@ export async function GET(request: NextRequest) {
             dadosValorTotal.push({
               mes: nomeMes,
               mes_completo: mesCompleto,
-              dia_semana: NOMES_DIAS[diaSemanaNum],
+              dia_semana: diaSemana === 'todos' ? 'Todos os Dias' : NOMES_DIAS[diaSemanaNum!],
               data_completa: mesCompleto,
               data_formatada: nomeMes,
               valor_total: totalMes,
@@ -739,7 +738,7 @@ export async function GET(request: NextRequest) {
         estatisticas,
         resumo_por_data: resumoPorData,
         valor_total_por_mes: dadosValorTotal, // Novo campo para o gráfico
-        dia_semana: NOMES_DIAS[diaSemanaNum],
+        dia_semana: diaSemana === 'todos' ? 'Todos os Dias' : NOMES_DIAS[diaSemanaNum!],
         periodo: `${datasComDados[3] || 'N/A'} - ${datasComDados[0] || 'N/A'}`,
         ultimaAtualizacao: new Date().toISOString()
       }
