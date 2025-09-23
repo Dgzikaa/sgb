@@ -149,6 +149,16 @@ export async function GET(request: NextRequest) {
     for (const data of datasParaProcessar) {
       console.log(`📊 Processando faturamento por hora para ${data}`);
 
+      // 🔍 PRIMEIRO: Tentar buscar dados do planejamento comercial (eventos_base)
+      const { data: eventoData, error: errorEvento } = await supabase
+        .from('eventos_base')
+        .select('real_r, dia_semana, nome')
+        .eq('data_evento', data)
+        .eq('bar_id', barIdNum)
+        .single();
+
+      console.log(`📋 Evento encontrado para ${data}:`, eventoData);
+
       // 1. Buscar dados oficiais por hora (produtos) - igual ao resumo
       // Horários 17:00-23:00 do dia
       const { data: faturamentoDia, error: errorFaturamentoDia } = await supabase
@@ -217,10 +227,26 @@ export async function GET(request: NextRequest) {
       }
 
       // Verificar se há dados significativos
-      const totalDia = Object.values(faturamentoPorHora).reduce((sum, val) => sum + val, 0);
+      let totalDia = Object.values(faturamentoPorHora).reduce((sum, val) => sum + val, 0);
       console.log(`💰 ${data}: Produtos: R$ ${totalProdutos.toLocaleString('pt-BR')}, Bilheteria: R$ ${faturamentoBilheteria.toLocaleString('pt-BR')}`);
       console.log(`💰 ${data}: Faturamento por hora:`, faturamentoPorHora);
       console.log(`💰 ${data}: Total do dia: R$ ${totalDia.toLocaleString('pt-BR')}`);
+      
+      // 🔄 FALLBACK: Se não há dados por hora MAS há dados do evento, usar dados do evento
+      if (totalDia === 0 && eventoData && eventoData.real_r > 0) {
+        console.log(`🔄 FALLBACK: Usando dados do evento para ${data} - R$ ${parseFloat(eventoData.real_r).toLocaleString('pt-BR')}`);
+        
+        // Distribuir o faturamento do evento pelos horários principais (19h-23h)
+        const horariosDistribuicao = [19, 20, 21, 22, 23];
+        const valorPorHora = parseFloat(eventoData.real_r) / horariosDistribuicao.length;
+        
+        horariosDistribuicao.forEach(hora => {
+          faturamentoPorHora[hora] = valorPorHora;
+        });
+        
+        totalDia = parseFloat(eventoData.real_r);
+        console.log(`✅ EVENTO ${data}: R$ ${totalDia.toLocaleString('pt-BR')} distribuído em ${horariosDistribuicao.length} horas`);
+      }
       
       if (totalDia > 0) {
         dadosPorSemana[data] = faturamentoPorHora;
