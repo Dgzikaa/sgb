@@ -84,6 +84,8 @@ interface DadosValorTotal {
   mes: string;
   mes_completo: string;
   dia_semana: string;
+  data_completa: string;
+  data_formatada: string;
   valor_total: number;
   cor_index: number;
 }
@@ -400,7 +402,7 @@ export function ComparativoSemanal() {
             Comparativo Semanal - {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Comparativo entre {mesesSelecionados.map(m => MESES_OPCOES.find(opt => opt.value === m)?.label.split(' ')[0]).join(' vs ')} (17h às 3h) - v2.1
+            Comparativo entre {mesesSelecionados.map(m => MESES_OPCOES.find(opt => opt.value === m)?.label.split(' ')[0]).join(' vs ')} (17h às 3h)
           </p>
         </div>
         
@@ -666,7 +668,7 @@ export function ComparativoSemanal() {
                 <ComposedChart data={dadosValorTotal} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis 
-                    dataKey="mes" 
+                    dataKey="data_formatada" 
                     className="text-xs"
                   />
                   <YAxis 
@@ -674,13 +676,21 @@ export function ComparativoSemanal() {
                     className="text-xs"
                   />
                   <Tooltip 
-                    formatter={(value: number) => [formatarMoeda(value), `${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`]}
-                    labelFormatter={(label) => `${label}`}
+                    formatter={(value: number, name: string, props: any) => [
+                      formatarMoeda(value), 
+                      `${props.payload.dia_semana} - ${props.payload.mes}`
+                    ]}
+                    labelFormatter={(label, payload) => {
+                      if (payload && payload[0]) {
+                        return `${payload[0].payload.data_formatada} (${payload[0].payload.mes})`;
+                      }
+                      return label;
+                    }}
                   />
                   <Legend />
                   <Bar
                     dataKey="valor_total"
-                    name={`Total ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`}
+                    name={`${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Data`}
                     fill="#3B82F6"
                     opacity={0.8}
                   />

@@ -576,35 +576,36 @@ export async function GET(request: NextRequest) {
     console.log(`🎯 Criando dados valor total - Modo: ${modo}, Meses: ${mesesSelecionados.length}`);
     
     if (modo === 'mes_x_mes' && mesesSelecionados.length >= 2) {
-      // Agrupar dados por mês para o gráfico de valor total
-      const dadosTotaisPorMes: { [mes: string]: number } = {};
-      
-      // Calcular total por mês
-      mesesSelecionados.forEach(mes => {
-        const datasDoMes = datasComDados.filter(data => data.startsWith(mes));
-        const totalMes = datasDoMes.reduce((sum, data) => {
-          return sum + Object.values(dadosPorSemana[data] || {}).reduce((sumHora, valor) => sumHora + valor, 0);
-        }, 0);
-        dadosTotaisPorMes[mes] = totalMes;
-      });
-
-      // Criar estrutura para o gráfico (um ponto por mês)
+      // Criar dados no formato do print: cada sexta-feira individual por mês
+      const diasSemanaLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
       
-      mesesSelecionados.forEach((mes, index) => {
-        const [ano, mesNum] = mes.split('-');
-        const nomeMes = nomesMeses[parseInt(mesNum) - 1];
+      // Para cada data encontrada, criar um ponto no gráfico
+      datasComDados.forEach(data => {
+        const [ano, mes, dia] = data.split('-');
+        const mesIndex = parseInt(mes) - 1;
+        const nomeMes = nomesMeses[mesIndex];
+        const dataObj = new Date(data + 'T12:00:00');
+        const diaSemanaLabel = diasSemanaLabels[dataObj.getDay()];
+        
+        // Calcular total da data
+        const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
         
         dadosValorTotal.push({
           mes: nomeMes,
-          mes_completo: mes,
-          dia_semana: NOMES_DIAS[diaSemanaNum],
-          valor_total: dadosTotaisPorMes[mes] || 0,
-          cor_index: index
+          mes_completo: `${ano}-${mes}`,
+          dia_semana: diaSemanaLabel,
+          data_completa: data,
+          data_formatada: `${dia}/${mes}`,
+          valor_total: totalData,
+          cor_index: mesesSelecionados.indexOf(`${ano}-${mes}`)
         });
       });
       
-      console.log(`📊 Dados valor total criados:`, dadosValorTotal);
+      // Ordenar por data (mais antiga primeiro para o gráfico)
+      dadosValorTotal.sort((a, b) => new Date(a.data_completa).getTime() - new Date(b.data_completa).getTime());
+      
+      console.log(`📊 Dados valor total criados (${dadosValorTotal.length} pontos):`, dadosValorTotal);
     }
 
     return NextResponse.json({
