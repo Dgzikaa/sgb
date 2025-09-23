@@ -577,15 +577,52 @@ export async function GET(request: NextRequest) {
     console.log(`🎯 Criando dados valor total - Modo: ${modo}, Meses: ${mesesSelecionados.length}`);
     
     if (modo === 'mes_x_mes' && mesesSelecionados.length >= 2) {
-      // Criar dados no formato do print: cada sexta-feira individual por mês
+      // MODO MENSAL: Agrupar todas as sextas-feiras por mês
+      const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const coresPorMes = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4', '#84CC16', '#F97316'];
+      
+      // Agrupar dados por mês e somar totais
+      const totaisPorMes: { [mes: string]: number } = {};
+      
+      datasComDados.forEach(data => {
+        const [ano, mes, dia] = data.split('-');
+        const mesCompleto = `${ano}-${mes}`;
+        const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+        
+        if (!totaisPorMes[mesCompleto]) {
+          totaisPorMes[mesCompleto] = 0;
+        }
+        totaisPorMes[mesCompleto] += totalData;
+      });
+      
+      // Criar estrutura para o gráfico mensal (um ponto por mês)
+      mesesSelecionados.forEach((mesCompleto, index) => {
+        const [ano, mes] = mesCompleto.split('-');
+        const mesIndex = parseInt(mes) - 1;
+        const nomeMes = nomesMeses[mesIndex];
+        const totalMes = totaisPorMes[mesCompleto] || 0;
+        
+        if (totalMes > 0) {
+          dadosValorTotal.push({
+            mes: nomeMes,
+            mes_completo: mesCompleto,
+            dia_semana: NOMES_DIAS[diaSemanaNum],
+            data_completa: mesCompleto,
+            data_formatada: nomeMes,
+            valor_total: totalMes,
+            cor_index: index,
+            cor: coresPorMes[index] || '#3B82F6'
+          });
+        }
+      });
+      
+      console.log(`📊 Dados valor total MENSAL criados:`, dadosValorTotal);
+    } else if (modo === 'individual' && datasComDados.length > 0) {
+      // MODO INDIVIDUAL: Cada sexta-feira individual com cores por mês
       const diasSemanaLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
       const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
       const coresPorMes = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4', '#84CC16', '#F97316'];
       
-      // Agrupar dados por mês para criar estrutura de barras múltiplas
-      const dadosPorMes: { [mes: string]: any[] } = {};
-      
-      // Para cada data encontrada, agrupar por mês
       datasComDados.forEach(data => {
         const [ano, mes, dia] = data.split('-');
         const mesIndex = parseInt(mes) - 1;
@@ -593,18 +630,9 @@ export async function GET(request: NextRequest) {
         const mesCompleto = `${ano}-${mes}`;
         const dataObj = new Date(data + 'T12:00:00');
         const diaSemanaLabel = diasSemanaLabels[dataObj.getDay()];
-        
-        // Calcular total da data
         const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
         
-        console.log(`💰 ${data}: Total calculado = R$ ${totalData.toLocaleString('pt-BR')}`);
-        console.log(`💰 ${data}: Valores por hora:`, dadosPorSemana[data]);
-        
-        if (!dadosPorMes[mesCompleto]) {
-          dadosPorMes[mesCompleto] = [];
-        }
-        
-        dadosPorMes[mesCompleto].push({
+        dadosValorTotal.push({
           mes: nomeMes,
           mes_completo: mesCompleto,
           dia_semana: diaSemanaLabel,
@@ -616,18 +644,10 @@ export async function GET(request: NextRequest) {
         });
       });
       
-      // Criar estrutura final para o gráfico (uma entrada por data)
-      Object.values(dadosPorMes).forEach(datasMes => {
-        datasMes.forEach(item => {
-          dadosValorTotal.push(item);
-        });
-      });
-      
-      // Ordenar por data (mais antiga primeiro para o gráfico)
+      // Ordenar por data (mais antiga primeiro)
       dadosValorTotal.sort((a, b) => new Date(a.data_completa).getTime() - new Date(b.data_completa).getTime());
       
-      console.log(`📊 Dados valor total criados (${dadosValorTotal.length} pontos):`, dadosValorTotal);
-      console.log(`📊 Meses encontrados:`, Object.keys(dadosPorMes));
+      console.log(`📊 Dados valor total INDIVIDUAL criados:`, dadosValorTotal);
     }
 
     return NextResponse.json({

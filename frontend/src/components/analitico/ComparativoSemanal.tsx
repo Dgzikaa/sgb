@@ -653,16 +653,22 @@ export function ComparativoSemanal() {
         </CardContent>
       </Card>
 
-      {/* Gráfico de Valor Total por Mês (Modo Mês x Mês) */}
-      {modoComparacao === 'mes_x_mes' && dadosValorTotal.length > 0 && (
+      {/* Gráfico de Valor Total (ambos os modos) */}
+      {dadosValorTotal.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <TrendingUp className="w-5 h-5" />
-              Evolução Mensal - {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s
+              {modoComparacao === 'mes_x_mes' 
+                ? `Evolução Mensal - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
+                : `Evolução Individual - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
+              }
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400">
-              Comparativo do valor total de cada {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()} por mês
+              {modoComparacao === 'mes_x_mes'
+                ? `Total agrupado de todas as ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()}s por mês`
+                : `Valor individual de cada ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()} por data`
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -704,18 +710,25 @@ export function ComparativoSemanal() {
                   <Tooltip 
                     formatter={(value: number, name: string, props: any) => [
                       formatarMoeda(value), 
-                      `${props.payload.dia_semana} - ${props.payload.mes}`
+                      modoComparacao === 'mes_x_mes' 
+                        ? `Total ${props.payload.dia_semana}s - ${props.payload.mes}`
+                        : `${props.payload.dia_semana} - ${props.payload.mes}`
                     ]}
                     labelFormatter={(label, payload) => {
                       if (payload && payload[0]) {
-                        return `${payload[0].payload.data_formatada} (${payload[0].payload.mes})`;
+                        return modoComparacao === 'mes_x_mes'
+                          ? `${payload[0].payload.mes} (Total do Mês)`
+                          : `${payload[0].payload.data_formatada} (${payload[0].payload.mes})`;
                       }
                       return label;
                     }}
                   />
                   <Bar
                     dataKey="valor_total"
-                    name={`${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Data`}
+                    name={modoComparacao === 'mes_x_mes' 
+                      ? `Total ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Mês`
+                      : `${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Data`
+                    }
                     opacity={0.8}
                   >
                     <LabelList 
