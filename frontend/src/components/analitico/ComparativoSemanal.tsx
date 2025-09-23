@@ -400,7 +400,7 @@ export function ComparativoSemanal() {
             Comparativo Semanal - {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Comparativo entre {mesesSelecionados.map(m => MESES_OPCOES.find(opt => opt.value === m)?.label.split(' ')[0]).join(' vs ')} (17h às 3h)
+            Comparativo entre {mesesSelecionados.map(m => MESES_OPCOES.find(opt => opt.value === m)?.label.split(' ')[0]).join(' vs ')} (17h às 3h) - v2.1
           </p>
         </div>
         
