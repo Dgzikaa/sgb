@@ -573,6 +573,8 @@ export async function GET(request: NextRequest) {
     // Criar dados para gráfico de valor total por dia da semana (modo Mês x Mês)
     const dadosValorTotal: any[] = [];
     
+    console.log(`🎯 Criando dados valor total - Modo: ${modo}, Meses: ${mesesSelecionados.length}`);
+    
     if (modo === 'mes_x_mes' && mesesSelecionados.length >= 2) {
       // Agrupar dados por mês para o gráfico de valor total
       const dadosTotaisPorMes: { [mes: string]: number } = {};
@@ -601,6 +603,8 @@ export async function GET(request: NextRequest) {
           cor_index: index
         });
       });
+      
+      console.log(`📊 Dados valor total criados:`, dadosValorTotal);
     }
 
     return NextResponse.json({
