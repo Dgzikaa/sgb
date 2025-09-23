@@ -442,33 +442,101 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Calcular estatísticas
-    const total_faturamento_atual = dadosHorarios.reduce((sum, item) => sum + item.faturamento_atual, 0);
-    const total_faturamento_semana1 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana1, 0);
-    const total_faturamento_semana2 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana2, 0);
-    const total_faturamento_semana3 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana3, 0);
-    const media_total_4_semanas = (total_faturamento_atual + total_faturamento_semana1 + total_faturamento_semana2 + total_faturamento_semana3) / 4;
+    // Calcular estatísticas corrigidas
+    let total_faturamento_atual = 0;
+    let total_faturamento_semana1 = 0;
+    let total_faturamento_semana2 = 0;
+    let total_faturamento_semana3 = 0;
+    let media_total_4_semanas = 0;
 
-    // Encontrar horários de pico
-    let horario_pico_atual = 17;
-    let maior_faturamento_atual = 0;
-    let soma_horarios_pico = 0;
-    let count_horarios_pico = 0;
-
-    dadosHorarios.forEach(item => {
-      if (item.faturamento_atual > maior_faturamento_atual) {
-        maior_faturamento_atual = item.faturamento_atual;
-        horario_pico_atual = item.hora;
-      }
+    if (modo === 'mes_x_mes') {
+      // Modo Mês x Mês: usar os totais calculados por hora
+      total_faturamento_atual = dadosHorarios.reduce((sum, item) => sum + item.faturamento_atual, 0);
+      total_faturamento_semana1 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana1, 0);
+      total_faturamento_semana2 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana2, 0);
+      total_faturamento_semana3 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana3, 0);
       
-      // Para média de horário de pico
-      if (item.faturamento_atual > 0) {
-        soma_horarios_pico += item.hora;
-        count_horarios_pico++;
-      }
-    });
+      const totaisValidos = [total_faturamento_atual, total_faturamento_semana1, total_faturamento_semana2, total_faturamento_semana3].filter(t => t > 0);
+      media_total_4_semanas = totaisValidos.length > 0 ? totaisValidos.reduce((sum, val) => sum + val, 0) / totaisValidos.length : 0;
+    } else {
+      // Modo Individual: usar apenas as últimas 4 datas com dados
+      const ultimasQuatroDatas = datasComDados.slice(0, 4);
+      const totaisPorData = ultimasQuatroDatas.map(data => {
+        if (!data) return 0;
+        return Object.values(dadosPorSemana[data] || {}).reduce((sum, val) => sum + val, 0);
+      });
 
-    const horario_pico_media = count_horarios_pico > 0 ? Math.round(soma_horarios_pico / count_horarios_pico) : 20;
+      total_faturamento_atual = totaisPorData[0] || 0;
+      total_faturamento_semana1 = totaisPorData[1] || 0;
+      total_faturamento_semana2 = totaisPorData[2] || 0;
+      total_faturamento_semana3 = totaisPorData[3] || 0;
+
+      // Média das últimas 4 semanas (apenas valores válidos)
+      const totaisValidos = totaisPorData.filter(t => t > 0);
+      media_total_4_semanas = totaisValidos.length > 0 ? totaisValidos.reduce((sum, val) => sum + val, 0) / totaisValidos.length : 0;
+    }
+
+    // Encontrar horários de pico corrigidos
+    let horario_pico_atual = 17;
+    let horario_pico_media = 20;
+
+    if (modo === 'individual' && datasComDados.length > 0) {
+      // Modo Individual: usar dados da data mais recente
+      const dataRecente = datasComDados[0];
+      const dadosDataRecente = dadosPorSemana[dataRecente] || {};
+      
+      let maior_faturamento_atual = 0;
+      for (const [hora, valor] of Object.entries(dadosDataRecente)) {
+        if (valor > maior_faturamento_atual) {
+          maior_faturamento_atual = valor;
+          horario_pico_atual = parseInt(hora);
+        }
+      }
+
+      // Calcular média de horário de pico das últimas 4 semanas
+      const ultimasQuatroDatas = datasComDados.slice(0, 4);
+      const horariosPico: number[] = [];
+      
+      ultimasQuatroDatas.forEach(data => {
+        if (!data) return;
+        const dadosData = dadosPorSemana[data] || {};
+        let horarioPicoData = 17;
+        let maiorValorData = 0;
+        
+        for (const [hora, valor] of Object.entries(dadosData)) {
+          if (valor > maiorValorData) {
+            maiorValorData = valor;
+            horarioPicoData = parseInt(hora);
+          }
+        }
+        
+        if (maiorValorData > 0) {
+          horariosPico.push(horarioPicoData);
+        }
+      });
+
+      horario_pico_media = horariosPico.length > 0 ? Math.round(horariosPico.reduce((sum, h) => sum + h, 0) / horariosPico.length) : 20;
+    } else {
+      // Modo Mês x Mês: usar dados agregados
+      let maior_faturamento_atual = 0;
+      dadosHorarios.forEach(item => {
+        if (item.faturamento_atual > maior_faturamento_atual) {
+          maior_faturamento_atual = item.faturamento_atual;
+          horario_pico_atual = item.hora;
+        }
+      });
+
+      // Média baseada nos dados agregados
+      let soma_horarios_pico = 0;
+      let count_horarios_pico = 0;
+      dadosHorarios.forEach(item => {
+        if (item.faturamento_atual > 0) {
+          soma_horarios_pico += item.hora;
+          count_horarios_pico++;
+        }
+      });
+      horario_pico_media = count_horarios_pico > 0 ? Math.round(soma_horarios_pico / count_horarios_pico) : 20;
+    }
 
     // Calcular crescimentos
     const crescimento_vs_semana_anterior = total_faturamento_semana1 > 0 
@@ -502,12 +570,46 @@ export async function GET(request: NextRequest) {
       horario_pico: `${horario_pico_atual}h`
     });
 
+    // Criar dados para gráfico de valor total por dia da semana (modo Mês x Mês)
+    const dadosValorTotal: any[] = [];
+    
+    if (modo === 'mes_x_mes' && mesesSelecionados.length >= 2) {
+      // Agrupar dados por mês para o gráfico de valor total
+      const dadosTotaisPorMes: { [mes: string]: number } = {};
+      
+      // Calcular total por mês
+      mesesSelecionados.forEach(mes => {
+        const datasDoMes = datasComDados.filter(data => data.startsWith(mes));
+        const totalMes = datasDoMes.reduce((sum, data) => {
+          return sum + Object.values(dadosPorSemana[data] || {}).reduce((sumHora, valor) => sumHora + valor, 0);
+        }, 0);
+        dadosTotaisPorMes[mes] = totalMes;
+      });
+
+      // Criar estrutura para o gráfico (um ponto por mês)
+      const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      
+      mesesSelecionados.forEach((mes, index) => {
+        const [ano, mesNum] = mes.split('-');
+        const nomeMes = nomesMeses[parseInt(mesNum) - 1];
+        
+        dadosValorTotal.push({
+          mes: nomeMes,
+          mes_completo: mes,
+          dia_semana: NOMES_DIAS[diaSemanaNum],
+          valor_total: dadosTotaisPorMes[mes] || 0,
+          cor_index: index
+        });
+      });
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         horarios: dadosHorarios,
         estatisticas,
         resumo_por_data: resumoPorData,
+        valor_total_por_mes: dadosValorTotal, // Novo campo para o gráfico
         dia_semana: NOMES_DIAS[diaSemanaNum],
         periodo: `${datasComDados[3] || 'N/A'} - ${datasComDados[0] || 'N/A'}`,
         ultimaAtualizacao: new Date().toISOString()

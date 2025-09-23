@@ -315,49 +315,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       console.error('❌ Erro ao enviar notificação Discord ContaHub:', discordError);
     }
     
-    // 2. DISPARAR ORCHESTRATOR PARA PROCESSAR OS DADOS
-    console.log('\n🚀 FASE 2: Disparando orchestrator para processar dados...');
+    // 2. PROCESSAMENTO AUTOMÁTICO VIA PG_CRON
+    console.log('\n🔄 FASE 2: Dados salvos para processamento automático via pg_cron');
+    console.log('ℹ️ O processamento será feito automaticamente pelas funções SQL configuradas no banco');
     
-    try {
-      // Chamar o orchestrator para processar todos os dados coletados
-      const orchestratorUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub_orchestrator';
-      
-      const orchestratorResponse = await fetch(orchestratorUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': req.headers.get('Authorization') || '' // Usar a mesma auth
-        },
-        body: JSON.stringify({
-          data_date: data_date,
-          bar_id: bar_id,
-          data_types: dataTypes
-        })
-      });
-      
-      const orchestratorResult = await orchestratorResponse.json();
-      
-      if (orchestratorResponse.ok) {
-        console.log('✅ Orchestrator disparado com sucesso:', orchestratorResult);
-        results.processed = orchestratorResult.jobs || [];
-        
-        // Notificar sucesso completo
-        const processMessage = `✅ **Processamento ContaHub iniciado**\n\n📊 Jobs criados: ${orchestratorResult.jobs?.length || 0}\n⏰ ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`;
-        await sendDiscordNotification(processMessage);
-      } else {
-        console.error('❌ Erro ao disparar orchestrator:', orchestratorResult);
-        results.errors.push({
-          type: 'orchestrator',
-          error: orchestratorResult.error || 'Erro ao disparar processamento'
-        });
-      }
-    } catch (orchError) {
-      console.error('❌ Erro ao chamar orchestrator:', orchError);
-      results.errors.push({
-        type: 'orchestrator',
-        error: orchError instanceof Error ? orchError.message : String(orchError)
-      });
-    }
+    // Marcar que o processamento será feito via pg_cron
+    results.processed = [{
+      message: 'Dados salvos para processamento automático via pg_cron',
+      method: 'background_processing'
+    }];
     
     return new Response(JSON.stringify({
       success: true,
