@@ -315,15 +315,49 @@ Deno.serve(async (req: Request): Promise<Response> => {
       console.error('❌ Erro ao enviar notificação Discord ContaHub:', discordError);
     }
     
-    // 2. PROCESSAMENTO AUTOMÁTICO VIA PG_CRON
-    console.log('\n🔄 FASE 2: Dados salvos para processamento automático via pg_cron');
-    console.log('ℹ️ O processamento será feito automaticamente pelas funções SQL configuradas no banco');
+    // 2. PROCESSAR DADOS COLETADOS
+    console.log('\n🔄 FASE 2: Processando dados coletados...');
     
-    // Marcar que o processamento será feito via pg_cron
-    results.processed = [{
-      message: 'Dados salvos para processamento automático via pg_cron',
-      method: 'background_processing'
-    }];
+    try {
+      // Chamar o processor para processar os dados da data atual
+      const processorUrl = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub-processor';
+      
+      const processorResponse = await fetch(processorUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': req.headers.get('Authorization') || ''
+        },
+        body: JSON.stringify({
+          data_date: data_date,
+          bar_id: bar_id,
+          data_types: ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'prodporhora'] // agora inclui prodporhora
+        })
+      });
+      
+      const processorResult = await processorResponse.json();
+      
+      if (processorResponse.ok) {
+        console.log('✅ Processor executado com sucesso:', processorResult.summary);
+        results.processed = processorResult.details?.processed || [];
+        
+        // Notificar sucesso completo
+        const processMessage = `✅ **Processamento ContaHub concluído**\n\n📊 Dados processados: ${processorResult.summary?.total_processed || 0}\n❌ Erros: ${processorResult.summary?.total_errors || 0}\n⏰ ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`;
+        await sendDiscordNotification(processMessage);
+      } else {
+        console.error('❌ Erro no processor:', processorResult);
+        results.errors.push({
+          type: 'processor',
+          error: processorResult.error || 'Erro ao processar dados'
+        });
+      }
+    } catch (procError) {
+      console.error('❌ Erro ao chamar processor:', procError);
+      results.errors.push({
+        type: 'processor',
+        error: procError instanceof Error ? procError.message : String(procError)
+      });
+    }
     
     return new Response(JSON.stringify({
       success: true,
