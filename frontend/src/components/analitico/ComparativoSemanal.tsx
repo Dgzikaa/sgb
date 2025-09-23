@@ -91,6 +91,7 @@ interface DadosValorTotal {
   valor_total: number;
   cor_index: number;
   cor: string;
+  sextas_detalhes?: { data: string, valor: number }[];
 }
 
 interface LinhaVisibilidade {
@@ -102,6 +103,7 @@ interface LinhaVisibilidade {
 }
 
 const DIAS_SEMANA = [
+  { value: 'todos', label: 'Todos os Dias' },
   { value: '0', label: 'Domingo' },
   { value: '1', label: 'Segunda-feira' },
   { value: '2', label: 'Terça-feira' },
@@ -132,7 +134,7 @@ export function ComparativoSemanal() {
   const [resumoPorData, setResumoPorData] = useState<ResumoPorData[]>([]);
   const [dadosValorTotal, setDadosValorTotal] = useState<DadosValorTotal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [diaSelecionado, setDiaSelecionado] = useState<string>('5'); // Sexta-feira por padrão
+  const [diaSelecionado, setDiaSelecionado] = useState<string>('todos'); // Todos os dias por padrão
   const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09', '2025-08', '2025-07', '2025-06', '2025-05', '2025-04']); // Desde abril por padrão
   const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('mes_x_mes'); // Novo modo
   const [linhasVisiveis, setLinhasVisiveis] = useState<LinhaVisibilidade>({
@@ -708,19 +710,40 @@ export function ComparativoSemanal() {
                     className="text-xs"
                   />
                   <Tooltip 
-                    formatter={(value: number, name: string, props: any) => [
-                      formatarMoeda(value), 
-                      modoComparacao === 'mes_x_mes' 
-                        ? `Total ${props.payload.dia_semana}s - ${props.payload.mes}`
-                        : `${props.payload.dia_semana} - ${props.payload.mes}`
-                    ]}
-                    labelFormatter={(label, payload) => {
-                      if (payload && payload[0]) {
-                        return modoComparacao === 'mes_x_mes'
-                          ? `${payload[0].payload.mes} (Total do Mês)`
-                          : `${payload[0].payload.data_formatada} (${payload[0].payload.mes})`;
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        
+                        return (
+                          <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                            <p className="font-semibold text-gray-900 dark:text-white mb-2">
+                              {modoComparacao === 'mes_x_mes' 
+                                ? `${data.mes} (Total do Mês)`
+                                : `${data.data_formatada} (${data.mes})`
+                              }
+                            </p>
+                            
+                            <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">
+                              <strong>Total: {formatarMoeda(data.valor_total)}</strong>
+                            </p>
+                            
+                            {modoComparacao === 'mes_x_mes' && data.sextas_detalhes && data.sextas_detalhes.length > 0 && (
+                              <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Detalhes por data:</p>
+                                {data.sextas_detalhes
+                                  .sort((a: any, b: any) => b.valor - a.valor)
+                                  .map((sexta: any, index: number) => (
+                                    <p key={index} className="text-xs text-gray-700 dark:text-gray-300">
+                                      {sexta.data} - {formatarMoeda(sexta.valor)}
+                                    </p>
+                                  ))
+                                }
+                              </div>
+                            )}
+                          </div>
+                        );
                       }
-                      return label;
+                      return null;
                     }}
                   />
                   <Bar

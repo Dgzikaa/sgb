@@ -86,10 +86,9 @@ export async function GET(request: NextRequest) {
     }
 
     const barIdNum = parseInt(barId);
-    const diaSemanaNum = parseInt(diaSemana);
     const mesesSelecionados = meses.split(',');
     
-    console.log(`🔍 Buscando dados de horário para ${NOMES_DIAS[diaSemanaNum]} (dia ${diaSemanaNum}) nos meses:`, mesesSelecionados);
+    console.log(`🔍 Buscando dados de horário para ${diaSemana === 'todos' ? 'TODOS OS DIAS' : NOMES_DIAS[parseInt(diaSemana)]} nos meses:`, mesesSelecionados);
     console.log(`🎯 Modo de comparação: ${modo}`);
     
     // Para cada mês selecionado, encontrar todas as ocorrências do dia da semana
@@ -98,25 +97,39 @@ export async function GET(request: NextRequest) {
     for (const mesAno of mesesSelecionados) {
       const [ano, mes] = mesAno.split('-').map(Number);
       
-      // Encontrar todas as ocorrências do dia da semana no mês
-      const primeiroDiaMes = new Date(ano, mes - 1, 1); // mes-1 porque Date usa 0-indexed
-      const ultimoDiaMes = new Date(ano, mes, 0);
-      
-      console.log(`📅 Processando ${mesAno}: ${primeiroDiaMes.toISOString().split('T')[0]} a ${ultimoDiaMes.toISOString().split('T')[0]}`);
-      
-      // Encontrar a primeira ocorrência do dia da semana no mês
-      let dataAtual = new Date(primeiroDiaMes);
-      const diasParaAvancar = (diaSemanaNum - dataAtual.getDay() + 7) % 7;
-      dataAtual.setDate(dataAtual.getDate() + diasParaAvancar);
-      
-      console.log(`🔍 Primeira ${NOMES_DIAS[diaSemanaNum]} de ${mesAno}: ${dataAtual.toISOString().split('T')[0]} (dia da semana: ${dataAtual.getDay()})`);
-      
-      // Adicionar todas as ocorrências do dia da semana no mês
-      while (dataAtual.getMonth() === mes - 1) {
-        const dataFormatada = dataAtual.toISOString().split('T')[0];
-        console.log(`➕ Adicionando ${NOMES_DIAS[diaSemanaNum]}: ${dataFormatada} (dia da semana: ${dataAtual.getDay()})`);
-        datasParaBuscar.push(dataFormatada);
-        dataAtual.setDate(dataAtual.getDate() + 7); // Próxima semana
+      if (diaSemana === 'todos') {
+        // Buscar todos os dias do mês
+        const primeiroDiaMes = new Date(ano, mes - 1, 1);
+        const ultimoDiaMes = new Date(ano, mes, 0);
+        
+        console.log(`📅 Processando TODOS OS DIAS de ${mesAno}: ${primeiroDiaMes.toISOString().split('T')[0]} a ${ultimoDiaMes.toISOString().split('T')[0]}`);
+        
+        for (let dia = 1; dia <= ultimoDiaMes.getDate(); dia++) {
+          const dataFormatada = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+          datasParaBuscar.push(dataFormatada);
+        }
+      } else {
+        // Buscar apenas o dia da semana específico
+        const diaSemanaNum = parseInt(diaSemana);
+        const primeiroDiaMes = new Date(ano, mes - 1, 1);
+        const ultimoDiaMes = new Date(ano, mes, 0);
+        
+        console.log(`📅 Processando ${mesAno}: ${primeiroDiaMes.toISOString().split('T')[0]} a ${ultimoDiaMes.toISOString().split('T')[0]}`);
+        
+        // Encontrar a primeira ocorrência do dia da semana no mês
+        let dataAtual = new Date(primeiroDiaMes);
+        const diasParaAvancar = (diaSemanaNum - dataAtual.getDay() + 7) % 7;
+        dataAtual.setDate(dataAtual.getDate() + diasParaAvancar);
+        
+        console.log(`🔍 Primeira ${NOMES_DIAS[diaSemanaNum]} de ${mesAno}: ${dataAtual.toISOString().split('T')[0]} (dia da semana: ${dataAtual.getDay()})`);
+        
+        // Adicionar todas as ocorrências do dia da semana no mês
+        while (dataAtual.getMonth() === mes - 1) {
+          const dataFormatada = dataAtual.toISOString().split('T')[0];
+          console.log(`➕ Adicionando ${NOMES_DIAS[diaSemanaNum]}: ${dataFormatada} (dia da semana: ${dataAtual.getDay()})`);
+          datasParaBuscar.push(dataFormatada);
+          dataAtual.setDate(dataAtual.getDate() + 7); // Próxima semana
+        }
       }
     }
     
@@ -602,6 +615,21 @@ export async function GET(request: NextRequest) {
         const nomeMes = nomesMeses[mesIndex];
         const totalMes = totaisPorMes[mesCompleto] || 0;
         
+        // Coletar detalhes das sextas-feiras do mês para o tooltip
+        const sextasDoMes: { data: string, valor: number }[] = [];
+        datasComDados.forEach(data => {
+          if (data.startsWith(mesCompleto)) {
+            const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+            if (totalData > 0) {
+              const [, , dia] = data.split('-');
+              sextasDoMes.push({
+                data: `${dia}/${mes}`,
+                valor: totalData
+              });
+            }
+          }
+        });
+        
         if (totalMes > 0) {
           dadosValorTotal.push({
             mes: nomeMes,
@@ -611,7 +639,8 @@ export async function GET(request: NextRequest) {
             data_formatada: nomeMes,
             valor_total: totalMes,
             cor_index: index,
-            cor: coresPorMes[index] || '#3B82F6'
+            cor: coresPorMes[index] || '#3B82F6',
+            sextas_detalhes: sextasDoMes // Para o tooltip
           });
         }
       });
