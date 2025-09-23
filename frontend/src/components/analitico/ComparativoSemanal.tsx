@@ -129,7 +129,7 @@ export function ComparativoSemanal() {
   const [loading, setLoading] = useState(true);
   const [diaSelecionado, setDiaSelecionado] = useState<string>('5'); // Sexta-feira por padrão
   const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09', '2025-08']); // Setembro e Agosto por padrão
-  const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('individual'); // Novo modo
+  const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('mes_x_mes'); // Novo modo
   const [linhasVisiveis, setLinhasVisiveis] = useState<LinhaVisibilidade>({
     atual: true,
     semana1: true,
