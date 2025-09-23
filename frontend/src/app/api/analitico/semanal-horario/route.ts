@@ -205,6 +205,7 @@ export async function GET(request: NextRequest) {
 
       // Verificar se há dados significativos
       const totalDia = Object.values(faturamentoPorHora).reduce((sum, val) => sum + val, 0);
+      console.log(`💰 ${data}: Produtos: R$ ${totalProdutos.toLocaleString('pt-BR')}, Bilheteria: R$ ${faturamentoBilheteria.toLocaleString('pt-BR')}`);
       console.log(`💰 ${data}: Faturamento por hora:`, faturamentoPorHora);
       console.log(`💰 ${data}: Total do dia: R$ ${totalDia.toLocaleString('pt-BR')}`);
       
