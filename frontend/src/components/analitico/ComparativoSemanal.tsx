@@ -170,7 +170,10 @@ export function ComparativoSemanal() {
   };
 
   const carregarDados = async () => {
-    if (!selectedBar?.id) return;
+    if (!selectedBar?.id) {
+      console.error('❌ Bar não selecionado');
+      return;
+    }
     
     setLoading(true);
     
@@ -178,21 +181,39 @@ export function ComparativoSemanal() {
       // 🎯 Usar os meses realmente selecionados pelo usuário
       const mesesParam = mesesSelecionados.join(',');
       console.log('🎯 Carregando dados para os meses selecionados:', mesesSelecionados);
+      console.log('🎯 Parâmetros:', { 
+        barId: selectedBar.id, 
+        diaSemana: diaSelecionado, 
+        meses: mesesParam, 
+        modo: modoComparacao 
+      });
+      
       const response = await fetch(
         `/api/analitico/semanal-horario?barId=${selectedBar.id}&diaSemana=${diaSelecionado}&meses=${mesesParam}&modo=${modoComparacao}`
       );
       
       if (!response.ok) {
-        throw new Error('Erro ao carregar dados');
+        const errorText = await response.text();
+        console.error('❌ Erro HTTP:', response.status, errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
       }
       
       const result = await response.json();
+      console.log('📊 Resposta completa da API:', result);
       
       if (result.success) {
-        console.log('📊 Dados recebidos da API:', {
-          horarios: result.data.horarios.slice(0, 2), // Mostrar apenas 2 horários para debug
-          estatisticas: result.data.estatisticas
+        console.log('✅ Dados recebidos com sucesso:', {
+          horarios: result.data.horarios?.length || 0,
+          estatisticas: !!result.data.estatisticas,
+          resumoPorData: result.data.resumo_por_data?.length || 0,
+          valorTotal: result.data.valor_total_por_mes?.length || 0
         });
+        
+        // Verificar se os dados são válidos
+        if (!result.data.horarios || !Array.isArray(result.data.horarios)) {
+          throw new Error('Dados de horários inválidos');
+        }
+        
         setDados(result.data.horarios);
         setEstatisticas(result.data.estatisticas);
         setResumoPorData(result.data.resumo_por_data || []);
@@ -203,13 +224,21 @@ export function ComparativoSemanal() {
           inicializarLinhasDinamicas(result.data.horarios[0].datas_ordenadas);
         }
       } else {
-        throw new Error(result.error || 'Erro desconhecido');
+        console.error('❌ API retornou erro:', result.error);
+        throw new Error(result.error || 'Erro desconhecido da API');
       }
     } catch (error) {
-      console.error('Erro ao carregar dados semanais:', error);
+      console.error('❌ Erro ao carregar dados semanais:', error);
+      
+      // Limpar dados em caso de erro
+      setDados([]);
+      setEstatisticas(null);
+      setResumoPorData([]);
+      setDadosValorTotal([]);
+      
       toast({
-        title: "Erro",
-        description: "Não foi possível carregar os dados semanais.",
+        title: "Erro ao carregar dados",
+        description: error instanceof Error ? error.message : "Erro desconhecido. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -446,12 +475,12 @@ export function ComparativoSemanal() {
             
             {/* Title */}
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Carregando dados da visão geral...
+              Carregando dados semanais...
             </h3>
             
             {/* Subtitle */}
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Aguarde um momento...
+              Processando informações por horário...
             </p>
             
             {/* Progress dots */}
@@ -466,10 +495,67 @@ export function ComparativoSemanal() {
     );
   }
 
+  // 🛡️ Verificações de segurança
   if (!dados || dados.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500 dark:text-gray-400">Nenhum dado disponível para o dia selecionado</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full mx-4">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Nenhum dado encontrado
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Não há dados disponíveis para o {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()} nos meses selecionados.
+            </p>
+            <button 
+              onClick={carregarDados}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Verificar se os dados têm a estrutura esperada
+  if (!Array.isArray(dados) || dados.some(item => !item.hora_formatada)) {
+    console.error('❌ Estrutura de dados inválida:', dados);
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full mx-4">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 text-red-400">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Erro nos dados
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Os dados recebidos estão em formato inválido. Tente recarregar a página.
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors mr-2"
+            >
+              Recarregar Página
+            </button>
+            <button 
+              onClick={carregarDados}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1092,8 +1178,10 @@ export function ComparativoSemanal() {
         </CardHeader>
         <CardContent>
           <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={dados} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            {/* 🛡️ Verificação de segurança antes de renderizar o gráfico */}
+            {dados && dados.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={dados} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis 
                   dataKey="hora_formatada" 
@@ -1238,8 +1326,22 @@ export function ComparativoSemanal() {
                     dot={{ r: 5 }}
                   />
                 )}
-              </ComposedChart>
-            </ResponsiveContainer>
+                </ComposedChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Nenhum dado para exibir no gráfico
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
