@@ -854,7 +854,7 @@ export async function GET(request: NextRequest) {
           const [ano, mes] = mesCompleto.split('-');
           const mesIndex = parseInt(mes) - 1;
           const nomeMes = nomesMeses[mesIndex];
-          const totalMes = totaisPorMes[mesCompleto] || 0;
+          const totalMesValor = totaisPorMes[mesCompleto] || 0;
           
           // 🎯 CORREÇÃO: Coletar detalhes das datas do mês para o tooltip (com média)
           const dadosDoMesDetalhes = dadosPorMesEMedia[mesCompleto];
@@ -878,17 +878,16 @@ export async function GET(request: NextRequest) {
             });
           }
           
-          const totalMes = totaisPorMes[mesCompleto] || 0;
           const countMes = dadosPorMesEMedia[mesCompleto]?.count || 0;
           
-          if (totalMes > 0) {
+          if (totalMesValor > 0) {
             dadosValorTotal.push({
               mes: nomeMes,
               mes_completo: mesCompleto,
               dia_semana: diaSemana === 'todos' ? 'Todos os Dias' : NOMES_DIAS[diaSemanaNum!],
               data_completa: mesCompleto,
               data_formatada: `${nomeMes} (Média de ${countMes}x)`,
-              valor_total: totalMes,
+              valor_total: totalMesValor,
               cor_index: index,
               cor: '#3B82F6',
               sextas_detalhes: datasDoMes

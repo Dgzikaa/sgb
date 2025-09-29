@@ -92,6 +92,15 @@ interface DadosValorTotal {
   cor_index: number;
   cor: string;
   sextas_detalhes?: { data: string, valor: number }[];
+  // Propriedades dos dias da semana para modo multidimensional
+  dom?: number;
+  seg?: number;
+  ter?: number;
+  qua?: number;
+  qui?: number;
+  sex?: number;
+  sab?: number;
+  [key: string]: any; // Para permitir propriedades dinâmicas
 }
 
 interface LinhaVisibilidade {
