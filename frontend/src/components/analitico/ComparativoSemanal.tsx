@@ -135,8 +135,8 @@ export function ComparativoSemanal() {
   const [dadosValorTotal, setDadosValorTotal] = useState<DadosValorTotal[]>([]);
   const [loading, setLoading] = useState(true);
   const [diaSelecionado, setDiaSelecionado] = useState<string>('todos'); // Todos os dias por padrão
-  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09', '2025-08', '2025-07', '2025-06', '2025-05', '2025-04']); // Desde abril por padrão
-  const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('mes_x_mes'); // Novo modo
+  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09']); // Apenas setembro por padrão
+  const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('individual'); // Modo Individual por padrão
   const [linhasVisiveis, setLinhasVisiveis] = useState<LinhaVisibilidade>({
     atual: true,
     semana1: true,
@@ -166,7 +166,9 @@ export function ComparativoSemanal() {
     setLoading(true);
     
     try {
+      // 🎯 Usar os meses realmente selecionados pelo usuário
       const mesesParam = mesesSelecionados.join(',');
+      console.log('🎯 Carregando dados para os meses selecionados:', mesesSelecionados);
       const response = await fetch(
         `/api/analitico/semanal-horario?barId=${selectedBar.id}&diaSemana=${diaSelecionado}&meses=${mesesParam}&modo=${modoComparacao}`
       );
@@ -289,23 +291,62 @@ export function ComparativoSemanal() {
             {`${label}`}
           </p>
           
-          {modoComparacao === 'individual' && dadosHora?.todas_datas && dadosHora?.datas_ordenadas ? (
-            // Modo Individual: Mostrar TODAS as datas
+          {modoComparacao === 'individual' && dadosHora ? (
+            // 🎯 CORREÇÃO: Modo Individual - Mostrar MÉDIA por dia da semana
             <>
-              {Object.entries(dadosHora.todas_datas)
-                .filter(([data, valor]) => valor > 0) // Só mostrar datas com valor
-                .sort(([, a], [, b]) => b - a) // Ordenar por valor decrescente
-                .map(([data, valor], index) => (
-                  <p key={index} className="text-sm flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: coresDinamicas[data] || '#6B7280' }}
-                    ></div>
-                    <span className="text-gray-700 dark:text-gray-300">
-                      {`${formatarData(data)}: ${formatarMoeda(valor)}`}
-                    </span>
-                  </p>
-                ))}
+              {(() => {
+                // Agrupar dados por dia da semana e calcular médias
+                const dadosPorDiaSemana = new Map<string, { valores: number[], cor: string }>();
+                const coresPorDiaSemana = {
+                  'Dom': '#EF4444', 'Seg': '#F59E0B', 'Ter': '#84CC16', 
+                  'Qua': '#10B981', 'Qui': '#06B6D4', 'Sex': '#3B82F6', 'Sáb': '#8B5CF6'
+                };
+                
+                // Se há dados individuais, agrupar por dia da semana
+                if (dadosHora.todas_datas && dadosHora.datas_ordenadas) {
+                  Object.entries(dadosHora.todas_datas)
+                    .filter(([data, valor]) => valor > 0)
+                    .forEach(([data, valor]) => {
+                      const dataObj = new Date(data + 'T12:00:00');
+                      const diaSemana = dataObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+                      const diaAbrev = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1, 3);
+                      
+                      if (!dadosPorDiaSemana.has(diaAbrev)) {
+                        dadosPorDiaSemana.set(diaAbrev, { 
+                          valores: [], 
+                          cor: coresPorDiaSemana[diaAbrev] || '#6B7280' 
+                        });
+                      }
+                      dadosPorDiaSemana.get(diaAbrev)!.valores.push(valor);
+                    });
+                }
+                
+                // Mostrar médias por dia da semana
+                return Array.from(dadosPorDiaSemana.entries())
+                  .map(([diaAbrev, dados]) => {
+                    const media = dados.valores.reduce((sum, val) => sum + val, 0) / dados.valores.length;
+                    const count = dados.valores.length;
+                    
+                    return (
+                      <p key={diaAbrev} className="text-sm flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: dados.cor }}
+                        ></div>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {`${diaAbrev} (${count}x): ${formatarMoeda(media)}`}
+                        </span>
+                      </p>
+                    );
+                  })
+                  .sort((a, b) => {
+                    // Ordenar por ordem dos dias da semana
+                    const ordemDias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                    const diaA = a.key as string;
+                    const diaB = b.key as string;
+                    return ordemDias.indexOf(diaA) - ordemDias.indexOf(diaB);
+                  });
+              })()}
               {dadosHora.media_4_semanas > 0 && (
                 <p className="text-sm text-red-600 dark:text-red-400 mt-1 pt-1 border-t border-gray-200 dark:border-gray-600">
                   {`Média Geral: ${formatarMoeda(dadosHora.media_4_semanas)}`}
@@ -354,38 +395,33 @@ export function ComparativoSemanal() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full mx-4">
+          <div className="text-center">
+            {/* Loading Circle */}
+            <div className="relative mx-auto mb-6">
+              <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-600 rounded-full"></div>
+              <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            
+            {/* Title */}
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Carregando dados da visão geral...
+            </h3>
+            
+            {/* Subtitle */}
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Aguarde um momento...
+            </p>
+            
+            {/* Progress dots */}
+            <div className="flex justify-center space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
           </div>
-          <Skeleton className="h-10 w-48" />
         </div>
-
-        {/* Cards de estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-20 mb-2" />
-                <Skeleton className="h-6 w-24 mb-1" />
-                <Skeleton className="h-3 w-16" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Gráfico */}
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-96 w-full" />
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -399,7 +435,24 @@ export function ComparativoSemanal() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Carregando dados</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Processando {mesesSelecionados.length} {mesesSelecionados.length === 1 ? 'mês' : 'meses'}...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header com seletor */}
       <div className="flex items-center justify-between">
         <div>
@@ -417,7 +470,20 @@ export function ComparativoSemanal() {
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Modo:</label>
             <select 
               value={modoComparacao} 
-              onChange={(e) => setModoComparacao(e.target.value as 'individual' | 'mes_x_mes')}
+              onChange={(e) => {
+                const value = e.target.value as 'individual' | 'mes_x_mes';
+                setModoComparacao(value);
+                // 🎯 Quando muda para Individual, resetar para apenas Setembro
+                if (value === 'individual') {
+                  setMesesSelecionados(['2025-09']);
+                  console.log('🎯 Modo Individual: Resetado para apenas Setembro');
+                }
+                // 🎯 Quando muda para Mês x Mês, usar padrão completo
+                else if (value === 'mes_x_mes') {
+                  setMesesSelecionados(['2025-09', '2025-08', '2025-07', '2025-06', '2025-05', '2025-04']);
+                  console.log('🎯 Modo Mês x Mês: Resetado para padrão completo');
+                }
+              }}
               className="bg-transparent text-sm text-gray-900 dark:text-white border-none outline-none"
             >
               <option value="individual" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Individual</option>
@@ -442,6 +508,7 @@ export function ComparativoSemanal() {
             </SelectContent>
           </Select>
 
+          {/* Seleção de Meses - Sempre visível */}
           <div className="flex flex-wrap gap-2">
             {MESES_OPCOES.slice(0, 6).map(mes => (
               <label 
@@ -463,9 +530,9 @@ export function ComparativoSemanal() {
             ))}
           </div>
           
-          <Button onClick={carregarDados} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Atualizar
+          <Button onClick={carregarDados} disabled={loading} variant="outline" size="sm">
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? 'Carregando...' : 'Atualizar'}
           </Button>
         </div>
       </div>
@@ -529,12 +596,12 @@ export function ComparativoSemanal() {
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-orange-600" />
                 <div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">vs Anterior</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">vs Último Similar</p>
                   <p className={`font-bold text-lg ${estatisticas.crescimento_vs_semana_anterior >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {estatisticas.crescimento_vs_semana_anterior >= 0 ? '+' : ''}{estatisticas.crescimento_vs_semana_anterior.toFixed(1)}%
                   </p>
                   <p className="text-xs text-gray-500">
-                    {formatarData(estatisticas.data_semana1)}
+                    {formatarData(estatisticas.data_atual)} vs {formatarData(estatisticas.data_semana1)}
                   </p>
                 </div>
               </div>
@@ -543,187 +610,279 @@ export function ComparativoSemanal() {
         </div>
       )}
 
-      {/* Controles de Visualização */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-            <LineChart className="w-5 h-5" />
-            Filtros do Gráfico
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            {modoComparacao === 'individual' && dados.length > 0 && dados[0].datas_ordenadas ? (
-              // Filtros dinâmicos para cada data no modo individual
-              <>
-                {dados[0].datas_ordenadas.map((data, index) => (
-                  <div key={data} className="flex items-center space-x-2">
-                    <Switch
-                      id={`linha-data-${data}`}
-                      checked={linhasVisiveisDinamicas[data] !== false} // Padrão true se não definido
-                      onCheckedChange={() => toggleLinhaDinamica(data)}
-                    />
-                    <Label htmlFor={`linha-data-${data}`} className="flex items-center gap-2 text-gray-900 dark:text-white">
-                      <div className="w-3 h-3 rounded" style={{ backgroundColor: coresDinamicas[data] || paletaCores[index % paletaCores.length] }}></div>
-                      {formatarData(data)}
-                    </Label>
-                  </div>
-                ))}
-                
-                {/* Sempre mostrar filtro da média */}
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="linha-media"
-                    checked={linhasVisiveis.media}
-                    onCheckedChange={() => toggleLinha('media')}
-                  />
-                  <Label htmlFor="linha-media" className="flex items-center gap-2 text-gray-900 dark:text-white">
-                    <div className="w-3 h-3 rounded" style={{ backgroundColor: cores.media }}></div>
-                    Média Total
-                  </Label>
-                </div>
-              </>
-            ) : (
-              // Filtros fixos para modo mês x mês
-              <>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="linha-atual"
-                    checked={linhasVisiveis.atual}
-                    onCheckedChange={() => toggleLinha('atual')}
-                  />
-                  <Label htmlFor="linha-atual" className="flex items-center gap-2 text-gray-900 dark:text-white">
-                    <div className="w-3 h-3 rounded" style={{ backgroundColor: cores.atual }}></div>
-                    {modoComparacao === 'mes_x_mes' ? `Média ${MESES_OPCOES.find(m => m.value === mesesSelecionados[0])?.label.split(' ')[0] || 'Mês 1'}` : 'Data 1'}
-                  </Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="linha-semana1"
-                    checked={linhasVisiveis.semana1}
-                    onCheckedChange={() => toggleLinha('semana1')}
-                  />
-                  <Label htmlFor="linha-semana1" className="flex items-center gap-2 text-gray-900 dark:text-white">
-                    <div className="w-3 h-3 rounded" style={{ backgroundColor: cores.semana1 }}></div>
-                    {modoComparacao === 'mes_x_mes' ? `Média ${MESES_OPCOES.find(m => m.value === mesesSelecionados[1])?.label.split(' ')[0] || 'Mês 2'}` : 'Data 2'}
-                  </Label>
-                </div>
-
-                {(modoComparacao !== 'mes_x_mes' || mesesSelecionados.length > 2) && (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="linha-semana2"
-                      checked={linhasVisiveis.semana2}
-                      onCheckedChange={() => toggleLinha('semana2')}
-                    />
-                    <Label htmlFor="linha-semana2" className="flex items-center gap-2 text-gray-900 dark:text-white">
-                      <div className="w-3 h-3 rounded" style={{ backgroundColor: cores.semana2 }}></div>
-                      {modoComparacao === 'mes_x_mes' ? `Média ${MESES_OPCOES.find(m => m.value === mesesSelecionados[2])?.label.split(' ')[0] || 'Mês 3'}` : 'Data 3'}
-                    </Label>
-                  </div>
-                )}
-
-                {(modoComparacao !== 'mes_x_mes' || mesesSelecionados.length > 3) && (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="linha-semana3"
-                      checked={linhasVisiveis.semana3}
-                      onCheckedChange={() => toggleLinha('semana3')}
-                    />
-                    <Label htmlFor="linha-semana3" className="flex items-center gap-2 text-gray-900 dark:text-white">
-                      <div className="w-3 h-3 rounded" style={{ backgroundColor: cores.semana3 }}></div>
-                      {modoComparacao === 'mes_x_mes' ? `Média ${MESES_OPCOES.find(m => m.value === mesesSelecionados[3])?.label.split(' ')[0] || 'Mês 4'}` : 'Data 4'}
-                    </Label>
-                  </div>
-                )}
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="linha-media"
-                    checked={linhasVisiveis.media}
-                    onCheckedChange={() => toggleLinha('media')}
-                  />
-                  <Label htmlFor="linha-media" className="flex items-center gap-2 text-gray-900 dark:text-white">
-                    <div className="w-3 h-3 rounded" style={{ backgroundColor: cores.media }}></div>
-                    {modoComparacao === 'mes_x_mes' ? "Média Geral" : "Média Total"}
-                  </Label>
-                </div>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Gráfico de Valor Total (ambos os modos) */}
       {dadosValorTotal.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <TrendingUp className="w-5 h-5" />
               {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos'
                 ? 'Evolução por Dia da Semana'
                 : modoComparacao === 'mes_x_mes' 
-                  ? `Evolução Mensal - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
+                  ? `Média Mensal - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
                   : `Evolução Individual - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
               }
-            </CardTitle>
+          </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400">
               {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos'
                 ? 'Comparativo de todos os dias da semana por mês'
                 : modoComparacao === 'mes_x_mes'
-                  ? `Total agrupado de todas as ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()}s por mês`
+                  ? `Média de todas as ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()}s por mês`
                   : `Valor individual de cada ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label.toLowerCase()} por data`
               }
             </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Legenda personalizada */}
+        </CardHeader>
+        <CardContent>
+            {/* 🎨 Legenda Estratégica Melhorada */}
             {dadosValorTotal.length > 0 && (
-              <div className="flex flex-wrap gap-4 mb-4 justify-center">
-                {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
-                  // Legenda para dias da semana
-                  ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia, index) => {
-                    const cores = ['#EF4444', '#F59E0B', '#84CC16', '#10B981', '#06B6D4', '#3B82F6', '#8B5CF6'];
-                    return (
-                      <div key={dia} className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded" 
-                          style={{ backgroundColor: cores[index] }}
-                        ></div>
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {dia}
-                        </span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  // Legenda original por mês
-                  Array.from(new Set(dadosValorTotal.map(d => d.mes_completo)))
-                    .sort()
-                    .map(mesCompleto => {
-                      const item = dadosValorTotal.find(d => d.mes_completo === mesCompleto);
-                      return (
-                        <div key={mesCompleto} className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded" 
-                            style={{ backgroundColor: item?.cor || '#3B82F6' }}
-                          ></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">
-                            {item?.mes || mesCompleto}
-                          </span>
-                        </div>
-                      );
-                    })
+              <div className="mb-6">
+                {/* Header da Legenda */}
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' 
+                      ? '📊 Evolução por Dia da Semana' 
+                      : '📅 Evolução por Mês'
+                    }
+                  </h4>
+                  <span className="text-xs text-gray-500 dark:text-gray-500">
+                    {dadosValorTotal.length} {dadosValorTotal.length === 1 ? 'período' : 'períodos'}
+                  </span>
+                </div>
+                
+                {/* Legenda Organizada */}
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                    {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
+                      // Legenda para dias da semana - Layout em grid
+                      ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia, index) => {
+                        const cores = ['#EF4444', '#F59E0B', '#84CC16', '#10B981', '#06B6D4', '#3B82F6', '#8B5CF6'];
+                        const diasCompletos = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                        return (
+                          <div key={dia} className="flex items-center gap-2 p-2 rounded-md bg-white dark:bg-gray-700/50">
+                            <div 
+                              className="w-4 h-4 rounded-full shadow-sm"
+                              style={{ backgroundColor: cores[index] }}
+                            />
+                            <div>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {dia}
+                              </span>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {diasCompletos[index]}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : modoComparacao === 'individual' && diaSelecionado === 'todos' ? (
+                      // 🎯 FILTROS DE DIAS DA SEMANA para modo Individual
+                      ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia, index) => {
+                        const cores = ['#EF4444', '#F59E0B', '#84CC16', '#10B981', '#06B6D4', '#3B82F6', '#8B5CF6'];
+                        const diasCompletos = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                        const diaValue = index.toString(); // 0=Domingo, 1=Segunda, etc.
+                        
+                        return (
+                          <label 
+                            key={dia}
+                            className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-all ${
+                              diaSelecionado === diaValue || diaSelecionado === 'todos'
+                                ? 'bg-white dark:bg-gray-700 border-2 border-blue-300 dark:border-blue-600'
+                                : 'bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-700'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="diaSemana"
+                              value={diaValue}
+                              checked={diaSelecionado === diaValue}
+                              onChange={() => setDiaSelecionado(diaValue)}
+                              className="sr-only"
+                            />
+                            <div 
+                              className="w-4 h-4 rounded-full shadow-sm"
+                              style={{ backgroundColor: cores[index] }}
+                            />
+                            <div>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {dia}
+                              </span>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {diasCompletos[index]}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })
+                    ) : (
+                      // Legenda por mês - Layout melhorado
+                      Array.from(new Set(dadosValorTotal.map(d => d.mes_completo)))
+                        .sort()
+                        .map(mesCompleto => {
+                          const item = dadosValorTotal.find(d => d.mes_completo === mesCompleto);
+                          const total = dadosValorTotal
+                            .filter(d => d.mes_completo === mesCompleto)
+                            .reduce((sum, d) => sum + d.valor_total, 0);
+                          
+                          return (
+                            <div key={mesCompleto} className="flex items-center gap-3 p-3 rounded-md bg-white dark:bg-gray-700/50">
+                              <div 
+                                className="w-4 h-4 rounded-full shadow-sm"
+                                style={{ backgroundColor: item?.cor || '#3B82F6' }}
+                              />
+                              <div>
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {item?.mes || new Date(mesCompleto + '-01').toLocaleDateString('pt-BR', { 
+                                    month: 'short', 
+                                    year: 'numeric' 
+                                  }).replace('.', '')}
+                                </span>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {formatarMoeda(total)}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })
+                    )}
+                  </div>
+                  
+                  {/* Botão "Todos os Dias" para modo Individual */}
+                  {modoComparacao === 'individual' && diaSelecionado !== 'todos' && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDiaSelecionado('todos')}
+                        className="text-xs"
+                      >
+                        📊 Ver Todos os Dias
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                  </div>
                 )}
+
+            {/* 🎯 Layout Estratégico do Gráfico */}
+            <div className="space-y-4">
+              {/* 📊 Insights Estratégicos */}
+              {dadosValorTotal.length > 0 && (
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
+                      // Insights para análise multidimensional
+                      <>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                            {(() => {
+                              // Encontrar dia da semana com maior faturamento médio
+                              const diasSemana = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+                              const nomesDias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+                              let melhorDia = '';
+                              let maiorMedia = 0;
+                              
+                              diasSemana.forEach((dia, index) => {
+                                const valores = dadosValorTotal.map(d => d[dia] || 0).filter(v => v > 0);
+                                const media = valores.length > 0 ? valores.reduce((sum, v) => sum + v, 0) / valores.length : 0;
+                                if (media > maiorMedia) {
+                                  maiorMedia = media;
+                                  melhorDia = nomesDias[index];
+                                }
+                              });
+                              
+                              return melhorDia || 'Sex';
+                            })()}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Melhor Dia da Semana</p>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                            {(() => {
+                              const totals = dadosValorTotal.map(d => 
+                                (d.dom || 0) + (d.seg || 0) + (d.ter || 0) + (d.qua || 0) + 
+                                (d.qui || 0) + (d.sex || 0) + (d.sab || 0)
+                              );
+                              const crescimento = totals.length > 1 ? 
+                                ((totals[totals.length - 1] - totals[0]) / totals[0] * 100) : 0;
+                              return crescimento > 0 ? `+${crescimento.toFixed(1)}%` : `${crescimento.toFixed(1)}%`;
+                            })()}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Evolução Total</p>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                            {dadosValorTotal.length}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Meses Analisados</p>
+                </div>
+              </>
+            ) : (
+                      // Insights para análise tradicional
+                      <>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                            {formatarMoeda(Math.max(...dadosValorTotal.map(d => d.valor_total)))}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Maior Faturamento</p>
+                </div>
+
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                            {formatarMoeda(dadosValorTotal.reduce((sum, d) => sum + d.valor_total, 0) / dadosValorTotal.length)}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Média do Período</p>
+                </div>
+
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                            {(() => {
+                              const valores = dadosValorTotal.map(d => d.valor_total);
+                              const crescimento = valores.length > 1 ? 
+                                ((valores[valores.length - 1] - valores[0]) / valores[0] * 100) : 0;
+                              return crescimento > 0 ? `+${crescimento.toFixed(1)}%` : `${crescimento.toFixed(1)}%`;
+                            })()}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Tendência</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  </div>
+                )}
+
+              {/* Controles de Visualização Estratégica */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' 
+                        ? 'Análise Multidimensional' 
+                        : 'Análise Temporal'
+                      }
+                    </span>
+                  </div>
+                  {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' && (
+                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      7 dimensões ativas
+                  </div>
+                )}
+                </div>
+                
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {dadosValorTotal.length} pontos de dados
+                </div>
               </div>
-            )}
-            
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
-                  // NOVO LAYOUT: Múltiplas barras por dia da semana
-                  <ComposedChart data={dadosValorTotal} margin={{ top: 60, right: 30, left: 20, bottom: 5 }}>
+              
+              <div className="h-80 relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  {modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos' ? (
+                    // 🚀 LAYOUT ESTRATÉGICO: Múltiplas barras por dia da semana
+                    <ComposedChart data={dadosValorTotal} margin={{ top: 60, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                     <XAxis 
                       dataKey="data_formatada" 
@@ -762,7 +921,7 @@ export function ComparativoSemanal() {
                                     </p>
                                   ))
                                 }
-                              </div>
+                </div>
                             </div>
                           );
                         }
@@ -818,12 +977,19 @@ export function ComparativoSemanal() {
                               </p>
                               
                               <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">
-                                <strong>Total: {formatarMoeda(data.valor_total)}</strong>
+                                <strong>
+                                  {modoComparacao === 'mes_x_mes' 
+                                    ? `Média: ${formatarMoeda(data.valor_total)}`
+                                    : `Total: ${formatarMoeda(data.valor_total)}`
+                                  }
+                                </strong>
                               </p>
                               
                               {modoComparacao === 'mes_x_mes' && data.sextas_detalhes && data.sextas_detalhes.length > 0 && (
                                 <div className="border-t border-gray-200 dark:border-gray-600 pt-2">
-                                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Detalhes por data:</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                    Valores individuais ({data.sextas_detalhes.length}x):
+                                  </p>
                                   {data.sextas_detalhes
                                     .sort((a: any, b: any) => b.valor - a.valor)
                                     .map((sexta: any, index: number) => (
@@ -843,7 +1009,7 @@ export function ComparativoSemanal() {
                     <Bar
                       dataKey="valor_total"
                       name={modoComparacao === 'mes_x_mes' 
-                        ? `Total ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Mês`
+                        ? `Média ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Mês`
                         : `${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s por Data`
                       }
                       opacity={0.8}
@@ -862,8 +1028,9 @@ export function ComparativoSemanal() {
                 )}
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
       )}
 
       {/* Gráfico por Hora */}
@@ -871,10 +1038,16 @@ export function ComparativoSemanal() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <BarChart3 className="w-5 h-5" />
-            Evolução por Horário - {DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s
+            {modoComparacao === 'individual' 
+              ? `Evolução por Horário - Média por Dia da Semana`
+              : `Evolução por Horário - ${DIAS_SEMANA.find(d => d.value === diaSelecionado)?.label}s`
+            }
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-400">
-            Faturamento detalhado por hora (17h às 3h)
+            {modoComparacao === 'individual'
+              ? `Faturamento médio por hora agrupado por dia da semana (17h às 3h)`
+              : `Faturamento detalhado por hora (17h às 3h)`
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -895,24 +1068,52 @@ export function ComparativoSemanal() {
 
                 {modoComparacao === 'individual' && dados.length > 0 && dados[0].datas_ordenadas ? (
                   // Modo Individual: Renderizar linha para cada data dinamicamente (apenas se visível)
-                  dados[0].datas_ordenadas
-                    .filter(data => linhasVisiveisDinamicas[data] !== false) // Só renderizar se visível
-                    .map((data, index) => {
-                      const cor = coresDinamicas[data] || paletaCores[index % paletaCores.length];
-                      const nomeData = formatarData(data);
+                  (() => {
+                    // 🎯 CORREÇÃO: Agrupar por dia da semana e usar uma cor única por dia
+                    const coresPorDiaSemana = {
+                      'Dom': '#EF4444', // Vermelho
+                      'Seg': '#F59E0B', // Laranja  
+                      'Ter': '#84CC16', // Verde claro
+                      'Qua': '#10B981', // Verde
+                      'Qui': '#06B6D4', // Ciano
+                      'Sex': '#3B82F6', // Azul
+                      'Sáb': '#8B5CF6'  // Roxo
+                    };
+                    
+                    // 🎯 NOVA LÓGICA: Agrupar datas por dia da semana primeiro
+                    const datasPorDiaSemana = new Map<string, string[]>();
+                    
+                    dados[0].datas_ordenadas
+                      .filter(data => linhasVisiveisDinamicas[data] !== false)
+                      .forEach(data => {
+                        const dataObj = new Date(data + 'T12:00:00');
+                        const diaSemana = dataObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+                        const diaAbrev = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1, 3); // Dom, Seg, Ter, etc.
+                        
+                        if (!datasPorDiaSemana.has(diaAbrev)) {
+                          datasPorDiaSemana.set(diaAbrev, []);
+                        }
+                        datasPorDiaSemana.get(diaAbrev)!.push(data);
+                      });
+                    
+                    // 🎯 RENDERIZAR: Uma linha por dia da semana (combinando todas as datas do mesmo dia)
+                    return Array.from(datasPorDiaSemana.entries()).map(([diaAbrev, datasDodia]) => {
+                      // Criar um dataKey que combine todas as datas deste dia da semana
+                      const dataKey = `dia_${diaAbrev.toLowerCase()}`;
                       
                       return (
                         <Line
-                          key={data}
+                          key={diaAbrev}
                           type="monotone"
-                          dataKey={`data_${data.replace(/-/g, '_')}`}
-                          name={nomeData}
-                          stroke={cor}
+                          dataKey={dataKey}
+                          name={diaAbrev}
+                          stroke={coresPorDiaSemana[diaAbrev] || '#6B7280'}
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
                       );
-                    })
+                    });
+                  })()
                 ) : (
                   // Modo Mês x Mês: Comportamento original
                   <>

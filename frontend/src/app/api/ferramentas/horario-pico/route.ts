@@ -117,17 +117,19 @@ export async function POST(request: NextRequest) {
     const totalPagamentos = dadosPeriodo.reduce((sum, item) => sum + item.vr_pagamentos, 0);
     const totalRepique = dadosPeriodo.reduce((sum, item) => sum + item.vr_repique, 0);
     
-    // Buscar o valor correto do ContaHub (contahub_pagamentos - valor líquido real = total do dia)
-    const { data: pagamentosContaHub } = await supabase
-      .from('contahub_pagamentos')
-      .select('liquido')
-      .eq('dt_gerencial', data_selecionada)
-      .eq('bar_id', bar_id);
+    // 🔧 CORREÇÃO: Usar vr_pagamentos do contahub_periodo (que JÁ É O TOTAL)
+    // Não usar contahub_pagamentos para evitar diferenças de processamento
+    const faturamentoTotalDia = totalPagamentos; // vr_pagamentos já é o total correto
     
-    const faturamentoTotalCalculado = pagamentosContaHub?.reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0;
+    console.log(`🔧 CORREÇÃO HORÁRIO PICO ${data_selecionada}:`, {
+      vr_pagamentos_TOTAL: `R$ ${totalPagamentos.toLocaleString('pt-BR')}`,
+      vr_couvert: `R$ ${totalCouvert.toLocaleString('pt-BR')}`,
+      vr_repique: `R$ ${totalRepique.toLocaleString('pt-BR')}`,
+      observacao: 'Usando apenas vr_pagamentos (sem duplicação)'
+    });
     
-    // Calcular faturamento do bar (total - couvert)
-    const faturamentoBar = faturamentoTotalCalculado - totalCouvert;
+    // O faturamento do bar é o total (vr_pagamentos já inclui tudo)
+    const faturamentoBar = faturamentoTotalDia;
 
     // 3. Buscar dados da semana passada (17-23h + 24-26h)
     const semanaPassadaStr = semanaPassada.toISOString().split('T')[0];
@@ -372,7 +374,7 @@ export async function POST(request: NextRequest) {
           total_recorde_real: totalRecordeReal, // Valor real do recorde para comparação
           comparacao_semana_passada: totalFaturamento - totalFaturamentoSemanaPassada,
           comparacao_media_ultimas_4: totalFaturamento - totalMediaUltimas4,
-          comparacao_recorde: faturamentoTotalCalculado - totalRecordeReal // Usar valores reais (pagamentos) para comparação
+          comparacao_recorde: faturamentoTotalDia - totalRecordeReal // Usar valores reais (vr_pagamentos) para comparação
         }
       }
     });
