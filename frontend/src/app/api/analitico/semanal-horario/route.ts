@@ -150,9 +150,10 @@ export async function GET(request: NextRequest) {
       console.log(`📊 Processando faturamento por hora para ${data}`);
 
       // 🔍 PRIMEIRO: Tentar buscar dados do planejamento comercial (eventos_base)
+      // Incluir dados históricos do Yuzer + Sympla para meses anteriores a setembro
       const { data: eventoData, error: errorEvento } = await supabase
         .from('eventos_base')
-        .select('real_r, dia_semana, nome')
+        .select('real_r, dia_semana, nome, sympla_liquido, yuzer_liquido')
         .eq('data_evento', data)
         .eq('bar_id', barIdNum)
         .single();
@@ -178,10 +179,10 @@ export async function GET(request: NextRequest) {
         .gte('hora', 24)
         .lte('hora', 26);
 
-      // 2. Buscar dados de bilheteria (couvert + pagamentos + repique) - igual ao horário de pico
+      // 2. Buscar dados de faturamento total (vr_pagamentos = TOTAL do dia)
       const { data: dadosPeriodo, error: errorPeriodo } = await supabase
         .from('contahub_periodo')
-        .select('pessoas, vr_couvert, vr_pagamentos, vr_repique')
+        .select('pessoas, vr_couvert, vr_pagamentos, vr_repique, vr_produtos, vr_desconto')
         .eq('dt_gerencial', data)
         .eq('bar_id', barIdNum);
 
@@ -190,62 +191,172 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // Calcular totais de bilheteria (couvert + pagamentos + repique)
-      const totalCouvert = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_couvert) || 0), 0) || 0;
+      // 🔧 ESTRUTURA CORRETA: vr_pagamentos = VALOR TOTAL DE FATURAMENTO DO DIA
       const totalPagamentos = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0) || 0;
+      const totalProdutosPeriodo = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_produtos) || 0), 0) || 0;
+      const totalCouvert = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_couvert) || 0), 0) || 0;
       const totalRepique = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_repique) || 0), 0) || 0;
-      const faturamentoBilheteria = totalCouvert + totalPagamentos + totalRepique;
+      const totalDescontos = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_desconto) || 0), 0) || 0;
+      
+      // ✅ USAR APENAS vr_pagamentos (que JÁ É O TOTAL)
+      const faturamentoTotalDia = totalPagamentos;
+      
+      console.log(`📊 ESTRUTURA CORRETA ${data}:`, {
+        vr_pagamentos_TOTAL: `R$ ${totalPagamentos.toLocaleString('pt-BR')}`,
+        vr_produtos: `R$ ${totalProdutosPeriodo.toLocaleString('pt-BR')}`,
+        vr_couvert: `R$ ${totalCouvert.toLocaleString('pt-BR')}`,
+        vr_repique: `R$ ${totalRepique.toLocaleString('pt-BR')}`,
+        vr_desconto: `R$ ${totalDescontos.toLocaleString('pt-BR')}`
+      });
 
-      // Combinar os dados e normalizar horários 24h+ para 0-2h
+      // 🔧 NOVA LÓGICA: Usar vr_pagamentos como total e distribuir proporcionalmente
       const faturamentoPorHora: { [hora: number]: number } = {};
+      
+      // Se há dados de produtos por hora, usar para distribuição proporcional
+      const produtosPorHora: { [hora: number]: number } = {};
       
       // Processar horários normais (17-23h)
       (faturamentoDia || []).forEach(item => {
         const hora = item.hora;
         const valor = parseFloat(item.valor) || 0;
-        faturamentoPorHora[hora] = valor;
+        produtosPorHora[hora] = valor;
       });
 
       // Processar madrugada (24h->0h, 25h->1h, 26h->2h)
       (faturamentoMadrugada || []).forEach(item => {
         const hora = item.hora - 24; // Normalizar: 24->0, 25->1, 26->2
         const valor = parseFloat(item.valor) || 0;
-        faturamentoPorHora[hora] = valor;
+        produtosPorHora[hora] = valor;
       });
 
-      // Distribuir bilheteria proporcionalmente pelos horários
-      const totalProdutos = Object.values(faturamentoPorHora).reduce((sum, val) => sum + val, 0);
-      if (totalProdutos > 0 && faturamentoBilheteria > 0) {
-        // Distribuir bilheteria proporcionalmente ao faturamento de produtos por hora
-        Object.keys(faturamentoPorHora).forEach(horaStr => {
-          const hora = parseInt(horaStr);
-          const faturamentoProdutosHora = faturamentoPorHora[hora];
-          const proporcao = faturamentoProdutosHora / totalProdutos;
-          const bilheteriaHora = faturamentoBilheteria * proporcao;
-          faturamentoPorHora[hora] = faturamentoProdutosHora + bilheteriaHora;
-        });
+      const totalProdutosPorHora = Object.values(produtosPorHora).reduce((sum, val) => sum + val, 0);
+      
+      // 🎯 USAR vr_pagamentos como valor total real (sem duplicação)
+      if (faturamentoTotalDia > 0) {
+        if (totalProdutosPorHora > 0) {
+          // Distribuir o valor total proporcionalmente aos produtos por hora
+          Object.keys(produtosPorHora).forEach(horaStr => {
+            const hora = parseInt(horaStr);
+            const produtosHora = produtosPorHora[hora];
+            const proporcao = produtosHora / totalProdutosPorHora;
+            faturamentoPorHora[hora] = faturamentoTotalDia * proporcao;
+          });
+        } else {
+          // Se não há dados por hora, distribuir igualmente pelos horários principais
+          const horariosDistribuicao = [19, 20, 21, 22, 23];
+          const valorPorHora = faturamentoTotalDia / horariosDistribuicao.length;
+          
+          horariosDistribuicao.forEach(hora => {
+            faturamentoPorHora[hora] = valorPorHora;
+          });
+        }
       }
 
       // Verificar se há dados significativos
       let totalDia = Object.values(faturamentoPorHora).reduce((sum, val) => sum + val, 0);
-      console.log(`💰 ${data}: Produtos: R$ ${totalProdutos.toLocaleString('pt-BR')}, Bilheteria: R$ ${faturamentoBilheteria.toLocaleString('pt-BR')}`);
-      console.log(`💰 ${data}: Faturamento por hora:`, faturamentoPorHora);
-      console.log(`💰 ${data}: Total do dia: R$ ${totalDia.toLocaleString('pt-BR')}`);
+      console.log(`💰 ${data}: vr_pagamentos (TOTAL): R$ ${faturamentoTotalDia.toLocaleString('pt-BR')}`);
+      console.log(`💰 ${data}: Produtos por hora: R$ ${totalProdutosPorHora.toLocaleString('pt-BR')}`);
+      console.log(`💰 ${data}: Faturamento distribuído por hora:`, faturamentoPorHora);
+      console.log(`💰 ${data}: Total calculado: R$ ${totalDia.toLocaleString('pt-BR')}`);
+      console.log(`🔍 DEBUG ${data}: Evento real_r: R$ ${eventoData?.real_r || 0}, ContaHub vr_pagamentos: R$ ${faturamentoTotalDia.toLocaleString('pt-BR')}`);
       
-      // 🔄 FALLBACK: Se não há dados por hora MAS há dados do evento, usar dados do evento
-      if (totalDia === 0 && eventoData && eventoData.real_r > 0) {
-        console.log(`🔄 FALLBACK: Usando dados do evento para ${data} - R$ ${parseFloat(eventoData.real_r).toLocaleString('pt-BR')}`);
+      // 🔧 CORREÇÃO: Verificar se há duplicação entre evento e ContaHub
+      if (eventoData && parseFloat(eventoData.real_r) > 0) {
+        const eventoValor = parseFloat(eventoData.real_r);
         
-        // Distribuir o faturamento do evento pelos horários principais (19h-23h)
-        const horariosDistribuicao = [19, 20, 21, 22, 23];
-        const valorPorHora = parseFloat(eventoData.real_r) / horariosDistribuicao.length;
+        // Se o valor do evento é muito próximo do ContaHub, pode haver duplicação
+        const diferenca = Math.abs(eventoValor - totalDia);
+        const percentualDiferenca = totalDia > 0 ? (diferenca / totalDia) * 100 : 100;
         
-        horariosDistribuicao.forEach(hora => {
-          faturamentoPorHora[hora] = valorPorHora;
+        console.log(`🔍 ANÁLISE DUPLICAÇÃO ${data}:`, {
+          evento: `R$ ${eventoValor.toLocaleString('pt-BR')}`,
+          contahub: `R$ ${totalDia.toLocaleString('pt-BR')}`,
+          diferenca: `R$ ${diferenca.toLocaleString('pt-BR')}`,
+          percentualDiferenca: `${percentualDiferenca.toFixed(1)}%`
         });
         
-        totalDia = parseFloat(eventoData.real_r);
-        console.log(`✅ EVENTO ${data}: R$ ${totalDia.toLocaleString('pt-BR')} distribuído em ${horariosDistribuicao.length} horas`);
+        // 🔧 CORREÇÃO: Detectar e corrigir duplicação sistemática
+        // O real_r do evento pode já incluir produtos, causando duplicação
+        console.log(`⚠️ ANÁLISE DUPLICAÇÃO ${data}:`, {
+          contahubProdutosPorHora: `R$ ${totalProdutosPorHora.toLocaleString('pt-BR')}`,
+          contahubVrPagamentos: `R$ ${faturamentoTotalDia.toLocaleString('pt-BR')}`,
+          contahubDistribuido: `R$ ${totalDia.toLocaleString('pt-BR')}`,
+          eventoRealR: `R$ ${eventoValor.toLocaleString('pt-BR')}`,
+          razaoEvento_ContaHub: (eventoValor / totalDia).toFixed(2)
+        });
+        
+        // ✅ LÓGICA CORRIGIDA: Agora usando vr_pagamentos como total (sem duplicação)
+        console.log(`✅ ESTRUTURA CORRETA ${data}: Total baseado em vr_pagamentos R$ ${totalDia.toLocaleString('pt-BR')}`);
+      }
+      
+      // 🔄 INTEGRAÇÃO: Sempre somar dados do Yuzer/Sympla quando disponíveis (meses históricos)
+      if (eventoData) {
+        const faturamentoYuzer = parseFloat(eventoData.yuzer_liquido) || 0;
+        const faturamenteSympla = parseFloat(eventoData.sympla_liquido) || 0;
+        const faturamentoIngressos = faturamentoYuzer + faturamenteSympla;
+        
+        // Se há dados de ingressos, somar ao faturamento existente
+        if (faturamentoIngressos > 0) {
+          console.log(`🎫 INGRESSOS: Adicionando dados históricos para ${data}:`, {
+            yuzer: `R$ ${faturamentoYuzer.toLocaleString('pt-BR')}`,
+            sympla: `R$ ${faturamenteSympla.toLocaleString('pt-BR')}`,
+            totalIngressos: `R$ ${faturamentoIngressos.toLocaleString('pt-BR')}`
+          });
+          
+          // Se já há dados por hora, distribuir ingressos proporcionalmente
+          if (totalDia > 0) {
+            Object.keys(faturamentoPorHora).forEach(horaStr => {
+              const hora = parseInt(horaStr);
+              const faturamentoHora = faturamentoPorHora[hora];
+              const proporcao = faturamentoHora / totalDia;
+              const ingressosHora = faturamentoIngressos * proporcao;
+              faturamentoPorHora[hora] = faturamentoHora + ingressosHora;
+            });
+            totalDia += faturamentoIngressos;
+            console.log(`✅ INTEGRADO ${data}: R$ ${totalDia.toLocaleString('pt-BR')} (ContaHub + Ingressos)`);
+          } else {
+            // Se não há dados por hora, usar fallback completo
+            const faturamentoBar = parseFloat(eventoData.real_r) || 0;
+            const faturamentoTotalEvento = faturamentoBar + faturamentoIngressos;
+            
+            if (faturamentoTotalEvento > 0) {
+              console.log(`🔄 FALLBACK COMPLETO: Usando dados completos do evento para ${data}:`, {
+                bar: `R$ ${faturamentoBar.toLocaleString('pt-BR')}`,
+                ingressos: `R$ ${faturamentoIngressos.toLocaleString('pt-BR')}`,
+                total: `R$ ${faturamentoTotalEvento.toLocaleString('pt-BR')}`
+              });
+              
+              // Distribuir pelos horários principais (19h-23h)
+              const horariosDistribuicao = [19, 20, 21, 22, 23];
+              const valorPorHora = faturamentoTotalEvento / horariosDistribuicao.length;
+              
+              horariosDistribuicao.forEach(hora => {
+                faturamentoPorHora[hora] = valorPorHora;
+              });
+              
+              totalDia = faturamentoTotalEvento;
+              console.log(`✅ EVENTO COMPLETO ${data}: R$ ${totalDia.toLocaleString('pt-BR')} distribuído em ${horariosDistribuicao.length} horas`);
+            }
+          }
+        } else if (totalDia === 0) {
+          // Fallback apenas com dados do bar se não há dados de ingressos nem ContaHub
+          const faturamentoBar = parseFloat(eventoData.real_r) || 0;
+          
+          if (faturamentoBar > 0) {
+            console.log(`🔄 FALLBACK BAR: Usando apenas dados do bar para ${data}: R$ ${faturamentoBar.toLocaleString('pt-BR')}`);
+            
+            // Distribuir pelos horários principais (19h-23h)
+            const horariosDistribuicao = [19, 20, 21, 22, 23];
+            const valorPorHora = faturamentoBar / horariosDistribuicao.length;
+            
+            horariosDistribuicao.forEach(hora => {
+              faturamentoPorHora[hora] = valorPorHora;
+            });
+            
+            totalDia = faturamentoBar;
+            console.log(`✅ EVENTO BAR ${data}: R$ ${totalDia.toLocaleString('pt-BR')} distribuído em ${horariosDistribuicao.length} horas`);
+          }
+        }
       }
       
       if (totalDia > 0) {
@@ -363,12 +474,20 @@ export async function GET(request: NextRequest) {
     const dadosHorarios: HorarioSemanalData[] = [];
 
     if (modo === 'mes_x_mes' && mesesSelecionados.length >= 2) {
-      // Modo Mês x Mês: Agrupar dados por mês e calcular médias
+      // 🎯 CORREÇÃO: Modo Mês x Mês - Calcular MÉDIA por dia da semana (não soma)
       const dadosPorMes: { [mes: string]: { [hora: number]: number[] } } = {};
       
-      // Agrupar dados por mês
+      // Agrupar dados por mês, separando por dia da semana
       datasComDados.forEach(data => {
         const mesData = data.substring(0, 7); // 2025-09
+        const dataObj = new Date(data + 'T12:00:00');
+        const diaSemanaData = dataObj.getDay();
+        
+        // 🎯 FILTRO: Só processar dados do dia da semana selecionado (ou todos se 'todos')
+        if (diaSemanaNum !== null && diaSemanaData !== diaSemanaNum) {
+          return; // Pular se não for o dia da semana selecionado
+        }
+        
         if (!dadosPorMes[mesData]) {
           dadosPorMes[mesData] = {};
         }
@@ -384,9 +503,9 @@ export async function GET(request: NextRequest) {
         });
       });
 
-      console.log(`📊 Dados agrupados por mês:`, Object.keys(dadosPorMes));
+      console.log(`📊 Dados agrupados por mês (MÉDIA por dia da semana):`, Object.keys(dadosPorMes));
 
-      // Calcular médias por hora para cada mês (suporte para múltiplos meses)
+      // 🎯 CORREÇÃO: Calcular MÉDIA por hora para cada mês (em vez de soma)
       horariosParaAnalise.forEach(hora => {
         const mediasDosMeses: number[] = [];
         const datasLabels: (string | undefined)[] = [];
@@ -394,9 +513,14 @@ export async function GET(request: NextRequest) {
         // Calcular média para cada mês selecionado
         mesesSelecionados.forEach((mes, index) => {
           const valores_mes = dadosPorMes[mes]?.[hora] || [];
+          // 🎯 MÉDIA: Dividir pela quantidade de ocorrências do dia da semana no mês
           const media_mes = valores_mes.length > 0 ? valores_mes.reduce((sum, val) => sum + val, 0) / valores_mes.length : 0;
           mediasDosMeses.push(media_mes);
-          datasLabels.push(`Média ${mes}`);
+          
+          const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+          const mesIndex = parseInt(mes.split('-')[1]) - 1;
+          const nomeMes = nomesMeses[mesIndex];
+          datasLabels.push(`Média ${nomeMes} (${valores_mes.length}x)`);
         });
 
         // Preencher com zeros se necessário (máximo 4 campos)
@@ -453,8 +577,33 @@ export async function GET(request: NextRequest) {
         const faturamento_semana2 = datasParaUsar[2] ? (dadosPorSemana[datasParaUsar[2]]?.[hora] || 0) : 0;
         const faturamento_semana3 = datasParaUsar[3] ? (dadosPorSemana[datasParaUsar[3]]?.[hora] || 0) : 0;
 
-        // Criar campos dinâmicos para cada data (formato que o Recharts espera)
+        // 🎯 CORREÇÃO: Criar campos dinâmicos por DIA DA SEMANA (não por data específica)
         const camposDinamicos: { [key: string]: number } = {};
+        const valoresPorDiaSemana = new Map<string, number[]>();
+        
+        // Agrupar valores por dia da semana
+        datasComDados.forEach(data => {
+          const dataObj = new Date(data + 'T12:00:00');
+          const diaSemana = dataObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+          const diaAbrev = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1, 3); // Dom, Seg, Ter, etc.
+          const valor = dadosPorSemana[data]?.[hora] || 0;
+          
+          if (!valoresPorDiaSemana.has(diaAbrev)) {
+            valoresPorDiaSemana.set(diaAbrev, []);
+          }
+          if (valor > 0) {
+            valoresPorDiaSemana.get(diaAbrev)!.push(valor);
+          }
+        });
+        
+        // Calcular média por dia da semana
+        valoresPorDiaSemana.forEach((valores, diaAbrev) => {
+          const campoNome = `dia_${diaAbrev.toLowerCase()}`;
+          const media = valores.length > 0 ? valores.reduce((sum, val) => sum + val, 0) / valores.length : 0;
+          camposDinamicos[campoNome] = media;
+        });
+        
+        // Manter campos originais para compatibilidade
         datasComDados.forEach(data => {
           const campoNome = `data_${data.replace(/-/g, '_')}`;
           camposDinamicos[campoNome] = dadosPorSemana[data]?.[hora] || 0;
@@ -489,39 +638,38 @@ export async function GET(request: NextRequest) {
     let total_faturamento_semana3 = 0;
     let media_total_4_semanas = 0;
 
-    if (modo === 'mes_x_mes') {
-      // Modo Mês x Mês: usar os totais calculados por hora
-      total_faturamento_atual = dadosHorarios.reduce((sum, item) => sum + item.faturamento_atual, 0);
-      total_faturamento_semana1 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana1, 0);
-      total_faturamento_semana2 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana2, 0);
-      total_faturamento_semana3 = dadosHorarios.reduce((sum, item) => sum + item.faturamento_semana3, 0);
-      
-      const totaisValidos = [total_faturamento_atual, total_faturamento_semana1, total_faturamento_semana2, total_faturamento_semana3].filter(t => t > 0);
-      media_total_4_semanas = totaisValidos.length > 0 ? totaisValidos.reduce((sum, val) => sum + val, 0) / totaisValidos.length : 0;
-    } else {
-      // Modo Individual: usar apenas as últimas 4 datas com dados
-      const ultimasQuatroDatas = datasComDados.slice(0, 4);
-      const totaisPorData = ultimasQuatroDatas.map(data => {
-        if (!data) return 0;
-        return Object.values(dadosPorSemana[data] || {}).reduce((sum, val) => sum + val, 0);
-      });
+    // 🔧 CORREÇÃO: "Mais Recente" deve SEMPRE ser o último dia específico
+    // Não deve somar médias mensais, mas sim mostrar o valor real do último dia
+    
+    // SEMPRE usar dados das últimas 4 datas específicas (independente do modo)
+    const ultimasQuatroDatas = datasComDados.slice(0, 4);
+    const totaisPorData = ultimasQuatroDatas.map(data => {
+      if (!data) return 0;
+      return Object.values(dadosPorSemana[data] || {}).reduce((sum, val) => sum + val, 0);
+    });
 
-      total_faturamento_atual = totaisPorData[0] || 0;
-      total_faturamento_semana1 = totaisPorData[1] || 0;
-      total_faturamento_semana2 = totaisPorData[2] || 0;
-      total_faturamento_semana3 = totaisPorData[3] || 0;
+    total_faturamento_atual = totaisPorData[0] || 0;  // ÚLTIMO DIA ESPECÍFICO
+    total_faturamento_semana1 = totaisPorData[1] || 0;
+    total_faturamento_semana2 = totaisPorData[2] || 0;
+    total_faturamento_semana3 = totaisPorData[3] || 0;
 
-      // Média das últimas 4 semanas (apenas valores válidos)
-      const totaisValidos = totaisPorData.filter(t => t > 0);
-      media_total_4_semanas = totaisValidos.length > 0 ? totaisValidos.reduce((sum, val) => sum + val, 0) / totaisValidos.length : 0;
-    }
+    // Média das últimas 4 semanas (apenas valores válidos)
+    const totaisValidos = totaisPorData.filter(t => t > 0);
+    media_total_4_semanas = totaisValidos.length > 0 ? totaisValidos.reduce((sum, val) => sum + val, 0) / totaisValidos.length : 0;
+    
+    console.log(`🔧 CORREÇÃO - "Mais Recente" baseado em data específica:`, {
+      dataRecente: datasComDados[0],
+      valorRecente: `R$ ${total_faturamento_atual.toLocaleString('pt-BR')}`,
+      ultimasQuatroDatas: ultimasQuatroDatas,
+      totaisPorData: totaisPorData.map(t => `R$ ${t.toLocaleString('pt-BR')}`)
+    });
 
-    // Encontrar horários de pico corrigidos
-    let horario_pico_atual = 17;
+    // 🔧 CORREÇÃO: Horário de pico SEMPRE baseado na data mais recente
+    let horario_pico_atual = 20;  // Default mais realista
     let horario_pico_media = 20;
 
-    if (modo === 'individual' && datasComDados.length > 0) {
-      // Modo Individual: usar dados da data mais recente
+    if (datasComDados.length > 0) {
+      // SEMPRE usar dados da data mais recente (independente do modo)
       const dataRecente = datasComDados[0];
       const dadosDataRecente = dadosPorSemana[dataRecente] || {};
       
@@ -533,14 +681,14 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Calcular média de horário de pico das últimas 4 semanas
+      // Calcular horário de pico médio das últimas 4 datas (modo mais inteligente)
       const ultimasQuatroDatas = datasComDados.slice(0, 4);
       const horariosPico: number[] = [];
       
       ultimasQuatroDatas.forEach(data => {
         if (!data) return;
         const dadosData = dadosPorSemana[data] || {};
-        let horarioPicoData = 17;
+        let horarioPicoData = 20;  // Default
         let maiorValorData = 0;
         
         for (const [hora, valor] of Object.entries(dadosData)) {
@@ -555,27 +703,33 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      horario_pico_media = horariosPico.length > 0 ? Math.round(horariosPico.reduce((sum, h) => sum + h, 0) / horariosPico.length) : 20;
-    } else {
-      // Modo Mês x Mês: usar dados agregados
-      let maior_faturamento_atual = 0;
-      dadosHorarios.forEach(item => {
-        if (item.faturamento_atual > maior_faturamento_atual) {
-          maior_faturamento_atual = item.faturamento_atual;
-          horario_pico_atual = item.hora;
+      // Usar moda (horário mais frequente) em vez de média aritmética
+      if (horariosPico.length > 0) {
+        const frequencias: { [hora: number]: number } = {};
+        horariosPico.forEach(hora => {
+          frequencias[hora] = (frequencias[hora] || 0) + 1;
+        });
+        
+        // Encontrar o horário mais frequente
+        let horarioMaisFrequente = 20;
+        let maiorFrequencia = 0;
+        for (const [hora, freq] of Object.entries(frequencias)) {
+          if (freq > maiorFrequencia) {
+            maiorFrequencia = freq;
+            horarioMaisFrequente = parseInt(hora);
+          }
         }
+        
+        horario_pico_media = horarioMaisFrequente;
+      }
+      
+      console.log(`🔧 CORREÇÃO - Horários de pico:`, {
+        dataRecente: dataRecente,
+        horarioPicoAtual: `${horario_pico_atual}h`,
+        ultimasQuatroDatas: ultimasQuatroDatas,
+        horariosPico: horariosPico.map(h => `${h}h`),
+        horarioPicoMedio: `${horario_pico_media}h`
       });
-
-      // Média baseada nos dados agregados
-      let soma_horarios_pico = 0;
-      let count_horarios_pico = 0;
-      dadosHorarios.forEach(item => {
-        if (item.faturamento_atual > 0) {
-          soma_horarios_pico += item.hora;
-          count_horarios_pico++;
-        }
-      });
-      horario_pico_media = count_horarios_pico > 0 ? Math.round(soma_horarios_pico / count_horarios_pico) : 20;
     }
 
     // Calcular crescimentos
@@ -671,18 +825,28 @@ export async function GET(request: NextRequest) {
         
         console.log(`📊 Dados valor total NOVO LAYOUT criados:`, dadosValorTotal);
       } else {
-        // LAYOUT ORIGINAL: Agrupar por dia da semana específico
-        const totaisPorMes: { [mes: string]: number } = {};
+        // 🎯 CORREÇÃO: Calcular MÉDIA por dia da semana específico (não soma)
+        const dadosPorMesEMedia: { [mes: string]: { valores: number[], count: number } } = {};
         
         datasComDados.forEach(data => {
           const [ano, mes, dia] = data.split('-');
           const mesCompleto = `${ano}-${mes}`;
           const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
           
-          if (!totaisPorMes[mesCompleto]) {
-            totaisPorMes[mesCompleto] = 0;
+          if (!dadosPorMesEMedia[mesCompleto]) {
+            dadosPorMesEMedia[mesCompleto] = { valores: [], count: 0 };
           }
-          totaisPorMes[mesCompleto] += totalData;
+          if (totalData > 0) {
+            dadosPorMesEMedia[mesCompleto].valores.push(totalData);
+            dadosPorMesEMedia[mesCompleto].count++;
+          }
+        });
+        
+        // Calcular médias por mês
+        const totaisPorMes: { [mes: string]: number } = {};
+        Object.keys(dadosPorMesEMedia).forEach(mes => {
+          const dados = dadosPorMesEMedia[mes];
+          totaisPorMes[mes] = dados.valores.length > 0 ? dados.valores.reduce((sum, val) => sum + val, 0) / dados.valores.length : 0;
         });
         
         // Criar estrutura para o gráfico mensal (um ponto por mês)
@@ -692,20 +856,30 @@ export async function GET(request: NextRequest) {
           const nomeMes = nomesMeses[mesIndex];
           const totalMes = totaisPorMes[mesCompleto] || 0;
           
-          // Coletar detalhes das datas do mês para o tooltip
+          // 🎯 CORREÇÃO: Coletar detalhes das datas do mês para o tooltip (com média)
+          const dadosDoMesDetalhes = dadosPorMesEMedia[mesCompleto];
           const datasDoMes: { data: string, valor: number }[] = [];
-          datasComDados.forEach(data => {
-            if (data.startsWith(mesCompleto)) {
-              const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
-              if (totalData > 0) {
-                const [, , dia] = data.split('-');
-                datasDoMes.push({
-                  data: `${dia}/${mes}`,
-                  valor: totalData
-                });
+          
+          if (dadosDoMesDetalhes && dadosDoMesDetalhes.valores.length > 0) {
+            // Mostrar detalhes das datas individuais
+            let dataIndex = 0;
+            datasComDados.forEach(data => {
+              if (data.startsWith(mesCompleto)) {
+                const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+                if (totalData > 0) {
+                  const [, , dia] = data.split('-');
+                  datasDoMes.push({
+                    data: `${dia}/${mes}`,
+                    valor: totalData
+                  });
+                  dataIndex++;
+                }
               }
-            }
-          });
+            });
+          }
+          
+          const totalMes = totaisPorMes[mesCompleto] || 0;
+          const countMes = dadosPorMesEMedia[mesCompleto]?.count || 0;
           
           if (totalMes > 0) {
             dadosValorTotal.push({
@@ -713,7 +887,7 @@ export async function GET(request: NextRequest) {
               mes_completo: mesCompleto,
               dia_semana: diaSemana === 'todos' ? 'Todos os Dias' : NOMES_DIAS[diaSemanaNum!],
               data_completa: mesCompleto,
-              data_formatada: nomeMes,
+              data_formatada: `${nomeMes} (Média de ${countMes}x)`,
               valor_total: totalMes,
               cor_index: index,
               cor: '#3B82F6',
