@@ -301,18 +301,31 @@ export function ComparativoSemanal() {
           </p>
           
           {modoComparacao === 'individual' && dadosHora ? (
-            // 🎯 CORREÇÃO: Modo Individual - Mostrar MÉDIA por dia da semana
+            // 🎯 CORREÇÃO: Modo Individual - Mostrar dados disponíveis
             <>
               {(() => {
-                // Agrupar dados por dia da semana e calcular médias
-                const dadosPorDiaSemana = new Map<string, { valores: number[], cor: string }>();
                 const coresPorDiaSemana = {
                   'Dom': '#EF4444', 'Seg': '#F59E0B', 'Ter': '#84CC16', 
                   'Qua': '#10B981', 'Qui': '#06B6D4', 'Sex': '#3B82F6', 'Sáb': '#8B5CF6'
                 };
                 
-                // Se há dados individuais, agrupar por dia da semana
-                if (dadosHora.todas_datas && dadosHora.datas_ordenadas) {
+                const dadosPorDiaSemana = new Map<string, { valores: number[], cor: string }>();
+                
+                // 🎯 PRIMEIRO: Tentar usar campos dia_* (novo formato)
+                Object.keys(dadosHora).forEach(key => {
+                  if (key.startsWith('dia_') && dadosHora[key] > 0) {
+                    const diaAbrev = key.replace('dia_', '');
+                    const diaCapitalizado = diaAbrev.charAt(0).toUpperCase() + diaAbrev.slice(1);
+                    
+                    dadosPorDiaSemana.set(diaCapitalizado, {
+                      valores: [dadosHora[key]],
+                      cor: coresPorDiaSemana[diaCapitalizado] || '#6B7280'
+                    });
+                  }
+                });
+                
+                // 🎯 FALLBACK: Se não há campos dia_*, usar dados individuais
+                if (dadosPorDiaSemana.size === 0 && dadosHora.todas_datas && dadosHora.datas_ordenadas) {
                   Object.entries(dadosHora.todas_datas)
                     .filter(([data, valor]) => valor > 0)
                     .forEach(([data, valor]) => {
@@ -330,7 +343,22 @@ export function ComparativoSemanal() {
                     });
                 }
                 
-                // Mostrar médias por dia da semana
+                // Se ainda não há dados, mostrar apenas o valor atual
+                if (dadosPorDiaSemana.size === 0) {
+                  const valorAtual = dadosHora.faturamento_atual || 0;
+                  if (valorAtual > 0) {
+                    return (
+                      <p className="text-sm flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          Atual: {formatarMoeda(valorAtual)}
+                        </span>
+                      </p>
+                    );
+                  }
+                }
+                
+                // Mostrar dados por dia da semana
                 return Array.from(dadosPorDiaSemana.entries())
                   .map(([diaAbrev, dados]) => {
                     const media = dados.valores.reduce((sum, val) => sum + val, 0) / dados.valores.length;
@@ -343,7 +371,10 @@ export function ComparativoSemanal() {
                           style={{ backgroundColor: dados.cor }}
                         ></div>
                         <span className="text-gray-700 dark:text-gray-300">
-                          {`${diaAbrev} (${count}x): ${formatarMoeda(media)}`}
+                          {count > 1 
+                            ? `${diaAbrev} (${count}x): ${formatarMoeda(media)}`
+                            : `${diaAbrev}: ${formatarMoeda(media)}`
+                          }
                         </span>
                       </p>
                     );
@@ -1075,39 +1106,65 @@ export function ComparativoSemanal() {
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
 
-                {modoComparacao === 'individual' && dados.length > 0 && dados[0].datas_ordenadas ? (
-                  // Modo Individual: Renderizar linha para cada data dinamicamente (apenas se visível)
+                {modoComparacao === 'individual' && dados.length > 0 ? (
+                  // 🎯 CORREÇÃO: Modo Individual - Renderizar apenas dias com dados
                   (() => {
-                    // 🎯 CORREÇÃO: Agrupar por dia da semana e usar uma cor única por dia
                     const coresPorDiaSemana = {
-                      'Dom': '#EF4444', // Vermelho
-                      'Seg': '#F59E0B', // Laranja  
-                      'Ter': '#84CC16', // Verde claro
-                      'Qua': '#10B981', // Verde
-                      'Qui': '#06B6D4', // Ciano
-                      'Sex': '#3B82F6', // Azul
-                      'Sáb': '#8B5CF6'  // Roxo
+                      'Dom': '#EF4444', 'Seg': '#F59E0B', 'Ter': '#84CC16', 
+                      'Qua': '#10B981', 'Qui': '#06B6D4', 'Sex': '#3B82F6', 'Sáb': '#8B5CF6'
                     };
                     
-                    // 🎯 NOVA LÓGICA: Agrupar datas por dia da semana primeiro
-                    const datasPorDiaSemana = new Map<string, string[]>();
+                    // 🎯 NOVA LÓGICA: Verificar quais campos dia_* existem nos dados
+                    const diasComDados = new Set<string>();
                     
-                    dados[0].datas_ordenadas
-                      .filter(data => linhasVisiveisDinamicas[data] !== false)
-                      .forEach(data => {
-                        const dataObj = new Date(data + 'T12:00:00');
-                        const diaSemana = dataObj.toLocaleDateString('pt-BR', { weekday: 'long' });
-                        const diaAbrev = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1, 3); // Dom, Seg, Ter, etc.
-                        
-                        if (!datasPorDiaSemana.has(diaAbrev)) {
-                          datasPorDiaSemana.set(diaAbrev, []);
+                    // Verificar se há dados nos campos dia_*
+                    dados.forEach(horario => {
+                      Object.keys(horario).forEach(key => {
+                        if (key.startsWith('dia_') && horario[key] > 0) {
+                          const diaAbrev = key.replace('dia_', '');
+                          const diaCapitalizado = diaAbrev.charAt(0).toUpperCase() + diaAbrev.slice(1);
+                          diasComDados.add(diaCapitalizado);
                         }
-                        datasPorDiaSemana.get(diaAbrev)!.push(data);
                       });
+                    });
                     
-                    // 🎯 RENDERIZAR: Uma linha por dia da semana (combinando todas as datas do mesmo dia)
-                    return Array.from(datasPorDiaSemana.entries()).map(([diaAbrev, datasDodia]) => {
-                      // Criar um dataKey que combine todas as datas deste dia da semana
+                    // Se não há campos dia_*, usar lógica de fallback com datas individuais
+                    if (diasComDados.size === 0 && dados[0].datas_ordenadas) {
+                      const datasPorDiaSemana = new Map<string, string[]>();
+                      
+                      dados[0].datas_ordenadas
+                        .filter(data => linhasVisiveisDinamicas[data] !== false)
+                        .forEach(data => {
+                          const dataObj = new Date(data + 'T12:00:00');
+                          const diaSemana = dataObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+                          const diaAbrev = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1, 3);
+                          
+                          if (!datasPorDiaSemana.has(diaAbrev)) {
+                            datasPorDiaSemana.set(diaAbrev, []);
+                          }
+                          datasPorDiaSemana.get(diaAbrev)!.push(data);
+                        });
+                      
+                      // Renderizar usando dados individuais (modo antigo)
+                      return Array.from(datasPorDiaSemana.entries()).map(([diaAbrev, datasDodia]) => {
+                        const dataKey = `data_${datasDodia[0].replace(/-/g, '_')}`;
+                        
+                        return (
+                          <Line
+                            key={diaAbrev}
+                            type="monotone"
+                            dataKey={dataKey}
+                            name={diaAbrev}
+                            stroke={coresPorDiaSemana[diaAbrev] || '#6B7280'}
+                            strokeWidth={2}
+                            dot={{ r: 4 }}
+                          />
+                        );
+                      });
+                    }
+                    
+                    // 🎯 RENDERIZAR: Uma linha por dia da semana (apenas os que têm dados)
+                    return Array.from(diasComDados).map(diaAbrev => {
                       const dataKey = `dia_${diaAbrev.toLowerCase()}`;
                       
                       return (
