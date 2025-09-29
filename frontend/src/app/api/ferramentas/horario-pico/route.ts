@@ -356,7 +356,7 @@ export async function POST(request: NextRequest) {
           total_couvert: totalCouvert,
           total_pagamentos: totalPagamentos,
           total_repique: totalRepique,
-          faturamento_total_calculado: faturamentoTotalCalculado,
+          faturamento_total_calculado: faturamentoTotalDia,
           faturamento_bar: faturamentoBar,
           total_produtos_vendidos: totalProdutosVendidos,
           produto_mais_vendido: produtoMaisVendido,
