@@ -393,11 +393,11 @@ export default function DesempenhoPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1600px]">
-                    <thead>
+                <div className="overflow-auto max-h-[600px] relative">
+                  <table className="w-full min-w-[1600px] relative">
+                    <thead className="sticky top-0 z-20">
                       <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <th className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Semana</th>
+                        <th className="sticky left-0 z-30 text-left py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px] bg-gray-50 dark:bg-gray-800/50 border-r border-gray-200 dark:border-gray-700">Semana</th>
                         <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Total</th>
                         <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Couvert</th>
                         <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Bar</th>
@@ -416,7 +416,7 @@ export default function DesempenhoPage() {
                     <tbody>
                       {dadosSemanas.map((semana, index) => (
                         <tr key={semana.semana} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:scale-[1.02] transition-all duration-300 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
-                          <td className="py-3 px-3">
+                          <td className="sticky left-0 z-10 py-3 px-3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
                             <div className="flex items-center gap-2">
                               <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
                               <div className="flex flex-col">
@@ -614,11 +614,11 @@ export default function DesempenhoPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1600px]">
-                    <thead>
+                <div className="overflow-auto max-h-[600px] relative">
+                  <table className="w-full min-w-[1600px] relative">
+                    <thead className="sticky top-0 z-20">
                       <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <th className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Mês</th>
+                        <th className="sticky left-0 z-30 text-left py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px] bg-gray-50 dark:bg-gray-800/50 border-r border-gray-200 dark:border-gray-700">Mês</th>
                         <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Total</th>
                         <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Couvert</th>
                         <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Bar</th>
@@ -655,7 +655,7 @@ export default function DesempenhoPage() {
                       ) : (
                         dadosMensais.map((dadoMes, index) => (
                           <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 dark:hover:from-violet-900/20 dark:hover:to-purple-900/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
-                            <td className="py-3 px-3">
+                            <td className="sticky left-0 z-10 py-3 px-3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
                               <div className="flex items-center gap-2">
                                 <div className="w-1 h-6 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
                                 <span className="font-semibold text-gray-900 dark:text-white text-sm">{dadoMes.nome_mes} {dadoMes.ano}</span>
@@ -692,7 +692,7 @@ export default function DesempenhoPage() {
                       )}
                       {dadosMensais.length > 0 && !loadingMensal && (
                         <tr className="border-t-2 border-gray-300 dark:border-gray-600 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
-                          <td className="py-3 px-3">
+                          <td className="sticky left-0 z-10 py-3 px-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 border-r border-gray-200 dark:border-gray-700">
                             <div className="flex items-center gap-2">
                               <div className="w-1 h-6 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full"></div>
                               <span className="font-bold text-gray-900 dark:text-white text-sm">TOTAL GERAL</span>
