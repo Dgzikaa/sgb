@@ -12,6 +12,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "tsBuildInfoFile": ".next/cache/tsbuildinfo",
     "plugins": [
       {
         "name": "next"
@@ -33,7 +34,9 @@
     "noImplicitOverride": false,
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "react", "react-dom"],
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "disableSourceOfProjectReferenceRedirect": true
   },
   "include": [
     "next-env.d.ts",
@@ -42,5 +45,27 @@
     ".next/types/**/*.ts",
     "public/inter/teste.js"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.min.js",
+    "**/*.min.css",
+    "**/logs",
+    "**/.cache",
+    "**/.temp",
+    "**/.tmp",
+    "**/temp",
+    "**/tmp",
+    "certificates",
+    ".vercel",
+    ".sentry"
+  ]
 }

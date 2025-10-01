@@ -167,7 +167,17 @@ export async function GET(request: NextRequest) {
 
     if (eventosFiltrados.length === 0) {
       console.log('⚠️ Nenhum evento encontrado para o período após filtro');
-      return NextResponse.json({ data: [] });
+      return NextResponse.json({ 
+        success: true,
+        data: [],
+        meta: {
+          estrutura: 'eventos_base_unificada',
+          eventos_recalculados: 0,
+          dados_reais_disponiveis: [],
+          periodo: `${mes}/${ano}`,
+          total_eventos: 0
+        }
+      });
     }
 
     console.log(`✅ ${eventosFiltrados.length} eventos encontrados após filtro`);
