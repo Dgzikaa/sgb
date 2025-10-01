@@ -18,6 +18,7 @@ import { UserProvider } from '@/contexts/UserContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LGPDProvider } from '@/hooks/useLGPD';
 import { CommandPaletteProvider } from '@/contexts/CommandPaletteContext';
+import { PageTitleProvider } from '@/contexts/PageTitleContext';
 
 export const metadata: Metadata = {
   title: 'Zykor - O núcleo da gestão de bares',
@@ -48,19 +49,21 @@ export default function RootLayout({
             <UserProvider>
               <BarProvider>
                 <CommandPaletteProvider>
-                  <ToastProvider>
-                    <ErrorBoundary>
-                      <div className="min-h-screen">
-                        {children}
-                      </div>
-                    </ErrorBoundary>
-                    <CommandPaletteWrapper />
-                    <AuthSync />
-                    <GlobalToastListener />
-                    <Toaster position="top-right" richColors />
-                    {/* <AssistantWrapper /> */}
-                    {/* <ZykorPWABanner /> */}
-                  </ToastProvider>
+                  <PageTitleProvider>
+                    <ToastProvider>
+                      <ErrorBoundary>
+                        <div className="min-h-screen">
+                          {children}
+                        </div>
+                      </ErrorBoundary>
+                      <CommandPaletteWrapper />
+                      <AuthSync />
+                      <GlobalToastListener />
+                      <Toaster position="top-right" richColors />
+                      {/* <AssistantWrapper /> */}
+                      {/* <ZykorPWABanner /> */}
+                    </ToastProvider>
+                  </PageTitleProvider>
                 </CommandPaletteProvider>
               </BarProvider>
             </UserProvider>
