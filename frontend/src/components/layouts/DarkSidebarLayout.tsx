@@ -4,7 +4,6 @@ import { ReactNode, useEffect, useState } from 'react';
 import { DarkHeader } from './DarkHeader';
 import { ModernSidebar } from './ModernSidebar';
 import { BottomNavigation } from './BottomNavigation';
-import { PageTitleProvider } from '@/contexts/PageTitleContext';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useNavigationGuard, safeDOMOperation } from '@/hooks/useNavigationGuard';
@@ -173,20 +172,18 @@ export function DarkSidebarLayout({ children }: DarkSidebarLayoutProps) {
   return (
     <AuthGuard>
       <ErrorBoundary>
-        <PageTitleProvider>
-          <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-            <DarkHeader />
-            <div className="flex flex-1">
-              <ModernSidebar />
-              <main className="flex-1 transition-all duration-300 ease-in-out overflow-y-auto">
-                <ErrorBoundary>
-                  <GlobalPageWrapper>{children}</GlobalPageWrapper>
-                </ErrorBoundary>
-              </main>
-            </div>
-            <BottomNavigation />
+        <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+          <DarkHeader />
+          <div className="flex flex-1">
+            <ModernSidebar />
+            <main className="flex-1 transition-all duration-300 ease-in-out overflow-y-auto">
+              <ErrorBoundary>
+                <GlobalPageWrapper>{children}</GlobalPageWrapper>
+              </ErrorBoundary>
+            </main>
           </div>
-        </PageTitleProvider>
+          <BottomNavigation />
+        </div>
       </ErrorBoundary>
     </AuthGuard>
   );
