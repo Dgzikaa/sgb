@@ -78,9 +78,47 @@ logs/
 # Build files
 dist/
 build/
+out/
+.next/
+.turbo/
+
+# Cache directories
+.cache/
+**/.cache/
+**/node_modules/.cache/
+**/.eslintcache
+**/.tsbuildinfo
+**/tsconfig.tsbuildinfo
 
 # Certificates
 *.pem
 *.key
 *.crt 
 .env*.local
+
+# Performance optimization - exclude heavy directories
+**/coverage/
+**/logs/
+**/*.log
+**/temp/
+**/tmp/
+**/.temp/
+**/.tmp/
+**/.sentry/
+**/.vercel/
+
+# IDE performance
+**/.vscode/settings.json.bak
+**/.idea/
+*.swp
+*.swo
+
+# Package manager files
+**/package-lock.json.bak
+**/yarn.lock.bak
+**/pnpm-lock.yaml.bak
+
+# Large generated files
+**/*.min.js
+**/*.min.css
+**/*.map

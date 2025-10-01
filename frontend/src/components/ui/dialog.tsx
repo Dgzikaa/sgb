@@ -4,6 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 
+// Hook para verificar se está no cliente
+function useIsClient() {
+  const [isClient, setIsClient] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  return isClient;
+}
+
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -142,7 +153,7 @@ const Dialog: React.FC<DialogProps> = ({
 
   return (
     <AnimatePresence>
-      {open && (
+      {open && mounted && (
         <>
           {createPortal(
             <motion.div
