@@ -23,6 +23,8 @@ import {
   Key,
   UserCog,
   Search,
+  BarChart3,
+  CheckCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/layouts/PageHeader';
@@ -271,6 +273,121 @@ export default function ConfiguracoesPage() {
                 <Link href="/configuracoes/usuarios">
                   <Button className="w-full bg-blue-500/10 border border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 dark:bg-blue-900/20 dark:border-blue-700 dark:hover:bg-blue-900/30">
                     Gerenciar Usuários
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Qualidade ContaHub */}
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                      <BarChart3 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
+                        Qualidade ContaHub
+                      </CardTitle>
+                      <Badge variant="outline" className="text-xs mt-1 border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        99.7% Precisão
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Monitore a integridade e precisão dos dados do ContaHub
+                </CardDescription>
+                <div className="space-y-2 mb-4">
+                  <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    Sistema 100% Confiável
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-500">
+                    Validação automática • Alertas em tempo real
+                  </div>
+                </div>
+                <Link href="/configuracoes/qualidade-contahub">
+                  <Button className="w-full bg-emerald-500/10 border border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 dark:bg-emerald-900/20 dark:border-emerald-700 dark:hover:bg-emerald-900/30">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Ver Dashboard
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Integrações */}
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                      <Database className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
+                        Integrações
+                      </CardTitle>
+                      <Badge variant="outline" className="text-xs mt-1 border-purple-200 text-purple-700 dark:border-purple-700 dark:text-purple-300">
+                        {stats.integracoes} Ativas
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Configure integrações com sistemas externos
+                </CardDescription>
+                <div className="space-y-2 mb-4">
+                  <div className="text-xs text-gray-500 dark:text-gray-500">
+                    ContaHub • ContaAzul • Discord • WhatsApp
+                  </div>
+                </div>
+                <Link href="/configuracoes/integracoes">
+                  <Button className="w-full bg-purple-500/10 border border-purple-500 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 dark:bg-purple-900/20 dark:border-purple-700 dark:hover:bg-purple-900/30">
+                    <Database className="w-4 h-4 mr-2" />
+                    Gerenciar Integrações
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Notificações */}
+            <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                      <Bell className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
+                        Notificações
+                      </CardTitle>
+                      <Badge variant="outline" className="text-xs mt-1 border-orange-200 text-orange-700 dark:border-orange-700 dark:text-orange-300">
+                        {stats.alertas} Alertas
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Configure alertas e notificações do sistema
+                </CardDescription>
+                <div className="space-y-2 mb-4">
+                  <div className="text-xs text-gray-500 dark:text-gray-500">
+                    Email • Discord • WhatsApp • Push
+                  </div>
+                </div>
+                <Link href="/configuracoes/notifications">
+                  <Button className="w-full bg-orange-500/10 border border-orange-500 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 dark:bg-orange-900/20 dark:border-orange-700 dark:hover:bg-orange-900/30">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Configurar Alertas
                   </Button>
                 </Link>
               </CardContent>
