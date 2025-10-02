@@ -304,6 +304,7 @@ export async function POST(request: NextRequest) {
     const horaPicoFaturamento = dadosHorarioPico.find(h => h.faturamento === maxFaturamento)?.hora;
 
     // 11. Buscar produto mais vendido do dia (agrupando por produto e somando todas as horas)
+    // Primeiro tentar contahub_prodporhora
     const { data: produtoMaisVendidoRaw } = await supabase
       .from('contahub_prodporhora')
       .select('produto_descricao, quantidade, valor_total')
@@ -312,14 +313,35 @@ export async function POST(request: NextRequest) {
 
     // Agrupar por produto e somar quantidades
     const produtosPorQuantidade: { [key: string]: { quantidade: number, valor: number } } = {};
-    produtoMaisVendidoRaw?.forEach(item => {
-      const produto = item.produto_descricao;
-      if (!produtosPorQuantidade[produto]) {
-        produtosPorQuantidade[produto] = { quantidade: 0, valor: 0 };
-      }
-      produtosPorQuantidade[produto].quantidade += parseFloat(item.quantidade);
-      produtosPorQuantidade[produto].valor += parseFloat(item.valor_total);
-    });
+    
+    if (produtoMaisVendidoRaw && produtoMaisVendidoRaw.length > 0) {
+      // Usar dados do prodporhora se disponível
+      produtoMaisVendidoRaw.forEach(item => {
+        const produto = item.produto_descricao;
+        if (!produtosPorQuantidade[produto]) {
+          produtosPorQuantidade[produto] = { quantidade: 0, valor: 0 };
+        }
+        produtosPorQuantidade[produto].quantidade += parseFloat(item.quantidade);
+        produtosPorQuantidade[produto].valor += parseFloat(item.valor_total);
+      });
+    } else {
+      // Fallback: usar dados do contahub_analitico
+      console.log('📊 Usando contahub_analitico para produtos (prodporhora vazio)');
+      const { data: produtosAnalitico } = await supabase
+        .from('contahub_analitico')
+        .select('prd_desc, qtd, valorfinal')
+        .eq('trn_dtgerencial', data_selecionada)
+        .eq('bar_id', bar_id);
+
+      produtosAnalitico?.forEach(item => {
+        const produto = item.prd_desc;
+        if (!produtosPorQuantidade[produto]) {
+          produtosPorQuantidade[produto] = { quantidade: 0, valor: 0 };
+        }
+        produtosPorQuantidade[produto].quantidade += parseFloat(item.qtd) || 0;
+        produtosPorQuantidade[produto].valor += parseFloat(item.valorfinal) || 0;
+      });
+    }
 
     // Encontrar produto mais vendido
     const produtoMaisVendido = Object.keys(produtosPorQuantidade).length > 0 
