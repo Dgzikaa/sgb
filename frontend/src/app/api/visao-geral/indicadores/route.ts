@@ -478,13 +478,18 @@ export async function GET(request: Request) {
       const { start: startDate, end: endDate } = getTrimestreDates(trimestre);
       // Trimestre selecionado
 
-      // Clientes Ativos (visitaram 2+ vezes) no TRIMESTRE ATUAL
-      // Usar as datas completas do trimestre selecionado
+      // Clientes Ativos (visitaram 2+ vezes) nos ÚLTIMOS 90 DIAS (D-90)
+      // Não zerar a cada trimestre - usar sempre os últimos 90 dias
+      const hoje = new Date();
+      const data90DiasAtras = new Date(hoje);
+      data90DiasAtras.setDate(hoje.getDate() - 90);
+      const startDate90 = data90DiasAtras.toISOString().split('T')[0];
+      const endDate90 = hoje.toISOString().split('T')[0];
       
       const clientesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate,
-        'lte_dt_gerencial': endDate
+        'gte_dt_gerencial': startDate90,
+        'lte_dt_gerencial': endDate90
       });
       
       // Filtrar apenas clientes com telefone
@@ -504,13 +509,18 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivos++;
       });
       
-      // ✅ COMPARAÇÃO COM TRIMESTRE ANTERIOR COMPLETO
-      const { start: startDateAnterior, end: endDateAnterior } = getTrimestreAnterior(trimestre);
+      // ✅ COMPARAÇÃO COM D-90 DO PERÍODO ANTERIOR (90 dias atrás dos últimos 90 dias)
+      const data180DiasAtras = new Date(hoje);
+      data180DiasAtras.setDate(hoje.getDate() - 180);
+      const data90DiasAtrasAnterior = new Date(hoje);
+      data90DiasAtrasAnterior.setDate(hoje.getDate() - 90);
+      const startDateAnterior90 = data180DiasAtras.toISOString().split('T')[0];
+      const endDateAnterior90 = data90DiasAtrasAnterior.toISOString().split('T')[0];
       
       const clientesDataAnterior = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDateAnterior,
-        'lte_dt_gerencial': endDateAnterior
+        'gte_dt_gerencial': startDateAnterior90,
+        'lte_dt_gerencial': endDateAnterior90
       });
       
       const clientesComTelefoneAnterior = clientesDataAnterior?.filter(item => item.cli_fone) || [];
@@ -525,16 +535,16 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivosAnterior++;
       });
       
-      // 🔍 DEBUG: Logs de comparação
+      // 🔍 DEBUG: Logs de comparação D-90
       // Logs detalhados apenas em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO TRIMESTRAL:');
-        console.log(`Trimestre atual: T${trimestre} (${startDate} a ${endDate}) = ${clientesAtivos} clientes ativos`);
-        console.log(`Trimestre anterior: T${trimestre-1} (${startDateAnterior} a ${endDateAnterior}) = ${clientesAtivosAnterior} clientes ativos`);
+        console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO D-90:');
+        console.log(`Período atual (D-90): ${startDate90} a ${endDate90} = ${clientesAtivos} clientes ativos`);
+        console.log(`Período anterior (D-90): ${startDateAnterior90} a ${endDateAnterior90} = ${clientesAtivosAnterior} clientes ativos`);
       }
       const variacaoClientesAtivos = clientesAtivosAnterior > 0 ? ((clientesAtivos - clientesAtivosAnterior) / clientesAtivosAnterior * 100) : 0;
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Variação: ${variacaoClientesAtivos.toFixed(1)}%`);
+        console.log(`Variação D-90: ${variacaoClientesAtivos.toFixed(1)}%`);
       }
       
       // Logs detalhados removidos
@@ -893,35 +903,68 @@ export async function GET(request: Request) {
       // Log final do CMO
       console.log(`📊 CMO T${trimestre}: ${percentualCMO.toFixed(1)}% (R$ ${totalCMO.toLocaleString('pt-BR')} / R$ ${faturamentoTrimestre.toLocaleString('pt-BR')})`);
 
+      // Metas dinâmicas por trimestre
+      const getMetasTrimestre = (trimestre: number) => {
+        const metas = {
+          2: { // T2 (Abr-Jun)
+            clientesAtivos: 3000,
+            clientesTotais: 30000,
+            retencao: 10,
+            cmvLimpo: 34,
+            cmo: 20,
+            artistica: 17
+          },
+          3: { // T3 (Jul-Set)
+            clientesAtivos: 3000,
+            clientesTotais: 30000,
+            retencao: 10,
+            cmvLimpo: 34,
+            cmo: 20,
+            artistica: 17
+          },
+          4: { // T4 (Out-Dez) - NOVAS METAS
+            clientesAtivos: 4000,
+            clientesTotais: 15000,
+            retencao: 10,
+            cmvLimpo: 34,
+            cmo: 20,
+            artistica: 20
+          }
+        };
+        return metas[trimestre as keyof typeof metas] || metas[3];
+      };
+
+      const metasTrimestre = getMetasTrimestre(trimestre);
+
       const resp = NextResponse.json({
         trimestral: {
           clientesAtivos: {
             valor: clientesAtivos,
-            meta: 3000,
+            meta: metasTrimestre.clientesAtivos,
             variacao: variacaoClientesAtivos
           },
           clientesTotais: {
             valor: totalClientesTrimestre,
-            meta: 30000,
+            meta: metasTrimestre.clientesTotais,
             variacao: variacaoClientesTotais
           },
           retencao: {
             ...(await calcularRetencao(supabase, barIdNum, mesRetencao || undefined)),
-            meta: 10
+            meta: metasTrimestre.retencao
           },
           cmvLimpo: {
             valor: 28.7, // TODO: Implementar input manual
-            meta: 34
+            meta: metasTrimestre.cmvLimpo
           },
           cmo: {
             valor: percentualCMO,
-            meta: 20,
+            meta: metasTrimestre.cmo,
             valorAbsoluto: viewTri ? (viewTri.cmo_total || 0) : totalCMO,
             variacao: variacaoCMO
           },
           artistica: {
             valor: await percentualArtistica,
-            meta: 17,
+            meta: metasTrimestre.artistica,
             variacao: variacaoArtistica
           }
         }
