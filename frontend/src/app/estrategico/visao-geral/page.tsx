@@ -79,7 +79,18 @@ export default function VisaoGeralEstrategica() {
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
-  const [trimestreAtual, setTrimestreAtual] = useState(3);
+  // Detectar trimestre atual automaticamente baseado na data
+  const getCurrentQuarter = () => {
+    const now = new Date();
+    const month = now.getMonth() + 1; // getMonth() retorna 0-11, então +1 para 1-12
+    
+    if (month >= 4 && month <= 6) return 2; // Abr-Jun
+    if (month >= 7 && month <= 9) return 3; // Jul-Set
+    if (month >= 10 && month <= 12) return 4; // Out-Dez
+    return 2; // Jan-Mar seria T1, mas como só temos T2-T4, usar T2 como fallback
+  };
+
+  const [trimestreAtual, setTrimestreAtual] = useState(getCurrentQuarter());
   const [anualExpanded, setAnualExpanded] = useState(true);
   const [trimestralExpanded, setTrimestralExpanded] = useState(true);
   const [requestInProgress, setRequestInProgress] = useState(false);
@@ -124,9 +135,9 @@ export default function VisaoGeralEstrategica() {
       const mesAtualTrimestre = {
         2: '2025-06', // T2 (Abr-Jun): usar Junho (último mês completo)
         3: '2025-08', // T3 (Jul-Set): usar Agosto (mês atual) 
-        4: '2025-12'  // T4 (Out-Dez): usar Dezembro
+        4: '2025-10'  // T4 (Out-Dez): usar Outubro (mês atual)
       };
-      return mesAtualTrimestre[trimestre as keyof typeof mesAtualTrimestre] || '2025-08';
+      return mesAtualTrimestre[trimestre as keyof typeof mesAtualTrimestre] || '2025-10';
     };
     
     const mesRetencao = getMesRetencao(trimestreAtual);
