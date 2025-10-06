@@ -324,14 +324,13 @@ export async function GET(request: NextRequest) {
       console.log(`✅ ${eventos.length} eventos encontrados`);
     }
 
-    // Função para calcular número da semana ISO
+    // Função para calcular número da semana ISO (corrigida)
     const getWeekNumber = (date: Date): number => {
-      const target = new Date(date.valueOf());
-      const dayNr = (date.getDay() + 6) % 7;
-      target.setDate(target.getDate() - dayNr + 3);
-      const jan4 = new Date(target.getFullYear(), 0, 4);
-      const dayDiff = (target.getTime() - jan4.getTime()) / 86400000;
-      return 1 + Math.ceil(dayDiff / 7);
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
     };
 
     // Função para obter período da semana ISO
@@ -380,8 +379,13 @@ export async function GET(request: NextRequest) {
     }>();
 
     eventos.forEach(evento => {
-      // Usar a semana já calculada na tabela eventos_base em vez de recalcular
-      const semana = evento.semana;
+      // 🎯 CORREÇÃO: Calcular semana automaticamente se não estiver preenchida
+      let semana = evento.semana;
+      if (!semana) {
+        const dataEvento = new Date(evento.data_evento + 'T12:00:00Z');
+        semana = getWeekNumber(dataEvento);
+        console.log(`📅 Calculando semana para ${evento.data_evento}: semana ${semana}`);
+      }
       
       if (!semanaMap.has(semana)) {
         // NÃO recalcular período - será definido dinamicamente baseado nas datas reais dos eventos
@@ -496,11 +500,10 @@ export async function GET(request: NextRequest) {
     // Converter para array e calcular métricas (mostrar semanas da atual até a 5)
     let semanasConsolidadas = Array.from(semanaMap.values())
       .filter(semana => {
-        // Mostrar apenas semanas com dados E dentro do range correto (36 até 5)
-        if (semana.eventos_count === 0) return false;
+        // 🎯 CORREÇÃO: Mostrar semanas com eventos OU com faturamento (para incluir outubro)
+        if (semana.eventos_count === 0 && semana.faturamento_total === 0) return false;
         
-        // Semana atual é 36, queremos mostrar da 36 até a 5
-        // Para semanas que cruzam o ano (36, 37, 38...), mostrar apenas até a atual
+        // Não mostrar semanas futuras
         if (semana.semana > semanaAtual) return false;
         
         // Para semanas do ano atual, mostrar da atual até a 5
@@ -511,6 +514,8 @@ export async function GET(request: NextRequest) {
 
     // Debug: Verificar se chegou até aqui
     console.log(`🔍 Iniciando cálculo de Couvert e CMO para ${semanasConsolidadas.length} semanas`);
+    console.log(`🔍 Semana atual calculada: ${semanaAtual}`);
+    console.log(`🔍 Semanas encontradas: ${Array.from(semanaMap.keys()).sort((a, b) => b - a).join(', ')}`);
     console.log(`🔍 Total contahubPeriodoData: ${contahubPeriodoData?.length || 0} registros`);
     console.log(`🔍 Total contahubClientesData: ${contahubClientesData?.length || 0} registros`);
     console.log(`🔍 Total niboData: ${niboData?.length || 0} registros`);
