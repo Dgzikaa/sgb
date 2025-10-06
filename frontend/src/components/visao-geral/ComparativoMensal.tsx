@@ -68,7 +68,7 @@ export function ComparativoMensal() {
   
   const [dados, setDados] = useState<DadosComparativos | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mesReferencia, setMesReferencia] = useState<string>('2025-09');
+  const [mesReferencia, setMesReferencia] = useState<string>('2025-10');
 
   const carregarDados = async () => {
     if (!selectedBar?.id) return;
