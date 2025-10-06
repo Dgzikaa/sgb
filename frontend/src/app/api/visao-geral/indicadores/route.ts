@@ -629,16 +629,16 @@ export async function GET(request: Request) {
       const [clientesContahubAnterior, clientesYuzerAnterior, clientesSymplaAnterior] = await Promise.all([
         fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
           'eq_bar_id': barIdNum,
-          'gte_dt_gerencial': startDateAnterior,
-          'lte_dt_gerencial': endDateAnterior
+          'gte_dt_gerencial': startDateAnterior90,
+          'lte_dt_gerencial': endDateAnterior90
         }),
         supabase.from('yuzer_produtos').select('quantidade, produto_nome').eq('bar_id', barIdNum)
-          .gte('data_evento', startDateAnterior)
-          .lte('data_evento', endDateAnterior),
+          .gte('data_evento', startDateAnterior90)
+          .lte('data_evento', endDateAnterior90),
         fetchAllData(supabase, 'sympla_resumo', 'checkins', {
           'eq_bar_id': barIdNum,
-          'gte_data_evento': startDateAnterior,
-          'lte_data_evento': endDateAnterior
+          'gte_data_evento': startDateAnterior90,
+          'lte_data_evento': endDateAnterior90
         })
       ]);
       
@@ -763,8 +763,8 @@ export async function GET(request: Request) {
       }
       
       // ✅ COMPARAÇÃO CMO COM TRIMESTRE ANTERIOR
-      const cmoTrimestreAnteriorStart = startDateAnterior;
-      const cmoTrimestreAnteriorEnd = endDateAnterior;
+      const cmoTrimestreAnteriorStart = startDateAnterior90;
+      const cmoTrimestreAnteriorEnd = endDateAnterior90;
       
       // Buscar CMO do trimestre anterior
       const cmoAnteriorData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
