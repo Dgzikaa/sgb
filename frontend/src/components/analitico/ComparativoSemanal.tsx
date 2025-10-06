@@ -123,6 +123,7 @@ const DIAS_SEMANA = [
 ];
 
 const MESES_OPCOES = [
+  { value: '2025-10', label: 'Outubro 2025' },
   { value: '2025-09', label: 'Setembro 2025' },
   { value: '2025-08', label: 'Agosto 2025' },
   { value: '2025-07', label: 'Julho 2025' },
@@ -144,7 +145,7 @@ export function ComparativoSemanal() {
   const [dadosValorTotal, setDadosValorTotal] = useState<DadosValorTotal[]>([]);
   const [loading, setLoading] = useState(true);
   const [diaSelecionado, setDiaSelecionado] = useState<string>('todos'); // Todos os dias por padrão
-  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-09']); // Apenas setembro por padrão
+  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-10']); // Outubro por padrão (mês atual)
   const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('individual'); // Modo Individual por padrão
   const [linhasVisiveis, setLinhasVisiveis] = useState<LinhaVisibilidade>({
     atual: true,
