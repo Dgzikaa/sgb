@@ -1,0 +1,35 @@
+# dependências / builds
+node_modules
+.next
+.vercel
+dist
+build
+out
+
+# IDE / VCS
+.git
+.vscode
+.idea
+.husky
+
+# dados pesados / estáticos
+public
+logs
+tmp
+cache
+database
+supabase/.branches
+supabase/.temp
+
+# arquivos grandes
+*.log
+*.csv
+*.json
+*.sqlite
+*.db
+*.sql
+*.zip
+*.rar
+*.png
+*.jpg
+*.mp4

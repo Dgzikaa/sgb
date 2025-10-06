@@ -145,7 +145,7 @@ export function ComparativoSemanal() {
   const [dadosValorTotal, setDadosValorTotal] = useState<DadosValorTotal[]>([]);
   const [loading, setLoading] = useState(true);
   const [diaSelecionado, setDiaSelecionado] = useState<string>('todos'); // Todos os dias por padrão
-  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-10']); // Outubro por padrão (mês atual)
+  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>(['2025-10', '2025-09', '2025-08']); // 3 meses mais recentes por padrão
   const [modoComparacao, setModoComparacao] = useState<'individual' | 'mes_x_mes'>('individual'); // Modo Individual por padrão
   const [linhasVisiveis, setLinhasVisiveis] = useState<LinhaVisibilidade>({
     atual: true,
@@ -605,10 +605,10 @@ export function ComparativoSemanal() {
                   setMesesSelecionados(['2025-09']);
                   console.log('🎯 Modo Individual: Resetado para apenas Setembro');
                 }
-                // 🎯 Quando muda para Mês x Mês, usar padrão completo
+                // 🎯 Quando muda para Mês x Mês, usar apenas 3 meses mais recentes
                 else if (value === 'mes_x_mes') {
-                  setMesesSelecionados(['2025-09', '2025-08', '2025-07', '2025-06', '2025-05', '2025-04']);
-                  console.log('🎯 Modo Mês x Mês: Resetado para padrão completo');
+                  setMesesSelecionados(['2025-10', '2025-09', '2025-08']);
+                  console.log('🎯 Modo Mês x Mês: Resetado para 3 meses mais recentes');
                 }
               }}
               className="bg-transparent text-sm text-gray-900 dark:text-white border-none outline-none"
@@ -635,9 +635,9 @@ export function ComparativoSemanal() {
             </SelectContent>
           </Select>
 
-          {/* Seleção de Meses - Sempre visível */}
+          {/* Seleção de Meses - Limitado a 3 meses mais recentes */}
           <div className="flex flex-wrap gap-2">
-            {MESES_OPCOES.slice(0, 6).map(mes => (
+            {MESES_OPCOES.slice(0, 3).map(mes => (
               <label 
                 key={mes.value}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${

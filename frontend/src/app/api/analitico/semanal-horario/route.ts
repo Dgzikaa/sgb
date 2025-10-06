@@ -142,54 +142,88 @@ export async function GET(request: NextRequest) {
     const dadosPorSemana: { [data: string]: { [hora: number]: number } } = {};
     const datasComDados: string[] = [];
 
-    // Processar TODAS as datas encontradas (sem limitação)
-    let datasParaProcessar = datasParaBuscar;
-    console.log(`🎯 Processando TODAS as ${datasParaProcessar.length} datas encontradas:`, datasParaProcessar);
+    // 🚀 OTIMIZAÇÃO: Limitar processamento para evitar timeout
+    // Por padrão, processar apenas as últimas 12 datas (3 meses × 4 semanas)
+    const LIMITE_DATAS_PROCESSAMENTO = 12;
+    let datasParaProcessar = datasParaBuscar.slice(0, LIMITE_DATAS_PROCESSAMENTO);
+    
+    console.log(`🚀 OTIMIZAÇÃO: Limitando processamento de ${datasParaBuscar.length} para ${datasParaProcessar.length} datas mais recentes`);
+    console.log(`🎯 Datas que serão processadas:`, datasParaProcessar);
+
+    // 🚀 OTIMIZAÇÃO: Buscar dados em batch para melhor performance
+    console.log(`📊 Buscando dados de eventos em batch para ${datasParaProcessar.length} datas`);
+    
+    const { data: eventosData, error: errorEventos } = await supabase
+      .from('eventos_base')
+      .select('data_evento, real_r, dia_semana, nome, sympla_liquido, yuzer_liquido')
+      .in('data_evento', datasParaProcessar)
+      .eq('bar_id', barIdNum);
+
+    if (errorEventos) {
+      console.error('❌ Erro ao buscar eventos em batch:', errorEventos);
+    }
+
+    // Criar mapa de eventos por data para acesso rápido
+    const eventosPorData = new Map<string, any>();
+    (eventosData || []).forEach(evento => {
+      eventosPorData.set(evento.data_evento, evento);
+    });
+
+    // 🚀 OTIMIZAÇÃO: Buscar dados ContaHub em batch
+    console.log(`📊 Buscando dados ContaHub em batch para ${datasParaProcessar.length} datas`);
+    
+    // Buscar faturamento por hora em batch
+    const { data: faturamentoDiaData, error: errorFaturamentoDia } = await supabase
+      .from('contahub_fatporhora')
+      .select('vd_dtgerencial, hora, valor, qtd')
+      .in('vd_dtgerencial', datasParaProcessar)
+      .eq('bar_id', barIdNum)
+      .gte('hora', 17)
+      .lte('hora', 26); // 17-23 + 24-26 (madrugada)
+
+    // Buscar dados de período em batch
+    const { data: dadosPeriodoData, error: errorPeriodo } = await supabase
+      .from('contahub_periodo')
+      .select('dt_gerencial, pessoas, vr_couvert, vr_pagamentos, vr_repique, vr_produtos, vr_desconto')
+      .in('dt_gerencial', datasParaProcessar)
+      .eq('bar_id', barIdNum);
+
+    if (errorFaturamentoDia || errorPeriodo) {
+      console.error('❌ Erro ao buscar dados ContaHub em batch:', errorFaturamentoDia || errorPeriodo);
+    }
+
+    // Criar mapas para acesso rápido
+    const faturamentoPorData = new Map<string, any[]>();
+    const periodosPorData = new Map<string, any[]>();
+
+    (faturamentoDiaData || []).forEach(item => {
+      const data = item.vd_dtgerencial;
+      if (!faturamentoPorData.has(data)) {
+        faturamentoPorData.set(data, []);
+      }
+      faturamentoPorData.get(data)!.push(item);
+    });
+
+    (dadosPeriodoData || []).forEach(item => {
+      const data = item.dt_gerencial;
+      if (!periodosPorData.has(data)) {
+        periodosPorData.set(data, []);
+      }
+      periodosPorData.get(data)!.push(item);
+    });
 
     for (const data of datasParaProcessar) {
       console.log(`📊 Processando faturamento por hora para ${data}`);
 
-      // 🔍 PRIMEIRO: Tentar buscar dados do planejamento comercial (eventos_base)
-      // Incluir dados históricos do Yuzer + Sympla para meses anteriores a setembro
-      const { data: eventoData, error: errorEvento } = await supabase
-        .from('eventos_base')
-        .select('real_r, dia_semana, nome, sympla_liquido, yuzer_liquido')
-        .eq('data_evento', data)
-        .eq('bar_id', barIdNum)
-        .single();
+      // 🔍 PRIMEIRO: Buscar dados do evento (já carregado em batch)
+      const eventoData = eventosPorData.get(data);
 
       console.log(`📋 Evento encontrado para ${data}:`, eventoData);
 
-      // 1. Buscar dados oficiais por hora (produtos) - igual ao resumo
-      // Horários 17:00-23:00 do dia
-      const { data: faturamentoDia, error: errorFaturamentoDia } = await supabase
-        .from('contahub_fatporhora')
-        .select('hora, valor, qtd')
-        .eq('vd_dtgerencial', data)
-        .eq('bar_id', barIdNum)
-        .gte('hora', 17)
-        .lte('hora', 23);
-
-      // Horários 24h, 25h, 26h (que são 00h, 01h, 02h) do mesmo dia
-      const { data: faturamentoMadrugada, error: errorFaturamentoMadrugada } = await supabase
-        .from('contahub_fatporhora')
-        .select('hora, valor, qtd')
-        .eq('vd_dtgerencial', data)
-        .eq('bar_id', barIdNum)
-        .gte('hora', 24)
-        .lte('hora', 26);
-
-      // 2. Buscar dados de faturamento total (vr_pagamentos = TOTAL do dia)
-      const { data: dadosPeriodo, error: errorPeriodo } = await supabase
-        .from('contahub_periodo')
-        .select('pessoas, vr_couvert, vr_pagamentos, vr_repique, vr_produtos, vr_desconto')
-        .eq('dt_gerencial', data)
-        .eq('bar_id', barIdNum);
-
-      if (errorFaturamentoDia || errorFaturamentoMadrugada || errorPeriodo) {
-        console.error(`❌ Erro ao buscar dados ContaHub para ${data}:`, errorFaturamentoDia || errorFaturamentoMadrugada || errorPeriodo);
-        continue;
-      }
+      // Buscar dados já carregados em batch
+      const faturamentoDia = faturamentoPorData.get(data)?.filter(item => item.hora >= 17 && item.hora <= 23) || [];
+      const faturamentoMadrugada = faturamentoPorData.get(data)?.filter(item => item.hora >= 24 && item.hora <= 26) || [];
+      const dadosPeriodo = periodosPorData.get(data) || [];
 
       // 🔧 ESTRUTURA CORRETA: vr_pagamentos = VALOR TOTAL DE FATURAMENTO DO DIA
       const totalPagamentos = dadosPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0) || 0;
@@ -379,24 +413,37 @@ export async function GET(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Buscar dados de produtos para criar resumo por data
+    // 🚀 OTIMIZAÇÃO: Buscar dados de produtos em batch para criar resumo por data
+    console.log(`📊 Buscando produtos em batch para ${datasComDados.length} datas`);
+    
+    const { data: produtosData, error: errorProdutos } = await supabase
+      .from('contahub_analitico')
+      .select('trn_dtgerencial, prd_desc, grp_desc, qtd, valorfinal')
+      .in('trn_dtgerencial', datasComDados)
+      .eq('bar_id', barIdNum)
+      .order('valorfinal', { ascending: false });
+
+    if (errorProdutos) {
+      console.error('❌ Erro ao buscar produtos em batch:', errorProdutos);
+    }
+
+    // Criar mapa de produtos por data
+    const produtosPorData = new Map<string, any[]>();
+    (produtosData || []).forEach(produto => {
+      const data = produto.trn_dtgerencial;
+      if (!produtosPorData.has(data)) {
+        produtosPorData.set(data, []);
+      }
+      produtosPorData.get(data)!.push(produto);
+    });
+
     const resumoPorData: ResumoPorData[] = [];
     
     for (const data of datasComDados) {
-      console.log(`📊 Buscando produtos para ${data}`);
+      console.log(`📊 Processando produtos para ${data}`);
       
-      // Buscar produtos do dia
-      const { data: produtosDia, error: errorProdutos } = await supabase
-        .from('contahub_analitico')
-        .select('prd_desc, grp_desc, qtd, valorfinal')
-        .eq('trn_dtgerencial', data)
-        .eq('bar_id', barIdNum)
-        .order('valorfinal', { ascending: false });
-
-      if (errorProdutos) {
-        console.error(`❌ Erro ao buscar produtos para ${data}:`, errorProdutos);
-        continue;
-      }
+      // Buscar produtos já carregados em batch
+      const produtosDia = produtosPorData.get(data) || [];
 
       // Processar dados dos produtos
       const produtosAgregados = new Map<string, { qtd: number, valor: number }>();
