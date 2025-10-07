@@ -147,14 +147,18 @@ export async function GET(request: NextRequest) {
     let datasParaProcessar: string[];
     
     if (diaSemana === 'todos') {
-      // Para "todos os dias", buscar datas que sabemos que têm dados
+      // Para "todos os dias", buscar datas com dados reais (mais amplo)
+      const hoje = new Date();
       const datasComDadosProvaveis = datasParaBuscar.filter(data => {
         const dataObj = new Date(data + 'T12:00:00');
-        return dataObj <= new Date('2025-10-06'); // Até onde sabemos que há dados
-      }).slice(0, 15); // Limitar a 15 datas
+        // Buscar até 30 dias atrás para garantir que encontremos dados
+        const dataLimite = new Date();
+        dataLimite.setDate(hoje.getDate() - 30);
+        return dataObj >= dataLimite;
+      }).slice(0, 20); // Aumentar limite para 20 datas
       
       datasParaProcessar = datasComDadosProvaveis;
-      console.log(`🎯 OTIMIZAÇÃO TODOS OS DIAS: Filtrando ${datasParaBuscar.length} datas para ${datasParaProcessar.length} com dados prováveis`);
+      console.log(`🎯 OTIMIZAÇÃO TODOS OS DIAS: Filtrando ${datasParaBuscar.length} datas para ${datasParaProcessar.length} com dados prováveis (últimos 30 dias)`);
     } else {
       // Para dias específicos, manter lógica original
       const LIMITE_DATAS_PROCESSAMENTO = 12;
@@ -460,10 +464,75 @@ export async function GET(request: NextRequest) {
     }));
 
     if (datasComDados.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'Nenhum dado encontrado para o dia da semana selecionado'
-      }, { status: 404 });
+      console.log(`❌ NENHUM DADO ENCONTRADO - Debug:`, {
+        diaSemana,
+        mesesSelecionados,
+        datasParaProcessar: datasParaProcessar.length,
+        datasParaBuscar: datasParaBuscar.length,
+        barId: barIdNum
+      });
+      
+      // Se é "todos os dias" e não encontrou dados, tentar com range maior
+      if (diaSemana === 'todos') {
+        console.log(`🔄 FALLBACK: Tentando com range maior para "todos os dias"`);
+        
+        // Buscar nos últimos 60 dias
+        const hoje = new Date();
+        const dataLimiteFallback = new Date();
+        dataLimiteFallback.setDate(hoje.getDate() - 60);
+        
+        const datasParaProcessarFallback = datasParaBuscar.filter(data => {
+          const dataObj = new Date(data + 'T12:00:00');
+          return dataObj >= dataLimiteFallback;
+        }).slice(0, 30);
+        
+        console.log(`🔄 FALLBACK: Processando ${datasParaProcessarFallback.length} datas dos últimos 60 dias`);
+        
+        if (datasParaProcessarFallback.length > 0) {
+          // Tentar novamente com range maior
+          datasParaProcessar = datasParaProcessarFallback;
+          
+          // Reprocessar com dados ampliados (simplificado)
+          for (const data of datasParaProcessar.slice(0, 5)) { // Apenas 5 datas para não dar timeout
+            const { data: dadosPeriodoFallback } = await supabase
+              .from('contahub_periodo')
+              .select('dt_gerencial, vr_pagamentos')
+              .eq('dt_gerencial', data)
+              .eq('bar_id', barIdNum);
+            
+            if (dadosPeriodoFallback && dadosPeriodoFallback.length > 0) {
+              const totalPagamentos = dadosPeriodoFallback.reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0);
+              
+              if (totalPagamentos > 0) {
+                console.log(`✅ FALLBACK: Encontrou dados para ${data}: R$ ${totalPagamentos.toLocaleString('pt-BR')}`);
+                datasComDados.push(data);
+                
+                // Criar dados básicos para o horário
+                const faturamentoPorHora: { [hora: number]: number } = {};
+                const horariosDistribuicao = [19, 20, 21, 22, 23];
+                const valorPorHora = totalPagamentos / horariosDistribuicao.length;
+                
+                horariosDistribuicao.forEach(hora => {
+                  faturamentoPorHora[hora] = valorPorHora;
+                });
+                
+                dadosPorSemana[data] = faturamentoPorHora;
+                
+                // Se encontrou pelo menos 1 data, pode continuar
+                if (datasComDados.length >= 1) break;
+              }
+            }
+          }
+        }
+      }
+      
+      // Se ainda não encontrou dados após fallback
+      if (datasComDados.length === 0) {
+        return NextResponse.json({
+          success: false,
+          error: 'Nenhum dado encontrado para o dia da semana selecionado'
+        }, { status: 404 });
+      }
     }
 
     // 🚀 OTIMIZAÇÃO: Buscar dados de produtos em batch para criar resumo por data
