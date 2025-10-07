@@ -32,7 +32,10 @@ export function usePermissions(): PermissionsHook {
   useEffect(() => {
     // Carregar dados do usuário do localStorage
     const loadUserData = () => {
+      console.log('🔍 usePermissions loadUserData - isClient:', isClient);
+      
       if (!isClient) {
+        console.log('🔍 usePermissions - não é client, finalizando loading');
         setLoading(false);
         setIsInitialized(true);
         return;
@@ -40,10 +43,20 @@ export function usePermissions(): PermissionsHook {
 
       try {
         const userData = safeLocalStorage.getItem('sgb_user');
+        console.log('🔍 usePermissions - userData do localStorage:', userData ? 'existe' : 'null');
         
         if (userData) {
           const parsedUser = JSON.parse(userData);
+          console.log('🔍 usePermissions - parsedUser:', {
+            hasId: !!parsedUser.id,
+            hasEmail: !!parsedUser.email,
+            hasModulos: !!parsedUser.modulos_permitidos,
+            role: parsedUser.role,
+            ativo: parsedUser.ativo
+          });
+          
           if (parsedUser && parsedUser.id && parsedUser.email && parsedUser.modulos_permitidos) {
+            console.log('🔍 usePermissions - usuário válido, definindo user e finalizando loading');
             setUser(parsedUser);
             setLoading(false);
             setIsInitialized(true);
