@@ -80,6 +80,9 @@ interface PlanejamentoData {
   t_bar: number;
   fat_19h: number;
   
+  // Stockout
+  percent_stockout: number;
+  
   // Campos manuais para domingos
   faturamento_couvert_manual?: number;
   faturamento_bar_manual?: number;
@@ -118,6 +121,7 @@ interface EventoEdicaoCompleta {
   percent_b: number;
   percent_d: number;
   percent_c: number;
+  percent_stockout: number;
   t_coz: number;
   t_bar: number;
   // Campos manuais para domingos
@@ -289,6 +293,7 @@ export default function PlanejamentoComercialPage() {
       percent_b: evento.percent_b || 0,
       percent_d: evento.percent_d || 0,
       percent_c: evento.percent_c || 0,
+      percent_stockout: evento.percent_stockout || 0,
       t_coz: evento.t_coz || 0,
       t_bar: evento.t_bar || 0,
       // Campos manuais para domingos
@@ -581,6 +586,7 @@ export default function PlanejamentoComercialPage() {
                       <th className="px-1 py-0.5 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight border-r border-gray-200 dark:border-gray-700">%B</th>
                       <th className="px-1 py-0.5 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight border-r border-gray-200 dark:border-gray-700">%D</th>
                       <th className="px-1 py-0.5 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight border-r border-gray-200 dark:border-gray-700">%C</th>
+                      <th className="px-1 py-0.5 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight border-r border-gray-200 dark:border-gray-700">%S</th>
                       <th className="px-1 py-0.5 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight border-r border-gray-200 dark:border-gray-700">T.Coz</th>
                       <th className="px-1 py-0.5 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight border-r border-gray-200 dark:border-gray-700">T.Bar</th>
                       <th className="px-1 py-0.5 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">Ações</th>
@@ -660,6 +666,15 @@ export default function PlanejamentoComercialPage() {
                         </td>
                         <td className="px-1 py-0.5 text-right text-xs text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
                           {evento.percent_c > 0 ? evento.percent_c.toFixed(1) + '%' : '-'}
+                        </td>
+                        <td className="px-1 py-0.5 text-right text-xs border-r border-gray-200 dark:border-gray-700">
+                          <span className={`font-medium ${
+                            evento.percent_stockout <= 10 ? 'text-green-600 dark:text-green-400' : 
+                            evento.percent_stockout <= 25 ? 'text-yellow-600 dark:text-yellow-400' : 
+                            'text-red-600 dark:text-red-400'
+                          }`}>
+                            {evento.percent_stockout > 0 ? evento.percent_stockout.toFixed(1) + '%' : '-'}
+                          </span>
                         </td>
                         <td className="px-1 py-0.5 text-right text-xs border-r border-gray-200 dark:border-gray-700">
                           <span className={`font-medium ${evento.t_coz_green ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
