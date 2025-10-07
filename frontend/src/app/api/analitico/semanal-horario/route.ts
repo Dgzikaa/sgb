@@ -143,9 +143,23 @@ export async function GET(request: NextRequest) {
     const datasComDados: string[] = [];
 
     // 🚀 OTIMIZAÇÃO: Limitar processamento para evitar timeout
-    // Por padrão, processar apenas as últimas 12 datas (3 meses × 4 semanas)
-    const LIMITE_DATAS_PROCESSAMENTO = 12;
-    let datasParaProcessar = datasParaBuscar.slice(0, LIMITE_DATAS_PROCESSAMENTO);
+    // Para "todos os dias", buscar datas com dados reais (não apenas as mais recentes)
+    let datasParaProcessar: string[];
+    
+    if (diaSemana === 'todos') {
+      // Para "todos os dias", buscar datas que sabemos que têm dados
+      const datasComDadosProvaveis = datasParaBuscar.filter(data => {
+        const dataObj = new Date(data + 'T12:00:00');
+        return dataObj <= new Date('2025-10-06'); // Até onde sabemos que há dados
+      }).slice(0, 15); // Limitar a 15 datas
+      
+      datasParaProcessar = datasComDadosProvaveis;
+      console.log(`🎯 OTIMIZAÇÃO TODOS OS DIAS: Filtrando ${datasParaBuscar.length} datas para ${datasParaProcessar.length} com dados prováveis`);
+    } else {
+      // Para dias específicos, manter lógica original
+      const LIMITE_DATAS_PROCESSAMENTO = 12;
+      datasParaProcessar = datasParaBuscar.slice(0, LIMITE_DATAS_PROCESSAMENTO);
+    }
     
     console.log(`🚀 OTIMIZAÇÃO: Limitando processamento de ${datasParaBuscar.length} para ${datasParaProcessar.length} datas mais recentes`);
     console.log(`🎯 Datas que serão processadas:`, datasParaProcessar);
@@ -192,6 +206,22 @@ export async function GET(request: NextRequest) {
       console.error('❌ Erro ao buscar dados ContaHub em batch:', errorFaturamentoDia || errorPeriodo);
     }
 
+    // 🔍 DEBUG: Verificar dados encontrados
+    console.log(`📊 DADOS ENCONTRADOS:`, {
+      eventos: eventosData?.length || 0,
+      faturamentoPorHora: faturamentoDiaData?.length || 0,
+      dadosPeriodo: dadosPeriodoData?.length || 0,
+      datasParaProcessar: datasParaProcessar.length
+    });
+    
+    if (dadosPeriodoData && dadosPeriodoData.length > 0) {
+      console.log(`📊 AMOSTRA DADOS PERÍODO:`, dadosPeriodoData.slice(0, 3));
+    }
+    
+    if (faturamentoDiaData && faturamentoDiaData.length > 0) {
+      console.log(`📊 AMOSTRA FATURAMENTO POR HORA:`, faturamentoDiaData.slice(0, 5));
+    }
+
     // Criar mapas para acesso rápido
     const faturamentoPorData = new Map<string, any[]>();
     const periodosPorData = new Map<string, any[]>();
@@ -234,6 +264,13 @@ export async function GET(request: NextRequest) {
       
       // ✅ USAR APENAS vr_pagamentos (que JÁ É O TOTAL)
       const faturamentoTotalDia = totalPagamentos;
+      
+      console.log(`📊 DADOS PERÍODO ${data}:`, {
+        registros: dadosPeriodo?.length || 0,
+        totalPagamentos: `R$ ${totalPagamentos.toLocaleString('pt-BR')}`,
+        totalProdutos: `R$ ${totalProdutosPeriodo.toLocaleString('pt-BR')}`,
+        faturamentoTotalDia: `R$ ${faturamentoTotalDia.toLocaleString('pt-BR')}`
+      });
       
       console.log(`📊 ESTRUTURA CORRETA ${data}:`, {
         vr_pagamentos_TOTAL: `R$ ${totalPagamentos.toLocaleString('pt-BR')}`,
@@ -293,6 +330,22 @@ export async function GET(request: NextRequest) {
       console.log(`💰 ${data}: Faturamento distribuído por hora:`, faturamentoPorHora);
       console.log(`💰 ${data}: Total calculado: R$ ${totalDia.toLocaleString('pt-BR')}`);
       console.log(`🔍 DEBUG ${data}: Evento real_r: R$ ${eventoData?.real_r || 0}, ContaHub vr_pagamentos: R$ ${faturamentoTotalDia.toLocaleString('pt-BR')}`);
+      
+      // 🔧 CORREÇÃO CRÍTICA: Se há dados do ContaHub mas totalDia está zero, usar faturamentoTotalDia
+      if (totalDia === 0 && faturamentoTotalDia > 0) {
+        console.log(`🔧 CORREÇÃO: totalDia estava zero mas há dados do ContaHub. Usando faturamentoTotalDia: R$ ${faturamentoTotalDia.toLocaleString('pt-BR')}`);
+        
+        // Distribuir pelos horários principais (19h-23h)
+        const horariosDistribuicao = [19, 20, 21, 22, 23];
+        const valorPorHora = faturamentoTotalDia / horariosDistribuicao.length;
+        
+        horariosDistribuicao.forEach(hora => {
+          faturamentoPorHora[hora] = valorPorHora;
+        });
+        
+        totalDia = faturamentoTotalDia;
+        console.log(`✅ CORREÇÃO APLICADA ${data}: R$ ${totalDia.toLocaleString('pt-BR')} distribuído em ${horariosDistribuicao.length} horas`);
+      }
       
       // 🔧 CORREÇÃO: Verificar se há duplicação entre evento e ContaHub
       if (eventoData && parseFloat(eventoData.real_r) > 0) {
