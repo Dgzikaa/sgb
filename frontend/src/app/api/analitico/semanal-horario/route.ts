@@ -195,10 +195,11 @@ export async function GET(request: NextRequest) {
       datasParaProcessar = datasUltimaSemana;
       console.log(`🎯 ÚLTIMA SEMANA SELECIONADA: ${datasParaProcessar.length} datas - ${datasParaProcessar[0]} até ${datasParaProcessar[datasParaProcessar.length - 1]}`);
     } else {
-      // Para dias específicos, manter lógica original
-      const LIMITE_DATAS_PROCESSAMENTO = 12;
-      datasParaProcessar = datasParaBuscar.slice(0, LIMITE_DATAS_PROCESSAMENTO);
-      console.log(`🎯 DIA ESPECÍFICO (${diaSemana}): ${datasParaProcessar.length} datas`);
+      // Para dias específicos, buscar TODAS as ocorrências do dia nos meses selecionados
+      const LIMITE_DATAS_DIA_ESPECIFICO = 50; // Aumentar limite para pegar mais datas
+      datasParaProcessar = datasParaBuscar.slice(0, LIMITE_DATAS_DIA_ESPECIFICO);
+      console.log(`🎯 DIA ESPECÍFICO (${diaSemana}): Processando ${datasParaProcessar.length} de ${datasParaBuscar.length} datas disponíveis`);
+      console.log(`🎯 Todas as ${diaSemana}s encontradas:`, datasParaProcessar);
     }
     
     console.log(`🚀 OTIMIZAÇÃO: Limitando processamento de ${datasParaBuscar.length} para ${datasParaProcessar.length} datas mais recentes`);
