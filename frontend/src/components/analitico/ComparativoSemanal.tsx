@@ -172,7 +172,7 @@ export function ComparativoSemanal() {
 
   const carregarDados = async () => {
     if (!selectedBar?.id) {
-      console.error('❌ Bar não selecionado');
+      console.log('⏳ Aguardando seleção do bar...');
       return;
     }
     
@@ -248,7 +248,10 @@ export function ComparativoSemanal() {
   };
 
   useEffect(() => {
-    carregarDados();
+    // Só carregar dados quando o bar estiver selecionado
+    if (selectedBar?.id) {
+      carregarDados();
+    }
   }, [selectedBar?.id, diaSelecionado, mesesSelecionados, modoComparacao]);
 
   const formatarMoeda = (valor: number) => {
