@@ -86,11 +86,29 @@ interface HistoricoData {
     media_stockout: string;
     media_disponibilidade: string;
   };
-  historico: Array<{
+  analise_por_dia_semana: Array<{
+    dia_semana: string;
+    dia_numero: number;
+    total_ocorrencias: number;
+    media_stockout: string;
+    media_disponibilidade: string;
+    melhor_dia: boolean;
+    pior_dia: boolean;
+  }>;
+  analise_semanal: Array<{
+    semana_inicio: string;
+    semana_fim: string;
+    numero_semana: number;
+    dias_com_dados: number;
+    media_stockout: string;
+    media_disponibilidade: string;
+  }>;
+  historico_diario: Array<{
     data_referencia: string;
-    total_produtos: number;
-    produtos_ativos: number;
-    produtos_inativos: number;
+    dia_semana: string;
+    total_produtos_ativos: number;
+    produtos_disponiveis: number;
+    produtos_stockout: number;
     percentual_stockout: string;
     percentual_disponibilidade: string;
   }>;
@@ -163,9 +181,28 @@ export default function StockoutPage() {
   const buscarHistoricoStockout = async () => {
     setLoading(true);
     try {
-      // Por enquanto, vamos desabilitar o histórico até implementarmos a nova API
-      toast.info('Funcionalidade de histórico em desenvolvimento');
-      setHistoricoData(null);
+      const response = await fetch('/api/analitico/stockout-historico', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data_inicio: dataInicio,
+          data_fim: dataFim,
+          bar_id: 3,
+          filtros: filtrosAtivos
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        setHistoricoData(result.data);
+        toast.success(`Histórico carregado: ${result.data.resumo.total_dias} dias analisados`);
+      } else {
+        toast.error(result.error || 'Erro ao buscar histórico de stockout');
+        setHistoricoData(null);
+      }
     } catch (error) {
       console.error('Erro ao buscar histórico de stockout:', error);
       toast.error('Erro ao buscar histórico de stockout');
@@ -265,7 +302,7 @@ export default function StockoutPage() {
                 Controle de Stockout
               </h1>
               <p className="card-description-dark">
-                Monitore a disponibilidade de produtos do bar
+                Monitore a disponibilidade de produtos do bar (produtos ativos='S' e venda='N' = stockout)
               </p>
             </div>
             <Button
@@ -690,6 +727,99 @@ export default function StockoutPage() {
                     </Card>
                   </div>
 
+                  {/* Análise por Dia da Semana */}
+                  <Card className="card-dark">
+                    <CardHeader>
+                      <CardTitle className="card-title-dark flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        Análise por Dia da Semana
+                      </CardTitle>
+                      <CardDescription className="card-description-dark">
+                        Média de stockout por dia da semana (baseado em produtos ativos='S' e venda='N')
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+                        {historicoData.analise_por_dia_semana.map((dia, index) => (
+                          <div key={index} className={`p-4 rounded-lg border-2 ${
+                            dia.melhor_dia ? 'border-green-500 bg-green-50 dark:bg-green-900/20' :
+                            dia.pior_dia ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
+                            'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'
+                          }`}>
+                            <div className="text-center">
+                              <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
+                                {dia.dia_semana}
+                              </h4>
+                              <div className={`text-lg font-bold ${getStockoutColor(dia.media_stockout)}`}>
+                                {dia.media_stockout}
+                              </div>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                {dia.total_ocorrencias} dia{dia.total_ocorrencias !== 1 ? 's' : ''}
+                              </p>
+                              {dia.melhor_dia && (
+                                <Badge className="badge-success mt-2">
+                                  Melhor
+                                </Badge>
+                              )}
+                              {dia.pior_dia && (
+                                <Badge className="badge-error mt-2">
+                                  Pior
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Análise Semanal */}
+                  {historicoData.analise_semanal.length > 1 && (
+                    <Card className="card-dark">
+                      <CardHeader>
+                        <CardTitle className="card-title-dark flex items-center gap-2">
+                          <TrendingDown className="h-5 w-5" />
+                          Análise Semanal
+                        </CardTitle>
+                        <CardDescription className="card-description-dark">
+                          Média de stockout por semana
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {historicoData.analise_semanal.map((semana, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900 dark:text-white">
+                                  Semana {semana.numero_semana}
+                                </h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {formatarData(semana.semana_inicio)} - {formatarData(semana.semana_fim)} • {semana.dias_com_dados} dias
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <div className={`text-lg font-bold ${getStockoutColor(semana.media_stockout)}`}>
+                                  {semana.media_stockout}
+                                </div>
+                                <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
+                                  <div 
+                                    className={`h-2 rounded-full ${
+                                      parseFloat(semana.media_stockout.replace('%', '')) <= 10 ? 'bg-green-500' :
+                                      parseFloat(semana.media_stockout.replace('%', '')) <= 25 ? 'bg-yellow-500' :
+                                      parseFloat(semana.media_stockout.replace('%', '')) <= 50 ? 'bg-orange-500' :
+                                      'bg-red-500'
+                                    }`}
+                                    style={{ width: `${Math.min(parseFloat(semana.media_stockout.replace('%', '')), 100)}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* Tabela de Histórico */}
                   <Card className="card-dark">
                     <CardHeader>
@@ -697,7 +827,7 @@ export default function StockoutPage() {
                         Histórico Detalhado
                       </CardTitle>
                       <CardDescription className="card-description-dark">
-                        Dados diários de stockout do período selecionado
+                        Dados diários de stockout do período selecionado (apenas produtos ativos)
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -706,27 +836,31 @@ export default function StockoutPage() {
                           <thead className="table-header-dark">
                             <tr className="table-row-dark">
                               <th className="table-cell-dark text-left">Data</th>
-                              <th className="table-cell-dark text-center">Total Produtos</th>
-                              <th className="table-cell-dark text-center">Ativos</th>
-                              <th className="table-cell-dark text-center">Inativos</th>
+                              <th className="table-cell-dark text-center">Dia da Semana</th>
+                              <th className="table-cell-dark text-center">Produtos Ativos</th>
+                              <th className="table-cell-dark text-center">Disponíveis</th>
+                              <th className="table-cell-dark text-center">Stockout</th>
                               <th className="table-cell-dark text-center">% Stockout</th>
                               <th className="table-cell-dark text-center">% Disponibilidade</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {historicoData.historico.map((dia, index) => (
+                            {historicoData.historico_diario.map((dia, index) => (
                               <tr key={index} className="table-row-dark">
                                 <td className="table-cell-dark font-medium">
                                   {formatarData(dia.data_referencia)}
                                 </td>
+                                <td className="table-cell-dark text-center text-gray-600 dark:text-gray-400">
+                                  {dia.dia_semana}
+                                </td>
                                 <td className="table-cell-dark text-center">
-                                  {dia.total_produtos}
+                                  {dia.total_produtos_ativos}
                                 </td>
                                 <td className="table-cell-dark text-center text-green-600 dark:text-green-400">
-                                  {dia.produtos_ativos}
+                                  {dia.produtos_disponiveis}
                                 </td>
                                 <td className="table-cell-dark text-center text-red-600 dark:text-red-400">
-                                  {dia.produtos_inativos}
+                                  {dia.produtos_stockout}
                                 </td>
                                 <td className="table-cell-dark text-center">
                                   <Badge className={getStockoutBadgeVariant(dia.percentual_stockout)}>
