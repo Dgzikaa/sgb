@@ -152,14 +152,17 @@ export async function GET(request: NextRequest) {
       
       const hoje = new Date();
       
-      // Primeiro: tentar últimos 7 dias
-      const dataLimite7Dias = new Date();
-      dataLimite7Dias.setDate(hoje.getDate() - 7);
-      
-      let datasUltimaSemana = datasParaBuscar.filter(data => {
-        const dataObj = new Date(data + 'T12:00:00');
-        return dataObj >= dataLimite7Dias;
-      }).slice(0, 7);
+    // Primeiro: tentar últimos 7 dias (incluindo hoje)
+    const dataLimite7Dias = new Date();
+    dataLimite7Dias.setDate(hoje.getDate() - 7);
+    
+    let datasUltimaSemana = datasParaBuscar.filter(data => {
+      const dataObj = new Date(data + 'T12:00:00');
+      return dataObj >= dataLimite7Dias && dataObj <= hoje;
+    }).slice(0, 7);
+    
+    console.log(`🎯 Buscando últimos 7 dias desde ${dataLimite7Dias.toISOString().split('T')[0]} até ${hoje.toISOString().split('T')[0]}`);
+    console.log(`🎯 Datas candidatas dos últimos 7 dias:`, datasUltimaSemana);
       
       console.log(`🎯 Últimos 7 dias encontrados: ${datasUltimaSemana.length}`);
       
@@ -233,11 +236,17 @@ export async function GET(request: NextRequest) {
       .lte('hora', 26); // 17-23 + 24-26 (madrugada)
 
     // Buscar dados de período em batch
+    console.log(`📊 QUERY PERÍODO: Buscando dados para ${datasParaProcessar.length} datas:`, datasParaProcessar);
     const { data: dadosPeriodoData, error: errorPeriodo } = await supabase
       .from('contahub_periodo')
       .select('dt_gerencial, pessoas, vr_couvert, vr_pagamentos, vr_repique, vr_produtos, vr_desconto')
       .in('dt_gerencial', datasParaProcessar)
       .eq('bar_id', barIdNum);
+    
+    console.log(`📊 RESULTADO PERÍODO: ${dadosPeriodoData?.length || 0} registros encontrados`);
+    if (dadosPeriodoData && dadosPeriodoData.length > 0) {
+      console.log(`📊 AMOSTRA PERÍODO:`, dadosPeriodoData.slice(0, 3));
+    }
 
     if (errorFaturamentoDia || errorPeriodo) {
       console.error('❌ Erro ao buscar dados ContaHub em batch:', errorFaturamentoDia || errorPeriodo);
