@@ -147,22 +147,55 @@ export async function GET(request: NextRequest) {
     let datasParaProcessar: string[];
     
     if (diaSemana === 'todos') {
-      // Para "todos os dias", buscar datas com dados reais (mais amplo)
-      const hoje = new Date();
-      const datasComDadosProvaveis = datasParaBuscar.filter(data => {
-        const dataObj = new Date(data + 'T12:00:00');
-        // Buscar até 30 dias atrás para garantir que encontremos dados
-        const dataLimite = new Date();
-        dataLimite.setDate(hoje.getDate() - 30);
-        return dataObj >= dataLimite;
-      }).slice(0, 20); // Aumentar limite para 20 datas
+      // 🎯 COMPORTAMENTO PADRÃO: Última semana com dados reais
+      console.log(`🎯 MODO PADRÃO: Buscando última semana com dados reais`);
       
-      datasParaProcessar = datasComDadosProvaveis;
-      console.log(`🎯 OTIMIZAÇÃO TODOS OS DIAS: Filtrando ${datasParaBuscar.length} datas para ${datasParaProcessar.length} com dados prováveis (últimos 30 dias)`);
+      const hoje = new Date();
+      
+      // Primeiro: tentar últimos 7 dias
+      const dataLimite7Dias = new Date();
+      dataLimite7Dias.setDate(hoje.getDate() - 7);
+      
+      let datasUltimaSemana = datasParaBuscar.filter(data => {
+        const dataObj = new Date(data + 'T12:00:00');
+        return dataObj >= dataLimite7Dias;
+      }).slice(0, 7);
+      
+      console.log(`🎯 Últimos 7 dias encontrados: ${datasUltimaSemana.length}`);
+      
+      // Se não há dados na última semana, expandir para 14 dias
+      if (datasUltimaSemana.length < 3) {
+        const dataLimite14Dias = new Date();
+        dataLimite14Dias.setDate(hoje.getDate() - 14);
+        
+        datasUltimaSemana = datasParaBuscar.filter(data => {
+          const dataObj = new Date(data + 'T12:00:00');
+          return dataObj >= dataLimite14Dias;
+        }).slice(0, 7);
+        
+        console.log(`🎯 Expandindo para 14 dias: ${datasUltimaSemana.length} datas`);
+      }
+      
+      // Se ainda não há dados suficientes, expandir para 30 dias
+      if (datasUltimaSemana.length < 2) {
+        const dataLimite30Dias = new Date();
+        dataLimite30Dias.setDate(hoje.getDate() - 30);
+        
+        datasUltimaSemana = datasParaBuscar.filter(data => {
+          const dataObj = new Date(data + 'T12:00:00');
+          return dataObj >= dataLimite30Dias;
+        }).slice(0, 10);
+        
+        console.log(`🎯 Expandindo para 30 dias: ${datasUltimaSemana.length} datas`);
+      }
+      
+      datasParaProcessar = datasUltimaSemana;
+      console.log(`🎯 ÚLTIMA SEMANA SELECIONADA: ${datasParaProcessar.length} datas - ${datasParaProcessar[0]} até ${datasParaProcessar[datasParaProcessar.length - 1]}`);
     } else {
       // Para dias específicos, manter lógica original
       const LIMITE_DATAS_PROCESSAMENTO = 12;
       datasParaProcessar = datasParaBuscar.slice(0, LIMITE_DATAS_PROCESSAMENTO);
+      console.log(`🎯 DIA ESPECÍFICO (${diaSemana}): ${datasParaProcessar.length} datas`);
     }
     
     console.log(`🚀 OTIMIZAÇÃO: Limitando processamento de ${datasParaBuscar.length} para ${datasParaProcessar.length} datas mais recentes`);
