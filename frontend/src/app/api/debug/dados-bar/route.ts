@@ -46,9 +46,9 @@ export async function GET(request: NextRequest) {
     // 3. Verificar dados na tabela eventos_base
     const { data: eventosData, error: eventosError } = await supabase
       .from('eventos_base')
-      .select('data, nome_evento')
+      .select('data_evento, nome_evento')
       .eq('bar_id', barId)
-      .order('data', { ascending: false })
+      .order('data_evento', { ascending: false })
       .limit(10);
 
     console.log('📊 Dados eventos_base:', {
