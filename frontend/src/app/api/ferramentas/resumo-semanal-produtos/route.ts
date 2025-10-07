@@ -33,92 +33,49 @@ export async function POST(request: NextRequest) {
 
     console.log(`📅 Período: ${dataInicialStr} até ${dataFinalStr}`);
 
-    // Query complexa para obter resumo por dia da semana
-    const { data: resumoSemanal, error } = await supabase.rpc('get_resumo_semanal_produtos', {
-      p_data_inicial: dataInicialStr,
-      p_data_final: dataFinalStr,
-      p_bar_id: bar_id
-    });
+    // Buscar dados diretamente das tabelas contahub_vendas
+    console.log('🔄 Buscando dados das vendas ContaHub...');
+    
+    const { data: dadosBrutos, error } = await supabase
+      .from('contahub_prodporhora')
+      .select('*')
+      .eq('bar_id', bar_id)
+      .gte('data_gerencial', dataInicialStr)
+      .lte('data_gerencial', dataFinalStr)
+      .gt('quantidade', 0)
+      .order('data_gerencial', { ascending: true });
 
     if (error) {
-      console.error('Erro ao buscar resumo semanal:', error);
-      
-      // Fallback: buscar dados manualmente com paginação (limite do Supabase: 1000)
-      console.log('🔄 Função não encontrada, usando fallback com paginação...');
-      
-      let dadosBrutos: any[] = [];
-      let offset = 0;
-      const limit = 1000;
-      let hasMore = true;
+      console.error('Erro ao buscar dados das vendas:', error);
+      return NextResponse.json({
+        success: false,
+        error: 'Erro ao buscar dados das vendas',
+        details: error.message
+      }, { status: 500 });
+    }
 
-      while (hasMore) {
-        console.log(`📄 Buscando página ${Math.floor(offset / limit) + 1} (offset: ${offset})`);
-        
-        const { data: pagina, error: errorPagina } = await supabase
-          .from('contahub_prodporhora')
-          .select('*')
-          .eq('bar_id', bar_id)
-          .gte('data_gerencial', dataInicialStr)
-          .lte('data_gerencial', dataFinalStr)
-          .order('data_gerencial', { ascending: true })
-          .range(offset, offset + limit - 1);
+    console.log(`🎯 Total de registros coletados: ${dadosBrutos?.length || 0}`);
 
-        if (errorPagina) {
-          console.error(`❌ Erro na página ${Math.floor(offset / limit) + 1}:`, errorPagina);
-          return NextResponse.json(
-            { error: 'Erro ao buscar dados do banco', details: errorPagina.message },
-            { status: 500 }
-          );
-        }
-
-        if (pagina && pagina.length > 0) {
-          dadosBrutos.push(...pagina);
-          console.log(`✅ Página ${Math.floor(offset / limit) + 1}: ${pagina.length} registros`);
-          
-          // Se retornou menos que o limite, chegamos ao fim
-          hasMore = pagina.length === limit;
-          offset += limit;
-        } else {
-          hasMore = false;
-        }
-      }
-
-      console.log(`🎯 Total de registros coletados: ${dadosBrutos.length}`);
-
-      if (dadosBrutos.length === 0) {
-        console.log('⚠️ Nenhum dado encontrado para o período');
-        return NextResponse.json({
-          success: true,
-          periodo_semanas,
-          periodo: `${dataInicialStr} a ${dataFinalStr}`,
-          dados: [],
-          metodo: 'fallback-paginado',
-          total_registros: 0
-        });
-      }
-
-      // Processar dados manualmente
-      const resumoProcessado = processarResumoSemanal(dadosBrutos);
-      
+    if (!dadosBrutos || dadosBrutos.length === 0) {
+      console.log('⚠️ Nenhum dado encontrado para o período');
       return NextResponse.json({
         success: true,
-        periodo_semanas,
         periodo: `${dataInicialStr} a ${dataFinalStr}`,
-        dados: resumoProcessado,
-        metodo: 'fallback-paginado',
-        total_registros: dadosBrutos.length
+        dados: [],
+        metodo: 'contahub_vendas',
+        total_registros: 0
       });
     }
 
-    console.log(`✅ Resumo semanal obtido: ${resumoSemanal?.length || 0} dias`);
-
+    // Processar dados manualmente
+    const resumoProcessado = processarResumoSemanal(dadosBrutos);
+    
     return NextResponse.json({
       success: true,
-      periodo_semanas,
       periodo: `${dataInicialStr} a ${dataFinalStr}`,
-      dados: resumoSemanal || [],
-      metodo: 'function',
-      total_registros: 'calculado_pela_funcao'
+      dados: resumoProcessado,
+      metodo: 'contahub_vendas',
+      total_registros: dadosBrutos.length
     });
 
   } catch (error) {
@@ -161,6 +118,10 @@ function processarResumoSemanal(dados: any[]) {
     const diaSemana = diasSemana[diaSemanaIndex];
     const dataStr = item.data_gerencial;
 
+    // Obter descrições dos produtos (dados já vêm na tabela contahub_prodporhora)
+    const produtoDescricao = item.produto_descricao || `Produto ${item.produto_id}`;
+    const grupoDescricao = item.grupo_descricao || 'Sem grupo';
+
     if (!resumoPorDia[diaSemana].dados_por_data[dataStr]) {
       resumoPorDia[diaSemana].dados_por_data[dataStr] = {
         faturamento: 0,
@@ -173,8 +134,8 @@ function processarResumoSemanal(dados: any[]) {
     const dadosData = resumoPorDia[diaSemana].dados_por_data[dataStr];
     
     // Acumular dados
-    dadosData.faturamento += item.valor_total;
-    dadosData.produtos_vendidos += item.quantidade;
+    dadosData.faturamento += item.valor_total || 0;
+    dadosData.produtos_vendidos += item.quantidade || 0;
     dadosData.produtos_unicos.add(item.produto_id);
     
     // Produtos por hora
@@ -182,16 +143,16 @@ function processarResumoSemanal(dados: any[]) {
       dadosData.produtos_por_hora[item.hora] = {};
     }
     
-    if (!dadosData.produtos_por_hora[item.hora][item.produto_descricao]) {
-      dadosData.produtos_por_hora[item.hora][item.produto_descricao] = {
+    if (!dadosData.produtos_por_hora[item.hora][produtoDescricao]) {
+      dadosData.produtos_por_hora[item.hora][produtoDescricao] = {
         quantidade: 0,
-        grupo: item.grupo_descricao,
+        grupo: grupoDescricao,
         valor: 0
       };
     }
     
-    dadosData.produtos_por_hora[item.hora][item.produto_descricao].quantidade += item.quantidade;
-    dadosData.produtos_por_hora[item.hora][item.produto_descricao].valor += item.valor_total;
+    dadosData.produtos_por_hora[item.hora][produtoDescricao].quantidade += item.quantidade || 0;
+    dadosData.produtos_por_hora[item.hora][produtoDescricao].valor += item.valor_total || 0;
   });
 
   // Calcular resumos finais
@@ -248,16 +209,16 @@ function processarResumoSemanal(dados: any[]) {
     
     return {
       dia_semana: dia,
-      data_exemplo: datas[datas.length - 1], // Data mais recente
+      data_exemplo: datas[0], // Primeira data encontrada
       horario_pico: melhorHora.hora,
-      produto_mais_vendido: melhorProduto.nome || 'N/A',
-      grupo_produto: melhorProduto.grupo || 'N/A',
-      quantidade_pico: Math.round(melhorProduto.quantidade / numDatas),
-      faturamento_total: Math.round(faturamentoTotal / numDatas * 100) / 100,
-      total_produtos_vendidos: Math.round(produtosVendidosTotal / numDatas),
+      produto_mais_vendido: melhorProduto.nome || 'Sem dados',
+      grupo_produto: melhorProduto.grupo || 'Sem dados',
+      quantidade_pico: melhorProduto.quantidade,
+      faturamento_total: Math.round(faturamentoTotal * 100) / 100,
+      total_produtos_vendidos: produtosVendidosTotal,
       produtos_unicos: produtosUnicos.size
     };
-  }).filter(Boolean); // Remove dias sem dados
+  }).filter(item => item !== null); // Remove dias sem dados
 
   return resultado;
 }
