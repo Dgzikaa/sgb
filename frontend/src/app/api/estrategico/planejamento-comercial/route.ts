@@ -53,6 +53,9 @@ interface PlanejamentoDataFinal {
   t_bar: number;
   fat_19h: number;
   
+  // Stockout
+  percent_stockout: number;
+  
   // Flags de performance
   real_vs_m1_green: boolean;
   ci_real_vs_plan_green: boolean;
@@ -182,6 +185,53 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ ${eventosFiltrados.length} eventos encontrados após filtro`);
 
+    // Buscar dados de stockout para todos os eventos do período
+    const datasEventos = eventosFiltrados.map(e => e.data_evento);
+    const stockoutPorData = new Map<string, number>();
+    
+    if (datasEventos.length > 0) {
+      try {
+        console.log(`🔍 Buscando dados de stockout para ${datasEventos.length} datas`);
+        
+        // Buscar dados de stockout com NOVA LÓGICA: apenas produtos ativos='S'
+        const { data: dadosStockout, error: stockoutError } = await supabase
+          .from('contahub_stockout')
+          .select('data_consulta, prd_ativo, prd_venda')
+          .eq('prd_ativo', 'S') // Apenas produtos ativos
+          .in('data_consulta', datasEventos)
+          .eq('bar_id', user.bar_id);
+
+        if (!stockoutError && dadosStockout) {
+          // Agrupar dados por data e calcular % stockout
+          const dadosPorData = new Map();
+          dadosStockout.forEach(item => {
+            const data = item.data_consulta;
+            if (!dadosPorData.has(data)) {
+              dadosPorData.set(data, { total_ativos: 0, stockout: 0 });
+            }
+            const stats = dadosPorData.get(data);
+            stats.total_ativos++;
+            if (item.prd_venda === 'N') {
+              stats.stockout++;
+            }
+          });
+
+          // Calcular percentual de stockout por data
+          dadosPorData.forEach((stats, data) => {
+            const percentual = stats.total_ativos > 0 ? 
+              ((stats.stockout / stats.total_ativos) * 100) : 0;
+            stockoutPorData.set(data, parseFloat(percentual.toFixed(1)));
+          });
+
+          console.log(`📊 Dados de stockout processados para ${stockoutPorData.size} datas`);
+        } else {
+          console.warn('⚠️ Erro ao buscar dados de stockout:', stockoutError);
+        }
+      } catch (stockoutErr) {
+        console.warn('⚠️ Erro ao processar dados de stockout:', stockoutErr);
+      }
+    }
+
     // Verificar se há eventos que precisam de recálculo
     // NOVA LÓGICA: Só recalcular se não há valores salvos manualmente (versao_calculo != 999)
     const eventosParaRecalcular = eventosFiltrados.filter(e => 
@@ -271,6 +321,9 @@ export async function GET(request: NextRequest) {
         t_coz: evento.t_coz || 0,
         t_bar: evento.t_bar || 0,
         fat_19h: evento.fat_19h_percent || 0,
+        
+        // Stockout
+        percent_stockout: stockoutPorData.get(evento.data_evento) || 0,
         
         // Campos manuais para domingos
         faturamento_couvert_manual: evento.faturamento_couvert_manual || undefined,
