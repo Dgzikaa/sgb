@@ -29,7 +29,8 @@ import {
   EyeIcon,
   TrendingDownIcon,
   BarChart3Icon,
-  LineChartIcon
+  LineChartIcon,
+  PackageIcon
 } from 'lucide-react';
 
 interface HorarioPicoData {
@@ -71,6 +72,15 @@ interface Estatisticas {
   comparacao_recorde: number;
 }
 
+interface StockoutResumo {
+  data_referencia: string;
+  total_produtos_ativos: number;
+  produtos_disponiveis: number;
+  produtos_stockout: number;
+  percentual_stockout: string;
+  percentual_disponibilidade: string;
+}
+
 interface LinhaVisibilidade {
   faturamento: boolean;
   semana_passada: boolean;
@@ -86,6 +96,7 @@ interface HorarioPicoChartProps {
 export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoChartProps) {
   const [dados, setDados] = useState<HorarioPicoData[]>([]);
   const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null);
+  const [stockoutResumo, setStockoutResumo] = useState<StockoutResumo | null>(null);
   const [diaSemana, setDiaSemana] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,6 +163,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
     setError(null);
     
     try {
+      // Buscar dados do horário de pico
       const response = await fetch('/api/ferramentas/horario-pico', {
         method: 'POST',
         headers: {
@@ -182,6 +194,21 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
       } else {
         setError(result.error || 'Erro desconhecido');
       }
+
+      // Buscar dados de stockout em paralelo
+      try {
+        const stockoutResponse = await fetch(`/api/analitico/stockout-resumo?data=${dataSelecionada}&bar_id=3`);
+        if (stockoutResponse.ok) {
+          const stockoutResult = await stockoutResponse.json();
+          if (stockoutResult.success) {
+            setStockoutResumo(stockoutResult.data);
+          }
+        }
+      } catch (stockoutErr) {
+        console.warn('Erro ao buscar dados de stockout:', stockoutErr);
+        // Não falha o componente se stockout não funcionar
+      }
+
     } catch (err) {
       console.error('Erro ao buscar dados:', err);
       setError('Erro ao carregar dados');
@@ -387,7 +414,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
               </div>
               
               {/* Linha única com todas as métricas */}
-              <div className="grid grid-cols-3 md:grid-cols-9 gap-3">
+              <div className="grid grid-cols-3 md:grid-cols-10 gap-3">
                 {/* Produto Top */}
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
@@ -506,6 +533,28 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                   </div>
                   <p className="text-sm font-bold text-indigo-900 dark:text-indigo-100">
                     {estatisticas.total_pessoas_dia || 0}
+                  </p>
+                </div>
+
+                {/* % Stockout */}
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-1">
+                    <PackageIcon className="w-4 h-4 text-red-600 dark:text-red-400 mr-1" />
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">% Stockout</p>
+                  </div>
+                  <p className={`text-sm font-bold ${
+                    stockoutResumo ? (
+                      parseFloat(stockoutResumo.percentual_stockout.replace('%', '')) <= 10 
+                        ? 'text-green-900 dark:text-green-100'
+                        : parseFloat(stockoutResumo.percentual_stockout.replace('%', '')) <= 25
+                        ? 'text-yellow-900 dark:text-yellow-100'
+                        : 'text-red-900 dark:text-red-100'
+                    ) : 'text-gray-500 dark:text-gray-400'
+                  }`}>
+                    {stockoutResumo?.percentual_stockout || '--'}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    {stockoutResumo ? `${stockoutResumo.produtos_stockout}/${stockoutResumo.total_produtos_ativos}` : 'Sem dados'}
                   </p>
                 </div>
               </div>

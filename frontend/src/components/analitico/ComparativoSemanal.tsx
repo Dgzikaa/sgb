@@ -29,7 +29,8 @@ import {
   BarChart3,
   LineChart,
   Users,
-  Clock
+  Clock,
+  Package
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useToast } from '@/hooks/use-toast';
@@ -66,6 +67,15 @@ interface EstatisticasSemana {
   data_semana1: string;
   data_semana2: string;
   data_semana3: string;
+}
+
+interface StockoutSemanal {
+  media_stockout: string;
+  total_dias: number;
+  dados_por_data: Array<{
+    data_referencia: string;
+    percentual_stockout: number;
+  }>;
 }
 
 interface ResumoPorData {
@@ -141,6 +151,7 @@ export function ComparativoSemanal() {
   
   const [dados, setDados] = useState<HorarioSemanalData[]>([]);
   const [estatisticas, setEstatisticas] = useState<EstatisticasSemana | null>(null);
+  const [stockoutSemanal, setStockoutSemanal] = useState<StockoutSemanal | null>(null);
   const [resumoPorData, setResumoPorData] = useState<ResumoPorData[]>([]);
   const [dadosValorTotal, setDadosValorTotal] = useState<DadosValorTotal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,6 +235,39 @@ export function ComparativoSemanal() {
         if (modoComparacao === 'individual' && result.data.horarios.length > 0 && result.data.horarios[0].datas_ordenadas) {
           inicializarLinhasDinamicas(result.data.horarios[0].datas_ordenadas);
         }
+
+        // Buscar dados de stockout semanal
+        try {
+          const hoje = new Date();
+          const umaSemanaAtras = new Date(hoje);
+          umaSemanaAtras.setDate(hoje.getDate() - 7);
+          
+          const dataFim = hoje.toISOString().split('T')[0];
+          const dataInicio = umaSemanaAtras.toISOString().split('T')[0];
+
+          const stockoutResponse = await fetch('/api/analitico/stockout-resumo', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              data_inicio: dataInicio,
+              data_fim: dataFim,
+              bar_id: selectedBar.id
+            }),
+          });
+
+          if (stockoutResponse.ok) {
+            const stockoutResult = await stockoutResponse.json();
+            if (stockoutResult.success) {
+              setStockoutSemanal(stockoutResult.data);
+            }
+          }
+        } catch (stockoutErr) {
+          console.warn('Erro ao buscar dados de stockout semanal:', stockoutErr);
+          // Não falha o componente se stockout não funcionar
+        }
+
       } else {
         console.error('❌ API retornou erro:', result.error);
         throw new Error(result.error || 'Erro desconhecido da API');
@@ -669,7 +713,7 @@ export function ComparativoSemanal() {
 
       {/* Cards de Estatísticas */}
       {estatisticas && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
@@ -732,6 +776,31 @@ export function ComparativoSemanal() {
                   </p>
                   <p className="text-xs text-gray-500">
                     {formatarData(estatisticas.data_atual)} vs {formatarData(estatisticas.data_semana1)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-red-600" />
+                <div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">% Stockout Semanal</p>
+                  <p className={`font-bold text-lg ${
+                    stockoutSemanal ? (
+                      parseFloat(stockoutSemanal.media_stockout.replace('%', '')) <= 10 
+                        ? 'text-green-600' 
+                        : parseFloat(stockoutSemanal.media_stockout.replace('%', '')) <= 25
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
+                    ) : 'text-gray-500'
+                  }`}>
+                    {stockoutSemanal?.media_stockout || '--'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {stockoutSemanal ? `${stockoutSemanal.total_dias} dias` : 'Sem dados'}
                   </p>
                 </div>
               </div>
