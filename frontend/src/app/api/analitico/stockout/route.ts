@@ -31,11 +31,12 @@ export async function POST(request: NextRequest) {
       whereConditions += ` AND ${filtroConditions}`;
     }
 
-    // 1. Estatísticas gerais - usando query direta
+    // 1. Estatísticas gerais - NOVA LÓGICA: apenas produtos ativos='S' e venda='N'
     let query = supabase
       .from('contahub_stockout')
-      .select('prd_venda')
-      .eq('data_consulta', data_selecionada);
+      .select('prd_ativo, prd_venda')
+      .eq('data_consulta', data_selecionada)
+      .eq('prd_ativo', 'S'); // Apenas produtos ativos
 
     // Aplicar filtros se existirem
     if (filtros.length > 0) {
@@ -54,17 +55,18 @@ export async function POST(request: NextRequest) {
       throw new Error('Erro ao buscar estatísticas gerais');
     }
 
-    // Calcular estatísticas
-    const totalProdutos = dadosGerais?.length || 0;
-    const countProdutosDisponiveis = dadosGerais?.filter(p => p.prd_venda === 'S').length || 0;
-    const countProdutosIndisponiveis = totalProdutos - countProdutosDisponiveis;
-    const percentualStockout = totalProdutos > 0 ? ((countProdutosIndisponiveis / totalProdutos) * 100).toFixed(2) : '0.00';
+    // Calcular estatísticas com NOVA LÓGICA
+    const totalProdutosAtivos = dadosGerais?.length || 0; // Total de produtos ativos
+    const countProdutosDisponiveis = dadosGerais?.filter(p => p.prd_venda === 'S').length || 0; // Ativos E venda='S'
+    const countProdutosStockout = dadosGerais?.filter(p => p.prd_venda === 'N').length || 0; // Ativos E venda='N' = STOCKOUT
+    const percentualStockout = totalProdutosAtivos > 0 ? ((countProdutosStockout / totalProdutosAtivos) * 100).toFixed(2) : '0.00';
 
-    // 2. Análise por local de produção
+    // 2. Análise por local de produção - NOVA LÓGICA: apenas produtos ativos
     let queryLocais = supabase
       .from('contahub_stockout')
-      .select('loc_desc, prd_venda')
-      .eq('data_consulta', data_selecionada);
+      .select('loc_desc, prd_ativo, prd_venda')
+      .eq('data_consulta', data_selecionada)
+      .eq('prd_ativo', 'S'); // Apenas produtos ativos
 
     // Aplicar filtros se existirem
     if (filtros.length > 0) {
@@ -83,19 +85,19 @@ export async function POST(request: NextRequest) {
       throw new Error('Erro ao buscar dados por local');
     }
 
-    // Processar dados por local
+    // Processar dados por local com NOVA LÓGICA
     const locaisMap = new Map();
     dadosLocais?.forEach(item => {
       const local = item.loc_desc || 'Sem local definido';
       if (!locaisMap.has(local)) {
-        locaisMap.set(local, { total: 0, disponiveis: 0, indisponiveis: 0 });
+        locaisMap.set(local, { total: 0, disponiveis: 0, stockout: 0 });
       }
       const stats = locaisMap.get(local);
-      stats.total++;
+      stats.total++; // Total de produtos ativos neste local
       if (item.prd_venda === 'S') {
-        stats.disponiveis++;
-      } else {
-        stats.indisponiveis++;
+        stats.disponiveis++; // Ativos E venda='S'
+      } else if (item.prd_venda === 'N') {
+        stats.stockout++; // Ativos E venda='N' = STOCKOUT
       }
     });
 
@@ -103,16 +105,17 @@ export async function POST(request: NextRequest) {
       local_producao: local,
       total_produtos: stats.total,
       disponiveis: stats.disponiveis,
-      indisponiveis: stats.indisponiveis,
-      perc_stockout: stats.total > 0 ? parseFloat(((stats.indisponiveis / stats.total) * 100).toFixed(1)) : 0
+      indisponiveis: stats.stockout, // Renomeado para manter compatibilidade
+      perc_stockout: stats.total > 0 ? parseFloat(((stats.stockout / stats.total) * 100).toFixed(1)) : 0
     })).sort((a, b) => b.perc_stockout - a.perc_stockout || b.total_produtos - a.total_produtos);
 
-    // 3. Produtos indisponíveis (top 50)
+    // 3. Produtos em stockout (top 50) - NOVA LÓGICA: ativos='S' E venda='N'
     let queryIndisponiveis = supabase
       .from('contahub_stockout')
       .select('prd_desc, loc_desc, prd_precovenda, prd_estoque, prd_controlaestoque, prd_validaestoquevenda')
       .eq('data_consulta', data_selecionada)
-      .eq('prd_venda', 'N')
+      .eq('prd_ativo', 'S') // Apenas produtos ativos
+      .eq('prd_venda', 'N') // E que não estão à venda = STOCKOUT
       .order('loc_desc')
       .order('prd_desc')
       .limit(50);
@@ -130,12 +133,13 @@ export async function POST(request: NextRequest) {
 
     const { data: listaProdutosIndisponiveis, error: errorIndisponiveis } = await queryIndisponiveis;
 
-    // 4. Produtos disponíveis (amostra de 20)
+    // 4. Produtos disponíveis (amostra de 20) - NOVA LÓGICA: ativos='S' E venda='S'
     let queryDisponiveis = supabase
       .from('contahub_stockout')
       .select('prd_desc, loc_desc, prd_precovenda, prd_estoque')
       .eq('data_consulta', data_selecionada)
-      .eq('prd_venda', 'S')
+      .eq('prd_ativo', 'S') // Apenas produtos ativos
+      .eq('prd_venda', 'S') // E que estão à venda = DISPONÍVEIS
       .order('loc_desc')
       .order('prd_desc')
       .limit(20);
@@ -163,9 +167,9 @@ export async function POST(request: NextRequest) {
         data_analisada: data_selecionada,
         filtros_aplicados: filtros,
         estatisticas: {
-          total_produtos: totalProdutos,
-          produtos_ativos: countProdutosDisponiveis,
-          produtos_inativos: countProdutosIndisponiveis,
+          total_produtos: totalProdutosAtivos, // Total de produtos ativos
+          produtos_ativos: countProdutosDisponiveis, // Ativos E venda='S'
+          produtos_inativos: countProdutosStockout, // Ativos E venda='N' = STOCKOUT
           percentual_stockout: `${percentualStockout}%`,
           percentual_disponibilidade: `${(100 - parseFloat(percentualStockout)).toFixed(2)}%`
         },
