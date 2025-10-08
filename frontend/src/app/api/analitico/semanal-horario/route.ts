@@ -151,19 +151,26 @@ export async function GET(request: NextRequest) {
     let datasParaProcessar: string[];
     
     if (diaSemana === 'todos') {
-      // 🎯 MODO ULTRA RÁPIDO: Apenas últimos 5 dias
-      console.log(`🎯 MODO ULTRA RÁPIDO: Limitando para últimos 5 dias`);
-      
-      const hoje = new Date();
-      const dataLimite = new Date();
-      dataLimite.setDate(hoje.getDate() - 7);
-      
-      datasParaProcessar = datasParaBuscar.filter(data => {
-        const dataObj = new Date(data + 'T12:00:00');
-        return dataObj >= dataLimite && dataObj <= hoje;
-      }).slice(0, 5); // MÁXIMO 5 DATAS
-      
-      console.log(`🚀 OTIMIZAÇÃO: Processando apenas ${datasParaProcessar.length} datas dos últimos 7 dias`);
+      if (modo === 'mes_x_mes') {
+        // 🎯 MODO MÊS X MÊS: Buscar dados de todos os meses selecionados
+        console.log(`🎯 MODO MÊS X MÊS: Buscando dados de todos os meses selecionados`);
+        datasParaProcessar = datasParaBuscar.slice(0, 30); // Máximo 30 datas para não dar timeout
+        console.log(`🚀 OTIMIZAÇÃO MÊS X MÊS: Processando ${datasParaProcessar.length} datas`);
+      } else {
+        // 🎯 MODO INDIVIDUAL: Apenas últimos 5 dias
+        console.log(`🎯 MODO INDIVIDUAL: Limitando para últimos 5 dias`);
+        
+        const hoje = new Date();
+        const dataLimite = new Date();
+        dataLimite.setDate(hoje.getDate() - 7);
+        
+        datasParaProcessar = datasParaBuscar.filter(data => {
+          const dataObj = new Date(data + 'T12:00:00');
+          return dataObj >= dataLimite && dataObj <= hoje;
+        }).slice(0, 5); // MÁXIMO 5 DATAS
+        
+        console.log(`🚀 OTIMIZAÇÃO INDIVIDUAL: Processando apenas ${datasParaProcessar.length} datas dos últimos 7 dias`);
+      }
     } else {
       // Para dias específicos, MÁXIMO 8 datas
       const LIMITE_CRITICO = 8;
@@ -697,6 +704,7 @@ export async function GET(request: NextRequest) {
         const diaSemanaData = dataObj.getDay();
         
         // 🎯 FILTRO: Só processar dados do dia da semana selecionado (ou todos se 'todos')
+        // Se diaSemanaNum é null (todos os dias), não filtrar
         if (diaSemanaNum !== null && diaSemanaData !== diaSemanaNum) {
           return; // Pular se não for o dia da semana selecionado
         }

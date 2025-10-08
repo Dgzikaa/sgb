@@ -695,9 +695,9 @@ export function ComparativoSemanal() {
             </SelectContent>
           </Select>
 
-          {/* Seleção de Meses - Limitado a 3 meses mais recentes */}
+          {/* Seleção de Meses */}
           <div className="flex flex-wrap gap-2">
-            {MESES_OPCOES.slice(0, 3).map(mes => (
+            {MESES_OPCOES.slice(0, modoComparacao === 'mes_x_mes' ? 6 : 3).map(mes => (
               <label 
                 key={mes.value}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all ${
