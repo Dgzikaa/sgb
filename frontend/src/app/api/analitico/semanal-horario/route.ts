@@ -178,11 +178,11 @@ export async function GET(request: NextRequest) {
     console.log(`📊 Buscando dados essenciais para ${datasParaProcessar.length} datas`);
     
     // Promise com timeout para cada query
-    const queryWithTimeout = async (queryPromise: Promise<any>, name: string) => {
+    const queryWithTimeout = async (queryPromise: PromiseLike<any>, name: string) => {
       const timeout = new Promise((_, reject) => 
         setTimeout(() => reject(new Error(`${name} timeout`)), 8000)
       );
-      return Promise.race([queryPromise, timeout]);
+      return Promise.race([Promise.resolve(queryPromise), timeout]);
     };
 
     let eventosData: any[] = [];
