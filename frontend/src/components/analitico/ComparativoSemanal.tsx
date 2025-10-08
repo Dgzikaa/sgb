@@ -281,10 +281,17 @@ export function ComparativoSemanal() {
       setResumoPorData([]);
       setDadosValorTotal([]);
       
+      // Verificar se é timeout
+      const isTimeout = error instanceof Error && 
+        (error.message.includes('timeout') || error.message.includes('408'));
+      
       toast({
-        title: "Erro ao carregar dados",
-        description: error instanceof Error ? error.message : "Erro desconhecido. Tente novamente.",
+        title: isTimeout ? "⏱️ Consulta muito lenta" : "Erro ao carregar dados",
+        description: isTimeout 
+          ? "A consulta demorou muito. Tente selecionar menos meses ou um dia específico da semana."
+          : error instanceof Error ? error.message : "Erro desconhecido. Tente novamente.",
         variant: "destructive",
+        duration: isTimeout ? 8000 : 5000, // Timeout: 8s, outros: 5s
       });
     } finally {
       setLoading(false);
@@ -527,9 +534,16 @@ export function ComparativoSemanal() {
             </h3>
             
             {/* Subtitle */}
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Processando informações por horário...
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Processando {mesesSelecionados.length} {mesesSelecionados.length === 1 ? 'mês' : 'meses'}...
             </p>
+            
+            {/* Timeout Warning */}
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4">
+              <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                ⏱️ Consultas grandes podem demorar até 25 segundos
+              </p>
+            </div>
             
             {/* Progress dots */}
             <div className="flex justify-center space-x-1">
