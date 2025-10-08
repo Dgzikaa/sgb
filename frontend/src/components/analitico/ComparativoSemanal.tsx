@@ -291,7 +291,6 @@ export function ComparativoSemanal() {
           ? "A consulta demorou muito. Tente selecionar menos meses ou um dia específico da semana."
           : error instanceof Error ? error.message : "Erro desconhecido. Tente novamente.",
         variant: "destructive",
-        duration: isTimeout ? 8000 : 5000, // Timeout: 8s, outros: 5s
       });
     } finally {
       setLoading(false);
