@@ -212,6 +212,9 @@ export function ComparativoSemanal() {
       
       const result = await response.json();
       console.log('📊 Resposta completa da API:', result);
+      console.log('🎯 Modo atual:', modoComparacao);
+      console.log('🎯 Dia selecionado:', diaSelecionado);
+      console.log('🎯 Meses selecionados:', mesesSelecionados);
       
       if (result.success) {
         console.log('✅ Dados recebidos com sucesso:', {
@@ -220,6 +223,13 @@ export function ComparativoSemanal() {
           resumoPorData: result.data.resumo_por_data?.length || 0,
           valorTotal: result.data.valor_total_por_mes?.length || 0
         });
+        
+        console.log('📊 Dados valor total recebidos:', result.data.valor_total_por_mes);
+        
+        if (modoComparacao === 'mes_x_mes' && diaSelecionado === 'todos') {
+          console.log('🔍 MODO MÊS X MÊS + TODOS OS DIAS - Analisando dados...');
+          console.log('🔍 Valor total por mês:', result.data.valor_total_por_mes);
+        }
         
         // Verificar se os dados são válidos
         if (!result.data.horarios || !Array.isArray(result.data.horarios)) {
@@ -649,6 +659,10 @@ export function ComparativoSemanal() {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Comparativo entre {mesesSelecionados.map(m => MESES_OPCOES.find(opt => opt.value === m)?.label.split(' ')[0]).join(' vs ')} (17h às 3h)
           </p>
+          {/* Debug Info */}
+          <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+            🔍 Debug: Modo={modoComparacao} | Dia={diaSelecionado} | Meses={mesesSelecionados.length} | Dados={dadosValorTotal.length}
+          </div>
         </div>
         
         <div className="flex items-center gap-4">
