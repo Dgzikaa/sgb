@@ -154,8 +154,12 @@ export async function GET(request: NextRequest) {
       if (modo === 'mes_x_mes') {
         // 🎯 MODO MÊS X MÊS: Buscar dados de todos os meses selecionados
         console.log(`🎯 MODO MÊS X MÊS: Buscando dados de todos os meses selecionados`);
-        datasParaProcessar = datasParaBuscar.slice(0, 30); // Máximo 30 datas para não dar timeout
-        console.log(`🚀 OTIMIZAÇÃO MÊS X MÊS: Processando ${datasParaProcessar.length} datas`);
+        console.log(`🔍 DEBUG: datasParaBuscar total: ${datasParaBuscar.length}`);
+        console.log(`🔍 DEBUG: Primeiras 10 datas:`, datasParaBuscar.slice(0, 10));
+        
+        datasParaProcessar = datasParaBuscar.slice(0, 60); // Aumentar para 60 datas
+        console.log(`🚀 OTIMIZAÇÃO MÊS X MÊS: Processando ${datasParaProcessar.length} de ${datasParaBuscar.length} datas`);
+        console.log(`🔍 DEBUG: Datas que serão processadas:`, datasParaProcessar.slice(0, 10));
       } else {
         // 🎯 MODO INDIVIDUAL: Apenas últimos 5 dias
         console.log(`🎯 MODO INDIVIDUAL: Limitando para últimos 5 dias`);
@@ -1000,12 +1004,17 @@ export async function GET(request: NextRequest) {
         // Agrupar dados por mês e dia da semana
         const dadosPorMesEDia: { [mes: string]: { [diaSemana: number]: number } } = {};
         
+        console.log(`🔍 DEBUG GRÁFICO: Processando ${datasComDados.length} datas com dados`);
+        console.log(`🔍 DEBUG GRÁFICO: datasComDados:`, datasComDados.slice(0, 5));
+        
         datasComDados.forEach(data => {
           const [ano, mes, dia] = data.split('-');
           const mesCompleto = `${ano}-${mes}`;
           const dataObj = new Date(data + 'T12:00:00');
           const diaSemanaNum = dataObj.getDay();
           const totalData = Object.values(dadosPorSemana[data] || {}).reduce((sum, valor) => sum + valor, 0);
+          
+          console.log(`🔍 DEBUG: ${data} (${mesCompleto}) - Dia ${diaSemanaNum} - Total: R$ ${totalData.toLocaleString('pt-BR')}`);
           
           if (totalData > 0) {
             if (!dadosPorMesEDia[mesCompleto]) {
@@ -1017,6 +1026,8 @@ export async function GET(request: NextRequest) {
             dadosPorMesEDia[mesCompleto][diaSemanaNum] += totalData;
           }
         });
+        
+        console.log(`🔍 DEBUG GRÁFICO: dadosPorMesEDia final:`, dadosPorMesEDia);
         
         // Criar estrutura para o gráfico (um ponto por mês, com dados de todos os dias da semana)
         mesesSelecionados.forEach((mesCompleto, index) => {
