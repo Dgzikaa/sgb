@@ -57,7 +57,12 @@ interface EstatisticasSemana {
 const NOMES_DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export async function GET(request: NextRequest) {
-  try {
+  // 🚀 TIMEOUT PROTECTION: Configurar timeout de 25 segundos
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Request timeout após 25 segundos')), 25000);
+  });
+
+  const mainPromise = async () => {
     const { searchParams } = new URL(request.url);
     const barId = searchParams.get('barId');
     const diaSemana = searchParams.get('diaSemana'); // 0=Domingo, 1=Segunda, ..., 6=Sábado
@@ -142,116 +147,103 @@ export async function GET(request: NextRequest) {
     const dadosPorSemana: { [data: string]: { [hora: number]: number } } = {};
     const datasComDados: string[] = [];
 
-    // 🚀 OTIMIZAÇÃO: Limitar processamento para evitar timeout
-    // Para "todos os dias", buscar datas com dados reais (não apenas as mais recentes)
+    // 🚀 OTIMIZAÇÃO CRÍTICA: Limitar drasticamente para evitar timeout
     let datasParaProcessar: string[];
     
     if (diaSemana === 'todos') {
-      // 🎯 COMPORTAMENTO PADRÃO: Última semana com dados reais
-      console.log(`🎯 MODO PADRÃO: Buscando última semana com dados reais`);
+      // 🎯 MODO ULTRA RÁPIDO: Apenas últimos 5 dias
+      console.log(`🎯 MODO ULTRA RÁPIDO: Limitando para últimos 5 dias`);
       
       const hoje = new Date();
+      const dataLimite = new Date();
+      dataLimite.setDate(hoje.getDate() - 7);
       
-    // Primeiro: tentar últimos 7 dias (incluindo hoje)
-    const dataLimite7Dias = new Date();
-    dataLimite7Dias.setDate(hoje.getDate() - 7);
-    
-    let datasUltimaSemana = datasParaBuscar.filter(data => {
-      const dataObj = new Date(data + 'T12:00:00');
-      return dataObj >= dataLimite7Dias && dataObj <= hoje;
-    }).slice(0, 7);
-    
-    console.log(`🎯 Buscando últimos 7 dias desde ${dataLimite7Dias.toISOString().split('T')[0]} até ${hoje.toISOString().split('T')[0]}`);
-    console.log(`🎯 Datas candidatas dos últimos 7 dias:`, datasUltimaSemana);
+      datasParaProcessar = datasParaBuscar.filter(data => {
+        const dataObj = new Date(data + 'T12:00:00');
+        return dataObj >= dataLimite && dataObj <= hoje;
+      }).slice(0, 5); // MÁXIMO 5 DATAS
       
-      console.log(`🎯 Últimos 7 dias encontrados: ${datasUltimaSemana.length}`);
-      
-      // Se não há dados na última semana, expandir para 14 dias
-      if (datasUltimaSemana.length < 3) {
-        const dataLimite14Dias = new Date();
-        dataLimite14Dias.setDate(hoje.getDate() - 14);
-        
-        datasUltimaSemana = datasParaBuscar.filter(data => {
-          const dataObj = new Date(data + 'T12:00:00');
-          return dataObj >= dataLimite14Dias;
-        }).slice(0, 7);
-        
-        console.log(`🎯 Expandindo para 14 dias: ${datasUltimaSemana.length} datas`);
-      }
-      
-      // Se ainda não há dados suficientes, expandir para 30 dias
-      if (datasUltimaSemana.length < 2) {
-        const dataLimite30Dias = new Date();
-        dataLimite30Dias.setDate(hoje.getDate() - 30);
-        
-        datasUltimaSemana = datasParaBuscar.filter(data => {
-          const dataObj = new Date(data + 'T12:00:00');
-          return dataObj >= dataLimite30Dias;
-        }).slice(0, 10);
-        
-        console.log(`🎯 Expandindo para 30 dias: ${datasUltimaSemana.length} datas`);
-      }
-      
-      datasParaProcessar = datasUltimaSemana;
-      console.log(`🎯 ÚLTIMA SEMANA SELECIONADA: ${datasParaProcessar.length} datas - ${datasParaProcessar[0]} até ${datasParaProcessar[datasParaProcessar.length - 1]}`);
+      console.log(`🚀 OTIMIZAÇÃO: Processando apenas ${datasParaProcessar.length} datas dos últimos 7 dias`);
     } else {
-      // Para dias específicos, buscar TODAS as ocorrências do dia nos meses selecionados
-      const LIMITE_DATAS_DIA_ESPECIFICO = 50; // Aumentar limite para pegar mais datas
-      datasParaProcessar = datasParaBuscar.slice(0, LIMITE_DATAS_DIA_ESPECIFICO);
-      console.log(`🎯 DIA ESPECÍFICO (${diaSemana}): Processando ${datasParaProcessar.length} de ${datasParaBuscar.length} datas disponíveis`);
-      console.log(`🎯 Todas as ${diaSemana}s encontradas:`, datasParaProcessar);
+      // Para dias específicos, MÁXIMO 8 datas
+      const LIMITE_CRITICO = 8;
+      datasParaProcessar = datasParaBuscar.slice(0, LIMITE_CRITICO);
+      console.log(`🚀 OTIMIZAÇÃO: Limitando ${diaSemana} para apenas ${datasParaProcessar.length} datas`);
     }
     
     console.log(`🚀 OTIMIZAÇÃO: Limitando processamento de ${datasParaBuscar.length} para ${datasParaProcessar.length} datas mais recentes`);
     console.log(`🎯 Datas que serão processadas:`, datasParaProcessar);
 
-    // 🚀 OTIMIZAÇÃO: Buscar dados em batch para melhor performance
-    console.log(`📊 Buscando dados de eventos em batch para ${datasParaProcessar.length} datas`);
+    // 🚀 OTIMIZAÇÃO CRÍTICA: Buscar apenas dados essenciais com timeout
+    console.log(`📊 Buscando dados essenciais para ${datasParaProcessar.length} datas`);
     
-    const { data: eventosData, error: errorEventos } = await supabase
-      .from('eventos_base')
-      .select('data_evento, real_r, dia_semana, nome, sympla_liquido, yuzer_liquido')
-      .in('data_evento', datasParaProcessar)
-      .eq('bar_id', barIdNum);
+    // Promise com timeout para cada query
+    const queryWithTimeout = async (queryPromise: Promise<any>, name: string) => {
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error(`${name} timeout`)), 8000)
+      );
+      return Promise.race([queryPromise, timeout]);
+    };
 
-    if (errorEventos) {
-      console.error('❌ Erro ao buscar eventos em batch:', errorEventos);
+    let eventosData: any[] = [];
+    let faturamentoDiaData: any[] = [];
+    let dadosPeriodoData: any[] = [];
+
+    try {
+      // Buscar apenas dados de período (mais essencial)
+      const periodoQuery = supabase
+        .from('contahub_periodo')
+        .select('dt_gerencial, vr_pagamentos')
+        .in('dt_gerencial', datasParaProcessar)
+        .eq('bar_id', barIdNum)
+        .limit(50);
+
+      const periodoResult = await queryWithTimeout(periodoQuery, 'contahub_periodo');
+      dadosPeriodoData = periodoResult.data || [];
+
+      // Se há dados de período, buscar faturamento por hora
+      if (dadosPeriodoData.length > 0) {
+        const fatHoraQuery = supabase
+          .from('contahub_fatporhora')
+          .select('vd_dtgerencial, hora, valor')
+          .in('vd_dtgerencial', datasParaProcessar)
+          .eq('bar_id', barIdNum)
+          .gte('hora', 17)
+          .lte('hora', 26)
+          .limit(200);
+
+        const fatHoraResult = await queryWithTimeout(fatHoraQuery, 'contahub_fatporhora');
+        faturamentoDiaData = fatHoraResult.data || [];
+      }
+
+      // Buscar eventos apenas se necessário (fallback)
+      if (dadosPeriodoData.length === 0) {
+        const eventosQuery = supabase
+          .from('eventos_base')
+          .select('data_evento, real_r, sympla_liquido, yuzer_liquido')
+          .in('data_evento', datasParaProcessar)
+          .eq('bar_id', barIdNum)
+          .limit(20);
+
+        const eventosResult = await queryWithTimeout(eventosQuery, 'eventos_base');
+        eventosData = eventosResult.data || [];
+      }
+
+    } catch (error) {
+      console.warn('⚠️ Timeout em alguma query, continuando com dados parciais:', error);
     }
+
+    console.log(`📊 DADOS OBTIDOS:`, {
+      periodo: dadosPeriodoData.length,
+      faturamentoHora: faturamentoDiaData.length,
+      eventos: eventosData.length
+    });
 
     // Criar mapa de eventos por data para acesso rápido
     const eventosPorData = new Map<string, any>();
-    (eventosData || []).forEach(evento => {
+    eventosData.forEach(evento => {
       eventosPorData.set(evento.data_evento, evento);
     });
-
-    // 🚀 OTIMIZAÇÃO: Buscar dados ContaHub em batch
-    console.log(`📊 Buscando dados ContaHub em batch para ${datasParaProcessar.length} datas`);
-    
-    // Buscar faturamento por hora em batch
-    const { data: faturamentoDiaData, error: errorFaturamentoDia } = await supabase
-      .from('contahub_fatporhora')
-      .select('vd_dtgerencial, hora, valor, qtd')
-      .in('vd_dtgerencial', datasParaProcessar)
-      .eq('bar_id', barIdNum)
-      .gte('hora', 17)
-      .lte('hora', 26); // 17-23 + 24-26 (madrugada)
-
-    // Buscar dados de período em batch
-    console.log(`📊 QUERY PERÍODO: Buscando dados para ${datasParaProcessar.length} datas:`, datasParaProcessar);
-    const { data: dadosPeriodoData, error: errorPeriodo } = await supabase
-      .from('contahub_periodo')
-      .select('dt_gerencial, pessoas, vr_couvert, vr_pagamentos, vr_repique, vr_produtos, vr_desconto')
-      .in('dt_gerencial', datasParaProcessar)
-      .eq('bar_id', barIdNum);
-    
-    console.log(`📊 RESULTADO PERÍODO: ${dadosPeriodoData?.length || 0} registros encontrados`);
-    if (dadosPeriodoData && dadosPeriodoData.length > 0) {
-      console.log(`📊 AMOSTRA PERÍODO:`, dadosPeriodoData.slice(0, 3));
-    }
-
-    if (errorFaturamentoDia || errorPeriodo) {
-      console.error('❌ Erro ao buscar dados ContaHub em batch:', errorFaturamentoDia || errorPeriodo);
-    }
 
     // 🔍 DEBUG: Verificar dados encontrados
     console.log(`📊 DADOS ENCONTRADOS:`, {
@@ -578,29 +570,38 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 🚀 OTIMIZAÇÃO: Buscar dados de produtos em batch para criar resumo por data
-    console.log(`📊 Buscando produtos em batch para ${datasComDados.length} datas`);
+    // 🚀 OTIMIZAÇÃO: Buscar produtos apenas se há poucas datas (evitar timeout)
+    let produtosPorData = new Map<string, any[]>();
     
-    const { data: produtosData, error: errorProdutos } = await supabase
-      .from('contahub_analitico')
-      .select('trn_dtgerencial, prd_desc, grp_desc, qtd, valorfinal')
-      .in('trn_dtgerencial', datasComDados)
-      .eq('bar_id', barIdNum)
-      .order('valorfinal', { ascending: false });
+    if (datasComDados.length <= 3) {
+      try {
+        console.log(`📊 Buscando produtos para ${datasComDados.length} datas`);
+        
+        const produtosQuery = supabase
+          .from('contahub_analitico')
+          .select('trn_dtgerencial, prd_desc, qtd, valorfinal')
+          .in('trn_dtgerencial', datasComDados)
+          .eq('bar_id', barIdNum)
+          .order('valorfinal', { ascending: false })
+          .limit(100);
 
-    if (errorProdutos) {
-      console.error('❌ Erro ao buscar produtos em batch:', errorProdutos);
-    }
+        const produtosResult = await queryWithTimeout(produtosQuery, 'contahub_analitico');
+        const produtosData = produtosResult.data || [];
 
-    // Criar mapa de produtos por data
-    const produtosPorData = new Map<string, any[]>();
-    (produtosData || []).forEach(produto => {
-      const data = produto.trn_dtgerencial;
-      if (!produtosPorData.has(data)) {
-        produtosPorData.set(data, []);
+        // Criar mapa de produtos por data
+        produtosData.forEach(produto => {
+          const data = produto.trn_dtgerencial;
+          if (!produtosPorData.has(data)) {
+            produtosPorData.set(data, []);
+          }
+          produtosPorData.get(data)!.push(produto);
+        });
+      } catch (error) {
+        console.warn('⚠️ Timeout ao buscar produtos, continuando sem dados de produtos:', error);
       }
-      produtosPorData.get(data)!.push(produto);
-    });
+    } else {
+      console.log(`🚀 OTIMIZAÇÃO: Pulando busca de produtos (${datasComDados.length} datas, muito pesado)`);
+    }
 
     const resumoPorData: ResumoPorData[] = [];
     
@@ -1154,9 +1155,22 @@ export async function GET(request: NextRequest) {
         ultimaAtualizacao: new Date().toISOString()
       }
     });
+  }; // Fim da mainPromise
 
+  try {
+    // 🚀 TIMEOUT PROTECTION: Executar com timeout
+    return await Promise.race([mainPromise(), timeoutPromise]);
   } catch (error) {
     console.error('❌ Erro ao calcular dados semanais por horário:', error);
+    
+    // Verificar se é timeout
+    if (error instanceof Error && error.message.includes('timeout')) {
+      return NextResponse.json({
+        success: false,
+        error: 'Timeout na consulta - tente novamente com menos dados',
+        details: 'A consulta demorou mais de 25 segundos. Tente selecionar menos meses ou um dia específico.'
+      }, { status: 408 });
+    }
     
     return NextResponse.json({
       success: false,
