@@ -45,6 +45,13 @@
   --zykor-purple-800: #452565;
   --zykor-purple-900: #371D52;
   
+  /* Cores suaves para insights */
+  --blue-25: #f8fafc;
+  --green-25: #f0fdf4;
+  --purple-25: #faf5ff;
+  --orange-25: #fffbeb;
+  --red-25: #fef2f2;
+  
   /* Aplicações do Sistema */
   --primary: var(--zykor-blue);
   --primary-foreground: white;
@@ -208,6 +215,14 @@
 }
 
 /* ===== CLASSES UTILITÁRIAS ZYKOR ===== */
+
+/* Classes para cores suaves */
+.bg-blue-25 { background-color: var(--blue-25); }
+.bg-green-25 { background-color: var(--green-25); }
+.bg-purple-25 { background-color: var(--purple-25); }
+.bg-orange-25 { background-color: var(--orange-25); }
+.bg-red-25 { background-color: var(--red-25); }
+.bg-yellow-25 { background-color: #fffbeb; }
 
 /* Botão com gradiente ZYKOR que funciona em ambos os temas */
 .btn-zykor {
