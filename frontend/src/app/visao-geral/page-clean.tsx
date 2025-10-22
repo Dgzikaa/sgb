@@ -20,7 +20,7 @@ import {
   Calendar,
   BarChart3
 } from 'lucide-react';
-import { AnimatedCounter } from '@/components/ui/motion-wrapper';
+import { AnimatedCounter, AnimatedCurrency } from '@/components/ui/animated-counter';
 
 interface BigNumber {
   label: string;
@@ -269,10 +269,13 @@ export default function VisaoGeralCleanPage() {
                 </div>
                 <div className="space-y-2">
                   <div className="text-2xl font-bold">
-                    <AnimatedCounter 
-                      value={item.value} 
-                      format={item.format === 'currency' ? 'currency' : 'number'}
-                    />
+                    {item.format === 'currency' ? (
+                      <AnimatedCurrency value={item.value} />
+                    ) : item.format === 'percentage' ? (
+                      <AnimatedCounter value={item.value} suffix="%" decimals={1} />
+                    ) : (
+                      <AnimatedCounter value={item.value} />
+                    )}
                   </div>
                   {item.meta && (
                     <div className="text-sm text-gray-600">
