@@ -152,7 +152,7 @@ export default function EstoquePage() {
       estoque_final: 0,
       status: 'pendente',
       data_contagem: dataFiltro,
-      responsavel_contagem: user?.name || ''
+      responsavel_contagem: user?.nome || ''
     });
     setModalAberto(true);
   };
@@ -180,7 +180,7 @@ export default function EstoquePage() {
         ...formData,
         bar_id: selectedBar.id,
         data_contagem: dataFiltro,
-        responsavel_contagem: user?.name || ''
+        responsavel_contagem: user?.nome || ''
       };
 
       const response = await fetch('/api/estoque-insumos', {
@@ -590,7 +590,7 @@ export default function EstoquePage() {
               <div>
                 <Label>Responsável</Label>
                 <Input
-                  value={formData.responsavel_contagem || user?.name || ''}
+                  value={formData.responsavel_contagem || user?.nome || ''}
                   onChange={(e) => setFormData({ ...formData, responsavel_contagem: e.target.value })}
                   className="bg-white dark:bg-gray-700"
                 />

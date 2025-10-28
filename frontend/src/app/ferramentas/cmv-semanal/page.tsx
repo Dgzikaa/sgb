@@ -163,7 +163,7 @@ export default function CMVSemanalPage() {
       cmv_descartaveis: 0,
       cmv_outros: 0,
       status: 'rascunho',
-      responsavel: user?.name || ''
+      responsavel: user?.nome || ''
     });
     setModalAberto(true);
   };
@@ -190,7 +190,7 @@ export default function CMVSemanalPage() {
       const registro = {
         ...formData,
         bar_id: selectedBar.id,
-        responsavel: user?.name || ''
+        responsavel: user?.nome || ''
       };
 
       const response = await fetch('/api/cmv-semanal', {

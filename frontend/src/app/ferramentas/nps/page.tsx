@@ -14,6 +14,7 @@ import { Smile, TrendingUp, Calendar, Users, BarChart3, Download, Upload, FileSp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useBar } from '@/hooks/useBar';
 
 interface NPSData {
   id: number;
@@ -44,6 +45,7 @@ export default function NPSPage() {
   const { setPageTitle } = usePageTitle();
   const { user } = useUser();
   const { toast } = useToast();
+  const { selectedBar } = useBar();
 
   const [loading, setLoading] = useState(false);
   const [dadosNPS, setDadosNPS] = useState<NPSData[]>([]);
@@ -81,13 +83,13 @@ export default function NPSPage() {
 
       // Buscar NPS
       const responseNPS = await fetch(
-        `/api/nps?bar_id=${user?.bar_id}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
+        `/api/nps?bar_id=${selectedBar?.id || 3}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
       );
       const dataNPS = await responseNPS.json();
 
       // Buscar Felicidade
       const responseFelicidade = await fetch(
-        `/api/pesquisa-felicidade?bar_id=${user?.bar_id}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
+        `/api/pesquisa-felicidade?bar_id=${selectedBar?.id || 3}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
       );
       const dataFelicidade = await responseFelicidade.json();
 
@@ -178,7 +180,7 @@ export default function NPSPage() {
         if (tipoImportacao === 'nps') {
           // Formato esperado: Data | Setor | Funcionário | Quorum | Q1 | Q2 | Q3 | Q4 | Q5 | Q6
           registros.push({
-            bar_id: user?.bar_id || 3,
+            bar_id: selectedBar?.id || 3 || 3,
             data_pesquisa: colunas[0] ? new Date(colunas[0]).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             setor: colunas[1] || 'Geral',
             funcionario_nome: colunas[2] || 'Anônimo',
@@ -193,7 +195,7 @@ export default function NPSPage() {
         } else {
           // Formato esperado: Data | Setor | Funcionário | Quorum | Q1 | Q2 | Q3 | Q4 | Q5
           registros.push({
-            bar_id: user?.bar_id || 3,
+            bar_id: selectedBar?.id || 3 || 3,
             data_pesquisa: colunas[0] ? new Date(colunas[0]).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             setor: colunas[1] || 'Geral',
             funcionario_nome: colunas[2] || 'Anônimo',
@@ -225,7 +227,7 @@ export default function NPSPage() {
           'x-user-data': encodeURIComponent(JSON.stringify(user))
         },
         body: JSON.stringify({
-          bar_id: user?.bar_id || 3,
+          bar_id: selectedBar?.id || 3 || 3,
           registros
         })
       });

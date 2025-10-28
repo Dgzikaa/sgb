@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { DateTime } from 'luxon';
+import { format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 export const dynamic = 'force-dynamic'
 
@@ -20,8 +21,8 @@ async function executeNiboSync(barId?: string) {
     }
 
     // Horário atual no fuso de São Paulo
-    const agoraBrasil = DateTime.now().setZone('America/Sao_Paulo');
-    console.log(`🕐 Horário em São Paulo: ${agoraBrasil.toFormat('dd/MM/yyyy HH:mm:ss')}`);
+    const agoraBrasil = toZonedTime(new Date(), 'America/Sao_Paulo');
+    console.log(`🕐 Horário em São Paulo: ${format(agoraBrasil, 'dd/MM/yyyy HH:mm:ss')}`);
 
     // Buscar credenciais do Nibo na tabela api_credentials
     const { data: credenciais, error: credError } = await supabase
@@ -143,7 +144,7 @@ export async function GET() {
       { 
         success: false, 
         error: error instanceof Error ? error.message : 'Erro desconhecido',
-        timestamp: DateTime.now().setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy HH:mm:ss')
+        timestamp: format(toZonedTime(new Date(), 'America/Sao_Paulo'), 'dd/MM/yyyy HH:mm:ss')
       }, 
       { status: 500 }
     );
@@ -176,7 +177,7 @@ export async function POST(request: NextRequest) {
       { 
         success: false, 
         error: error instanceof Error ? error.message : 'Erro desconhecido',
-        timestamp: DateTime.now().setZone('America/Sao_Paulo').toFormat('dd/MM/yyyy HH:mm:ss')
+        timestamp: format(toZonedTime(new Date(), 'America/Sao_Paulo'), 'dd/MM/yyyy HH:mm:ss')
       }, 
       { status: 500 }
     );

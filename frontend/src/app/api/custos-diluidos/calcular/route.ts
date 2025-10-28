@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
         custos_por_dia: Object.fromEntries(custosPorDia),
         custos_por_dia_array: custosPorDiaArray,
         total_mes: custos.reduce((sum, c) => sum + parseFloat(c.valor_total.toString()), 0),
-        custos_detalhados
+        custos_detalhados: custosDetalhados
       }
     });
 
