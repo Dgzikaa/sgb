@@ -99,7 +99,7 @@ async function executeNiboSync(barId?: string) {
     return {
       success: true,
       message: `Sincronização com Nibo executada com sucesso para bar_id: ${targetBarId}`,
-      timestamp: agoraBrasil.toFormat('dd/MM/yyyy HH:mm:ss'),
+      timestamp: format(agoraBrasil, 'dd/MM/yyyy HH:mm:ss'),
       log_id: logInicio?.id,
       edge_function_result: result
     };
