@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     // 4. Se foi solicitado um dia específico, retornar apenas esse dia
     if (dataEvento) {
       const custoDia = custosPorDia.get(dataEvento) || 0;
-      const custosDoD ia = custosDetalhados.map(c => ({
+      const custosDoDia = custosDetalhados.map(c => ({
         ...c,
         valor_dia: c.distribuicao[dataEvento] || 0
       }));
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
         data: {
           data_evento: dataEvento,
           custo_total_dia: custoDia,
-          custos_detalhados: custosDoD ia
+          custos_detalhados: custosDoDia
         }
       });
     }
