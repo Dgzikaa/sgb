@@ -20,7 +20,9 @@ import {
   RefreshCcw,
   Activity,
   Edit,
-  Save
+  Save,
+  Smile,
+  Heart
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
@@ -99,6 +101,38 @@ interface DadosMes {
   performance_media: number;
 }
 
+interface DadosNPS {
+  id: number;
+  bar_id: number;
+  data_pesquisa: string;
+  funcionario_nome: string;
+  setor: string;
+  quorum: number;
+  qual_sua_area_atuacao: number;
+  sinto_me_motivado: number;
+  empresa_se_preocupa: number;
+  conectado_colegas: number;
+  relacionamento_positivo: number;
+  quando_identifico: number;
+  media_geral: number;
+  resultado_percentual: number;
+}
+
+interface DadosFelicidade {
+  id: number;
+  bar_id: number;
+  data_pesquisa: string;
+  funcionario_nome: string;
+  setor: string;
+  quorum: number;
+  eu_comigo_engajamento: number;
+  eu_com_empresa_pertencimento: number;
+  eu_com_colega_relacionamento: number;
+  eu_com_gestor_lideranca: number;
+  media_geral: number;
+  resultado_percentual: number;
+}
+
 
 
 export default function DesempenhoPage() {
@@ -113,6 +147,9 @@ export default function DesempenhoPage() {
   const [dadosSemanas, setDadosSemanas] = useState<DadosSemana[]>([]);
   const [totaisAnuais, setTotaisAnuais] = useState<TotaisMensais | null>(null);
   const [dadosMensais, setDadosMensais] = useState<DadosMes[]>([]);
+  const [dadosNPS, setDadosNPS] = useState<DadosNPS[]>([]);
+  const [dadosFelicidade, setDadosFelicidade] = useState<DadosFelicidade[]>([]);
+  const [loadingPesquisas, setLoadingPesquisas] = useState(false);
   
   // Estados para modal de edição
   const [modalAberto, setModalAberto] = useState(false);
@@ -125,6 +162,59 @@ export default function DesempenhoPage() {
   ], []);
 
 
+
+  // Carregar dados de NPS e Pesquisa da Felicidade
+  const carregarDadosPesquisas = useCallback(async () => {
+    if (!selectedBar || !user) return;
+
+    setLoadingPesquisas(true);
+    
+    try {
+      // Buscar últimos 90 dias de dados
+      const dataFim = new Date().toISOString().split('T')[0];
+      const dataInicio = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      // Buscar NPS
+      const responseNPS = await fetch(
+        `/api/nps?bar_id=${selectedBar.id}&data_inicio=${dataInicio}&data_fim=${dataFim}`,
+        {
+          headers: {
+            'x-user-data': encodeURIComponent(JSON.stringify(user))
+          }
+        }
+      );
+
+      if (responseNPS.ok) {
+        const dataNPS = await responseNPS.json();
+        setDadosNPS(dataNPS.data || []);
+      }
+
+      // Buscar Pesquisa da Felicidade
+      const responseFelicidade = await fetch(
+        `/api/pesquisa-felicidade?bar_id=${selectedBar.id}&data_inicio=${dataInicio}&data_fim=${dataFim}`,
+        {
+          headers: {
+            'x-user-data': encodeURIComponent(JSON.stringify(user))
+          }
+        }
+      );
+
+      if (responseFelicidade.ok) {
+        const dataFelicidade = await responseFelicidade.json();
+        setDadosFelicidade(dataFelicidade.data || []);
+      }
+
+    } catch (error) {
+      console.error('Erro ao carregar dados de pesquisas:', error);
+      toast({
+        title: "Erro ao carregar pesquisas",
+        description: "Não foi possível carregar os dados de NPS e Felicidade",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingPesquisas(false);
+    }
+  }, [selectedBar, user, toast]);
 
   // Carregar dados mensais consolidados (fevereiro 2025 até atual)
   const carregarDadosMensais = useCallback(async () => {
@@ -339,6 +429,13 @@ export default function DesempenhoPage() {
     }
   }, [activeTab, selectedBar, user, anoAtual, dadosMensais.length, carregarDadosMensais]);
 
+  // Carregar dados de pesquisas quando mudar para aba pesquisas
+  useEffect(() => {
+    if (activeTab === 'pesquisas' && selectedBar && user && dadosNPS.length === 0 && dadosFelicidade.length === 0) {
+      carregarDadosPesquisas();
+    }
+  }, [activeTab, selectedBar, user, dadosNPS.length, dadosFelicidade.length, carregarDadosPesquisas]);
+
 
 
   if (loading) {
@@ -372,6 +469,13 @@ export default function DesempenhoPage() {
             >
               <Calendar className="h-4 w-4 mr-2" />
               Visão Mensal
+            </TabsTrigger>
+            <TabsTrigger 
+              value="pesquisas" 
+              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/25 !rounded-xl"
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              NPS & Felicidade
             </TabsTrigger>
 
           </TabsList>
@@ -747,6 +851,200 @@ export default function DesempenhoPage() {
                 </div>
               </CardContent>
             </Card>
+            </motion.div>
+          </TabsContent>
+
+          {/* Visão Pesquisas - NPS & Felicidade */}
+          <TabsContent value="pesquisas" className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+            >
+              {/* Card NPS */}
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
+                  <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+                      <Smile className="h-5 w-5 text-white" />
+                    </div>
+                    NPS - Net Promoter Score
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {loadingPesquisas ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <RefreshCcw className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando dados NPS...</p>
+                    </div>
+                  ) : dadosNPS.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Smile className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400 font-medium">Nenhum dado NPS encontrado</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Últimos 90 dias</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Estatísticas Gerais */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Média Geral</p>
+                          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                            {(dadosNPS.reduce((sum, item) => sum + (item.media_geral || 0), 0) / dadosNPS.length).toFixed(1)}
+                          </p>
+                        </div>
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-xl border border-green-200 dark:border-green-800">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Respostas</p>
+                          <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                            {dadosNPS.length}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Lista de Pesquisas Recentes */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pesquisas Recentes</h4>
+                        <div className="max-h-[400px] overflow-y-auto space-y-2">
+                          {dadosNPS.slice(0, 10).map((item) => (
+                            <div
+                              key={item.id}
+                              className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {new Date(item.data_pesquisa).toLocaleDateString('pt-BR')}
+                                  </p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">{item.setor}</p>
+                                </div>
+                                <Badge className={`${
+                                  (item.resultado_percentual || 0) >= 80 
+                                    ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800'
+                                    : (item.resultado_percentual || 0) >= 60
+                                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800'
+                                    : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'
+                                }`}>
+                                  {(item.resultado_percentual || 0).toFixed(1)}%
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                  <div
+                                    className={`h-2 rounded-full ${
+                                      (item.resultado_percentual || 0) >= 80 
+                                        ? 'bg-green-500'
+                                        : (item.resultado_percentual || 0) >= 60
+                                        ? 'bg-yellow-500'
+                                        : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${item.resultado_percentual || 0}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs text-gray-600 dark:text-gray-400">
+                                  {item.quorum || 0} resp.
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Card Pesquisa da Felicidade */}
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
+                  <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg">
+                      <Heart className="h-5 w-5 text-white" />
+                    </div>
+                    Pesquisa da Felicidade
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {loadingPesquisas ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <RefreshCcw className="h-8 w-8 animate-spin text-pink-600 dark:text-pink-400 mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando dados de felicidade...</p>
+                    </div>
+                  ) : dadosFelicidade.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Heart className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400 font-medium">Nenhum dado de felicidade encontrado</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Últimos 90 dias</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Estatísticas Gerais */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 p-4 rounded-xl border border-pink-200 dark:border-pink-800">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Média Geral</p>
+                          <p className="text-3xl font-bold text-pink-600 dark:text-pink-400">
+                            {(dadosFelicidade.reduce((sum, item) => sum + (item.media_geral || 0), 0) / dadosFelicidade.length).toFixed(1)}
+                          </p>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 p-4 rounded-xl border border-purple-200 dark:border-purple-800">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Respostas</p>
+                          <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                            {dadosFelicidade.length}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Lista de Pesquisas Recentes */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pesquisas Recentes</h4>
+                        <div className="max-h-[400px] overflow-y-auto space-y-2">
+                          {dadosFelicidade.slice(0, 10).map((item) => (
+                            <div
+                              key={item.id}
+                              className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {new Date(item.data_pesquisa).toLocaleDateString('pt-BR')}
+                                  </p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">{item.setor}</p>
+                                </div>
+                                <Badge className={`${
+                                  (item.resultado_percentual || 0) >= 80 
+                                    ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800'
+                                    : (item.resultado_percentual || 0) >= 60
+                                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800'
+                                    : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'
+                                }`}>
+                                  {(item.resultado_percentual || 0).toFixed(1)}%
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                  <div
+                                    className={`h-2 rounded-full ${
+                                      (item.resultado_percentual || 0) >= 80 
+                                        ? 'bg-pink-500'
+                                        : (item.resultado_percentual || 0) >= 60
+                                        ? 'bg-yellow-500'
+                                        : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${item.resultado_percentual || 0}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs text-gray-600 dark:text-gray-400">
+                                  {item.quorum || 0} resp.
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </motion.div>
           </TabsContent>
 

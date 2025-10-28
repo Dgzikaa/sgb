@@ -83,17 +83,9 @@ const nextConfig = {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
-        ignored: [
-          '**/node_modules/**',
-          '**/.git/**',
-          '**/.next/**',
-          '**/dist/**',
-          '**/build/**',
-        ],
+        ignored: /(node_modules|\.git|\.next|dist|build)/i,
       };
-      
-      // Source maps otimizados para dev (sem warning)
-      config.devtool = 'eval-source-map';
+      // Não ajustar devtool em desenvolvimento para evitar regressões e warnings do Next.js
     }
 
     return config;

@@ -50,7 +50,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
     {
       icon: ChefHat,
       label: 'Terminal Produção',
-      href: '/future/operacoes/terminal',
+      href: '/operacoes/terminal',
       description: 'Terminal de produção',
     },
     {

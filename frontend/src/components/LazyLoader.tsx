@@ -116,7 +116,7 @@ export function LazyLoader({
 // );
 
 // export const LazyTerminal = createLazyComponent(
-//   () => import('@/app/future/operacoes/terminal/page'),
+//   () => import('@/app/operacoes/terminal/page'),
 //   <div className="p-6 space-y-4">
 //     <Skeleton className="h-8 w-1/3" />
 //     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -140,7 +140,7 @@ export function LazyLoader({
 // );
 
 // export const LazyChecklists = createLazyComponent(
-//   () => import('@/app/future/configuracoes/checklists/page'),
+//   () => import('@/app/configuracoes/checklists/page'),
 //   <div className="p-6 space-y-4">
 //     <Skeleton className="h-8 w-1/3" />
 //     {Array.from({ length: 5 }).map((_, i) => (

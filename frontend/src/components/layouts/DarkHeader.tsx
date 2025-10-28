@@ -36,7 +36,7 @@ const routeMapping: Record<
   '/operacoes/checklists': { name: 'Checklists' },
   '/operacoes/checklists/checklists-funcionario': { name: 'Meus Checklists' },
   '/operacoes/receitas': { name: 'Receitas' },
-  '/future/operacoes/terminal': { name: 'Terminal de Produção' },
+  '/operacoes/terminal': { name: 'Terminal de Produção' },
 
   // Relatórios
   '/relatorios': { name: 'Relatórios' },

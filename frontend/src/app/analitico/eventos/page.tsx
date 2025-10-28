@@ -10,8 +10,10 @@ import ProdutosDoDiaDataTable from '@/components/ferramentas/ProdutosDoDiaDataTa
 export default function EventosAnaliticoPage() {
   const { setPageTitle } = usePageTitle();
   const [dataSelecionada, setDataSelecionada] = useState(() => {
-    // Definir data padrão como 26.09.2025 (data que o usuário testou)
-    return '2025-09-26';
+    // Definir data padrão como ontem
+    const ontem = new Date();
+    ontem.setDate(ontem.getDate() - 1);
+    return ontem.toISOString().split('T')[0]; // Formato YYYY-MM-DD
   });
 
   useEffect(() => {

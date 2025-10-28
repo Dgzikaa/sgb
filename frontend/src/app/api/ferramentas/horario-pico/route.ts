@@ -128,8 +128,8 @@ export async function POST(request: NextRequest) {
       observacao: 'Usando apenas vr_pagamentos (sem duplicação)'
     });
     
-    // O faturamento do bar é o total (vr_pagamentos já inclui tudo)
-    const faturamentoBar = faturamentoTotalDia;
+    // Faturamento do bar = total do dia - couvert (produtos/bebidas)
+    const faturamentoBar = Math.max(0, faturamentoTotalDia - totalCouvert);
 
     // 3. Buscar dados da semana passada (17-23h + 24-26h)
     const semanaPassadaStr = semanaPassada.toISOString().split('T')[0];

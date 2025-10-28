@@ -21,7 +21,7 @@ export const ThemeContext = createContext<ThemeContextType | undefined>(
 );
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark'); // Default para dark
+  const [theme, setTheme] = useState<Theme>('light'); // Default para light
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -34,11 +34,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setTheme(savedTheme);
       document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     } else {
-      // Default para dark mode sempre
-      const initialTheme = 'dark';
+      // Default para light mode sempre
+      const initialTheme = 'light';
       setTheme(initialTheme);
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark'); // Salvar dark como padrão
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light'); // Salvar light como padrão
     }
 
     setIsLoading(false);
