@@ -3,61 +3,8 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'
 
-// Criar tabela de insumos
-const criarTabelaInsumos = async (supabase: any) => {
-  const { error } = await supabase.rpc('exec_sql', {
-    sql: `
-      CREATE TABLE IF NOT EXISTS insumos (
-        id BIGSERIAL PRIMARY KEY,
-        bar_id INTEGER NOT NULL DEFAULT 3,
-        codigo VARCHAR(20) UNIQUE NOT NULL,
-        nome VARCHAR(255) NOT NULL,
-        categoria VARCHAR(50) DEFAULT 'cozinha',
-        tipo_local VARCHAR(20) DEFAULT 'cozinha' CHECK (tipo_local IN ('cozinha', 'bar')),
-        unidade_medida VARCHAR(10) NOT NULL DEFAULT 'g' CHECK (unidade_medida IN ('g', 'kg', 'ml', 'l', 'unid', 'pct')),
-        custo_unitario DECIMAL(10,4) DEFAULT 0,
-        observacoes TEXT,
-        ativo BOOLEAN DEFAULT true,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      );
-      
-      -- Adicionar colunas que podem estar faltando
-      ALTER TABLE insumos ADD COLUMN IF NOT EXISTS bar_id INTEGER DEFAULT 3;
-      ALTER TABLE insumos ADD COLUMN IF NOT EXISTS categoria VARCHAR(50) DEFAULT 'cozinha';
-      ALTER TABLE insumos ADD COLUMN IF NOT EXISTS tipo_local VARCHAR(20) DEFAULT 'cozinha';
-      ALTER TABLE insumos ADD COLUMN IF NOT EXISTS unidade_medida VARCHAR(10) DEFAULT 'g';
-      
-      -- Adicionar constraint se não existir
-      DO $$ 
-      BEGIN
-        ALTER TABLE insumos ADD CONSTRAINT insumos_tipo_local_check 
-        CHECK (tipo_local IN ('cozinha', 'bar'));
-      EXCEPTION 
-        WHEN duplicate_object THEN NULL;
-      END $$;
-      
-      -- Corrigir dados existentes que podem ter valores NULL ou vazios
-      UPDATE insumos SET bar_id = 3 WHERE bar_id IS NULL;
-      UPDATE insumos SET categoria = 'cozinha' WHERE categoria IS NULL OR categoria = '';
-      UPDATE insumos SET tipo_local = 'cozinha' WHERE tipo_local IS NULL OR tipo_local = '';
-      UPDATE insumos SET unidade_medida = 'g' WHERE unidade_medida IS NULL OR unidade_medida = '';
-      UPDATE insumos SET custo_unitario = 0 WHERE custo_unitario IS NULL;
-      
-      CREATE INDEX IF NOT EXISTS idx_insumos_codigo ON insumos(codigo);
-      CREATE INDEX IF NOT EXISTS idx_insumos_ativo ON insumos(ativo);
-      CREATE INDEX IF NOT EXISTS idx_insumos_tipo_local ON insumos(tipo_local);
-      CREATE INDEX IF NOT EXISTS idx_insumos_bar_id ON insumos(bar_id);
-    `,
-  });
-
-  if (error) {
-    console.error('❌ Erro ao criar tabela insumos:', error);
-    throw error;
-  }
-
-  console.log('✅ Tabela insumos criada/verificada');
-};
+// NOTA: Tabela 'insumos' já foi criada via migration do Supabase
+// Não é necessário criar via RPC
 
 // GET - Listar insumos
 export async function GET(request: NextRequest) {
@@ -73,9 +20,6 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    // Verificar/criar tabela
-    await criarTabelaInsumos(supabase);
 
     let query = supabase
       .from('insumos')
@@ -169,9 +113,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    // Verificar/criar tabela
-    await criarTabelaInsumos(supabase);
 
     // Verificar se código já existe
     const { data: existente } = await supabase
