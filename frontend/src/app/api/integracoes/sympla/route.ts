@@ -57,14 +57,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // NOTA: Edge Function sympla-sync foi removida - implementar sincronização direta aqui se necessário
-    // Por enquanto, retornar sucesso simulado
-    const result = {
-      success: true,
-      message: 'Sincronização Sympla não implementada (Edge Function removida)',
-      eventoId,
-      tipo
-    };
+    // Chamar Edge Function sympla-sync
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      return NextResponse.json(
+        { error: 'Configuração do Supabase não encontrada' },
+        { status: 500 }
+      );
+    }
+    
+    // Chamar a Edge Function
+    const functionUrl = `${supabaseUrl}/functions/v1/sympla-sync`;
+    
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        filtro_eventos: 'ordi',
+        // Se eventoId for fornecido, usar como filtro customizado
+        // Caso contrário, usa a última semana automaticamente
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Edge Function error: ${response.status} - ${errorText}`);
+    }
+    
+    const result = await response.json();
 
     // Registrar a sincronização na tabela de logs local se necessário
     const logData = {

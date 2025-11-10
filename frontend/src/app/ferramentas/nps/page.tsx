@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Smile, TrendingUp, Calendar, Users, BarChart3, Download, Upload, FileSpreadsheet, RefreshCcw } from 'lucide-react';
+import { Smile, TrendingUp, Calendar, Users, BarChart3, Download, Upload, FileSpreadsheet } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -56,7 +56,6 @@ export default function NPSPage() {
   const [tipoImportacao, setTipoImportacao] = useState<'nps' | 'felicidade'>('nps');
   const [dadosCSV, setDadosCSV] = useState('');
   const [importando, setImportando] = useState(false);
-  const [sincronizando, setSincronizando] = useState(false);
   
   const [dataInicio, setDataInicio] = useState(() => {
     const data = new Date();
@@ -109,47 +108,6 @@ export default function NPSPage() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Função para sincronizar automaticamente do Google Sheets
-  const sincronizarGoogleSheets = async () => {
-    setSincronizando(true);
-    try {
-      const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
-      const response = await fetch(
-        `${SUPABASE_URL}/functions/v1/sync-pesquisa-felicidade`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast({
-          title: 'Sincronização concluída!',
-          description: data.message || 'Dados importados com sucesso'
-        });
-        carregarDados();
-      } else {
-        throw new Error(data.error || 'Erro na sincronização');
-      }
-    } catch (error: any) {
-      console.error('Erro ao sincronizar:', error);
-      toast({
-        title: 'Erro na sincronização',
-        description: error.message || 'Não foi possível sincronizar os dados',
-        variant: 'destructive'
-      });
-    } finally {
-      setSincronizando(false);
     }
   };
 
@@ -296,23 +254,6 @@ export default function NPSPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              onClick={sincronizarGoogleSheets}
-              disabled={sincronizando}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {sincronizando ? (
-                <>
-                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                  Sincronizando...
-                </>
-              ) : (
-                <>
-                  <RefreshCcw className="h-4 w-4 mr-2" />
-                  Sync Automático
-                </>
-              )}
-            </Button>
             <Button
               onClick={() => {
                 setTipoImportacao('nps');
