@@ -40,10 +40,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Configuração Sympla
 function getSymplaConfig() {
-  // CHAVES DISPONÍVEIS - DESCOMENTE APENAS 1 POR VEZ:
-  //const token = '97d7b77e99d40dc8fb5583f590f9b7db3072afe7969c167c493077d9c5a862a6'; // CHAVE_ORIGINAL
-  //const token = 'e96a8233fd5acc27c65b166bf424dd8e1874f4d48b16ee2029c93b6f80fd6a06'; // CHAVE_1
-  const token = '24a8cb785b622adeb3239928dd2ac79ec3f1a076558b0159ee9d4d27c8099022'; // CHAVE_2
+  const token = '2835b1e7099e748057c71a9c0c34b3a4ca1246b379687ebf8affa92cdc65a7a4'; // CHAVE_ATIVA
   
   if (!token) {
     throw new Error('SYMPLA_API_TOKEN não encontrado');
@@ -54,8 +51,7 @@ function getSymplaConfig() {
     token: token,
     headers: {
       's_token': token,
-      'Content-Type': 'application/json',
-      'User-Agent': 'SGB-Sync-Retroativo/1.0'
+      'Content-Type': 'application/json'
     }
   };
 }
@@ -104,22 +100,32 @@ async function buscarEventosPeriodo(dataInicio, dataFim) {
   let pagina = 1;
   let temProximaPagina = true;
 
-  console.log(`🔍 Buscando eventos de ${dataInicio} a ${dataFim}`);
+  console.log(`🔍 Buscando todos os eventos (filtro de data será aplicado depois)`);
+  
+  // Converter datas para objetos Date para comparação
+  const dataInicioObj = new Date(dataInicio);
+  const dataFimObj = new Date(dataFim);
 
   while (temProximaPagina) {
-    const path = `/public/v1.5.1/events?page=${pagina}&start_date=${dataInicio}&end_date=${dataFim}`;
+    const path = `/public/v1.5.1/events?page=${pagina}`;
     
     try {
       console.log(`   📄 Página ${pagina}...`);
       const response = await makeSymplaRequest(path);
 
       if (response.data && response.data.length > 0) {
-        // Filtrar apenas eventos com 'ordi'
+        // Filtrar eventos com 'ordi' E no período especificado
         const eventosOrdi = response.data.filter(evento => {
-          return evento.name && evento.name.toLowerCase().includes('ordi') && evento.start_date;
+          if (!evento.name || !evento.name.toLowerCase().includes('ordi') || !evento.start_date) {
+            return false;
+          }
+          
+          // Verificar se está no período
+          const dataEvento = new Date(evento.start_date);
+          return dataEvento >= dataInicioObj && dataEvento <= dataFimObj;
         });
         
-        console.log(`     📊 ${response.data.length} eventos total, ${eventosOrdi.length} do Ordi`);
+        console.log(`     📊 ${response.data.length} eventos total, ${eventosOrdi.length} do Ordi no período`);
         
         todosEventos = todosEventos.concat(eventosOrdi);
         pagina++;
@@ -136,7 +142,7 @@ async function buscarEventosPeriodo(dataInicio, dataFim) {
     }
   }
 
-  console.log(`✅ TOTAL: ${todosEventos.length} eventos do Ordi encontrados`);
+  console.log(`✅ TOTAL: ${todosEventos.length} eventos do Ordi encontrados no período ${dataInicio} a ${dataFim}`);
   return todosEventos;
 }
 

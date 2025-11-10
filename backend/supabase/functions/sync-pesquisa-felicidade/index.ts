@@ -1,13 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import * as XLSX from 'https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs'
+import { read, utils } from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Credenciais da Service Account (hardcoded para simplificar)
+// Credenciais da Service Account
 const CREDENTIALS = {
   client_email: 'contaazul-sheets-service@canvas-landing-447918-h7.iam.gserviceaccount.com',
   private_key: `-----BEGIN PRIVATE KEY-----
@@ -56,35 +56,8 @@ interface PesquisaFelicidadeRow {
   funcionario_nome: string
 }
 
-// Função para criar JWT
-function createJWT(clientEmail: string, privateKey: string, scopes: string[]): string {
-  const encoder = new TextEncoder()
-  const header = { alg: 'RS256', typ: 'JWT' }
-  const now = Math.floor(Date.now() / 1000)
-  
-  const payload = {
-    iss: clientEmail,
-    sub: clientEmail,
-    scope: scopes.join(' '),
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600
-  }
-
-  const base64Header = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-  const base64Payload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-  
-  // Importar chave e assinar (usando Web Crypto API do Deno)
-  const signData = `${base64Header}.${base64Payload}`
-  
-  // Nota: Para simplificar, vamos usar uma abordagem alternativa
-  // Em produção, usar crypto.subtle.sign()
-  return `${base64Header}.${base64Payload}.SIGNATURE_PLACEHOLDER`
-}
-
-// Função para obter Access Token
+// Função para obter Access Token usando Service Account
 async function getAccessToken(): Promise<string> {
-  // Criar JWT
   const encoder = new TextEncoder()
   const now = Math.floor(Date.now() / 1000)
   
@@ -186,7 +159,7 @@ serve(async (req) => {
 
     // 3. Processar Excel com SheetJS
     console.log('📊 Processando planilha...')
-    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' })
+    const workbook = read(new Uint8Array(arrayBuffer), { type: 'array' })
     
     console.log(`📑 Abas encontradas: ${workbook.SheetNames.join(', ')}`)
 
@@ -198,7 +171,7 @@ serve(async (req) => {
     }
 
     // Converter para JSON
-    const jsonData = XLSX.utils.sheet_to_json(targetSheet, { 
+    const jsonData = utils.sheet_to_json(targetSheet, { 
       header: 1,
       defval: '',
       raw: false
@@ -236,12 +209,16 @@ serve(async (req) => {
 
         if (!dataFormatada) continue
 
-        // Converter percentuais
-        const parsePercentual = (val: any): number => {
+        // Converter percentuais para escala de 1-5
+        // Percentuais vêm como "91,67%" -> converter para 4.58 -> arredondar para 5
+        const parsePercentualToScale = (val: any): number => {
           if (!val) return 0
           const str = String(val).replace('%', '').replace(',', '.')
-          const num = parseFloat(str)
-          return num > 1 ? num / 100 : num
+          const percentual = parseFloat(str)
+          // Converter percentual (0-100) para escala 1-5
+          // 0-20% = 1, 20-40% = 2, 40-60% = 3, 60-80% = 4, 80-100% = 5
+          const escala = Math.ceil((percentual / 100) * 5)
+          return Math.max(1, Math.min(5, escala)) // Garantir entre 1 e 5
         }
 
         const registro: PesquisaFelicidadeRow = {
@@ -249,11 +226,11 @@ serve(async (req) => {
           data_pesquisa: dataFormatada,
           setor: row[1] || 'TODOS',
           quorum: parseInt(row[2]) || 0,
-          eu_comigo_engajamento: parsePercentual(row[3]),
-          eu_com_empresa_pertencimento: parsePercentual(row[4]),
-          eu_com_colega_relacionamento: parsePercentual(row[5]),
-          eu_com_gestor_lideranca: parsePercentual(row[6]),
-          justica_reconhecimento: parsePercentual(row[7]),
+          eu_comigo_engajamento: parsePercentualToScale(row[3]),
+          eu_com_empresa_pertencimento: parsePercentualToScale(row[4]),
+          eu_com_colega_relacionamento: parsePercentualToScale(row[5]),
+          eu_com_gestor_lideranca: parsePercentualToScale(row[6]),
+          justica_reconhecimento: parsePercentualToScale(row[7]),
           funcionario_nome: 'Equipe',
         }
 
@@ -286,7 +263,7 @@ serve(async (req) => {
     const { data: insertedData, error: insertError } = await supabaseClient
       .from('pesquisa_felicidade')
       .upsert(registros, {
-        onConflict: 'bar_id,data_pesquisa,setor',
+        onConflict: 'bar_id,data_pesquisa,funcionario_nome,setor',
         ignoreDuplicates: false
       })
       .select()

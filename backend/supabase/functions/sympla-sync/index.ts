@@ -18,8 +18,7 @@ function getSymplaConfig() {
     token: token,
     headers: {
       's_token': token,
-      'Content-Type': 'application/json',
-      'User-Agent': 'SGB-Sync/1.0'
+      'Content-Type': 'application/json'
     }
   };
 }
@@ -44,25 +43,18 @@ async function makeSymplaRequest(path: string) {
 }
 
 // Função para buscar TODOS os eventos (com paginação completa)
-async function buscarTodosEventos(dataInicio?: string, dataFim?: string) {
+async function buscarTodosEventos() {
   let todosEventos: any[] = [];
   let pagina = 1;
   let temProximaPagina = true;
 
   console.log(`🔄 Buscando eventos com paginação...`);
-  
-  // Adicionar filtro de data se fornecido
-  let baseUrl = '/public/v1.5.1/events';
-  const params: string[] = [];
-  
-  if (dataInicio) params.push(`start_date=${dataInicio}`);
-  if (dataFim) params.push(`end_date=${dataFim}`);
 
   while (temProximaPagina) {
     console.log(`   📄 Página ${pagina}...`);
     
-    const urlParams = [...params, `page=${pagina}`].join('&');
-    const path = `${baseUrl}?${urlParams}`;
+    // Não usar filtros de data na API, filtrar depois no código
+    const path = `/public/v1.5.1/events?page=${pagina}`;
     
     const response = await makeSymplaRequest(path);
 
@@ -356,23 +348,28 @@ Deno.serve(async (req: Request) => {
       console.log(`📅 Usando última semana automática: ${dataInicioPeriodo.toISOString().split('T')[0]} a ${dataFimPeriodo.toISOString().split('T')[0]}`);
     }
 
-    // Buscar eventos no período
+    // Buscar todos os eventos
     const dataInicioStr = dataInicioPeriodo.toISOString().split('T')[0];
     const dataFimStr = dataFimPeriodo.toISOString().split('T')[0];
     
-    console.log(`🔍 Buscando eventos de ${dataInicioStr} a ${dataFimStr}...`);
-    const todosEventos = await buscarTodosEventos(dataInicioStr, dataFimStr);
+    console.log(`🔍 Buscando eventos...`);
+    const todosEventos = await buscarTodosEventos();
     
-    // Filtrar eventos por nome (Ordi)
+    // Filtrar eventos por nome (Ordi) e período
     const eventosParaSincronizar = todosEventos.filter((evento: any) => {
       const temNomeCorreto = evento.name && evento.name.toLowerCase().includes(filtro_eventos.toLowerCase());
       
-      if (temNomeCorreto) {
-        const dataEvento = new Date(evento.start_date || evento.date);
+      if (!temNomeCorreto || !evento.start_date) return false;
+      
+      // Filtrar por período
+      const dataEvento = new Date(evento.start_date);
+      const noPeriodo = dataEvento >= dataInicioPeriodo && dataEvento <= dataFimPeriodo;
+      
+      if (temNomeCorreto && noPeriodo) {
         console.log(`   ✅ Evento incluído: ${evento.name} - ${dataEvento.toISOString().split('T')[0]}`);
       }
       
-      return temNomeCorreto;
+      return noPeriodo;
     });
 
     console.log(`🎯 ${eventosParaSincronizar.length} eventos encontrados com filtro "${filtro_eventos}"`);
