@@ -319,26 +319,39 @@ class NiboSyncService {
       console.log(`📋 Batch ID: ${batchId}`)
 
       // Calcular período baseado no modo de sincronização
-      let filterDate: string
+      let filterDateStart: string
+      let filterDateEnd: string
       let periodDescription: string
 
       if (syncMode === 'daily_complete') {
         // Sincronização diária completa: últimos 3 meses
         const threeMonthsAgo = new Date()
         threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
-        filterDate = threeMonthsAgo.toISOString().split('T')[0]
-        periodDescription = 'últimos 3 meses'
-        console.log('📅 MODO DIÁRIO COMPLETO: Sincronizando últimos 3 meses')
+        filterDateStart = threeMonthsAgo.toISOString().split('T')[0]
+        
+        // ✅ CORREÇÃO: Adicionar data final para não pegar dados futuros
+        const oneMonthAhead = new Date()
+        oneMonthAhead.setMonth(oneMonthAhead.getMonth() + 1)
+        filterDateEnd = oneMonthAhead.toISOString().split('T')[0]
+        
+        periodDescription = 'últimos 3 meses + 1 mês futuro'
+        console.log('📅 MODO DIÁRIO COMPLETO: Sincronizando últimos 3 meses + 1 mês futuro')
       } else {
         // Sincronização contínua: últimos 7 dias
         const sevenDaysAgo = new Date()
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-        filterDate = sevenDaysAgo.toISOString().split('T')[0]
-        periodDescription = 'últimos 7 dias'
-        console.log('📅 MODO CONTÍNUO: Sincronizando últimos 7 dias')
+        filterDateStart = sevenDaysAgo.toISOString().split('T')[0]
+        
+        // ✅ CORREÇÃO: Adicionar data final
+        const sevenDaysAhead = new Date()
+        sevenDaysAhead.setDate(sevenDaysAhead.getDate() + 7)
+        filterDateEnd = sevenDaysAhead.toISOString().split('T')[0]
+        
+        periodDescription = 'últimos 7 dias + próximos 7 dias'
+        console.log('📅 MODO CONTÍNUO: Sincronizando últimos 7 dias + próximos 7 dias')
       }
       
-      console.log(`📅 Buscando agendamentos EDITADOS nos ${periodDescription} (desde ${filterDate})...`)
+      console.log(`📅 Buscando agendamentos com data de competência entre ${filterDateStart} e ${filterDateEnd}...`)
       
       // Buscar dados da API NIBO com limite otimizado
       const allAgendamentos = []
@@ -351,7 +364,7 @@ class NiboSyncService {
       while (hasMore && pageCount < maxPages) {
         pageCount++
         const pageParams = {
-          $filter: `accrualDate ge ${filterDate}`, // ✅ CORRIGIDO: usar accrualDate
+          $filter: `accrualDate ge ${filterDateStart} and accrualDate le ${filterDateEnd}`, // ✅ CORRIGIDO: intervalo de datas
           $orderby: "accrualDate desc",
           $top: top,
           $skip: skip
