@@ -362,9 +362,9 @@ async function syncRetroativo() {
     const supabase = createClient(supabaseConfig.supabaseUrl, supabaseConfig.serviceRoleKey);
     console.log('✅ Conectado ao Supabase');
     
-    // Período retroativo
-    const dataInicio = '2025-09-29';
-    const dataFim = '2025-11-10';
+    // Período retroativo - desde último evento (28/09) até hoje
+    const dataInicio = '2025-09-28'; // Incluir 28/09 para atualizar check-ins
+    const dataFim = new Date().toISOString().split('T')[0]; // Hoje
     
     console.log(`📊 Período: ${dataInicio} até ${dataFim}\n`);
     
