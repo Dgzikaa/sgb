@@ -40,7 +40,10 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Configuração Sympla
 function getSymplaConfig() {
-  const token = '97d7b77e99d40dc8fb5583f590f9b7db3072afe7969c167c493077d9c5a862a6'; // CHAVE_ORIGINAL
+  // CHAVES DISPONÍVEIS - DESCOMENTE APENAS 1 POR VEZ:
+  //const token = '97d7b77e99d40dc8fb5583f590f9b7db3072afe7969c167c493077d9c5a862a6'; // CHAVE_ORIGINAL
+  //const token = 'e96a8233fd5acc27c65b166bf424dd8e1874f4d48b16ee2029c93b6f80fd6a06'; // CHAVE_1
+  const token = '24a8cb785b622adeb3239928dd2ac79ec3f1a076558b0159ee9d4d27c8099022'; // CHAVE_2
   
   if (!token) {
     throw new Error('SYMPLA_API_TOKEN não encontrado');
