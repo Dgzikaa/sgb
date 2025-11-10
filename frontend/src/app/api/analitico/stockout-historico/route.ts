@@ -97,16 +97,16 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('data_consulta, prd_ativo, prd_venda, loc_desc')
       .eq('prd_ativo', 'S') // Apenas produtos ativos
+      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
+      .not('loc_desc', 'is', null) // Excluir "Sem local definido" permanentemente
       .gte('data_consulta', data_inicio)
       .lte('data_consulta', data_fim)
       .eq('bar_id', bar_id);
 
-    // Aplicar filtros se existirem
+    // Aplicar filtros adicionais se existirem
     if (filtros.length > 0) {
       filtros.forEach((filtro: string) => {
-        if (filtro === 'sem_local') {
-          query = query.not('loc_desc', 'is', null);
-        } else {
+        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
           query = query.neq('loc_desc', filtro);
         }
       });

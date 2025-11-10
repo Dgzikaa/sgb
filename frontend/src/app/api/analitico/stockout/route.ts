@@ -38,14 +38,14 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('prd_ativo, prd_venda')
       .eq('data_consulta', data_selecionada)
-      .eq('prd_ativo', 'S'); // Apenas produtos ativos
+      .eq('prd_ativo', 'S') // Apenas produtos ativos
+      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
+      .not('loc_desc', 'is', null); // Excluir "Sem local definido" permanentemente
 
-    // Aplicar filtros se existirem
+    // Aplicar filtros adicionais se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro === 'sem_local') {
-          query = query.not('loc_desc', 'is', null);
-        } else {
+        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
           query = query.neq('loc_desc', filtro);
         }
       });
@@ -73,14 +73,14 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('loc_desc, prd_ativo, prd_venda')
       .eq('data_consulta', data_selecionada)
-      .eq('prd_ativo', 'S'); // Apenas produtos ativos
+      .eq('prd_ativo', 'S') // Apenas produtos ativos
+      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
+      .not('loc_desc', 'is', null); // Excluir "Sem local definido" permanentemente
 
-    // Aplicar filtros se existirem
+    // Aplicar filtros adicionais se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro === 'sem_local') {
-          queryLocais = queryLocais.not('loc_desc', 'is', null);
-        } else {
+        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
           queryLocais = queryLocais.neq('loc_desc', filtro);
         }
       });
@@ -123,16 +123,16 @@ export async function POST(request: NextRequest) {
       .eq('data_consulta', data_selecionada)
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'N') // E que não estão à venda = STOCKOUT
+      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
+      .not('loc_desc', 'is', null) // Excluir "Sem local definido" permanentemente
       .order('loc_desc')
       .order('prd_desc')
       .limit(50);
 
-    // Aplicar filtros se existirem
+    // Aplicar filtros adicionais se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro === 'sem_local') {
-          queryIndisponiveis = queryIndisponiveis.not('loc_desc', 'is', null);
-        } else {
+        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
           queryIndisponiveis = queryIndisponiveis.neq('loc_desc', filtro);
         }
       });
@@ -147,16 +147,16 @@ export async function POST(request: NextRequest) {
       .eq('data_consulta', data_selecionada)
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'S') // E que estão à venda = DISPONÍVEIS
+      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
+      .not('loc_desc', 'is', null) // Excluir "Sem local definido" permanentemente
       .order('loc_desc')
       .order('prd_desc')
       .limit(20);
 
-    // Aplicar filtros se existirem
+    // Aplicar filtros adicionais se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro === 'sem_local') {
-          queryDisponiveis = queryDisponiveis.not('loc_desc', 'is', null);
-        } else {
+        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
           queryDisponiveis = queryDisponiveis.neq('loc_desc', filtro);
         }
       });
