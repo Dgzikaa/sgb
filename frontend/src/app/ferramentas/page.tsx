@@ -34,8 +34,8 @@ interface FerramentaStats {
 export default function FerramentasPage() {
   const router = useRouter();
   const [stats, setStats] = useState<FerramentaStats>({
-    total_ferramentas: 7,
-    ferramentas_ativas: 6,
+    total_ferramentas: 8,
+    ferramentas_ativas: 7,
     ultima_atualizacao: new Date().toLocaleDateString('pt-BR')
   });
   const [loading, setLoading] = useState(false);
@@ -144,6 +144,42 @@ export default function FerramentasPage() {
         {/* Cards de Ferramentas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           
+          {/* Produção e Insumos */}
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                    <Package className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
+                      Produção e Insumos
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs mt-1 border-indigo-200 text-indigo-700 dark:border-indigo-700 dark:text-indigo-300">
+                      Ativo
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Gestão completa de insumos, receitas e controle de produção
+              </CardDescription>
+              <div className="space-y-2 mb-4">
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  • Cadastro de Insumos • Receitas • Terminal de Produção
+                </div>
+              </div>
+              <Link href="/ferramentas/producao-insumos">
+                <Button className="w-full bg-indigo-500/10 border border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 dark:bg-indigo-900/20 dark:border-indigo-700 dark:hover:bg-indigo-900/30">
+                  Gerenciar Produção
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
           {/* Análise de Eventos */}
           <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="pb-3">
