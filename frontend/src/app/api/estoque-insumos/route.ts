@@ -22,8 +22,7 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('bar_id', barId)
       .order('data_contagem', { ascending: false })
-      .order('categoria', { ascending: true })
-      .order('produto', { ascending: true });
+      .order('categoria', { ascending: true });
 
     if (dataContagem) {
       query = query.eq('data_contagem', dataContagem);

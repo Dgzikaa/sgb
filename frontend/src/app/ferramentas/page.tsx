@@ -34,7 +34,7 @@ interface FerramentaStats {
 export default function FerramentasPage() {
   const router = useRouter();
   const [stats, setStats] = useState<FerramentaStats>({
-    total_ferramentas: 8,
+    total_ferramentas: 7,
     ferramentas_ativas: 6,
     ultima_atualizacao: new Date().toLocaleDateString('pt-BR')
   });
@@ -353,6 +353,42 @@ export default function FerramentasPage() {
               <Link href="/visao-geral">
                 <Button className="w-full bg-teal-500/10 border border-teal-500 text-teal-600 dark:text-teal-400 hover:bg-teal-500/20 dark:bg-teal-900/20 dark:border-teal-700 dark:hover:bg-teal-900/30">
                   Ver Status
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Stockout */}
+          <Card className="card-dark shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg group-hover:scale-110 transition-transform">
+                    <Package className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
+                      Controle Stockout
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs mt-1 border-rose-200 text-rose-700 dark:border-rose-700 dark:text-rose-300">
+                      Ativo
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Monitore produtos em falta e disponibilidade em tempo real
+              </CardDescription>
+              <div className="space-y-2 mb-4">
+                <div className="text-xs text-gray-500 dark:text-gray-500">
+                  Análise Diária • Histórico • Por Local
+                </div>
+              </div>
+              <Link href="/analitico/stockout">
+                <Button className="w-full bg-rose-500/10 border border-rose-500 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 dark:bg-rose-900/20 dark:border-rose-700 dark:hover:bg-rose-900/30">
+                  Ver Análise Stockout
                 </Button>
               </Link>
             </CardContent>
