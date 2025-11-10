@@ -1,0 +1,113 @@
+=================================================================
+📊 INSTRUÇÕES PARA IMPORTAÇÃO DE HISTÓRICO DE ESTOQUE
+=================================================================
+
+## 📋 FORMATO DO ARQUIVO CSV
+
+O arquivo CSV deve ter as seguintes colunas (exatamente nesta ordem):
+
+1. data_contagem     - Data da contagem no formato YYYY-MM-DD (ex: 2025-11-01)
+2. insumo_codigo     - Código do insumo cadastrado (ex: i0093, i0228)
+3. estoque_final     - Quantidade em estoque no final do dia (número decimal)
+4. quantidade_pedido - Quantidade comprada/recebida no dia (opcional, padrão: 0)
+5. observacoes       - Observações adicionais (opcional)
+
+## 📝 EXEMPLO DE ARQUIVO CSV
+
+```csv
+data_contagem,insumo_codigo,estoque_final,quantidade_pedido,observacoes
+2025-11-01,i0093,5.5,10.0,Compra da semana
+2025-11-01,i0097,3.2,5.0,
+2025-11-01,i0228,15.8,20.0,
+2025-11-02,i0093,4.1,0,Consumo normal
+2025-11-02,i0097,2.8,0,
+2025-11-02,i0228,12.5,0,
+```
+
+## 🚀 COMO USAR
+
+### 1. Preparar o arquivo CSV
+
+- Exporte os dados da planilha Excel/Google Sheets como CSV
+- Certifique-se de que as colunas estão na ordem correta
+- Use vírgula (,) como separador
+- Datas devem estar no formato YYYY-MM-DD
+
+### 2. Executar o script
+
+**Com servidor local (localhost:3000):**
+```bash
+node exemplo_teste/importar-historico-estoque.js seu-arquivo.csv
+```
+
+**Com servidor de produção:**
+```bash
+node exemplo_teste/importar-historico-estoque.js seu-arquivo.csv https://zykor.vercel.app
+```
+
+## 📊 PROCESSAMENTO
+
+O script irá:
+1. ✅ Ler o arquivo CSV
+2. ✅ Agrupar os registros por data
+3. ✅ Processar as datas em ordem cronológica
+4. ✅ Buscar o insumo pelo código
+5. ✅ Criar/atualizar a contagem no sistema
+6. ✅ Calcular automaticamente:
+   - estoque_inicial (estoque_final do dia anterior)
+   - consumo_periodo (estoque_inicial + pedido - estoque_final)
+   - valor_consumo (consumo * custo_unitario)
+
+## ⚠️ IMPORTANTE
+
+- Os códigos dos insumos devem existir no sistema
+- Caso o código não seja encontrado, o registro será pulado
+- Contagens duplicadas (mesma data + insumo) serão atualizadas
+- O script processa em lotes de 5 para não sobrecarregar a API
+
+## 📈 RESULTADO
+
+Ao final, você verá um resumo:
+```
+📊 RESUMO DA IMPORTAÇÃO
+============================================================
+✅ Sucesso: 182
+❌ Erros: 3
+📦 Total: 185
+📅 Datas processadas: 15
+
+❌ Registros com erro:
+   - i9999: Insumo não encontrado (3x)
+
+✅ Importação concluída!
+```
+
+## 💡 DICAS
+
+1. **Começe com um arquivo pequeno** para testar
+2. **Verifique os códigos** antes de importar tudo
+3. **Mantenha backup** do arquivo original
+4. **Importe em ordem cronológica** (o script já faz isso automaticamente)
+5. **Use o arquivo exemplo** como referência
+
+## 🔄 CONVERTENDO PLANILHA EXCEL
+
+Se você tem os dados em Excel:
+
+1. Abra o Excel
+2. Organize as colunas na ordem correta
+3. Arquivo → Salvar Como → CSV (Delimitado por vírgulas)
+4. Escolha UTF-8 como encoding
+5. Execute o script
+
+## 📞 SUPORTE
+
+Em caso de dúvidas ou erros, verifique:
+- ✅ Servidor está rodando (localhost:3000 ou produção)
+- ✅ Códigos dos insumos estão corretos
+- ✅ Formato de data está correto (YYYY-MM-DD)
+- ✅ Números usam ponto (.) como separador decimal
+- ✅ Arquivo está em UTF-8
+
+=================================================================
+

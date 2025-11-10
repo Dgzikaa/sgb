@@ -169,6 +169,13 @@ const defaultSidebarItems: SidebarItem[] = [
           permission: 'operacoes',
         },
         {
+          icon: Package,
+          label: 'Contagem de Estoque',
+          href: '/ferramentas/contagem-estoque',
+          description: 'Registro diário de contagem de estoque',
+          permission: 'operacoes',
+        },
+        {
           icon: Calendar,
           label: 'Agendamento',
           href: '/ferramentas/agendamento',
