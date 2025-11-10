@@ -359,6 +359,7 @@ export async function GET(request: Request) {
         'eq_bar_id': barIdNum
       });
       
+      // ✅ CORRIGIDO: Buscar faturamento Sympla de sympla_pedidos (dados corretos)
       const symplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
         'gte_data_pedido': startDate,
         'lte_data_pedido': endDate
@@ -400,19 +401,18 @@ export async function GET(request: Request) {
           .gte('data_evento', startDate)
           .lte('data_evento', endDate),
         
-        // ✅ USAR SYMPLA_RESUMO PARA MELHOR PERFORMANCE
+        // ✅ CORRIGIDO: Usar checkins_realizados (coluna correta) de sympla_resumo
         supabase
           .from('sympla_resumo')
-          .select('checkins')
-          .eq('bar_id', barIdNum)
-          .gte('data_evento', startDate)
-          .lte('data_evento', endDate)
+          .select('checkins_realizados')
+          .gte('data_inicio', startDate)
+          .lte('data_inicio', endDate)
       ]);
 
       const totalPessoasContahub = pessoasContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
       const totalPessoasYuzer = pessoasYuzer.data?.reduce((sum, item) => sum + (item.quantidade || 0), 0) || 0;
-      // ✅ SOMAR CHECKINS DO SYMPLA_RESUMO
-      const totalPessoasSympla = pessoasSympla.data?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0;
+      // ✅ CORRIGIDO: Somar checkins_realizados do sympla_resumo
+      const totalPessoasSympla = pessoasSympla.data?.reduce((sum, item) => sum + (item.checkins_realizados || 0), 0) || 0;
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
       
       // Log final de pessoas
@@ -585,11 +585,10 @@ export async function GET(request: Request) {
         'lte_data_evento': endDate
       });
       
-      // ✅ USAR SYMPLA_RESUMO PARA MELHOR PERFORMANCE NO TRIMESTRAL
-      const clientesTotaisSymplaData = viewTri ? null : await fetchAllData(supabase, 'sympla_resumo', 'checkins', {
-        'eq_bar_id': barIdNum,
-        'gte_data_evento': startDate,
-        'lte_data_evento': endDate
+      // ✅ CORRIGIDO: Usar checkins_realizados de sympla_resumo (coluna correta)
+      const clientesTotaisSymplaData = viewTri ? null : await fetchAllData(supabase, 'sympla_resumo', 'checkins_realizados', {
+        'gte_data_inicio': startDate,
+        'lte_data_inicio': endDate
       });
 
       // Logs detalhados removidos
@@ -619,8 +618,8 @@ export async function GET(request: Request) {
       // ✅ CORREÇÃO: Somar unidades de ingressos = pessoas que foram ao evento
       // Cada ingresso vendido representa uma pessoa
       const totalClientesYuzer = viewTri ? 0 : ingressosYuzer.reduce((sum, item) => sum + (item.quantidade || 0), 0);
-      // ✅ SOMAR CHECKINS DO SYMPLA_RESUMO NO TRIMESTRAL
-      const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0);
+      // ✅ CORRIGIDO: Somar checkins_realizados do sympla_resumo no trimestral
+      const totalClientesSympla = viewTri ? 0 : (clientesTotaisSymplaData?.reduce((sum, item) => sum + (item.checkins_realizados || 0), 0) || 0);
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
       // ✅ COMPARAÇÃO CLIENTES TOTAIS COM TRIMESTRE ANTERIOR
@@ -635,10 +634,9 @@ export async function GET(request: Request) {
         supabase.from('yuzer_produtos').select('quantidade, produto_nome').eq('bar_id', barIdNum)
           .gte('data_evento', startDateAnterior90)
           .lte('data_evento', endDateAnterior90),
-        fetchAllData(supabase, 'sympla_resumo', 'checkins', {
-          'eq_bar_id': barIdNum,
-          'gte_data_evento': startDateAnterior90,
-          'lte_data_evento': endDateAnterior90
+        fetchAllData(supabase, 'sympla_resumo', 'checkins_realizados', {
+          'gte_data_inicio': startDateAnterior90,
+          'lte_data_inicio': endDateAnterior90
         })
       ]);
       
@@ -651,7 +649,7 @@ export async function GET(request: Request) {
       
       const totalClientesContahubAnterior = clientesContahubAnterior?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
       const totalClientesYuzerAnterior = ingressosYuzerAnterior.reduce((sum, item) => sum + (item.quantidade || 0), 0);
-      const totalClientesSymplaAnterior = clientesSymplaAnterior?.reduce((sum, item) => sum + (item.checkins || 0), 0) || 0;
+      const totalClientesSymplaAnterior = clientesSymplaAnterior?.reduce((sum, item) => sum + (item.checkins_realizados || 0), 0) || 0;
       const totalClientesTrimestreAnterior = totalClientesContahubAnterior + totalClientesYuzerAnterior + totalClientesSymplaAnterior;
       
       const variacaoClientesTotais = totalClientesTrimestreAnterior > 0 ? 
