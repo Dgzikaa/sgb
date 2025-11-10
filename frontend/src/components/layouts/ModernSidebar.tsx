@@ -162,6 +162,13 @@ const defaultSidebarItems: SidebarItem[] = [
         //   permission: 'operacoes',
         // },
         {
+          icon: Package,
+          label: 'Produção e Insumos',
+          href: '/ferramentas/producao-insumos',
+          description: 'Gestão de insumos, receitas e produção',
+          permission: 'operacoes',
+        },
+        {
           icon: Calendar,
           label: 'Agendamento',
           href: '/ferramentas/agendamento',

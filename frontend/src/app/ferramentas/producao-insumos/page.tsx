@@ -320,6 +320,13 @@ export default function ProducaoInsumosPage() {
               <ChefHat className="w-4 h-4 mr-2" />
               Receitas ({stats.total_receitas})
             </TabsTrigger>
+            <TabsTrigger
+              value="terminal"
+              className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400"
+            >
+              <ChefHat className="w-4 h-4 mr-2" />
+              Terminal
+            </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -583,6 +590,30 @@ export default function ProducaoInsumosPage() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Terminal Tab */}
+          <TabsContent value="terminal" className="space-y-6">
+            <Card className="card-dark">
+              <CardHeader>
+                <CardTitle>Terminal de Produção</CardTitle>
+                <CardDescription>
+                  Acesso rápido ao terminal de produção
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  O Terminal de Produção permite registrar produções em tempo real, controlar insumos e calcular rendimentos.
+                </p>
+                <Button
+                  onClick={() => window.location.href = '/operacoes/terminal'}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  <ChefHat className="w-4 h-4 mr-2" />
+                  Abrir Terminal de Produção
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
