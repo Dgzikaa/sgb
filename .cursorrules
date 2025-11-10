@@ -1,5 +1,75 @@
 # REGRAS DE ORGANIZAÇÃO ATUALIZADAS - SGB_V2
 
+## ⚠️ REGRAS CRÍTICAS ABSOLUTAS (NUNCA IGNORAR)
+
+### 🔒 1. GIT PUSH - SEMPRE PERGUNTAR AO USUÁRIO
+```bash
+# ❌ NUNCA fazer push automático
+git push origin main
+
+# ✅ SEMPRE perguntar antes
+"Posso fazer o push para origin/main? (y/n)"
+```
+
+**IMPORTANTE**: 
+- ✅ `git add .` é permitido automaticamente
+- ✅ `git pull origin main` é permitido automaticamente  
+- ✅ `git commit` é permitido automaticamente
+- ❌ `git push` **SEMPRE** requer confirmação explícita do usuário
+
+### 💻 2. AMBIENTE WINDOWS - SINTAXE CORRETA
+
+#### Comandos de Terminal:
+```bash
+# ❌ ERRADO - Sintaxe Unix/Linux
+curl https://api.exemplo.com/endpoint
+cat arquivo.json
+ls -la
+grep "texto" arquivo.txt
+
+# ✅ CORRETO - Sintaxe PowerShell ou Node.js
+Invoke-WebRequest -Uri "https://api.exemplo.com/endpoint" -Method Get
+Get-Content arquivo.json
+Get-ChildItem
+Select-String -Pattern "texto" -Path arquivo.txt
+
+# OU usar Node.js (preferível)
+node -e "fetch('https://api.exemplo.com/endpoint').then(r => r.json()).then(console.log)"
+```
+
+#### Navegação de Arquivos:
+```bash
+# ✅ CORRETO - Windows paths
+cd F:\Zykor\frontend
+cd backend\supabase\functions
+
+# ❌ ERRADO - Unix paths  
+cd /f/Zykor/frontend
+```
+
+### 📄 3. NUNCA CRIAR ARQUIVOS .MD SEM PERMISSÃO
+
+```bash
+# ❌ NUNCA criar automaticamente:
+- Arquivos .md de documentação
+- Resumos em markdown
+- Arquivos de "próximos passos"
+
+# ✅ SEMPRE mostrar no chat:
+- Resumos de implementação
+- Próximos passos
+- Documentação e explicações
+
+# ✅ SÓ criar .md se o usuário EXPLICITAMENTE pedir:
+"Pode gerar um arquivo .md com isso"
+"Cria um README.md"
+"Documenta isso em markdown"
+```
+
+**RAZÃO**: Evitar poluição da estrutura de arquivos com documentação desnecessária.
+
+---
+
 ## Estrutura do Projeto
 Este é um projeto fullstack com:
 - **Frontend**: Next.js 14+ com TypeScript (pasta `frontend/`)
@@ -514,11 +584,17 @@ await mcp_supabase_list_tables({ project_id })
 git add .
 git pull origin main  
 git commit -m "feat: [descrição da feature]"
+
+# ⚠️ PERGUNTAR AO USUÁRIO antes de:
+"Posso fazer o push para origin/main? (y/n)"
+
+# Só após confirmação:
 git push origin main
 
 # Manter sistema em produção sempre atualizado
 # NUNCA deixar commits pendentes por muito tempo
 # SEMPRE testar antes do push final
+# ❌ NUNCA fazer push sem confirmação explícita
 ```
 
 ### 🎨 **5. PADRÃO DE LAYOUT E CSS**
@@ -572,16 +648,20 @@ Antes de qualquer commit, SEMPRE verificar:
 - [ ] Fiz `git add .`?
 - [ ] Fiz `git pull origin main`?
 - [ ] Commit com mensagem descritiva?
-- [ ] `git push origin main` executado?
+- [ ] **PERGUNTEI AO USUÁRIO** antes de fazer push?
+- [ ] Recebi confirmação para `git push origin main`?
 - [ ] Sistema em produção atualizado?
 
 ## 🚨 **PRIORIDADES CRÍTICAS**
 
-1. **MCP FIRST**: Sempre verificar BD via MCP antes de qualquer implementação
-2. **NPX ONLY**: Nunca usar `npm run`, sempre `npx`
-3. **LAYOUT CONSISTENCY**: Toda página deve seguir padrão visual
-4. **GIT DISCIPLINE**: Sempre finalizar com sequência completa de git
-5. **PRODUCTION READY**: Código sempre pronto para produção
+1. **NEVER PUSH WITHOUT ASKING**: ❌ NUNCA fazer `git push` sem confirmação explícita do usuário
+2. **WINDOWS ENVIRONMENT**: ✅ Sempre usar sintaxe PowerShell/Windows correta (não Unix/Linux)
+3. **NO AUTO .MD FILES**: ❌ NUNCA criar arquivos .md sem permissão - mostrar no chat
+4. **MCP FIRST**: Sempre verificar BD via MCP antes de qualquer implementação
+5. **NPX ONLY**: Nunca usar `npm run`, sempre `npx`
+6. **LAYOUT CONSISTENCY**: Toda página deve seguir padrão visual
+7. **GIT DISCIPLINE**: Sempre finalizar com sequência completa de git
+8. **PRODUCTION READY**: Código sempre pronto para produção
 
 ---
 
