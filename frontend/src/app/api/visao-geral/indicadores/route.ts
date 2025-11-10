@@ -623,20 +623,23 @@ export async function GET(request: Request) {
       const totalClientesTrimestre = viewTri ? (viewTri.clientes_totais || 0) : (totalClientesContahub + totalClientesYuzer + totalClientesSympla);
       
       // ✅ COMPARAÇÃO CLIENTES TOTAIS COM TRIMESTRE ANTERIOR
-      // Usar as mesmas datas já calculadas para o trimestre anterior
+      // 🔧 CORREÇÃO: Usar trimestre anterior REAL (T3: Jul-Set) não D-90
+      const trimestreAnteriorDatesClientes = getTrimestreAnterior(trimestre);
+      const trimestreAnteriorStartClientes = trimestreAnteriorDatesClientes.start;
+      const trimestreAnteriorEndClientes = trimestreAnteriorDatesClientes.end;
       
       const [clientesContahubAnterior, clientesYuzerAnterior, clientesSymplaAnterior] = await Promise.all([
         fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
           'eq_bar_id': barIdNum,
-          'gte_dt_gerencial': startDateAnterior90,
-          'lte_dt_gerencial': endDateAnterior90
+          'gte_dt_gerencial': trimestreAnteriorStartClientes,
+          'lte_dt_gerencial': trimestreAnteriorEndClientes
         }),
         supabase.from('yuzer_produtos').select('quantidade, produto_nome').eq('bar_id', barIdNum)
-          .gte('data_evento', startDateAnterior90)
-          .lte('data_evento', endDateAnterior90),
+          .gte('data_evento', trimestreAnteriorStartClientes)
+          .lte('data_evento', trimestreAnteriorEndClientes),
         fetchAllData(supabase, 'sympla_resumo', 'checkins_realizados', {
-          'gte_data_inicio': startDateAnterior90,
-          'lte_data_inicio': endDateAnterior90
+          'gte_data_inicio': trimestreAnteriorStartClientes,
+          'lte_data_inicio': trimestreAnteriorEndClientes
         })
       ]);
       
@@ -656,17 +659,20 @@ export async function GET(request: Request) {
         ((totalClientesTrimestre - totalClientesTrimestreAnterior) / totalClientesTrimestreAnterior * 100) : 0;
       
       // 🔍 DEBUG: Logs detalhados dos clientes totais
-      console.log('👥 CLIENTES TOTAIS TRIMESTRE DETALHADOS:');
+      console.log('👥 CLIENTES TOTAIS TRIMESTRE DETALHADOS - ✅ CORRIGIDO:');
+      console.log(`Trimestre ATUAL (T${trimestre}): ${startDate} a ${endDate}`);
+      console.log(`Trimestre ANTERIOR (T${trimestre - 1}): ${trimestreAnteriorStartClientes} a ${trimestreAnteriorEndClientes}`);
       if (viewTri) {
         console.log(`📊 Usando VIEW materializada: ${viewTri.clientes_totais || 0} clientes`);
       } else {
-        console.log(`ContaHub Período: ${clientesTotaisContahubData?.length || 0} registros = ${totalClientesContahub} pessoas`);
-        console.log(`Yuzer Ingressos: ${ingressosYuzer.length || 0} produtos = ${totalClientesYuzer} pessoas`);
-        console.log(`Sympla Check-ins: ${clientesTotaisSymplaData?.length || 0} participantes = ${totalClientesSympla} pessoas`);
+        console.log(`\nT${trimestre} (atual):`);
+        console.log(`  ContaHub: ${clientesTotaisContahubData?.length || 0} registros = ${totalClientesContahub} pessoas`);
+        console.log(`  Yuzer: ${ingressosYuzer.length || 0} produtos = ${totalClientesYuzer} pessoas`);
+        console.log(`  Sympla: ${clientesTotaisSymplaData?.length || 0} participantes = ${totalClientesSympla} pessoas`);
       }
-      console.log(`TOTAL CLIENTES TRIMESTRE ATUAL: ${totalClientesTrimestre}`);
-      console.log(`TOTAL CLIENTES TRIMESTRE ANTERIOR: ${totalClientesTrimestreAnterior}`);
-      console.log(`VARIAÇÃO CLIENTES TOTAIS: ${variacaoClientesTotais.toFixed(1)}%`);
+      console.log(`\nTOTAL CLIENTES T${trimestre} (atual): ${totalClientesTrimestre}`);
+      console.log(`TOTAL CLIENTES T${trimestre - 1} (anterior): ${totalClientesTrimestreAnterior}`);
+      console.log(`✅ Variação correta: ${variacaoClientesTotais.toFixed(1)}%`);
       
       // Logs detalhados removidos
 
@@ -761,8 +767,10 @@ export async function GET(request: Request) {
       }
       
       // ✅ COMPARAÇÃO CMO COM TRIMESTRE ANTERIOR
-      const cmoTrimestreAnteriorStart = startDateAnterior90;
-      const cmoTrimestreAnteriorEnd = endDateAnterior90;
+      // 🔧 CORREÇÃO: Usar trimestre anterior REAL (T3: Jul-Set) não D-90
+      const trimestreAnteriorDatesCMO = getTrimestreAnterior(trimestre);
+      const cmoTrimestreAnteriorStart = trimestreAnteriorDatesCMO.start;
+      const cmoTrimestreAnteriorEnd = trimestreAnteriorDatesCMO.end;
       
       // Buscar CMO do trimestre anterior
       const cmoAnteriorData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
@@ -799,21 +807,18 @@ export async function GET(request: Request) {
       const variacaoCMO = percentualCMOAnterior > 0 ? ((percentualCMO - percentualCMOAnterior) / percentualCMOAnterior * 100) : 0;
       
       // 🔍 DEBUG: Comparação CMO detalhada
-      console.log('🔄 COMPARAÇÃO CMO TRIMESTRE ANTERIOR:');
-      console.log(`Período anterior: ${cmoTrimestreAnteriorStart} até ${cmoTrimestreAnteriorEnd}`);
-      console.log(`CMO Anterior: R$ ${totalCMOAnterior.toLocaleString('pt-BR')}`);
-      console.log(`Faturamento Anterior - ContaHub: R$ ${faturamentoAnteriorContahub.toLocaleString('pt-BR')}`);
-      console.log(`Faturamento Anterior - Yuzer: R$ ${faturamentoAnteriorYuzer.toLocaleString('pt-BR')}`);
-      console.log(`Faturamento Anterior - Sympla: R$ ${faturamentoAnteriorSympla.toLocaleString('pt-BR')}`);
-      console.log(`Faturamento Anterior TOTAL: R$ ${faturamentoTrimestreAnteriorTotal.toLocaleString('pt-BR')}`);
-      console.log(`CMO% Anterior: ${percentualCMOAnterior.toFixed(2)}%`);
-      console.log(`CMO% Atual: ${percentualCMO.toFixed(2)}%`);
-      console.log(`Variação CMO: ${variacaoCMO.toFixed(1)}%`);
-      
-      console.log('🧮 COMPARAÇÃO CMO (TRIMESTRE):');
-      console.log(`CMO Atual: ${percentualCMO.toFixed(2)}%`);
-      console.log(`CMO Trimestre Anterior (${cmoTrimestreAnteriorStart} a ${cmoTrimestreAnteriorEnd}): ${percentualCMOAnterior.toFixed(2)}%`);
-      console.log(`Variação: ${variacaoCMO.toFixed(1)}%`);
+      console.log('🔄 COMPARAÇÃO CMO TRIMESTRE - ✅ CORRIGIDO:');
+      console.log(`Trimestre ATUAL (T${trimestre}): ${startDate} a ${endDate}`);
+      console.log(`Trimestre ANTERIOR (T${trimestre - 1}): ${cmoTrimestreAnteriorStart} a ${cmoTrimestreAnteriorEnd}`);
+      console.log(`\nDados T${trimestre - 1} (anterior):`);
+      console.log(`  CMO: R$ ${totalCMOAnterior.toLocaleString('pt-BR')}`);
+      console.log(`  Faturamento ContaHub: R$ ${faturamentoAnteriorContahub.toLocaleString('pt-BR')}`);
+      console.log(`  Faturamento Yuzer: R$ ${faturamentoAnteriorYuzer.toLocaleString('pt-BR')}`);
+      console.log(`  Faturamento Sympla: R$ ${faturamentoAnteriorSympla.toLocaleString('pt-BR')}`);
+      console.log(`  Faturamento TOTAL: R$ ${faturamentoTrimestreAnteriorTotal.toLocaleString('pt-BR')}`);
+      console.log(`  CMO%: ${percentualCMOAnterior.toFixed(2)}%`);
+      console.log(`\nCMO% T${trimestre} (atual): ${percentualCMO.toFixed(2)}%`);
+      console.log(`✅ Variação correta: ${variacaoCMO.toFixed(1)}%`);
       
       // Logs detalhados removidos
 
