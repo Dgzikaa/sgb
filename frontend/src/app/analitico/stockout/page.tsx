@@ -148,6 +148,8 @@ export default function StockoutPage() {
     setLoading(true);
     
     try {
+      console.log('🔍 Buscando stockout para data:', data, 'filtros:', filtros);
+      
       const response = await fetch('/api/analitico/stockout', {
         method: 'POST',
         headers: {
@@ -159,18 +161,21 @@ export default function StockoutPage() {
         }),
       });
       
+      console.log('📡 Response status:', response.status);
       const result = await response.json();
+      console.log('📊 Result:', result);
       
       if (result.success) {
         setStockoutData(result.data);
         const filtroTexto = filtros.length > 0 ? ` (${filtros.length} filtros aplicados)` : '';
         toast.success(`Dados de stockout carregados para ${data}${filtroTexto}`);
       } else {
+        console.error('❌ Erro na resposta:', result.error);
         toast.error(result.error || 'Erro ao buscar dados de stockout');
         setStockoutData(null);
       }
     } catch (error) {
-      console.error('Erro ao buscar dados de stockout:', error);
+      console.error('❌ Erro ao buscar dados de stockout:', error);
       toast.error('Erro ao buscar dados de stockout');
       setStockoutData(null);
     } finally {
@@ -265,13 +270,16 @@ export default function StockoutPage() {
     }
   };
 
+  // Carregar dados automaticamente na primeira renderização
   useEffect(() => {
-    if (activeTab === 'diario') {
+    if (activeTab === 'diario' && selectedDate) {
+      console.log('🚀 Carregando dados iniciais para:', selectedDate);
       buscarDadosStockout(selectedDate, filtrosAtivos);
     } else if (activeTab === 'historico') {
       buscarHistoricoStockout();
     }
-  }, [selectedDate, activeTab]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const formatarData = (data: string) => {
     return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');

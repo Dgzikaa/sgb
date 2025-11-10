@@ -10,6 +10,8 @@ export async function POST(request: NextRequest) {
   try {
     const { data_selecionada, filtros = [] } = await request.json();
 
+    console.log('🔍 API Stockout - Data recebida:', data_selecionada, 'Filtros:', filtros);
+
     if (!data_selecionada) {
       return NextResponse.json(
         { error: 'Data é obrigatória' },
@@ -51,7 +53,10 @@ export async function POST(request: NextRequest) {
 
     const { data: dadosGerais, error: errorEstatisticas } = await query;
 
+    console.log('📊 Dados encontrados:', dadosGerais?.length || 0, 'produtos');
+
     if (errorEstatisticas) {
+      console.error('❌ Erro ao buscar estatísticas:', errorEstatisticas);
       throw new Error('Erro ao buscar estatísticas gerais');
     }
 
@@ -60,6 +65,8 @@ export async function POST(request: NextRequest) {
     const countProdutosDisponiveis = dadosGerais?.filter(p => p.prd_venda === 'S').length || 0; // Ativos E venda='S'
     const countProdutosStockout = dadosGerais?.filter(p => p.prd_venda === 'N').length || 0; // Ativos E venda='N' = STOCKOUT
     const percentualStockout = totalProdutosAtivos > 0 ? ((countProdutosStockout / totalProdutosAtivos) * 100).toFixed(2) : '0.00';
+
+    console.log(`📈 Total: ${totalProdutosAtivos}, Disponíveis: ${countProdutosDisponiveis}, Stockout: ${countProdutosStockout}, %: ${percentualStockout}%`);
 
     // 2. Análise por local de produção - NOVA LÓGICA: apenas produtos ativos
     let queryLocais = supabase
