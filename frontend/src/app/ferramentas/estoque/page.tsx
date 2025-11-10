@@ -285,7 +285,8 @@ export default function EstoquePage() {
     if (selectedBar && user) {
       carregarEstoque();
     }
-  }, [selectedBar, user, dataFiltro, categoriaFiltro, statusFiltro, carregarEstoque]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBar, user, dataFiltro, categoriaFiltro, statusFiltro]);
 
   if (loading) {
     return (

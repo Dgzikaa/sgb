@@ -295,7 +295,8 @@ export default function CMVSemanalPage() {
     if (selectedBar && user) {
       carregarCMVs();
     }
-  }, [selectedBar, user, anoFiltro, statusFiltro, carregarCMVs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBar, user, anoFiltro, statusFiltro]);
 
   if (loading) {
     return (

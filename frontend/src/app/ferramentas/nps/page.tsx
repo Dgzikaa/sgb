@@ -51,11 +51,31 @@ export default function NPSPage() {
   const [dadosNPS, setDadosNPS] = useState<NPSData[]>([]);
   const [dadosFelicidade, setDadosFelicidade] = useState<FelicidadeData[]>([]);
   
-  // Estados para importação
-  const [modalImportacao, setModalImportacao] = useState(false);
-  const [tipoImportacao, setTipoImportacao] = useState<'nps' | 'felicidade'>('nps');
-  const [dadosCSV, setDadosCSV] = useState('');
-  const [importando, setImportando] = useState(false);
+  // Estados para formulário de pesquisa
+  const [modalFormulario, setModalFormulario] = useState(false);
+  const [tipoPesquisa, setTipoPesquisa] = useState<'nps' | 'felicidade'>('felicidade');
+  const [salvando, setSalvando] = useState(false);
+  
+  // Estados do formulário
+  const [formData, setFormData] = useState({
+    data_pesquisa: new Date().toISOString().split('T')[0],
+    setor: '',
+    funcionario_nome: '',
+    quorum: 0,
+    // Campos NPS
+    qual_sua_area_atuacao: 0,
+    sinto_me_motivado: 0,
+    empresa_se_preocupa: 0,
+    conectado_colegas: 0,
+    relacionamento_positivo: 0,
+    quando_identifico: 0,
+    // Campos Felicidade
+    eu_comigo_engajamento: 0,
+    eu_com_empresa_pertencimento: 0,
+    eu_com_colega_relacionamento: 0,
+    eu_com_gestor_lideranca: 0,
+    justica_reconhecimento: 0,
+  });
   
   const [dataInicio, setDataInicio] = useState(() => {
     const data = new Date();
@@ -111,73 +131,51 @@ export default function NPSPage() {
     }
   };
 
-  // Função para importar dados do CSV/Google Sheets
-  const importarDados = async () => {
-    if (!dadosCSV.trim()) {
+  // Função para salvar pesquisa
+  const salvarPesquisa = async () => {
+    // Validações
+    if (!formData.setor || !formData.funcionario_nome) {
       toast({
         title: 'Erro',
-        description: 'Cole os dados do Google Sheets',
+        description: 'Preencha todos os campos obrigatórios',
         variant: 'destructive'
       });
       return;
     }
 
     try {
-      setImportando(true);
+      setSalvando(true);
 
-      // Parse CSV (separado por tabs do Google Sheets)
-      const linhas = dadosCSV.trim().split('\n');
-      const registros: any[] = [];
+      const registro = {
+        bar_id: selectedBar?.id || 3,
+        data_pesquisa: formData.data_pesquisa,
+        setor: formData.setor,
+        funcionario_nome: formData.funcionario_nome,
+        quorum: formData.quorum,
+      };
 
-      // Pular cabeçalho (primeira linha)
-      for (let i = 1; i < linhas.length; i++) {
-        const colunas = linhas[i].split('\t');
-        
-        if (colunas.length < 3) continue; // Linha inválida
-
-        if (tipoImportacao === 'nps') {
-          // Formato esperado: Data | Setor | Funcionário | Quorum | Q1 | Q2 | Q3 | Q4 | Q5 | Q6
-          registros.push({
-            bar_id: selectedBar?.id || 3 || 3,
-            data_pesquisa: colunas[0] ? new Date(colunas[0]).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            setor: colunas[1] || 'Geral',
-            funcionario_nome: colunas[2] || 'Anônimo',
-            quorum: parseInt(colunas[3]) || 0,
-            qual_sua_area_atuacao: parseFloat(colunas[4]) || 0,
-            sinto_me_motivado: parseFloat(colunas[5]) || 0,
-            empresa_se_preocupa: parseFloat(colunas[6]) || 0,
-            conectado_colegas: parseFloat(colunas[7]) || 0,
-            relacionamento_positivo: parseFloat(colunas[8]) || 0,
-            quando_identifico: parseFloat(colunas[9]) || 0,
-          });
-        } else {
-          // Formato esperado: Data | Setor | Funcionário | Quorum | Q1 | Q2 | Q3 | Q4 | Q5
-          registros.push({
-            bar_id: selectedBar?.id || 3 || 3,
-            data_pesquisa: colunas[0] ? new Date(colunas[0]).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            setor: colunas[1] || 'Geral',
-            funcionario_nome: colunas[2] || 'Anônimo',
-            quorum: parseInt(colunas[3]) || 0,
-            eu_comigo_engajamento: parseFloat(colunas[4]) || 0,
-            eu_com_empresa_pertencimento: parseFloat(colunas[5]) || 0,
-            eu_com_colega_relacionamento: parseFloat(colunas[6]) || 0,
-            eu_com_gestor_lideranca: parseFloat(colunas[7]) || 0,
-            justica_reconhecimento: parseFloat(colunas[8]) || 0,
-          });
-        }
-      }
-
-      if (registros.length === 0) {
-        toast({
-          title: 'Erro',
-          description: 'Nenhum registro válido encontrado',
-          variant: 'destructive'
+      // Adicionar campos específicos baseado no tipo
+      if (tipoPesquisa === 'nps') {
+        Object.assign(registro, {
+          qual_sua_area_atuacao: formData.qual_sua_area_atuacao,
+          sinto_me_motivado: formData.sinto_me_motivado,
+          empresa_se_preocupa: formData.empresa_se_preocupa,
+          conectado_colegas: formData.conectado_colegas,
+          relacionamento_positivo: formData.relacionamento_positivo,
+          quando_identifico: formData.quando_identifico,
         });
-        return;
+      } else {
+        Object.assign(registro, {
+          eu_comigo_engajamento: formData.eu_comigo_engajamento,
+          eu_com_empresa_pertencimento: formData.eu_com_empresa_pertencimento,
+          eu_com_colega_relacionamento: formData.eu_com_colega_relacionamento,
+          eu_com_gestor_lideranca: formData.eu_com_gestor_lideranca,
+          justica_reconhecimento: formData.justica_reconhecimento,
+        });
       }
 
       // Enviar para API
-      const endpoint = tipoImportacao === 'nps' ? '/api/nps' : '/api/pesquisa-felicidade';
+      const endpoint = tipoPesquisa === 'nps' ? '/api/nps' : '/api/pesquisa-felicidade';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -185,8 +183,8 @@ export default function NPSPage() {
           'x-user-data': encodeURIComponent(JSON.stringify(user))
         },
         body: JSON.stringify({
-          bar_id: selectedBar?.id || 3 || 3,
-          registros
+          bar_id: selectedBar?.id || 3,
+          registros: [registro]
         })
       });
 
@@ -195,25 +193,46 @@ export default function NPSPage() {
       if (response.ok && data.success) {
         toast({
           title: 'Sucesso!',
-          description: `${registros.length} registros importados com sucesso`
+          description: 'Pesquisa registrada com sucesso'
         });
-        setModalImportacao(false);
-        setDadosCSV('');
+        setModalFormulario(false);
+        limparFormulario();
         carregarDados();
       } else {
-        throw new Error(data.error || 'Erro ao importar');
+        throw new Error(data.error || 'Erro ao salvar');
       }
 
     } catch (error: any) {
-      console.error('Erro ao importar:', error);
+      console.error('Erro ao salvar:', error);
       toast({
-        title: 'Erro ao importar',
-        description: error.message || 'Não foi possível importar os dados',
+        title: 'Erro ao salvar',
+        description: error.message || 'Não foi possível salvar a pesquisa',
         variant: 'destructive'
       });
     } finally {
-      setImportando(false);
+      setSalvando(false);
     }
+  };
+
+  // Função para limpar formulário
+  const limparFormulario = () => {
+    setFormData({
+      data_pesquisa: new Date().toISOString().split('T')[0],
+      setor: '',
+      funcionario_nome: '',
+      quorum: 0,
+      qual_sua_area_atuacao: 0,
+      sinto_me_motivado: 0,
+      empresa_se_preocupa: 0,
+      conectado_colegas: 0,
+      relacionamento_positivo: 0,
+      quando_identifico: 0,
+      eu_comigo_engajamento: 0,
+      eu_com_empresa_pertencimento: 0,
+      eu_com_colega_relacionamento: 0,
+      eu_com_gestor_lideranca: 0,
+      justica_reconhecimento: 0,
+    });
   };
 
   const calcularMediaPorSetor = (dados: any[], campo?: string) => {
@@ -243,7 +262,7 @@ export default function NPSPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Header com botões de importação */}
+        {/* Header com botão de nova pesquisa */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -253,30 +272,16 @@ export default function NPSPage() {
               Gerencie e visualize as pesquisas de satisfação
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                setTipoImportacao('nps');
-                setModalImportacao(true);
-              }}
-              variant="outline"
-              className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Importar NPS Manual
-            </Button>
-            <Button
-              onClick={() => {
-                setTipoImportacao('felicidade');
-                setModalImportacao(true);
-              }}
-              variant="outline"
-              className="border-pink-600 text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Importar Felicidade Manual
-            </Button>
-          </div>
+          <Button
+            onClick={() => {
+              limparFormulario();
+              setModalFormulario(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Smile className="h-4 w-4 mr-2" />
+            Nova Pesquisa
+          </Button>
         </div>
 
         {/* Filtros */}
@@ -489,84 +494,274 @@ export default function NPSPage() {
           </TabsContent>
         </Tabs>
 
-        {/* Modal de Importação */}
-        <Dialog open={modalImportacao} onOpenChange={setModalImportacao}>
-          <DialogContent className="max-w-3xl">
+        {/* Modal de Nova Pesquisa */}
+        <Dialog open={modalFormulario} onOpenChange={setModalFormulario}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <FileSpreadsheet className="h-5 w-5" />
-                Importar Dados do Google Sheets - {tipoImportacao === 'nps' ? 'NPS' : 'Pesquisa da Felicidade'}
+              <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                <Smile className="h-5 w-5" />
+                Nova Pesquisa de Satisfação
               </DialogTitle>
-              <DialogDescription>
-                Cole os dados copiados do Google Sheets abaixo. Certifique-se de copiar com o cabeçalho.
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
+                Preencha os dados da pesquisa abaixo
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              {/* Instruções */}
+            <div className="space-y-6">
+              {/* Seletor de Tipo de Pesquisa */}
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">📋 Como importar:</h4>
-                <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
-                  <li>Abra a planilha do Google Sheets</li>
-                  <li>Selecione todas as linhas (incluindo cabeçalho)</li>
-                  <li>Copie (Ctrl+C ou Cmd+C)</li>
-                  <li>Cole no campo abaixo</li>
-                  <li>Clique em "Importar"</li>
-                </ol>
+                <Label className="text-gray-900 dark:text-white mb-2 block">Tipo de Pesquisa</Label>
+                <Tabs value={tipoPesquisa} onValueChange={(v) => setTipoPesquisa(v as 'nps' | 'felicidade')}>
+                  <TabsList className="bg-gray-200 dark:bg-gray-700 w-full">
+                    <TabsTrigger value="felicidade" className="flex-1">
+                      <Smile className="w-4 h-4 mr-2" />
+                      Pesquisa da Felicidade
+                    </TabsTrigger>
+                    <TabsTrigger value="nps" className="flex-1">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      NPS
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
 
-              {/* Formato esperado */}
-              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  📊 Formato esperado ({tipoImportacao === 'nps' ? 'NPS' : 'Felicidade'}):
-                </h4>
-                <code className="text-xs text-gray-700 dark:text-gray-300 block whitespace-pre-wrap">
-                  {tipoImportacao === 'nps' 
-                    ? 'Data | Setor | Funcionário | Quorum | Q1 | Q2 | Q3 | Q4 | Q5 | Q6'
-                    : 'Data | Setor | Funcionário | Quorum | Engajamento | Pertencimento | Relacionamento | Liderança | Reconhecimento'}
-                </code>
+              {/* Dados Básicos */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-gray-900 dark:text-white">Data da Pesquisa *</Label>
+                  <Input
+                    type="date"
+                    value={formData.data_pesquisa}
+                    onChange={(e) => setFormData({ ...formData, data_pesquisa: e.target.value })}
+                    className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                  />
+                </div>
+                <div>
+                  <Label className="text-gray-900 dark:text-white">Setor *</Label>
+                  <Select value={formData.setor} onValueChange={(v) => setFormData({ ...formData, setor: v })}>
+                    <SelectTrigger className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
+                      <SelectValue placeholder="Selecione o setor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Liderança">Liderança</SelectItem>
+                      <SelectItem value="Cozinha">Cozinha</SelectItem>
+                      <SelectItem value="Bar">Bar</SelectItem>
+                      <SelectItem value="Salão">Salão</SelectItem>
+                      <SelectItem value="DUDU">DUDU</SelectItem>
+                      <SelectItem value="LUAN">LUAN</SelectItem>
+                      <SelectItem value="ANDREIA">ANDREIA</SelectItem>
+                      <SelectItem value="TODOS">TODOS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-gray-900 dark:text-white">Nome do Funcionário *</Label>
+                  <Input
+                    value={formData.funcionario_nome}
+                    onChange={(e) => setFormData({ ...formData, funcionario_nome: e.target.value })}
+                    placeholder="Nome completo"
+                    className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                  />
+                </div>
+                <div>
+                  <Label className="text-gray-900 dark:text-white">Quórum</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={formData.quorum}
+                    onChange={(e) => setFormData({ ...formData, quorum: parseInt(e.target.value) || 0 })}
+                    className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                  />
+                </div>
               </div>
 
-              {/* Campo de texto */}
-              <div>
-                <Label className="text-gray-900 dark:text-white">Dados do Google Sheets</Label>
-                <Textarea
-                  value={dadosCSV}
-                  onChange={(e) => setDadosCSV(e.target.value)}
-                  placeholder="Cole aqui os dados copiados do Google Sheets..."
-                  className="min-h-[300px] font-mono text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  {dadosCSV ? `${dadosCSV.split('\n').length - 1} linhas detectadas` : 'Aguardando dados...'}
-                </p>
-              </div>
+              {/* Perguntas - Felicidade */}
+              {tipoPesquisa === 'felicidade' && (
+                <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Smile className="w-5 h-5" />
+                    Perguntas da Pesquisa de Felicidade
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Avalie de 0 a 5</p>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">1. Eu comigo - Engajamento</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.eu_comigo_engajamento}
+                        onChange={(e) => setFormData({ ...formData, eu_comigo_engajamento: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">2. Eu com empresa - Pertencimento</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.eu_com_empresa_pertencimento}
+                        onChange={(e) => setFormData({ ...formData, eu_com_empresa_pertencimento: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">3. Eu com colega - Relacionamento</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.eu_com_colega_relacionamento}
+                        onChange={(e) => setFormData({ ...formData, eu_com_colega_relacionamento: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">4. Eu com gestor - Liderança</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.eu_com_gestor_lideranca}
+                        onChange={(e) => setFormData({ ...formData, eu_com_gestor_lideranca: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">5. Justiça - Reconhecimento</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.justica_reconhecimento}
+                        onChange={(e) => setFormData({ ...formData, justica_reconhecimento: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Perguntas - NPS */}
+              {tipoPesquisa === 'nps' && (
+                <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Perguntas do NPS
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Avalie de 0 a 5</p>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">1. Qual sua área de atuação</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.qual_sua_area_atuacao}
+                        onChange={(e) => setFormData({ ...formData, qual_sua_area_atuacao: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">2. Sinto-me motivado</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.sinto_me_motivado}
+                        onChange={(e) => setFormData({ ...formData, sinto_me_motivado: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">3. Empresa se preocupa</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.empresa_se_preocupa}
+                        onChange={(e) => setFormData({ ...formData, empresa_se_preocupa: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">4. Conectado com colegas</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.conectado_colegas}
+                        onChange={(e) => setFormData({ ...formData, conectado_colegas: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">5. Relacionamento positivo</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.relacionamento_positivo}
+                        onChange={(e) => setFormData({ ...formData, relacionamento_positivo: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-900 dark:text-white">6. Quando identifico</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        value={formData.quando_identifico}
+                        onChange={(e) => setFormData({ ...formData, quando_identifico: parseFloat(e.target.value) || 0 })}
+                        className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
               <Button
                 variant="outline"
                 onClick={() => {
-                  setModalImportacao(false);
-                  setDadosCSV('');
+                  setModalFormulario(false);
+                  limparFormulario();
                 }}
-                disabled={importando}
+                disabled={salvando}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
               >
                 Cancelar
               </Button>
               <Button
-                onClick={importarDados}
-                disabled={importando || !dadosCSV.trim()}
+                onClick={salvarPesquisa}
+                disabled={salvando || !formData.setor || !formData.funcionario_nome}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                {importando ? (
+                {salvando ? (
                   <>
                     <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                    Importando...
+                    Salvando...
                   </>
                 ) : (
                   <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Importar
+                    <Smile className="h-4 w-4 mr-2" />
+                    Salvar Pesquisa
                   </>
                 )}
               </Button>

@@ -53,6 +53,8 @@ interface PesquisaFelicidadeRow {
   eu_com_colega_relacionamento: number
   eu_com_gestor_lideranca: number
   justica_reconhecimento: number
+  media_geral: number
+  resultado_percentual: number
   funcionario_nome: string
 }
 
@@ -221,16 +223,30 @@ serve(async (req) => {
           return Math.max(1, Math.min(5, escala)) // Garantir entre 1 e 5
         }
 
+        const engajamento = parsePercentualToScale(row[3])
+        const pertencimento = parsePercentualToScale(row[4])
+        const relacionamento = parsePercentualToScale(row[5])
+        const lideranca = parsePercentualToScale(row[6])
+        const reconhecimento = parsePercentualToScale(row[7])
+        
+        // Calcular média geral (média dos 5 indicadores)
+        const mediaGeral = (engajamento + pertencimento + relacionamento + lideranca + reconhecimento) / 5
+        
+        // Calcular resultado percentual (média / 5 * 100)
+        const resultadoPercentual = (mediaGeral / 5) * 100
+
         const registro: PesquisaFelicidadeRow = {
           bar_id: 3,
           data_pesquisa: dataFormatada,
           setor: row[1] || 'TODOS',
           quorum: parseInt(row[2]) || 0,
-          eu_comigo_engajamento: parsePercentualToScale(row[3]),
-          eu_com_empresa_pertencimento: parsePercentualToScale(row[4]),
-          eu_com_colega_relacionamento: parsePercentualToScale(row[5]),
-          eu_com_gestor_lideranca: parsePercentualToScale(row[6]),
-          justica_reconhecimento: parsePercentualToScale(row[7]),
+          eu_comigo_engajamento: engajamento,
+          eu_com_empresa_pertencimento: pertencimento,
+          eu_com_colega_relacionamento: relacionamento,
+          eu_com_gestor_lideranca: lideranca,
+          justica_reconhecimento: reconhecimento,
+          media_geral: parseFloat(mediaGeral.toFixed(2)),
+          resultado_percentual: parseFloat(resultadoPercentual.toFixed(2)),
           funcionario_nome: 'Equipe',
         }
 
