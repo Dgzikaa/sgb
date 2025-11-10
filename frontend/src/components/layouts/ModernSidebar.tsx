@@ -240,13 +240,13 @@ const defaultSidebarItems: SidebarItem[] = [
         //   description: 'Análise de produtos mais vendidos',
         //   permission: 'relatorios',
         // },
-        // {
-        //   icon: AlertTriangle,
-        //   label: 'Stockout',
-        //   href: '/analitico/stockout',
-        //   description: 'Controle de disponibilidade de produtos',
-        //   permission: 'relatorios',
-        // },
+        {
+          icon: AlertTriangle,
+          label: 'Stockout',
+          href: '/analitico/stockout',
+          description: 'Controle de disponibilidade de produtos',
+          permission: 'relatorios',
+        },
         // {
         //   icon: Users,
         //   label: 'Sócios',
