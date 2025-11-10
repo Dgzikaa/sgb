@@ -297,6 +297,12 @@ deno_version = 1
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Cron Jobs - Sympla Sync Semanal (toda segunda-feira às 09:00)
+[edge_runtime.cron]
+# Formato: "minuto hora dia_do_mes mes dia_da_semana"
+# 1 = segunda-feira, 0 = domingo
+sympla_sync = { schedule = "0 9 * * 1", function_name = "sympla-sync" }
+
 [analytics]
 enabled = true
 port = 54327
