@@ -99,6 +99,26 @@ export default function TerminalProducao() {
     }
   };
 
+  // Função para destacar texto na busca
+  const highlightText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+    
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() ? (
+            <mark key={i} className="bg-yellow-200 dark:bg-yellow-600/50 text-gray-900 dark:text-white font-semibold px-0.5 rounded">
+              {part}
+            </mark>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        )}
+      </>
+    );
+  };
+
   // Carregar receitas
   useEffect(() => {
     const carregarReceitas = async () => {
@@ -401,7 +421,8 @@ export default function TerminalProducao() {
   };
 
   const handleInputBlur = () => {
-    setTimeout(() => setMostrarDropdown(false), 200);
+    // Delay maior para permitir clique nas opções
+    setTimeout(() => setMostrarDropdown(false), 300);
   };
 
   const atualizarQuantidadeReal = (
@@ -759,6 +780,9 @@ export default function TerminalProducao() {
                     Buscar Receita
                   </Label>
                   <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                      🔍
+                    </div>
                     <Input
                       type="text"
                       value={buscaReceita}
@@ -766,18 +790,29 @@ export default function TerminalProducao() {
                         setBuscaReceita(e.target.value);
                         setMostrarDropdown(true);
                       }}
-                      placeholder={`Buscar receita de ${tipoLocalSelecionado}...`}
-                      className="h-12 text-base bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      onKeyDown={e => {
+                        if (e.key === 'Escape') {
+                          setBuscaReceita('');
+                          setMostrarDropdown(false);
+                        }
+                      }}
+                      placeholder={`Digite para buscar... (${tipoLocalSelecionado})`}
+                      className="h-12 text-base pl-10 pr-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                       onFocus={handleInputFocus}
                       onBlur={handleInputBlur}
+                      autoComplete="off"
                     />
 
                     {buscaReceita && (
                       <Button
-                        onClick={() => setBuscaReceita('')}
+                        onClick={() => {
+                          setBuscaReceita('');
+                          setMostrarDropdown(false);
+                        }}
                         variant="ghost"
                         size="sm"
                         className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 h-8 w-8"
+                        title="Limpar busca (ESC)"
                       >
                         ×
                       </Button>
@@ -785,10 +820,13 @@ export default function TerminalProducao() {
                   </div>
                 </div>
 
-                {mostrarDropdown && (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg max-h-60 overflow-y-auto">
-                    {receitasFiltradas.length > 0 ? (
-                      receitasFiltradas.map(receita => (
+                {mostrarDropdown && receitasFiltradas.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg max-h-80 overflow-y-auto">
+                    <div className="sticky top-0 bg-gray-50 dark:bg-gray-700 px-3 py-2 border-b border-gray-200 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400">
+                      {receitasFiltradas.length} receita{receitasFiltradas.length !== 1 ? 's' : ''} encontrada{receitasFiltradas.length !== 1 ? 's' : ''}
+                    </div>
+                    {receitasFiltradas.slice(0, 10).map(receita => {
+                      return (
                         <div
                           key={receita.receita_codigo}
                           className="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors touch-manipulation"
@@ -802,20 +840,29 @@ export default function TerminalProducao() {
                           role="button"
                           tabIndex={0}
                         >
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {receita.receita_nome}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            {receita.tipo_local === 'bar' ? '🍺' : '👨‍🍳'}{' '}
-                            {receita.tipo_local} •{' '}
-                            {receita.insumos?.length || 0} insumos
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-900 dark:text-white">
+                                {highlightText(receita.receita_nome, buscaReceita)}
+                              </div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                {receita.tipo_local === 'bar' ? '🍺' : '👨‍🍳'}{' '}
+                                {receita.tipo_local} • {receita.insumos?.length || 0} insumos
+                                {receita.rendimento_esperado && (
+                                  <> • {receita.rendimento_esperado}g</>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-500 font-mono">
+                              {highlightText(receita.receita_codigo, buscaReceita)}
+                            </div>
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                        🔍 Nenhuma receita de {tipoLocalSelecionado} encontrada
-                        para &quot;{buscaReceita}&quot;
+                      );
+                    })}
+                    {receitasFiltradas.length > 10 && (
+                      <div className="sticky bottom-0 bg-gray-50 dark:bg-gray-700 px-3 py-2 border-t border-gray-200 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400 text-center">
+                        + {receitasFiltradas.length - 10} receitas não exibidas. Continue digitando para refinar...
                       </div>
                     )}
                   </div>
