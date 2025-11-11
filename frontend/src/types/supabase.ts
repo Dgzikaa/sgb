@@ -1760,9 +1760,11 @@ export type Database = {
           bar_id: number | null
           codigo: string | null
           nome: string | null
-          tipo: string | null
-          unidade: string | null
-          preco: number | null
+          tipo_local: string | null
+          categoria: string | null
+          unidade_medida: string | null
+          custo_unitario: number | null
+          observacoes: string | null
           ativo: boolean | null
           created_at: string | null
           updated_at: string | null
@@ -1772,9 +1774,11 @@ export type Database = {
           bar_id?: number | null
           codigo?: string | null
           nome?: string | null
-          tipo?: string | null
-          unidade?: string | null
-          preco?: number | null
+          tipo_local?: string | null
+          categoria?: string | null
+          unidade_medida?: string | null
+          custo_unitario?: number | null
+          observacoes?: string | null
           ativo?: boolean | null
           created_at?: string | null
           updated_at?: string | null
@@ -1784,10 +1788,60 @@ export type Database = {
           bar_id?: number | null
           codigo?: string | null
           nome?: string | null
-          tipo?: string | null
-          unidade?: string | null
-          preco?: number | null
+          tipo_local?: string | null
+          categoria?: string | null
+          unidade_medida?: string | null
+          custo_unitario?: number | null
+          observacoes?: string | null
           ativo?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      contagem_estoque_insumos: {
+        Row: {
+          id: number
+          bar_id: number
+          insumo_id: number
+          data_contagem: string
+          estoque_inicial: number | null
+          estoque_final: number
+          quantidade_pedido: number | null
+          consumo_calculado: number | null
+          custo_unitario: number | null
+          custo_total: number | null
+          observacoes: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          bar_id: number
+          insumo_id: number
+          data_contagem: string
+          estoque_inicial?: number | null
+          estoque_final: number
+          quantidade_pedido?: number | null
+          consumo_calculado?: number | null
+          custo_unitario?: number | null
+          custo_total?: number | null
+          observacoes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          bar_id?: number
+          insumo_id?: number
+          data_contagem?: string
+          estoque_inicial?: number | null
+          estoque_final?: number
+          quantidade_pedido?: number | null
+          consumo_calculado?: number | null
+          custo_unitario?: number | null
+          custo_total?: number | null
+          observacoes?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
