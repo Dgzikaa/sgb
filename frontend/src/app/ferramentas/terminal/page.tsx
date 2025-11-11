@@ -128,15 +128,16 @@ export default function TerminalProducao() {
       }
 
       try {
-        const response = await fetch(`/api/operacional/receitas/todas?bar_id=${selectedBar.id}`);
+        const response = await fetch(`/api/operacional/receitas/com-insumos?bar_id=${selectedBar.id}`);
         if (response.ok) {
           const data = await response.json();
-          // Filtrar apenas receitas ativas
-          const receitasAtivas = (data.receitas || []).filter((r: any) => r.ativo !== false);
-          setReceitas(receitasAtivas);
+          setReceitas(data.receitas || []);
+          console.log(`✅ ${data.receitas?.length || 0} receitas carregadas`);
+        } else {
+          console.error('❌ Erro ao carregar receitas:', response.status);
         }
-      } catch {
-        // Error silently handled
+      } catch (error) {
+        console.error('❌ Erro ao buscar receitas:', error);
       } finally {
         setIsLoading(false);
       }
