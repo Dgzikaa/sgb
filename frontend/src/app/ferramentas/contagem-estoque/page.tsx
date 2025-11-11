@@ -390,29 +390,29 @@ export default function ContagemEstoquePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 py-4 md:py-6 max-w-7xl">
         {/* Header */}
-        <div className="card-dark p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="card-dark p-4 md:p-6 mb-4 md:mb-6">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 Contagem de Estoque
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Registro diário de estoque de insumos
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-gray-500" />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex items-center gap-2 flex-1">
+                <Calendar className="w-4 h-4 text-gray-500 shrink-0" />
                 <Input
                   type="date"
                   value={dataContagem}
                   onChange={(e) => setDataContagem(e.target.value)}
-                  className="w-auto bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                  className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-sm md:text-base h-10"
                 />
               </div>
-              <Badge variant="outline" className="text-sm">
+              <Badge variant="outline" className="text-xs sm:text-sm self-start px-3 py-1.5">
                 {selectedBar?.nome || 'Bar Principal'}
               </Badge>
             </div>
@@ -420,67 +420,68 @@ export default function ContagemEstoquePage() {
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
           <Card className="card-dark">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                     Total de Itens
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.total_itens}
                   </p>
                 </div>
-                <Package className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                <Package className="w-6 h-6 md:w-8 md:h-8 text-blue-600 dark:text-blue-400 shrink-0" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="card-dark">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                     Itens Contados
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.itens_contados} / {stats.total_itens}
                   </p>
                 </div>
-                <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
+                <Check className="w-6 h-6 md:w-8 md:h-8 text-green-600 dark:text-green-400 shrink-0" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="card-dark">
-            <CardContent className="p-4">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                     Consumo Total
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                     R$ {stats.valor_total_consumo.toFixed(2)}
                   </p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-purple-600 dark:text-purple-400 shrink-0" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs e Tabela */}
+        {/* Tabs e Conteúdo */}
         <Card className="card-dark">
-          <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <CardTitle>Registro de Contagem</CardTitle>
-              <div className="flex gap-2">
+          <CardHeader className="p-4 md:p-6">
+            <div className="flex flex-col gap-4">
+              <CardTitle className="text-lg md:text-xl">Registro de Contagem</CardTitle>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   onClick={exportarParaExcel}
                   variant="outline"
                   size="sm"
                   disabled={stats.itens_contados === 0}
+                  className="flex-1 sm:flex-none h-10"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Exportar
@@ -488,7 +489,7 @@ export default function ContagemEstoquePage() {
                 <Button
                   onClick={salvarTodas}
                   disabled={salvando || stats.itens_contados === 0}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none h-10"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {salvando ? 'Salvando...' : `Salvar Todas (${stats.itens_contados})`}
@@ -496,13 +497,13 @@ export default function ContagemEstoquePage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6 pt-0">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 mb-4">
-                <TabsTrigger value="cozinha">
+              <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 mb-4 w-full grid grid-cols-2">
+                <TabsTrigger value="cozinha" className="text-sm">
                   Cozinha ({insumos.filter((i) => i.tipo_local === 'cozinha').length})
                 </TabsTrigger>
-                <TabsTrigger value="bar">
+                <TabsTrigger value="bar" className="text-sm">
                   Bar ({insumos.filter((i) => i.tipo_local === 'bar').length})
                 </TabsTrigger>
               </TabsList>
@@ -511,14 +512,14 @@ export default function ContagemEstoquePage() {
               <div className="mb-4 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Buscar insumo por nome ou código..."
+                  placeholder="Buscar insumo..."
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
-                  className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                  className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-11"
                 />
               </div>
 
-              <TabsContent value={activeTab}>
+              <TabsContent value={activeTab} className="mt-0">
                 {insumosFiltrados.length === 0 ? (
                   <div className="text-center py-12">
                     <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -527,53 +528,187 @@ export default function ContagemEstoquePage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-gray-50 dark:bg-gray-800">
-                          <TableHead className="w-[100px]">Código</TableHead>
-                          <TableHead>Insumo</TableHead>
-                          <TableHead className="text-center w-[100px]">Est. Inicial</TableHead>
-                          <TableHead className="text-center w-[100px]">Pedido</TableHead>
-                          <TableHead className="text-center w-[100px]">Est. Final</TableHead>
-                          <TableHead className="text-center w-[100px]">Consumo</TableHead>
-                          <TableHead className="text-right w-[120px]">Valor</TableHead>
-                          <TableHead className="text-center w-[80px]">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {insumosFiltrados.map((insumo) => {
-                          const contagem = contagens[insumo.id];
-                          const isEditado = contagem?.editado;
+                  <>
+                    {/* Desktop: Tabela */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50 dark:bg-gray-800">
+                            <TableHead className="w-[100px]">Código</TableHead>
+                            <TableHead>Insumo</TableHead>
+                            <TableHead className="text-center w-[100px]">Est. Inicial</TableHead>
+                            <TableHead className="text-center w-[100px]">Pedido</TableHead>
+                            <TableHead className="text-center w-[100px]">Est. Final</TableHead>
+                            <TableHead className="text-center w-[100px]">Consumo</TableHead>
+                            <TableHead className="text-right w-[120px]">Valor</TableHead>
+                            <TableHead className="text-center w-[80px]">Ações</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {insumosFiltrados.map((insumo) => {
+                            const contagem = contagens[insumo.id];
+                            const isEditado = contagem?.editado;
 
-                          return (
-                            <TableRow
-                              key={insumo.id}
-                              id={`row-${insumo.id}`}
-                              className={`transition-colors ${
-                                isEditado ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
-                              }`}
-                            >
-                              <TableCell className="font-medium text-gray-900 dark:text-white">
-                                {insumo.codigo}
-                              </TableCell>
-                              <TableCell className="text-gray-900 dark:text-white">
-                                <div>
-                                  <div className="font-medium">{insumo.nome}</div>
-                                  <div className="text-xs text-gray-500 dark:text-gray-500">
-                                    {insumo.categoria}
+                            return (
+                              <TableRow
+                                key={insumo.id}
+                                id={`row-${insumo.id}`}
+                                className={`transition-colors ${
+                                  isEditado ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
+                                }`}
+                              >
+                                <TableCell className="font-medium text-gray-900 dark:text-white">
+                                  {insumo.codigo}
+                                </TableCell>
+                                <TableCell className="text-gray-900 dark:text-white">
+                                  <div>
+                                    <div className="font-medium">{insumo.nome}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                                      {insumo.categoria}
+                                    </div>
                                   </div>
+                                </TableCell>
+                                <TableCell className="text-center text-gray-600 dark:text-gray-400">
+                                  {contagem?.estoque_inicial !== null && contagem?.estoque_inicial !== undefined
+                                    ? `${contagem.estoque_inicial} ${insumo.unidade_medida}`
+                                    : '-'}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={contagem?.quantidade_pedido || ''}
+                                    onChange={(e) =>
+                                      handleContagemChange(
+                                        insumo.id,
+                                        'quantidade_pedido',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-20 text-center bg-white dark:bg-gray-700"
+                                    placeholder="0"
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={contagem?.estoque_final !== undefined ? contagem.estoque_final : ''}
+                                    onChange={(e) =>
+                                      handleContagemChange(
+                                        insumo.id,
+                                        'estoque_final',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-20 text-center bg-white dark:bg-gray-700"
+                                    placeholder="0"
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center text-gray-900 dark:text-white font-medium">
+                                  {contagem?.consumo_periodo !== null && contagem?.consumo_periodo !== undefined
+                                    ? `${contagem.consumo_periodo.toFixed(2)} ${insumo.unidade_medida}`
+                                    : '-'}
+                                </TableCell>
+                                <TableCell className="text-right text-gray-900 dark:text-white font-medium">
+                                  {contagem?.valor_consumo !== null && contagem?.valor_consumo !== undefined
+                                    ? `R$ ${contagem.valor_consumo.toFixed(2)}`
+                                    : '-'}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <Button
+                                    onClick={() => salvarContagem(insumo.id)}
+                                    size="sm"
+                                    disabled={salvando || !isEditado}
+                                    className={`${
+                                      isEditado
+                                        ? 'bg-green-600 hover:bg-green-700'
+                                        : 'bg-gray-400'
+                                    } text-white`}
+                                  >
+                                    <Save className="w-3 h-3" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile: Cards */}
+                    <div className="md:hidden space-y-3">
+                      {insumosFiltrados.map((insumo) => {
+                        const contagem = contagens[insumo.id];
+                        const isEditado = contagem?.editado;
+
+                        return (
+                          <div
+                            key={insumo.id}
+                            id={`row-${insumo.id}`}
+                            className={`bg-white dark:bg-gray-800 border rounded-lg p-4 transition-all ${
+                              isEditado 
+                                ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/10' 
+                                : 'border-gray-200 dark:border-gray-700'
+                            }`}
+                          >
+                            {/* Header do Card */}
+                            <div className="flex justify-between items-start mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-xs font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">
+                                    {insumo.codigo}
+                                  </span>
+                                  {isEditado && (
+                                    <Badge className="bg-yellow-500 text-white text-[10px] px-1.5 py-0">
+                                      Editado
+                                    </Badge>
+                                  )}
                                 </div>
-                              </TableCell>
-                              <TableCell className="text-center text-gray-600 dark:text-gray-400">
-                                {contagem?.estoque_inicial !== null && contagem?.estoque_inicial !== undefined
-                                  ? `${contagem.estoque_inicial} ${insumo.unidade_medida}`
-                                  : '-'}
-                              </TableCell>
-                              <TableCell className="text-center">
+                                <h3 className="font-semibold text-gray-900 dark:text-white text-base leading-tight">
+                                  {insumo.nome}
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                                  {insumo.categoria}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Informações de Estoque */}
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                                <Label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">
+                                  Estoque Inicial
+                                </Label>
+                                <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                                  {contagem?.estoque_inicial !== null && contagem?.estoque_inicial !== undefined
+                                    ? `${contagem.estoque_inicial} ${insumo.unidade_medida}`
+                                    : '-'}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                                <Label className="text-xs text-blue-600 dark:text-blue-400 mb-1 block">
+                                  Consumo
+                                </Label>
+                                <div className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                                  {contagem?.consumo_periodo !== null && contagem?.consumo_periodo !== undefined
+                                    ? `${contagem.consumo_periodo.toFixed(2)} ${insumo.unidade_medida}`
+                                    : '-'}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Inputs de Contagem */}
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                              <div>
+                                <Label className="text-xs text-gray-600 dark:text-gray-400 mb-1.5 block">
+                                  Pedido
+                                </Label>
                                 <Input
                                   type="number"
                                   step="0.01"
+                                  inputMode="decimal"
                                   value={contagem?.quantidade_pedido || ''}
                                   onChange={(e) =>
                                     handleContagemChange(
@@ -582,14 +717,19 @@ export default function ContagemEstoquePage() {
                                       e.target.value
                                     )
                                   }
-                                  className="w-20 text-center bg-white dark:bg-gray-700"
+                                  className="h-12 text-center text-base font-semibold bg-white dark:bg-gray-700 border-2 focus:ring-2"
                                   placeholder="0"
                                 />
-                              </TableCell>
-                              <TableCell className="text-center">
+                              </div>
+
+                              <div>
+                                <Label className="text-xs text-gray-600 dark:text-gray-400 mb-1.5 block">
+                                  Estoque Final *
+                                </Label>
                                 <Input
                                   type="number"
                                   step="0.01"
+                                  inputMode="decimal"
                                   value={contagem?.estoque_final !== undefined ? contagem.estoque_final : ''}
                                   onChange={(e) =>
                                     handleContagemChange(
@@ -598,40 +738,44 @@ export default function ContagemEstoquePage() {
                                       e.target.value
                                     )
                                   }
-                                  className="w-20 text-center bg-white dark:bg-gray-700"
+                                  className="h-12 text-center text-base font-semibold bg-white dark:bg-gray-700 border-2 focus:ring-2 border-blue-300 dark:border-blue-600"
                                   placeholder="0"
                                 />
-                              </TableCell>
-                              <TableCell className="text-center text-gray-900 dark:text-white font-medium">
-                                {contagem?.consumo_periodo !== null && contagem?.consumo_periodo !== undefined
-                                  ? `${contagem.consumo_periodo.toFixed(2)} ${insumo.unidade_medida}`
-                                  : '-'}
-                              </TableCell>
-                              <TableCell className="text-right text-gray-900 dark:text-white font-medium">
-                                {contagem?.valor_consumo !== null && contagem?.valor_consumo !== undefined
-                                  ? `R$ ${contagem.valor_consumo.toFixed(2)}`
-                                  : '-'}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <Button
-                                  onClick={() => salvarContagem(insumo.id)}
-                                  size="sm"
-                                  disabled={salvando || !isEditado}
-                                  className={`${
-                                    isEditado
-                                      ? 'bg-green-600 hover:bg-green-700'
-                                      : 'bg-gray-400'
-                                  } text-white`}
-                                >
-                                  <Save className="w-3 h-3" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
+                              </div>
+                            </div>
+
+                            {/* Valor de Consumo */}
+                            {contagem?.valor_consumo !== null && contagem?.valor_consumo !== undefined && (
+                              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 mb-3">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-purple-600 dark:text-purple-400">
+                                    Valor Consumo
+                                  </span>
+                                  <span className="text-base font-bold text-purple-700 dark:text-purple-300">
+                                    R$ {contagem.valor_consumo.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Botão Salvar */}
+                            <Button
+                              onClick={() => salvarContagem(insumo.id)}
+                              disabled={salvando || !isEditado}
+                              className={`w-full h-12 text-base font-semibold ${
+                                isEditado
+                                  ? 'bg-green-600 hover:bg-green-700'
+                                  : 'bg-gray-400'
+                              } text-white`}
+                            >
+                              <Save className="w-4 h-4 mr-2" />
+                              {isEditado ? 'Salvar' : 'Salvo'}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </TabsContent>
             </Tabs>
