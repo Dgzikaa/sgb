@@ -1,3 +1,4 @@
+// Layout para ferramentas - Atualizado
 import { DarkSidebarLayout } from '@/components/layouts';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
