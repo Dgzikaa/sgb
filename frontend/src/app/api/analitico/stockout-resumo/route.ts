@@ -6,6 +6,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Função auxiliar para aplicar filtros base (locais e prefixos a ignorar)
+const aplicarFiltrosBase = (query: any) => {
+  // LOCAIS A IGNORAR PERMANENTEMENTE
+  query = query
+    .neq('loc_desc', 'Pegue e Pague')
+    .neq('loc_desc', 'Shot e Dose')
+    .neq('loc_desc', 'Venda Volante')
+    .not('loc_desc', 'is', null); // Excluir "Sem local definido"
+  
+  // PRODUTOS COM PREFIXOS A IGNORAR
+  query = query
+    .not('prd_desc', 'ilike', '[HH]%')  // Happy Hour
+    .not('prd_desc', 'ilike', '[PP]%')  // Pegue Pague
+    .not('prd_desc', 'ilike', '[DD]%')  // Dose Dupla
+    .not('prd_desc', 'ilike', '[IN]%'); // Insumos
+  
+  return query;
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -20,12 +39,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar dados de stockout com NOVA LÓGICA: apenas produtos ativos='S'
-    const { data: dadosStockout, error } = await supabase
+    let query = supabase
       .from('contahub_stockout')
       .select('prd_ativo, prd_venda')
       .eq('data_consulta', data_selecionada)
       .eq('bar_id', bar_id)
       .eq('prd_ativo', 'S'); // Apenas produtos ativos
+
+    // Aplicar filtros base
+    query = aplicarFiltrosBase(query);
+
+    const { data: dadosStockout, error } = await query;
 
     if (error) {
       console.error('Erro ao buscar dados de stockout:', error);
@@ -75,13 +99,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar dados históricos com NOVA LÓGICA: apenas produtos ativos='S'
-    const { data: dadosHistoricos, error } = await supabase
+    let queryHistorico = supabase
       .from('contahub_stockout')
       .select('data_consulta, prd_ativo, prd_venda')
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .gte('data_consulta', data_inicio)
       .lte('data_consulta', data_fim)
       .eq('bar_id', bar_id);
+
+    // Aplicar filtros base
+    queryHistorico = aplicarFiltrosBase(queryHistorico);
+
+    const { data: dadosHistoricos, error } = await queryHistorico;
 
     if (error) {
       console.error('Erro ao buscar dados históricos:', error);

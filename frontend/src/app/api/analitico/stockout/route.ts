@@ -19,33 +19,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Construir condições de filtro
-    let whereConditions = `data_consulta = '${data_selecionada}'`;
-    
-    if (filtros.length > 0) {
-      const filtroConditions = filtros.map((filtro: string) => {
-        if (filtro === 'sem_local') {
-          return `loc_desc IS NOT NULL`;
-        }
-        return `loc_desc != '${filtro}'`;
-      }).join(' AND ');
+    // Função auxiliar para aplicar filtros base (locais e prefixos a ignorar)
+    const aplicarFiltrosBase = (query: any) => {
+      // LOCAIS A IGNORAR PERMANENTEMENTE
+      query = query
+        .neq('loc_desc', 'Pegue e Pague')
+        .neq('loc_desc', 'Shot e Dose')
+        .neq('loc_desc', 'Venda Volante')
+        .not('loc_desc', 'is', null); // Excluir "Sem local definido"
       
-      whereConditions += ` AND ${filtroConditions}`;
-    }
+      // PRODUTOS COM PREFIXOS A IGNORAR
+      query = query
+        .not('prd_desc', 'ilike', '[HH]%')  // Happy Hour
+        .not('prd_desc', 'ilike', '[PP]%')  // Pegue Pague
+        .not('prd_desc', 'ilike', '[DD]%')  // Dose Dupla
+        .not('prd_desc', 'ilike', '[IN]%'); // Insumos
+      
+      return query;
+    };
 
     // 1. Estatísticas gerais - NOVA LÓGICA: apenas produtos ativos='S' e venda='N'
     let query = supabase
       .from('contahub_stockout')
       .select('prd_ativo, prd_venda')
       .eq('data_consulta', data_selecionada)
-      .eq('prd_ativo', 'S') // Apenas produtos ativos
-      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
-      .not('loc_desc', 'is', null); // Excluir "Sem local definido" permanentemente
+      .eq('prd_ativo', 'S'); // Apenas produtos ativos
 
-    // Aplicar filtros adicionais se existirem
+    // Aplicar filtros base
+    query = aplicarFiltrosBase(query);
+
+    // Aplicar filtros adicionais do usuário se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
+        if (filtro !== 'sem_local') {
           query = query.neq('loc_desc', filtro);
         }
       });
@@ -73,14 +79,15 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('loc_desc, prd_ativo, prd_venda')
       .eq('data_consulta', data_selecionada)
-      .eq('prd_ativo', 'S') // Apenas produtos ativos
-      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
-      .not('loc_desc', 'is', null); // Excluir "Sem local definido" permanentemente
+      .eq('prd_ativo', 'S'); // Apenas produtos ativos
 
-    // Aplicar filtros adicionais se existirem
+    // Aplicar filtros base
+    queryLocais = aplicarFiltrosBase(queryLocais);
+
+    // Aplicar filtros adicionais do usuário se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
+        if (filtro !== 'sem_local') {
           queryLocais = queryLocais.neq('loc_desc', filtro);
         }
       });
@@ -123,16 +130,17 @@ export async function POST(request: NextRequest) {
       .eq('data_consulta', data_selecionada)
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'N') // E que não estão à venda = STOCKOUT
-      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
-      .not('loc_desc', 'is', null) // Excluir "Sem local definido" permanentemente
       .order('loc_desc')
       .order('prd_desc')
       .limit(50);
 
-    // Aplicar filtros adicionais se existirem
+    // Aplicar filtros base
+    queryIndisponiveis = aplicarFiltrosBase(queryIndisponiveis);
+
+    // Aplicar filtros adicionais do usuário se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
+        if (filtro !== 'sem_local') {
           queryIndisponiveis = queryIndisponiveis.neq('loc_desc', filtro);
         }
       });
@@ -147,16 +155,17 @@ export async function POST(request: NextRequest) {
       .eq('data_consulta', data_selecionada)
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'S') // E que estão à venda = DISPONÍVEIS
-      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
-      .not('loc_desc', 'is', null) // Excluir "Sem local definido" permanentemente
       .order('loc_desc')
       .order('prd_desc')
       .limit(20);
 
-    // Aplicar filtros adicionais se existirem
+    // Aplicar filtros base
+    queryDisponiveis = aplicarFiltrosBase(queryDisponiveis);
+
+    // Aplicar filtros adicionais do usuário se existirem
     if (filtros.length > 0) {
       filtros.forEach(filtro => {
-        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
+        if (filtro !== 'sem_local') {
           queryDisponiveis = queryDisponiveis.neq('loc_desc', filtro);
         }
       });

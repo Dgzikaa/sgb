@@ -6,6 +6,25 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Função auxiliar para aplicar filtros base (locais e prefixos a ignorar)
+const aplicarFiltrosBase = (query: any) => {
+  // LOCAIS A IGNORAR PERMANENTEMENTE
+  query = query
+    .neq('loc_desc', 'Pegue e Pague')
+    .neq('loc_desc', 'Shot e Dose')
+    .neq('loc_desc', 'Venda Volante')
+    .not('loc_desc', 'is', null); // Excluir "Sem local definido"
+  
+  // PRODUTOS COM PREFIXOS A IGNORAR
+  query = query
+    .not('prd_desc', 'ilike', '[HH]%')  // Happy Hour
+    .not('prd_desc', 'ilike', '[PP]%')  // Pegue Pague
+    .not('prd_desc', 'ilike', '[DD]%')  // Dose Dupla
+    .not('prd_desc', 'ilike', '[IN]%'); // Insumos
+  
+  return query;
+};
+
 interface AnaliseStockoutHistorico {
   periodo: {
     data_inicio: string;
@@ -95,18 +114,19 @@ export async function POST(request: NextRequest) {
     // Buscar dados históricos com NOVA LÓGICA: apenas produtos ativos='S'
     let query = supabase
       .from('contahub_stockout')
-      .select('data_consulta, prd_ativo, prd_venda, loc_desc')
+      .select('data_consulta, prd_ativo, prd_venda, loc_desc, prd_desc')
       .eq('prd_ativo', 'S') // Apenas produtos ativos
-      .neq('loc_desc', 'Pegue e Pague') // Excluir Pegue e Pague permanentemente
-      .not('loc_desc', 'is', null) // Excluir "Sem local definido" permanentemente
       .gte('data_consulta', data_inicio)
       .lte('data_consulta', data_fim)
       .eq('bar_id', bar_id);
 
-    // Aplicar filtros adicionais se existirem
+    // Aplicar filtros base
+    query = aplicarFiltrosBase(query);
+
+    // Aplicar filtros adicionais do usuário se existirem
     if (filtros.length > 0) {
       filtros.forEach((filtro: string) => {
-        if (filtro !== 'sem_local' && filtro !== 'Pegue e Pague') {
+        if (filtro !== 'sem_local') {
           query = query.neq('loc_desc', filtro);
         }
       });
