@@ -323,6 +323,102 @@ export type Database = {
         }
         Relationships: []
       }
+      bar_api_configs: {
+        Row: {
+          api_name: string | null
+          bar_id: number | null
+          config_data: Json | null
+          created_at: string | null
+          id: number
+        }
+        Insert: {
+          api_name?: string | null
+          bar_id?: number | null
+          config_data?: Json | null
+          created_at?: string | null
+          id?: number
+        }
+        Update: {
+          api_name?: string | null
+          bar_id?: number | null
+          config_data?: Json | null
+          created_at?: string | null
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bar_api_configs_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bar_notification_configs: {
+        Row: {
+          bar_id: number | null
+          config_data: Json | null
+          created_at: string | null
+          id: number
+          notification_type: string | null
+        }
+        Insert: {
+          bar_id?: number | null
+          config_data?: Json | null
+          created_at?: string | null
+          id?: number
+          notification_type?: string | null
+        }
+        Update: {
+          bar_id?: number | null
+          config_data?: Json | null
+          created_at?: string | null
+          id?: number
+          notification_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bar_notification_configs_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bar_stats: {
+        Row: {
+          bar_id: number | null
+          created_at: string | null
+          id: number
+          metrics: Json | null
+          stat_date: string | null
+        }
+        Insert: {
+          bar_id?: number | null
+          created_at?: string | null
+          id?: number
+          metrics?: Json | null
+          stat_date?: string | null
+        }
+        Update: {
+          bar_id?: number | null
+          created_at?: string | null
+          id?: number
+          metrics?: Json | null
+          stat_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bar_stats_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bars: {
         Row: {
           ativo: boolean | null
@@ -517,6 +613,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      checklist_executions: {
+        Row: {
+          checklist_id: string | null
+          created_at: string | null
+          executed_by: string | null
+          id: string
+          status: string | null
+        }
+        Insert: {
+          checklist_id?: string | null
+          created_at?: string | null
+          executed_by?: string | null
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          checklist_id?: string | null
+          created_at?: string | null
+          executed_by?: string | null
+          id?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
+      checklist_funcionario: {
+        Row: {
+          checklist_id: string | null
+          created_at: string | null
+          funcionario_id: string | null
+          id: string
+          status: string | null
+        }
+        Insert: {
+          checklist_id?: string | null
+          created_at?: string | null
+          funcionario_id?: string | null
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          checklist_id?: string | null
+          created_at?: string | null
+          funcionario_id?: string | null
+          id?: string
+          status?: string | null
+        }
+        Relationships: []
       }
       checklist_itens: {
         Row: {
@@ -2431,6 +2575,7 @@ export type Database = {
           c_artistico_plan: number | null
           c_prod: number | null
           calculado_em: string | null
+          capacidade_estimada: number | null
           cl_plan: number | null
           cl_real: number | null
           criado_em: string | null
@@ -2442,17 +2587,20 @@ export type Database = {
           faturamento_bar_manual: number | null
           faturamento_couvert: number | null
           faturamento_couvert_manual: number | null
+          faturamento_liquido: number | null
           genero: string | null
           id: number
           lot_max: number | null
           m1_r: number | null
           nome: string
+          nome_evento: string | null
           observacoes: string | null
           percent_art_fat: number | null
           percent_b: number | null
           percent_c: number | null
           percent_d: number | null
           precisa_recalculo: boolean | null
+          publico_real: number | null
           real_r: number | null
           res_p: number | null
           res_tot: number | null
@@ -2481,6 +2629,7 @@ export type Database = {
           c_artistico_plan?: number | null
           c_prod?: number | null
           calculado_em?: string | null
+          capacidade_estimada?: number | null
           cl_plan?: number | null
           cl_real?: number | null
           criado_em?: string | null
@@ -2492,17 +2641,20 @@ export type Database = {
           faturamento_bar_manual?: number | null
           faturamento_couvert?: number | null
           faturamento_couvert_manual?: number | null
+          faturamento_liquido?: number | null
           genero?: string | null
           id?: number
           lot_max?: number | null
           m1_r?: number | null
           nome: string
+          nome_evento?: string | null
           observacoes?: string | null
           percent_art_fat?: number | null
           percent_b?: number | null
           percent_c?: number | null
           percent_d?: number | null
           precisa_recalculo?: boolean | null
+          publico_real?: number | null
           real_r?: number | null
           res_p?: number | null
           res_tot?: number | null
@@ -2531,6 +2683,7 @@ export type Database = {
           c_artistico_plan?: number | null
           c_prod?: number | null
           calculado_em?: string | null
+          capacidade_estimada?: number | null
           cl_plan?: number | null
           cl_real?: number | null
           criado_em?: string | null
@@ -2542,17 +2695,20 @@ export type Database = {
           faturamento_bar_manual?: number | null
           faturamento_couvert?: number | null
           faturamento_couvert_manual?: number | null
+          faturamento_liquido?: number | null
           genero?: string | null
           id?: number
           lot_max?: number | null
           m1_r?: number | null
           nome?: string
+          nome_evento?: string | null
           observacoes?: string | null
           percent_art_fat?: number | null
           percent_b?: number | null
           percent_c?: number | null
           percent_d?: number | null
           precisa_recalculo?: boolean | null
+          publico_real?: number | null
           real_r?: number | null
           res_p?: number | null
           res_tot?: number | null
@@ -2911,6 +3067,54 @@ export type Database = {
           tipo_local?: string | null
           unidade_medida?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      lgpd_audit_log: {
+        Row: {
+          action: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      logs_sistema: {
+        Row: {
+          created_at: string | null
+          id: number
+          log_type: string | null
+          message: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          log_type?: string | null
+          message?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          log_type?: string | null
+          message?: string | null
+          metadata?: Json | null
         }
         Relationships: []
       }
@@ -3350,6 +3554,30 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string | null
+          read: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          read?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          read?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       nps: {
         Row: {
           bar_id: number
@@ -3613,6 +3841,30 @@ export type Database = {
           },
         ]
       }
+      producao_insumos_calculados: {
+        Row: {
+          created_at: string | null
+          id: number
+          insumo_id: number | null
+          producao_id: number | null
+          quantidade_calculada: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          insumo_id?: number | null
+          producao_id?: number | null
+          quantidade_calculada?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          insumo_id?: number | null
+          producao_id?: number | null
+          quantidade_calculada?: number | null
+        }
+        Relationships: []
+      }
       producoes: {
         Row: {
           bar_id: number
@@ -3732,6 +3984,86 @@ export type Database = {
           },
         ]
       }
+      produtos: {
+        Row: {
+          ativo: boolean | null
+          bar_id: number | null
+          categoria: string | null
+          codigo: string
+          created_at: string | null
+          id: number
+          nome: string
+          observacoes: string | null
+          quantidade_base: number | null
+          rendimento_percentual: number | null
+          tipo: string | null
+          unidade_final: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          bar_id?: number | null
+          categoria?: string | null
+          codigo: string
+          created_at?: string | null
+          id?: number
+          nome: string
+          observacoes?: string | null
+          quantidade_base?: number | null
+          rendimento_percentual?: number | null
+          tipo?: string | null
+          unidade_final?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          bar_id?: number | null
+          categoria?: string | null
+          codigo?: string
+          created_at?: string | null
+          id?: number
+          nome?: string
+          observacoes?: string | null
+          quantidade_base?: number | null
+          rendimento_percentual?: number | null
+          tipo?: string | null
+          unidade_final?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       recalculo_eventos_log: {
         Row: {
           created_at: string | null
@@ -3777,6 +4109,7 @@ export type Database = {
           bar_id: number
           created_at: string | null
           id: number
+          insumo_chefe_id: number | null
           observacoes: string | null
           receita_categoria: string | null
           receita_codigo: string
@@ -3790,6 +4123,7 @@ export type Database = {
           bar_id: number
           created_at?: string | null
           id?: number
+          insumo_chefe_id?: number | null
           observacoes?: string | null
           receita_categoria?: string | null
           receita_codigo: string
@@ -3803,6 +4137,7 @@ export type Database = {
           bar_id?: number
           created_at?: string | null
           id?: number
+          insumo_chefe_id?: number | null
           observacoes?: string | null
           receita_categoria?: string | null
           receita_codigo?: string
@@ -3811,7 +4146,15 @@ export type Database = {
           tipo_local?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "receitas_insumo_chefe_id_fkey"
+            columns: ["insumo_chefe_id"]
+            isOneToOne: false
+            referencedRelation: "insumos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       receitas_insumos: {
         Row: {
@@ -4411,6 +4754,30 @@ export type Database = {
           },
         ]
       }
+      sympla_sync_logs: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          id: number
+          status: string | null
+          sync_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          id?: number
+          status?: string | null
+          sync_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          id?: number
+          status?: string | null
+          sync_date?: string | null
+        }
+        Relationships: []
+      }
       sync_logs_contahub: {
         Row: {
           bar_id: number | null
@@ -4504,6 +4871,125 @@ export type Database = {
         }
         Relationships: []
       }
+      uploads: {
+        Row: {
+          created_at: string | null
+          file_name: string | null
+          file_path: string | null
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      user_bars: {
+        Row: {
+          bar_id: number | null
+          created_at: string | null
+          id: number
+          role: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bar_id?: number | null
+          created_at?: string | null
+          id?: number
+          role?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bar_id?: number | null
+          created_at?: string | null
+          id?: number
+          role?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bars_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_lgpd_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          preferences: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          preferences?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          preferences?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          session_data: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          session_data?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          session_data?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          settings: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          settings?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          settings?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       usuarios_bar: {
         Row: {
           ativo: boolean | null
@@ -4524,6 +5010,7 @@ export type Database = {
           foto_perfil: string | null
           id: number
           modulos_permitidos: Json | null
+          nivel_acesso: string | null
           nome: string | null
           observacoes: string | null
           preferencias: Json | null
@@ -4553,6 +5040,7 @@ export type Database = {
           foto_perfil?: string | null
           id?: number
           modulos_permitidos?: Json | null
+          nivel_acesso?: string | null
           nome?: string | null
           observacoes?: string | null
           preferencias?: Json | null
@@ -4582,6 +5070,7 @@ export type Database = {
           foto_perfil?: string | null
           id?: number
           modulos_permitidos?: Json | null
+          nivel_acesso?: string | null
           nome?: string | null
           observacoes?: string | null
           preferencias?: Json | null
@@ -4663,6 +5152,7 @@ export type Database = {
       }
       whatsapp_contatos: {
         Row: {
+          aceita_notificacoes: boolean | null
           bar_id: number | null
           created_at: string | null
           id: string
@@ -4672,6 +5162,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          aceita_notificacoes?: boolean | null
           bar_id?: number | null
           created_at?: string | null
           id?: string
@@ -4681,6 +5172,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          aceita_notificacoes?: boolean | null
           bar_id?: number | null
           created_at?: string | null
           id?: string
@@ -5358,6 +5850,8 @@ export type Database = {
           itemorigem: string | null
           itm: number | null
           itm_obs: string | null
+          itm_qtd: number | null
+          itm_valorfinal: number | null
           loc_desc: string | null
           mes: number | null
           prd: string | null
@@ -5388,6 +5882,8 @@ export type Database = {
           itemorigem?: string | null
           itm?: number | null
           itm_obs?: string | null
+          itm_qtd?: never
+          itm_valorfinal?: number | null
           loc_desc?: string | null
           mes?: number | null
           prd?: string | null
@@ -5418,6 +5914,8 @@ export type Database = {
           itemorigem?: string | null
           itm?: number | null
           itm_obs?: string | null
+          itm_qtd?: never
+          itm_valorfinal?: number | null
           loc_desc?: string | null
           mes?: number | null
           prd?: string | null
@@ -5438,6 +5936,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "fk_contahub_analitico_bar_id"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cliente_visitas: {
+        Row: {
+          bar_id: number | null
+          cliente_nome: string | null
+          cliente_telefone: string | null
+          created_at: string | null
+          id: number | null
+        }
+        Insert: {
+          bar_id?: number | null
+          cliente_nome?: string | null
+          cliente_telefone?: string | null
+          created_at?: string | null
+          id?: number | null
+        }
+        Update: {
+          bar_id?: number | null
+          cliente_nome?: string | null
+          cliente_telefone?: string | null
+          created_at?: string | null
+          id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_contahub_periodo_bar_id"
             columns: ["bar_id"]
             isOneToOne: false
             referencedRelation: "bars"
@@ -5845,11 +6375,14 @@ export type Database = {
           vd_dtcontabil: string | null
           vd_localizacao: string | null
           vd_mesadesc: string | null
+          vr_acrescimo: number | null
           vr_couvert: number | null
           vr_desconto: number | null
           vr_pagamentos: number | null
           vr_produtos: number | null
           vr_repique: number | null
+          vr_taxa: number | null
+          vr_total: number | null
         }
         Insert: {
           bar_id?: number | null
@@ -5874,11 +6407,14 @@ export type Database = {
           vd_dtcontabil?: string | null
           vd_localizacao?: string | null
           vd_mesadesc?: string | null
+          vr_acrescimo?: never
           vr_couvert?: number | null
           vr_desconto?: number | null
           vr_pagamentos?: number | null
           vr_produtos?: number | null
           vr_repique?: number | null
+          vr_taxa?: never
+          vr_total?: never
         }
         Update: {
           bar_id?: number | null
@@ -5903,11 +6439,14 @@ export type Database = {
           vd_dtcontabil?: string | null
           vd_localizacao?: string | null
           vd_mesadesc?: string | null
+          vr_acrescimo?: never
           vr_couvert?: number | null
           vr_desconto?: number | null
           vr_pagamentos?: number | null
           vr_produtos?: number | null
           vr_repique?: number | null
+          vr_taxa?: never
+          vr_total?: never
         }
         Relationships: [
           {
@@ -5919,57 +6458,24 @@ export type Database = {
           },
         ]
       }
-      produtos: {
+      pessoas_diario_corrigido: {
         Row: {
           bar_id: number | null
-          categoria: string | null
-          created_at: string | null
-          data_evento: string | null
-          eh_ingresso: boolean | null
-          evento_id: number | null
+          data: string | null
           id: number | null
-          percentual: number | null
-          produto_id: number | null
-          produto_nome: string | null
-          quantidade: number | null
-          raw_data: Json | null
-          subcategoria: string | null
-          updated_at: string | null
-          valor_total: number | null
+          total_pessoas_bruto: number | null
         }
         Insert: {
           bar_id?: number | null
-          categoria?: string | null
-          created_at?: string | null
-          data_evento?: string | null
-          eh_ingresso?: boolean | null
-          evento_id?: number | null
+          data?: string | null
           id?: number | null
-          percentual?: number | null
-          produto_id?: number | null
-          produto_nome?: string | null
-          quantidade?: number | null
-          raw_data?: Json | null
-          subcategoria?: string | null
-          updated_at?: string | null
-          valor_total?: number | null
+          total_pessoas_bruto?: never
         }
         Update: {
           bar_id?: number | null
-          categoria?: string | null
-          created_at?: string | null
-          data_evento?: string | null
-          eh_ingresso?: boolean | null
-          evento_id?: number | null
+          data?: string | null
           id?: number | null
-          percentual?: number | null
-          produto_id?: number | null
-          produto_nome?: string | null
-          quantidade?: number | null
-          raw_data?: Json | null
-          subcategoria?: string | null
-          updated_at?: string | null
-          valor_total?: number | null
+          total_pessoas_bruto?: never
         }
         Relationships: []
       }
