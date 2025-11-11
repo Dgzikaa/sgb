@@ -241,32 +241,49 @@ export default function CMVSemanalPage() {
     setCalculando(true);
 
     try {
-      // 1. Buscar consumo dos sócios
-      // TODO: Implementar busca de consumo dos sócios (x-corbal, etc)
-      // Baseado na API /api/analitico/socios
-      
-      // 2. Buscar compras do NIBO por categoria
-      // TODO: Implementar busca no NIBO
-      // CUSTO COMIDA, CUSTO BEBIDAS, CUSTO OUTROS, CUSTO DRINKS
-      
-      // 3. Buscar faturamento CMVível do ContaHub
-      // TODO: Implementar busca de vr_repique no ContaHub
-      
-      // 4. Buscar estoque final (contagem) por tipo_local
-      // TODO: Implementar busca de estoque por data
-      
-      toast({
-        title: "Dados carregados",
-        description: "Dados automáticos foram carregados com sucesso",
+      console.log('🔍 Buscando dados automáticos...');
+
+      const response = await fetch('/api/cmv-semanal/buscar-dados-automaticos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          data_inicio: formData.data_inicio,
+          data_fim: formData.data_fim
+        })
       });
 
-      calcularValoresAutomaticos();
+      if (!response.ok) {
+        throw new Error('Erro ao buscar dados automáticos');
+      }
+
+      const resultado = await response.json();
+
+      if (resultado.success && resultado.data) {
+        // Atualizar formData com os dados recebidos
+        setFormData(prev => ({
+          ...prev,
+          ...resultado.data
+        }));
+
+        toast({
+          title: "✅ Dados carregados",
+          description: "Dados automáticos foram carregados com sucesso",
+        });
+
+        console.log('✅ Dados automáticos carregados:', resultado.data);
+      } else {
+        throw new Error(resultado.error || 'Erro desconhecido');
+      }
 
     } catch (error) {
       console.error('Erro ao buscar dados automáticos:', error);
       toast({
         title: "Erro ao buscar dados",
-        description: "Não foi possível carregar dados automáticos",
+        description: error instanceof Error ? error.message : "Não foi possível carregar dados automáticos",
         variant: "destructive"
       });
     } finally {
