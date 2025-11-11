@@ -89,6 +89,8 @@ export default function ProducaoInsumosPage() {
   const [receitasFiltro, setReceitasFiltro] = useState<'todos' | 'bar' | 'cozinha'>('todos');
   const [modalReceita, setModalReceita] = useState(false);
   const [receitaEdit, setReceitaEdit] = useState<Partial<ReceitaCompleta> | null>(null);
+  const [receitaDetalhes, setReceitaDetalhes] = useState<ReceitaCompleta | null>(null);
+  const [modalDetalhes, setModalDetalhes] = useState(false);
 
   // Form states para insumo
   const [formInsumo, setFormInsumo] = useState({
@@ -227,6 +229,31 @@ export default function ProducaoInsumosPage() {
     }
   };
 
+  // Funções para Receitas
+  const abrirDetalhesReceita = (receita: ReceitaCompleta) => {
+    setReceitaDetalhes(receita);
+    setModalDetalhes(true);
+  };
+
+  const calcularCustoReceita = (receita: ReceitaCompleta): number => {
+    if (!receita.insumos || receita.insumos.length === 0) return 0;
+    
+    return receita.insumos.reduce((total, insumoReceita) => {
+      // Buscar o insumo na lista para pegar o custo
+      const insumoEncontrado = insumos.find(i => 
+        i.id === insumoReceita.id || 
+        i.codigo === insumoReceita.codigo ||
+        i.nome === insumoReceita.nome
+      );
+      
+      if (!insumoEncontrado) return total;
+      
+      // Calcular custo baseado na quantidade e unidade
+      const custo = insumoEncontrado.custo_unitario * insumoReceita.quantidade_necessaria;
+      return total + custo;
+    }, 0);
+  };
+
   // Filtrar insumos
   const insumosFiltrados = insumos.filter((insumo) => {
     const matchSearch =
@@ -261,6 +288,10 @@ export default function ProducaoInsumosPage() {
     total_receitas: receitas.length,
     receitas_bar: receitas.filter((r) => r.tipo_local === 'bar').length,
     receitas_cozinha: receitas.filter((r) => r.tipo_local === 'cozinha').length,
+    custo_medio_receitas: receitas.length > 0
+      ? receitas.reduce((acc, r) => acc + calcularCustoReceita(r), 0) / receitas.length
+      : 0,
+    custo_total_receitas: receitas.reduce((acc, r) => acc + calcularCustoReceita(r), 0),
   };
 
   if (loading) {
@@ -420,6 +451,69 @@ export default function ProducaoInsumosPage() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Cards de Análise de Custo */}
+            {stats.total_receitas > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="card-dark bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-green-900 dark:text-green-100">
+                      Custo Médio por Receita
+                    </CardTitle>
+                    <CardDescription className="text-green-700 dark:text-green-300">
+                      Média de custo considerando todas as receitas cadastradas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
+                      R$ {stats.custo_medio_receitas.toFixed(2)}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>Baseado em {stats.total_receitas} receitas</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="card-dark bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-blue-900 dark:text-blue-100">
+                      Custo Total do Cardápio
+                    </CardTitle>
+                    <CardDescription className="text-blue-700 dark:text-blue-300">
+                      Soma do custo de todas as receitas cadastradas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                      R$ {stats.custo_total_receitas.toFixed(2)}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                      <div>
+                        <div className="text-blue-700 dark:text-blue-300">Bar:</div>
+                        <div className="font-semibold text-blue-900 dark:text-blue-100">
+                          R$ {receitas
+                            .filter(r => r.tipo_local === 'bar')
+                            .reduce((acc, r) => acc + calcularCustoReceita(r), 0)
+                            .toFixed(2)
+                          }
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-blue-700 dark:text-blue-300">Cozinha:</div>
+                        <div className="font-semibold text-blue-900 dark:text-blue-100">
+                          R$ {receitas
+                            .filter(r => r.tipo_local === 'cozinha')
+                            .reduce((acc, r) => acc + calcularCustoReceita(r), 0)
+                            .toFixed(2)
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Alerta se não houver dados */}
             {stats.total_insumos === 0 && (
@@ -751,21 +845,39 @@ export default function ProducaoInsumosPage() {
                                 {receita.rendimento_esperado}g
                               </span>
                             </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">
+                                Custo Estimado:
+                              </span>
+                              <span className="font-semibold text-green-600 dark:text-green-400">
+                                R$ {calcularCustoReceita(receita).toFixed(2)}
+                              </span>
+                            </div>
                             {receita.receita_categoria && (
                               <div className="text-xs text-gray-500 dark:text-gray-500 mt-2">
                                 {receita.receita_categoria}
                               </div>
                             )}
                           </div>
-                          <Button
-                            onClick={() => window.location.href = '/operacoes/terminal'}
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                          >
-                            <ChefHat className="w-3 h-3 mr-1" />
-                            Produzir
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => abrirDetalhesReceita(receita)}
+                              size="sm"
+                              variant="outline"
+                              className="flex-1"
+                            >
+                              <Search className="w-3 h-3 mr-1" />
+                              Ver Detalhes
+                            </Button>
+                            <Button
+                              onClick={() => window.location.href = '/operacoes/terminal'}
+                              size="sm"
+                              className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+                            >
+                              <ChefHat className="w-3 h-3 mr-1" />
+                              Produzir
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -775,6 +887,190 @@ export default function ProducaoInsumosPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Modal de Detalhes da Receita */}
+        <Dialog open={modalDetalhes} onOpenChange={setModalDetalhes}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <Badge variant="outline" className="text-xs">
+                  {receitaDetalhes?.receita_codigo}
+                </Badge>
+                <Badge
+                  className={
+                    receitaDetalhes?.tipo_local === 'bar'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                      : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  }
+                >
+                  {receitaDetalhes?.tipo_local === 'bar' ? 'Bar' : 'Cozinha'}
+                </Badge>
+              </div>
+              <DialogTitle className="text-gray-900 dark:text-white text-xl">
+                {receitaDetalhes?.receita_nome}
+              </DialogTitle>
+              {receitaDetalhes?.receita_categoria && (
+                <DialogDescription className="text-gray-600 dark:text-gray-400">
+                  {receitaDetalhes.receita_categoria}
+                </DialogDescription>
+              )}
+            </DialogHeader>
+
+            {receitaDetalhes && (
+              <div className="space-y-6">
+                {/* Resumo da Receita */}
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="card-dark">
+                    <CardContent className="p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Total de Insumos
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {receitaDetalhes.insumos?.length || 0}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="card-dark">
+                    <CardContent className="p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Rendimento
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {receitaDetalhes.rendimento_esperado}g
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="card-dark">
+                    <CardContent className="p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Custo Total
+                      </div>
+                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        R$ {calcularCustoReceita(receitaDetalhes).toFixed(2)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Lista de Insumos */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Insumos da Receita
+                  </h3>
+                  <div className="space-y-2">
+                    {receitaDetalhes.insumos && receitaDetalhes.insumos.length > 0 ? (
+                      receitaDetalhes.insumos.map((insumoReceita, index) => {
+                        const insumoEncontrado = insumos.find(i => 
+                          i.id === insumoReceita.id || 
+                          i.codigo === insumoReceita.codigo ||
+                          i.nome === insumoReceita.nome
+                        );
+                        const custoInsumo = insumoEncontrado 
+                          ? insumoEncontrado.custo_unitario * insumoReceita.quantidade_necessaria
+                          : 0;
+
+                        return (
+                          <Card
+                            key={index}
+                            className={`card-dark ${insumoReceita.is_chefe ? 'border-2 border-orange-400 dark:border-orange-600' : ''}`}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {insumoReceita.is_chefe && (
+                                      <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-xs">
+                                        Chefe
+                                      </Badge>
+                                    )}
+                                    <span className="text-xs text-gray-500 dark:text-gray-500">
+                                      {insumoReceita.codigo}
+                                    </span>
+                                  </div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">
+                                    {insumoReceita.nome}
+                                  </div>
+                                </div>
+                                <div className="text-right ml-4">
+                                  <div className="font-bold text-gray-900 dark:text-white">
+                                    {insumoReceita.quantidade_necessaria} {insumoReceita.unidade_medida}
+                                  </div>
+                                  <div className="text-sm text-green-600 dark:text-green-400">
+                                    R$ {custoInsumo.toFixed(2)}
+                                  </div>
+                                  {insumoEncontrado && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                                      (R$ {insumoEncontrado.custo_unitario.toFixed(2)}/{insumoEncontrado.unidade_medida})
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-500">
+                        Nenhum insumo cadastrado para esta receita
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Análise de Custo */}
+                <Card className="card-dark bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                  <CardContent className="p-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                          Custo por Grama
+                        </div>
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">
+                          R$ {receitaDetalhes.rendimento_esperado > 0 
+                            ? (calcularCustoReceita(receitaDetalhes) / receitaDetalhes.rendimento_esperado).toFixed(4)
+                            : '0.0000'
+                          }
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                          Custo por 100g
+                        </div>
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">
+                          R$ {receitaDetalhes.rendimento_esperado > 0 
+                            ? ((calcularCustoReceita(receitaDetalhes) / receitaDetalhes.rendimento_esperado) * 100).toFixed(2)
+                            : '0.00'
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                onClick={() => setModalDetalhes(false)}
+                variant="outline"
+                className="mr-2"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Fechar
+              </Button>
+              <Button
+                onClick={() => {
+                  setModalDetalhes(false);
+                  window.location.href = '/operacoes/terminal';
+                }}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                <ChefHat className="w-4 h-4 mr-2" />
+                Produzir Receita
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Modal de Insumo */}
         <Dialog open={modalInsumo} onOpenChange={setModalInsumo}>
