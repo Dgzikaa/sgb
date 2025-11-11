@@ -99,48 +99,34 @@ export default function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="h-full px-4 py-2 flex flex-col max-w-none">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="h-full px-6 py-8 flex flex-col max-w-none">
+        {/* Header - Apenas hora e data */}
         <motion.div 
-          className="mb-2 flex-shrink-0"
+          className="mb-8 flex-shrink-0"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : -20 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-1">
-                ZYKOR Dashboard
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Bem-vindo ao sistema de gestão mais completo para bares
-              </p>
-            </div>
+          <div className="flex items-center justify-end">
             <div className="text-right">
-              <div className="text-xl font-bold text-gray-900 dark:text-white">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 {currentTime}
               </div>
-              <div className="text-gray-600 dark:text-gray-400 text-xs capitalize">
+              <div className="text-gray-600 dark:text-gray-400 text-sm capitalize">
                 {currentDate}
               </div>
             </div>
           </div>
-
-
         </motion.div>
-
-
 
         {/* Quick Actions */}
         <motion.div 
           className="flex-1 flex flex-col"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
-
-
           <div className="grid grid-cols-3 grid-rows-2 gap-6 h-full">
             {quickActions.map((action, index) => (
               <motion.div
@@ -149,64 +135,55 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 * index }}
                 className="group"
-                whileHover={{ y: -4, scale: 1.02 }}
+                whileHover={{ y: -8, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Link href={action.href}>
-                  <div className="relative h-full bg-gradient-to-br from-white/5 via-gray-800/30 to-gray-900/50 backdrop-blur-xl border border-gray-700/30 hover:border-gray-600/50 rounded-2xl p-6 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 group-hover:bg-gradient-to-br group-hover:from-white/8 group-hover:via-gray-800/40 group-hover:to-gray-900/60">
-                    {/* Background pattern */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-white/[0.02] rounded-2xl opacity-50"></div>
+                  <div className="relative h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:shadow-xl dark:hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 hover:border-blue-300 dark:hover:border-blue-600 overflow-hidden">
                     
                     {/* Badge */}
                     {action.badge && (
-                      <div className="absolute -top-2 -right-2 z-10">
-                        <div className="relative">
-                          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-purple-600/30 rounded-full blur opacity-75"></div>
-                          <Badge className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white text-[10px] font-bold px-2 py-1 border border-blue-400/30">
-                            {action.badge}
-                          </Badge>
-                        </div>
+                      <div className="absolute top-4 right-4 z-10">
+                        <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-semibold px-3 py-1 shadow-lg">
+                          {action.badge}
+                        </Badge>
                       </div>
                     )}
                     
                     {/* Content */}
                     <div className="relative flex flex-col items-center h-full justify-center text-center">
-                      {/* Icon with glow */}
-                      <div className="relative mb-3">
-                        <div className={`absolute -inset-1 bg-gradient-to-r ${action.color} rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-500`}></div>
-                        <div className={`relative w-16 h-16 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 border border-white/10`}>
-                          <action.icon className="w-8 h-8 text-white drop-shadow-sm" />
+                      {/* Icon */}
+                      <div className="relative mb-6">
+                        <div className={`w-20 h-20 bg-gradient-to-br ${action.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300`}>
+                          <action.icon className="w-10 h-10 text-white" />
                         </div>
                       </div>
                       
                       {/* Title */}
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-400 dark:group-hover:text-blue-300 transition-colors duration-300 mb-2 leading-tight">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
                         {action.title}
                       </h3>
                       
                       {/* Description */}
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-tight mb-3 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors duration-300">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
                         {action.description}
                       </p>
                       
                       {/* Action button */}
-                      <div className="flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:text-blue-500 dark:group-hover:text-blue-300 transition-all duration-300 bg-blue-500/10 dark:bg-blue-400/10 px-3 py-1.5 rounded-lg hover:bg-blue-500/20 dark:hover:bg-blue-400/20">
-                        <span className="mr-1">Acessar</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
+                      <div className="mt-auto flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:gap-2 transition-all duration-300">
+                        <span>Acessar</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                       </div>
                     </div>
                     
-                    {/* Hover shimmer effect */}
-                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
-                    </div>
+                    {/* Gradient overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
                   </div>
                 </Link>
               </motion.div>
             ))}
           </div>
         </motion.div>
-
 
       </div>
     </div>
