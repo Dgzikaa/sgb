@@ -827,10 +827,9 @@ export default function TerminalProducao() {
                         ×
                       </Button>
                     )}
-                  </div>
-                </div>
 
-                {mostrarDropdown && receitasFiltradas.length > 0 && (
+                    {/* Dropdown de Receitas */}
+                    {mostrarDropdown && receitasFiltradas.length > 0 && (
                   <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-lg max-h-80 overflow-y-auto">
                     <div className="sticky top-0 bg-gray-50 dark:bg-gray-700 px-3 py-2 border-b border-gray-200 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400">
                       {receitasFiltradas.length} receita{receitasFiltradas.length !== 1 ? 's' : ''} encontrada{receitasFiltradas.length !== 1 ? 's' : ''}
@@ -875,8 +874,9 @@ export default function TerminalProducao() {
                         + {receitasFiltradas.length - 10} receitas não exibidas. Continue digitando para refinar...
                       </div>
                     )}
+                    </div>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
 
