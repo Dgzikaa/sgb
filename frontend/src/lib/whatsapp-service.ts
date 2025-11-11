@@ -454,8 +454,8 @@ export class WhatsAppNotificationService {
 
       const { data: usuario } = await supabase
         .from('usuarios')
-        .select('id, nome, email')
-        .eq('id', notificacao.usuario_id.toString())
+        .select('id, nome, email, user_id')
+        .eq('user_id', notificacao.usuario_id.toString())
         .single();
 
       if (!usuario) {

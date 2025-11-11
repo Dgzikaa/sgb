@@ -237,7 +237,7 @@ export async function POST(request: NextRequest) {
     // Get all events from the bar in the date range
 
     const { data: eventos, error: fetchError } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('id, data_evento, nome_evento')
       .eq('bar_id', bar_id)
       .gte('data_evento', `${ano}-02-01`)
@@ -292,7 +292,7 @@ export async function POST(request: NextRequest) {
     // FORCE UPDATE ALL: Update all events with correct names from mapping
     for (const [date, correctName] of Object.entries(dateNameMap)) {
       const { error: updateError } = await supabase
-        .from('eventos')
+        .from('eventos_base')
         .update({ nome_evento: correctName })
         .eq('bar_id', bar_id)
         .eq('data_evento', date);
@@ -308,7 +308,7 @@ export async function POST(request: NextRequest) {
     // Apply regular updates if (unknown)
     for (const update of updates) {
       const { error: updateError } = await supabase
-        .from('eventos')
+        .from('eventos_base')
         .update({ nome_evento: update.new_name })
         .eq('id', update.id);
 

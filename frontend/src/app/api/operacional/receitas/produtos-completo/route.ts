@@ -305,17 +305,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Inserir receitas
-    const receitasParaInserir = receita.map((r: any) => ({
+    // Inserir receita principal
+    const receitaParaInserir = {
+      bar_id: 1, // Valor fixo por enquanto
       receita_codigo: codigo,
-      produto_id: null,
-      insumo_id: null,
-      quantidade: parseFloat(r.quantidade_receita),
-    }));
+      receita_nome: nome,
+      ativo: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
     const { error: erroReceitas } = await supabase
       .from('receitas')
-      .insert(receitasParaInserir);
+      .insert([receitaParaInserir]);
 
     if (erroReceitas) {
       // Se falhou nas receitas, remover produto

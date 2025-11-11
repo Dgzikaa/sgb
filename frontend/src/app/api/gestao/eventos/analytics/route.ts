@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar eventos do período
     const { data: eventos, error } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('*')
       .eq('bar_id', barId)
       .gte('data_evento', dataInicio)

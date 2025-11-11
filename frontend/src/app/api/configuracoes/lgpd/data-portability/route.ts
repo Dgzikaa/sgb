@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
       user_id: userId,
       action: 'data_portability_requested',
       details: {
-        exportedAt: new Date(),
+        exportedAt: new Date().toISOString(),
         ipAddress: getClientIP(request),
         dataTypes: Object.keys(exportData.data),
       },

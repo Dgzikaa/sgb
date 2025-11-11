@@ -38,7 +38,7 @@ export async function POST() {
       console.log(`Updating ${update.date} to "${update.name}"`);
 
       const { data, error } = await supabase
-        .from('eventos')
+        .from('eventos_base')
         .update({ nome_evento: update.name })
         .eq('bar_id', 1)
         .eq('data_evento', update.date)

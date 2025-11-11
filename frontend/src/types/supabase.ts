@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -1008,7 +1008,7 @@ export type Database = {
           insumo_nome: string
           observacoes: string | null
           quantidade_pedido: number | null
-          tipo_local: string
+          tipo_local: string | null
           unidade_medida: string
           updated_at: string | null
           usuario_contagem: string | null
@@ -1029,7 +1029,7 @@ export type Database = {
           insumo_nome: string
           observacoes?: string | null
           quantidade_pedido?: number | null
-          tipo_local: string
+          tipo_local?: string | null
           unidade_medida: string
           updated_at?: string | null
           usuario_contagem?: string | null
@@ -1050,7 +1050,7 @@ export type Database = {
           insumo_nome?: string
           observacoes?: string | null
           quantidade_pedido?: number | null
-          tipo_local?: string
+          tipo_local?: string | null
           unidade_medida?: string
           updated_at?: string | null
           usuario_contagem?: string | null
@@ -3991,6 +3991,7 @@ export type Database = {
           categoria: string | null
           codigo: string
           created_at: string | null
+          grupo: string | null
           id: number
           nome: string
           observacoes: string | null
@@ -4006,6 +4007,7 @@ export type Database = {
           categoria?: string | null
           codigo: string
           created_at?: string | null
+          grupo?: string | null
           id?: number
           nome: string
           observacoes?: string | null
@@ -4021,6 +4023,7 @@ export type Database = {
           categoria?: string | null
           codigo?: string
           created_at?: string | null
+          grupo?: string | null
           id?: number
           nome?: string
           observacoes?: string | null
@@ -5882,7 +5885,7 @@ export type Database = {
           itemorigem?: string | null
           itm?: number | null
           itm_obs?: string | null
-          itm_qtd?: never
+          itm_qtd?: number | null
           itm_valorfinal?: number | null
           loc_desc?: string | null
           mes?: number | null
@@ -5914,7 +5917,7 @@ export type Database = {
           itemorigem?: string | null
           itm?: number | null
           itm_obs?: string | null
-          itm_qtd?: never
+          itm_qtd?: number | null
           itm_valorfinal?: number | null
           loc_desc?: string | null
           mes?: number | null
@@ -5985,6 +5988,7 @@ export type Database = {
           c_artistico_plan: number | null
           c_prod: number | null
           calculado_em: string | null
+          capacidade_estimada: number | null
           cl_plan: number | null
           cl_real: number | null
           criado_em: string | null
@@ -5996,17 +6000,20 @@ export type Database = {
           faturamento_bar_manual: number | null
           faturamento_couvert: number | null
           faturamento_couvert_manual: number | null
+          faturamento_liquido: number | null
           genero: string | null
           id: number | null
           lot_max: number | null
           m1_r: number | null
           nome: string | null
+          nome_evento: string | null
           observacoes: string | null
           percent_art_fat: number | null
           percent_b: number | null
           percent_c: number | null
           percent_d: number | null
           precisa_recalculo: boolean | null
+          publico_real: number | null
           real_r: number | null
           res_p: number | null
           res_tot: number | null
@@ -6035,6 +6042,7 @@ export type Database = {
           c_artistico_plan?: number | null
           c_prod?: number | null
           calculado_em?: string | null
+          capacidade_estimada?: number | null
           cl_plan?: number | null
           cl_real?: number | null
           criado_em?: string | null
@@ -6046,17 +6054,20 @@ export type Database = {
           faturamento_bar_manual?: number | null
           faturamento_couvert?: number | null
           faturamento_couvert_manual?: number | null
+          faturamento_liquido?: number | null
           genero?: string | null
           id?: number | null
           lot_max?: number | null
           m1_r?: number | null
           nome?: string | null
+          nome_evento?: string | null
           observacoes?: string | null
           percent_art_fat?: number | null
           percent_b?: number | null
           percent_c?: number | null
           percent_d?: number | null
           precisa_recalculo?: boolean | null
+          publico_real?: number | null
           real_r?: number | null
           res_p?: number | null
           res_tot?: number | null
@@ -6085,6 +6096,7 @@ export type Database = {
           c_artistico_plan?: number | null
           c_prod?: number | null
           calculado_em?: string | null
+          capacidade_estimada?: number | null
           cl_plan?: number | null
           cl_real?: number | null
           criado_em?: string | null
@@ -6096,17 +6108,20 @@ export type Database = {
           faturamento_bar_manual?: number | null
           faturamento_couvert?: number | null
           faturamento_couvert_manual?: number | null
+          faturamento_liquido?: number | null
           genero?: string | null
           id?: number | null
           lot_max?: number | null
           m1_r?: number | null
           nome?: string | null
+          nome_evento?: string | null
           observacoes?: string | null
           percent_art_fat?: number | null
           percent_b?: number | null
           percent_c?: number | null
           percent_d?: number | null
           precisa_recalculo?: boolean | null
+          publico_real?: number | null
           real_r?: number | null
           res_p?: number | null
           res_tot?: number | null
@@ -6136,9 +6151,11 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          date: string | null
           discount: number | null
           id: number | null
           info: string | null
+          name: string | null
           no_show: boolean | null
           no_show_eligible: boolean | null
           no_show_hours: number | null
@@ -6146,6 +6163,7 @@ export type Database = {
           nps_answered: boolean | null
           nps_url: string | null
           people: number | null
+          phone: string | null
           raw_data: Json | null
           reservation_date: string | null
           reservation_id: string | null
@@ -6172,9 +6190,11 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          date?: never
           discount?: number | null
           id?: number | null
           info?: string | null
+          name?: string | null
           no_show?: boolean | null
           no_show_eligible?: boolean | null
           no_show_hours?: number | null
@@ -6182,6 +6202,7 @@ export type Database = {
           nps_answered?: boolean | null
           nps_url?: string | null
           people?: number | null
+          phone?: string | null
           raw_data?: Json | null
           reservation_date?: string | null
           reservation_id?: string | null
@@ -6208,9 +6229,11 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          date?: never
           discount?: number | null
           id?: number | null
           info?: string | null
+          name?: string | null
           no_show?: boolean | null
           no_show_eligible?: boolean | null
           no_show_hours?: number | null
@@ -6218,6 +6241,7 @@ export type Database = {
           nps_answered?: boolean | null
           nps_url?: string | null
           people?: number | null
+          phone?: string | null
           raw_data?: Json | null
           reservation_date?: string | null
           reservation_id?: string | null
@@ -6747,6 +6771,7 @@ export type Database = {
           foto_perfil: string | null
           id: number | null
           modulos_permitidos: Json | null
+          nivel_acesso: string | null
           nome: string | null
           observacoes: string | null
           preferencias: Json | null
@@ -6776,6 +6801,7 @@ export type Database = {
           foto_perfil?: string | null
           id?: number | null
           modulos_permitidos?: Json | null
+          nivel_acesso?: string | null
           nome?: string | null
           observacoes?: string | null
           preferencias?: Json | null
@@ -6805,6 +6831,7 @@ export type Database = {
           foto_perfil?: string | null
           id?: number | null
           modulos_permitidos?: Json | null
+          nivel_acesso?: string | null
           nome?: string | null
           observacoes?: string | null
           preferencias?: Json | null

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar se existe evento para esta data
     const { data: evento, error: eventoError } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('*')
       .eq('bar_id', bar_id)
       .eq('data_evento', data_evento)
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
 
     // Atualizar o evento com os dados de performance
     const { data: eventoAtualizado, error: updateError } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .update({
         publico_real,
         receita_total: faturamento_liquido, // Usar campo existente

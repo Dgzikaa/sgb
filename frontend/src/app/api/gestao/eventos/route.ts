@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     // Primeiro, vamos testar uma query simples sem filtros
     console.log('🚀 [API] Testando query simples...')
     const { data: countData, error: errorTodos } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('count')
       .limit(1)
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     // Agora a query principal com paginação para retornar todos os eventos
     let query = supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('*')
       .order('data_evento', { ascending: true })
 

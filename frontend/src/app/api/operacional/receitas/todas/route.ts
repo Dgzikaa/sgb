@@ -26,19 +26,25 @@ export async function GET(request: NextRequest) {
 
     // Buscar TODAS as receitas (ativas e inativas) com insumos
     const { data: todasReceitas, error: receitasError } = await supabase
-      .from('receitas')
+      .from('receitas_insumos')
       .select(
         `
-        receita_codigo,
-        receita_nome,
-        receita_categoria,
-        tipo_local,
-        insumo_chefe_id,
-        rendimento_esperado,
+        receita_id,
         insumo_id,
         quantidade_necessaria,
-        ativo,
-        insumos!receitas_insumo_id_fkey(
+        unidade_medida,
+        is_chefe,
+        receitas!inner(
+          bar_id,
+          receita_codigo,
+          receita_nome,
+          receita_categoria,
+          tipo_local,
+          insumo_chefe_id,
+          rendimento_esperado,
+          ativo
+        ),
+        insumos(
           id,
           codigo,
           nome,
@@ -47,8 +53,8 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .eq('bar_id', barId)
-      .order('receita_codigo');
+      .eq('receitas.bar_id', barId)
+      .order('receitas.receita_codigo');
 
     if (receitasError) {
       console.error('❌ Erro ao buscar receitas:', receitasError);
@@ -68,7 +74,9 @@ export async function GET(request: NextRequest) {
     // Agrupar receitas por código
     const receitasAgrupadas = new Map<string, any>();
 
-    for (const receita of todasReceitas || []) {
+    for (const item of todasReceitas || []) {
+      const receita = (item as any).receitas;
+      const insumo = (item as any).insumos;
       const codigo = receita.receita_codigo;
 
       if (codigo && !receitasAgrupadas.has(codigo)) {
@@ -76,7 +84,7 @@ export async function GET(request: NextRequest) {
           receita_codigo: codigo,
           receita_nome: receita.receita_nome,
           receita_categoria: receita.receita_categoria,
-          rendimento_esperado: 0, // Será preenchido quando encontrar o insumo chefe
+          rendimento_esperado: receita.rendimento_esperado || 0,
           insumo_chefe_id: receita.insumo_chefe_id,
           tipo_local: receita.receita_categoria?.includes('DRINKS')
             ? 'bar'
@@ -87,22 +95,16 @@ export async function GET(request: NextRequest) {
       }
 
       // Adicionar insumo à receita
-      if (receita.insumos && Array.isArray(receita.insumos) && receita.insumos[0]) {
+      if (insumo) {
         const receitaObj = codigo ? receitasAgrupadas.get(codigo) : null;
-        const insumo = receita.insumos[0];
-        const isChefe = receita.insumo_chefe_id === insumo.id;
-
-        // Se este é o insumo chefe, aplicar o rendimento esperado à receita
-        if (isChefe && receita.rendimento_esperado) {
-          receitaObj.rendimento_esperado = receita.rendimento_esperado;
-        }
+        const isChefe = (item as any).is_chefe || false;
 
         receitaObj.insumos.push({
           id: insumo.id,
           codigo: insumo.codigo,
           nome: insumo.nome,
-          quantidade_necessaria: receita.quantidade_necessaria,
-          unidade_medida: insumo.unidade_medida,
+          quantidade_necessaria: (item as any).quantidade_necessaria,
+          unidade_medida: (item as any).unidade_medida || insumo.unidade_medida,
           categoria: insumo.categoria,
           is_chefe: isChefe,
         });

@@ -36,7 +36,7 @@ export async function DELETE(
     // Primeiro verificar se o evento existe
     console.log('🔍 [DELETE EVENTO] Verificando se evento existe...');
     const { data: eventoExistente, error: erroConsulta } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('id, nome_evento')
       .eq('id', eventoId)
       .single();
@@ -74,7 +74,7 @@ export async function DELETE(
     // Deletar o evento
     console.log('🗑️ [DELETE EVENTO] Executando exclusão...');
     const { error: erroDelecao } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .delete()
       .eq('id', eventoId);
 

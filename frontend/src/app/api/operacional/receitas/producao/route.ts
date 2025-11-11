@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     // Buscar receita_id baseada no produto_codigo
     const { data: produto, error: produtoError } = await supabase
       .from('produtos')
-      .select('id')
+      .select('id, codigo, nome')
       .eq('codigo', produto_codigo)
       .single();
 
@@ -96,25 +96,21 @@ export async function POST(request: NextRequest) {
     // Adaptar dados para a estrutura da tabela producoes
     const dadosProducao = {
       bar_id,
-      receita_id: produto.id, // Usar ID do produto como receita_id
-      funcionario_id: 1, // ID fixo por enquanto (pode ser melhorado)
-      peso_bruto_proteina: peso_bruto_g,
-      peso_limpo_proteina: peso_limpo_g,
-      rendimento_calculado: peso_final_g || rendimento_real,
-      itens_produzidos_real: quantidade_produzida || null,
+      receita_codigo: produto.codigo,
+      receita_nome: produto.nome,
+      receita_categoria: null,
+      criado_por_nome: null,
       inicio_producao: inicioProducao.toISOString(),
       fim_producao: fimProducao.toISOString(),
-      // tempo_total_producao será calculado automaticamente no banco via trigger ou computed column
-      status: 'finalizada',
+      peso_bruto_proteina: peso_bruto_g,
+      peso_limpo_proteina: peso_limpo_g,
+      rendimento_real: peso_final_g || rendimento_real,
+      rendimento_esperado: rendimento_teorico || null,
+      percentual_aderencia_receita: rendimento_teorico > 0
+        ? (rendimento_real / rendimento_teorico) * 100
+        : 0,
       observacoes: observacoes || '',
-      fator_correcao:
-        fator_correcao ||
-        (peso_bruto_g > 0 ? (peso_limpo_g / peso_bruto_g) * 100 : 0),
-      desvio:
-        desvio ||
-        (rendimento_teorico > 0
-          ? (rendimento_real / rendimento_teorico) * 100
-          : 0),
+      status: 'finalizada',
     };
 
     console.log('📊 Dados adaptados para tabela producoes:', dadosProducao);

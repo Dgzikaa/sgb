@@ -60,8 +60,8 @@ export async function GET(request: NextRequest) {
     // Calcular estatísticas
     const estatisticas = {
       total_registros: data?.length || 0,
-      total_vendas: data?.reduce((sum, item) => sum + (item.itm_valorfinal || 0), 0) || 0,
-      total_itens: data?.reduce((sum, item) => sum + (item.itm_qtd || 0), 0) || 0,
+      total_vendas: data?.reduce((sum, item) => sum + (item.valorfinal || 0), 0) || 0,
+      total_itens: data?.reduce((sum, item) => sum + (item.qtd || 0), 0) || 0,
       produtos_unicos: [...new Set(data?.map(item => item.prd_desc).filter(Boolean))].length,
       grupos_unicos: [...new Set(data?.map(item => item.grp_desc).filter(Boolean))].length,
       usuarios_unicos: [...new Set(data?.map(item => item.usr_lancou).filter(Boolean))].length
@@ -73,8 +73,8 @@ export async function GET(request: NextRequest) {
       if (!acc[produto]) {
         acc[produto] = { valor: 0, quantidade: 0, vendas: 0 };
       }
-      acc[produto].valor += item.itm_valorfinal || 0;
-      acc[produto].quantidade += item.itm_qtd || 0;
+      acc[produto].valor += item.valorfinal || 0;
+      acc[produto].quantidade += item.qtd || 0;
       acc[produto].vendas += 1;
       return acc;
     }, {} as Record<string, { valor: number; quantidade: number; vendas: number }>);
@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
       if (!acc[grupo]) {
         acc[grupo] = { valor: 0, quantidade: 0, vendas: 0 };
       }
-      acc[grupo].valor += item.itm_valorfinal || 0;
-      acc[grupo].quantidade += item.itm_qtd || 0;
+      acc[grupo].valor += item.valorfinal || 0;
+      acc[grupo].quantidade += item.qtd || 0;
       acc[grupo].vendas += 1;
       return acc;
     }, {} as Record<string, { valor: number; quantidade: number; vendas: number }>);

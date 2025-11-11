@@ -50,7 +50,7 @@ export async function POST() {
     // 1. Limpar todos os eventos existentes do Bar Ordinário
     console.log('🗑️ Removendo eventos existentes...');
     const { error: deleteError } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .delete()
       .eq('bar_id', 1);
 
@@ -66,22 +66,7 @@ export async function POST() {
     console.log('✅ Eventos existentes removidos com sucesso');
 
     // 2. Processar CSV e inserir eventos
-    const eventosParaInserir: Array<{
-      bar_id: number;
-      nome_evento: string;
-      nome_artista: string | null;
-      genero_musical: string;
-      observacoes: string | null;
-      data_evento: string;
-      horario_inicio: string;
-      horario_fim: string;
-      status: string;
-      categoria: string;
-      tipo_evento: string;
-      divulgacao_ativa: boolean;
-      created_at: string;
-      updated_at: string;
-    }> = [];
+    const eventosParaInserir: any[] = [];
 
     // Pular o cabeçalho (primeira linha)
     for (let i = 1; i < lines.length; i++) {
@@ -103,19 +88,15 @@ export async function POST() {
 
       eventosParaInserir.push({
         bar_id: 1,
+        nome: evento,
         nome_evento: evento,
-        nome_artista: artista,
-        genero_musical: genero,
-        observacoes: obs,
+        artista: artista || null,
+        genero: genero,
+        observacoes: obs || null,
         data_evento: dataSQL,
-        horario_inicio: '19:00:00',
-        horario_fim: '23:59:00',
-        status: 'ativo',
-        categoria: 'música',
-        tipo_evento: 'show',
-        divulgacao_ativa: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        ativo: true,
+        criado_em: new Date().toISOString(),
+        atualizado_em: new Date().toISOString(),
       });
     }
 
@@ -123,7 +104,7 @@ export async function POST() {
 
     // 3. Inserir eventos em lotes
     const { data: insertedEvents, error: insertError } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .insert(eventosParaInserir)
       .select();
 

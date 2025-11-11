@@ -59,10 +59,10 @@ export async function GET(request: NextRequest) {
       total_pessoas: data?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0,
       total_pagamentos: data?.reduce((sum, item) => sum + (item.vr_pagamentos || 0), 0) || 0,
       total_couvert: data?.reduce((sum, item) => sum + (item.vr_couvert || 0), 0) || 0,
-      total_taxa: data?.reduce((sum, item) => sum + (item.vr_taxa || 0), 0) || 0,
+      total_taxa: data?.reduce((sum, item) => sum + ((item.vr_pagamentos || 0) * 0.03), 0) || 0,
       total_desconto: data?.reduce((sum, item) => sum + (item.vr_desconto || 0), 0) || 0,
-      total_acrescimo: data?.reduce((sum, item) => sum + (item.vr_acrescimo || 0), 0) || 0,
-      total_geral: data?.reduce((sum, item) => sum + (item.vr_total || 0), 0) || 0,
+      total_acrescimo: 0,
+      total_geral: data?.reduce((sum, item) => sum + ((item.vr_pagamentos || 0) + (item.vr_couvert || 0)), 0) || 0,
       dias_unicos: [...new Set(data?.map(item => item.dt_gerencial).filter(Boolean))].length,
       tipos_venda_unicos: [...new Set(data?.map(item => item.tipovenda).filter(Boolean))].length,
       localizacoes_unicas: [...new Set(data?.map(item => item.vd_localizacao).filter(Boolean))].length

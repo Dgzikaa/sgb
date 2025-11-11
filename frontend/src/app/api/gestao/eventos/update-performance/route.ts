@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Atualizar os dados de performance
     const { data, error } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .update({
         publico_real,
         receita_total: faturamento_liquido, // Usar campo existente
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar evento com dados de performance
     const { data: evento, error } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .select('*')
       .eq('bar_id', parseInt(bar_id))
       .eq('data_evento', data_evento)

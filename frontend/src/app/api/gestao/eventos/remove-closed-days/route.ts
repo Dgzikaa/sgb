@@ -61,7 +61,7 @@ export async function POST() {
 
     // Remover eventos nos dias fechados
     const { data, error } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .delete()
       .eq('bar_id', 1)
       .in('data_evento', diasFechados)

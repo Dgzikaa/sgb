@@ -33,7 +33,7 @@ export async function POST() {
     for (const mapping of eventMappings) {
       try {
         const { error } = await supabase
-          .from('eventos')
+          .from('eventos_base')
           .update({ nome_evento: mapping.name })
           .eq('bar_id', 1)
           .ilike('nome_evento', `%${mapping.originalPattern.source}%`);

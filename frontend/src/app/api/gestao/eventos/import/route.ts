@@ -479,7 +479,7 @@ export async function POST(request: NextRequest) {
     if (!confirmar_substituicao) {
       // Primeiro, verificar se já existem eventos no período
       const { data: eventosExistentes } = await supabase
-        .from('eventos')
+        .from('eventos_base')
         .select('id, data_evento')
         .eq('bar_id', barIdFinal)
         .gte('data_evento', `${ano}-02-01`)
@@ -497,7 +497,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Deletar eventos existentes no período
       await supabase
-        .from('eventos')
+        .from('eventos_base')
         .delete()
         .eq('bar_id', barIdFinal)
         .gte('data_evento', `${ano}-02-01`)
@@ -524,7 +524,7 @@ export async function POST(request: NextRequest) {
       );
 
       const { data, error } = await supabase
-        .from('eventos')
+        .from('eventos_base')
         .insert(lote)
         .select();
 

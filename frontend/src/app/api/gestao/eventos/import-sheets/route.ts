@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
 
         // Verificar se já existe
         const { data: existente } = await supabase
-          .from('eventos')
+          .from('eventos_base')
           .select('id')
           .eq('bar_id', bar_id)
           .eq('data_evento', dadosEvento.data_evento)
@@ -123,12 +123,12 @@ export async function POST(request: NextRequest) {
         let error;
         if (existente) {
           const result = await supabase
-            .from('eventos')
+            .from('eventos_base')
             .update(dadosEvento)
             .eq('id', existente.id);
           error = result.error;
         } else {
-          const result = await supabase.from('eventos').insert(dadosEvento);
+          const result = await supabase.from('eventos_base').insert(dadosEvento);
           error = result.error;
         }
 

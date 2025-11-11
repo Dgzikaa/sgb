@@ -857,7 +857,7 @@ export async function POST() {
     // 1. Limpar todos os eventos existentes do Bar Ordinário
     console.log('🗑️ Removendo eventos existentes...');
     const { error: deleteError } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .delete()
       .eq('bar_id', 1);
 
@@ -876,23 +876,19 @@ export async function POST() {
     console.log('📝 Inserindo novos eventos...');
     const eventosParaInserir = attractionsData.map((item: AttractionItem) => ({
       bar_id: 1,
+      nome: item.evento,
       nome_evento: item.evento,
-      nome_artista: item.artista || null,
-      genero_musical: item.genero,
+      artista: item.artista || null,
+      genero: item.genero,
       observacoes: item.obs || null,
       data_evento: item.data,
-      horario_inicio: '19:00:00',
-      horario_fim: '23:59:00',
-      status: 'ativo',
-      categoria: 'música',
-      tipo_evento: 'show',
-      divulgacao_ativa: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      ativo: true,
+      criado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
     }));
 
     const { data: insertedEvents, error: insertError } = await supabase
-      .from('eventos')
+      .from('eventos_base')
       .insert(eventosParaInserir)
       .select();
 
