@@ -1,0 +1,553 @@
+CodProduto	Produto	CodInsumo	INSUMO	QUANTIDADE RECEITA	QTDE REND
+pc0005	Frango a Passarinho preparo	i0123	Frango a passarinho	1000	1116
+pc0005	Frango a Passarinho preparo	i0149	Pimenta do reino	3	3
+pc0005	Frango a Passarinho preparo	i0092	Alho descascado	50	50
+pc0005	Frango a Passarinho preparo	i0158	Sal Refinado 1kg	12	12
+pc0005	Frango a Passarinho preparo	i0168	Vinagre de álcool	10	10
+pc0072		i0092	Alho descascado	20	20
+pc0072		pc0073	Batata Cozida	200	200
+pc0072		i0138	Óleo de soja	20	20
+pc0072		i0138	Óleo de Soja	50	50
+pc0072		i0168	Vinagre de Álcool	15	15
+pc0009	Base bechamel	i0133	Manteiga Barra kg	100	100
+pc0009	Base bechamel	i0126	Leite 1L Integral	1000	1000
+pc0009	Base bechamel	i0119	Farinha de trigo 1kg	100	100
+pc0009	Base bechamel	i0079	Noz moscada	1	1
+pc0067	Batata Chips Artesanal	i0221	Batata Inglesa	1000	1000
+pc0067	Batata Chips Artesanal	i0240	Óleo de Algodão 15L	25	25
+pc0073	Batata Cozida	i0221	Batata Inglesa	1000	1000
+pc0020	Bolinho escondidinho	i0158	Sal Refinado 1kg	20	20
+pc0020	Bolinho escondidinho	pc0019	Carne Seca Desfiada Escondidinho	1000	1000
+pc0020	Bolinho escondidinho	pc0018	Mandioca cozida	750	750
+pc0020	Bolinho escondidinho	i0134	Manteiga de garrafa	50	50
+pc0020	Bolinho escondidinho	i0111	Cebola Nacional	100	100
+pc0020	Bolinho escondidinho	i0149	Pimenta do Reino	25	25
+pc0020	Bolinho escondidinho	i0047	Pimenta Dedo de Moça	15	15
+pc0020	Bolinho escondidinho	i0454	Pimenta de Cheiro	25	25
+pc0020	Bolinho escondidinho	i0035	Coentro	0,5	1
+pc0020	Bolinho escondidinho	i0092	Alho descascado	13	13
+pc0020	Bolinho escondidinho	i0120	Farinha panko	100	100
+pc0020	Bolinho escondidinho	i0139	Ovo Branco 	6	6
+pc0020	Bolinho escondidinho	i0119	Farinha de trigo 1kg	100	100
+pc0057	Calda de Caramelo	i0059	Açúcar	300	300
+pc0057	Calda de Caramelo	i0210	Água da Casa	100	100
+pc0032	Caldinho de feijão	i0158	Sal Refinado 1kg	26	26
+pc0032	Caldinho de feijão	i0121	Feijão preto	1000	1000
+pc0032	Caldinho de feijão	i0111	Cebola Nacional	150	150
+pc0032	Caldinho de feijão	i0112	Cebola em pó	30	30
+pc0032	Caldinho de feijão	i0149	Pimenta do reino	1	1
+pc0032	Caldinho de feijão	i0071	Folha de Louro	1	1
+pc0032	Caldinho de feijão	i0092	Alho descascado	20	20
+pc0032	Caldinho de feijão	i0210	Água da Casa	2500	2500
+pc0023	Carne de panela	i0138	Óleo de soja	4	4
+pc0023	Carne de panela	i0159	Salsão	0,04	0
+pc0023	Carne de panela	i0158	Sal Refinado 1kg	5,75	6
+pc0023	Carne de panela	i0115	Coxão duro	1.000	1145
+pc0023	Carne de panela	i0223	Vinho Tinto Seco 4,5L	160	160
+pc0023	Carne de panela	i0101	Bacon	40	44
+pc0023	Carne de panela	i0160	Salsinha	0,12	0
+pc0023	Carne de panela	i0111	Cebola Nacional	60	67
+pc0023	Carne de panela	i0149	Pimenta do reino	1,2	1
+pc0023	Carne de panela	i0071	Folha de Louro	0,25	0
+pc0023	Carne de panela	i0092	Alho descascado	8	8
+pc0023	Carne de panela	i0210	Água da Casa	100	100
+pc0065	Carne Moída p/ Recheio	i0092	Alho descascado	50	50
+pc0065	Carne Moída p/ Recheio	i0455	Carne moída (Acem)	1000	1000
+pc0065	Carne Moída p/ Recheio	i0111	Cebola Nacional	160	160
+pc0065	Carne Moída p/ Recheio	i0043	Limão Tahiti 	43	43
+pc0065	Carne Moída p/ Recheio	i0150	Pimenta do reino em grão	33	33
+pc0065	Carne Moída p/ Recheio	i0047	Pimenta Dedo de Moça	33	33
+pc0019	Carne Seca Desfiada Escondidinho	i0109	Carne seca (Charque)	1000	1000
+pc0019	Carne Seca Desfiada Escondidinho	i0071	Folha de Louro	0,2	0
+pc0019	Carne Seca Desfiada Escondidinho	i0210	Água da Casa	600	600
+pc0085	Chimichurri	i0522	Pimentão Vermelho kg	1000	1000
+pc0085	Chimichurri	i0521	Pimentão Amarelo kg	1000	1000
+pc0085	Chimichurri	i0165	Tomate Extra	1000	1000
+pc0085	Chimichurri	i0113	Cebola Roxa	4	4
+pc0085	Chimichurri	i0161	Salsa	0,2	0
+pc0085	Chimichurri	i0158	Sal Refinado 1kg	40	40
+pc0085	Chimichurri	i0292	Orégano kg	20	20
+pc0085	Chimichurri	i0258	Páprica Defumada kg	20	20
+pc0085	Chimichurri	i0100	Azeite Extr. Virgem 5L	720	720
+pc0076	Copa Lombo Desfiado	i0097	Alho em pó	10	10
+pc0076	Copa Lombo Desfiado	i0266	Copa Lombo	1.000	1000
+pc0076	Copa Lombo Desfiado	i0112	Cebola em pó	10	10
+pc0076	Copa Lombo Desfiado	i0258	Páprica defumada kg	20	20
+pc0053	Coxinha	pc0033	Massa de coxinha	1000	1000
+pc0053	Coxinha	i0459	Requeijão Cremoso 1,5kg	143	143
+pc0053	Coxinha	pc0036	Recheio para coxinha	286	286
+pc0053	Coxinha	i0120	farinha panko	71	71
+pc0053	Coxinha	i0210	Água da Casa	0	0
+pc0053	Coxinha	i0139	Ovo Branco 	3	3
+pc0024	Croquete de carne com catupiry	pc0078	Massa Croquete	1000	1000
+pc0024	Croquete de carne com catupiry	i0459	Requeijão Cremoso 1,5kg	78	78
+pc0024	Croquete de carne com catupiry	i0120	Farinha Panko	107	107
+pc0024	Croquete de carne com catupiry	i0139	Ovo Branco 	2,3	2
+pc0024	Croquete de carne com catupiry	i0119	Farinha de trigo 1kg	77	77
+pc0025	Dadinho de tapioca	i0153	Queijo coalho	1200	1200
+pc0025	Dadinho de tapioca	i0156	Queijo Mussarela	300	300
+pc0025	Dadinho de tapioca	i0163	Tapioca granulada	1000	1000
+pc0025	Dadinho de tapioca	i0126	Leite 1L Integral	2000	2000
+pc0038	Disco de carne	i0455	Carne moída (Acem)	1000	1000
+pc0038	Disco de carne	i0111	Cebola Nacional	200	200
+pc0038	Disco de carne	i0092	Alho descascado	15	15
+pc0038	Disco de carne	i0139	Ovo Branco 	3	3
+pc0038	Disco de carne	i0112	Cebola em pó	22	22
+pc0038	Disco de carne	i0097	Alho em pó	10	10
+pc0038	Disco de carne	i0119	Farinha de trigo 1kg	78	78
+pc0038	Disco de carne	i0139	Ovo Branco 	3,6	4
+pc0038	Disco de carne	i0035	Coentro	1,3	1
+pc0038	Disco de carne		Farinha de pão francês (sobra)	43	43
+pc0038	Disco de carne	i0149	Pimenta do Reino	43	43
+pc0038	Disco de carne	i0158	Sal Refinado 1kg	14	14
+pc0087	Disco Vegano (Sanduba Vegano)	pc0069	Massa de Quibe Vegano	70	70
+pc0079	Empada Queijo do Reino	pc0037	Massa Empada de Queijo do Reino	50	50
+pc0079	Empada Queijo do Reino	pc0048	Recheio Empada de Queijo do Reino	40	40
+pc0084	Filé de Peito de Frango Empanado (Parmegiana)	i0143	Filé de Peito de Frango kg	1000	1064
+pc0084	Filé de Peito de Frango Empanado (Parmegiana)	i0158	Sal Refinado 1kg	9	9
+pc0084	Filé de Peito de Frango Empanado (Parmegiana)	i0149	Pimenta do reino	1,15	1
+pc0084	Filé de Peito de Frango Empanado (Parmegiana)	i0092	Alho descascado	3,5	4
+pc0084	Filé de Peito de Frango Empanado (Parmegiana)	i0139	Ovo Branco 	3,25	3
+pc0084	Filé de Peito de Frango Empanado (Parmegiana)	i0119	Farinha de trigo 1kg	160	160
+pc0084	Filé de Peito de Frango Empanado (Parmegiana)	i0120	Farinha Panko	250	250
+pc0083	Filé Mignon Empanado (Parmegiana)	i0122	Filé Mignon	1000	1149
+pc0083	Filé Mignon Empanado (Parmegiana)	i0158	Sal Refinado 1kg	5,4	5
+pc0083	Filé Mignon Empanado (Parmegiana)	i0149	Pimenta do reino	1,15	1
+pc0083	Filé Mignon Empanado (Parmegiana)	i0092	Alho descascado	8	8
+pc0083	Filé Mignon Empanado (Parmegiana)	i0139	Ovo Branco 	2,7	3
+pc0083	Filé Mignon Empanado (Parmegiana)	i0119	Farinha de trigo 1kg	80	80
+pc0083	Filé Mignon Empanado (Parmegiana)	i0120	Farinha Panko	200	200
+pc0063	Ganache de Chocolate	i0116	Creme de leite 1,3kg	500	500
+pc0063	Ganache de Chocolate	i0218	Chocolate Amargo em Barra	250	250
+pc0055	Geléia de Pimenta	i0168	Vinagre de álcool	25	25
+pc0055	Geléia de Pimenta	i0059	Açúcar	375	375
+pc0055	Geléia de Pimenta	i0047	Pimenta dedo de moça	50	50
+pc0055	Geléia de Pimenta	i0445	Maça Nacional kg	1000	1000
+pc0055	Geléia de Pimenta	pd0040	Suco de Laranja Artesanal	375	375
+pc0055	Geléia de Pimenta	i0210	Água da Casa	300	300
+pc0070	Geleia de Tomate	i0059	Açúcar	116	116
+pc0070	Geleia de Tomate	i0111	Cebola Nacional	228	228
+pc0070	Geleia de Tomate	i0258	Páprica defumada kg	18	18
+pc0070	Geleia de Tomate	i0488	Tomate Cereja	258	258
+pc0070	Geleia de Tomate	i0489	Tomate Italiano	1040	1040
+pc0070	Geleia de Tomate	i0168	Vinagre de álcool	17	17
+pc0031	Maionese verde	i0158	Sal Refinado 1kg	1	1
+pc0031	Maionese verde	i0130	Maionese Hellmanns	500	500
+pc0031	Maionese verde	i0160	Salsinha	0,5	1
+pc0031	Maionese verde	i0035	Coentro	0,5	1
+pc0031	Maionese verde	i0114	Cebolinha	0,5	1
+pc0031	Maionese verde	i0092	Alho descascado	5	5
+pc0018	Mandioca cozida	i0158	Sal Refinado 1kg	7	7
+pc0018	Mandioca cozida	i0131	Mandioca	1000	1010
+pc0078	Massa Croquete	pc0023	Carne de panela	1000	1000
+pc0078	Massa Croquete		Caldo do Cozimento da Carne	200	200
+pc0078	Massa Croquete	i0047	Pimenta Dedo de moça	3	3
+pc0078	Massa Croquete	i0517	Caldo de Carne und 1kg	25	25
+pc0078	Massa Croquete	i0111	Cebola Nacional	45	45
+pc0078	Massa Croquete	i0092	Alho descascado	30	30
+pc0078	Massa Croquete	i0119	Farinha de trigo 1kg	200	200
+pc0033	Massa de coxinha	i0158	Sal Refinado 1kg	10	10
+pc0033	Massa de coxinha	i0258	Páprica defumada kg	40	40
+pc0033	Massa de coxinha	i0133	Manteiga Barra kg	80	80
+pc0033	Massa de coxinha	i0106	Caldo de Galinha 1kg	50	50
+pc0033	Massa de coxinha	i0119	Farinha de trigo 1kg	1000	1000
+pc0033	Massa de coxinha		Caldo Cozimento do Frango	1800	1800
+pc0068	Massa de Quibe	i0455	Carne moída (Acem)	1000	1000
+pc0068	Massa de Quibe	i0340	Trigo para Quibe 5kg	1000	1000
+pc0068	Massa de Quibe	i0149	Pimenta do reino	20	20
+pc0068	Massa de Quibe	i0111	Cebola Nacional	225	225
+pc0068	Massa de Quibe	i0092	Alho descascado	100	100
+pc0068	Massa de Quibe	i0039	Hortelã	1,5	2
+pc0068	Massa de Quibe	i0158	Sal Refinado 1kg	90	90
+pc0068	Massa de Quibe	i0210	Água da Casa	1500	
+pc0069	Massa de Quibe Vegano	i0158	Sal Refinado 1kg	40	40
+pc0069	Massa de Quibe Vegano	i0340	Trigo para Quibe 5kg	1000	1000
+pc0069	Massa de Quibe Vegano	i0039	Hortelã	1,5	2
+pc0069	Massa de Quibe Vegano	i0149	Pimenta do reino	5	5
+pc0069	Massa de Quibe Vegano	i0111	Cebola Nacional	300	300
+pc0069	Massa de Quibe Vegano	i0043	Limão Tahiti 	80	80
+pc0069	Massa de Quibe Vegano	i0043	Limão Tahiti 	4	4
+pc0069	Massa de Quibe Vegano	i0079	Noz moscada	0,1	0
+pc0069	Massa de Quibe Vegano	i0092	Alho descascado	50	50
+pc0037	Massa Empada de Queijo do Reino	i0119	Farinha de trigo 1kg	900	900
+pc0037	Massa Empada de Queijo do Reino	i0133	Manteiga Barra kg	450	450
+pc0037	Massa Empada de Queijo do Reino	i0158	Sal Refinado 1kg	9	9
+pc0037	Massa Empada de Queijo do Reino	i0099	Amido de Milho	30	30
+pc0037	Massa Empada de Queijo do Reino	i0210	Água da Casa	90	90
+pc0071	Molho Barbecue	i0490	Açucar Mascavo	350	350
+pc0071	Molho Barbecue	i0535	Fumaça Líquida	20	20
+pc0071	Molho Barbecue	i0295	Catchup Galão 3,5kg	1000	1000
+pc0071	Molho Barbecue	i0149	Pimenta do Reino	20	20
+pc0071	Molho Barbecue	i0136	Molho Inglês	80	80
+pc0071	Molho Barbecue	i0168	Vinagre de Álcool	60	60
+pc0056	Molho de Carne (Escuro)		Aparas de Outros Cortes de Carne	1000	1000
+pc0056	Molho de Carne (Escuro)	i0111	Cebola Nacional	127	127
+pc0056	Molho de Carne (Escuro)	i0223	Vinho Tinto Seco 4,5L	364	364
+pc0056	Molho de Carne (Escuro)	i0098	Alho poró mç	0,36	0
+pc0056	Molho de Carne (Escuro)	i0159	Salsão	0,18	0
+pc0056	Molho de Carne (Escuro)	i0224	Cenoura	91	91
+pc0056	Molho de Carne (Escuro)	i0129	Folha de louro kg	1,1	1
+pc0056	Molho de Carne (Escuro)	i0092	Alho descascado	18,1	18
+pc0056	Molho de Carne (Escuro)	i0210	Água da Casa	1270	1270
+pc0056	Molho de Carne (Escuro)	i0512	Molho Shoyu	182	182
+pc0056	Molho de Carne (Escuro)	i0133	Manteiga Barra kg	63,6	64
+pc0056	Molho de Carne (Escuro)	i0119	Farinha de trigo 1kg	36	36
+pc0075	Molho de Picles	i0092	Alho descascado	20	20
+pc0075	Molho de Picles	pc0073	Batata Cozida	200	200
+pc0075	Molho de Picles	i0138	Óleo de soja	30	30
+pc0075	Molho de Picles	i0297	Mostarda 3,3kg	40	40
+pc0075	Molho de Picles	i0138	Óleo de Soja	200	200
+pc0075	Molho de Picles	i0147	Picles	120	120
+pc0001	Molho de pimenta tradicional	i0151	Pimenta malagueta desidratada	40	40
+pc0001	Molho de pimenta tradicional	i0162	Coentro em grão	1	1
+pc0001	Molho de pimenta tradicional	i0150	Pimenta do reino em grão	1	1
+pc0001	Molho de pimenta tradicional	i0158	Sal Refinado 1kg	1	1
+pc0001	Molho de pimenta tradicional	i0100	Azeite Extr. Virgem 5L	100	100
+pc0001	Molho de pimenta tradicional	i0071	Folha de Louro	1	1
+pc0001	Molho de pimenta tradicional	i0092	Alho descascado	5	5
+pc0086	Molho Rose	i0295	Catchup Galão 3,5kg	100	100
+pc0086	Molho Rose	i0130	Maionese Hellmanns	100	100
+pc0077	Molho Rústico (Deboche)	i0059	Açúcar	40	40
+pc0077	Molho Rústico (Deboche)	i0092	Alho descascado	150	150
+pc0077	Molho Rústico (Deboche)	i0100	Azeite Extr. Virgem 5L	100	100
+pc0077	Molho Rústico (Deboche)	i0111	Cebola Nacional	1084	1084
+pc0077	Molho Rústico (Deboche)	i0294	Tomilho mç	0,1	0,1
+pc0077	Molho Rústico (Deboche)	i0045	Manjericão	0,1	0,1
+pc0077	Molho Rústico (Deboche)	i0149	Pimenta do reino	20	20
+pc0077	Molho Rústico (Deboche)	i0158	Sal Refinado 1kg	20	20
+pc0077	Molho Rústico (Deboche)	i0489	Tomate Italiano	4.100	4100
+pc0077	Molho Rústico (Deboche)	i0117	Molho de Tomate	200	200
+pc0066	Molho Tártaro	i0130	Maionese Hellmanns	500	500
+pc0066	Molho Tártaro	i0224	Cenoura	200	200
+pc0066	Molho Tártaro	i0147	Picles	200	200
+pc0066	Molho Tártaro	i0160	Salsinha	0,3	0
+pc0066	Molho Tártaro	i0136	Molho inglês	70	70
+pc0052	Pasta Pão de Alho	i0156	Queijo Mussarela	200	200
+pc0052	Pasta Pão de Alho	i0130	Maionese Hellmanns	200	200
+pc0052	Pasta Pão de Alho	i0092	Alho descascado	10	10
+pc0013	Pastel Carne	i0449	Massa de pastel 500g	1	1
+pc0013	Pastel Carne	pc0065	Carne Moída p/ Recheio	35	35
+pc0014	Pastel Queijo	i0449	Massa de pastel 500g	1	1
+pc0014	Pastel Queijo	i0448	Cream Cheese 1,2kg	15	15
+pc0014	Pastel Queijo	i0156	Queijo Mussarela	30	30
+pc0044	Pesto de cheiro verde	i0100	Azeite Extr. Virgem 5L	180	180
+pc0044	Pesto de cheiro verde	i0114	Cebolinha	0,8	1
+pc0044	Pesto de cheiro verde	i0035	Coentro	0,8	1
+pc0044	Pesto de cheiro verde	i0225	Castanha de caju	65	65
+pc0044	Pesto de cheiro verde	i0158	Sal Refinado 1kg	5	5
+pc0044	Pesto de cheiro verde	i0092	Alho descascado	10	10
+pc0061	Preparo Bolinho de Chocolate	i0119	Farinha de trigo 1kg	250	250
+pc0061	Preparo Bolinho de Chocolate	i0158	Sal Refinado 1kg	1	1
+pc0061	Preparo Bolinho de Chocolate	i0217	Fermento em pó 	10	10
+pc0061	Preparo Bolinho de Chocolate	i0139	Ovo Branco 	6	6
+pc0061	Preparo Bolinho de Chocolate	i0059	Açúcar	300	300
+pc0061	Preparo Bolinho de Chocolate	i0218	chocolate amargo em barra	340	340
+pc0061	Preparo Bolinho de Chocolate	i0220	iogurte natural	450	450
+pc0061	Preparo Bolinho de Chocolate	i0133	Manteiga Barra kg	200	200
+pc0061	Preparo Bolinho de Chocolate	i0219	Chocolate em pó 50% (Cacau)	25	25
+pc0061	Preparo Bolinho de Chocolate	i0210	Água da Casa	45	45
+pc0082	Preparo de Choripan	i0506	Pão Francês Baguete und	1	1
+pc0082	Preparo de Choripan	i0156	Queijo Mussarela	16	16
+pc0082	Preparo de Choripan	i0513	Linguiça Toscana Suína kg	200	207
+pc0058	Preparo de Cocada Cremosa	i0339	Coco Ralado Em Flocos 500g	200	200
+pc0058	Preparo de Cocada Cremosa	i0214	Leite Condensado	395	395
+pc0058	Preparo de Cocada Cremosa	i0139	Ovo Branco 	3	3
+pc0058	Preparo de Cocada Cremosa	i0217	Fermento em pó 	15	15
+pc0060	Preparo de Pudim de Caramelo	i0126	Leite 1L Integral	395	395
+pc0060	Preparo de Pudim de Caramelo	i0139	Ovo Branco 	3	3
+pc0060	Preparo de Pudim de Caramelo	pc0057	Calda de caramelo	100	100
+pc0060	Preparo de Pudim de Caramelo	i0214	Leite condensado	395	395
+pc0081	Preparo Isca de Frango	i0143	Filé de peito de frango kg	1000	1105
+pc0081	Preparo Isca de Frango	i0092	Alho descascado	60	60
+pc0081	Preparo Isca de Frango	i0158	Sal Refinado 1kg	20	20
+pc0081	Preparo Isca de Frango	i0292	Orégano kg	1,2	1
+pc0081	Preparo Isca de Frango	i0258	Páprica Defumada kg	2,4	2
+pc0081	Preparo Isca de Frango	i0149	Pimenta do reino	2,4	2
+pc0080	Pudim de Caramelo	pc0057	Calda de Caramelo	15	15
+pc0080	Pudim de Caramelo	pc0060	Preparo de Pudim de Caramelo	1	1
+pc0040	Quibe	pc0068	Massa de Quibe	125	125
+pc0040	Quibe	pc0065	Carne Moída p/ Recheio	25	25
+pc0050	Quibe Vegano	pc0054	Recheio quibe veg	20	20
+pc0050	Quibe Vegano	pc0069	Massa de Quibe Vegano	100	100
+pc0074	Recheio Deboche	pc0076	Copa Lombo Desfiado	1000	1000
+pc0074	Recheio Deboche	pc0071	Molho Barbecue	415	415
+pc0048	Recheio Empada de Queijo do Reino	i0154	Queijo do reino	650	650
+pc0048	Recheio Empada de Queijo do Reino	pc0009	Base bechamel	800	800
+pc0048	Recheio Empada de Queijo do Reino	i0099	Amido de Milho	50	50
+pc0048	Recheio Empada de Queijo do Reino	i0158	Sal Refinado 1kg	15	15
+pc0036	Recheio para coxinha	i0092	Alho descascado	43	43
+pc0036	Recheio para coxinha	i0097	Alho em Pó	15,7	16
+pc0036	Recheio para coxinha	i0111	Cebola Nacional	137	137
+pc0036	Recheio para coxinha	i0112	Cebola em Pó	15,7	16
+pc0036	Recheio para coxinha	i0035	Coentro	0,3	0
+pc0036	Recheio para coxinha	i0143	Filé de peito de frango kg	1.000	1000
+pc0036	Recheio para coxinha	i0258	Páprica defumada kg	28,5	29
+pc0036	Recheio para coxinha	i0454	Pimenta de Cheiro	35,7	36
+pd0001	Água de mel	i0076	Mel de Abelha kg	1.000	1000
+pd0001	Água de mel	i0061	Água de Flor de Laranjeira	150	150
+pd0001	Água de mel	i0210	Água da Casa	250	250
+pd0002	Cachaça infusionada com café	i0007	Cachaça Ypioca 150	1000	1000
+pd0002	Cachaça infusionada com café	i0063	Café em grãos	100	100
+pd0003	Cereja em calda de açaí	i0064	Cereja	1000	1000
+pd0003	Cereja em calda de açaí	i0056	Polpa de Açaí	700	700
+pd0003	Cereja em calda de açaí	i0059	Açúcar	500	500
+pd0003	Cereja em calda de açaí	i0210	Água da Casa	300	300
+pd0004	Chá de Louro	i0071	Folha de Louro	60	60
+pd0004	Chá de Louro	i0210	Água da Casa	1000	1000
+pd0005	Cordial de Cajá	i0052	Polpa de Cajá	1000	1000
+pd0005	Cordial de Cajá	i0059	Açúcar	700	700
+pd0005	Cordial de Cajá	i0025	Vodka Smirnoff 998ml	150	150
+pd0005	Cordial de Cajá	i0210	Água da Casa	500	500
+pd0006	Cordial de Maracujá	i0054	Polpa de maracujá	1000	1000
+pd0006	Cordial de Maracujá	i0059	Açúcar	500	500
+pd0006	Cordial de Maracujá	i0025	Vodka Smirnoff 998ml	150	150
+pd0006	Cordial de Maracujá	i0058	Ácido Cítrico	2	2
+pd0006	Cordial de Maracujá	i0210	Água da Casa	350	350
+pd0007	Espuma de Acerola	pd0024	Xarope de acerola com pimenta Jamaica	350	350
+pd0007	Espuma de Acerola	i0068	Emulsificante Emustab	5	5
+pd0007	Espuma de Acerola	pd0030	Suco de Limão	80	80
+pd0007	Espuma de Acerola	i0305	Cápsula CO2 (cx 10 und)	1	1
+pd0008	Espuma de gengibre	pd0026	Xarope de Gengibre	350	350
+pd0008	Espuma de gengibre	i0068	Emulsificante Emustab	5	5
+pd0008	Espuma de gengibre	i0305	Cápsula CO2 (cx 10 und)	1	1
+pd0008	Espuma de gengibre	pd0030	Suco de Limão	80	80
+pd0009	Infusão de Mate tostado	i0075	Mate Tostado	250	250
+pd0009	Infusão de Mate tostado	i0210	Água da Casa	2000	2000
+pd0010	Mel com Capim Santo	i0076	Mel de Abelha kg	1000	1000
+pd0010	Mel com Capim Santo	i0033	Capim Santo	125	125
+pd0010	Mel com Capim Santo	i0210	Água da Casa	250	250
+pd0011	Mel de abacaxi	i0059	Açúcar	1000	1000
+pd0011	Mel de abacaxi	i0031	Abacaxi	1000	1000
+pd0013	Purê de Carambola	i0034	Carambola	1000	1000
+pd0013	Purê de Carambola	i0059	Açúcar	500	500
+pd0013	Purê de Carambola	i0210	Água da Casa	500	500
+pd0014	Redução de cacau	i0078	Nibs de cacau	200	200
+pd0014	Redução de cacau	i0059	Açúcar	400	400
+pd0014	Redução de cacau	i0210	Água da Casa	1000	1000
+pd0015	Redução de manga com pimenta	i0059	Açúcar	300	300
+pd0015	Redução de manga com pimenta	i0044	Manga Tommy Kg	600	600
+pd0015	Redução de manga com pimenta	i0047	Pimenta dedo de moça	15	15
+pd0015	Redução de manga com pimenta	i0210	Água da Casa	300	300
+pd0017	Refrigerante de gengibre	pd0026	Xarope de Gengibre	800	800
+pd0017	Refrigerante de gengibre	pd0030	Suco de Limão	80	80
+pd0019	Shrub de Caju	i0059	Açúcar	1000	1000
+pd0019	Shrub de Caju	i0053	Polpa de Caju	1000	1000
+pd0019	Shrub de Caju	i0169	Vinagre de maçã	150	150
+pd0019	Shrub de Caju	pd0030	Suco de Limão	300	300
+pd0019	Shrub de Caju	i0210	Água da Casa	170	170
+pd0020	Shrub de cupuaçu	i0059	Açúcar	1000	1000
+pd0020	Shrub de cupuaçu	i0050	Polpa de Cupuaçu	1000	1000
+pd0020	Shrub de cupuaçu	i0169	Vinagre de Maçã	150	150
+pd0020	Shrub de cupuaçu	i0210	Água da Casa	1000	1000
+pd0021	Tequila infusionada com camomila	i0523	Tequila José Cuervo Ouro	750	750
+pd0021	Tequila infusionada com camomila	i0065	Chá de Camomila	40	40
+pd0022	Vodka infusionada com baunilha	i0025	Vodka Smirnoff 998ml	1000	1000
+pd0022	Vodka infusionada com baunilha	i0303	Essência de Baunilha 500ml	20	20
+pd0023	Xarope de Açaí	i0056	Polpa de Açaí	1000	1000
+pd0023	Xarope de Açaí	i0059	Açúcar	300	300
+pd0023	Xarope de Açaí	i0083	Xarope de Guaraná	400	400
+pd0023	Xarope de Açaí	pd0040	Suco de Laranja Artesanal	200	200
+pd0024	Xarope de acerola com pimenta Jamaica	i0049	Polpa de Acerola	1000	1000
+pd0024	Xarope de acerola com pimenta Jamaica	i0059	Açúcar	500	500
+pd0024	Xarope de acerola com pimenta Jamaica	i0080	Pimenta Jamaica Grão kg	20	20
+pd0024	Xarope de acerola com pimenta Jamaica	i0058	Ácido Cítrico	4	4
+pd0024	Xarope de acerola com pimenta Jamaica	i0210	Água da Casa	500	500
+pd0025	Xarope de Frutas Vermelhas	i0301	Polpa de Frutas Vermelhas	1000	1000
+pd0025	Xarope de Frutas Vermelhas	i0059	Açúcar	1000	1000
+pd0025	Xarope de Frutas Vermelhas	i0210	Água da Casa	1000	1000
+pd0026	Xarope de Gengibre	i0059	Açúcar	1000	1000
+pd0026	Xarope de Gengibre	i0037	Gengibre	300	300
+pd0026	Xarope de Gengibre	i0210	Água da Casa	1000	1000
+pd0027	Xarope de melado	i0077	Melado	1000	1000
+pd0027	Xarope de melado	i0210	Água da Casa	250	250
+pd0028	Xarope de Umbu com matcha	i0057	Polpa de umbu	1000	1000
+pd0028	Xarope de Umbu com matcha	i0059	Açúcar	750	750
+pd0028	Xarope de Umbu com matcha	i0074	Matcha	2	2
+pd0028	Xarope de Umbu com matcha	i0058	Ácido Cítrico	2	2
+pd0028	Xarope de Umbu com matcha	i0210	Água da Casa	250	250
+pd0029	Xarope Simples	i0059	Açúcar	1000	1000
+pd0029	Xarope Simples	i0210	Água da Casa	1000	1000
+pd0030	Suco de Limão	i0043	Limão Tahiti 	1000	1000
+pd0040	Suco de Laranja Artesanal	i0041	Laranja Pera	1000	1000
+pd0041	Pré-Batch  Negroni	i0014	Gin Orloff	30	30
+pd0041	Pré-Batch  Negroni	i0023	Vermouth Rosso Cinzano 1L	30	30
+pd0041	Pré-Batch  Negroni	i0009	Campari	30	30
+pd0042	Pré-Batch Rabo de Galo	i0007	Cachaça Ypioca 150	50	50
+pd0042	Pré-Batch Rabo de Galo	i0012	Cynar	25	25
+pd0042	Pré-Batch Rabo de Galo	i0023	Vermouth Rosso Cinzano 1L	25	25
+pd0043	Pré-Batch  Fitzgerald	i0536	Gin Gordons	850	850
+pd0043	Pré-Batch  Fitzgerald	i0002	Angostura	27	27
+pd0043	Pré-Batch  Fitzgerald	pd0029	Xarope Simples	425	425
+pd0043	Pré-Batch  Fitzgerald	pd0030	Suco de Limão	510	510
+pd0044	Pré-Batch Daiquiri	i0020	Bacardi Prata 980ml	50	50
+pd0044	Pré-Batch Daiquiri	pd0029	Xarope Simples	20	20
+pd0044	Pré-Batch Daiquiri	pd0030	Suco de Limão	30	30
+pd0045	Pré-Batch Margarita	i0558	Tequila Don Julio 750ml	50	50
+pd0045	Pré-Batch Margarita	i0010	Cointreau	30	30
+pd0045	Pré-Batch Margarita	pd0030	Suco de Limão	20	20
+pd0046	Pré-Batch Penicillin	i0030	whisky Jameson	60	60
+pd0046	Pré-Batch Penicillin	pd0030	Suco de Limão	30	30
+pd0046	Pré-Batch Penicillin	pd0026	Xarope de Gengibre	15	15
+pd0047	Pré-Batch Aperol Spritz	i0003	Aperol	60	60
+pd0047	Pré-Batch Aperol Spritz	i0013	Espumante	100	100
+pd0047	Pré-Batch Aperol Spritz	pd0040	Suco de Laranja Artesanal	15	15
+pd0048	Pré-Batch Arlequim	i0007	Cachaça Ypioca 150	50	50
+pd0048	Pré-Batch Arlequim	pd0005	Cordial de Cajá	40	40
+pd0048	Pré-Batch Arlequim	pd0026	Xarope de Gengibre	15	15
+pd0048	Pré-Batch Arlequim	pd0030	Suco de Limão	20	20
+pd0048	Pré-Batch Arlequim	pd0013	Purê de Carambola	10	10
+pd0049	Pré-Batch Coração da Mangueira	i0028	Whisky Chivas 12 anos	50	50
+pd0049	Pré-Batch Coração da Mangueira	pd0015	Redução de manga com pimenta	35	35
+pd0049	Pré-Batch Coração da Mangueira	pd0030	Suco de Limão	25	25
+pd0049	Pré-Batch Coração da Mangueira	pd0010	Mel com capim santo	5	5
+pd0050	Pré-Batch Iguatu	i0021	Bacardi ouro 980ml	50	50
+pd0050	Pré-Batch Iguatu	pd0005	Cordial de Cajá	40	40
+pd0050	Pré-Batch Iguatu	pd0030	Suco de Limão	20	20
+pd0050	Pré-Batch Iguatu	pd0004	Chá de Louro	10	10
+pd0051	Pré-Batch Estopinha	i0558	Tequila Don Julio 750ml	50	50
+pd0051	Pré-Batch Estopinha		Redução de tamarindo	50	50
+pd0051	Pré-Batch Estopinha	pd0030	Suco de Limão	20	20
+pd0052	Pré-Batch Brasilia Amarela	pd0022	Vodka infusionada com baunilha	50	50
+pd0052	Pré-Batch Brasilia Amarela	i0018	Limoncello	15	15
+pd0052	Pré-Batch Brasilia Amarela	i0085	Água de Coco 330mL	50	50
+pd0052	Pré-Batch Brasilia Amarela	pd0030	Suco de Limão	30	30
+pd0052	Pré-Batch Brasilia Amarela	pd0029	Xarope Simples	20	20
+pd0053	Pré-Batch Mistura de Candango	i0008	Cachaça Ypioca Prata	30	30
+pd0053	Pré-Batch Mistura de Candango	i0007	Cachaça Ypioca 150	30	30
+pd0053	Pré-Batch Mistura de Candango	pd0040	Suco de Laranja Artesanal	20	20
+pd0053	Pré-Batch Mistura de Candango	pd0005	Cordial de Cajá	20	20
+pd0053	Pré-Batch Mistura de Candango	pd0019	Shrub de Caju	20	20
+pd0053	Pré-Batch Mistura de Candango	pd0030	Suco de Limão	20	20
+pd0053	Pré-Batch Mistura de Candango	i0001	Amaretto	10	10
+pd0054	Pré-Batch Zé Pilintra	i0026	Whisky Bourbon  Jim Beam White	50	50
+pd0054	Pré-Batch Zé Pilintra	i0265	Presidente 900ml	25	25
+pd0054	Pré-Batch Zé Pilintra	pd0027	Xarope de melado	15	15
+pd0054	Pré-Batch Zé Pilintra	pd0014	Redução de cacau	15	15
+pd0055	Pré-Batch Pingado	pd0002	Cachaça infusionada com café	40	40
+pd0055	Pré-Batch Pingado	i0017	Licor don luiz	50	50
+pd0055	Pré-Batch Pingado	i0303	Essência de Baunilha 500ml	10	10
+pd0055	Pré-Batch Pingado	i0004	Bitter de Café	2	2
+pd0056	Pré-Batch Café do Zeca	i0025	Vodka Smirnoff 998ml	50	50
+pd0056	Pré-Batch Café do Zeca	pd0020	Shrub de cupuaçu	40	40
+pd0056	Pré-Batch Café do Zeca	pd0014	Redução de cacau	5	5
+pd0056	Pré-Batch Café do Zeca	i0016	licor de café	10	10
+pd0056	Pré-Batch Café do Zeca	i0062	Café em pó 500g	20	20
+pd0056	Pré-Batch Café do Zeca	i0004	bitter de café	2	2
+pd0057	Pré-Batch Rei Momo	i0014	Gin Orloff	50	50
+pd0057	Pré-Batch Rei Momo	pd0020	Shrub de Cupuaçu	30	30
+pd0057	Pré-Batch Rei Momo	pd0011	Mel de Abacaxi	20	20
+pd0057	Pré-Batch Rei Momo	i0067	Suco Concentrado de Abacaxi 500ml	25	25
+pd0057	Pré-Batch Rei Momo	pd0030	Suco de Limão	15	15
+pd0057	Pré-Batch Rei Momo	i0085	Água de Coco 330mL	50	50
+pd0058	Pré-Batch Voo do Carcará	pd0021	Tequila infusionada com camomila	60	60
+pd0058	Pré-Batch Voo do Carcará	i0075	Mate tostado	40	40
+pd0058	Pré-Batch Voo do Carcará	pd0027	Xarope de melado	30	30
+pd0058	Pré-Batch Voo do Carcará	pd0030	Suco de Limão	25	25
+pd0059	Pré-Batch Beth Carvalho	pd0009	Infusão de Mate tostado	100	100
+pd0059	Pré-Batch Beth Carvalho	pd0030	Suco de Limão	50	50
+pd0059	Pré-Batch Beth Carvalho	pd0010	mel com capim santo	30	30
+pd0060	Pré-Batch Burguesinha	i0025	Vodka Smirnoff 998ml	50	50
+pd0060	Pré-Batch Burguesinha	pd0011	Mel de abacaxi	20	20
+pd0060	Pré-Batch Burguesinha	pd0006	Cordial de Maracujá	40	40
+pd0060	Pré-Batch Burguesinha	pd0030	Suco de Limão	20	20
+pd0060	Pré-Batch Burguesinha	i0210	Água da Casa	50	50
+pd0061	Pré-Batch Creone	i0008	Cachaça Ypioca prata	20	20
+pd0061	Pré-Batch Creone	i0073	Leite de Coco	5	5
+pd0061	Pré-Batch Creone	pd0011	Mel de Abacaxi	20	20
+pd0062	Pré-Batch Xonadao	i0558	Tequila Don Julio 750ml	20	20
+pc0036	Recheio para coxinha	i0047	Pimenta Dedo de Moça	3,5	4
+pc0054	Recheio Quibe Veg	i0158	Sal Refinado 1kg	21	21
+pc0054	Recheio Quibe Veg	i0111	Cebola Nacional	1000	1000
+pc0054	Recheio Quibe Veg	i0059	Açúcar	133	133
+pc0054	Recheio Quibe Veg	i0149	Pimenta do reino	8	8
+pc0011	Tilápia Empanada	i0158	Sal Refinado 1kg	25	25
+pc0011	Tilápia Empanada	i0227	Gergelim Preto kg	25	25
+pc0011	Tilápia Empanada	i0235	Filé de Peixe - Tilápia kg	1000	1068
+pc0011	Tilápia Empanada	i0092	Alho descascado	25	25
+pc0011	Tilápia Empanada	pd0030	Suco de Limão	45	45
+pc0011	Tilápia Empanada	i0149	Pimenta do Reino	1	1
+pc0011	Tilápia Empanada	i0120	Farinha Panko	400	400
+pc0011	Tilápia Empanada	i0139	Ovo Branco 	7	7
+pc0011	Tilápia Empanada	i0119	Farinha de trigo 1kg	300	300
+pc0021	Torresmo de Banda Prep	i0103	Barriga Porco - Panceta kg	1000	1000
+pc0021	Torresmo de Banda Prep	i0158	Sal Refinado 1kg	200	200
+pd0062	Pré-Batch Xonadao	pd0015	Redução de manga com pimenta	20	20
+pd0062	Pré-Batch Xonadao	pd0030	Suco de Limão	10	10
+pd0063	Pré-Batch Leonito	i0025	Vodka Smirnoff 998ml	15	15
+pd0063	Pré-Batch Leonito	pd0020	Shrub de Cupuaçu	10	10
+pd0063	Pré-Batch Leonito	i0019	Netuno	15	15
+pd0064	Espuma de Maracujá	pd0006	Cordial de Maracujá	700	700
+pd0064	Espuma de Maracujá	pd0030	Suco de Limão	70	70
+pd0064	Espuma de Maracujá	i0068	Emulsificante Emustab	7	7
+pd0064	Espuma de Maracujá	i0305	Cápsula CO2 (cx 10 und)	1	1
+pd0065	Espuma de Cupuaçu	pd0020	Shrub de Cupuaçu	700	700
+pd0065	Espuma de Cupuaçu	i0068	Emulsificante Emustab	7	7
+pd0065	Espuma de Cupuaçu	i0305	Cápsula CO2 (cx 10 und)	1	1
+pd0066	Espuma de Limão Siciliano	pd0068	Xarope de Limão Siciliano	700	700
+pd0066	Espuma de Limão Siciliano	i0068	Emulsificante Emustab	7	7
+pd0066	Espuma de Limão Siciliano	i0305	Cápsula CO2 (cx 10 und)	1	1
+pd0067	Espuma de Açai	pd0023	Xarope de açaí	700	700
+pd0067	Espuma de Açai	pd0030	Suco de Limão	70	70
+pd0067	Espuma de Açai	i0068	Emulsificante Emustab	7	7
+pd0067	Espuma de Açai	i0305	Cápsula CO2 (cx 10 und)	1	1
+pd0068	Xarope de Limão Siciliano	pd0069	Suco de Limão Siciliano	500	500
+pd0068	Xarope de Limão Siciliano	i0059	Açúcar	500	500
+pd0069	Suco de Limão Siciliano	i0042	Limão Siciliano	1000	1000
+PD0071	Licor de Jabuticaba	i0577	Jabuticaba	500	500
+PD0071	Licor de Jabuticaba	i0008	Cachaça Ypioca Prata	1000	1000
+PD0071	Licor de Jabuticaba	i0059	Açúcar	1000	1000
+pc0021	Torresmo de Banda Prep	i0168	Vinagre de álcool	200	200
+pc0088	Farofa de Bacon	i0111	Cebola Nacional	1	1
+pc0088	Farofa de Bacon	i0101	Bacon	400	400
+pc0088	Farofa de Bacon	i0158	Sal Refinado 1kg	20	20
+pc0088	Farofa de Bacon	i0138	Óleo de Soja	100	100
+pc0089	Vinagrete	i0165	Tomate Extra	300	300
+pc0089	Vinagrete	i0521	Pimentão Amarelo kg	150	150
+pc0089	Vinagrete	i0522	Pimentão Vermelho kg	200	200
+pc0089	Vinagrete	i0111	Cebola Nacional	150	150
+pc0089	Vinagrete	i0168	Vinagre de Álcool	20	20
+pc0089	Vinagrete	i0100	Azeite Extr. Virgem 5L	60	60
+pc0089	Vinagrete	i0158	Sal Refinado 1kg	10	10
+pc0090	Queijo Coalho C/ Melaço	i0077	Melado	80	80
+pc0090	Queijo Coalho C/ Melaço	i0153	Queijo Coalho	200	200
+pc0091	Cupim C/ Queijo	i0447	Cupim kg	5780	5780
+pc0091	Cupim C/ Queijo	i0111	Cebola Nacional	1400	1400
+pc0091	Cupim C/ Queijo	i0168	Vinagre de Álcool	100	100
+pc0091	Cupim C/ Queijo	i0138	Óleo de Soja	20	20
+pc0091	Cupim C/ Queijo	i0186	Original 600ml	1	1
+pc0091	Cupim C/ Queijo	i0098	Alho poró mç	400	400
+pc0091	Cupim C/ Queijo	i0512	Molho Shoyu	400	400
+pc0091	Cupim C/ Queijo	i0071	Folha de Louro	0,1	0
+pc0091	Cupim C/ Queijo	i0158	Sal Refinado 1kg	80	80
+pc0091	Cupim C/ Queijo	i0149	Pimenta do Reino	10	10
+pc0091	Cupim C/ Queijo	i0210	Água da Casa	1500	1500
+pc0091	Cupim C/ Queijo	pc0018	Mandioca Cozida	300	300
+pc0092	Moela	i0092	Alho descascado	150	150
+pc0092	Moela	i0111	Cebola Nacional	600	600
+pc0092	Moela	i0138	Óleo de Soja	40	40
+pc0092	Moela	i0522	Pimentão Vermelho kg	160	160
+pc0092	Moela	i0521	Pimentão Amarelo kg	180	180
+pc0092	Moela	i0454	Pimenta de Cheiro	100	100
+pc0092	Moela	i0165	Tomate Extra	600	600
+pc0092	Moela	i0258	Páprica Defumada kg	40	40
+pc0092	Moela	i0047	Pimenta Dedo de Moça	5	5
+pc0092	Moela		Molho de Tomate	200	200
+pc0092	Moela	i0035	Coentro	1	1
+pc0092	Moela	i0158	Sal Refinado 1kg	40	40
+pc0092	Moela	i0210	Água da Casa	15000	15000
+pc0092	Moela	i0574	Moela kg	3250	3250
+pc0093	Jiló Empanado	i0158	Sal Refinado 1kg	3	3
+pc0093	Jiló Empanado	i0149	Pimenta do Reino	2	2
+pc0093	Jiló Empanado	i0084	Água com gás 500mL	175	175
+pc0093	Jiló Empanado	i0112	Cebola em Pó	1	1
+pc0093	Jiló Empanado	i0097	Alho em Pó	1	1
+pc0093	Jiló Empanado		páprica kg	5	5
+pc0093	Jiló Empanado	i0292	Orégano kg	2	2
+pc0093	Jiló Empanado	i0120	Farinha Panko	75	75
+pc0093	Jiló Empanado	i0119	Farinha de trigo 1kg	50	50
+pc0093	Jiló Empanado	i0473	jiló kg	145	145
+pc0094	Bolo Petit Gateau	i0059	Açúcar	90	90
+pc0094	Bolo Petit Gateau	i0218	Chocolate Amargo em Barra	200	200
+pc0094	Bolo Petit Gateau	i0119	Farinha de trigo 1kg	90	90
+pc0094	Bolo Petit Gateau	i0139	Ovo Branco 	3	3
+
