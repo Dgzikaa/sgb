@@ -133,6 +133,8 @@ export default function TerminalProducao() {
           const data = await response.json();
           setReceitas(data.receitas || []);
           console.log(`✅ ${data.receitas?.length || 0} receitas carregadas`);
+          console.log('📋 Primeira receita:', data.receitas?.[0]);
+          console.log('🔍 Tipos encontrados:', [...new Set(data.receitas?.map((r: any) => r.tipo_local))]);
         } else {
           console.error('❌ Erro ao carregar receitas:', response.status);
         }
@@ -149,9 +151,13 @@ export default function TerminalProducao() {
 
   // Filtrar receitas por tipo e busca
   useEffect(() => {
+    console.log(`🔍 Filtrando receitas: total=${receitas.length}, tipo=${tipoLocalSelecionado}, busca="${buscaReceita}"`);
+    
     const receitasFiltradasPorTipo = receitas.filter(
       receita => receita.tipo_local === tipoLocalSelecionado
     );
+    
+    console.log(`📊 Após filtro por tipo: ${receitasFiltradasPorTipo.length} receitas`);
 
     if (!buscaReceita.trim()) {
       setReceitasFiltradas(receitasFiltradasPorTipo);
@@ -165,6 +171,7 @@ export default function TerminalProducao() {
             .toLowerCase()
             .includes(buscaReceita.toLowerCase())
       );
+      console.log(`🔎 Após busca "${buscaReceita}": ${filtradas.length} receitas`);
       setReceitasFiltradas(filtradas);
     }
 
