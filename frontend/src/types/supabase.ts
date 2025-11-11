@@ -3338,6 +3338,13 @@ export type Database = {
             foreignKeyName: "notificacoes_usuario_id_fkey"
             columns: ["usuario_id"]
             isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "notificacoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
             referencedRelation: "usuarios_bar"
             referencedColumns: ["user_id"]
           },
@@ -4595,6 +4602,144 @@ export type Database = {
           },
         ]
       }
+      whatsapp_configuracoes: {
+        Row: {
+          access_token: string | null
+          api_version: string | null
+          ativo: boolean | null
+          bar_id: number | null
+          created_at: string | null
+          id: string
+          idioma: string | null
+          max_retry_attempts: number | null
+          phone_number_id: string | null
+          rate_limit_per_minute: number | null
+          retry_delay_seconds: number | null
+          template_prefix: string | null
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          api_version?: string | null
+          ativo?: boolean | null
+          bar_id?: number | null
+          created_at?: string | null
+          id?: string
+          idioma?: string | null
+          max_retry_attempts?: number | null
+          phone_number_id?: string | null
+          rate_limit_per_minute?: number | null
+          retry_delay_seconds?: number | null
+          template_prefix?: string | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          api_version?: string | null
+          ativo?: boolean | null
+          bar_id?: number | null
+          created_at?: string | null
+          id?: string
+          idioma?: string | null
+          max_retry_attempts?: number | null
+          phone_number_id?: string | null
+          rate_limit_per_minute?: number | null
+          retry_delay_seconds?: number | null
+          template_prefix?: string | null
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_configuracoes_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_contatos: {
+        Row: {
+          bar_id: number | null
+          created_at: string | null
+          id: string
+          name: string | null
+          phone_number: string | null
+          total_mensagens_enviadas: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          bar_id?: number | null
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          phone_number?: string | null
+          total_mensagens_enviadas?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          bar_id?: number | null
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          phone_number?: string | null
+          total_mensagens_enviadas?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_contatos_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_mensagens: {
+        Row: {
+          bar_id: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          message_text: string | null
+          phone_number: string | null
+          sent_at: string | null
+          status: string | null
+        }
+        Insert: {
+          bar_id?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_text?: string | null
+          phone_number?: string | null
+          sent_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          bar_id?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_text?: string | null
+          phone_number?: string | null
+          sent_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_mensagens_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_messages: {
         Row: {
           alert_id: string | null
@@ -4645,6 +4790,41 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      whatsapp_templates: {
+        Row: {
+          ativo: boolean | null
+          bar_id: number | null
+          created_at: string | null
+          id: string
+          template_content: string | null
+          template_name: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          bar_id?: number | null
+          created_at?: string | null
+          id?: string
+          template_content?: string | null
+          template_name?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          bar_id?: number | null
+          created_at?: string | null
+          id?: string
+          template_content?: string | null
+          template_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_templates_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       windsor_datav2: {
         Row: {
@@ -5164,6 +5344,710 @@ export type Database = {
       }
     }
     Views: {
+      analitico: {
+        Row: {
+          ano: number | null
+          bar_id: number | null
+          comandaorigem: string | null
+          created_at: string | null
+          custo: number | null
+          desconto: number | null
+          grp_desc: string | null
+          id: number | null
+          idempotency_key: string | null
+          itemorigem: string | null
+          itm: number | null
+          itm_obs: string | null
+          loc_desc: string | null
+          mes: number | null
+          prd: string | null
+          prd_desc: string | null
+          prefixo: string | null
+          qtd: number | null
+          tipo: string | null
+          tipovenda: string | null
+          trn: number | null
+          trn_desc: string | null
+          trn_dtgerencial: string | null
+          updated_at: string | null
+          usr_lancou: string | null
+          valorfinal: number | null
+          vd_localizacao: string | null
+          vd_mesadesc: string | null
+        }
+        Insert: {
+          ano?: number | null
+          bar_id?: number | null
+          comandaorigem?: string | null
+          created_at?: string | null
+          custo?: number | null
+          desconto?: number | null
+          grp_desc?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          itemorigem?: string | null
+          itm?: number | null
+          itm_obs?: string | null
+          loc_desc?: string | null
+          mes?: number | null
+          prd?: string | null
+          prd_desc?: string | null
+          prefixo?: string | null
+          qtd?: number | null
+          tipo?: string | null
+          tipovenda?: string | null
+          trn?: number | null
+          trn_desc?: string | null
+          trn_dtgerencial?: string | null
+          updated_at?: string | null
+          usr_lancou?: string | null
+          valorfinal?: number | null
+          vd_localizacao?: string | null
+          vd_mesadesc?: string | null
+        }
+        Update: {
+          ano?: number | null
+          bar_id?: number | null
+          comandaorigem?: string | null
+          created_at?: string | null
+          custo?: number | null
+          desconto?: number | null
+          grp_desc?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          itemorigem?: string | null
+          itm?: number | null
+          itm_obs?: string | null
+          loc_desc?: string | null
+          mes?: number | null
+          prd?: string | null
+          prd_desc?: string | null
+          prefixo?: string | null
+          qtd?: number | null
+          tipo?: string | null
+          tipovenda?: string | null
+          trn?: number | null
+          trn_desc?: string | null
+          trn_dtgerencial?: string | null
+          updated_at?: string | null
+          usr_lancou?: string | null
+          valorfinal?: number | null
+          vd_localizacao?: string | null
+          vd_mesadesc?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_contahub_analitico_bar_id"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      eventos: {
+        Row: {
+          artista: string | null
+          ativo: boolean | null
+          atualizado_em: string | null
+          bar_id: number | null
+          c_art: number | null
+          c_artistico_plan: number | null
+          c_prod: number | null
+          calculado_em: string | null
+          cl_plan: number | null
+          cl_real: number | null
+          criado_em: string | null
+          data_evento: string | null
+          dia_semana: string | null
+          fat_19h: number | null
+          fat_19h_percent: number | null
+          faturamento_bar: number | null
+          faturamento_bar_manual: number | null
+          faturamento_couvert: number | null
+          faturamento_couvert_manual: number | null
+          genero: string | null
+          id: number | null
+          lot_max: number | null
+          m1_r: number | null
+          nome: string | null
+          observacoes: string | null
+          percent_art_fat: number | null
+          percent_b: number | null
+          percent_c: number | null
+          percent_d: number | null
+          precisa_recalculo: boolean | null
+          real_r: number | null
+          res_p: number | null
+          res_tot: number | null
+          semana: number | null
+          sympla_checkins: number | null
+          sympla_liquido: number | null
+          t_bar: number | null
+          t_coz: number | null
+          t_medio: number | null
+          tb_plan: number | null
+          tb_real: number | null
+          tb_real_calculado: number | null
+          te_plan: number | null
+          te_real: number | null
+          te_real_calculado: number | null
+          versao_calculo: number | null
+          yuzer_ingressos: number | null
+          yuzer_liquido: number | null
+        }
+        Insert: {
+          artista?: string | null
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          bar_id?: number | null
+          c_art?: number | null
+          c_artistico_plan?: number | null
+          c_prod?: number | null
+          calculado_em?: string | null
+          cl_plan?: number | null
+          cl_real?: number | null
+          criado_em?: string | null
+          data_evento?: string | null
+          dia_semana?: string | null
+          fat_19h?: number | null
+          fat_19h_percent?: number | null
+          faturamento_bar?: number | null
+          faturamento_bar_manual?: number | null
+          faturamento_couvert?: number | null
+          faturamento_couvert_manual?: number | null
+          genero?: string | null
+          id?: number | null
+          lot_max?: number | null
+          m1_r?: number | null
+          nome?: string | null
+          observacoes?: string | null
+          percent_art_fat?: number | null
+          percent_b?: number | null
+          percent_c?: number | null
+          percent_d?: number | null
+          precisa_recalculo?: boolean | null
+          real_r?: number | null
+          res_p?: number | null
+          res_tot?: number | null
+          semana?: number | null
+          sympla_checkins?: number | null
+          sympla_liquido?: number | null
+          t_bar?: number | null
+          t_coz?: number | null
+          t_medio?: number | null
+          tb_plan?: number | null
+          tb_real?: number | null
+          tb_real_calculado?: number | null
+          te_plan?: number | null
+          te_real?: number | null
+          te_real_calculado?: number | null
+          versao_calculo?: number | null
+          yuzer_ingressos?: number | null
+          yuzer_liquido?: number | null
+        }
+        Update: {
+          artista?: string | null
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          bar_id?: number | null
+          c_art?: number | null
+          c_artistico_plan?: number | null
+          c_prod?: number | null
+          calculado_em?: string | null
+          cl_plan?: number | null
+          cl_real?: number | null
+          criado_em?: string | null
+          data_evento?: string | null
+          dia_semana?: string | null
+          fat_19h?: number | null
+          fat_19h_percent?: number | null
+          faturamento_bar?: number | null
+          faturamento_bar_manual?: number | null
+          faturamento_couvert?: number | null
+          faturamento_couvert_manual?: number | null
+          genero?: string | null
+          id?: number | null
+          lot_max?: number | null
+          m1_r?: number | null
+          nome?: string | null
+          observacoes?: string | null
+          percent_art_fat?: number | null
+          percent_b?: number | null
+          percent_c?: number | null
+          percent_d?: number | null
+          precisa_recalculo?: boolean | null
+          real_r?: number | null
+          res_p?: number | null
+          res_tot?: number | null
+          semana?: number | null
+          sympla_checkins?: number | null
+          sympla_liquido?: number | null
+          t_bar?: number | null
+          t_coz?: number | null
+          t_medio?: number | null
+          tb_plan?: number | null
+          tb_real?: number | null
+          tb_real_calculado?: number | null
+          te_plan?: number | null
+          te_real?: number | null
+          te_real_calculado?: number | null
+          versao_calculo?: number | null
+          yuzer_ingressos?: number | null
+          yuzer_liquido?: number | null
+        }
+        Relationships: []
+      }
+      getin_reservas: {
+        Row: {
+          bar_id: number | null
+          confirmation_sent: boolean | null
+          created_at: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          discount: number | null
+          id: number | null
+          info: string | null
+          no_show: boolean | null
+          no_show_eligible: boolean | null
+          no_show_hours: number | null
+          no_show_tax: number | null
+          nps_answered: boolean | null
+          nps_url: string | null
+          people: number | null
+          raw_data: Json | null
+          reservation_date: string | null
+          reservation_id: string | null
+          reservation_time: string | null
+          sector_id: string | null
+          sector_name: string | null
+          status: string | null
+          unit_city_name: string | null
+          unit_coordinates_lat: number | null
+          unit_coordinates_lng: number | null
+          unit_cover_image: string | null
+          unit_cuisine_name: string | null
+          unit_full_address: string | null
+          unit_id: string | null
+          unit_name: string | null
+          unit_profile_image: string | null
+          unit_zipcode: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bar_id?: number | null
+          confirmation_sent?: boolean | null
+          created_at?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          discount?: number | null
+          id?: number | null
+          info?: string | null
+          no_show?: boolean | null
+          no_show_eligible?: boolean | null
+          no_show_hours?: number | null
+          no_show_tax?: number | null
+          nps_answered?: boolean | null
+          nps_url?: string | null
+          people?: number | null
+          raw_data?: Json | null
+          reservation_date?: string | null
+          reservation_id?: string | null
+          reservation_time?: string | null
+          sector_id?: string | null
+          sector_name?: string | null
+          status?: string | null
+          unit_city_name?: string | null
+          unit_coordinates_lat?: number | null
+          unit_coordinates_lng?: number | null
+          unit_cover_image?: string | null
+          unit_cuisine_name?: string | null
+          unit_full_address?: string | null
+          unit_id?: string | null
+          unit_name?: string | null
+          unit_profile_image?: string | null
+          unit_zipcode?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bar_id?: number | null
+          confirmation_sent?: boolean | null
+          created_at?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          discount?: number | null
+          id?: number | null
+          info?: string | null
+          no_show?: boolean | null
+          no_show_eligible?: boolean | null
+          no_show_hours?: number | null
+          no_show_tax?: number | null
+          nps_answered?: boolean | null
+          nps_url?: string | null
+          people?: number | null
+          raw_data?: Json | null
+          reservation_date?: string | null
+          reservation_id?: string | null
+          reservation_time?: string | null
+          sector_id?: string | null
+          sector_name?: string | null
+          status?: string | null
+          unit_city_name?: string | null
+          unit_coordinates_lat?: number | null
+          unit_coordinates_lng?: number | null
+          unit_cover_image?: string | null
+          unit_cuisine_name?: string | null
+          unit_full_address?: string | null
+          unit_id?: string | null
+          unit_name?: string | null
+          unit_profile_image?: string | null
+          unit_zipcode?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "getin_reservations_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          autorizacao: string | null
+          bar_id: number | null
+          cartao: string | null
+          cli: number | null
+          cliente: string | null
+          created_at: string | null
+          dt_credito: string | null
+          dt_gerencial: string | null
+          dt_transacao: string | null
+          hr_lancamento: string | null
+          hr_transacao: string | null
+          id: number | null
+          idempotency_key: string | null
+          liquido: number | null
+          meio: string | null
+          mesa: string | null
+          motivodesconto: string | null
+          pag: string | null
+          perc: number | null
+          taxa: number | null
+          tipo: string | null
+          trn: string | null
+          updated_at: string | null
+          usr_abriu: string | null
+          usr_aceitou: string | null
+          usr_lancou: string | null
+          valor: number | null
+          vd: string | null
+          vr_pagamentos: number | null
+        }
+        Insert: {
+          autorizacao?: string | null
+          bar_id?: number | null
+          cartao?: string | null
+          cli?: number | null
+          cliente?: string | null
+          created_at?: string | null
+          dt_credito?: string | null
+          dt_gerencial?: string | null
+          dt_transacao?: string | null
+          hr_lancamento?: string | null
+          hr_transacao?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          liquido?: number | null
+          meio?: string | null
+          mesa?: string | null
+          motivodesconto?: string | null
+          pag?: string | null
+          perc?: number | null
+          taxa?: number | null
+          tipo?: string | null
+          trn?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          usr_aceitou?: string | null
+          usr_lancou?: string | null
+          valor?: number | null
+          vd?: string | null
+          vr_pagamentos?: number | null
+        }
+        Update: {
+          autorizacao?: string | null
+          bar_id?: number | null
+          cartao?: string | null
+          cli?: number | null
+          cliente?: string | null
+          created_at?: string | null
+          dt_credito?: string | null
+          dt_gerencial?: string | null
+          dt_transacao?: string | null
+          hr_lancamento?: string | null
+          hr_transacao?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          liquido?: number | null
+          meio?: string | null
+          mesa?: string | null
+          motivodesconto?: string | null
+          pag?: string | null
+          perc?: number | null
+          taxa?: number | null
+          tipo?: string | null
+          trn?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          usr_aceitou?: string | null
+          usr_lancou?: string | null
+          valor?: number | null
+          vd?: string | null
+          vr_pagamentos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_contahub_pagamentos_bar_id"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      periodo: {
+        Row: {
+          bar_id: number | null
+          cht_nome: string | null
+          cli_dtnasc: string | null
+          cli_email: string | null
+          cli_fone: string | null
+          cli_nome: string | null
+          created_at: string | null
+          dt_contabil: string | null
+          dt_gerencial: string | null
+          id: number | null
+          idempotency_key: string | null
+          motivo: string | null
+          pessoas: number | null
+          qtd_itens: number | null
+          semana: number | null
+          tipovenda: string | null
+          ultimo_pedido: string | null
+          updated_at: string | null
+          usr_abriu: string | null
+          vd_dtcontabil: string | null
+          vd_localizacao: string | null
+          vd_mesadesc: string | null
+          vr_couvert: number | null
+          vr_desconto: number | null
+          vr_pagamentos: number | null
+          vr_produtos: number | null
+          vr_repique: number | null
+        }
+        Insert: {
+          bar_id?: number | null
+          cht_nome?: string | null
+          cli_dtnasc?: string | null
+          cli_email?: string | null
+          cli_fone?: string | null
+          cli_nome?: string | null
+          created_at?: string | null
+          dt_contabil?: string | null
+          dt_gerencial?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          motivo?: string | null
+          pessoas?: number | null
+          qtd_itens?: number | null
+          semana?: number | null
+          tipovenda?: string | null
+          ultimo_pedido?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          vd_dtcontabil?: string | null
+          vd_localizacao?: string | null
+          vd_mesadesc?: string | null
+          vr_couvert?: number | null
+          vr_desconto?: number | null
+          vr_pagamentos?: number | null
+          vr_produtos?: number | null
+          vr_repique?: number | null
+        }
+        Update: {
+          bar_id?: number | null
+          cht_nome?: string | null
+          cli_dtnasc?: string | null
+          cli_email?: string | null
+          cli_fone?: string | null
+          cli_nome?: string | null
+          created_at?: string | null
+          dt_contabil?: string | null
+          dt_gerencial?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          motivo?: string | null
+          pessoas?: number | null
+          qtd_itens?: number | null
+          semana?: number | null
+          tipovenda?: string | null
+          ultimo_pedido?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          vd_dtcontabil?: string | null
+          vd_localizacao?: string | null
+          vd_mesadesc?: string | null
+          vr_couvert?: number | null
+          vr_desconto?: number | null
+          vr_pagamentos?: number | null
+          vr_produtos?: number | null
+          vr_repique?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_contahub_periodo_bar_id"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos: {
+        Row: {
+          bar_id: number | null
+          categoria: string | null
+          created_at: string | null
+          data_evento: string | null
+          eh_ingresso: boolean | null
+          evento_id: number | null
+          id: number | null
+          percentual: number | null
+          produto_id: number | null
+          produto_nome: string | null
+          quantidade: number | null
+          raw_data: Json | null
+          subcategoria: string | null
+          updated_at: string | null
+          valor_total: number | null
+        }
+        Insert: {
+          bar_id?: number | null
+          categoria?: string | null
+          created_at?: string | null
+          data_evento?: string | null
+          eh_ingresso?: boolean | null
+          evento_id?: number | null
+          id?: number | null
+          percentual?: number | null
+          produto_id?: number | null
+          produto_nome?: string | null
+          quantidade?: number | null
+          raw_data?: Json | null
+          subcategoria?: string | null
+          updated_at?: string | null
+          valor_total?: number | null
+        }
+        Update: {
+          bar_id?: number | null
+          categoria?: string | null
+          created_at?: string | null
+          data_evento?: string | null
+          eh_ingresso?: boolean | null
+          evento_id?: number | null
+          id?: number | null
+          percentual?: number | null
+          produto_id?: number | null
+          produto_nome?: string | null
+          quantidade?: number | null
+          raw_data?: Json | null
+          subcategoria?: string | null
+          updated_at?: string | null
+          valor_total?: number | null
+        }
+        Relationships: []
+      }
+      sympla_bilheteria: {
+        Row: {
+          bar_id: number | null
+          created_at: string | null
+          dados_comprador: Json | null
+          dados_utm: Json | null
+          data_pedido: string | null
+          email_comprador: string | null
+          evento_sympla_id: string | null
+          id: number | null
+          nome_comprador: string | null
+          pedido_sympla_id: string | null
+          raw_data: Json | null
+          status_pedido: string | null
+          taxa_sympla: number | null
+          tipo_transacao: string | null
+          updated_at: string | null
+          valor_bruto: number | null
+          valor_liquido: number | null
+        }
+        Insert: {
+          bar_id?: number | null
+          created_at?: string | null
+          dados_comprador?: Json | null
+          dados_utm?: Json | null
+          data_pedido?: string | null
+          email_comprador?: string | null
+          evento_sympla_id?: string | null
+          id?: number | null
+          nome_comprador?: string | null
+          pedido_sympla_id?: string | null
+          raw_data?: Json | null
+          status_pedido?: string | null
+          taxa_sympla?: number | null
+          tipo_transacao?: string | null
+          updated_at?: string | null
+          valor_bruto?: number | null
+          valor_liquido?: number | null
+        }
+        Update: {
+          bar_id?: number | null
+          created_at?: string | null
+          dados_comprador?: Json | null
+          dados_utm?: Json | null
+          data_pedido?: string | null
+          email_comprador?: string | null
+          evento_sympla_id?: string | null
+          id?: number | null
+          nome_comprador?: string | null
+          pedido_sympla_id?: string | null
+          raw_data?: Json | null
+          status_pedido?: string | null
+          taxa_sympla?: number | null
+          tipo_transacao?: string | null
+          updated_at?: string | null
+          valor_bruto?: number | null
+          valor_liquido?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sympla_pedidos_evento_sympla_id_fkey"
+            columns: ["evento_sympla_id"]
+            isOneToOne: false
+            referencedRelation: "sympla_eventos"
+            referencedColumns: ["evento_sympla_id"]
+          },
+          {
+            foreignKeyName: "sympla_pedidos_evento_sympla_id_fkey"
+            columns: ["evento_sympla_id"]
+            isOneToOne: false
+            referencedRelation: "sympla_resumo"
+            referencedColumns: ["evento_sympla_id"]
+          },
+        ]
+      }
       sympla_resumo: {
         Row: {
           checkins_realizados: number | null
@@ -5175,6 +6059,140 @@ export type Database = {
           total_participantes: number | null
         }
         Relationships: []
+      }
+      tempo: {
+        Row: {
+          ano: number | null
+          bar_id: number | null
+          categoria: string | null
+          created_at: string | null
+          data: string | null
+          dds: number | null
+          dia: string | null
+          diadasemana: string | null
+          grp_desc: string | null
+          hora: string | null
+          id: number | null
+          idempotency_key: string | null
+          itm: string | null
+          itm_qtd: number | null
+          loc_desc: string | null
+          mes: number | null
+          prd: number | null
+          prd_desc: string | null
+          prd_idexterno: string | null
+          prefixo: string | null
+          t0_lancamento: string | null
+          t0_t1: number | null
+          t0_t2: number | null
+          t0_t3: number | null
+          t1_prodini: string | null
+          t1_t2: number | null
+          t1_t3: number | null
+          t2_prodfim: string | null
+          t2_t3: number | null
+          t3_entrega: string | null
+          tipovenda: string | null
+          updated_at: string | null
+          usr_abriu: string | null
+          usr_entregou: string | null
+          usr_lancou: string | null
+          usr_produziu: string | null
+          usr_transfcancelou: string | null
+          vd_localizacao: string | null
+          vd_mesadesc: string | null
+        }
+        Insert: {
+          ano?: number | null
+          bar_id?: number | null
+          categoria?: string | null
+          created_at?: string | null
+          data?: string | null
+          dds?: number | null
+          dia?: string | null
+          diadasemana?: string | null
+          grp_desc?: string | null
+          hora?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          itm?: string | null
+          itm_qtd?: number | null
+          loc_desc?: string | null
+          mes?: number | null
+          prd?: number | null
+          prd_desc?: string | null
+          prd_idexterno?: string | null
+          prefixo?: string | null
+          t0_lancamento?: string | null
+          t0_t1?: number | null
+          t0_t2?: number | null
+          t0_t3?: number | null
+          t1_prodini?: string | null
+          t1_t2?: number | null
+          t1_t3?: number | null
+          t2_prodfim?: string | null
+          t2_t3?: number | null
+          t3_entrega?: string | null
+          tipovenda?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          usr_entregou?: string | null
+          usr_lancou?: string | null
+          usr_produziu?: string | null
+          usr_transfcancelou?: string | null
+          vd_localizacao?: string | null
+          vd_mesadesc?: string | null
+        }
+        Update: {
+          ano?: number | null
+          bar_id?: number | null
+          categoria?: string | null
+          created_at?: string | null
+          data?: string | null
+          dds?: number | null
+          dia?: string | null
+          diadasemana?: string | null
+          grp_desc?: string | null
+          hora?: string | null
+          id?: number | null
+          idempotency_key?: string | null
+          itm?: string | null
+          itm_qtd?: number | null
+          loc_desc?: string | null
+          mes?: number | null
+          prd?: number | null
+          prd_desc?: string | null
+          prd_idexterno?: string | null
+          prefixo?: string | null
+          t0_lancamento?: string | null
+          t0_t1?: number | null
+          t0_t2?: number | null
+          t0_t3?: number | null
+          t1_prodini?: string | null
+          t1_t2?: number | null
+          t1_t3?: number | null
+          t2_prodfim?: string | null
+          t2_t3?: number | null
+          t3_entrega?: string | null
+          tipovenda?: string | null
+          updated_at?: string | null
+          usr_abriu?: string | null
+          usr_entregou?: string | null
+          usr_lancou?: string | null
+          usr_produziu?: string | null
+          usr_transfcancelou?: string | null
+          vd_localizacao?: string | null
+          vd_mesadesc?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_contahub_tempo_bar_id"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       token_status: {
         Row: {
@@ -5202,6 +6220,104 @@ export type Database = {
           token_name?: string | null
         }
         Relationships: []
+      }
+      usuarios: {
+        Row: {
+          ativo: boolean | null
+          atualizado_em: string | null
+          bar_id: number | null
+          bio: string | null
+          biometric_credentials: Json | null
+          celular: string | null
+          cep: string | null
+          cidade: string | null
+          conta_verificada: boolean | null
+          cpf: string | null
+          criado_em: string | null
+          data_nascimento: string | null
+          email: string | null
+          endereco: string | null
+          estado: string | null
+          foto_perfil: string | null
+          id: number | null
+          modulos_permitidos: Json | null
+          nome: string | null
+          observacoes: string | null
+          preferencias: Json | null
+          role: string | null
+          senha_redefinida: boolean | null
+          telefone: string | null
+          ultima_atividade: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          bar_id?: number | null
+          bio?: string | null
+          biometric_credentials?: Json | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          conta_verificada?: boolean | null
+          cpf?: string | null
+          criado_em?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          foto_perfil?: string | null
+          id?: number | null
+          modulos_permitidos?: Json | null
+          nome?: string | null
+          observacoes?: string | null
+          preferencias?: Json | null
+          role?: string | null
+          senha_redefinida?: boolean | null
+          telefone?: string | null
+          ultima_atividade?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          atualizado_em?: string | null
+          bar_id?: number | null
+          bio?: string | null
+          biometric_credentials?: Json | null
+          celular?: string | null
+          cep?: string | null
+          cidade?: string | null
+          conta_verificada?: boolean | null
+          cpf?: string | null
+          criado_em?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
+          foto_perfil?: string | null
+          id?: number | null
+          modulos_permitidos?: Json | null
+          nome?: string | null
+          observacoes?: string | null
+          preferencias?: Json | null
+          role?: string | null
+          senha_redefinida?: boolean | null
+          telefone?: string | null
+          ultima_atividade?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_bar_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       view_dre: {
         Row: {
@@ -5338,6 +6454,48 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
           to_number?: string | null
+        }
+        Relationships: []
+      }
+      yuzer_analitico: {
+        Row: {
+          bar_id: number | null
+          created_at: string | null
+          data_evento: string | null
+          evento_id: number | null
+          faturamento: number | null
+          hora: number | null
+          hora_formatada: string | null
+          id: number | null
+          raw_data: Json | null
+          updated_at: string | null
+          vendas: number | null
+        }
+        Insert: {
+          bar_id?: number | null
+          created_at?: string | null
+          data_evento?: string | null
+          evento_id?: number | null
+          faturamento?: number | null
+          hora?: number | null
+          hora_formatada?: string | null
+          id?: number | null
+          raw_data?: Json | null
+          updated_at?: string | null
+          vendas?: number | null
+        }
+        Update: {
+          bar_id?: number | null
+          created_at?: string | null
+          data_evento?: string | null
+          evento_id?: number | null
+          faturamento?: number | null
+          hora?: number | null
+          hora_formatada?: string | null
+          id?: number | null
+          raw_data?: Json | null
+          updated_at?: string | null
+          vendas?: number | null
         }
         Relationships: []
       }
