@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       tipo_local: insumo.tipo_local,
       categoria: insumo.categoria,
       unidade_medida: insumo.unidade_medida,
-      custo_unitario: parseFloat(insumo.custo_unitario) || 0,
+      custo_unitario: insumo.custo_unitario || 0,
       observacoes,
       usuario_contagem,
       updated_at: new Date().toISOString(),
