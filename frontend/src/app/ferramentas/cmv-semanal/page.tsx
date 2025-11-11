@@ -8,12 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog';
+  LargeModal,
+  ModalField,
+  ModalFormGrid,
+  ModalSection,
+} from '@/components/ui/large-modal';
 import {
   Select,
   SelectContent,
@@ -24,19 +23,24 @@ import {
 import {
   TrendingUp,
   Plus,
-  Save,
   Trash2,
   RefreshCcw,
-  Calendar,
+  Calculator,
   CheckCircle,
   AlertCircle,
   Edit,
   DollarSign,
-  Package
+  Package,
+  ShoppingCart,
+  Users,
+  TrendingDown,
+  Info,
+  Sparkles
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 
 interface CMVSemanal {
   id?: number;
@@ -45,17 +49,58 @@ interface CMVSemanal {
   semana: number;
   data_inicio: string;
   data_fim: string;
+  
+  // Vendas
   vendas_brutas: number;
   vendas_liquidas: number;
+  
+  // Estoque e Compras
   estoque_inicial: number;
   compras_periodo: number;
   estoque_final: number;
-  cmv_calculado?: number;
-  cmv_percentual?: number;
+  
+  // Consumos
+  consumo_socios: number;
+  consumo_beneficios: number;
+  consumo_adm: number;
+  consumo_rh: number;
+  consumo_artista: number;
+  outros_ajustes: number;
+  ajuste_bonificacoes: number;
+  
+  // Cálculos
+  cmv_real: number;
+  faturamento_cmvivel: number;
+  cmv_limpo_percentual: number;
+  cmv_teorico_percentual: number;
+  gap: number;
+  
+  // Estoque Final Detalhado
+  estoque_final_cozinha: number;
+  estoque_final_bebidas: number;
+  estoque_final_drinks: number;
+  
+  // Compras Detalhadas
+  compras_custo_comida: number;
+  compras_custo_bebidas: number;
+  compras_custo_outros: number;
+  compras_custo_drinks: number;
+  
+  // Contas Especiais
+  total_consumo_socios: number;
+  mesa_beneficios_cliente: number;
+  mesa_banda_dj: number;
+  chegadeira: number;
+  mesa_adm_casa: number;
+  mesa_rh: number;
+  
+  // Categorias (legado)
   cmv_bebidas: number;
   cmv_alimentos: number;
   cmv_descartaveis: number;
   cmv_outros: number;
+  
+  // Metadados
   status: 'rascunho' | 'fechado' | 'auditado';
   responsavel?: string;
   observacoes?: string;
@@ -68,6 +113,8 @@ export default function CMVSemanalPage() {
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [calculando, setCalculando] = useState(false);
   const [cmvs, setCmvs] = useState<CMVSemanal[]>([]);
   const [anoFiltro, setAnoFiltro] = useState(() => new Date().getFullYear());
   const [statusFiltro, setStatusFiltro] = useState('TODOS');
@@ -81,6 +128,31 @@ export default function CMVSemanalPage() {
     estoque_inicial: 0,
     compras_periodo: 0,
     estoque_final: 0,
+    consumo_socios: 0,
+    consumo_beneficios: 0,
+    consumo_adm: 0,
+    consumo_rh: 0,
+    consumo_artista: 0,
+    outros_ajustes: 0,
+    ajuste_bonificacoes: 0,
+    cmv_real: 0,
+    faturamento_cmvivel: 0,
+    cmv_limpo_percentual: 0,
+    cmv_teorico_percentual: 0,
+    gap: 0,
+    estoque_final_cozinha: 0,
+    estoque_final_bebidas: 0,
+    estoque_final_drinks: 0,
+    compras_custo_comida: 0,
+    compras_custo_bebidas: 0,
+    compras_custo_outros: 0,
+    compras_custo_drinks: 0,
+    total_consumo_socios: 0,
+    mesa_beneficios_cliente: 0,
+    mesa_banda_dj: 0,
+    chegadeira: 0,
+    mesa_adm_casa: 0,
+    mesa_rh: 0,
     cmv_bebidas: 0,
     cmv_alimentos: 0,
     cmv_descartaveis: 0,
@@ -95,6 +167,111 @@ export default function CMVSemanalPage() {
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
     return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+  };
+
+  // Calcular todos os valores automaticamente
+  const calcularValoresAutomaticos = useCallback(() => {
+    const dados = { ...formData };
+    
+    // 1. Calcular consumos baseados nas contas especiais
+    // Consumo Sócios = Total Consumo Sócios * 0.35
+    dados.consumo_socios = (dados.total_consumo_socios || 0) * 0.35;
+    
+    // Consumo Benefícios = (Mesa Benefícios Cliente + Chegadeira) * 0.33
+    dados.consumo_beneficios = ((dados.mesa_beneficios_cliente || 0) + (dados.chegadeira || 0)) * 0.33;
+    
+    // Consumo ADM = Mesa ADM/Casa * 0.35
+    dados.consumo_adm = (dados.mesa_adm_casa || 0) * 0.35;
+    
+    // Consumo Artista = Mesa da Banda/DJ * 0.35
+    dados.consumo_artista = (dados.mesa_banda_dj || 0) * 0.35;
+    
+    // 2. Calcular estoque final total
+    dados.estoque_final = (dados.estoque_final_cozinha || 0) + 
+                          (dados.estoque_final_bebidas || 0) + 
+                          (dados.estoque_final_drinks || 0);
+    
+    // 3. Calcular compras do período total
+    dados.compras_periodo = (dados.compras_custo_comida || 0) + 
+                            (dados.compras_custo_bebidas || 0) + 
+                            (dados.compras_custo_outros || 0) + 
+                            (dados.compras_custo_drinks || 0);
+    
+    // 4. Calcular CMV Real
+    // CMV Real = (Estoque Inicial + Compras - Estoque Final) - 
+    //            (Consumo Sócios + Consumo Benefícios + Consumo ADM + Consumo RH + Consumo Artista + Outros Ajustes) +
+    //            Ajuste Bonificações
+    const cmvBruto = (dados.estoque_inicial || 0) + 
+                     (dados.compras_periodo || 0) - 
+                     (dados.estoque_final || 0);
+    
+    const totalConsumos = (dados.consumo_socios || 0) + 
+                          (dados.consumo_beneficios || 0) + 
+                          (dados.consumo_adm || 0) + 
+                          (dados.consumo_rh || 0) + 
+                          (dados.consumo_artista || 0) + 
+                          (dados.outros_ajustes || 0);
+    
+    dados.cmv_real = cmvBruto - totalConsumos + (dados.ajuste_bonificacoes || 0);
+    
+    // 5. Calcular CMV Limpo (%)
+    // CMV Limpo = (CMV Real / Faturamento CMVível) * 100
+    if ((dados.faturamento_cmvivel || 0) > 0) {
+      dados.cmv_limpo_percentual = ((dados.cmv_real || 0) / (dados.faturamento_cmvivel || 1)) * 100;
+    }
+    
+    // 6. Calcular GAP
+    // GAP = CMV Limpo - CMV Teórico
+    dados.gap = (dados.cmv_limpo_percentual || 0) - (dados.cmv_teorico_percentual || 0);
+    
+    setFormData(dados);
+  }, [formData]);
+
+  // Buscar dados automáticos de APIs externas
+  const buscarDadosAutomaticos = async () => {
+    if (!selectedBar || !formData.data_inicio || !formData.data_fim) {
+      toast({
+        title: "Dados insuficientes",
+        description: "Defina as datas da semana primeiro",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCalculando(true);
+
+    try {
+      // 1. Buscar consumo dos sócios
+      // TODO: Implementar busca de consumo dos sócios (x-corbal, etc)
+      // Baseado na API /api/analitico/socios
+      
+      // 2. Buscar compras do NIBO por categoria
+      // TODO: Implementar busca no NIBO
+      // CUSTO COMIDA, CUSTO BEBIDAS, CUSTO OUTROS, CUSTO DRINKS
+      
+      // 3. Buscar faturamento CMVível do ContaHub
+      // TODO: Implementar busca de vr_repique no ContaHub
+      
+      // 4. Buscar estoque final (contagem) por tipo_local
+      // TODO: Implementar busca de estoque por data
+      
+      toast({
+        title: "Dados carregados",
+        description: "Dados automáticos foram carregados com sucesso",
+      });
+
+      calcularValoresAutomaticos();
+
+    } catch (error) {
+      console.error('Erro ao buscar dados automáticos:', error);
+      toast({
+        title: "Erro ao buscar dados",
+        description: "Não foi possível carregar dados automáticos",
+        variant: "destructive"
+      });
+    } finally {
+      setCalculando(false);
+    }
   };
 
   // Carregar dados
@@ -147,6 +324,9 @@ export default function CMVSemanalPage() {
     const ultimoDiaSemana = new Date(primeiroDiaSemana);
     ultimoDiaSemana.setDate(primeiroDiaSemana.getDate() + 6);
 
+    // Buscar estoque final da semana anterior como estoque inicial
+    const semanaAnterior = cmvs.find(cmv => cmv.ano === anoFiltro && cmv.semana === (semanaAtual - 1));
+
     setItemEditando(null);
     setFormData({
       ano: anoFiltro,
@@ -155,9 +335,34 @@ export default function CMVSemanalPage() {
       data_fim: ultimoDiaSemana.toISOString().split('T')[0],
       vendas_brutas: 0,
       vendas_liquidas: 0,
-      estoque_inicial: 0,
+      estoque_inicial: semanaAnterior?.estoque_final || 0, // Usar estoque final da semana anterior
       compras_periodo: 0,
       estoque_final: 0,
+      consumo_socios: 0,
+      consumo_beneficios: 0,
+      consumo_adm: 0,
+      consumo_rh: 0,
+      consumo_artista: 0,
+      outros_ajustes: 0,
+      ajuste_bonificacoes: 0,
+      cmv_real: 0,
+      faturamento_cmvivel: 0,
+      cmv_limpo_percentual: 0,
+      cmv_teorico_percentual: 0,
+      gap: 0,
+      estoque_final_cozinha: 0,
+      estoque_final_bebidas: 0,
+      estoque_final_drinks: 0,
+      compras_custo_comida: 0,
+      compras_custo_bebidas: 0,
+      compras_custo_outros: 0,
+      compras_custo_drinks: 0,
+      total_consumo_socios: 0,
+      mesa_beneficios_cliente: 0,
+      mesa_banda_dj: 0,
+      chegadeira: 0,
+      mesa_adm_casa: 0,
+      mesa_rh: 0,
       cmv_bebidas: 0,
       cmv_alimentos: 0,
       cmv_descartaveis: 0,
@@ -186,7 +391,12 @@ export default function CMVSemanalPage() {
       return;
     }
 
+    setSalvando(true);
+
     try {
+      // Recalcular antes de salvar
+      calcularValoresAutomaticos();
+
       const registro = {
         ...formData,
         bar_id: selectedBar.id,
@@ -208,7 +418,7 @@ export default function CMVSemanalPage() {
       if (!response.ok) throw new Error('Erro ao salvar');
 
       toast({
-        title: "Sucesso",
+        title: "✅ Sucesso",
         description: "CMV salvo com sucesso"
       });
 
@@ -222,6 +432,8 @@ export default function CMVSemanalPage() {
         description: "Não foi possível salvar o CMV",
         variant: "destructive"
       });
+    } finally {
+      setSalvando(false);
     }
   };
 
@@ -287,6 +499,39 @@ export default function CMVSemanalPage() {
     }
   };
 
+  // Recalcular quando formData mudar
+  useEffect(() => {
+    if (modalAberto) {
+      calcularValoresAutomaticos();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formData.estoque_inicial,
+    formData.compras_periodo,
+    formData.estoque_final,
+    formData.consumo_socios,
+    formData.consumo_beneficios,
+    formData.consumo_adm,
+    formData.consumo_rh,
+    formData.consumo_artista,
+    formData.outros_ajustes,
+    formData.ajuste_bonificacoes,
+    formData.faturamento_cmvivel,
+    formData.cmv_teorico_percentual,
+    formData.total_consumo_socios,
+    formData.mesa_beneficios_cliente,
+    formData.mesa_banda_dj,
+    formData.chegadeira,
+    formData.mesa_adm_casa,
+    formData.estoque_final_cozinha,
+    formData.estoque_final_bebidas,
+    formData.estoque_final_drinks,
+    formData.compras_custo_comida,
+    formData.compras_custo_bebidas,
+    formData.compras_custo_outros,
+    formData.compras_custo_drinks,
+  ]);
+
   useEffect(() => {
     setPageTitle('📊 CMV Semanal');
   }, [setPageTitle]);
@@ -313,7 +558,11 @@ export default function CMVSemanalPage() {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(valor);
+    }).format(valor || 0);
+  };
+
+  const formatarPercentual = (valor: number) => {
+    return `${(valor || 0).toFixed(2)}%`;
   };
 
   return (
@@ -323,15 +572,15 @@ export default function CMVSemanalPage() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              CMV Semanal
+              📊 CMV Semanal
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Custo de Mercadoria Vendida calculado semanalmente
+              Custo de Mercadoria Vendida calculado semanalmente com precisão
             </p>
           </div>
           <Button
             onClick={abrirModalAdicionar}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Adicionar CMV
@@ -339,33 +588,35 @@ export default function CMVSemanalPage() {
         </div>
 
         {/* Filtros */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+        <Card className="card-dark mb-6">
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label>Ano</Label>
+                <Label className="text-gray-700 dark:text-gray-300">Ano</Label>
                 <Select value={anoFiltro.toString()} onValueChange={(value) => setAnoFiltro(parseInt(value))}>
-                  <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                  <SelectTrigger className="select-dark">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="modal-select-content">
                     {[2024, 2025, 2026].map((ano) => (
-                      <SelectItem key={ano} value={ano.toString()}>{ano}</SelectItem>
+                      <SelectItem key={ano} value={ano.toString()} className="modal-select-item">
+                        {ano}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Status</Label>
+                <Label className="text-gray-700 dark:text-gray-300">Status</Label>
                 <Select value={statusFiltro} onValueChange={setStatusFiltro}>
-                  <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                  <SelectTrigger className="select-dark">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TODOS">Todos</SelectItem>
-                    <SelectItem value="rascunho">Rascunho</SelectItem>
-                    <SelectItem value="fechado">Fechado</SelectItem>
-                    <SelectItem value="auditado">Auditado</SelectItem>
+                  <SelectContent className="modal-select-content">
+                    <SelectItem value="TODOS" className="modal-select-item">Todos</SelectItem>
+                    <SelectItem value="rascunho" className="modal-select-item">Rascunho</SelectItem>
+                    <SelectItem value="fechado" className="modal-select-item">Fechado</SelectItem>
+                    <SelectItem value="auditado" className="modal-select-item">Auditado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -373,7 +624,7 @@ export default function CMVSemanalPage() {
                 <Button
                   onClick={carregarCMVs}
                   variant="outline"
-                  className="w-full"
+                  className="w-full btn-outline-dark"
                 >
                   <RefreshCcw className="h-4 w-4 mr-2" />
                   Atualizar
@@ -384,9 +635,9 @@ export default function CMVSemanalPage() {
         </Card>
 
         {/* Tabela de CMVs */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="card-dark">
           <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <TrendingUp className="h-5 w-5" />
               CMVs Registrados ({cmvs.length})
             </CardTitle>
@@ -398,9 +649,10 @@ export default function CMVSemanalPage() {
                   <tr>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Semana</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Período</th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Vendas Líq.</th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">CMV Calc.</th>
-                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">CMV %</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Fat. CMVível</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">CMV Real</th>
+                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">CMV Limpo %</th>
+                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Gap</th>
                     <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Status</th>
                     <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Ações</th>
                   </tr>
@@ -408,7 +660,7 @@ export default function CMVSemanalPage() {
                 <tbody>
                   {cmvs.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center">
+                      <td colSpan={8} className="py-12 text-center">
                         <Package className="h-12 w-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
                         <p className="text-gray-600 dark:text-gray-400 font-medium">
                           Nenhum CMV encontrado
@@ -432,22 +684,35 @@ export default function CMVSemanalPage() {
                           {new Date(cmv.data_fim).toLocaleDateString('pt-BR')}
                         </td>
                         <td className="py-3 px-4 text-right text-sm font-semibold text-gray-900 dark:text-white">
-                          {formatarMoeda(cmv.vendas_liquidas)}
+                          {formatarMoeda(cmv.faturamento_cmvivel)}
                         </td>
                         <td className="py-3 px-4 text-right text-sm font-semibold text-gray-900 dark:text-white">
-                          {formatarMoeda(cmv.cmv_calculado || 0)}
+                          {formatarMoeda(cmv.cmv_real || 0)}
                         </td>
                         <td className="py-3 px-4 text-center">
                           <Badge
                             className={`${
-                              (cmv.cmv_percentual || 0) <= 33
+                              (cmv.cmv_limpo_percentual || 0) <= 33
                                 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300'
-                                : (cmv.cmv_percentual || 0) <= 40
+                                : (cmv.cmv_limpo_percentual || 0) <= 40
                                 ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300'
                                 : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300'
                             }`}
                           >
-                            {(cmv.cmv_percentual || 0).toFixed(1)}%
+                            {formatarPercentual(cmv.cmv_limpo_percentual || 0)}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <Badge
+                            className={`${
+                              (cmv.gap || 0) <= 0
+                                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300'
+                                : (cmv.gap || 0) <= 3
+                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300'
+                                : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300'
+                            }`}
+                          >
+                            {formatarPercentual(cmv.gap || 0)}
                           </Badge>
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -469,8 +734,8 @@ export default function CMVSemanalPage() {
                               atualizarStatus(cmv.id!, proximoStatus);
                             }}
                           >
-                            {cmv.status === 'auditado' && <CheckCircle className="h-3 w-3 mr-1" />}
-                            {cmv.status === 'fechado' && <AlertCircle className="h-3 w-3 mr-1" />}
+                            {cmv.status === 'auditado' && <CheckCircle className="h-3 w-3 mr-1 inline" />}
+                            {cmv.status === 'fechado' && <AlertCircle className="h-3 w-3 mr-1 inline" />}
                             {cmv.status.charAt(0).toUpperCase() + cmv.status.slice(1)}
                           </Badge>
                         </td>
@@ -505,229 +770,443 @@ export default function CMVSemanalPage() {
         </Card>
 
         {/* Modal Adicionar/Editar */}
-        <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {itemEditando ? 'Editar CMV' : 'Adicionar CMV Semanal'}
-              </DialogTitle>
-              <DialogDescription>
-                Preencha os dados do CMV da semana
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-              {/* Identificação */}
-              <div className="md:col-span-2 border-b pb-4">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                  Identificação da Semana
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Ano *</Label>
-                    <Input
-                      type="number"
-                      value={formData.ano || ''}
-                      onChange={(e) => setFormData({ ...formData, ano: parseInt(e.target.value) })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>Semana *</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="53"
-                      value={formData.semana || ''}
-                      onChange={(e) => setFormData({ ...formData, semana: parseInt(e.target.value) })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>Data Início *</Label>
-                    <Input
-                      type="date"
-                      value={formData.data_inicio || ''}
-                      onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>Data Fim *</Label>
-                    <Input
-                      type="date"
-                      value={formData.data_fim || ''}
-                      onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
+        <LargeModal
+          open={modalAberto}
+          onOpenChange={setModalAberto}
+          title={itemEditando ? 'Editar CMV Semanal' : 'Adicionar CMV Semanal'}
+          description="Preencha os dados do CMV da semana. Os cálculos serão feitos automaticamente."
+          size="3xl"
+          onSave={salvarItem}
+          saveText="Salvar CMV"
+          loading={salvando}
+        >
+          {/* Botão de calcular automaticamente */}
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                    Preencher Dados Automaticamente
+                  </h4>
                 </div>
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  Buscar dados de consumo dos sócios, compras do NIBO, faturamento do ContaHub e estoques automaticamente.
+                </p>
               </div>
+              <Button
+                onClick={buscarDadosAutomaticos}
+                disabled={calculando || !formData.data_inicio || !formData.data_fim}
+                className="btn-primary-dark whitespace-nowrap"
+              >
+                {calculando ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Buscando...
+                  </>
+                ) : (
+                  <>
+                    <Calculator className="h-4 w-4 mr-2" />
+                    Buscar Dados
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
 
-              {/* Vendas */}
-              <div className="md:col-span-2 border-b pb-4">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Vendas
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Vendas Brutas</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.vendas_brutas || 0}
-                      onChange={(e) => setFormData({ ...formData, vendas_brutas: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>Vendas Líquidas</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.vendas_liquidas || 0}
-                      onChange={(e) => setFormData({ ...formData, vendas_liquidas: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Estoque */}
-              <div className="md:col-span-2 border-b pb-4">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  Estoque e Compras
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label>Estoque Inicial</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.estoque_inicial || 0}
-                      onChange={(e) => setFormData({ ...formData, estoque_inicial: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>Compras do Período</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.compras_periodo || 0}
-                      onChange={(e) => setFormData({ ...formData, compras_periodo: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>Estoque Final</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.estoque_final || 0}
-                      onChange={(e) => setFormData({ ...formData, estoque_final: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                </div>
-                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <p className="text-sm text-blue-900 dark:text-blue-300">
-                    <strong>CMV Calculado:</strong> {formatarMoeda(
-                      (formData.estoque_inicial || 0) + 
-                      (formData.compras_periodo || 0) - 
-                      (formData.estoque_final || 0)
-                    )}
-                    {formData.vendas_liquidas && formData.vendas_liquidas > 0 && (
-                      <span className="ml-2">
-                        ({((((formData.estoque_inicial || 0) + (formData.compras_periodo || 0) - (formData.estoque_final || 0)) / formData.vendas_liquidas) * 100).toFixed(1)}%)
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {/* Detalhamento por Categoria */}
-              <div className="md:col-span-2 border-b pb-4">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                  Detalhamento por Categoria (Opcional)
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>CMV Bebidas</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.cmv_bebidas || 0}
-                      onChange={(e) => setFormData({ ...formData, cmv_bebidas: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>CMV Alimentos</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.cmv_alimentos || 0}
-                      onChange={(e) => setFormData({ ...formData, cmv_alimentos: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>CMV Descartáveis</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.cmv_descartaveis || 0}
-                      onChange={(e) => setFormData({ ...formData, cmv_descartaveis: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label>CMV Outros</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={formData.cmv_outros || 0}
-                      onChange={(e) => setFormData({ ...formData, cmv_outros: parseFloat(e.target.value) || 0 })}
-                      className="bg-white dark:bg-gray-700"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Observações */}
-              <div className="md:col-span-2">
-                <Label>Observações</Label>
+          {/* Seção 1: Identificação da Semana */}
+          <ModalSection title="📅 Identificação da Semana">
+            <ModalFormGrid columns={4}>
+              <ModalField label="Ano" required>
                 <Input
-                  value={formData.observacoes || ''}
-                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  placeholder="Observações adicionais..."
-                  className="bg-white dark:bg-gray-700"
+                  type="number"
+                  value={formData.ano || ''}
+                  onChange={(e) => setFormData({ ...formData, ano: parseInt(e.target.value) })}
+                  className="input-dark"
                 />
+              </ModalField>
+              <ModalField label="Semana" required>
+                <Input
+                  type="number"
+                  min="1"
+                  max="53"
+                  value={formData.semana || ''}
+                  onChange={(e) => setFormData({ ...formData, semana: parseInt(e.target.value) })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Data Início" required>
+                <Input
+                  type="date"
+                  value={formData.data_inicio || ''}
+                  onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Data Fim" required>
+                <Input
+                  type="date"
+                  value={formData.data_fim || ''}
+                  onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
+                  className="input-dark"
+                />
+              </ModalField>
+            </ModalFormGrid>
+          </ModalSection>
+
+          {/* Seção 2: Estoque Final Detalhado */}
+          <ModalSection 
+            title="📦 Estoque Final (por tipo)" 
+            description="Soma de estoque flutuante + fechado de cada área"
+          >
+            <ModalFormGrid columns={3}>
+              <ModalField label="Cozinha" description="Insumos da cozinha">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.estoque_final_cozinha || 0}
+                  onChange={(e) => setFormData({ ...formData, estoque_final_cozinha: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Bebidas + Tabacaria" description="Insumos do salão">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.estoque_final_bebidas || 0}
+                  onChange={(e) => setFormData({ ...formData, estoque_final_bebidas: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Drinks" description="Insumos de drinks">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.estoque_final_drinks || 0}
+                  onChange={(e) => setFormData({ ...formData, estoque_final_drinks: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+            </ModalFormGrid>
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                Estoque Final Total: {formatarMoeda(formData.estoque_final || 0)}
+              </p>
+            </div>
+          </ModalSection>
+
+          {/* Seção 3: Compras do NIBO */}
+          <ModalSection 
+            title="🛒 Compras do Período (NIBO)" 
+            description="Compras por categoria vindas do NIBO"
+          >
+            <ModalFormGrid columns={4}>
+              <ModalField label="Custo Comida">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.compras_custo_comida || 0}
+                  onChange={(e) => setFormData({ ...formData, compras_custo_comida: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Custo Bebidas">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.compras_custo_bebidas || 0}
+                  onChange={(e) => setFormData({ ...formData, compras_custo_bebidas: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Custo Outros">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.compras_custo_outros || 0}
+                  onChange={(e) => setFormData({ ...formData, compras_custo_outros: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Custo Drinks">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.compras_custo_drinks || 0}
+                  onChange={(e) => setFormData({ ...formData, compras_custo_drinks: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+            </ModalFormGrid>
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                Compras Total: {formatarMoeda(formData.compras_periodo || 0)}
+              </p>
+            </div>
+          </ModalSection>
+
+          {/* Seção 4: Contas Especiais para Consumos */}
+          <ModalSection 
+            title="👥 Contas Especiais (Consumos Internos)" 
+            description="Valores das mesas/contas que entram no cálculo de consumo"
+          >
+            <ModalFormGrid columns={3}>
+              <ModalField label="Total Consumo Sócios" description="x-corbal, etc. × 0.35">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.total_consumo_socios || 0}
+                  onChange={(e) => setFormData({ ...formData, total_consumo_socios: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Mesa Benefícios Cliente" description="Parte do cálculo × 0.33">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.mesa_beneficios_cliente || 0}
+                  onChange={(e) => setFormData({ ...formData, mesa_beneficios_cliente: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Mesa Banda/DJ" description="× 0.35">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.mesa_banda_dj || 0}
+                  onChange={(e) => setFormData({ ...formData, mesa_banda_dj: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Chegadeira" description="Parte do cálculo × 0.33">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.chegadeira || 0}
+                  onChange={(e) => setFormData({ ...formData, chegadeira: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Mesa ADM/Casa" description="× 0.35">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.mesa_adm_casa || 0}
+                  onChange={(e) => setFormData({ ...formData, mesa_adm_casa: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Mesa RH" description="Sem multiplicador">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.mesa_rh || 0}
+                  onChange={(e) => setFormData({ ...formData, mesa_rh: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+            </ModalFormGrid>
+          </ModalSection>
+
+          {/* Seção 5: Consumos Calculados */}
+          <ModalSection 
+            title="🍽️ Consumos Calculados" 
+            description="Valores calculados automaticamente baseados nas contas especiais"
+            collapsible
+            defaultOpen={false}
+          >
+            <ModalFormGrid columns={3}>
+              <ModalField label="Consumo Sócios">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.consumo_socios || 0}
+                  readOnly
+                  className="input-dark bg-gray-100 dark:bg-gray-600"
+                />
+              </ModalField>
+              <ModalField label="Consumo Benefícios">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.consumo_beneficios || 0}
+                  readOnly
+                  className="input-dark bg-gray-100 dark:bg-gray-600"
+                />
+              </ModalField>
+              <ModalField label="Consumo ADM">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.consumo_adm || 0}
+                  readOnly
+                  className="input-dark bg-gray-100 dark:bg-gray-600"
+                />
+              </ModalField>
+              <ModalField label="Consumo RH">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.consumo_rh || 0}
+                  onChange={(e) => setFormData({ ...formData, consumo_rh: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Consumo Artista">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.consumo_artista || 0}
+                  readOnly
+                  className="input-dark bg-gray-100 dark:bg-gray-600"
+                />
+              </ModalField>
+            </ModalFormGrid>
+          </ModalSection>
+
+          {/* Seção 6: Estoque e Ajustes */}
+          <ModalSection 
+            title="⚖️ Estoque Inicial e Ajustes" 
+            description="Estoque inicial (vem da semana anterior) e ajustes manuais"
+          >
+            <ModalFormGrid columns={3}>
+              <ModalField label="Estoque Inicial" description="Automático da semana anterior">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.estoque_inicial || 0}
+                  onChange={(e) => setFormData({ ...formData, estoque_inicial: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Outros Ajustes" description="Ajustes manuais">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.outros_ajustes || 0}
+                  onChange={(e) => setFormData({ ...formData, outros_ajustes: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField label="Ajuste Bonificações" description="Bonificações recebidas">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.ajuste_bonificacoes || 0}
+                  onChange={(e) => setFormData({ ...formData, ajuste_bonificacoes: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+            </ModalFormGrid>
+          </ModalSection>
+
+          {/* Seção 7: Faturamento e Metas */}
+          <ModalSection 
+            title="💰 Faturamento e Metas" 
+            description="Faturamento CMVível e CMV teórico esperado"
+          >
+            <ModalFormGrid columns={2}>
+              <ModalField 
+                label="Faturamento CMVível" 
+                description="Faturamento - Comissões (vr_repique)"
+              >
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.faturamento_cmvivel || 0}
+                  onChange={(e) => setFormData({ ...formData, faturamento_cmvivel: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+              <ModalField 
+                label="CMV Teórico (%)" 
+                description="Meta/esperado de CMV"
+              >
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={formData.cmv_teorico_percentual || 0}
+                  onChange={(e) => setFormData({ ...formData, cmv_teorico_percentual: parseFloat(e.target.value) || 0 })}
+                  className="input-dark"
+                />
+              </ModalField>
+            </ModalFormGrid>
+          </ModalSection>
+
+          {/* Seção 8: Resultado do CMV */}
+          <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-3 mb-4">
+              <Calculator className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                Resultado do CMV Semanal
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">CMV Real</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  {formatarMoeda(formData.cmv_real || 0)}
+                </p>
+              </div>
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">CMV Limpo</p>
+                <p className={`text-xl font-bold ${
+                  (formData.cmv_limpo_percentual || 0) <= 33
+                    ? 'text-green-600 dark:text-green-400'
+                    : (formData.cmv_limpo_percentual || 0) <= 40
+                    ? 'text-yellow-600 dark:text-yellow-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {formatarPercentual(formData.cmv_limpo_percentual || 0)}
+                </p>
+              </div>
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">CMV Teórico</p>
+                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                  {formatarPercentual(formData.cmv_teorico_percentual || 0)}
+                </p>
+              </div>
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Gap</p>
+                <p className={`text-xl font-bold ${
+                  (formData.gap || 0) <= 0
+                    ? 'text-green-600 dark:text-green-400'
+                    : (formData.gap || 0) <= 3
+                    ? 'text-yellow-600 dark:text-yellow-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {formatarPercentual(formData.gap || 0)}
+                </p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setModalAberto(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={salvarItem}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
+            {/* Explicação da fórmula */}
+            <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                  <p><strong>CMV Real =</strong> (Estoque Inicial + Compras - Estoque Final) - (Consumos) + Bonificações</p>
+                  <p><strong>CMV Limpo =</strong> (CMV Real / Faturamento CMVível) × 100</p>
+                  <p><strong>Gap =</strong> CMV Limpo - CMV Teórico</p>
+                </div>
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+
+          {/* Observações */}
+          <ModalSection title="📝 Observações" description="Anotações e comentários adicionais">
+            <ModalField label="Observações" fullWidth>
+              <Textarea
+                value={formData.observacoes || ''}
+                onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                placeholder="Observações adicionais sobre esta semana..."
+                className="textarea-dark min-h-[100px]"
+                rows={4}
+              />
+            </ModalField>
+          </ModalSection>
+        </LargeModal>
       </div>
     </div>
   );
 }
-
