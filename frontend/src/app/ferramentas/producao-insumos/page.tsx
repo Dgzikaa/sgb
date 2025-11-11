@@ -442,7 +442,7 @@ export default function ProducaoInsumosPage() {
                     Nova Receita
                   </Button>
                   <Button
-                    onClick={() => window.location.href = '/operacoes/terminal'}
+                    onClick={() => window.location.href = '/ferramentas/terminal'}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     <ChefHat className="w-4 h-4 mr-2" />
@@ -702,7 +702,7 @@ export default function ProducaoInsumosPage() {
                   O Terminal de Produção permite registrar produções em tempo real, controlar insumos e calcular rendimentos.
                 </p>
                 <Button
-                  onClick={() => window.location.href = '/operacoes/terminal'}
+                  onClick={() => window.location.href = '/ferramentas/terminal'}
                   className="bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <ChefHat className="w-4 h-4 mr-2" />
@@ -724,7 +724,7 @@ export default function ProducaoInsumosPage() {
                     </CardDescription>
                   </div>
                   <Button
-                    onClick={() => window.location.href = '/operacoes/terminal'}
+                    onClick={() => window.location.href = '/ferramentas/terminal'}
                     className="bg-orange-600 hover:bg-orange-700 text-white"
                   >
                     <ChefHat className="w-4 h-4 mr-2" />
@@ -774,7 +774,7 @@ export default function ProducaoInsumosPage() {
                           Use o Terminal de Produção para criar receitas
                         </p>
                         <Button
-                          onClick={() => window.location.href = '/operacoes/terminal'}
+                          onClick={() => window.location.href = '/ferramentas/terminal'}
                           className="bg-orange-600 hover:bg-orange-700 text-white"
                         >
                           <ChefHat className="w-4 h-4 mr-2" />
@@ -870,7 +870,7 @@ export default function ProducaoInsumosPage() {
                               Ver Detalhes
                             </Button>
                             <Button
-                              onClick={() => window.location.href = '/operacoes/terminal'}
+                              onClick={() => window.location.href = '/ferramentas/terminal'}
                               size="sm"
                               className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
                             >
@@ -1061,7 +1061,7 @@ export default function ProducaoInsumosPage() {
               <Button
                 onClick={() => {
                   setModalDetalhes(false);
-                  window.location.href = '/operacoes/terminal';
+                  window.location.href = '/ferramentas/terminal';
                 }}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
