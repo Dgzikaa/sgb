@@ -510,12 +510,12 @@ export default function ContagemEstoquePage() {
 
               {/* Busca */}
               <div className="mb-4 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                 <Input
-                  placeholder="Buscar insumo..."
+                  placeholder="Buscar insumo por nome ou código..."
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
-                  className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-11"
+                  className="pl-10 pr-3 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-12 md:h-11 text-base focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -646,9 +646,9 @@ export default function ContagemEstoquePage() {
                           <div
                             key={insumo.id}
                             id={`row-${insumo.id}`}
-                            className={`bg-white dark:bg-gray-800 border rounded-lg p-4 transition-all ${
+                            className={`bg-white dark:bg-gray-800 border rounded-xl p-4 transition-all shadow-sm ${
                               isEditado 
-                                ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/10' 
+                                ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/10 shadow-md' 
                                 : 'border-gray-200 dark:border-gray-700'
                             }`}
                           >
@@ -702,8 +702,8 @@ export default function ContagemEstoquePage() {
                             {/* Inputs de Contagem */}
                             <div className="grid grid-cols-2 gap-3 mb-4">
                               <div>
-                                <Label className="text-xs text-gray-600 dark:text-gray-400 mb-1.5 block">
-                                  Pedido
+                                <Label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5 block flex items-center gap-1">
+                                  📦 Pedido
                                 </Label>
                                 <Input
                                   type="number"
@@ -717,14 +717,14 @@ export default function ContagemEstoquePage() {
                                       e.target.value
                                     )
                                   }
-                                  className="h-12 text-center text-base font-semibold bg-white dark:bg-gray-700 border-2 focus:ring-2"
+                                  className="h-14 text-center text-lg font-bold bg-white dark:bg-gray-700 border-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg"
                                   placeholder="0"
                                 />
                               </div>
 
                               <div>
-                                <Label className="text-xs text-gray-600 dark:text-gray-400 mb-1.5 block">
-                                  Estoque Final *
+                                <Label className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1.5 block flex items-center gap-1">
+                                  ✅ Estoque Final *
                                 </Label>
                                 <Input
                                   type="number"
@@ -738,7 +738,7 @@ export default function ContagemEstoquePage() {
                                       e.target.value
                                     )
                                   }
-                                  className="h-12 text-center text-base font-semibold bg-white dark:bg-gray-700 border-2 focus:ring-2 border-blue-300 dark:border-blue-600"
+                                  className="h-14 text-center text-lg font-bold bg-blue-50 dark:bg-blue-900/20 border-2 focus:ring-2 focus:ring-blue-500 border-blue-400 dark:border-blue-600 focus:border-blue-500 rounded-lg"
                                   placeholder="0"
                                 />
                               </div>
@@ -762,14 +762,14 @@ export default function ContagemEstoquePage() {
                             <Button
                               onClick={() => salvarContagem(insumo.id)}
                               disabled={salvando || !isEditado}
-                              className={`w-full h-12 text-base font-semibold ${
+                              className={`w-full h-14 text-base font-bold rounded-xl transition-all ${
                                 isEditado
-                                  ? 'bg-green-600 hover:bg-green-700'
-                                  : 'bg-gray-400'
+                                  ? 'bg-green-600 hover:bg-green-700 active:scale-95 shadow-md hover:shadow-lg'
+                                  : 'bg-gray-400 cursor-not-allowed'
                               } text-white`}
                             >
-                              <Save className="w-4 h-4 mr-2" />
-                              {isEditado ? 'Salvar' : 'Salvo'}
+                              <Save className="w-5 h-5 mr-2" />
+                              {isEditado ? '💾 Salvar Contagem' : '✅ Salvo'}
                             </Button>
                           </div>
                         );
