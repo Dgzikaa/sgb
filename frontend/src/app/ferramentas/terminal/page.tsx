@@ -88,7 +88,7 @@ export default function TerminalProducao() {
   // Carregar insumos disponíveis
   const carregarInsumos = async () => {
     try {
-              const response = await fetch('/api/operacoes/receitas/insumos?ativo=true');
+              const response = await fetch('/api/operacional/receitas/insumos?ativo=true');
       if (response.ok) {
         const data = await response.json();
         const insumos = data.data || [];
