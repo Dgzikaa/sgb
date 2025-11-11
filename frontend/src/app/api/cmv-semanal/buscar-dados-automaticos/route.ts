@@ -140,10 +140,47 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar faturamento:', err);
     }
 
-    // 4. BUSCAR COMPRAS DO NIBO (por categoria)
-    // Isso precisaria integração com a API do NIBO
-    // Por enquanto, vamos deixar como 0 e o usuário pode preencher manualmente
-    console.log('⚠️ Compras do NIBO: Não implementado ainda (precisa integração com API do NIBO)');
+    // 4. BUSCAR COMPRAS DO NIBO (por categoria) - Do nosso banco nibo_agendamentos
+    try {
+      const categoriasCompras = {
+        'CUSTO COMIDA': ['CUSTO COMIDA', 'COMIDA', 'ALIMENTOS', 'INSUMOS COZINHA'],
+        'CUSTO BEBIDAS': ['CUSTO BEBIDAS', 'BEBIDAS', 'CERVEJA', 'REFRIGERANTE', 'ÁGUA'],
+        'CUSTO OUTROS': ['CUSTO OUTROS', 'OUTROS CUSTOS', 'DESCARTÁVEIS', 'LIMPEZA'],
+        'CUSTO DRINKS': ['CUSTO DRINKS', 'DRINKS', 'DESTILADOS', 'INSUMOS BAR']
+      };
+
+      // Buscar todas as despesas pagas no período
+      const { data: comprasNibo, error: errorCompras } = await supabase
+        .from('nibo_agendamentos')
+        .select('categoria_nome, valor_pago')
+        .eq('bar_id', bar_id)
+        .eq('tipo', 'despesa')
+        .eq('status', 'pago')
+        .gte('data_pagamento', data_inicio)
+        .lte('data_pagamento', data_fim);
+
+      if (!errorCompras && comprasNibo) {
+        for (const [campo, categorias] of Object.entries(categoriasCompras)) {
+          const valorCategoria = comprasNibo
+            .filter(item => 
+              item.categoria_nome && 
+              categorias.some(cat => 
+                item.categoria_nome.toUpperCase().includes(cat.toUpperCase())
+              )
+            )
+            .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor_pago) || 0), 0);
+
+          if (campo === 'CUSTO COMIDA') resultado.compras_custo_comida = valorCategoria;
+          else if (campo === 'CUSTO BEBIDAS') resultado.compras_custo_bebidas = valorCategoria;
+          else if (campo === 'CUSTO OUTROS') resultado.compras_custo_outros = valorCategoria;
+          else if (campo === 'CUSTO DRINKS') resultado.compras_custo_drinks = valorCategoria;
+
+          console.log(`✅ Compras ${campo}: R$ ${valorCategoria.toFixed(2)}`);
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao buscar compras do NIBO:', err);
+    }
 
     // 5. BUSCAR ESTOQUES (última contagem antes da data_fim)
     try {
