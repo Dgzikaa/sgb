@@ -108,7 +108,7 @@ export default function TerminalProducao() {
       }
 
       try {
-        const response = await fetch(`/api/receitas?bar_id=${selectedBar.id}`);
+        const response = await fetch(`/api/operacional/receitas?bar_id=${selectedBar.id}`);
         if (response.ok) {
           const data = await response.json();
           setReceitas(data.receitas || []);
