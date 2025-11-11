@@ -874,7 +874,8 @@ export default function TerminalProducao() {
                         + {receitasFiltradas.length - 10} receitas não exibidas. Continue digitando para refinar...
                       </div>
                     )}
-                    </div>
+                  </div>
+                )}
                   </div>
                 </div>
               </CardContent>
