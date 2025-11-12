@@ -190,13 +190,6 @@ const defaultSidebarItems: SidebarItem[] = [
           permission: 'gestao',
         },
         {
-          icon: Package,
-          label: 'Estoque',
-          href: '/ferramentas/estoque',
-          description: 'Controle de estoque de insumos',
-          permission: 'gestao',
-        },
-        {
           icon: TrendingUp,
           label: 'CMV Semanal',
           href: '/ferramentas/cmv-semanal',
