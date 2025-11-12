@@ -46,15 +46,17 @@ const SPREADSHEET_ID = '1QhuD52kQrdCv4XMfKR5NSRMttx6NzVBZO0S8ajQK1H8';
 const SHEET_NAME = 'CMV Semanal';
 
 // Configuração da Service Account
-const SERVICE_ACCOUNT_PATH = path.resolve(__dirname, '../../frontend/google-service-account.json');
+const SERVICE_ACCOUNT_PATH = path.resolve(__dirname, '../credentials_deboche_ordinario.json');
 
 // Validar se o arquivo existe
 import fs from 'fs';
 if (!fs.existsSync(SERVICE_ACCOUNT_PATH)) {
-  console.error(`❌ Arquivo google-service-account.json não encontrado em: ${SERVICE_ACCOUNT_PATH}`);
-  console.error('   Certifique-se de que o arquivo está na pasta frontend/');
+  console.error(`❌ Arquivo credentials_deboche_ordinario.json não encontrado em: ${SERVICE_ACCOUNT_PATH}`);
+  console.error('   Certifique-se de que o arquivo está na pasta exemplo_teste/');
   process.exit(1);
 }
+
+console.log(`📄 Usando credenciais: ${SERVICE_ACCOUNT_PATH}\n`);
 
 /**
  * Autenticar com Google Sheets API
@@ -80,10 +82,10 @@ async function buscarDadosSheets() {
   const sheets = await autenticarGoogleSheets();
   
   // Buscar dados da aba CMV Semanal
-  // Colunas: AK até AR (Semana 39 até Semana 46)
+  // Colunas: A até AQ (Coluna A = rótulos, B até AQ = Semana 4 até Semana 45)
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${SHEET_NAME}!AK1:AR250`, // Pegar várias linhas para garantir
+    range: `${SHEET_NAME}!A1:AQ250`, // Pegar todas as colunas e linhas
   });
 
   const rows = response.data.values;
