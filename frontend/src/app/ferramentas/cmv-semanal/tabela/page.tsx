@@ -47,6 +47,7 @@ interface CMVSemanal {
   cmv_limpo_percentual: number;
   cmv_teorico_percentual: number;
   gap: number;
+  giro_estoque?: number; // Calculado dinamicamente
   
   // Estoque Final Detalhado
   estoque_final_cozinha: number;
@@ -128,8 +129,8 @@ export default function CMVSemanalTabelaPage() {
     }
   }
 
-  // Pegar 3 semanas centradas na semana atual
-  const startIndex = Math.max(0, semanaAtualIndex - 1);
+  // Pegar 3 semanas com a semana atual sendo a ÚLTIMA (3ª) das 3
+  const startIndex = Math.max(0, semanaAtualIndex - 2);
   const currentSemanas = semanas.slice(startIndex, startIndex + SEMANAS_POR_PAGINA);
   const semanaExibida = semanas[semanaAtualIndex];
 
@@ -161,6 +162,13 @@ export default function CMVSemanalTabelaPage() {
     return 'text-red-600 dark:text-red-400 font-semibold';
   }
 
+  // Calcular Giro de Estoque para cada semana
+  function calcularGiroEstoque(semana: CMVSemanal): number {
+    const mediaEstoque = (semana.estoque_inicial + semana.estoque_final) / 2;
+    if (mediaEstoque === 0) return 0;
+    return semana.cmv_real / mediaEstoque;
+  }
+
   const linhas = [
     { titulo: 'IDENTIFICAÇÃO', items: [
       { label: 'Semana', campo: 'semana' as keyof CMVSemanal, tipo: 'numero' },
@@ -168,50 +176,54 @@ export default function CMVSemanalTabelaPage() {
       { label: 'Data Fim', campo: 'data_fim' as keyof CMVSemanal, tipo: 'data' },
       { label: 'Status', campo: 'status' as keyof CMVSemanal, tipo: 'status' },
     ]},
-    { titulo: 'VENDAS', items: [
-      { label: 'Vendas Brutas', campo: 'vendas_brutas' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Vendas Líquidas', campo: 'vendas_liquidas' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Faturamento CMVível', campo: 'faturamento_cmvivel' as keyof CMVSemanal, tipo: 'moeda' },
-    ]},
-    { titulo: 'ESTOQUE', items: [
+    { titulo: 'CMV PRINCIPAL', items: [
       { label: 'Estoque Inicial', campo: 'estoque_inicial' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
+      { label: 'Compras', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
       { label: 'Estoque Final', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
-      { label: '├─ Cozinha', campo: 'estoque_final_cozinha' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '├─ Bebidas + Tabacaria', campo: 'estoque_final_bebidas' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '└─ Drinks', campo: 'estoque_final_drinks' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-    ]},
-    { titulo: 'COMPRAS', items: [
-      { label: 'Compras Total', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
-      { label: '├─ Custo Comida', campo: 'compras_custo_comida' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '├─ Custo Bebidas', campo: 'compras_custo_bebidas' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '├─ Custo Drinks', campo: 'compras_custo_drinks' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '└─ Custo Outros', campo: 'compras_custo_outros' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-    ]},
-    { titulo: 'CONSUMOS INTERNOS', items: [
-      { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
-      { label: '├─ Mesa Benefícios Cliente', campo: 'mesa_beneficios_cliente' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '├─ Mesa Banda/DJ', campo: 'mesa_banda_dj' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '├─ Chegadeira', campo: 'chegadeira' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '├─ Mesa ADM/Casa', campo: 'mesa_adm_casa' as keyof CMVSemanal, tipo: 'moeda', indent: true },
-      { label: '└─ Mesa RH', campo: 'mesa_rh' as keyof CMVSemanal, tipo: 'moeda', indent: true },
+      { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo Benefícios', campo: 'consumo_beneficios' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo ADM', campo: 'consumo_adm' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo RH', campo: 'consumo_rh' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo Artista', campo: 'consumo_artista' as keyof CMVSemanal, tipo: 'moeda' },
-    ]},
-    { titulo: 'AJUSTES', items: [
       { label: 'Outros Ajustes', campo: 'outros_ajustes' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Ajuste Bonificações', campo: 'ajuste_bonificacoes' as keyof CMVSemanal, tipo: 'moeda' },
-    ]},
-    { titulo: 'CÁLCULOS CMV', items: [
-      { label: 'CMV Real', campo: 'cmv_real' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
+      { label: 'CMV Real (R$)', campo: 'cmv_real' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
+      { label: 'Faturamento CMVível', campo: 'faturamento_cmvivel' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
       { label: 'CMV Limpo (%)', campo: 'cmv_limpo_percentual' as keyof CMVSemanal, tipo: 'percentual', destaque: true },
       { label: 'CMV Teórico (%)', campo: 'cmv_teorico_percentual' as keyof CMVSemanal, tipo: 'percentual' },
       { label: 'Gap', campo: 'gap' as keyof CMVSemanal, tipo: 'gap', destaque: true },
+      { label: 'Giro de Estoque', campo: 'giro_estoque' as keyof CMVSemanal, tipo: 'decimal' },
+    ]},
+    { titulo: 'ESTOQUE FINAL', items: [
+      { label: 'Cozinha', campo: 'estoque_final_cozinha' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Bebidas + Tabacaria', campo: 'estoque_final_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Drinks', campo: 'estoque_final_drinks' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'TOTAL', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
+    ]},
+    { titulo: 'COMPRAS', items: [
+      { label: 'Cozinha', campo: 'compras_custo_comida' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Bebidas + Tabacaria', campo: 'compras_custo_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Drinks', campo: 'compras_custo_drinks' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Outros', campo: 'compras_custo_outros' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'TOTAL', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
+    ]},
+    { titulo: 'CONTAS ESPECIAIS', items: [
+      { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
+      { label: 'Mesa de Benefícios Cliente', campo: 'mesa_beneficios_cliente' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Mesa da Banda/DJ', campo: 'mesa_banda_dj' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Chegadeira', campo: 'chegadeira' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Mesa ADM/Casa', campo: 'mesa_adm_casa' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Mesa RH', campo: 'mesa_rh' as keyof CMVSemanal, tipo: 'moeda' },
     ]},
   ];
 
   function renderCelula(semana: CMVSemanal, campo: keyof CMVSemanal, tipo: string) {
+    // Calcular Giro de Estoque dinamicamente
+    if (campo === 'giro_estoque') {
+      const giro = calcularGiroEstoque(semana);
+      return <span className="font-mono">{giro.toFixed(2)}x</span>;
+    }
+
     const valor = semana[campo];
 
     if (tipo === 'moeda') {
@@ -220,6 +232,10 @@ export default function CMVSemanalTabelaPage() {
     
     if (tipo === 'percentual') {
       return <span className="font-mono">{Number(valor).toFixed(2)}%</span>;
+    }
+    
+    if (tipo === 'decimal') {
+      return <span className="font-mono">{Number(valor).toFixed(2)}x</span>;
     }
     
     if (tipo === 'gap') {
@@ -420,7 +436,6 @@ export default function CMVSemanalTabelaPage() {
                               px-4 py-2 text-gray-900 dark:text-white border-r border-gray-300 dark:border-gray-600
                               sticky left-0 bg-white dark:bg-gray-800
                               ${item.destaque ? 'font-semibold bg-yellow-50 dark:bg-yellow-900/10' : ''}
-                              ${item.indent ? 'pl-8 text-gray-700 dark:text-gray-300 text-xs' : ''}
                             `}
                           >
                             {item.label}
