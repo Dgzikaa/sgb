@@ -16,7 +16,25 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-config({ path: path.resolve(__dirname, '../../.env.local') });
+// Tentar carregar .env.local da raiz do projeto frontend
+const envPath = path.resolve(__dirname, '../../frontend/.env.local');
+console.log(`📄 Carregando variáveis de ambiente de: ${envPath}`);
+config({ path: envPath });
+
+// Validar variáveis de ambiente
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  console.error('❌ NEXT_PUBLIC_SUPABASE_URL não encontrada no .env.local');
+  console.error(`   Caminho verificado: ${envPath}`);
+  console.error('   Certifique-se de que o arquivo .env.local existe em frontend/');
+  process.exit(1);
+}
+
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('❌ SUPABASE_SERVICE_ROLE_KEY não encontrada no .env.local');
+  process.exit(1);
+}
+
+console.log('✅ Variáveis de ambiente carregadas com sucesso\n');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -28,7 +46,15 @@ const SPREADSHEET_ID = '1QhuD52kQrdCv4XMfKR5NSRMttx6NzVBZO0S8ajQK1H8';
 const SHEET_NAME = 'CMV Semanal';
 
 // Configuração da Service Account
-const SERVICE_ACCOUNT_PATH = path.resolve(__dirname, '../../google-service-account.json');
+const SERVICE_ACCOUNT_PATH = path.resolve(__dirname, '../../frontend/google-service-account.json');
+
+// Validar se o arquivo existe
+import fs from 'fs';
+if (!fs.existsSync(SERVICE_ACCOUNT_PATH)) {
+  console.error(`❌ Arquivo google-service-account.json não encontrado em: ${SERVICE_ACCOUNT_PATH}`);
+  console.error('   Certifique-se de que o arquivo está na pasta frontend/');
+  process.exit(1);
+}
 
 /**
  * Autenticar com Google Sheets API
