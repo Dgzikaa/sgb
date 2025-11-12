@@ -96,7 +96,8 @@ export default function CMVSemanalTabelaPage() {
       const response = await fetch('/api/cmv-semanal');
       if (!response.ok) throw new Error('Erro ao carregar dados');
       
-      const data = await response.json();
+      const result = await response.json();
+      const data = result.data || [];
       
       // Filtrar por ano e ordenar por semana (crescente)
       const filtrado = data
