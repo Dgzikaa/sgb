@@ -227,6 +227,64 @@ export default function CMVSemanalPage() {
     setFormData(dados);
   }, [formData]);
 
+  // Processar semana atual automaticamente
+  const processarSemanaAtual = async () => {
+    if (!selectedBar) {
+      toast({
+        title: "Bar não selecionado",
+        description: "Selecione um bar para processar o CMV",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCalculando(true);
+
+    try {
+      console.log('🤖 Processando CMV da semana atual automaticamente...');
+
+      // Chamar a Edge Function
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/cmv-semanal-auto`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Erro ao processar CMV automático');
+      }
+
+      const resultado = await response.json();
+
+      if (resultado.success) {
+        toast({
+          title: "✅ CMV Processado",
+          description: "CMV da semana atual foi processado automaticamente",
+        });
+
+        // Recarregar lista
+        carregarCMVs();
+      } else {
+        throw new Error(resultado.error || 'Erro desconhecido');
+      }
+
+    } catch (error) {
+      console.error('Erro ao processar CMV automático:', error);
+      toast({
+        title: "Erro ao processar CMV",
+        description: error instanceof Error ? error.message : "Não foi possível processar automaticamente",
+        variant: "destructive"
+      });
+    } finally {
+      setCalculando(false);
+    }
+  };
+
   // Buscar dados automáticos de APIs externas
   const buscarDadosAutomaticos = async () => {
     if (!selectedBar || !formData.data_inicio || !formData.data_fim) {
@@ -595,13 +653,32 @@ export default function CMVSemanalPage() {
               Custo de Mercadoria Vendida calculado semanalmente com precisão
             </p>
           </div>
-          <Button
-            onClick={abrirModalAdicionar}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar CMV
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={processarSemanaAtual}
+              disabled={calculando}
+              className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+            >
+              {calculando ? (
+                <>
+                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Processar Semana Atual
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={abrirModalAdicionar}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar CMV
+            </Button>
+          </div>
         </div>
 
         {/* Filtros */}
