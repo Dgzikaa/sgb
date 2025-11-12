@@ -330,15 +330,12 @@ export default function StockoutPage() {
             <TabsContent value="diario" className="space-y-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none z-10" />
-                    <Input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      className="input-dark w-[180px] pl-10"
-                    />
-                  </div>
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="input-dark w-[180px]"
+                  />
                   <Button
                     onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
                     disabled={loading}
@@ -641,29 +638,23 @@ export default function StockoutPage() {
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     De:
                   </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none z-10" />
-                    <Input
-                      type="date"
-                      value={dataInicio}
-                      onChange={(e) => setDataInicio(e.target.value)}
-                      className="input-dark w-[180px] pl-10"
-                    />
-                  </div>
+                  <Input
+                    type="date"
+                    value={dataInicio}
+                    onChange={(e) => setDataInicio(e.target.value)}
+                    className="input-dark w-[180px]"
+                  />
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Até:
                   </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none z-10" />
-                    <Input
-                      type="date"
-                      value={dataFim}
-                      onChange={(e) => setDataFim(e.target.value)}
-                      className="input-dark w-[180px] pl-10"
-                    />
-                  </div>
+                  <Input
+                    type="date"
+                    value={dataFim}
+                    onChange={(e) => setDataFim(e.target.value)}
+                    className="input-dark w-[180px]"
+                  />
                 </div>
                 <Button
                   onClick={buscarHistoricoStockout}

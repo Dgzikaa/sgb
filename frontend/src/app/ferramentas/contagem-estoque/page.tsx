@@ -402,16 +402,13 @@ export default function ContagemEstoquePage() {
                 Registro diário de estoque de insumos
               </p>
             </div>
-            <div className="relative max-w-[200px]">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400 pointer-events-none z-10" />
-              <Input
-                type="date"
-                value={dataContagem}
-                onChange={(e) => setDataContagem(e.target.value)}
-                className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-sm font-medium h-10 pl-10 pr-3"
-                style={{ colorScheme: 'light dark' }}
-              />
-            </div>
+            <Input
+              type="date"
+              value={dataContagem}
+              onChange={(e) => setDataContagem(e.target.value)}
+              className="max-w-[200px] bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-sm font-medium h-10 px-3"
+              style={{ colorScheme: 'light dark' }}
+            />
           </div>
         </div>
 
