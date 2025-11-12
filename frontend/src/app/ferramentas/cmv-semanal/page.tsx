@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,9 @@ import {
   Users,
   TrendingDown,
   Info,
-  Sparkles
+  Sparkles,
+  BarChart3,
+  Table
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
@@ -654,6 +657,18 @@ export default function CMVSemanalPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/ferramentas/cmv-semanal/tabela">
+              <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                <Table className="h-4 w-4 mr-2" />
+                Visualização Tabela
+              </Button>
+            </Link>
+            <Link href="/ferramentas/cmv-semanal/visualizar">
+              <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+            </Link>
             <Button
               onClick={processarSemanaAtual}
               disabled={calculando}
