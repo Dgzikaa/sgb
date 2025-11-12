@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
             .eq('insumos.tipo_local', tipo);
 
           if (!errorEstoque && estoque) {
-            const valorTotal = estoque.reduce((sum, item) => {
+            const valorTotal = estoque.reduce((sum, item: any) => {
               const qtdTotal = (item.quantidade_fechada || 0) + (item.quantidade_flutuante || 0);
               const custo = item.insumos?.custo_unitario || 0;
               return sum + (qtdTotal * custo);
