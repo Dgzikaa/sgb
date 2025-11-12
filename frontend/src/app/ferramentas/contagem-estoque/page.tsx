@@ -402,19 +402,15 @@ export default function ContagemEstoquePage() {
                 Registro diário de estoque de insumos
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex items-center gap-2 flex-1">
-                <Calendar className="w-4 h-4 text-gray-500 shrink-0" />
-                <Input
-                  type="date"
-                  value={dataContagem}
-                  onChange={(e) => setDataContagem(e.target.value)}
-                  className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-sm md:text-base h-10"
-                />
-              </div>
-              <Badge variant="outline" className="text-xs sm:text-sm self-start px-3 py-1.5">
-                {selectedBar?.nome || 'Bar Principal'}
-              </Badge>
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+              <Input
+                type="date"
+                value={dataContagem}
+                onChange={(e) => setDataContagem(e.target.value)}
+                className="max-w-[200px] bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-sm font-medium h-10 px-3"
+                style={{ colorScheme: 'light dark' }}
+              />
             </div>
           </div>
         </div>
