@@ -105,17 +105,20 @@ export default function CMVSemanalTabelaPage() {
       
       setSemanas(filtrado);
       
-      // Posicionar na semana atual
+      // Posicionar na última semana disponível (semana anterior ou atual)
       if (filtrado.length > 0) {
         const semanaAtual = getSemanaAtual();
-        const indexSemanaAtual = filtrado.findIndex((s: CMVSemanal) => s.semana >= semanaAtual);
+        // Buscar a última semana disponível antes ou igual à semana atual
+        let indexMelhor = filtrado.length - 1;
         
-        if (indexSemanaAtual !== -1) {
-          setSemanaAtualIndex(indexSemanaAtual);
-        } else {
-          // Se não encontrou semana atual, mostrar a última semana
-          setSemanaAtualIndex(filtrado.length - 1);
+        for (let i = filtrado.length - 1; i >= 0; i--) {
+          if (filtrado[i].semana <= semanaAtual) {
+            indexMelhor = i;
+            break;
+          }
         }
+        
+        setSemanaAtualIndex(indexMelhor);
       }
     } catch (error) {
       console.error('Erro ao carregar CMV Semanal:', error);
@@ -260,37 +263,10 @@ export default function CMVSemanalTabelaPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                CMV Semanal - Visualização Tabela
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Layout estilo planilha com {SEMANAS_POR_PAGINA} semanas por vez
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Link href="/ferramentas/cmv-semanal">
-                <Button variant="outline">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Listagem
-                </Button>
-              </Link>
-              <Link href="/ferramentas/cmv-semanal/visualizar">
-                <Button variant="outline">
-                  📊 Dashboard
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Filtro de Ano */}
+        {/* Filtro de Ano e Navegação */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-4">
           <CardContent className="p-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <CalendarDays className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 <Label className="text-gray-700 dark:text-gray-300 font-semibold">Ano:</Label>
@@ -304,12 +280,25 @@ export default function CMVSemanalTabelaPage() {
                   <SelectItem value="2026" className="hover:bg-gray-100 dark:hover:bg-gray-700">2026</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="flex-1" />
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-semibold">Semana Atual:</span> {getSemanaAtual()} de {anoFiltro}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-semibold">Total de Semanas:</span> {semanas.length}
+              </div>
+              <div className="flex-1" />
+              <div className="flex gap-2">
+                <Link href="/ferramentas/cmv-semanal">
+                  <Button variant="outline" size="sm">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Listagem
+                  </Button>
+                </Link>
+                <Link href="/ferramentas/cmv-semanal/visualizar">
+                  <Button variant="outline" size="sm">
+                    📊 Dashboard
+                  </Button>
+                </Link>
               </div>
             </div>
           </CardContent>
