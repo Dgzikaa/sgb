@@ -74,7 +74,7 @@ interface CMVSemanal {
 export default function CMVSemanalTabelaPage() {
   const [semanas, setSemanas] = useState<CMVSemanal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentGroup, setCurrentGroup] = useState(0);
+  const [semanaAtualIndex, setSemanaAtualIndex] = useState(0);
   const [anoFiltro, setAnoFiltro] = useState(new Date().getFullYear());
   const SEMANAS_POR_PAGINA = 3;
 
@@ -111,13 +111,10 @@ export default function CMVSemanalTabelaPage() {
         const indexSemanaAtual = filtrado.findIndex((s: CMVSemanal) => s.semana >= semanaAtual);
         
         if (indexSemanaAtual !== -1) {
-          // Centralizar a semana atual (colocar no meio dos 3)
-          const grupoInicial = Math.max(0, Math.floor(indexSemanaAtual / SEMANAS_POR_PAGINA));
-          setCurrentGroup(grupoInicial);
+          setSemanaAtualIndex(indexSemanaAtual);
         } else {
-          // Se não encontrou semana atual, mostrar as últimas semanas
-          const ultimoGrupo = Math.max(0, Math.floor((filtrado.length - 1) / SEMANAS_POR_PAGINA));
-          setCurrentGroup(ultimoGrupo);
+          // Se não encontrou semana atual, mostrar a última semana
+          setSemanaAtualIndex(filtrado.length - 1);
         }
       }
     } catch (error) {
@@ -127,11 +124,10 @@ export default function CMVSemanalTabelaPage() {
     }
   }
 
-  const totalGroups = Math.ceil(semanas.length / SEMANAS_POR_PAGINA);
-  const currentSemanas = semanas.slice(
-    currentGroup * SEMANAS_POR_PAGINA,
-    (currentGroup + 1) * SEMANAS_POR_PAGINA
-  );
+  // Pegar 3 semanas centradas na semana atual
+  const startIndex = Math.max(0, semanaAtualIndex - 1);
+  const currentSemanas = semanas.slice(startIndex, startIndex + SEMANAS_POR_PAGINA);
+  const semanaExibida = semanas[semanaAtualIndex];
 
   function formatarMoeda(valor: number): string {
     return new Intl.NumberFormat('pt-BR', {
@@ -322,8 +318,8 @@ export default function CMVSemanalTabelaPage() {
         {/* Navegação */}
         <div className="flex items-center justify-between mb-4">
           <Button
-            onClick={() => setCurrentGroup(Math.max(0, currentGroup - 1))}
-            disabled={currentGroup === 0}
+            onClick={() => setSemanaAtualIndex(Math.max(0, semanaAtualIndex - 1))}
+            disabled={semanaAtualIndex === 0}
             variant="outline"
             className="min-w-[120px]"
           >
@@ -331,36 +327,26 @@ export default function CMVSemanalTabelaPage() {
             Anterior
           </Button>
           
-          <div className="flex items-center gap-3">
-            <div className="text-center">
+          <div className="text-center">
+            {semanaExibida ? (
+              <>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Semana {semanaExibida.semana}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {formatarData(semanaExibida.data_inicio)} - {formatarData(semanaExibida.data_fim)}
+                </p>
+              </>
+            ) : (
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Grupo {currentGroup + 1} de {totalGroups}
+                Nenhuma semana selecionada
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">
-                Semanas {semanas[currentGroup * SEMANAS_POR_PAGINA]?.semana || '-'} até {semanas[Math.min((currentGroup + 1) * SEMANAS_POR_PAGINA - 1, semanas.length - 1)]?.semana || '-'}
-              </p>
-            </div>
-            <Button
-              onClick={() => {
-                const semanaAtual = getSemanaAtual();
-                const indexSemanaAtual = semanas.findIndex(s => s.semana >= semanaAtual);
-                if (indexSemanaAtual !== -1) {
-                  const grupoAtual = Math.floor(indexSemanaAtual / SEMANAS_POR_PAGINA);
-                  setCurrentGroup(grupoAtual);
-                }
-              }}
-              variant="default"
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
-            >
-              <CalendarDays className="w-4 h-4 mr-2" />
-              Ir para Semana Atual
-            </Button>
+            )}
           </div>
           
           <Button
-            onClick={() => setCurrentGroup(Math.min(totalGroups - 1, currentGroup + 1))}
-            disabled={currentGroup === totalGroups - 1}
+            onClick={() => setSemanaAtualIndex(Math.min(semanas.length - 1, semanaAtualIndex + 1))}
+            disabled={semanaAtualIndex === semanas.length - 1}
             variant="outline"
             className="min-w-[120px]"
           >
