@@ -358,6 +358,7 @@ export default function PlanejamentoComercialPage() {
       }
 
       // Salvar valores reais
+      // NOTA: percent_b, percent_d, percent_c NÃO são enviados - serão recalculados automaticamente do Contahub
       const responseReais = await apiCall(`/api/eventos/${eventoEdicao.id}/valores-reais`, {
         method: 'PUT',
         headers: {
@@ -374,9 +375,7 @@ export default function PlanejamentoComercialPage() {
           res_p: eventoEdicao.res_p || 0,
           c_art: eventoEdicao.c_art || 0,
           c_prod: eventoEdicao.c_prod || 0,
-          percent_b: eventoEdicao.percent_b || 0,
-          percent_d: eventoEdicao.percent_d || 0,
-          percent_c: eventoEdicao.percent_c || 0,
+          // percent_b, percent_d, percent_c serão recalculados automaticamente pela API do Contahub
           t_coz: eventoEdicao.t_coz || 0,
           t_bar: eventoEdicao.t_bar || 0,
           // Campos manuais para domingos
@@ -1611,57 +1610,34 @@ export default function PlanejamentoComercialPage() {
                           )}
                     </div>
                       </div>
+                      {/* PERCENTUAIS - SEMPRE SOMENTE LEITURA (RECALCULADOS DO CONTAHUB) */}
                       <div className="grid grid-cols-3 gap-4">
                       <div>
-                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">% Bebidas</Label>
-                          {modoEdicao ? (
-                        <Input
-                          type="number"
-                              value={eventoEdicao?.percent_b || 0}
-                              onChange={(e) => setEventoEdicao(prev => prev ? {...prev, percent_b: parseFloat(e.target.value) || 0} : null)}
-                              className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
-                              placeholder="0.00"
-                              step="0.01"
-                            />
-                          ) : (
-                            <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
-                              {formatarPercentual(eventoEdicao?.percent_b)}
-                            </div>
-                          )}
+                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                            % Bebidas
+                            <span className="ml-1 text-xs text-gray-500 dark:text-gray-500">(Contahub)</span>
+                          </Label>
+                          <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white font-medium text-sm">
+                            {formatarPercentual(eventoEdicao?.percent_b)}
+                          </div>
                       </div>
                       <div>
-                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">% Comidas</Label>
-                          {modoEdicao ? (
-                        <Input
-                          type="number"
-                              value={eventoEdicao?.percent_c || 0}
-                              onChange={(e) => setEventoEdicao(prev => prev ? {...prev, percent_c: parseFloat(e.target.value) || 0} : null)}
-                              className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
-                              placeholder="0.00"
-                              step="0.01"
-                            />
-                          ) : (
-                            <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
-                              {formatarPercentual(eventoEdicao?.percent_c)}
-                            </div>
-                          )}
+                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                            % Comidas
+                            <span className="ml-1 text-xs text-gray-500 dark:text-gray-500">(Contahub)</span>
+                          </Label>
+                          <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white font-medium text-sm">
+                            {formatarPercentual(eventoEdicao?.percent_c)}
+                          </div>
                       </div>
                       <div>
-                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">% Drinks</Label>
-                          {modoEdicao ? (
-                        <Input
-                          type="number"
-                              value={eventoEdicao?.percent_d || 0}
-                              onChange={(e) => setEventoEdicao(prev => prev ? {...prev, percent_d: parseFloat(e.target.value) || 0} : null)}
-                              className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
-                              placeholder="0.00"
-                              step="0.01"
-                            />
-                          ) : (
-                            <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
-                              {formatarPercentual(eventoEdicao?.percent_d)}
-                      </div>
-                          )}
+                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                            % Drinks
+                            <span className="ml-1 text-xs text-gray-500 dark:text-gray-500">(Contahub)</span>
+                          </Label>
+                          <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white font-medium text-sm">
+                            {formatarPercentual(eventoEdicao?.percent_d)}
+                          </div>
                     </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">

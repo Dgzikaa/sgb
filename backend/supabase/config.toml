@@ -297,18 +297,8 @@ deno_version = 1
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
-# Cron Jobs - Configurações de sincronização automática
-[edge_runtime.cron]
-# Formato: "minuto hora dia_do_mes mes dia_da_semana"
-# 1 = segunda-feira, 0 = domingo
-
-# Sympla - Sync Semanal (toda segunda-feira às 09:00 Brasília)
-sympla_sync = { schedule = "0 9 * * 1", function_name = "sympla-sync" }
-
-# Stockout - Sync Diário (todo dia às 17:00 Brasília = 20:00 UTC)
-# Configurado diretamente via pg_cron no Supabase (Job ID: 160)
-# Nome: stockout-sync-diario-correto
-# Chama: https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub-stockout-sync
+# NOTA: Cron Jobs são configurados via pg_cron no Supabase Dashboard (SQL Editor)
+# Veja os jobs configurados em: SELECT * FROM cron.job;
 
 [analytics]
 enabled = true

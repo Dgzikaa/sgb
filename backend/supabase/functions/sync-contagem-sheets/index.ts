@@ -135,8 +135,44 @@ async function buscarContagemData(data: string): Promise<InsumoSheet[]> {
  * Handler principal
  */
 serve(async (req) => {
+  // Configurar CORS
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      },
+    });
+  }
+
   try {
     console.log('🚀 Iniciando sincronização de contagem...');
+    
+    // Verificar autenticação - aceitar SERVICE_ROLE_KEY ou cronSecret
+    const authHeader = req.headers.get('authorization');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    // Ler body para obter cronSecret (se houver)
+    const requestBody = await req.text();
+    const { cronSecret } = requestBody ? JSON.parse(requestBody) : {};
+    
+    if (authHeader && authHeader.includes(serviceRoleKey || '')) {
+      console.log('✅ Acesso autorizado via SERVICE_ROLE_KEY');
+    } else if (cronSecret === 'pgcron_contagem' || cronSecret === 'manual_test') {
+      console.log('✅ Acesso autorizado via cronSecret');
+    } else if (!authHeader && !cronSecret) {
+      // Permitir chamadas sem auth do pg_cron
+      console.log('✅ Acesso autorizado - assumindo pg_cron');
+    } else {
+      return new Response(
+        JSON.stringify({ error: 'Acesso não autorizado' }),
+        { 
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
     
     // Verificar se é um cron job ou requisição manual
     const url = new URL(req.url);

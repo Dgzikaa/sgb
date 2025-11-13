@@ -112,9 +112,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       res_p: body.res_p || 0,
       c_art: body.c_art || 0,
       c_prod: body.c_prod || 0,
-      percent_b: body.percent_b || 0,
-      percent_d: body.percent_d || 0,
-      percent_c: body.percent_c || 0,
+      // NUNCA salvar percent_b, percent_d, percent_c - sempre recalcular do Contahub
+      // percent_b, percent_d, percent_c serão recalculados pela função calculate_evento_metrics
       t_coz: body.t_coz || 0,
       t_bar: body.t_bar || 0,
       observacoes: body.observacoes || '',
@@ -150,6 +149,157 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     console.log('✅ Valores reais atualizados com sucesso para evento:', evento.nome);
+
+    // 🔄 RECALCULAR PERCENTUAIS E STOCKOUT DO CONTAHUB (SEMPRE ATUALIZAR)
+    // Os percentuais %B, %D, %C e %S (stockout) vêm do Contahub e devem sempre estar atualizados
+    console.log('🔄 Recalculando percentuais e stockout do Contahub para evento:', eventoId);
+    try {
+      // Buscar dados do evento para pegar a data
+      const { data: eventoData } = await supabase
+        .from('eventos_base')
+        .select('data_evento')
+        .eq('id', eventoId)
+        .single();
+
+      if (!eventoData) {
+        console.log('⚠️ Evento não encontrado para recalcular percentuais');
+        throw new Error('Evento não encontrado');
+      }
+
+      // Buscar dados do Contahub Analítico para recalcular percentuais
+      const { data: contahubData, error: contahubError } = await supabase
+        .from('contahub_analitico')
+        .select('valorfinal, loc_desc')
+        .eq('trn_dtgerencial', eventoData.data_evento)
+        .eq('bar_id', user.bar_id);
+
+      if (!contahubError && contahubData && contahubData.length > 0) {
+        // Calcular totais por categoria
+        let valor_bebidas = 0;
+        let valor_comidas = 0;
+        let valor_drinks = 0;
+        let valor_outros = 0;
+        let total_valorfinal = 0;
+
+        contahubData.forEach(item => {
+          const valor = item.valorfinal || 0;
+          const loc = item.loc_desc || '';
+          total_valorfinal += valor;
+
+          // Bebidas: Chopp, Baldes, Pegue e Pague, PP, Venda Volante, Bar
+          if (['Chopp', 'Baldes', 'Pegue e Pague', 'PP', 'Venda Volante', 'Bar'].includes(loc)) {
+            valor_bebidas += valor;
+          }
+          // Comidas: Cozinha, Cozinha 1, Cozinha 2
+          else if (['Cozinha', 'Cozinha 1', 'Cozinha 2'].includes(loc)) {
+            valor_comidas += valor;
+          }
+          // Drinks: Preshh, Drinks, Drinks Autorais, Mexido, Shot e Dose, Batidos, Montados
+          else if (['Preshh', 'Drinks', 'Drinks Autorais', 'Mexido', 'Shot e Dose', 'Batidos', 'Montados'].includes(loc)) {
+            valor_drinks += valor;
+          }
+          // Outros
+          else {
+            valor_outros += valor;
+          }
+        });
+
+        // Calcular percentuais
+        let percent_b = 0;
+        let percent_c = 0;
+        let percent_d = 0;
+
+        if (total_valorfinal > 0) {
+          percent_b = ((valor_bebidas + valor_outros) / total_valorfinal) * 100;
+          percent_c = (valor_comidas / total_valorfinal) * 100;
+          percent_d = (valor_drinks / total_valorfinal) * 100;
+        }
+
+        // Preparar objeto de update com percentuais
+        const updateData: any = {
+          percent_b: parseFloat(percent_b.toFixed(2)),
+          percent_d: parseFloat(percent_d.toFixed(2)),
+          percent_c: parseFloat(percent_c.toFixed(2))
+        };
+
+        console.log(`✅ Percentuais calculados: %B=${percent_b.toFixed(1)}%, %D=${percent_d.toFixed(1)}%, %C=${percent_c.toFixed(1)}%`);
+        
+        // 🔄 RECALCULAR STOCKOUT
+        console.log('🔄 Recalculando stockout para data:', eventoData.data_evento);
+        try {
+          // Buscar dados de stockout com NOVA LÓGICA: apenas produtos ativos='S'
+          const { data: dadosStockout, error: stockoutError } = await supabase
+            .from('contahub_stockout')
+            .select('prd_ativo, prd_venda')
+            .eq('prd_ativo', 'S') // Apenas produtos ativos
+            .eq('data_consulta', eventoData.data_evento)
+            .eq('bar_id', user.bar_id);
+
+          if (!stockoutError && dadosStockout && dadosStockout.length > 0) {
+            // Calcular % stockout
+            const total_ativos = dadosStockout.length;
+            const stockout_count = dadosStockout.filter(item => item.prd_venda === 'N').length;
+            const percent_stockout = total_ativos > 0 ? 
+              ((stockout_count / total_ativos) * 100) : 0;
+
+            updateData.percent_stockout = parseFloat(percent_stockout.toFixed(2));
+            console.log(`✅ Stockout calculado: ${percent_stockout.toFixed(1)}% (${stockout_count}/${total_ativos} produtos)`);
+          } else {
+            updateData.percent_stockout = 0;
+            console.log('⚠️ Sem dados de stockout para essa data');
+          }
+        } catch (stockoutErr) {
+          console.warn('⚠️ Erro ao calcular stockout:', stockoutErr);
+          updateData.percent_stockout = 0;
+        }
+
+        // Atualizar todos os percentuais (incluindo stockout) no banco
+        const { error: updatePercentError } = await supabase
+          .from('eventos_base')
+          .update(updateData)
+          .eq('id', eventoId)
+          .eq('bar_id', user.bar_id);
+
+        if (updatePercentError) {
+          console.warn('⚠️ Erro ao atualizar percentuais:', updatePercentError);
+        } else {
+          console.log(`✅ Todos os percentuais atualizados no banco`);
+        }
+      } else {
+        console.log('⚠️ Sem dados do Contahub Analítico para recalcular percentuais');
+        
+        // Mesmo sem dados analíticos, tentar calcular stockout
+        try {
+          console.log('🔄 Tentando calcular apenas stockout...');
+          const { data: dadosStockout } = await supabase
+            .from('contahub_stockout')
+            .select('prd_ativo, prd_venda')
+            .eq('prd_ativo', 'S')
+            .eq('data_consulta', eventoData.data_evento)
+            .eq('bar_id', user.bar_id);
+
+          if (dadosStockout && dadosStockout.length > 0) {
+            const total_ativos = dadosStockout.length;
+            const stockout_count = dadosStockout.filter(item => item.prd_venda === 'N').length;
+            const percent_stockout = total_ativos > 0 ? 
+              ((stockout_count / total_ativos) * 100) : 0;
+
+            await supabase
+              .from('eventos_base')
+              .update({ percent_stockout: parseFloat(percent_stockout.toFixed(2)) })
+              .eq('id', eventoId)
+              .eq('bar_id', user.bar_id);
+
+            console.log(`✅ Stockout calculado: ${percent_stockout.toFixed(1)}%`);
+          }
+        } catch (err) {
+          console.warn('⚠️ Erro ao calcular stockout:', err);
+        }
+      }
+    } catch (percentError) {
+      console.warn('⚠️ Erro ao recalcular percentuais:', percentError);
+      // Não falhar a requisição por causa disso
+    }
 
     // Log da operação para auditoria
     console.log('📊 Valores salvos:', {
