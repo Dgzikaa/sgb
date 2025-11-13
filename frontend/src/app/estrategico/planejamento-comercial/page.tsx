@@ -131,6 +131,9 @@ interface EventoEdicaoCompleta {
   sympla_checkins?: number;
   yuzer_liquido?: number;
   yuzer_ingressos?: number;
+  // Faturamentos manuais (domingos)
+  faturamento_couvert_manual?: number | null;
+  faturamento_bar_manual?: number | null;
   // Atrasos de entrega
   atrasos_cozinha?: number;
   atrasos_bar?: number;
