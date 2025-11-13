@@ -165,12 +165,11 @@ async function buscarDadosAutomaticos(barId, dataInicio, dataFim) {
 
     const { data: comprasNibo } = await supabase
       .from('nibo_agendamentos')
-      .select('categoria_nome, valor_pago')
+      .select('categoria_nome, valor')
       .eq('bar_id', barId)
-      .eq('tipo', 'despesa')
-      .eq('status', 'pago')
-      .gte('data_pagamento', dataInicio)
-      .lte('data_pagamento', dataFim);
+      .eq('tipo', 'Debit')
+      .gte('data_competencia', dataInicio)
+      .lte('data_competencia', dataFim);
 
     if (comprasNibo) {
       for (const [campo, categorias] of Object.entries(categoriasCompras)) {
@@ -181,7 +180,7 @@ async function buscarDadosAutomaticos(barId, dataInicio, dataFim) {
               item.categoria_nome.toUpperCase().includes(cat.toUpperCase())
             )
           )
-          .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor_pago) || 0), 0);
+          .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
         if (campo === 'CUSTO COMIDA') resultado.compras_custo_comida = valorCategoria;
         else if (campo === 'CUSTO BEBIDAS') resultado.compras_custo_bebidas = valorCategoria;
@@ -193,10 +192,10 @@ async function buscarDadosAutomaticos(barId, dataInicio, dataFim) {
     console.error('  ⚠️ Erro ao buscar compras NIBO:', err.message);
   }
 
-  // 5. ESTOQUES
+  // 5. ESTOQUES - contagem_estoque_insumos
   try {
     const { data: ultimaContagem } = await supabase
-      .from('historico_estoque')
+      .from('contagem_estoque_insumos')
       .select('data_contagem')
       .eq('bar_id', barId)
       .lte('data_contagem', dataFim)
@@ -206,34 +205,42 @@ async function buscarDadosAutomaticos(barId, dataInicio, dataFim) {
 
     if (ultimaContagem) {
       const dataContagem = ultimaContagem.data_contagem;
-      const tiposLocal = ['cozinha', 'salão', 'drinks'];
       
-      for (const tipo of tiposLocal) {
-        const { data: estoque } = await supabase
-          .from('historico_estoque')
-          .select(`
-            insumos!inner(tipo_local, custo_unitario),
-            quantidade_fechada,
-            quantidade_flutuante
-          `)
+      // Buscar todos os insumos com suas categorias
+      const { data: insumos } = await supabase
+        .from('insumos')
+        .select('id, tipo_local, categoria, custo_unitario')
+        .eq('bar_id', barId);
+
+      if (insumos) {
+        // Buscar contagens dessa data
+        const { data: contagens } = await supabase
+          .from('contagem_estoque_insumos')
+          .select('insumo_id, estoque_final')
           .eq('bar_id', barId)
-          .eq('data_contagem', dataContagem)
-          .eq('insumos.tipo_local', tipo);
+          .eq('data_contagem', dataContagem);
 
-        if (estoque) {
-          const valorTotal = estoque.reduce((sum, item) => {
-            const qtdTotal = (item.quantidade_fechada || 0) + (item.quantidade_flutuante || 0);
-            const custo = item.insumos?.custo_unitario || 0;
-            return sum + (qtdTotal * custo);
-          }, 0);
+        if (contagens) {
+          const insumosMap = new Map(insumos.map(i => [i.id, i]));
 
-          if (tipo === 'cozinha') {
-            resultado.estoque_final_cozinha = valorTotal;
-          } else if (tipo === 'salão') {
-            resultado.estoque_final_bebidas = valorTotal;
-          } else if (tipo === 'drinks') {
-            resultado.estoque_final_drinks = valorTotal;
-          }
+          const categoriasCozinha = ['ARMAZÉM (C)', 'HORTIFRUTI (C)', 'MERCADO (C)', 'PÃES', 'PEIXE', 'PROTEÍNA', 'Mercado (S)', 'tempero', 'hortifruti', 'líquido'];
+          const categoriasDrinks = ['ARMAZÉM B', 'DESTILADOS', 'DESTILADOS LOG', 'HORTIFRUTI B', 'IMPÉRIO', 'MERCADO B', 'POLPAS', 'Não-alcóolicos', 'OUTROS', 'polpa', 'fruta'];
+          const categoriasExcluir = ['HORTIFRUTI (F)', 'MERCADO (F)', 'PROTEÍNA (F)'];
+
+          contagens.forEach((contagem) => {
+            const insumo = insumosMap.get(contagem.insumo_id);
+            if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
+
+            const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
+
+            if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
+              resultado.estoque_final_cozinha += valor;
+            } else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
+              resultado.estoque_final_drinks += valor;
+            } else if (insumo.tipo_local === 'bar') {
+              resultado.estoque_final_bebidas += valor;
+            }
+          });
         }
       }
     }

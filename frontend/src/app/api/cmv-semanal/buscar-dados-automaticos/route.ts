@@ -166,15 +166,14 @@ export async function POST(request: NextRequest) {
         'CUSTO DRINKS': ['CUSTO DRINKS', 'DRINKS', 'DESTILADOS', 'INSUMOS BAR']
       };
 
-      // Buscar todas as despesas pagas no período
+      // Buscar todas as despesas no período (usa data_competencia)
       const { data: comprasNibo, error: errorCompras } = await supabase
         .from('nibo_agendamentos')
-        .select('categoria_nome, valor_pago')
+        .select('categoria_nome, valor')
         .eq('bar_id', bar_id)
-        .eq('tipo', 'despesa')
-        .eq('status', 'pago')
-        .gte('data_pagamento', data_inicio)
-        .lte('data_pagamento', data_fim);
+        .eq('tipo', 'Debit')
+        .gte('data_competencia', data_inicio)
+        .lte('data_competencia', data_fim);
 
       if (!errorCompras && comprasNibo) {
         for (const [campo, categorias] of Object.entries(categoriasCompras)) {
@@ -185,7 +184,7 @@ export async function POST(request: NextRequest) {
                 item.categoria_nome.toUpperCase().includes(cat.toUpperCase())
               )
             )
-            .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor_pago) || 0), 0);
+            .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
           if (campo === 'CUSTO COMIDA') resultado.compras_custo_comida = valorCategoria;
           else if (campo === 'CUSTO BEBIDAS') resultado.compras_custo_bebidas = valorCategoria;
@@ -200,10 +199,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. BUSCAR ESTOQUES (última contagem antes da data_fim)
+    // Tabela: contagem_estoque_insumos
     try {
       // Buscar última contagem disponível até data_fim
       const { data: ultimaContagem, error: errorContagem } = await supabase
-        .from('historico_estoque')
+        .from('contagem_estoque_insumos')
         .select('data_contagem')
         .eq('bar_id', bar_id)
         .lte('data_contagem', data_fim)
@@ -215,37 +215,53 @@ export async function POST(request: NextRequest) {
         const dataContagem = ultimaContagem.data_contagem;
         console.log(`📅 Usando contagem de estoque de: ${dataContagem}`);
 
-        // Buscar estoque por tipo_local
-        const tiposLocal = ['cozinha', 'salão', 'drinks'];
-        
-        for (const tipo of tiposLocal) {
-          const { data: estoque, error: errorEstoque } = await supabase
-            .from('historico_estoque')
-            .select(`
-              insumos!inner(tipo_local, custo_unitario),
-              quantidade_fechada,
-              quantidade_flutuante
-            `)
+        // Buscar todos os insumos com suas categorias
+        const { data: insumos, error: errorInsumos } = await supabase
+          .from('insumos')
+          .select('id, tipo_local, categoria, custo_unitario')
+          .eq('bar_id', bar_id);
+
+        if (!errorInsumos && insumos) {
+          // Buscar contagens dessa data
+          const { data: contagens, error: errorContagens } = await supabase
+            .from('contagem_estoque_insumos')
+            .select('insumo_id, estoque_final')
             .eq('bar_id', bar_id)
-            .eq('data_contagem', dataContagem)
-            .eq('insumos.tipo_local', tipo);
+            .eq('data_contagem', dataContagem);
 
-          if (!errorEstoque && estoque) {
-            const valorTotal = estoque.reduce((sum, item: any) => {
-              const qtdTotal = (item.quantidade_fechada || 0) + (item.quantidade_flutuante || 0);
-              const custo = item.insumos?.custo_unitario || 0;
-              return sum + (qtdTotal * custo);
-            }, 0);
+          if (!errorContagens && contagens) {
+            // Criar map de insumos para facilitar lookup
+            const insumosMap = new Map(insumos.map(i => [i.id, i]));
 
-            if (tipo === 'cozinha') {
-              resultado.estoque_final_cozinha = valorTotal;
-            } else if (tipo === 'salão') {
-              resultado.estoque_final_bebidas = valorTotal;
-            } else if (tipo === 'drinks') {
-              resultado.estoque_final_drinks = valorTotal;
-            }
+            // Categorias de cada tipo
+            const categoriasCozinha = ['ARMAZÉM (C)', 'HORTIFRUTI (C)', 'MERCADO (C)', 'PÃES', 'PEIXE', 'PROTEÍNA', 'Mercado (S)', 'tempero', 'hortifruti', 'líquido'];
+            const categoriasDrinks = ['ARMAZÉM B', 'DESTILADOS', 'DESTILADOS LOG', 'HORTIFRUTI B', 'IMPÉRIO', 'MERCADO B', 'POLPAS', 'Não-alcóolicos', 'OUTROS', 'polpa', 'fruta'];
+            // Excluir funcionários
+            const categoriasExcluir = ['HORTIFRUTI (F)', 'MERCADO (F)', 'PROTEÍNA (F)'];
 
-            console.log(`✅ Estoque ${tipo}: R$ ${valorTotal.toFixed(2)}`);
+            contagens.forEach((contagem: any) => {
+              const insumo = insumosMap.get(contagem.insumo_id);
+              if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
+
+              const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
+
+              // Cozinha
+              if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
+                resultado.estoque_final_cozinha += valor;
+              }
+              // Drinks
+              else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
+                resultado.estoque_final_drinks += valor;
+              }
+              // Bebidas + Tabacaria (tudo do bar)
+              else if (insumo.tipo_local === 'bar') {
+                resultado.estoque_final_bebidas += valor;
+              }
+            });
+
+            console.log(`✅ Estoque Cozinha: R$ ${resultado.estoque_final_cozinha.toFixed(2)}`);
+            console.log(`✅ Estoque Drinks: R$ ${resultado.estoque_final_drinks.toFixed(2)}`);
+            console.log(`✅ Estoque Bebidas + Tabacaria: R$ ${resultado.estoque_final_bebidas.toFixed(2)}`);
           }
         }
       } else {
