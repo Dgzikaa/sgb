@@ -215,21 +215,36 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           percent_d = (valor_drinks / total_valorfinal) * 100;
         }
 
-        // 🔄 BUSCAR DADOS DE STOCKOUT PARA A DATA DO EVENTO
+        // 🔄 BUSCAR DADOS DE STOCKOUT COM OS MESMOS FILTROS DO ANALÍTICO
         const { data: stockoutData, error: stockoutError } = await supabase
           .from('contahub_stockout')
-          .select('prd_ativo, prd_venda')
+          .select('prd_ativo, prd_venda, loc_desc, prd_desc')
           .eq('data_consulta', eventoData.data_evento)
           .eq('bar_id', user.bar_id)
-          .eq('prd_ativo', 'S'); // Apenas produtos ativos
+          .eq('prd_ativo', 'S') // Apenas produtos ativos
+          // FILTROS DO ANALÍTICO - Locais
+          .neq('loc_desc', 'Pegue e Pague')
+          .neq('loc_desc', 'Shot e Dose')
+          .neq('loc_desc', 'Venda Volante')
+          .not('loc_desc', 'is', null); // Excluir "Sem local definido"
 
         let percent_stockout = 0;
 
         if (!stockoutError && stockoutData && stockoutData.length > 0) {
-          const total_ativos = stockoutData.length;
-          const stockout_count = stockoutData.filter(item => item.prd_venda === 'N').length;
+          // Aplicar filtros de prefixo manualmente (ilike não funciona com .not())
+          const stockoutFiltrado = stockoutData.filter(item => {
+            const desc = item.prd_desc || '';
+            // Excluir produtos com prefixos específicos
+            return !desc.startsWith('[HH]') && // Happy Hour
+                   !desc.startsWith('[PP]') && // Pegue Pague
+                   !desc.startsWith('[DD]') && // Dose Dupla
+                   !desc.startsWith('[IN]');   // Insumos
+          });
+
+          const total_ativos = stockoutFiltrado.length;
+          const stockout_count = stockoutFiltrado.filter(item => item.prd_venda === 'N').length;
           percent_stockout = total_ativos > 0 ? (stockout_count / total_ativos) * 100 : 0;
-          console.log(`✅ Stockout calculado: ${stockout_count}/${total_ativos} = ${percent_stockout.toFixed(1)}%`);
+          console.log(`✅ Stockout calculado (com filtros do analítico): ${stockout_count}/${total_ativos} = ${percent_stockout.toFixed(1)}%`);
         } else {
           console.log('⚠️ Sem dados de stockout para esta data');
         }
@@ -259,19 +274,33 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       } else {
         console.log('⚠️ Sem dados do Contahub Analítico para recalcular percentuais');
         
-        // Mesmo sem dados analíticos, tentar calcular stockout
+        // Mesmo sem dados analíticos, tentar calcular stockout COM FILTROS
         try {
           console.log('🔄 Tentando calcular apenas stockout...');
           const { data: dadosStockout } = await supabase
             .from('contahub_stockout')
-            .select('prd_ativo, prd_venda')
+            .select('prd_ativo, prd_venda, loc_desc, prd_desc')
             .eq('prd_ativo', 'S')
             .eq('data_consulta', eventoData.data_evento)
-            .eq('bar_id', user.bar_id);
+            .eq('bar_id', user.bar_id)
+            // FILTROS DO ANALÍTICO - Locais
+            .neq('loc_desc', 'Pegue e Pague')
+            .neq('loc_desc', 'Shot e Dose')
+            .neq('loc_desc', 'Venda Volante')
+            .not('loc_desc', 'is', null);
 
           if (dadosStockout && dadosStockout.length > 0) {
-            const total_ativos = dadosStockout.length;
-            const stockout_count = dadosStockout.filter(item => item.prd_venda === 'N').length;
+            // Aplicar filtros de prefixo
+            const stockoutFiltrado = dadosStockout.filter(item => {
+              const desc = item.prd_desc || '';
+              return !desc.startsWith('[HH]') && 
+                     !desc.startsWith('[PP]') && 
+                     !desc.startsWith('[DD]') && 
+                     !desc.startsWith('[IN]');
+            });
+
+            const total_ativos = stockoutFiltrado.length;
+            const stockout_count = stockoutFiltrado.filter(item => item.prd_venda === 'N').length;
             const percent_stockout = total_ativos > 0 ? 
               ((stockout_count / total_ativos) * 100) : 0;
 
@@ -281,7 +310,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
               .eq('id', eventoId)
               .eq('bar_id', user.bar_id);
 
-            console.log(`✅ Stockout calculado: ${percent_stockout.toFixed(1)}%`);
+            console.log(`✅ Stockout calculado (com filtros do analítico): ${percent_stockout.toFixed(1)}%`);
           }
         } catch (err) {
           console.warn('⚠️ Erro ao calcular stockout:', err);
