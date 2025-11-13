@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "importar-historico": "node importar-historico-sheets.js",
+    "importar-insumos": "node importar-contagem-insumos-sheets.js",
     "atualizar": "node atualizar-dados-tempo-real.js"
   },
   "dependencies": {
