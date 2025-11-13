@@ -102,6 +102,7 @@ interface PlanejamentoData {
 interface EventoEdicaoCompleta {
   id: number;
   nome: string;
+  data_evento: string; // Adicionar data para buscar atrasos
   // Dados de planejamento
   m1_r: number;
   cl_plan: number;
@@ -124,6 +125,9 @@ interface EventoEdicaoCompleta {
   percent_stockout: number;
   t_coz: number;
   t_bar: number;
+  // Atrasos de entrega
+  atrasos_cozinha?: number;
+  atrasos_bar?: number;
   // Campos manuais para domingos
   faturamento_couvert_manual?: number;
   faturamento_bar_manual?: number;
@@ -265,15 +269,31 @@ export default function PlanejamentoComercialPage() {
 
 
   // Abrir modal de edição unificado (planejamento + valores reais)
-  const abrirModal = (evento: PlanejamentoData, editMode: boolean = false) => {
+  const abrirModal = async (evento: PlanejamentoData, editMode: boolean = false) => {
     console.log('🔍 Debug - Evento selecionado para edição:', evento);
     
     setEventoSelecionado(evento);
     setModoEdicao(editMode);
     
+    // Buscar dados de atrasos de entrega para o evento
+    let atrasosData = { atrasos_cozinha: 0, atrasos_bar: 0 };
+    try {
+      const response = await apiCall(`/api/estrategico/atrasos-evento?data=${evento.data_evento}`, {
+        headers: {
+          'x-user-data': encodeURIComponent(JSON.stringify(user))
+        }
+      });
+      if (response.success && response.data) {
+        atrasosData = response.data;
+      }
+    } catch (error) {
+      console.warn('⚠️ Erro ao buscar atrasos:', error);
+    }
+    
     const dadosIniciais: EventoEdicaoCompleta = {
       id: evento.evento_id,
       nome: evento.evento_nome,
+      data_evento: evento.data_evento,
       // Dados de planejamento
       m1_r: evento.m1_receita || 0,
       cl_plan: evento.clientes_plan || 0,
@@ -296,6 +316,9 @@ export default function PlanejamentoComercialPage() {
       percent_stockout: evento.percent_stockout || 0,
       t_coz: evento.t_coz || 0,
       t_bar: evento.t_bar || 0,
+      // Atrasos de entrega
+      atrasos_cozinha: atrasosData.atrasos_cozinha,
+      atrasos_bar: atrasosData.atrasos_bar,
       // Campos manuais para domingos
       faturamento_couvert_manual: evento.faturamento_couvert_manual || undefined,
       faturamento_bar_manual: evento.faturamento_bar_manual || undefined,
