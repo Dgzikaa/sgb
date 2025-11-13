@@ -103,6 +103,7 @@ interface EventoEdicaoCompleta {
   id: number;
   nome: string;
   data_evento: string; // Adicionar data para buscar atrasos
+  dia_semana: string; // Adicionar dia da semana para identificar domingos
   // Dados de planejamento
   m1_r: number;
   cl_plan: number;
@@ -125,12 +126,14 @@ interface EventoEdicaoCompleta {
   percent_stockout: number;
   t_coz: number;
   t_bar: number;
+  // Dados Sympla/Yuzer (domingos)
+  sympla_liquido?: number;
+  sympla_checkins?: number;
+  yuzer_liquido?: number;
+  yuzer_ingressos?: number;
   // Atrasos de entrega
   atrasos_cozinha?: number;
   atrasos_bar?: number;
-  // Campos manuais para domingos
-  faturamento_couvert_manual?: number;
-  faturamento_bar_manual?: number;
   observacoes: string;
 }
 
@@ -290,10 +293,33 @@ export default function PlanejamentoComercialPage() {
       console.warn('⚠️ Erro ao buscar atrasos:', error);
     }
     
+    // Buscar dados do Sympla/Yuzer se for domingo
+    let dadosSymplaYuzer = {};
+    if (evento.dia_semana === 'DOMINGO' || evento.dia_semana === 'Domingo') {
+      try {
+        const { data: eventoCompleto } = await apiCall(`/api/eventos/${evento.evento_id}`, {
+          headers: {
+            'x-user-data': encodeURIComponent(JSON.stringify(user))
+          }
+        });
+        if (eventoCompleto) {
+          dadosSymplaYuzer = {
+            sympla_liquido: eventoCompleto.sympla_liquido || 0,
+            sympla_checkins: eventoCompleto.sympla_checkins || 0,
+            yuzer_liquido: eventoCompleto.yuzer_liquido || 0,
+            yuzer_ingressos: eventoCompleto.yuzer_ingressos || 0
+          };
+        }
+      } catch (error) {
+        console.warn('⚠️ Erro ao buscar dados Sympla/Yuzer:', error);
+      }
+    }
+
     const dadosIniciais: EventoEdicaoCompleta = {
       id: evento.evento_id,
       nome: evento.evento_nome,
       data_evento: evento.data_evento,
+      dia_semana: evento.dia_semana,
       // Dados de planejamento
       m1_r: evento.m1_receita || 0,
       cl_plan: evento.clientes_plan || 0,
@@ -316,12 +342,11 @@ export default function PlanejamentoComercialPage() {
       percent_stockout: evento.percent_stockout || 0,
       t_coz: evento.t_coz || 0,
       t_bar: evento.t_bar || 0,
+      // Dados Sympla/Yuzer (domingos)
+      ...dadosSymplaYuzer,
       // Atrasos de entrega
       atrasos_cozinha: atrasosData.atrasos_cozinha,
       atrasos_bar: atrasosData.atrasos_bar,
-      // Campos manuais para domingos
-      faturamento_couvert_manual: evento.faturamento_couvert_manual || undefined,
-      faturamento_bar_manual: evento.faturamento_bar_manual || undefined,
       observacoes: ''
     };
     
@@ -1532,65 +1557,48 @@ export default function PlanejamentoComercialPage() {
                     </div>
                   </div>
 
-                  {/* Faturamento Manual (para domingos) */}
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                    <h3 className="text-base font-medium mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                      <Edit className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                      Faturamento Manual (Domingos)
-                    </h3>
-                    <div className="text-xs text-yellow-700 dark:text-yellow-300 mb-3 p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded">
-                      💡 Use estes campos para domingos com te_real = 0. Os valores de te_real e tb_real serão calculados automaticamente.
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Faturamento Couvert Manual</Label>
-                        {modoEdicao ? (
-                          <Input
-                            type="number"
-                            value={eventoEdicao?.faturamento_couvert_manual || ''}
-                            onChange={(e) => setEventoEdicao(prev => prev ? {...prev, faturamento_couvert_manual: parseFloat(e.target.value) || undefined} : null)}
-                            className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
-                            placeholder="0.00"
-                            step="0.01"
-                          />
-                        ) : (
+                  {/* Dados Sympla/Yuzer (Domingos) */}
+                  {eventoEdicao && (eventoEdicao.dia_semana === 'DOMINGO' || eventoEdicao.dia_semana === 'Domingo') && (
+                    <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <h3 className="text-base font-medium mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                        <Ticket className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        Ingressos (Sympla & Yuzer)
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Sympla - Faturamento</Label>
                           <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
-                            {eventoEdicao?.faturamento_couvert_manual ? formatarMoeda(eventoEdicao.faturamento_couvert_manual) : 'Não definido'}
+                            {formatarMoeda(eventoEdicao?.sympla_liquido || 0)}
                           </div>
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Faturamento Bar Manual</Label>
-                        {modoEdicao ? (
-                          <Input
-                            type="number"
-                            value={eventoEdicao?.faturamento_bar_manual || ''}
-                            onChange={(e) => setEventoEdicao(prev => prev ? {...prev, faturamento_bar_manual: parseFloat(e.target.value) || undefined} : null)}
-                            className="mt-2 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm h-9"
-                            placeholder="0.00"
-                            step="0.01"
-                          />
-                        ) : (
+                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-2">Sympla - Check-ins</Label>
                           <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
-                            {eventoEdicao?.faturamento_bar_manual ? formatarMoeda(eventoEdicao.faturamento_bar_manual) : 'Não definido'}
+                            {eventoEdicao?.sympla_checkins || 0} pessoas
                           </div>
-                        )}
+                        </div>
+                        <div>
+                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">Yuzer - Faturamento</Label>
+                          <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
+                            {formatarMoeda(eventoEdicao?.yuzer_liquido || 0)}
+                          </div>
+                          <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-2">Yuzer - Ingressos</Label>
+                          <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white font-medium text-sm">
+                            {eventoEdicao?.yuzer_ingressos || 0} ingressos
+                          </div>
+                        </div>
                       </div>
-                      {eventoEdicao?.faturamento_couvert_manual && eventoEdicao?.cl_real && (
-                        <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                          <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Valores Calculados:</div>
-                          <div className="text-xs text-blue-600 dark:text-blue-400">
-                            TE Real: {formatarMoeda(eventoEdicao.faturamento_couvert_manual / eventoEdicao.cl_real)}
+                      {((eventoEdicao?.sympla_liquido || 0) + (eventoEdicao?.yuzer_liquido || 0)) > 0 && (
+                        <div className="mt-3 p-2 bg-purple-100 dark:bg-purple-900/30 rounded border border-purple-200 dark:border-purple-800">
+                          <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mb-1">Total Ingressos:</div>
+                          <div className="text-sm text-purple-600 dark:text-purple-400 font-bold">
+                            {formatarMoeda((eventoEdicao?.sympla_liquido || 0) + (eventoEdicao?.yuzer_liquido || 0))}
                           </div>
-                          {eventoEdicao?.faturamento_bar_manual && (
-                            <div className="text-xs text-blue-600 dark:text-blue-400">
-                              TB Real: {formatarMoeda(eventoEdicao.faturamento_bar_manual / eventoEdicao.cl_real)}
-                            </div>
-                          )}
+                          <div className="text-xs text-purple-600 dark:text-purple-400">
+                            {(eventoEdicao?.sympla_checkins || 0) + (eventoEdicao?.yuzer_ingressos || 0)} pessoas
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
+                  )}
 
                   {/* Atrasos de Entrega */}
                   <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
