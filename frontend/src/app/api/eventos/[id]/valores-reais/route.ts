@@ -215,7 +215,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           percent_d = (valor_drinks / total_valorfinal) * 100;
         }
 
-        // Preparar objeto de update com percentuais
+        // Atualizar percentuais no banco (sem stockout ainda)
         const updateData: any = {
           percent_b: parseFloat(percent_b.toFixed(2)),
           percent_d: parseFloat(percent_d.toFixed(2)),
@@ -297,7 +297,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         }
       }
     } catch (percentError) {
-      console.warn('⚠️ Erro ao recalcular percentuais:', percentError);
+      console.warn('⚠️ Erro ao recalcular percentuais e stockout:', percentError);
       // Não falhar a requisição por causa disso
     }
 
