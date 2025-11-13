@@ -57,21 +57,32 @@ export async function POST(request: NextRequest) {
       estoque_final_drinks: 0,
     };
 
-    // 1. BUSCAR CONSUMO DOS SÓCIOS (x-corbal, x-bruno, x-matheus, x-leonardo, x-thiago)
+    // 1. BUSCAR CONSUMO DOS SÓCIOS
+    // Sócios: x-digao, x-diogo, x-rodrigo, x-cadu, x-corbal, x-augusto, x-gonza
+    // Campos: vd_mesadesc, cli_nome, motivo (contém "sócio" ou "socio")
+    // Valor: vr_desconto
     try {
-      const sociosPatterns = ['x-corbal', 'x-bruno', 'x-matheus', 'x-leonardo', 'x-thiago'];
+      const sociosNomes = ['x-digao', 'x-diogo', 'x-rodrigo', 'x-cadu', 'x-corbal', 'x-augusto', 'x-gonza'];
       
+      // Construir condições OR para todos os campos
+      const conditions = [
+        ...sociosNomes.map(s => `vd_mesadesc.ilike.%${s}%`),
+        ...sociosNomes.map(s => `cli_nome.ilike.%${s}%`),
+        'motivo.ilike.%sócio%',
+        'motivo.ilike.%socio%'
+      ];
+
       const { data: consumoSocios, error: errorSocios } = await supabase
         .from('contahub_periodo')
-        .select('vr_consumo')
+        .select('vr_desconto')
         .eq('bar_id', bar_id)
         .gte('dt_gerencial', data_inicio)
         .lte('dt_gerencial', data_fim)
-        .or(sociosPatterns.map(s => `cli_nome.ilike.%${s}%`).join(','));
+        .or(conditions.join(','));
 
       if (!errorSocios && consumoSocios) {
         resultado.total_consumo_socios = consumoSocios.reduce((sum, item) => 
-          sum + (parseFloat(item.vr_consumo) || 0), 0
+          sum + (parseFloat(item.vr_desconto) || 0), 0
         );
         console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)}`);
       }
@@ -79,28 +90,34 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar consumo dos sócios:', err);
     }
 
-    // 2. BUSCAR CONTAS ESPECIAIS (Mesa Benefícios, Banda/DJ, Chegadeira, ADM, RH)
+    // 2. BUSCAR CONTAS ESPECIAIS
+    // Campo: motivo
+    // Valor: vr_desconto
     try {
       const contasEspeciais = {
-        'mesa_beneficios_cliente': ['benefício', 'beneficio'],
-        'mesa_banda_dj': ['banda', 'dj', 'artista'],
+        'mesa_banda_dj': ['dj', 'benza', 'banda', 'roadie', 'roudier'],
+        'mesa_beneficios_cliente': ['aniversario', 'aniversário', 'voucher', 'beneficio', 'benefício'],
+        'mesa_adm_casa': ['funcionario', 'funcionário', 'chefe', 'consuma', 'mkt', 'consumação financeiro', 'financeiro', 'rh', 'thais', 'isaias'],
         'chegadeira': ['chegadeira', 'chegador'],
-        'mesa_adm_casa': ['adm', 'administrativo', 'casa'],
-        'mesa_rh': ['rh', 'recursos humanos']
+        'mesa_rh': [] // Definir padrões depois
       };
 
       for (const [campo, patterns] of Object.entries(contasEspeciais)) {
+        if (patterns.length === 0) continue; // Pular se não houver padrões
+
+        const conditions = patterns.map(p => `motivo.ilike.%${p}%`);
+
         const { data, error } = await supabase
           .from('contahub_periodo')
-          .select('vr_consumo')
+          .select('vr_desconto')
           .eq('bar_id', bar_id)
           .gte('dt_gerencial', data_inicio)
           .lte('dt_gerencial', data_fim)
-          .or(patterns.map(p => `cli_nome.ilike.%${p}%`).join(','));
+          .or(conditions.join(','));
 
         if (!error && data) {
           resultado[campo as keyof typeof resultado] = data.reduce((sum: number, item: any) => 
-            sum + (parseFloat(item.vr_consumo) || 0), 0
+            sum + (parseFloat(item.vr_desconto) || 0), 0
           );
           console.log(`✅ ${campo}: R$ ${(resultado[campo as keyof typeof resultado] as number).toFixed(2)}`);
         }

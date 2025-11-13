@@ -60,20 +60,30 @@ async function buscarDadosAutomaticos(barId, dataInicio, dataFim) {
   };
 
   // 1. CONSUMO DOS SÓCIOS
+  // Sócios: x-digao, x-diogo, x-rodrigo, x-cadu, x-corbal, x-augusto, x-gonza
+  // Campos: vd_mesadesc, cli_nome, motivo (contém "sócio" ou "socio")
+  // Valor: vr_desconto
   try {
-    const sociosPatterns = ['x-corbal', 'x-bruno', 'x-matheus', 'x-leonardo', 'x-thiago'];
+    const sociosNomes = ['x-digao', 'x-diogo', 'x-rodrigo', 'x-cadu', 'x-corbal', 'x-augusto', 'x-gonza'];
     
+    const conditions = [
+      ...sociosNomes.map(s => `vd_mesadesc.ilike.%${s}%`),
+      ...sociosNomes.map(s => `cli_nome.ilike.%${s}%`),
+      'motivo.ilike.%sócio%',
+      'motivo.ilike.%socio%'
+    ];
+
     const { data: consumoSocios } = await supabase
       .from('contahub_periodo')
-      .select('vr_consumo')
+      .select('vr_desconto')
       .eq('bar_id', barId)
       .gte('dt_gerencial', dataInicio)
       .lte('dt_gerencial', dataFim)
-      .or(sociosPatterns.map(s => `cli_nome.ilike.%${s}%`).join(','));
+      .or(conditions.join(','));
 
     if (consumoSocios) {
       resultado.total_consumo_socios = consumoSocios.reduce((sum, item) => 
-        sum + (parseFloat(item.vr_consumo) || 0), 0
+        sum + (parseFloat(item.vr_desconto) || 0), 0
       );
     }
   } catch (err) {
@@ -81,27 +91,36 @@ async function buscarDadosAutomaticos(barId, dataInicio, dataFim) {
   }
 
   // 2. CONTAS ESPECIAIS
+  // Campo: motivo
+  // Valor: vr_desconto
   try {
     const contasEspeciais = {
-      'mesa_beneficios_cliente': ['benefício', 'beneficio'],
-      'mesa_banda_dj': ['banda', 'dj', 'artista'],
-      'chegadeira': ['chegadeira', 'chegador'],
-      'mesa_adm_casa': ['adm', 'administrativo', 'casa'],
-      'mesa_rh': ['rh', 'recursos humanos']
+      'mesa_banda_dj': ['dj', 'benza', 'banda', 'roadie', 'roudier'],
+      'mesa_beneficios_cliente': ['aniversario', 'aniversário', 'voucher', 'beneficio', 'benefício'],
+      'mesa_adm_casa': ['funcionario', 'funcionário', 'chefe', 'consuma', 'mkt', 'consumação financeiro', 'financeiro', 'rh', 'thais', 'isaias'],
+      'chegadeira': [], // Sempre zerado
+      'mesa_rh': [] // Sempre zerado
     };
 
     for (const [campo, patterns] of Object.entries(contasEspeciais)) {
+      if (patterns.length === 0) {
+        resultado[campo] = 0;
+        continue;
+      }
+
+      const conditions = patterns.map(p => `motivo.ilike.%${p}%`);
+
       const { data } = await supabase
         .from('contahub_periodo')
-        .select('vr_consumo')
+        .select('vr_desconto')
         .eq('bar_id', barId)
         .gte('dt_gerencial', dataInicio)
         .lte('dt_gerencial', dataFim)
-        .or(patterns.map(p => `cli_nome.ilike.%${p}%`).join(','));
+        .or(conditions.join(','));
 
       if (data) {
         resultado[campo] = data.reduce((sum, item) => 
-          sum + (parseFloat(item.vr_consumo) || 0), 0
+          sum + (parseFloat(item.vr_desconto) || 0), 0
         );
       }
     }
