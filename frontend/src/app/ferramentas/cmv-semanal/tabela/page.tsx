@@ -196,9 +196,9 @@ export default function CMVSemanalTabelaPage() {
       { label: 'Giro de Estoque', campo: 'giro_estoque' as keyof CMVSemanal, tipo: 'decimal' },
     ]},
     { titulo: 'ESTOQUE FINAL', items: [
-      { label: 'Cozinha', campo: 'estoque_final_cozinha' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Bebidas + Tabacaria', campo: 'estoque_final_bebidas' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Drinks', campo: 'estoque_final_drinks' as keyof CMVSemanal, tipo: 'moeda', manual: true },
+      { label: 'Cozinha', campo: 'estoque_final_cozinha' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Bebidas + Tabacaria', campo: 'estoque_final_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Drinks', campo: 'estoque_final_drinks' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'TOTAL', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda' },
     ]},
     { titulo: 'COMPRAS', items: [
