@@ -215,44 +215,35 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           percent_d = (valor_drinks / total_valorfinal) * 100;
         }
 
-        // Atualizar percentuais no banco (sem stockout ainda)
+        // 🔄 BUSCAR DADOS DE STOCKOUT PARA A DATA DO EVENTO
+        const { data: stockoutData, error: stockoutError } = await supabase
+          .from('contahub_stockout')
+          .select('prd_ativo, prd_venda')
+          .eq('data_consulta', eventoData.data_evento)
+          .eq('bar_id', user.bar_id)
+          .eq('prd_ativo', 'S'); // Apenas produtos ativos
+
+        let percent_stockout = 0;
+
+        if (!stockoutError && stockoutData && stockoutData.length > 0) {
+          const total_ativos = stockoutData.length;
+          const stockout_count = stockoutData.filter(item => item.prd_venda === 'N').length;
+          percent_stockout = total_ativos > 0 ? (stockout_count / total_ativos) * 100 : 0;
+          console.log(`✅ Stockout calculado: ${stockout_count}/${total_ativos} = ${percent_stockout.toFixed(1)}%`);
+        } else {
+          console.log('⚠️ Sem dados de stockout para esta data');
+        }
+
+        // Atualizar percentuais no banco (incluindo stockout)
         const updateData: any = {
           percent_b: parseFloat(percent_b.toFixed(2)),
           percent_d: parseFloat(percent_d.toFixed(2)),
-          percent_c: parseFloat(percent_c.toFixed(2))
+          percent_c: parseFloat(percent_c.toFixed(2)),
+          percent_stockout: parseFloat(percent_stockout.toFixed(2))
         };
 
-        console.log(`✅ Percentuais calculados: %B=${percent_b.toFixed(1)}%, %D=${percent_d.toFixed(1)}%, %C=${percent_c.toFixed(1)}%`);
+        console.log(`✅ Percentuais calculados: %B=${percent_b.toFixed(1)}%, %D=${percent_d.toFixed(1)}%, %C=${percent_c.toFixed(1)}%, %S=${percent_stockout.toFixed(1)}%`);
         
-        // 🔄 RECALCULAR STOCKOUT
-        console.log('🔄 Recalculando stockout para data:', eventoData.data_evento);
-        try {
-          // Buscar dados de stockout com NOVA LÓGICA: apenas produtos ativos='S'
-          const { data: dadosStockout, error: stockoutError } = await supabase
-            .from('contahub_stockout')
-            .select('prd_ativo, prd_venda')
-            .eq('prd_ativo', 'S') // Apenas produtos ativos
-            .eq('data_consulta', eventoData.data_evento)
-            .eq('bar_id', user.bar_id);
-
-          if (!stockoutError && dadosStockout && dadosStockout.length > 0) {
-            // Calcular % stockout
-            const total_ativos = dadosStockout.length;
-            const stockout_count = dadosStockout.filter(item => item.prd_venda === 'N').length;
-            const percent_stockout = total_ativos > 0 ? 
-              ((stockout_count / total_ativos) * 100) : 0;
-
-            updateData.percent_stockout = parseFloat(percent_stockout.toFixed(2));
-            console.log(`✅ Stockout calculado: ${percent_stockout.toFixed(1)}% (${stockout_count}/${total_ativos} produtos)`);
-          } else {
-            updateData.percent_stockout = 0;
-            console.log('⚠️ Sem dados de stockout para essa data');
-          }
-        } catch (stockoutErr) {
-          console.warn('⚠️ Erro ao calcular stockout:', stockoutErr);
-          updateData.percent_stockout = 0;
-        }
-
         // Atualizar todos os percentuais (incluindo stockout) no banco
         const { error: updatePercentError } = await supabase
           .from('eventos_base')

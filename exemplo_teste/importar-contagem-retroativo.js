@@ -38,8 +38,13 @@ async function importarData(data) {
     const result = await response.json();
     
     if (result.success) {
-      console.log(`✅ ${data} - Sucesso: ${result.data.sucesso} | Erro: ${result.data.erro} | Não encontrados: ${result.data.naoEncontrados.length}`);
-      return result;
+      if (result.data) {
+        console.log(`✅ ${data} - Sucesso: ${result.data.sucesso} | Erro: ${result.data.erro} | Não encontrados: ${result.data.naoEncontrados.length}`);
+        return result;
+      } else {
+        console.log(`⚠️  ${data} - ${result.message || 'Sem dados na planilha'}`);
+        return { success: true, semDados: true };
+      }
     } else {
       console.log(`❌ ${data} - ${result.message || 'Erro desconhecido'}`);
       return null;
@@ -88,6 +93,7 @@ async function main() {
   const stats = {
     total: 0,
     sucesso: 0,
+    semDados: 0,
     erro: 0,
   };
   
@@ -96,7 +102,11 @@ async function main() {
     stats.total++;
     
     if (resultado && resultado.success) {
-      stats.sucesso++;
+      if (resultado.semDados) {
+        stats.semDados++;
+      } else {
+        stats.sucesso++;
+      }
     } else {
       stats.erro++;
     }
@@ -110,6 +120,7 @@ async function main() {
   console.log('='.repeat(60));
   console.log(`📅 Datas processadas: ${stats.total}`);
   console.log(`✅ Sucesso: ${stats.sucesso}`);
+  console.log(`⚠️  Sem dados: ${stats.semDados}`);
   console.log(`❌ Erro: ${stats.erro}`);
   console.log('\n✅ Importação concluída!\n');
 }
