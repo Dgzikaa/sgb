@@ -177,7 +177,7 @@ export default function CMVSemanalTabelaPage() {
       { label: 'Status', campo: 'status' as keyof CMVSemanal, tipo: 'status' },
     ]},
     { titulo: 'CMV PRINCIPAL', items: [
-      { label: 'Estoque Inicial', campo: 'estoque_inicial' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
+      { label: 'Estoque Inicial', campo: 'estoque_inicial' as keyof CMVSemanal, tipo: 'moeda', destaque: true, manual: true },
       { label: 'Compras', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
       { label: 'Estoque Final', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
       { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda' },
@@ -185,12 +185,12 @@ export default function CMVSemanalTabelaPage() {
       { label: 'Consumo ADM', campo: 'consumo_adm' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo RH', campo: 'consumo_rh' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo Artista', campo: 'consumo_artista' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Outros Ajustes', campo: 'outros_ajustes' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Ajuste Bonificações', campo: 'ajuste_bonificacoes' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Outros Ajustes', campo: 'outros_ajustes' as keyof CMVSemanal, tipo: 'moeda', manual: true },
+      { label: 'Ajuste Bonificações', campo: 'ajuste_bonificacoes' as keyof CMVSemanal, tipo: 'moeda', manual: true },
       { label: 'CMV Real (R$)', campo: 'cmv_real' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
       { label: 'Faturamento CMVível', campo: 'faturamento_cmvivel' as keyof CMVSemanal, tipo: 'moeda', destaque: true },
       { label: 'CMV Limpo (%)', campo: 'cmv_limpo_percentual' as keyof CMVSemanal, tipo: 'percentual', destaque: true },
-      { label: 'CMV Teórico (%)', campo: 'cmv_teorico_percentual' as keyof CMVSemanal, tipo: 'percentual' },
+      { label: 'CMV Teórico (%)', campo: 'cmv_teorico_percentual' as keyof CMVSemanal, tipo: 'percentual', manual: true },
       { label: 'Gap', campo: 'gap' as keyof CMVSemanal, tipo: 'gap', destaque: true },
       { label: 'Giro de Estoque', campo: 'giro_estoque' as keyof CMVSemanal, tipo: 'decimal' },
     ]},
@@ -217,7 +217,7 @@ export default function CMVSemanalTabelaPage() {
     ]},
   ];
 
-  function renderCelula(semana: CMVSemanal, campo: keyof CMVSemanal, tipo: string) {
+  function renderCelula(semana: CMVSemanal, campo: keyof CMVSemanal, tipo: string, manual?: boolean) {
     // Calcular Giro de Estoque dinamicamente
     if (campo === 'giro_estoque') {
       const giro = calcularGiroEstoque(semana);
@@ -226,29 +226,34 @@ export default function CMVSemanalTabelaPage() {
 
     const valor = semana[campo];
 
+    // Classes de highlight para campos manuais
+    const manualClasses = manual 
+      ? 'bg-amber-50 dark:bg-amber-900/20 border-l-2 border-amber-400 dark:border-amber-500 pl-2' 
+      : '';
+
     if (tipo === 'moeda') {
-      return <span className="font-mono">{formatarMoeda(Number(valor))}</span>;
+      return <span className={`font-mono ${manualClasses}`}>{formatarMoeda(Number(valor))}</span>;
     }
     
     if (tipo === 'percentual') {
-      return <span className="font-mono">{Number(valor).toFixed(2)}%</span>;
+      return <span className={`font-mono ${manualClasses}`}>{Number(valor).toFixed(2)}%</span>;
     }
     
     if (tipo === 'decimal') {
-      return <span className="font-mono">{Number(valor).toFixed(2)}x</span>;
+      return <span className={`font-mono ${manualClasses}`}>{Number(valor).toFixed(2)}x</span>;
     }
     
     if (tipo === 'gap') {
       const numValor = Number(valor);
       return (
-        <span className={`font-mono ${getGapColor(numValor)}`}>
+        <span className={`font-mono ${getGapColor(numValor)} ${manualClasses}`}>
           {numValor > 0 ? '+' : ''}{numValor.toFixed(2)}%
         </span>
       );
     }
     
     if (tipo === 'data') {
-      return <span>{formatarData(String(valor))}</span>;
+      return <span className={manualClasses}>{formatarData(String(valor))}</span>;
     }
     
     if (tipo === 'status') {
@@ -260,10 +265,10 @@ export default function CMVSemanalTabelaPage() {
     }
     
     if (tipo === 'numero') {
-      return <span className="font-semibold">{valor}</span>;
+      return <span className={`font-semibold ${manualClasses}`}>{valor}</span>;
     }
 
-    return <span>{String(valor)}</span>;
+    return <span className={manualClasses}>{String(valor)}</span>;
   }
 
   if (loading) {
@@ -361,6 +366,27 @@ export default function CMVSemanalTabelaPage() {
           </Button>
         </div>
 
+        {/* Legenda */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-4">
+          <CardContent className="p-3">
+            <div className="flex items-center gap-4 flex-wrap text-xs">
+              <span className="font-semibold text-gray-700 dark:text-gray-300">Legenda:</span>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded"></div>
+                <span className="text-gray-600 dark:text-gray-400">Campo Calculado</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-400 dark:border-amber-500 rounded"></div>
+                <span className="text-gray-600 dark:text-gray-400">✏️ Campo Manual</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded"></div>
+                <span className="text-gray-600 dark:text-gray-400">Semana Atual</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Tabela Principal */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-0">
@@ -436,9 +462,13 @@ export default function CMVSemanalTabelaPage() {
                               px-4 py-2 text-gray-900 dark:text-white border-r border-gray-300 dark:border-gray-600
                               sticky left-0 bg-white dark:bg-gray-800
                               ${item.destaque ? 'font-semibold bg-yellow-50 dark:bg-yellow-900/10' : ''}
+                              ${item.manual ? 'bg-amber-50 dark:bg-amber-900/20 font-medium' : ''}
                             `}
                           >
                             {item.label}
+                            {item.manual && (
+                              <span className="ml-2 text-xs text-amber-600 dark:text-amber-400">✏️</span>
+                            )}
                           </td>
                           {currentSemanas.map((semana) => {
                             const semanaAtual = getSemanaAtual();
@@ -451,9 +481,10 @@ export default function CMVSemanalTabelaPage() {
                                   px-4 py-2 text-center text-gray-700 dark:text-gray-300 border-r border-gray-300 dark:border-gray-600
                                   ${item.destaque ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''}
                                   ${isSemanaAtual ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                                  ${item.manual ? 'bg-amber-50 dark:bg-amber-900/20' : ''}
                                 `}
                               >
-                                {renderCelula(semana, item.campo, item.tipo)}
+                                {renderCelula(semana, item.campo, item.tipo, item.manual)}
                               </td>
                             );
                           })}

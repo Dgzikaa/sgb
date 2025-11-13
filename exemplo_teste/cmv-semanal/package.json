@@ -1,14 +1,15 @@
 ﻿{
-  "name": "cmv-semanal-import",
-  "version": "1.0.0",
-  "description": "Scripts para importar e gerenciar CMV Semanal",
-  "type": "module",
-  "scripts": {
-    "importar-historico": "node importar-historico-sheets.js"
+  \"name\": \"cmv-semanal-import\",
+  \"version\": \"1.0.0\",
+  \"description\": \"Scripts para importar e gerenciar CMV Semanal\",
+  \"type\": \"module\",
+  \"scripts\": {
+    \"importar-historico\": \"node importar-historico-sheets.js\",
+    \"atualizar\": \"node atualizar-dados-tempo-real.js\"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "dotenv": "^16.3.1",
-    "googleapis": "^128.0.0"
+  \"dependencies\": {
+    \"@supabase/supabase-js\": \"^2.39.0\",
+    \"dotenv\": \"^16.3.1\",
+    \"googleapis\": \"^128.0.0\"
   }
 }
