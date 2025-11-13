@@ -178,7 +178,7 @@ export default function CMVSemanalTabelaPage() {
       { label: 'Status', campo: 'status' as keyof CMVSemanal, tipo: 'status' },
     ]},
     { titulo: 'CMV PRINCIPAL', items: [
-      { label: 'Estoque Inicial', campo: 'estoque_inicial' as keyof CMVSemanal, tipo: 'moeda', manual: true },
+      { label: 'Estoque Inicial', campo: 'estoque_inicial' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Compras', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Estoque Final', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda' },
@@ -202,19 +202,19 @@ export default function CMVSemanalTabelaPage() {
       { label: 'TOTAL', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda' },
     ]},
     { titulo: 'COMPRAS', items: [
-      { label: 'Cozinha', campo: 'compras_custo_comida' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Bebidas + Tabacaria', campo: 'compras_custo_bebidas' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Drinks', campo: 'compras_custo_drinks' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Outros', campo: 'compras_custo_outros' as keyof CMVSemanal, tipo: 'moeda', manual: true },
+      { label: 'Cozinha', campo: 'compras_custo_comida' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Bebidas + Tabacaria', campo: 'compras_custo_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Drinks', campo: 'compras_custo_drinks' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Outros', campo: 'compras_custo_outros' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'TOTAL', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda' },
     ]},
     { titulo: 'CONTAS ESPECIAIS', items: [
-      { label: 'Total Consumo Sócios', campo: 'total_consumo_socios' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Mesa de Benefícios Cliente', campo: 'mesa_beneficios_cliente' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Mesa da Banda/DJ', campo: 'mesa_banda_dj' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Chegadeira', campo: 'chegadeira' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Mesa ADM/Casa', campo: 'mesa_adm_casa' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Mesa RH', campo: 'mesa_rh' as keyof CMVSemanal, tipo: 'moeda', manual: true },
+      { label: 'Total Consumo Sócios', campo: 'total_consumo_socios' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Mesa de Benefícios Cliente', campo: 'mesa_beneficios_cliente' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Mesa da Banda/DJ', campo: 'mesa_banda_dj' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Chegadeira', campo: 'chegadeira' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Mesa ADM/Casa', campo: 'mesa_adm_casa' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Mesa RH', campo: 'mesa_rh' as keyof CMVSemanal, tipo: 'moeda' },
     ]},
   ];
 

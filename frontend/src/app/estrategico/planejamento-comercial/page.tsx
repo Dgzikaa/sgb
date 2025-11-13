@@ -1592,6 +1592,38 @@ export default function PlanejamentoComercialPage() {
                     </div>
                   </div>
 
+                  {/* Atrasos de Entrega */}
+                  <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                    <h3 className="text-base font-medium mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                      Atrasos de Entrega (Contahub)
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                          🍳 Cozinha
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-500">({'>'}20min)</span>
+                        </Label>
+                        <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md font-medium text-sm">
+                          <span className={`${(eventoEdicao?.atrasos_cozinha || 0) > 80 ? 'text-red-600 dark:text-red-400' : (eventoEdicao?.atrasos_cozinha || 0) > 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}`}>
+                            {eventoEdicao?.atrasos_cozinha ?? 0} itens
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                          🍺 Bar/Drinks
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-500">({'>'}10min)</span>
+                        </Label>
+                        <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md font-medium text-sm">
+                          <span className={`${(eventoEdicao?.atrasos_bar || 0) > 15 ? 'text-red-600 dark:text-red-400' : (eventoEdicao?.atrasos_bar || 0) > 5 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}`}>
+                            {eventoEdicao?.atrasos_bar ?? 0} itens
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Custos e Análises Reais */}
                   <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                     <h3 className="text-base font-medium mb-4 text-gray-900 dark:text-white flex items-center gap-2">
