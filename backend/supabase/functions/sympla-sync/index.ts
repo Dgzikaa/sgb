@@ -501,6 +501,25 @@ Deno.serve(async (req: Request) => {
       }
     });
 
+    // 🔄 ATUALIZAR EVENTOS_BASE COM DADOS DO SYMPLA
+    try {
+      console.log('\n🔄 Atualizando eventos_base com dados do Sympla...');
+      const { data: updateResult, error: updateError } = await supabase
+        .rpc('update_eventos_base_with_sympla_yuzer', {
+          p_bar_id: 3, // Ordinário
+          p_data_inicio: dataInicioStr,
+          p_data_fim: dataFimStr
+        });
+
+      if (updateError) {
+        console.error('❌ Erro ao atualizar eventos_base:', updateError);
+      } else {
+        console.log(`✅ eventos_base atualizado: ${updateResult?.[0]?.mensagem || 'OK'}`);
+      }
+    } catch (updateError) {
+      console.error('❌ Erro ao atualizar eventos_base:', updateError);
+    }
+
     return Response.json({
       success: true,
       message: `Sympla sync concluído: ${eventosParaSincronizar.length} eventos processados`,

@@ -210,6 +210,25 @@ serve(async (req: Request) => {
 
     console.log(`✅ Yuzer Sync concluído: ${statsData.data?.length || 0} eventos, ${totalProdutosInseridos} produtos em ${executionTime}ms`);
 
+    // 🔄 ATUALIZAR EVENTOS_BASE COM DADOS DO YUZER
+    try {
+      console.log('\n🔄 Atualizando eventos_base com dados do Yuzer...');
+      const { data: updateResult, error: updateError } = await supabase
+        .rpc('update_eventos_base_with_sympla_yuzer', {
+          p_bar_id: targetBarId,
+          p_data_inicio: startDate,
+          p_data_fim: endDate
+        });
+
+      if (updateError) {
+        console.error('❌ Erro ao atualizar eventos_base:', updateError);
+      } else {
+        console.log(`✅ eventos_base atualizado: ${updateResult?.[0]?.mensagem || 'OK'}`);
+      }
+    } catch (updateError) {
+      console.error('❌ Erro ao atualizar eventos_base:', updateError);
+    }
+
     // 🚀 CHAMAR DISCORD NOTIFICATION para EVENTOS (Yuzer)
     try {
       const discordResponse = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/discord-notification', {
