@@ -1,8 +1,125 @@
-# 📚 Script de Sincronização com Histórico - Guia Completo
+# 📚 Sistema de Histórico Automático - Guia Completo
 
-## 🎯 Objetivo
+## 🎯 Visão Geral
 
-Este script sincroniza insumos e receitas do Google Sheets para o Supabase, **mantendo histórico completo de todas as alterações** com versionamento automático.
+O sistema **salva automaticamente** no histórico toda vez que você:
+- ✏️ Editar um insumo (preço, nome, categoria, etc)
+- ✏️ Editar uma receita (nome, rendimento, etc)
+- ➕ Adicionar insumo a uma receita
+- ➖ Remover insumo de uma receita
+- 🔄 Alterar quantidade de insumo em receita
+
+**NÃO PRECISA RODAR NENHUM SCRIPT!** Tudo é automático via triggers do banco de dados.
+
+---
+
+## 🔥 NOVO: Histórico Automático via Triggers
+
+### Como Funciona
+
+1. **Você edita** um insumo ou receita pela interface
+2. **Trigger detecta** a mudança automaticamente
+3. **Salva histórico** com versionamento automático
+4. **Pronto!** Nada mais a fazer
+
+### Exemplo Prático
+
+```typescript
+// Frontend: Você apenas atualiza normalmente
+await fetch('/api/operacional/receitas/insumos', {
+  method: 'PUT',
+  body: JSON.stringify({
+    id: 123,
+    custo_unitario: 15.50 // Mudou de 14.20 para 15.50
+  })
+});
+
+// ✅ O trigger AUTOMATICAMENTE salva:
+// - Estado anterior (14.20) no histórico
+// - Versão: 2025-11-14-v1
+// - Origem: "sistema"
+// - Data: timestamp exato
+```
+
+---
+
+## 📊 O que é Salvo Automaticamente
+
+### Insumos
+Toda vez que você editar:
+- Código
+- Nome  
+- Categoria
+- Tipo local
+- Unidade de medida
+- **Custo unitário** (mais importante!)
+- Observações
+
+### Receitas
+Toda vez que você editar:
+- Código
+- Nome
+- Categoria
+- Tipo local
+- Rendimento esperado
+- Observações
+- **Lista completa de insumos com quantidades**
+
+---
+
+## 🔍 Consultar Histórico
+
+### Ver mudanças de preço de um insumo
+
+```sql
+SELECT 
+  versao,
+  data_atualizacao,
+  custo_unitario,
+  origem
+FROM insumos_historico
+WHERE codigo = 'INS001'
+ORDER BY data_atualizacao DESC;
+```
+
+### Ver evolução de uma receita
+
+```sql
+SELECT 
+  versao,
+  data_atualizacao,
+  rendimento_esperado,
+  jsonb_array_length(insumos) as total_insumos,
+  origem
+FROM receitas_historico
+WHERE receita_codigo = 'REC001'
+ORDER BY data_atualizacao DESC;
+```
+
+### Comparar custos antes/depois
+
+```sql
+-- Exemplo: Ver o que mudou hoje
+SELECT 
+  h.codigo,
+  h.nome,
+  h.custo_unitario as custo_anterior,
+  i.custo_unitario as custo_atual,
+  ROUND(
+    ((i.custo_unitario - h.custo_unitario) / h.custo_unitario * 100)::numeric, 
+    2
+  ) as variacao_percentual
+FROM insumos_historico h
+JOIN insumos i ON i.id = h.insumo_id
+WHERE h.data_atualizacao::date = CURRENT_DATE
+  AND h.custo_unitario != i.custo_unitario;
+```
+
+---
+
+## 📅 Script Manual (Opcional)
+
+### Este script sincroniza insumos e receitas do Google Sheets para o Supabase, **mantendo histórico completo de todas as alterações** com versionamento automático.
 
 ## 📋 Características
 

@@ -22,9 +22,12 @@ import {
   BarChart3,
   RefreshCw,
   Filter,
-  Search
+  Search,
+  MapPin,
+  Settings
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface Alerta {
   tipo: string;
@@ -50,6 +53,14 @@ interface ContagemData {
   observacoes: string | null;
   created_at: string;
   updated_at: string;
+  area_id: number | null;
+}
+
+interface Area {
+  id: number;
+  nome: string;
+  tipo: string;
+  ativo: boolean;
 }
 
 const CATEGORIAS = [
@@ -70,27 +81,47 @@ export default function ContagemEstoquePage() {
   const [preco, setPreco] = useState('');
   const [dataContagem, setDataContagem] = useState(new Date().toISOString().split('T')[0]);
   const [observacoes, setObservacoes] = useState('');
+  const [areaId, setAreaId] = useState<string>('');
 
   // Estados de controle
   const [loading, setLoading] = useState(false);
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [contagens, setContagens] = useState<ContagemData[]>([]);
   const [loadingContagens, setLoadingContagens] = useState(false);
+  const [areas, setAreas] = useState<Area[]>([]);
   
   // Filtros
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroAlerta, setFiltroAlerta] = useState(false);
+  const [filtroArea, setFiltroArea] = useState('');
   const [busca, setBusca] = useState('');
 
   // Tab ativa
   const [activeTab, setActiveTab] = useState('registrar');
+
+  // Buscar áreas ao carregar
+  useEffect(() => {
+    buscarAreas();
+  }, []);
 
   // Carregar contagens ao mudar de tab
   useEffect(() => {
     if (activeTab === 'lista') {
       buscarContagens();
     }
-  }, [activeTab, filtroCategoria, filtroAlerta]);
+  }, [activeTab, filtroCategoria, filtroAlerta, filtroArea]);
+
+  const buscarAreas = async () => {
+    try {
+      const response = await fetch('/api/operacoes/areas-contagem?ativas=true');
+      const result = await response.json();
+      if (result.success) {
+        setAreas(result.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar áreas:', error);
+    }
+  };
 
   const buscarContagens = async () => {
     setLoadingContagens(true);
@@ -205,6 +236,7 @@ export default function ContagemEstoquePage() {
           estoque_flutuante: parseFloat(estoqueFlutuante) || 0,
           preco: parseFloat(preco) || 0,
           data_contagem: dataContagem,
+          area_id: areaId ? parseInt(areaId) : null,
           observacoes: observacoes || null,
           usuario_nome: 'Usuário Sistema'
         })
@@ -246,6 +278,7 @@ export default function ContagemEstoquePage() {
     setEstoqueFechado('');
     setEstoqueFlutuante('');
     setPreco('');
+    setAreaId('');
     setObservacoes('');
     setAlertas([]);
   };
@@ -286,19 +319,34 @@ export default function ContagemEstoquePage() {
                 Registre e acompanhe a contagem de estoque com validações inteligentes
               </p>
             </div>
+            <Link href="/operacoes/areas-contagem">
+              <Button variant="outline" className="btn-outline-dark">
+                <Settings className="h-4 w-4 mr-2" />
+                Gerenciar Áreas
+              </Button>
+            </Link>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="tabs-list-dark">
-              <TabsTrigger value="registrar" className="tabs-trigger-dark">
-                <Package className="h-4 w-4 mr-2" />
-                Registrar Contagem
-              </TabsTrigger>
-              <TabsTrigger value="lista" className="tabs-trigger-dark">
-                <History className="h-4 w-4 mr-2" />
-                Histórico
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between mb-4">
+              <TabsList className="tabs-list-dark">
+                <TabsTrigger value="registrar" className="tabs-trigger-dark">
+                  <Package className="h-4 w-4 mr-2" />
+                  Registrar Contagem
+                </TabsTrigger>
+                <TabsTrigger value="lista" className="tabs-trigger-dark">
+                  <History className="h-4 w-4 mr-2" />
+                  Histórico
+                </TabsTrigger>
+              </TabsList>
+              
+              <Link href="/operacoes/contagem-estoque/consolidado">
+                <Button className="btn-primary-dark">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Ver Consolidado por Área
+                </Button>
+              </Link>
+            </div>
 
             {/* TAB: REGISTRAR CONTAGEM */}
             <TabsContent value="registrar" className="space-y-6">
@@ -313,7 +361,7 @@ export default function ContagemEstoquePage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Categoria */}
                         <div className="space-y-2">
                           <Label htmlFor="categoria" className="text-gray-700 dark:text-gray-300">
@@ -326,6 +374,32 @@ export default function ContagemEstoquePage() {
                             <SelectContent>
                               {CATEGORIAS.map(cat => (
                                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Área */}
+                        <div className="space-y-2">
+                          <Label htmlFor="area" className="text-gray-700 dark:text-gray-300">
+                            Área
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                              (Opcional)
+                            </span>
+                          </Label>
+                          <Select value={areaId} onValueChange={setAreaId}>
+                            <SelectTrigger className="input-dark">
+                              <SelectValue placeholder="Selecione área..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Sem área específica</SelectItem>
+                              {areas.map(area => (
+                                <SelectItem key={area.id} value={area.id.toString()}>
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-3 w-3" />
+                                    {area.nome}
+                                  </div>
+                                </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
