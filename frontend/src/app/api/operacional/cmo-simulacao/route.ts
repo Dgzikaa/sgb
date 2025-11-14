@@ -10,12 +10,16 @@ const supabase = createClient(
 interface Funcionario {
   nome: string;
   tipo_contratacao: 'CLT' | 'PJ';
-  vt: number;
   area: string;
-  salario: number;
-  dias_trabalhados: number;
-  adicional_bonus: number;
+  diaria: number;
+  vale: number;
+  salario_bruto: number;
+  adicionais: number;
   aviso_previo: number;
+  estimativa: number;
+  tempo_casa: number;
+  mensalidade_sindical: number;
+  dias_trabalhados: number;
 }
 
 // Interface para simulação
@@ -32,46 +36,101 @@ interface SimulacaoCMO {
   criado_por?: string;
 }
 
-// Calcular encargos de um funcionário CLT
-function calcularEncargosCLT(salario: number, area: string, diasTrabalhados: number): number {
-  const salarioProporcional = (salario / 30) * diasTrabalhados;
+// Lookup de adicional noturno por área
+function obterAdicionalNoturno(area: string): number {
+  const adicionalPorArea: Record<string, number> = {
+    'Salão': 125,
+    'Bar': 125,
+    'Cozinha': 115,
+    'Liderança': 0,
+  };
+  return adicionalPorArea[area] || 0;
+}
+
+// Calcular todos os valores de um funcionário
+function calcularValoresFuncionario(func: Funcionario) {
+  const diasMes = 30;
   
-  // Encargos CLT (aproximados)
-  const inss = salarioProporcional * 0.20; // INSS Patronal
-  const fgts = salarioProporcional * 0.08; // FGTS
-  const decimoTerceiro = salarioProporcional / 12; // 13º proporcional
-  const ferias = salarioProporcional / 12; // Férias proporcionais
+  // 1. Salário Bruto + Estimativa
+  const salarioBrutoEstimativa = func.salario_bruto + func.estimativa;
   
-  // Adicional noturno para áreas específicas (20% sobre salário base)
-  let adicionalNoturno = 0;
-  if (area.toLowerCase().includes('salão') || area.toLowerCase().includes('bar') || area.toLowerCase().includes('cozinha')) {
-    adicionalNoturno = salarioProporcional * 0.20;
+  // 2. Adicional Noturno (lookup por área)
+  const adicionalNoturno = obterAdicionalNoturno(func.area);
+  
+  // 3. DRS Sobre Ads Noturno = 0,2 * adicional noturno
+  const drsSobreAdsNoturno = adicionalNoturno * 0.2;
+  
+  // 4. Produtividade = salário bruto * 0,05
+  const produtividade = func.salario_bruto * 0.05;
+  
+  // 5. Desc Vale Transporte = salário bruto * -0,06
+  const descValeTransporte = func.salario_bruto * -0.06;
+  
+  // 6. INSS = soma * -0,08
+  const baseINSS = salarioBrutoEstimativa + adicionalNoturno + drsSobreAdsNoturno + func.tempo_casa + produtividade;
+  const inss = baseINSS * -0.08;
+  
+  // 7. IR = fórmula progressiva
+  let ir = 0;
+  const baseIR = (func.salario_bruto - 528) * 0.075 - 158.4;
+  if (baseIR > 0) {
+    ir = baseIR * -1; // Negativo porque é desconto
   }
   
-  return inss + fgts + decimoTerceiro + ferias + adicionalNoturno;
+  // 8. Salário Líquido
+  const salarioLiquido = func.salario_bruto + adicionalNoturno + drsSobreAdsNoturno + 
+                         func.tempo_casa + produtividade + descValeTransporte + inss + ir;
+  
+  // 9. Provisão Certa = soma * 0,27
+  const baseProvisao = func.salario_bruto + adicionalNoturno + drsSobreAdsNoturno + func.tempo_casa + produtividade;
+  const provisaoCerta = baseProvisao * 0.27;
+  
+  // 10. FGTS = mesmo valor absoluto do INSS
+  const fgts = Math.abs(inss);
+  
+  // 11. CUSTO-EMPRESA
+  let custoEmpresa = 0;
+  
+  if (func.tipo_contratacao === 'CLT') {
+    // CLT: (soma dos encargos / 30 * dias trabalhados) + aviso prévio + adicionais
+    const somaEncargos = Math.abs(inss) + fgts + Math.abs(descValeTransporte) + provisaoCerta + func.mensalidade_sindical;
+    custoEmpresa = (somaEncargos / diasMes * func.dias_trabalhados) + func.aviso_previo + func.adicionais;
+  } else {
+    // PJ: soma / 30 * dias trabalhados
+    const somaPJ = func.salario_bruto + func.tempo_casa + func.vale + func.adicionais + func.aviso_previo;
+    custoEmpresa = (somaPJ / diasMes) * func.dias_trabalhados;
+  }
+  
+  return {
+    salarioBrutoEstimativa,
+    adicionalNoturno,
+    drsSobreAdsNoturno,
+    produtividade,
+    descValeTransporte,
+    inss,
+    ir,
+    salarioLiquido,
+    provisaoCerta,
+    fgts,
+    custoEmpresa
+  };
 }
 
 // Calcular totais de uma simulação
 function calcularTotais(funcionarios: Funcionario[]) {
-  let totalFolha = 0;
-  let totalEncargos = 0;
+  let totalSalarioLiquido = 0;
+  let totalCustoEmpresa = 0;
   
   funcionarios.forEach(func => {
-    const salarioProporcional = (func.salario / 30) * func.dias_trabalhados;
-    const custoBase = salarioProporcional + func.vt + func.adicional_bonus + func.aviso_previo;
-    
-    totalFolha += custoBase;
-    
-    if (func.tipo_contratacao === 'CLT') {
-      const encargos = calcularEncargosCLT(func.salario, func.area, func.dias_trabalhados);
-      totalEncargos += encargos;
-    }
+    const valores = calcularValoresFuncionario(func);
+    totalSalarioLiquido += valores.salarioLiquido;
+    totalCustoEmpresa += valores.custoEmpresa;
   });
   
   return {
-    total_folha: totalFolha,
-    total_encargos: totalEncargos,
-    total_geral: totalFolha + totalEncargos
+    total_folha: totalSalarioLiquido,
+    total_encargos: totalCustoEmpresa - totalSalarioLiquido,
+    total_geral: totalCustoEmpresa
   };
 }
 

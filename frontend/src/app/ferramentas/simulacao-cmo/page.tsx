@@ -26,10 +26,7 @@ import {
   TrendingUp,
   FileText,
   Edit,
-  ChevronDown,
-  ChevronUp,
   Info,
-  Download,
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
@@ -40,12 +37,16 @@ interface Funcionario {
   id: string;
   nome: string;
   tipo_contratacao: 'CLT' | 'PJ';
-  vt: number;
   area: string;
-  salario: number;
-  dias_trabalhados: number;
-  adicional_bonus: number;
+  diaria: number;
+  vale: number;
+  salario_bruto: number;
+  adicionais: number;
   aviso_previo: number;
+  estimativa: number;
+  tempo_casa: number;
+  mensalidade_sindical: number;
+  dias_trabalhados: number;
 }
 
 interface SimulacaoCMO {
@@ -78,16 +79,7 @@ const MESES = [
   { value: 12, label: 'Dezembro' },
 ];
 
-const AREAS = [
-  'Salão',
-  'Bar',
-  'Cozinha',
-  'Administrativo',
-  'Gerência',
-  'Segurança',
-  'Limpeza',
-  'Outro'
-];
+const AREAS = ['Salão', 'Liderança', 'Bar', 'Cozinha'];
 
 export default function SimulacaoCMOPage() {
   const { setPageTitle } = usePageTitle();
@@ -105,56 +97,101 @@ export default function SimulacaoCMOPage() {
   const [mostrarHistorico, setMostrarHistorico] = useState(false);
   const [simulacaoAtualId, setSimulacaoAtualId] = useState<number | undefined>();
 
-  // Calcular encargos de um funcionário CLT
-  const calcularEncargosCLT = (salario: number, area: string, diasTrabalhados: number): number => {
-    const salarioProporcional = (salario / 30) * diasTrabalhados;
-    
-    const inss = salarioProporcional * 0.20; // INSS Patronal
-    const fgts = salarioProporcional * 0.08; // FGTS
-    const decimoTerceiro = salarioProporcional / 12;
-    const ferias = salarioProporcional / 12;
-    
-    // Adicional noturno para áreas específicas (20%)
-    let adicionalNoturno = 0;
-    if (area.toLowerCase().includes('salão') || area.toLowerCase().includes('bar') || area.toLowerCase().includes('cozinha')) {
-      adicionalNoturno = salarioProporcional * 0.20;
-    }
-    
-    return inss + fgts + decimoTerceiro + ferias + adicionalNoturno;
+  // Lookup de adicional noturno por área
+  const obterAdicionalNoturno = (area: string): number => {
+    const adicionalPorArea: Record<string, number> = {
+      'Salão': 125,
+      'Bar': 125,
+      'Cozinha': 115,
+      'Liderança': 0,
+    };
+    return adicionalPorArea[area] || 0;
   };
 
-  // Calcular custo total de um funcionário
-  const calcularCustoFuncionario = (func: Funcionario) => {
-    const salarioProporcional = (func.salario / 30) * func.dias_trabalhados;
-    const custoBase = salarioProporcional + func.vt + func.adicional_bonus + func.aviso_previo;
+  // Calcular todos os valores de um funcionário (seguindo fórmulas da planilha)
+  const calcularValoresFuncionario = (func: Funcionario) => {
+    const diasMes = 30;
     
-    let encargos = 0;
+    // 1. Salário Bruto + Estimativa
+    const salarioBrutoEstimativa = func.salario_bruto + func.estimativa;
+    
+    // 2. Adicional Noturno (lookup por área)
+    const adicionalNoturno = obterAdicionalNoturno(func.area);
+    
+    // 3. DRS Sobre Ads Noturno = 0,2 * adicional noturno
+    const drsSobreAdsNoturno = adicionalNoturno * 0.2;
+    
+    // 4. Produtividade = salário bruto * 0,05
+    const produtividade = func.salario_bruto * 0.05;
+    
+    // 5. Desc Vale Transporte = salário bruto * -0,06
+    const descValeTransporte = func.salario_bruto * -0.06;
+    
+    // 6. INSS = soma * -0,08
+    const baseINSS = salarioBrutoEstimativa + adicionalNoturno + drsSobreAdsNoturno + func.tempo_casa + produtividade;
+    const inss = baseINSS * -0.08;
+    
+    // 7. IR = fórmula progressiva
+    let ir = 0;
+    const baseIR = (func.salario_bruto - 528) * 0.075 - 158.4;
+    if (baseIR > 0) {
+      ir = baseIR * -1; // Negativo porque é desconto
+    }
+    
+    // 8. Salário Líquido
+    const salarioLiquido = func.salario_bruto + adicionalNoturno + drsSobreAdsNoturno + 
+                           func.tempo_casa + produtividade + descValeTransporte + inss + ir;
+    
+    // 9. Provisão Certa = soma * 0,27
+    const baseProvisao = func.salario_bruto + adicionalNoturno + drsSobreAdsNoturno + func.tempo_casa + produtividade;
+    const provisaoCerta = baseProvisao * 0.27;
+    
+    // 10. FGTS = mesmo valor absoluto do INSS
+    const fgts = Math.abs(inss);
+    
+    // 11. CUSTO-EMPRESA
+    let custoEmpresa = 0;
+    
     if (func.tipo_contratacao === 'CLT') {
-      encargos = calcularEncargosCLT(func.salario, func.area, func.dias_trabalhados);
+      // CLT: (soma dos encargos / 30 * dias trabalhados) + aviso prévio + adicionais
+      const somaEncargos = Math.abs(inss) + fgts + Math.abs(descValeTransporte) + provisaoCerta + func.mensalidade_sindical;
+      custoEmpresa = (somaEncargos / diasMes * func.dias_trabalhados) + func.aviso_previo + func.adicionais;
+    } else {
+      // PJ: soma / 30 * dias trabalhados
+      const somaPJ = func.salario_bruto + func.tempo_casa + func.vale + func.adicionais + func.aviso_previo;
+      custoEmpresa = (somaPJ / diasMes) * func.dias_trabalhados;
     }
     
     return {
-      custoBase,
-      encargos,
-      total: custoBase + encargos
+      salarioBrutoEstimativa,
+      adicionalNoturno,
+      drsSobreAdsNoturno,
+      produtividade,
+      descValeTransporte,
+      inss,
+      ir,
+      salarioLiquido,
+      provisaoCerta,
+      fgts,
+      custoEmpresa
     };
   };
 
   // Calcular totais gerais
   const calcularTotaisGerais = () => {
-    let totalFolha = 0;
-    let totalEncargos = 0;
+    let totalSalarioLiquido = 0;
+    let totalCustoEmpresa = 0;
     
     funcionarios.forEach(func => {
-      const custos = calcularCustoFuncionario(func);
-      totalFolha += custos.custoBase;
-      totalEncargos += custos.encargos;
+      const valores = calcularValoresFuncionario(func);
+      totalSalarioLiquido += valores.salarioLiquido;
+      totalCustoEmpresa += valores.custoEmpresa;
     });
     
     return {
-      totalFolha,
-      totalEncargos,
-      totalGeral: totalFolha + totalEncargos
+      totalFolha: totalSalarioLiquido,
+      totalEncargos: totalCustoEmpresa - totalSalarioLiquido,
+      totalGeral: totalCustoEmpresa
     };
   };
 
@@ -186,7 +223,6 @@ export default function SimulacaoCMOPage() {
         setObservacoes(simulacao.observacoes || '');
         setSimulacaoAtualId(simulacao.id);
       } else {
-        // Limpar se não houver simulação para este mês
         setFuncionarios([]);
         setObservacoes('');
         setSimulacaoAtualId(undefined);
@@ -289,12 +325,16 @@ export default function SimulacaoCMOPage() {
       id: `func-${Date.now()}`,
       nome: '',
       tipo_contratacao: 'CLT',
-      vt: 0,
       area: 'Salão',
-      salario: 0,
-      dias_trabalhados: 30,
-      adicional_bonus: 0,
-      aviso_previo: 0
+      diaria: 0,
+      vale: 0,
+      salario_bruto: 0,
+      adicionais: 0,
+      aviso_previo: 0,
+      estimativa: 0,
+      tempo_casa: 0,
+      mensalidade_sindical: 0,
+      dias_trabalhados: 30
     };
     setFuncionarios([...funcionarios, novoFunc]);
   };
@@ -539,45 +579,47 @@ export default function SimulacaoCMOPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <tr>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Nome</th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Tipo</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">VT</th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Área</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Salário</th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Dias Trab.</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Adicional/Bônus</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Aviso Prévio</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Custo Base</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Encargos</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Total</th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-gray-900 dark:text-white">Ações</th>
+                      <th className="text-left py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white">Nome</th>
+                      <th className="text-center py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Tipo</th>
+                      <th className="text-center py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Área</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Diária</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Vale</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Salário Bruto</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Adicionais</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Aviso Prévio</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Estimativa</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Tempo Casa</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Mens. Sindical</th>
+                      <th className="text-center py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white bg-orange-50 dark:bg-orange-900/20">Dias Trab.</th>
+                      <th className="text-right py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white">Custo Empresa</th>
+                      <th className="text-center py-2 px-2 text-xs font-semibold text-gray-900 dark:text-white">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
                     {funcionarios.map((func) => {
-                      const custos = calcularCustoFuncionario(func);
+                      const valores = calcularValoresFuncionario(func);
                       return (
                         <tr
                           key={func.id}
                           className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                         >
-                          <td className="py-2 px-4">
+                          <td className="py-1 px-2">
                             <Input
                               value={func.nome}
                               onChange={(e) => atualizarFuncionario(func.id, 'nome', e.target.value)}
-                              placeholder="Nome do funcionário"
-                              className="input-dark text-sm"
+                              placeholder="Nome"
+                              className="input-dark text-xs h-8"
                             />
                           </td>
-                          <td className="py-2 px-4 bg-orange-50 dark:bg-orange-900/10">
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
                             <Select
                               value={func.tipo_contratacao}
                               onValueChange={(value) => atualizarFuncionario(func.id, 'tipo_contratacao', value)}
                             >
-                              <SelectTrigger className="select-dark text-sm">
+                              <SelectTrigger className="select-dark text-xs h-8">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="modal-select-content">
@@ -586,84 +628,114 @@ export default function SimulacaoCMOPage() {
                               </SelectContent>
                             </Select>
                           </td>
-                          <td className="py-2 px-4 bg-orange-50 dark:bg-orange-900/10">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={func.vt}
-                              onChange={(e) => atualizarFuncionario(func.id, 'vt', parseFloat(e.target.value) || 0)}
-                              className="input-dark text-sm text-right"
-                            />
-                          </td>
-                          <td className="py-2 px-4 bg-orange-50 dark:bg-orange-900/10">
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
                             <Select
                               value={func.area}
                               onValueChange={(value) => atualizarFuncionario(func.id, 'area', value)}
                             >
-                              <SelectTrigger className="select-dark text-sm">
+                              <SelectTrigger className="select-dark text-xs h-8">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent className="modal-select-content">
                                 {AREAS.map(area => (
-                                  <SelectItem key={area} value={area} className="modal-select-item">{area}</SelectItem>
+                                  <SelectItem key={area} value={area} className="modal-select-item text-xs">{area}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
                           </td>
-                          <td className="py-2 px-4 bg-orange-50 dark:bg-orange-900/10">
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
                             <Input
                               type="number"
                               step="0.01"
-                              value={func.salario}
-                              onChange={(e) => atualizarFuncionario(func.id, 'salario', parseFloat(e.target.value) || 0)}
-                              className="input-dark text-sm text-right"
+                              value={func.diaria}
+                              onChange={(e) => atualizarFuncionario(func.id, 'diaria', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-20"
                             />
                           </td>
-                          <td className="py-2 px-4 bg-orange-50 dark:bg-orange-900/10">
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={func.vale}
+                              onChange={(e) => atualizarFuncionario(func.id, 'vale', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-20"
+                            />
+                          </td>
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={func.salario_bruto}
+                              onChange={(e) => atualizarFuncionario(func.id, 'salario_bruto', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-24"
+                            />
+                          </td>
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={func.adicionais}
+                              onChange={(e) => atualizarFuncionario(func.id, 'adicionais', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-20"
+                            />
+                          </td>
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={func.aviso_previo}
+                              onChange={(e) => atualizarFuncionario(func.id, 'aviso_previo', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-20"
+                            />
+                          </td>
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={func.estimativa}
+                              onChange={(e) => atualizarFuncionario(func.id, 'estimativa', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-20"
+                            />
+                          </td>
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={func.tempo_casa}
+                              onChange={(e) => atualizarFuncionario(func.id, 'tempo_casa', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-20"
+                            />
+                          </td>
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={func.mensalidade_sindical}
+                              onChange={(e) => atualizarFuncionario(func.id, 'mensalidade_sindical', parseFloat(e.target.value) || 0)}
+                              className="input-dark text-xs text-right h-8 w-20"
+                            />
+                          </td>
+                          <td className="py-1 px-2 bg-orange-50 dark:bg-orange-900/10">
                             <Input
                               type="number"
                               min="1"
                               max="31"
                               value={func.dias_trabalhados}
                               onChange={(e) => atualizarFuncionario(func.id, 'dias_trabalhados', parseInt(e.target.value) || 30)}
-                              className="input-dark text-sm text-center"
+                              className="input-dark text-xs text-center h-8 w-16"
                             />
                           </td>
-                          <td className="py-2 px-4 bg-orange-50 dark:bg-orange-900/10">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={func.adicional_bonus}
-                              onChange={(e) => atualizarFuncionario(func.id, 'adicional_bonus', parseFloat(e.target.value) || 0)}
-                              className="input-dark text-sm text-right"
-                            />
+                          <td className="py-1 px-2 text-right text-xs font-bold text-green-600 dark:text-green-400">
+                            {formatarMoeda(valores.custoEmpresa)}
                           </td>
-                          <td className="py-2 px-4 bg-orange-50 dark:bg-orange-900/10">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={func.aviso_previo}
-                              onChange={(e) => atualizarFuncionario(func.id, 'aviso_previo', parseFloat(e.target.value) || 0)}
-                              className="input-dark text-sm text-right"
-                            />
-                          </td>
-                          <td className="py-2 px-4 text-right text-sm font-semibold text-gray-900 dark:text-white">
-                            {formatarMoeda(custos.custoBase)}
-                          </td>
-                          <td className="py-2 px-4 text-right text-sm font-semibold text-blue-600 dark:text-blue-400">
-                            {formatarMoeda(custos.encargos)}
-                          </td>
-                          <td className="py-2 px-4 text-right text-sm font-bold text-green-600 dark:text-green-400">
-                            {formatarMoeda(custos.total)}
-                          </td>
-                          <td className="py-2 px-4 text-center">
+                          <td className="py-1 px-2 text-center">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => removerFuncionario(func.id)}
-                              className="h-8 w-8 p-0"
+                              className="h-7 w-7 p-0"
                             >
-                              <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                              <Trash2 className="h-3 w-3 text-red-600 dark:text-red-400" />
                             </Button>
                           </td>
                         </tr>
@@ -689,7 +761,7 @@ export default function SimulacaoCMOPage() {
                   {formatarMoeda(totais.totalFolha)}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  Salários + VT + Adicionais
+                  Salário Líquido Total
                 </p>
               </div>
 
@@ -702,7 +774,7 @@ export default function SimulacaoCMOPage() {
                   {formatarMoeda(totais.totalEncargos)}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  INSS + FGTS + 13º + Férias + Adic. Noturno
+                  INSS + FGTS + Provisões
                 </p>
               </div>
 
@@ -747,13 +819,20 @@ export default function SimulacaoCMOPage() {
             <div className="flex items-start gap-2">
               <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-                <p><strong>Colunas Laranja:</strong> Campos editáveis que você deve preencher</p>
-                <p><strong>Tipo de Contratação:</strong> CLT (com encargos) ou PJ (sem encargos)</p>
-                <p><strong>Área:</strong> Salão, Bar e Cozinha recebem adicional noturno de 20%</p>
-                <p><strong>Dias Trabalhados:</strong> Ajuste para contratações/demissões no meio do mês ou férias</p>
-                <p><strong>Adicional/Bônus:</strong> Valores extras por meta, capitão, craque, etc.</p>
-                <p><strong>Aviso Prévio:</strong> Quando indenizado, adicionar aqui</p>
-                <p><strong>Encargos CLT:</strong> INSS (20%) + FGTS (8%) + 13º + Férias + Adicional Noturno (quando aplicável)</p>
+                <p><strong>Colunas Laranja:</strong> Campos editáveis que você deve preencher manualmente</p>
+                <p><strong>Adicional Noturno:</strong> Automático por área - Salão/Bar: R$125, Cozinha: R$115, Liderança: R$0</p>
+                <p><strong>Cálculos Automáticos:</strong></p>
+                <ul className="list-disc list-inside ml-4 space-y-1">
+                  <li>DRS Sobre Ads Noturno = Adicional Noturno × 20%</li>
+                  <li>Produtividade = Salário Bruto × 5%</li>
+                  <li>Desc Vale Transporte = Salário Bruto × 6% (negativo)</li>
+                  <li>INSS = Base × 8% (negativo)</li>
+                  <li>IR = Fórmula progressiva com dedução</li>
+                  <li>Provisão Certa = Base × 27%</li>
+                  <li>FGTS = Mesmo valor absoluto do INSS</li>
+                </ul>
+                <p><strong>Custo-Empresa CLT:</strong> (Encargos / 30 × Dias Trabalhados) + Aviso Prévio + Adicionais</p>
+                <p><strong>Custo-Empresa PJ:</strong> (Salário + Tempo Casa + Vale + Adicionais + Aviso) / 30 × Dias Trabalhados</p>
               </div>
             </div>
           </CardContent>
@@ -762,4 +841,3 @@ export default function SimulacaoCMOPage() {
     </div>
   );
 }
-

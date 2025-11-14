@@ -43,7 +43,7 @@ fict34UnfFfDpdLHjxA7AQc=
 // ID do arquivo do Google Drive - NPS
 // https://docs.google.com/spreadsheets/d/1GSsU3G2uEl6RHkQUop_WDWjzLBsMVomJN-rf-_J8Sx4/edit?resourcekey=&pli=1&gid=38070213#gid=38070213
 const FILE_ID = '1GSsU3G2uEl6RHkQUop_WDWjzLBsMVomJN-rf-_J8Sx4'
-const SHEET_NAME = 'NPS'
+const SHEET_NAME = 'Respostas ao formulário 1'
 
 interface NPSRow {
   bar_id: number
@@ -140,7 +140,13 @@ serve(async (req) => {
   }
 
   try {
+    // Permitir acesso sem autenticação para pg_cron
+    const authHeader = req.headers.get('authorization')
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    // Log para debugging
     console.log('🔄 Iniciando sincronização do NPS...')
+    console.log('🔐 Auth presente:', !!authHeader)
 
     // 1. Obter Access Token
     console.log('🔑 Obtendo Access Token...')
@@ -168,19 +174,21 @@ serve(async (req) => {
     
     console.log(`📑 Abas encontradas: ${workbook.SheetNames.join(', ')}`)
 
-    // Encontrar aba NPS (gid=38070213)
+    // Encontrar aba "Respostas ao formulário 1"
     let targetSheet = workbook.Sheets[SHEET_NAME]
     if (!targetSheet) {
       console.warn(`⚠️ Aba "${SHEET_NAME}" não encontrada, buscando alternativas...`)
       // Tentar encontrar por nome parcial
       const npsSheetName = workbook.SheetNames.find(name => 
-        name.toLowerCase().includes('nps')
+        name.toLowerCase().includes('respostas') || 
+        name.toLowerCase().includes('formulário') ||
+        name.toLowerCase().includes('formulario')
       )
       if (npsSheetName) {
         targetSheet = workbook.Sheets[npsSheetName]
         console.log(`✅ Usando aba: ${npsSheetName}`)
       } else {
-        throw new Error('Aba NPS não encontrada na planilha')
+        throw new Error('Aba de respostas não encontrada na planilha')
       }
     }
 
@@ -193,17 +201,19 @@ serve(async (req) => {
 
     console.log(`📊 ${jsonData.length} linhas encontradas`)
 
-    // 4. Processar dados (pular cabeçalho - linhas 0-2)
+    // 4. Processar dados (pular cabeçalho - linha 0)
     const registros: NPSRow[] = []
     
-    for (let i = 3; i < jsonData.length; i++) {
+    // Google Forms geralmente tem: Carimbo de data/hora + perguntas
+    for (let i = 1; i < jsonData.length; i++) {
       const row = jsonData[i]
       
       if (!row[0] || String(row[0]).trim() === '') continue
 
       try {
-        // Processar data
+        // Processar carimbo de data/hora do Google Forms
         let dataFormatada = ''
+        let timestampCompleto = ''
         if (row[0]) {
           if (typeof row[0] === 'number') {
             // Data Excel
@@ -212,35 +222,54 @@ serve(async (req) => {
             const month = String(date.getMonth() + 1).padStart(2, '0')
             const day = String(date.getDate()).padStart(2, '0')
             dataFormatada = `${year}-${month}-${day}`
+            timestampCompleto = row[0].toString() // Usar número como timestamp único
           } else {
-            // String DD/MM/YYYY
-            const parts = String(row[0]).split('/')
-            if (parts.length === 3) {
-              dataFormatada = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+            // String do Google Forms: "DD/MM/YYYY HH:MM:SS" ou "MM/DD/YYYY HH:MM:SS"
+            const dateStr = String(row[0])
+            timestampCompleto = dateStr // Salvar timestamp completo
+            const dateMatch = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+            if (dateMatch) {
+              const day = dateMatch[1].padStart(2, '0')
+              const month = dateMatch[2].padStart(2, '0')
+              const year = dateMatch[3]
+              dataFormatada = `${year}-${month}-${day}`
             }
           }
         }
 
-        if (!dataFormatada) continue
-
-        // Converter percentuais para escala de 1-5
-        const parsePercentualToScale = (val: any): number => {
-          if (!val) return 0
-          const str = String(val).replace('%', '').replace(',', '.')
-          const percentual = parseFloat(str)
-          // Converter percentual (0-100) para escala 1-5
-          const escala = Math.ceil((percentual / 100) * 5)
-          return Math.max(1, Math.min(5, escala))
+        if (!dataFormatada) {
+          console.warn(`⚠️ Linha ${i + 1}: Data inválida - ${row[0]}`)
+          continue
         }
 
-        // Assumindo estrutura da planilha NPS:
-        // Col 0: Data | Col 1: Setor | Col 2: Quórum | Cols 3-8: Perguntas NPS
-        const pergunta1 = parsePercentualToScale(row[3])
-        const pergunta2 = parsePercentualToScale(row[4])
-        const pergunta3 = parsePercentualToScale(row[5])
-        const pergunta4 = parsePercentualToScale(row[6])
-        const pergunta5 = parsePercentualToScale(row[7])
-        const pergunta6 = parsePercentualToScale(row[8])
+        // Converter valores (podem ser números 1-5 ou percentuais)
+        const parseValue = (val: any): number => {
+          if (!val) return 0
+          const str = String(val).replace('%', '').replace(',', '.')
+          const num = parseFloat(str)
+          
+          // Se já está na escala 1-5, retornar direto
+          if (num >= 1 && num <= 5) {
+            return num
+          }
+          
+          // Se é percentual (0-100), converter para escala 1-5
+          if (num > 5 && num <= 100) {
+            const escala = Math.ceil((num / 100) * 5)
+            return Math.max(1, Math.min(5, escala))
+          }
+          
+          return num
+        }
+
+        // Estrutura do Google Forms NPS:
+        // Col 0: Carimbo | Cols 1-6: 6 perguntas
+        const pergunta1 = parseValue(row[1])
+        const pergunta2 = parseValue(row[2])
+        const pergunta3 = parseValue(row[3])
+        const pergunta4 = parseValue(row[4])
+        const pergunta5 = parseValue(row[5])
+        const pergunta6 = parseValue(row[6])
         
         // Calcular média geral (média das 6 perguntas)
         const mediaGeral = (pergunta1 + pergunta2 + pergunta3 + pergunta4 + pergunta5 + pergunta6) / 6
@@ -251,8 +280,8 @@ serve(async (req) => {
         const registro: NPSRow = {
           bar_id: 3,
           data_pesquisa: dataFormatada,
-          setor: row[1] || 'TODOS',
-          quorum: parseInt(row[2]) || 0,
+          setor: 'TODOS', // Google Forms geralmente não tem setor
+          quorum: 1, // 1 resposta por linha
           qual_sua_area_atuacao: pergunta1,
           sinto_me_motivado: pergunta2,
           empresa_se_preocupa: pergunta3,
@@ -261,7 +290,7 @@ serve(async (req) => {
           quando_identifico: pergunta6,
           media_geral: parseFloat(mediaGeral.toFixed(2)),
           resultado_percentual: parseFloat(resultadoPercentual.toFixed(2)),
-          funcionario_nome: row[9] || 'Cliente',
+          funcionario_nome: `Cliente_${timestampCompleto.substring(0, 20)}`, // Identificador único baseado em timestamp
         }
 
         registros.push(registro)
