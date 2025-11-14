@@ -147,7 +147,7 @@ export function LargeModal({
                 variant="outline"
                 onClick={onCancel || (() => onOpenChange(false))}
                 disabled={loading}
-                className="flex items-center gap-2 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="inline-flex flex-row items-center gap-2 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <X className="w-4 h-4" />
                 {cancelText}
@@ -158,7 +158,7 @@ export function LargeModal({
                   type="button"
                   onClick={onSave}
                   disabled={saveDisabled || loading}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                  className="inline-flex flex-row items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                 >
                   <Save className="w-4 h-4" />
                   {loading ? 'Salvando...' : saveText}

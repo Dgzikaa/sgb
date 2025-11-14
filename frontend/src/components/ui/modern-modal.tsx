@@ -78,7 +78,7 @@ export function ModernModal({
             variant="outline"
             onClick={onCancel || (() => onOpenChange(false))}
             disabled={loading}
-            className="modal-button-secondary"
+            className="inline-flex flex-row items-center modal-button-secondary"
           >
             <X className="w-4 h-4 mr-2" />
             {cancelText}
@@ -88,7 +88,7 @@ export function ModernModal({
             <Button
               onClick={onSave}
               disabled={saveDisabled || loading}
-              className="modal-button-primary"
+              className="inline-flex flex-row items-center modal-button-primary"
             >
               <Save className="w-4 h-4 mr-2" />
               {loading ? 'Salvando...' : saveText}

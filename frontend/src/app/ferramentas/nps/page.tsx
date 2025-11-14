@@ -55,6 +55,7 @@ export default function NPSPage() {
   const [modalFormulario, setModalFormulario] = useState(false);
   const [tipoPesquisa, setTipoPesquisa] = useState<'nps' | 'felicidade'>('felicidade');
   const [salvando, setSalvando] = useState(false);
+  const [sincronizando, setSincronizando] = useState(false);
   
   // Estados do formulário
   const [formData, setFormData] = useState({
@@ -235,6 +236,48 @@ export default function NPSPage() {
     });
   };
 
+  // Função para sincronizar manualmente da planilha
+  const sincronizarPlanilha = async () => {
+    try {
+      setSincronizando(true);
+      
+      toast({
+        title: 'Sincronizando...',
+        description: 'Buscando dados da planilha do Google Sheets',
+      });
+
+      const response = await fetch('/api/ferramentas/nps/sync-manual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast({
+          title: 'Sucesso!',
+          description: data.data?.message || 'Dados sincronizados com sucesso',
+        });
+        // Recarregar dados após sincronização
+        await carregarDados();
+      } else {
+        throw new Error(data.error || 'Erro ao sincronizar');
+      }
+
+    } catch (error: any) {
+      console.error('Erro ao sincronizar:', error);
+      toast({
+        title: 'Erro na sincronização',
+        description: error.message || 'Não foi possível sincronizar os dados',
+        variant: 'destructive'
+      });
+    } finally {
+      setSincronizando(false);
+    }
+  };
+
   const calcularMediaPorSetor = (dados: any[], campo?: string) => {
     const setores = new Map<string, { total: number; count: number }>();
     
@@ -262,7 +305,7 @@ export default function NPSPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Header com botão de nova pesquisa */}
+        {/* Header com botões */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -272,16 +315,36 @@ export default function NPSPage() {
               Gerencie e visualize as pesquisas de satisfação
             </p>
           </div>
-          <Button
-            onClick={() => {
-              limparFormulario();
-              setModalFormulario(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Smile className="h-4 w-4 mr-2" />
-            Nova Pesquisa
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={sincronizarPlanilha}
+              disabled={sincronizando}
+              variant="outline"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
+            >
+              {sincronizando ? (
+                <>
+                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  <RefreshCcw className="h-4 w-4 mr-2" />
+                  Sincronizar Planilha
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={() => {
+                limparFormulario();
+                setModalFormulario(true);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Smile className="h-4 w-4 mr-2" />
+              Nova Pesquisa
+            </Button>
+          </div>
         </div>
 
         {/* Filtros */}
