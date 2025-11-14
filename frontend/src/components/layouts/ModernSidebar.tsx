@@ -196,6 +196,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Custo de Mercadoria Vendida semanal',
           permission: 'gestao',
         },
+        {
+          icon: Users,
+          label: 'Simulação de CMO',
+          href: '/ferramentas/simulacao-cmo',
+          description: 'Simulação de Custo de Mão de Obra mensal',
+          permission: 'gestao',
+        },
         // {
         //   icon: MessageSquare,
         //   label: 'Agente',

@@ -12,7 +12,22 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ArrowLeft, User, UserPlus } from 'lucide-react';
 
 interface Insumo {
   id: number;
@@ -38,6 +53,13 @@ interface InsumoExpandido extends Insumo {
   quantidade_calculada?: number;
 }
 
+interface PessoaResponsavel {
+  id: number;
+  nome: string;
+  cargo?: string;
+  ativo: boolean;
+}
+
 interface ProducaoAtiva {
   id: string;
   receita: Receita;
@@ -54,6 +76,8 @@ interface ProducaoAtiva {
   insumosExpandidos?: boolean;
   controlesExpandidos?: boolean;
   rendimentoReceita?: number;
+  pessoa_responsavel_id?: number;
+  pessoa_responsavel_nome?: string;
 }
 
 export default function TerminalProducao() {
@@ -88,10 +112,16 @@ export default function TerminalProducao() {
     [key: string]: boolean;
   }>({});
 
+  // Estados para pessoas responsáveis
+  const [pessoasResponsaveis, setPessoasResponsaveis] = useState<PessoaResponsavel[]>([]);
+  const [modalNovaPessoa, setModalNovaPessoa] = useState(false);
+  const [novaPessoaNome, setNovaPessoaNome] = useState('');
+  const [novaPessoaCargo, setNovaPessoaCargo] = useState('');
+
   // Carregar insumos disponíveis
   const carregarInsumos = async () => {
     try {
-              const response = await fetch('/api/operacional/receitas/insumos?ativo=true');
+      const response = await fetch('/api/operacional/receitas/insumos?ativo=true');
       if (response.ok) {
         const data = await response.json();
         const insumos = data.data || [];
@@ -99,6 +129,54 @@ export default function TerminalProducao() {
       }
     } catch {
       // Error silently handled
+    }
+  };
+
+  // Carregar pessoas responsáveis
+  const carregarPessoasResponsaveis = async () => {
+    try {
+      const response = await fetch(`/api/operacional/pessoas-responsaveis?bar_id=${selectedBar?.id || 3}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPessoasResponsaveis(data.data || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar pessoas responsáveis:', error);
+    }
+  };
+
+  // Adicionar nova pessoa responsável
+  const adicionarNovaPessoa = async () => {
+    if (!novaPessoaNome.trim()) {
+      alert('⚠️ Nome é obrigatório!');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/operacional/pessoas-responsaveis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: selectedBar?.id || 3,
+          nome: novaPessoaNome.trim(),
+          cargo: novaPessoaCargo.trim() || null,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPessoasResponsaveis(prev => [...prev, data.data]);
+        setNovaPessoaNome('');
+        setNovaPessoaCargo('');
+        setModalNovaPessoa(false);
+        alert('✅ Pessoa responsável cadastrada com sucesso!');
+      } else {
+        const error = await response.json();
+        alert('❌ Erro ao cadastrar: ' + (error.error || 'Erro desconhecido'));
+      }
+    } catch (error) {
+      console.error('Erro ao cadastrar pessoa:', error);
+      alert('❌ Erro ao cadastrar pessoa responsável');
     }
   };
 
@@ -150,6 +228,7 @@ export default function TerminalProducao() {
 
     carregarReceitas();
     carregarInsumos();
+    carregarPessoasResponsaveis();
   }, [selectedBar?.id]);
 
   // Filtrar receitas por tipo e busca
@@ -303,6 +382,11 @@ export default function TerminalProducao() {
       return;
     }
 
+    if (!producao.pessoa_responsavel_id) {
+      alert('⚠️ Selecione a pessoa responsável antes de iniciar a produção!');
+      return;
+    }
+
     atualizarProducao(id, {
       timerAtivo: true,
     });
@@ -360,7 +444,8 @@ export default function TerminalProducao() {
       receita_codigo: producao.receita.receita_codigo,
       receita_nome: producao.receita.receita_nome,
       receita_categoria: producao.receita.receita_categoria,
-      criado_por_nome: `Terminal ${producao.tipo_local}`,
+      criado_por_nome: producao.pessoa_responsavel_nome || `Terminal ${producao.tipo_local}`,
+      pessoa_responsavel_id: producao.pessoa_responsavel_id,
       inicio_producao: new Date(
         Date.now() - producao.segundosDecorridos * 1000
       ).toISOString(),
@@ -1061,6 +1146,70 @@ export default function TerminalProducao() {
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-6">
+                                  {/* Etapa 0: Pessoa Responsável (Obrigatório) */}
+                                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+                                    <Label
+                                      htmlFor={`pessoa-responsavel-${producao.id}`}
+                                      className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-2"
+                                    >
+                                      <User className="w-4 h-4" />
+                                      Pessoa Responsável *
+                                      {producao.pessoa_responsavel_id && (
+                                        <span className="text-green-600 dark:text-green-400 text-xs">
+                                          ✅
+                                        </span>
+                                      )}
+                                    </Label>
+                                    <div className="flex gap-2">
+                                      <Select
+                                        value={producao.pessoa_responsavel_id?.toString() || ''}
+                                        onValueChange={value => {
+                                          const pessoa = pessoasResponsaveis.find(
+                                            p => p.id === parseInt(value)
+                                          );
+                                          if (pessoa) {
+                                            atualizarProducao(producao.id, {
+                                              pessoa_responsavel_id: pessoa.id,
+                                              pessoa_responsavel_nome: pessoa.nome,
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                                          <SelectValue placeholder="Selecione quem está produzindo..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {pessoasResponsaveis.map(pessoa => (
+                                            <SelectItem
+                                              key={pessoa.id}
+                                              value={pessoa.id.toString()}
+                                            >
+                                              {pessoa.nome}
+                                              {pessoa.cargo && (
+                                                <span className="text-gray-500 dark:text-gray-400 text-xs ml-2">
+                                                  ({pessoa.cargo})
+                                                </span>
+                                              )}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <Button
+                                        onClick={() => setModalNovaPessoa(true)}
+                                        variant="outline"
+                                        className="h-12 px-3"
+                                        title="Cadastrar nova pessoa"
+                                      >
+                                        <UserPlus className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                    {!producao.pessoa_responsavel_id && (
+                                      <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                                        ⚠️ Obrigatório para iniciar a produção
+                                      </p>
+                                    )}
+                                  </div>
+
                                   {/* Etapa 1: Peso Bruto (Sempre visível) */}
                                   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
                                     <Label
@@ -1588,6 +1737,80 @@ export default function TerminalProducao() {
           </div>
         </div>
       </div>
+
+      {/* Modal: Cadastrar Nova Pessoa Responsável */}
+      <Dialog open={modalNovaPessoa} onOpenChange={setModalNovaPessoa}>
+        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900 dark:text-white">
+              <div className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5" />
+                Cadastrar Pessoa Responsável
+              </div>
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
+              Cadastre uma nova pessoa que pode ser responsável pela produção.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label
+                htmlFor="nova-pessoa-nome"
+                className="text-gray-700 dark:text-gray-300"
+              >
+                Nome *
+              </Label>
+              <Input
+                id="nova-pessoa-nome"
+                value={novaPessoaNome}
+                onChange={e => setNovaPessoaNome(e.target.value)}
+                placeholder="Ex: Isaías"
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                required
+              />
+            </div>
+
+            <div>
+              <Label
+                htmlFor="nova-pessoa-cargo"
+                className="text-gray-700 dark:text-gray-300"
+              >
+                Cargo (opcional)
+              </Label>
+              <Input
+                id="nova-pessoa-cargo"
+                value={novaPessoaCargo}
+                onChange={e => setNovaPessoaCargo(e.target.value)}
+                placeholder="Ex: Chefe de Produção"
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setModalNovaPessoa(false);
+                setNovaPessoaNome('');
+                setNovaPessoaCargo('');
+              }}
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={adicionarNovaPessoa}
+              disabled={!novaPessoaNome.trim()}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Cadastrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ProtectedRoute>
   );
 }

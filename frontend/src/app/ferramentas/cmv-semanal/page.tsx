@@ -814,10 +814,10 @@ export default function CMVSemanalPage() {
                         <td className="py-3 px-4 text-center">
                           <Badge
                             className={`${
-                              (cmv.gap || 0) <= 0
-                                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300'
-                                : (cmv.gap || 0) <= 3
+                              (cmv.gap || 0) < 0
                                 ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300'
+                                : (cmv.gap || 0) <= 5
+                                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300'
                                 : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300'
                             }`}
                           >

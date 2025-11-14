@@ -2,69 +2,105 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * API para disparar manualmente a sincronização da Pesquisa da Felicidade
- */
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+// ========================================
+// 🔄 SINCRONIZAÇÃO MANUAL NPS E FELICIDADE
+// ========================================
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔄 Iniciando sincronização manual da Pesquisa da Felicidade...');
+    console.log('🔄 Iniciando sincronização manual...');
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error('Variáveis de ambiente não configuradas');
-    }
-
-    // Chamar a Edge Function de sincronização
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/sync-pesquisa-felicidade`,
-      {
+    // Chamar ambas as Edge Functions
+    const [npsResponse, felicidadeResponse] = await Promise.all([
+      // Sincronizar NPS
+      fetch(`${SUPABASE_URL}/functions/v1/sync-nps`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${serviceRoleKey}`,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
-      }
-    );
+      }),
+      // Sincronizar Pesquisa da Felicidade
+      fetch(`${SUPABASE_URL}/functions/v1/sync-pesquisa-felicidade`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }),
+    ]);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Erro na Edge Function:', errorText);
-      
+    const npsData = await npsResponse.json();
+    const felicidadeData = await felicidadeResponse.json();
+
+    console.log('📊 Resultado NPS:', npsData);
+    console.log('😊 Resultado Felicidade:', felicidadeData);
+
+    // Verificar se ambas tiveram sucesso
+    const npsSuccess = npsResponse.ok && npsData.success;
+    const felicidadeSuccess = felicidadeResponse.ok && felicidadeData.success;
+
+    if (!npsSuccess && !felicidadeSuccess) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Erro ao executar sincronização',
-          details: errorText,
-          status: response.status
+          error: 'Falha ao sincronizar ambas as pesquisas',
+          details: {
+            nps: npsData.error || 'Erro desconhecido',
+            felicidade: felicidadeData.error || 'Erro desconhecido',
+          },
         },
         { status: 500 }
       );
     }
 
-    const result = await response.json();
-    console.log('✅ Sincronização concluída:', result);
+    // Montar mensagem de sucesso
+    const messages = [];
+    if (npsSuccess) {
+      messages.push(
+        `✅ NPS: ${npsData.inserted || 0} registros sincronizados`
+      );
+    } else {
+      messages.push(`⚠️ NPS: ${npsData.error || 'Falha na sincronização'}`);
+    }
+
+    if (felicidadeSuccess) {
+      messages.push(
+        `✅ Felicidade: ${felicidadeData.inserted || 0} registros sincronizados`
+      );
+    } else {
+      messages.push(
+        `⚠️ Felicidade: ${felicidadeData.error || 'Falha na sincronização'}`
+      );
+    }
 
     return NextResponse.json({
-      success: true,
-      message: 'Sincronização executada com sucesso',
-      data: result,
-      timestamp: new Date().toISOString()
+      success: npsSuccess || felicidadeSuccess,
+      data: {
+        message: messages.join('\n'),
+        nps: {
+          success: npsSuccess,
+          total: npsData.total || 0,
+          inserted: npsData.inserted || 0,
+        },
+        felicidade: {
+          success: felicidadeSuccess,
+          total: felicidadeData.total || 0,
+          inserted: felicidadeData.inserted || 0,
+        },
+      },
     });
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Erro na sincronização manual:', error);
-    
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido',
-        timestamp: new Date().toISOString()
+        error: 'Erro ao sincronizar dados',
+        details: error.message,
       },
       { status: 500 }
     );
   }
 }
-
