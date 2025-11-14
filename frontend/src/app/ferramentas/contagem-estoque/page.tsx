@@ -474,7 +474,7 @@ export default function ContagemEstoquePage() {
                   variant="outline"
                   size="sm"
                   disabled={stats.itens_contados === 0}
-                  className="flex-1 sm:flex-none h-10"
+                  className="inline-flex flex-row items-center justify-center flex-1 sm:flex-none h-10"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Exportar
@@ -482,7 +482,7 @@ export default function ContagemEstoquePage() {
                 <Button
                   onClick={salvarTodas}
                   disabled={salvando || stats.itens_contados === 0}
-                  className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none h-10"
+                  className="inline-flex flex-row items-center justify-center bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none h-10"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {salvando ? 'Salvando...' : `Salvar Todas (${stats.itens_contados})`}
@@ -755,7 +755,7 @@ export default function ContagemEstoquePage() {
                             <Button
                               onClick={() => salvarContagem(insumo.id)}
                               disabled={salvando || !isEditado}
-                              className={`w-full h-14 text-base font-bold rounded-xl transition-all ${
+                              className={`inline-flex flex-row items-center justify-center w-full h-14 text-base font-bold rounded-xl transition-all ${
                                 isEditado
                                   ? 'bg-green-600 hover:bg-green-700 active:scale-95 shadow-md hover:shadow-lg'
                                   : 'bg-gray-400 cursor-not-allowed'
