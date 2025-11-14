@@ -22,7 +22,8 @@ import {
   Edit,
   Save,
   Smile,
-  Heart
+  Heart,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
@@ -133,14 +134,17 @@ interface DadosFelicidade {
   resultado_percentual: number;
 }
 
-
+// 📊 CONFIGURAÇÃO DA PLANILHA GOOGLE SHEETS
+// Substitua este ID pelo ID da sua planilha de desempenho
+// Exemplo de URL: https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/edit
+const GOOGLE_SHEETS_ID = '1PUgMBo8qdB6nHqbMQcA3LrwMsQ3eIuUm7EvHMr4k-EY'; // Substitua pelo ID da sua planilha
 
 export default function DesempenhoPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
   const { user } = useUser();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('semanal');
+  const [activeTab, setActiveTab] = useState('sheets');
   const [loading, setLoading] = useState(true);
   const [loadingMensal, setLoadingMensal] = useState(false);
   const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
@@ -457,18 +461,25 @@ export default function DesempenhoPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1.5 rounded-xl shadow-sm">
             <TabsTrigger 
+              value="sheets" 
+              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/25 !rounded-xl"
+            >
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Planilha Google
+            </TabsTrigger>
+            <TabsTrigger 
               value="semanal" 
               className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 !rounded-xl"
             >
               <Activity className="h-4 w-4 mr-2" />
-              Visão Semanal
+              Análise Semanal
             </TabsTrigger>
             <TabsTrigger 
               value="mensal" 
-              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 !rounded-xl"
+              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-violet-500/25 !rounded-xl"
             >
               <Calendar className="h-4 w-4 mr-2" />
-              Visão Mensal
+              Análise Mensal
             </TabsTrigger>
             <TabsTrigger 
               value="pesquisas" 
@@ -479,6 +490,50 @@ export default function DesempenhoPage() {
             </TabsTrigger>
 
           </TabsList>
+
+          {/* Planilha Google Sheets */}
+          <TabsContent value="sheets" className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                        <FileSpreadsheet className="h-5 w-5 text-white" />
+                      </div>
+                      Planilha Estratégica Ordinário - {anoAtual}
+                    </CardTitle>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit`, '_blank')}
+                      className="gap-2"
+                    >
+                      <FileSpreadsheet className="h-4 w-4" />
+                      Abrir no Google Sheets
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    📝 Use esta planilha para preenchimento direto de dados. As abas de análise mostram visualizações otimizadas dos dados.
+                  </p>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="w-full" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
+                    <iframe
+                      src={`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?usp=sharing&widget=true&headers=false`}
+                      className="w-full h-full border-0"
+                      title="Planilha de Desempenho"
+                      loading="lazy"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
 
           {/* Visão Semanal */}
           <TabsContent value="semanal" className="space-y-4">
