@@ -253,13 +253,11 @@ export default function AreasContagemPage() {
                 Crie e organize as áreas para facilitar a contagem de estoque
               </p>
             </div>
+            <Button onClick={abrirModalNovo} className="btn-primary-dark">
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Área
+            </Button>
             <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-              <DialogTrigger asChild>
-                <Button onClick={abrirModalNovo} className="btn-primary-dark">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Área
-                </Button>
-              </DialogTrigger>
               <DialogContent className="modal-dark max-w-md">
                 <DialogHeader>
                   <DialogTitle className="text-gray-900 dark:text-white">
