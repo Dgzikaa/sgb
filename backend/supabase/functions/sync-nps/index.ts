@@ -200,6 +200,27 @@ serve(async (req) => {
     }) as any[][]
 
     console.log(`📊 ${jsonData.length} linhas encontradas`)
+    
+    // Log da primeira linha (cabeçalho)
+    if (jsonData.length > 0) {
+      console.log('📋 Cabeçalho (primeira 10 colunas):', jsonData[0].slice(0, 10))
+    }
+    
+    // Log de uma linha de exemplo (linha 2)
+    if (jsonData.length > 1) {
+      console.log('📝 Exemplo linha 2:', {
+        carimbo: jsonData[1][0],
+        dia: jsonData[1][1],
+        genero: jsonData[1][2],
+        idade: jsonData[1][3],
+        ambiente: jsonData[1][4],
+        atendimento: jsonData[1][5],
+        limpeza: jsonData[1][6],
+        musica: jsonData[1][7],
+        comidas: jsonData[1][8],
+        drinks: jsonData[1][9]
+      })
+    }
 
     // 4. Processar dados (pular cabeçalho - linha 0)
     const registros: NPSRow[] = []
@@ -224,14 +245,22 @@ serve(async (req) => {
             dataFormatada = `${year}-${month}-${day}`
             timestampCompleto = row[0].toString() // Usar número como timestamp único
           } else {
-            // String do Google Forms: "DD/MM/YYYY HH:MM:SS" ou "MM/DD/YYYY HH:MM:SS"
+            // String do Google Forms: "DD/MM/YYYY HH:MM:SS" (formato brasileiro)
             const dateStr = String(row[0])
             timestampCompleto = dateStr // Salvar timestamp completo
             const dateMatch = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
             if (dateMatch) {
-              const day = dateMatch[1].padStart(2, '0')
-              const month = dateMatch[2].padStart(2, '0')
+              const part1 = dateMatch[1].padStart(2, '0')
+              const part2 = dateMatch[2].padStart(2, '0')
               const year = dateMatch[3]
+              
+              // Formato brasileiro: DD/MM/YYYY
+              // Se part1 > 12, é certamente dia (DD/MM/YYYY)
+              // Se part2 > 12, é certamente mês (MM/DD/YYYY) - improvável em PT-BR
+              const isDayFirst = parseInt(part1) > 12 || parseInt(part2) <= 12
+              
+              const day = isDayFirst ? part1 : part2
+              const month = isDayFirst ? part2 : part1
               dataFormatada = `${year}-${month}-${day}`
             }
           }
@@ -239,40 +268,48 @@ serve(async (req) => {
 
         if (!dataFormatada) {
           console.warn(`⚠️ Linha ${i + 1}: Data inválida - ${row[0]}`)
+          console.warn(`⚠️ Tipo: ${typeof row[0]}, Valor: ${JSON.stringify(row[0])}`)
           continue
         }
+        
+        console.log(`✅ Linha ${i + 1}: Data processada = ${dataFormatada}, Timestamp = ${timestampCompleto.substring(0, 30)}`)
 
-        // Converter valores (podem ser números 1-5 ou percentuais)
+        // Converter valores (podem ser números 0-10, ou "Não" quando não consumiu)
         const parseValue = (val: any): number => {
           if (!val) return 0
-          const str = String(val).replace('%', '').replace(',', '.')
-          const num = parseFloat(str)
           
-          // Se já está na escala 1-5, retornar direto
-          if (num >= 1 && num <= 5) {
-            return num
+          // Se é "Não" ou texto, retornar 0 (não avaliado)
+          const str = String(val).trim()
+          if (str.toLowerCase() === 'não' || str.toLowerCase() === 'nao') {
+            return 0
           }
           
-          // Se é percentual (0-100), converter para escala 1-5
-          if (num > 5 && num <= 100) {
-            const escala = Math.ceil((num / 100) * 5)
-            return Math.max(1, Math.min(5, escala))
-          }
+          const num = parseFloat(str.replace('%', '').replace(',', '.'))
           
-          return num
+          if (isNaN(num)) return 0
+          
+          // Valores vêm na escala 0-10, converter para 0-5
+          // 0-10 -> 0-5 (dividir por 2)
+          return Math.round(num / 2 * 10) / 10  // Arredondar para 1 casa decimal
         }
 
-        // Estrutura do Google Forms NPS:
-        // Col 0: Carimbo | Cols 1-6: 6 perguntas
-        const pergunta1 = parseValue(row[1])
-        const pergunta2 = parseValue(row[2])
-        const pergunta3 = parseValue(row[3])
-        const pergunta4 = parseValue(row[4])
-        const pergunta5 = parseValue(row[5])
-        const pergunta6 = parseValue(row[6])
+        // Estrutura do Google Forms NPS Ordi:
+        // Col 0: Carimbo | Cols 1-3: Dia/Gênero/Idade | Cols 4-9: 6 perguntas NPS
+        // Col 4 (E): Ambiente | Col 5 (F): Atendimento | Col 6 (G): Limpeza
+        // Col 7 (H): Música | Col 8 (I): Comidas | Col 9 (J): Drinks
+        const pergunta1 = parseValue(row[4])  // Ambiente
+        const pergunta2 = parseValue(row[5])  // Atendimento
+        const pergunta3 = parseValue(row[6])  // Limpeza
+        const pergunta4 = parseValue(row[7])  // Música
+        const pergunta5 = parseValue(row[8])  // Comidas
+        const pergunta6 = parseValue(row[9])  // Drinks
         
-        // Calcular média geral (média das 6 perguntas)
-        const mediaGeral = (pergunta1 + pergunta2 + pergunta3 + pergunta4 + pergunta5 + pergunta6) / 6
+        // Calcular média apenas das perguntas respondidas (ignorar zeros)
+        const valores = [pergunta1, pergunta2, pergunta3, pergunta4, pergunta5, pergunta6]
+        const valoresRespondidos = valores.filter(v => v > 0)
+        const mediaGeral = valoresRespondidos.length > 0 
+          ? valoresRespondidos.reduce((a, b) => a + b, 0) / valoresRespondidos.length 
+          : 0
         
         // Calcular resultado percentual (média / 5 * 100)
         const resultadoPercentual = (mediaGeral / 5) * 100
