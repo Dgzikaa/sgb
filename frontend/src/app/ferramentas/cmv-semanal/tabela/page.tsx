@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Edit, Plus, Calendar, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit, Calendar, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 
 interface CMVSemanal {
@@ -299,21 +299,18 @@ export default function CMVSemanalTabelaPage() {
                 </SelectContent>
               </Select>
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                <span className="font-semibold">Semana Atual:</span> {getSemanaAtual()} de {anoFiltro}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                <span className="font-semibold">Total de Semanas:</span> {semanas.length}
+                <span className="font-semibold">Semana Atual:</span> {getSemanaAtual()}
               </div>
               <div className="flex-1" />
               <div className="flex gap-2">
                 <Link href="/ferramentas/cmv-semanal">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="inline-flex flex-row items-center">
                     <Calendar className="w-4 h-4 mr-2" />
                     Listagem
                   </Button>
                 </Link>
                 <Link href="/ferramentas/cmv-semanal/visualizar">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="inline-flex flex-row items-center">
                     📊 Dashboard
                   </Button>
                 </Link>
@@ -328,7 +325,7 @@ export default function CMVSemanalTabelaPage() {
             onClick={() => setSemanaAtualIndex(Math.max(0, semanaAtualIndex - 1))}
             disabled={semanaAtualIndex === 0}
             variant="outline"
-            className="min-w-[120px]"
+            className="inline-flex flex-row items-center min-w-[120px]"
           >
             <ChevronLeft className="w-4 h-4 mr-2" />
             Anterior
@@ -355,7 +352,7 @@ export default function CMVSemanalTabelaPage() {
             onClick={() => setSemanaAtualIndex(Math.min(semanas.length - 1, semanaAtualIndex + 1))}
             disabled={semanaAtualIndex === semanas.length - 1}
             variant="outline"
-            className="min-w-[120px]"
+            className="inline-flex flex-row items-center min-w-[120px]"
           >
             Próximo
             <ChevronRight className="w-4 h-4 ml-2" />
@@ -394,15 +391,6 @@ export default function CMVSemanalTabelaPage() {
                                 </span>
                               )}
                             </span>
-                            <span className="text-xs font-normal text-gray-600 dark:text-gray-400">
-                              {semana.ano}
-                            </span>
-                            <Link href={`/ferramentas/cmv-semanal?edit=${semana.id}`}>
-                              <Button size="sm" variant="ghost" className="h-6 text-xs">
-                                <Edit className="w-3 h-3 mr-1" />
-                                Editar
-                              </Button>
-                            </Link>
                           </div>
                         </th>
                       );
