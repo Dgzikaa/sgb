@@ -146,9 +146,25 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Agrupar dados por data
+    // FILTRAR TERÇAS-FEIRAS INVÁLIDAS (bar não abre às terças após 15/04/2025)
+    const ultimaTercaOperacional = new Date('2025-04-15T12:00:00Z');
+    const dadosValidosFiltrados = dadosHistoricos.filter(item => {
+      const dataConsulta = new Date(item.data_consulta + 'T12:00:00Z');
+      const diaSemana = dataConsulta.getUTCDay();
+      
+      // Excluir terças-feiras (2) após 15/04/2025
+      if (diaSemana === 2 && dataConsulta > ultimaTercaOperacional) {
+        return false;
+      }
+      
+      return true;
+    });
+
+    console.log(`🔍 Dados filtrados: ${dadosHistoricos.length} → ${dadosValidosFiltrados.length} (removidas ${dadosHistoricos.length - dadosValidosFiltrados.length} terças inválidas)`);
+
+    // Agrupar dados por data (usando apenas dados válidos)
     const dadosPorData = new Map();
-    dadosHistoricos.forEach(item => {
+    dadosValidosFiltrados.forEach(item => {
       const data = item.data_consulta;
       if (!dadosPorData.has(data)) {
         dadosPorData.set(data, {
