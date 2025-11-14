@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Montar mensagem de sucesso
-    const messages = [];
+    const messages: string[] = [];
     if (npsSuccess) {
       messages.push(
         `✅ NPS: ${npsData.inserted || 0} registros sincronizados`
