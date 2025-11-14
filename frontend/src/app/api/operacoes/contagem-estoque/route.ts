@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const alertas: AlertaValidacao[] = [];
     let alerta_preenchimento = false;
     let alerta_variacao = false;
-    let variacao_percentual = null;
+    let variacao_percentual: number | null = null;
 
     // VALIDAÇÃO 1: Detectar erro de digitação (número muito alto)
     const estoqueTotal = body.estoque_fechado + body.estoque_flutuante;
@@ -82,41 +82,41 @@ export async function POST(request: NextRequest) {
         variacao_percentual = ((estoqueTotal - estoqueAnterior) / estoqueAnterior) * 100;
         
         // ALERTA: Variação muito alta (mais de 500% ou multiplicação por 10)
-        if (Math.abs(variacao_percentual) > 500) {
+        if (Math.abs(variacao_percentual ?? 0) > 500) {
           alerta_variacao = true;
           alertas.push({
             tipo: 'variacao_alta',
             severidade: 'critico',
-            mensagem: `Variação de ${variacao_percentual.toFixed(1)}% em relação à última contagem (${estoqueAnterior})`,
+            mensagem: `Variação de ${(variacao_percentual ?? 0).toFixed(1)}% em relação à última contagem (${estoqueAnterior})`,
             sugestao: `Verifique se não digitou ${estoqueTotal} em vez de ${estoqueTotal / 10} ou ${estoqueTotal / 100}`,
             dados: {
               estoque_anterior: estoqueAnterior,
               estoque_novo: estoqueTotal,
-              variacao: variacao_percentual
+              variacao: variacao_percentual ?? 0
             }
           });
         }
         // ALERTA: Variação alta (mais de 200%)
-        else if (Math.abs(variacao_percentual) > 200) {
+        else if (Math.abs(variacao_percentual ?? 0) > 200) {
           alerta_variacao = true;
           alertas.push({
             tipo: 'variacao_alta',
             severidade: 'alto',
-            mensagem: `Variação de ${variacao_percentual.toFixed(1)}% em relação à última contagem`,
+            mensagem: `Variação de ${(variacao_percentual ?? 0).toFixed(1)}% em relação à última contagem`,
             sugestao: 'Variação significativa detectada. Confirme se os valores estão corretos.',
             dados: {
               estoque_anterior: estoqueAnterior,
               estoque_novo: estoqueTotal,
-              variacao: variacao_percentual
+              variacao: variacao_percentual ?? 0
             }
           });
         }
         // ALERTA: Variação moderada (mais de 100%)
-        else if (Math.abs(variacao_percentual) > 100) {
+        else if (Math.abs(variacao_percentual ?? 0) > 100) {
           alertas.push({
             tipo: 'variacao_alta',
             severidade: 'medio',
-            mensagem: `Variação de ${variacao_percentual.toFixed(1)}% em relação à última contagem`,
+            mensagem: `Variação de ${(variacao_percentual ?? 0).toFixed(1)}% em relação à última contagem`,
             dados: {
               estoque_anterior: estoqueAnterior,
               estoque_novo: estoqueTotal

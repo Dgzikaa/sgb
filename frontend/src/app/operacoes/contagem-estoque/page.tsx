@@ -755,25 +755,25 @@ export default function ContagemEstoquePage() {
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Fechado:</p>
                                   <p className="font-medium text-gray-900 dark:text-white">
-                                    {parseFloat(contagem.estoque_fechado).toFixed(2)}
+                                    {Number(contagem.estoque_fechado).toFixed(2)}
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Flutuante:</p>
                                   <p className="font-medium text-gray-900 dark:text-white">
-                                    {parseFloat(contagem.estoque_flutuante).toFixed(2)}
+                                    {Number(contagem.estoque_flutuante).toFixed(2)}
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Total:</p>
                                   <p className="font-medium text-gray-900 dark:text-white">
-                                    {parseFloat(contagem.estoque_total).toFixed(2)}
+                                    {Number(contagem.estoque_total).toFixed(2)}
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Valor:</p>
                                   <p className="font-medium text-green-600 dark:text-green-400">
-                                    {formatarValor(parseFloat(contagem.valor_total))}
+                                    {formatarValor(Number(contagem.valor_total))}
                                   </p>
                                 </div>
                               </div>

@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     if (erroContagens) throw erroContagens;
 
     // Para cada contagem, buscar seu histórico de alterações
-    const historicoCompleto = [];
+    const historicoCompleto: any[] = [];
     
     for (const contagem of contagens || []) {
       const { data: historico } = await supabase

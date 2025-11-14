@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const barId = searchParams.get('bar_id') || '3';
 
-    const { data: pessoas, error } = await supabase
+    const { data: pessoas, error } = await (supabase as any)
       .from('pessoas_responsaveis')
       .select('*')
       .eq('bar_id', barId)
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: pessoa, error } = await supabase
+    const { data: pessoa, error } = await (supabase as any)
       .from('pessoas_responsaveis')
       .insert({
         bar_id,
@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest) {
     if (cargo !== undefined) updateData.cargo = cargo;
     if (ativo !== undefined) updateData.ativo = ativo;
 
-    const { data: pessoa, error } = await supabase
+    const { data: pessoa, error } = await (supabase as any)
       .from('pessoas_responsaveis')
       .update(updateData)
       .eq('id', id)
@@ -113,7 +113,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Soft delete
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('pessoas_responsaveis')
       .update({ ativo: false, updated_at: new Date().toISOString() })
       .eq('id', id);
