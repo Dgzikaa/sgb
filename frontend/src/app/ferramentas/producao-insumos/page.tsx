@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,6 +73,7 @@ interface ReceitaCompleta extends Receita {
 }
 
 export default function ProducaoInsumosPage() {
+  const router = useRouter();
   const { selectedBar } = useBar();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -351,14 +353,16 @@ export default function ProducaoInsumosPage() {
               <ChefHat className="w-4 h-4 mr-2" />
               Receitas ({stats.total_receitas})
             </TabsTrigger>
-            <TabsTrigger
-              value="terminal"
-              className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400"
-            >
-              <ChefHat className="w-4 h-4 mr-2" />
-              Terminal
-            </TabsTrigger>
           </TabsList>
+
+          {/* Botão Terminal - Navega para página dedicada */}
+          <Button
+            onClick={() => router.push('/ferramentas/terminal')}
+            className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
+          >
+            <ChefHat className="w-4 h-4 mr-2" />
+            Abrir Terminal de Produção
+          </Button>
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
@@ -684,30 +688,6 @@ export default function ProducaoInsumosPage() {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Terminal Tab */}
-          <TabsContent value="terminal" className="space-y-6">
-            <Card className="card-dark">
-              <CardHeader>
-                <CardTitle>Terminal de Produção</CardTitle>
-                <CardDescription>
-                  Acesso rápido ao terminal de produção
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  O Terminal de Produção permite registrar produções em tempo real, controlar insumos e calcular rendimentos.
-                </p>
-                <Button
-                  onClick={() => window.location.href = '/ferramentas/terminal'}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  <ChefHat className="w-4 h-4 mr-2" />
-                  Abrir Terminal de Produção
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>

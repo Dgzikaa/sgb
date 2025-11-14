@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -11,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft } from 'lucide-react';
 
 interface Insumo {
   id: number;
@@ -55,6 +57,7 @@ interface ProducaoAtiva {
 }
 
 export default function TerminalProducao() {
+  const router = useRouter();
   const { selectedBar } = useBar();
   const { setPageTitle } = usePageTitle();
   const intervalRef = useRef<{ [key: string]: NodeJS.Timeout }>({});
@@ -746,6 +749,18 @@ export default function TerminalProducao() {
     <ProtectedRoute requiredModule="operacoes">
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
+          {/* Botão Voltar */}
+          <div className="mb-4">
+            <Button
+              onClick={() => router.push('/ferramentas/producao-insumos')}
+              variant="outline"
+              className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar para Produção e Insumos
+            </Button>
+          </div>
+
           <div className="space-y-6 mt-8">
             {/* Seletor de Tipo e Receita */}
             <Card className="card-dark rounded-xl shadow-sm">
