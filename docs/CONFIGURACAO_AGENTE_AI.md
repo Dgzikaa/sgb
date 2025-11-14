@@ -9,6 +9,63 @@
 
 ---
 
+# ⚠️ REGRA CRÍTICA - GIT WORKFLOW MANUAL
+
+## 🚫 **NUNCA FAZER GIT AUTOMATICAMENTE**
+
+**Esta é uma regra OBRIGATÓRIA para TODOS os agentes/chats:**
+
+### ❌ **PROIBIDO fazer automaticamente:**
+```bash
+git add .
+git commit -m "..."
+git push
+```
+
+### ✅ **APENAS quando o usuário EXPLICITAMENTE pedir:**
+
+**Comandos que indicam para fazer git:**
+- *"Agora vamos fazer git"*
+- *"Pode commitar agora"*
+- *"Faz o commit"*
+- *"Sobe pro git"*
+- *"Commit e push"*
+
+### 📋 **Workflow Correto:**
+
+```bash
+# 1. Fazer alterações normalmente nos arquivos
+# 2. NÃO rodar git add/commit automaticamente
+# 3. ESPERAR o usuário pedir explicitamente
+
+# 4. Quando o usuário pedir "agora vamos fazer git":
+git status                              # ✅ Mostrar o que mudou
+git add .                              # ✅ Adicionar tudo
+git commit -m "mensagem descritiva"    # ✅ Commitar
+# ⚠️ PERGUNTAR antes de push:
+"Posso fazer o push para origin/main? (y/n)"
+```
+
+### 🎯 **Motivo desta regra:**
+
+- ✅ **Múltiplos agentes** trabalham em paralelo (6+ chats simultâneos)
+- ✅ **Evita conflitos** entre commits de diferentes chats
+- ✅ **Commits organizados** com todas as mudanças juntas
+- ✅ **Controle do usuário** sobre quando consolidar alterações
+- ✅ **Git rastreia arquivos**, não chats - qualquer chat pode fazer o commit final
+
+### 📝 **Importante:**
+
+```markdown
+✅ Alterações de código são SEMPRE salvas nos arquivos
+✅ Git detecta mudanças de TODOS os chats automaticamente
+✅ UM chat faz git add/commit e pega mudanças de TODOS
+❌ NUNCA assumir que deve fazer git após alterações
+⚠️ SEMPRE esperar comando explícito do usuário
+```
+
+---
+
 # 🎨 REGRAS DE UI/UX - BOTÕES E COMPONENTES
 
 ## 📋 **REGRA OBRIGATÓRIA: ÍCONES EM BOTÕES**
