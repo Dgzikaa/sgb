@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Package, TrendingDown, TrendingUp, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Calendar, Package, TrendingDown, TrendingUp, RefreshCw, AlertTriangle, CheckCircle, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StockoutData {
@@ -114,6 +114,22 @@ interface HistoricoData {
   }>;
 }
 
+// Mapeamento de locais para categorias
+const GRUPOS_LOCAIS = {
+  drink: {
+    nome: 'Drink / Bebida',
+    locais: ['preshh', 'mexido', 'batidos', 'drink', 'bebida']
+  },
+  bar: {
+    nome: 'Bar',
+    locais: ['chopp', 'baldes', 'bar']
+  },
+  cozinha: {
+    nome: 'Cozinha',
+    locais: ['cozinha 1', 'cozinha 2', 'cozinha']
+  }
+};
+
 export default function StockoutPage() {
   const [selectedDate, setSelectedDate] = useState(() => {
     const yesterday = new Date();
@@ -130,6 +146,9 @@ export default function StockoutPage() {
   // Estados para filtros
   const [filtrosAtivos, setFiltrosAtivos] = useState<string[]>([]);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  
+  // Estado para local selecionado
+  const [localSelecionado, setLocalSelecionado] = useState<string>('');
   
   // Datas para histórico
   const [dataInicio, setDataInicio] = useState(() => {
@@ -297,6 +316,73 @@ export default function StockoutPage() {
     if (valor <= 10) return 'badge-success';
     if (valor <= 25) return 'badge-warning';
     return 'badge-error';
+  };
+
+  // Função para agrupar locais da análise
+  const agruparLocaisPorCategoria = () => {
+    if (!stockoutData?.analise_por_local) return [];
+
+    const grupos: Record<string, any> = {};
+
+    stockoutData.analise_por_local.forEach(local => {
+      const localNormalizado = local.local_producao.toLowerCase().trim();
+      
+      // Encontrar em qual grupo o local pertence
+      let grupoEncontrado = '';
+      Object.entries(GRUPOS_LOCAIS).forEach(([key, grupo]) => {
+        if (grupo.locais.some(l => localNormalizado.includes(l.toLowerCase()))) {
+          grupoEncontrado = key;
+        }
+      });
+
+      if (grupoEncontrado) {
+        if (!grupos[grupoEncontrado]) {
+          grupos[grupoEncontrado] = {
+            nome: GRUPOS_LOCAIS[grupoEncontrado as keyof typeof GRUPOS_LOCAIS].nome,
+            locais: [],
+            total_produtos: 0,
+            disponiveis: 0,
+            indisponiveis: 0
+          };
+        }
+
+        grupos[grupoEncontrado].locais.push(local);
+        grupos[grupoEncontrado].total_produtos += local.total_produtos;
+        grupos[grupoEncontrado].disponiveis += local.disponiveis;
+        grupos[grupoEncontrado].indisponiveis += local.indisponiveis;
+      }
+    });
+
+    // Calcular percentual de stockout para cada grupo
+    return Object.entries(grupos).map(([key, grupo]) => ({
+      key,
+      ...grupo,
+      perc_stockout: grupo.total_produtos > 0 
+        ? parseFloat(((grupo.indisponiveis / grupo.total_produtos) * 100).toFixed(1))
+        : 0
+    }));
+  };
+
+  // Função para filtrar produtos por local selecionado
+  const getProdutosPorLocal = () => {
+    if (!localSelecionado || !stockoutData) {
+      return { disponiveis: [], indisponiveis: [] };
+    }
+
+    const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
+    if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
+
+    const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
+      const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
+      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+    });
+
+    const indisponiveis = (stockoutData.produtos?.inativos || []).filter(produto => {
+      const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
+      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+    });
+
+    return { disponiveis, indisponiveis };
   };
 
   return (
@@ -467,160 +553,180 @@ export default function StockoutPage() {
                     </Card>
                   </div>
 
-                  {/* Lista de Produtos */}
-                  {/* Análise por Local de Produção */}
+                  {/* Análise Agrupada por Local */}
                   {stockoutData?.analise_por_local && stockoutData.analise_por_local.length > 0 && (
-                    <Card className="card-dark">
-                      <CardHeader>
-                        <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                          <Package className="h-5 w-5" />
-                          Análise por Local de Produção
-                        </CardTitle>
-                        <CardDescription className="card-description-dark">
-                          Percentual de stockout por setor/local
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {stockoutData.analise_por_local.map((local, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-gray-900 dark:text-white">
-                                  {local.local_producao}
-                                </h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {local.total_produtos} produtos • {local.disponiveis} disponíveis • {local.indisponiveis} indisponíveis
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <div className={`text-lg font-bold ${
-                                  local.perc_stockout <= 10 ? 'text-green-600 dark:text-green-400' :
-                                  local.perc_stockout <= 25 ? 'text-yellow-600 dark:text-yellow-400' :
-                                  local.perc_stockout <= 50 ? 'text-orange-600 dark:text-orange-400' :
-                                  'text-red-600 dark:text-red-400'
-                                }`}>
-                                  {local.perc_stockout}%
-                                </div>
-                                <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
-                                  <div 
-                                    className={`h-2 rounded-full ${
-                                      local.perc_stockout <= 10 ? 'bg-green-500' :
-                                      local.perc_stockout <= 25 ? 'bg-yellow-500' :
-                                      local.perc_stockout <= 50 ? 'bg-orange-500' :
-                                      'bg-red-500'
-                                    }`}
-                                    style={{ width: `${Math.min(local.perc_stockout, 100)}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Produtos Inativos */}
-                    <Card className="card-dark">
-                      <CardHeader>
-                        <CardTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
-                          <AlertTriangle className="h-5 w-5" />
-                          Produtos em Stockout ({stockoutData?.estatisticas?.produtos_inativos || 0})
-                        </CardTitle>
-                        <CardDescription className="card-description-dark">
-                          Produtos que não estavam disponíveis em {formatarData(stockoutData?.data_analisada || '')}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        {(stockoutData?.produtos?.inativos?.length || 0) === 0 ? (
-                          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                            <p>Nenhum produto em stockout!</p>
-                          </div>
-                        ) : (
-                          <div className="space-y-2 max-h-96 overflow-y-auto">
-                            {(stockoutData?.produtos?.inativos || []).map((produto, index) => (
-                              <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/20 rounded">
-                                <div className="flex justify-between items-start">
-                                  <div className="flex-1">
-                                    <h4 className="font-medium text-gray-900 dark:text-white text-sm">
-                                      {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
-                                    </h4>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                                      Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
-                                    </p>
+                    <>
+                      <Card className="card-dark">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                            <MapPin className="h-5 w-5" />
+                            Análise por Local
+                          </CardTitle>
+                          <CardDescription className="card-description-dark">
+                            Percentual de stockout por setor (clique em um local para ver detalhes)
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {agruparLocaisPorCategoria().map((grupo) => (
+                              <div 
+                                key={grupo.key}
+                                onClick={() => setLocalSelecionado(grupo.key)}
+                                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                                  localSelecionado === grupo.key
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg'
+                                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:border-blue-300 dark:hover:border-blue-700'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <h4 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+                                    {grupo.nome}
+                                  </h4>
+                                  <div className={`text-3xl font-bold mb-2 ${
+                                    grupo.perc_stockout <= 10 ? 'text-green-600 dark:text-green-400' :
+                                    grupo.perc_stockout <= 25 ? 'text-yellow-600 dark:text-yellow-400' :
+                                    grupo.perc_stockout <= 50 ? 'text-orange-600 dark:text-orange-400' :
+                                    'text-red-600 dark:text-red-400'
+                                  }`}>
+                                    {grupo.perc_stockout}%
                                   </div>
-                                  <div className="text-right">
-                                    {produto.prd_precovenda && (
-                                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                        R$ {Number(produto.prd_precovenda).toFixed(2)}
-                                      </p>
-                                    )}
-                                    {produto.prd_estoque !== undefined && (
-                                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        Estoque: {produto.prd_estoque}
-                                      </p>
-                                    )}
+                                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                    {grupo.total_produtos} produtos
+                                  </p>
+                                  <div className="flex justify-center gap-4 text-xs">
+                                    <span className="text-green-600 dark:text-green-400">
+                                      ✓ {grupo.disponiveis}
+                                    </span>
+                                    <span className="text-red-600 dark:text-red-400">
+                                      ✗ {grupo.indisponiveis}
+                                    </span>
                                   </div>
+                                  {localSelecionado === grupo.key && (
+                                    <div className="mt-2">
+                                      <Badge className="badge-primary">Selecionado</Badge>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             ))}
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                        </CardContent>
+                      </Card>
 
-                    {/* Produtos Ativos */}
-                    <Card className="card-dark">
-                      <CardHeader>
-                        <CardTitle className="text-green-600 dark:text-green-400 flex items-center gap-2">
-                          <CheckCircle className="h-5 w-5" />
-                          Produtos Disponíveis ({stockoutData?.estatisticas?.produtos_ativos || 0})
-                        </CardTitle>
-                        <CardDescription className="card-description-dark">
-                          Produtos que estavam disponíveis em {formatarData(stockoutData?.data_referencia || '')}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {(stockoutData?.produtos?.ativos || []).slice(0, 10).map((produto, index) => (
-                            <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/20 rounded">
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <h4 className="font-medium text-gray-900 dark:text-white text-sm">
-                                    {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
-                                  </h4>
-                                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                                    Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  {produto.prd_precovenda && (
-                                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                      R$ {Number(produto.prd_precovenda).toFixed(2)}
-                                    </p>
-                                  )}
-                                  {produto.prd_estoque !== undefined && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                      Estoque: {produto.prd_estoque}
-                                    </p>
-                                  )}
-                                </div>
+                      {/* Detalhes do Local Selecionado */}
+                      {localSelecionado && (
+                        <Card className="card-dark">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                  <Package className="h-5 w-5" />
+                                  Produtos: {GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS]?.nome}
+                                </CardTitle>
+                                <CardDescription className="card-description-dark">
+                                  Produtos disponíveis e em stockout para {formatarData(stockoutData?.data_analisada || '')}
+                                </CardDescription>
                               </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setLocalSelecionado('')}
+                                className="btn-outline-dark"
+                              >
+                                Limpar
+                              </Button>
                             </div>
-                          ))}
-                          {(stockoutData?.produtos?.ativos?.length || 0) > 10 && (
-                            <div className="text-center py-2">
-                              <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                                ... e mais {(stockoutData?.produtos?.ativos?.length || 0) - 10} produtos disponíveis
-                              </p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {/* Produtos em Stockout */}
+                              {getProdutosPorLocal().indisponiveis.length > 0 && (
+                                <div>
+                                  <h4 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-3 flex items-center gap-2">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    Produtos em Stockout ({getProdutosPorLocal().indisponiveis.length})
+                                  </h4>
+                                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                                    {getProdutosPorLocal().indisponiveis.map((produto, index) => (
+                                      <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/20 rounded">
+                                        <div className="flex justify-between items-start">
+                                          <div className="flex-1">
+                                            <h5 className="font-medium text-gray-900 dark:text-white text-sm">
+                                              {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                            </h5>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                              Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                            </p>
+                                          </div>
+                                          <div className="text-right">
+                                            {produto.prd_precovenda && (
+                                              <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                R$ {Number(produto.prd_precovenda).toFixed(2)}
+                                              </p>
+                                            )}
+                                            {produto.prd_estoque !== undefined && (
+                                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Estoque: {produto.prd_estoque}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Produtos Disponíveis */}
+                              {getProdutosPorLocal().disponiveis.length > 0 && (
+                                <div>
+                                  <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-3 flex items-center gap-2">
+                                    <CheckCircle className="h-4 w-4" />
+                                    Produtos Disponíveis ({getProdutosPorLocal().disponiveis.length})
+                                  </h4>
+                                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                                    {getProdutosPorLocal().disponiveis.map((produto, index) => (
+                                      <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/20 rounded">
+                                        <div className="flex justify-between items-start">
+                                          <div className="flex-1">
+                                            <h5 className="font-medium text-gray-900 dark:text-white text-sm">
+                                              {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                            </h5>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                              Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                            </p>
+                                          </div>
+                                          <div className="text-right">
+                                            {produto.prd_precovenda && (
+                                              <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                R$ {Number(produto.prd_precovenda).toFixed(2)}
+                                              </p>
+                                            )}
+                                            {produto.prd_estoque !== undefined && (
+                                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Estoque: {produto.prd_estoque}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {getProdutosPorLocal().disponiveis.length === 0 && getProdutosPorLocal().indisponiveis.length === 0 && (
+                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                  <Package className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                                  <p>Nenhum produto encontrado para este local</p>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </>
+                  )}
                 </>
               )}
 

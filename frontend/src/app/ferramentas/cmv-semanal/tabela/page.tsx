@@ -158,8 +158,8 @@ export default function CMVSemanalTabelaPage() {
   }
 
   function getGapColor(gap: number) {
-    if (gap <= 0) return 'text-green-600 dark:text-green-400 font-semibold';
-    if (gap <= 5) return 'text-yellow-600 dark:text-yellow-400 font-semibold';
+    if (gap < 0) return 'text-yellow-600 dark:text-yellow-400 font-semibold';
+    if (gap <= 5) return 'text-green-600 dark:text-green-400 font-semibold';
     return 'text-red-600 dark:text-red-400 font-semibold';
   }
 
