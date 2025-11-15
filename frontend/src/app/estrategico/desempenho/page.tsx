@@ -101,9 +101,8 @@ interface DadosMes {
 }
 
 // 📊 CONFIGURAÇÃO DA PLANILHA GOOGLE SHEETS
-// Substitua este ID pelo ID da sua planilha de desempenho
-// Exemplo de URL: https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/edit
-const GOOGLE_SHEETS_ID = '1PUgMBo8qdB6nHqbMQcA3LrwMsQ3eIuUm7EvHMr4k-EY'; // Substitua pelo ID da sua planilha
+// URL da planilha: https://docs.google.com/spreadsheets/d/1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY/edit
+const GOOGLE_SHEETS_ID = '1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY';
 
 export default function DesempenhoPage() {
   const { setPageTitle } = usePageTitle();
@@ -404,7 +403,7 @@ export default function DesempenhoPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit`, '_blank')}
+                      onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162`, '_blank')}
                       className="gap-2"
                     >
                       <FileSpreadsheet className="h-4 w-4" />
@@ -412,15 +411,15 @@ export default function DesempenhoPage() {
                     </Button>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    📝 Use esta planilha para preenchimento direto de dados. As abas de análise mostram visualizações otimizadas dos dados.
+                    📝 Aba: <strong>Tab Desemp ContaHub</strong> - Use para preenchimento direto de dados. As abas de análise mostram visualizações otimizadas.
                   </p>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="w-full" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
                     <iframe
-                      src={`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?usp=sharing&widget=true&headers=false`}
+                      src={`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162&widget=true&headers=false`}
                       className="w-full h-full border-0"
-                      title="Planilha de Desempenho"
+                      title="Planilha de Desempenho - Tab Desemp ContaHub"
                       loading="lazy"
                     />
                   </div>
