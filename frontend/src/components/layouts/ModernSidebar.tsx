@@ -171,7 +171,7 @@ const defaultSidebarItems: SidebarItem[] = [
         {
           icon: Package,
           label: 'Contagem de Estoque',
-          href: '/operacoes/contagem-estoque',
+          href: '/ferramentas/contagem-estoque',
           description: 'Registro de contagem com validações inteligentes',
           permission: 'operacoes',
         },

@@ -123,7 +123,7 @@ export default function ConsolidadoContagemPage() {
                 Visualize os produtos somados de todas as áreas de contagem
               </p>
             </div>
-            <Link href="/operacoes/contagem-estoque">
+            <Link href="/ferramentas/contagem-estoque">
               <Button variant="outline" className="btn-outline-dark">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Voltar
