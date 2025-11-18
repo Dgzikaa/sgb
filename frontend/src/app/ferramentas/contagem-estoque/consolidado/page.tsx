@@ -157,7 +157,6 @@ export default function ConsolidadoContagemPage() {
                       <SelectValue placeholder="Todas categorias" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas categorias</SelectItem>
                       {CATEGORIAS.map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}

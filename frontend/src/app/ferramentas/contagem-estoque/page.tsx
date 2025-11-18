@@ -389,10 +389,9 @@ export default function ContagemEstoquePage() {
                           </Label>
                           <Select value={areaId} onValueChange={setAreaId}>
                             <SelectTrigger className="input-dark">
-                              <SelectValue placeholder="Selecione área..." />
+                              <SelectValue placeholder="Sem área específica" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Sem área específica</SelectItem>
                               {areas.map(area => (
                                 <SelectItem key={area.id} value={area.id.toString()}>
                                   <div className="flex items-center gap-2">
@@ -673,7 +672,6 @@ export default function ContagemEstoquePage() {
                         <SelectValue placeholder="Todas categorias" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todas categorias</SelectItem>
                         {CATEGORIAS.map(cat => (
                           <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                         ))}
