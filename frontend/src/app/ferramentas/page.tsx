@@ -422,7 +422,7 @@ export default function FerramentasPage() {
                   Análise Diária • Histórico • Por Local
                 </div>
               </div>
-              <Link href="/analitico/stockout">
+              <Link href="/ferramentas/stockout">
                 <Button className="w-full bg-rose-500/10 border border-rose-500 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 dark:bg-rose-900/20 dark:border-rose-700 dark:hover:bg-rose-900/30">
                   Ver Análise Stockout
                 </Button>
