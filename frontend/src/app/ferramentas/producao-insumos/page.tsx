@@ -358,10 +358,12 @@ export default function ProducaoInsumosPage() {
           {/* Botão Terminal - Navega para página dedicada */}
           <Button
             onClick={() => router.push('/ferramentas/terminal')}
-            className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white flex items-center"
+            className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
           >
-            <ChefHat className="w-4 h-4 mr-2" />
-            Abrir Terminal de Produção
+            <span className="flex flex-row items-center gap-2">
+              <ChefHat className="w-4 h-4" />
+              <span>Abrir Terminal de Produção</span>
+            </span>
           </Button>
 
           {/* Dashboard Tab */}
@@ -433,24 +435,30 @@ export default function ProducaoInsumosPage() {
                 <CardContent className="space-y-2">
                   <Button
                     onClick={() => abrirModalInsumo()}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Novo Insumo
+                    <span className="flex flex-row items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Novo Insumo</span>
+                    </span>
                   </Button>
                   <Button
                     onClick={() => setActiveTab('receitas')}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center"
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nova Receita
+                    <span className="flex flex-row items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Nova Receita</span>
+                    </span>
                   </Button>
                   <Button
                     onClick={() => window.location.href = '/ferramentas/terminal'}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
-                    <ChefHat className="w-4 h-4 mr-2" />
-                    Terminal de Produção
+                    <span className="flex flex-row items-center gap-2">
+                      <ChefHat className="w-4 h-4" />
+                      <span>Terminal de Produção</span>
+                    </span>
                   </Button>
                 </CardContent>
               </Card>
