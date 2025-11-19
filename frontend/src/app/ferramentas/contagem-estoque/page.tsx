@@ -91,6 +91,11 @@ export default function ContagemEstoquePage() {
   const [loadingContagens, setLoadingContagens] = useState(false);
   const [areas, setAreas] = useState<Area[]>([]);
   
+  // Estados para seleção rápida de produtos
+  const [produtosSugeridos, setProdutosSugeridos] = useState<Array<{descricao: string; preco: number}>>([]);
+  const [loadingProdutos, setLoadingProdutos] = useState(false);
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  
   // Filtros
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroAlerta, setFiltroAlerta] = useState(false);
@@ -122,6 +127,40 @@ export default function ContagemEstoquePage() {
     } catch (error) {
       console.error('Erro ao buscar áreas:', error);
     }
+  };
+
+  const buscarProdutosPorCategoria = async (cat: string) => {
+    if (!cat) {
+      setProdutosSugeridos([]);
+      setMostrarSugestoes(false);
+      return;
+    }
+
+    setLoadingProdutos(true);
+    try {
+      const response = await fetch(`/api/operacoes/contagem-estoque/produtos?categoria=${encodeURIComponent(cat)}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setProdutosSugeridos(result.data || []);
+        setMostrarSugestoes((result.data || []).length > 0);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error);
+    } finally {
+      setLoadingProdutos(false);
+    }
+  };
+
+  const selecionarProduto = (produto: {descricao: string; preco: number}) => {
+    setDescricao(produto.descricao);
+    setPreco(produto.preco.toString());
+    setMostrarSugestoes(false);
+    // Focar no campo de estoque fechado
+    setTimeout(() => {
+      const input = document.querySelector('input[type="number"]') as HTMLInputElement;
+      if (input) input.focus();
+    }, 100);
   };
 
   const buscarContagens = async () => {
@@ -282,6 +321,8 @@ export default function ContagemEstoquePage() {
     setAreaId('');
     setObservacoes('');
     setAlertas([]);
+    setProdutosSugeridos([]);
+    setMostrarSugestoes(false);
   };
 
   const formatarData = (data: string) => {
@@ -368,7 +409,13 @@ export default function ContagemEstoquePage() {
                           <Label htmlFor="categoria" className="text-gray-700 dark:text-gray-300">
                             Categoria *
                           </Label>
-                          <Select value={categoria} onValueChange={setCategoria}>
+                          <Select 
+                            value={categoria} 
+                            onValueChange={(value) => {
+                              setCategoria(value);
+                              buscarProdutosPorCategoria(value);
+                            }}
+                          >
                             <SelectTrigger className="input-dark">
                               <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
@@ -421,17 +468,66 @@ export default function ContagemEstoquePage() {
 
                       {/* Descrição */}
                       <div className="space-y-2">
-                        <Label htmlFor="descricao" className="text-gray-700 dark:text-gray-300">
-                          Descrição do Produto *
-                        </Label>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="descricao" className="text-gray-700 dark:text-gray-300">
+                            Descrição do Produto *
+                          </Label>
+                          {produtosSugeridos.length > 0 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setMostrarSugestoes(!mostrarSugestoes)}
+                              className="text-xs text-blue-600 dark:text-blue-400"
+                            >
+                              {mostrarSugestoes ? 'Ocultar' : 'Ver'} {produtosSugeridos.length} produto(s) cadastrado(s)
+                            </Button>
+                          )}
+                        </div>
                         <Input
                           id="descricao"
-                          placeholder="Ex: Coca-Cola 2L, Cerveja Heineken..."
+                          placeholder={categoria ? "Digite ou selecione um produto abaixo..." : "Selecione uma categoria primeiro"}
                           value={descricao}
                           onChange={(e) => setDescricao(e.target.value)}
                           className="input-dark"
+                          disabled={!categoria}
                         />
                       </div>
+
+                      {/* Seleção Rápida de Produtos */}
+                      {mostrarSugestoes && produtosSugeridos.length > 0 && (
+                        <div className="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                              <Package className="h-4 w-4" />
+                              Seleção Rápida - {produtosSugeridos.length} produto(s)
+                            </h4>
+                            {loadingProdutos && (
+                              <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                            {produtosSugeridos.map((produto, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={() => selecionarProduto(produto)}
+                                className="text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-500 transition-colors"
+                              >
+                                <div className="font-medium text-sm text-gray-900 dark:text-white mb-1">
+                                  {produto.descricao}
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  R$ {produto.preco.toFixed(2)}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
+                            💡 Clique em um produto para preencher automaticamente
+                          </p>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Estoque Fechado */}
