@@ -11,12 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
   BarChart3, 
-  TrendingUp, 
   Calendar, 
-  Users,
-  DollarSign,
-  ChevronLeft,
-  ChevronRight,
   RefreshCcw,
   Activity,
   Edit,
@@ -26,7 +21,6 @@ import {
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
-import { AnimatedCounter, AnimatedCurrency } from '@/components/ui/animated-counter';
 import { motion } from 'framer-motion';
 
 interface DadosSemana {
@@ -354,79 +348,38 @@ export default function DesempenhoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="w-full px-4 py-6">
+    <div className="relative h-screen w-full overflow-hidden bg-white dark:bg-gray-900">
+      {/* Botão Abrir no Google Sheets - Posição fixa no canto superior direito */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162`, '_blank')}
+        className="absolute top-4 right-4 z-50 gap-2 shadow-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+      >
+        <FileSpreadsheet className="h-4 w-4" />
+        Abrir no Google Sheets
+      </Button>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1.5 rounded-xl shadow-sm">
-            <TabsTrigger 
-              value="sheets" 
-              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/25 !rounded-xl"
-            >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Planilha Google
-            </TabsTrigger>
-            <TabsTrigger 
-              value="semanal" 
-              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/25 !rounded-xl"
-            >
-              <Activity className="h-4 w-4 mr-2" />
-              Análise Semanal
-            </TabsTrigger>
-            <TabsTrigger 
-              value="mensal" 
-              className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-violet-500/25 !rounded-xl"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Análise Mensal
-            </TabsTrigger>
+      {/* Google Sheets em tela cheia */}
+      <div className="w-full h-full">
+        <iframe
+          src={`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162&widget=true&headers=false&rm=minimal`}
+          className="w-full h-full border-0"
+          title="Planilha de Desempenho - Tab Desemp ContaHub"
+          loading="eager"
+        />
+      </div>
 
+      {/* Tabs ocultas - mantidas para possível uso futuro */}
+      <div className="hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="sheets">Planilha Google</TabsTrigger>
+            <TabsTrigger value="semanal">Análise Semanal</TabsTrigger>
+            <TabsTrigger value="mensal">Análise Mensal</TabsTrigger>
           </TabsList>
-
-          {/* Planilha Google Sheets */}
-          <TabsContent value="sheets" className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                      <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
-                        <FileSpreadsheet className="h-5 w-5 text-white" />
-                      </div>
-                      Planilha Estratégica Ordinário - {anoAtual}
-                    </CardTitle>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162`, '_blank')}
-                      className="gap-2"
-                    >
-                      <FileSpreadsheet className="h-4 w-4" />
-                      Abrir no Google Sheets
-                    </Button>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    📝 Aba: <strong>Tab Desemp ContaHub</strong> - Use para preenchimento direto de dados. As abas de análise mostram visualizações otimizadas.
-                  </p>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="w-full" style={{ height: 'calc(100vh - 250px)', minHeight: '600px' }}>
-                    <iframe
-                      src={`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162&widget=true&headers=false`}
-                      className="w-full h-full border-0"
-                      title="Planilha de Desempenho - Tab Desemp ContaHub"
-                      loading="lazy"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </TabsContent>
+          
+          <TabsContent value="sheets"></TabsContent>
 
           {/* Visão Semanal */}
           <TabsContent value="semanal" className="space-y-4">
@@ -803,9 +756,10 @@ export default function DesempenhoPage() {
           </TabsContent>
 
         </Tabs>
+      </div>
 
-        {/* Modal de Edição */}
-        <Dialog open={modalAberto} onOpenChange={setModalAberto}>
+      {/* Modal de Edição */}
+      <Dialog open={modalAberto} onOpenChange={setModalAberto}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -955,7 +909,6 @@ export default function DesempenhoPage() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
     </div>
   );
 }
