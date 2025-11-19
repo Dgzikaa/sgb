@@ -839,7 +839,7 @@ export default function TerminalProducao() {
             <Button
               onClick={() => router.push('/ferramentas/producao-insumos')}
               variant="outline"
-              className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="btn-outline-dark"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar para Produção e Insumos

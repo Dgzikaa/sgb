@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
+import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,6 +76,7 @@ interface ReceitaCompleta extends Receita {
 export default function ProducaoInsumosPage() {
   const router = useRouter();
   const { selectedBar } = useBar();
+  const { setPageTitle } = usePageTitle();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -104,6 +106,12 @@ export default function ProducaoInsumosPage() {
     custo_unitario: 0,
     observacoes: '',
   });
+
+  // Definir título da página
+  useEffect(() => {
+    setPageTitle('📦 Produção e Insumos');
+    return () => setPageTitle('');
+  }, [setPageTitle]);
 
   // Carregar dados
   useEffect(() => {
@@ -290,10 +298,6 @@ export default function ProducaoInsumosPage() {
     total_receitas: receitas.length,
     receitas_bar: receitas.filter((r) => r.tipo_local === 'bar').length,
     receitas_cozinha: receitas.filter((r) => r.tipo_local === 'cozinha').length,
-    custo_medio_receitas: receitas.length > 0
-      ? receitas.reduce((acc, r) => acc + calcularCustoReceita(r), 0) / receitas.length
-      : 0,
-    custo_total_receitas: receitas.reduce((acc, r) => acc + calcularCustoReceita(r), 0),
   };
 
   if (loading) {
@@ -310,25 +314,6 @@ export default function ProducaoInsumosPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="card-dark p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Produção e Insumos
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Gestão completa de insumos e receitas para produção
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-sm">
-                {selectedBar?.nome || 'Bar Principal'}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -353,18 +338,16 @@ export default function ProducaoInsumosPage() {
               <ChefHat className="w-4 h-4 mr-2" />
               Receitas ({stats.total_receitas})
             </TabsTrigger>
+            
+            {/* Botão Terminal - Navega para página dedicada */}
+            <button
+              onClick={() => router.push('/ferramentas/terminal')}
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
+              <ChefHat className="w-4 h-4 mr-2" />
+              Abrir Terminal de Produção
+            </button>
           </TabsList>
-
-          {/* Botão Terminal - Navega para página dedicada */}
-          <Button
-            onClick={() => router.push('/ferramentas/terminal')}
-            className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
-          >
-            <span className="flex flex-row items-center gap-2">
-              <ChefHat className="w-4 h-4" />
-              <span>Abrir Terminal de Produção</span>
-            </span>
-          </Button>
 
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
@@ -463,69 +446,6 @@ export default function ProducaoInsumosPage() {
                 </CardContent>
               </Card>
             </div>
-
-            {/* Cards de Análise de Custo */}
-            {stats.total_receitas > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="card-dark bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-green-900 dark:text-green-100">
-                      Custo Médio por Receita
-                    </CardTitle>
-                    <CardDescription className="text-green-700 dark:text-green-300">
-                      Média de custo considerando todas as receitas cadastradas
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
-                      R$ {stats.custo_medio_receitas.toFixed(2)}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300">
-                      <TrendingUp className="w-4 h-4" />
-                      <span>Baseado em {stats.total_receitas} receitas</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="card-dark bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-blue-900 dark:text-blue-100">
-                      Custo Total do Cardápio
-                    </CardTitle>
-                    <CardDescription className="text-blue-700 dark:text-blue-300">
-                      Soma do custo de todas as receitas cadastradas
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                      R$ {stats.custo_total_receitas.toFixed(2)}
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-                      <div>
-                        <div className="text-blue-700 dark:text-blue-300">Bar:</div>
-                        <div className="font-semibold text-blue-900 dark:text-blue-100">
-                          R$ {receitas
-                            .filter(r => r.tipo_local === 'bar')
-                            .reduce((acc, r) => acc + calcularCustoReceita(r), 0)
-                            .toFixed(2)
-                          }
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-blue-700 dark:text-blue-300">Cozinha:</div>
-                        <div className="font-semibold text-blue-900 dark:text-blue-100">
-                          R$ {receitas
-                            .filter(r => r.tipo_local === 'cozinha')
-                            .reduce((acc, r) => acc + calcularCustoReceita(r), 0)
-                            .toFixed(2)
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
 
             {/* Alerta se não houver dados */}
             {stats.total_insumos === 0 && (
