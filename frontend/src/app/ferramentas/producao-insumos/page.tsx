@@ -358,7 +358,7 @@ export default function ProducaoInsumosPage() {
           {/* Botão Terminal - Navega para página dedicada */}
           <Button
             onClick={() => router.push('/ferramentas/terminal')}
-            className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white"
+            className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white flex items-center"
           >
             <ChefHat className="w-4 h-4 mr-2" />
             Abrir Terminal de Produção
@@ -433,21 +433,21 @@ export default function ProducaoInsumosPage() {
                 <CardContent className="space-y-2">
                   <Button
                     onClick={() => abrirModalInsumo()}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Novo Insumo
                   </Button>
                   <Button
                     onClick={() => setActiveTab('receitas')}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Nova Receita
                   </Button>
                   <Button
                     onClick={() => window.location.href = '/ferramentas/terminal'}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center"
                   >
                     <ChefHat className="w-4 h-4 mr-2" />
                     Terminal de Produção

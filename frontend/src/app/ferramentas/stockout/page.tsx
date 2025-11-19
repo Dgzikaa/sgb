@@ -150,7 +150,10 @@ export default function StockoutPage() {
   // Estado para local selecionado
   const [localSelecionado, setLocalSelecionado] = useState<string>('');
   
-  // Datas para histórico
+  // Modo de análise diária: 'unica' ou 'periodo'
+  const [modoAnalise, setModoAnalise] = useState<'unica' | 'periodo'>('unica');
+  
+  // Datas para histórico e período
   const [dataInicio, setDataInicio] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() - 7); // 7 dias atrás
@@ -158,6 +161,19 @@ export default function StockoutPage() {
   });
   
   const [dataFim, setDataFim] = useState(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
+  });
+  
+  // Datas para análise diária em período
+  const [dataInicioDiaria, setDataInicioDiaria] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 3); // 3 dias atrás
+    return date.toISOString().split('T')[0];
+  });
+  
+  const [dataFimDiaria, setDataFimDiaria] = useState(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     return yesterday.toISOString().split('T')[0];
@@ -196,6 +212,77 @@ export default function StockoutPage() {
     } catch (error) {
       console.error('❌ Erro ao buscar dados de stockout:', error);
       toast.error('Erro ao buscar dados de stockout');
+      setStockoutData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const buscarDadosPeriodo = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/analitico/stockout-historico', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data_inicio: dataInicioDiaria,
+          data_fim: dataFimDiaria,
+          bar_id: 3,
+          filtros: filtrosAtivos
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        // Converter dados de histórico para formato de stockout
+        const mediaStockout = parseFloat(result.data.resumo.media_stockout.replace('%', ''));
+        const mediaDisponibilidade = parseFloat(result.data.resumo.media_disponibilidade.replace('%', ''));
+        
+        // Calcular totais médios
+        const totalDias = result.data.historico_diario.length;
+        const somaAtivos = result.data.historico_diario.reduce((acc: number, dia: any) => acc + dia.total_produtos_ativos, 0);
+        const somaDisponiveis = result.data.historico_diario.reduce((acc: number, dia: any) => acc + dia.produtos_disponiveis, 0);
+        const somaStockout = result.data.historico_diario.reduce((acc: number, dia: any) => acc + dia.produtos_stockout, 0);
+        
+        const mediaAtivos = Math.round(somaAtivos / totalDias);
+        const mediaDisponiveis = Math.round(somaDisponiveis / totalDias);
+        const mediaStockoutQtd = Math.round(somaStockout / totalDias);
+        
+        // Criar objeto compatível com StockoutData
+        const dadosPeriodo: StockoutData = {
+          data_referencia: `${dataInicioDiaria} a ${dataFimDiaria}`,
+          data_analisada: `${dataInicioDiaria} a ${dataFimDiaria}`,
+          timestamp_consulta: new Date().toISOString(),
+          filtros_aplicados: filtrosAtivos,
+          estatisticas: {
+            total_produtos: mediaAtivos,
+            produtos_ativos: mediaDisponiveis,
+            produtos_inativos: mediaStockoutQtd,
+            percentual_stockout: `${mediaStockout.toFixed(1)}%`,
+            percentual_disponibilidade: `${mediaDisponibilidade.toFixed(1)}%`
+          },
+          produtos: {
+            ativos: [],
+            inativos: []
+          },
+          grupos: {
+            ativos: [],
+            inativos: []
+          }
+        };
+        
+        setStockoutData(dadosPeriodo);
+        toast.success(`Média de ${totalDias} dias analisados (${dataInicioDiaria} a ${dataFimDiaria})`);
+      } else {
+        toast.error(result.error || 'Erro ao buscar dados do período');
+        setStockoutData(null);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do período:', error);
+      toast.error('Erro ao buscar dados do período');
       setStockoutData(null);
     } finally {
       setLoading(false);
@@ -291,14 +378,19 @@ export default function StockoutPage() {
 
   // Carregar dados automaticamente na primeira renderização
   useEffect(() => {
-    if (activeTab === 'diario' && selectedDate) {
-      console.log('🚀 Carregando dados iniciais para:', selectedDate);
-      buscarDadosStockout(selectedDate, filtrosAtivos);
+    if (activeTab === 'diario') {
+      if (modoAnalise === 'unica' && selectedDate) {
+        console.log('🚀 Carregando dados iniciais para:', selectedDate);
+        buscarDadosStockout(selectedDate, filtrosAtivos);
+      } else if (modoAnalise === 'periodo') {
+        console.log('🚀 Carregando dados de período:', dataInicioDiaria, 'a', dataFimDiaria);
+        buscarDadosPeriodo();
+      }
     } else if (activeTab === 'historico') {
       buscarHistoricoStockout();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [activeTab, modoAnalise]);
 
   const formatarData = (data: string) => {
     return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
@@ -414,22 +506,110 @@ export default function StockoutPage() {
             </TabsList>
 
             <TabsContent value="diario" className="space-y-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <Input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="input-dark w-[180px]"
-                  />
+              {/* Seletor de Modo */}
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Modo de análise:
+                </span>
+                <div className="flex gap-2">
                   <Button
-                    onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
-                    disabled={loading}
-                    variant="outline"
-                    className="btn-outline-dark"
+                    size="sm"
+                    variant={modoAnalise === 'unica' ? 'default' : 'outline'}
+                    onClick={() => setModoAnalise('unica')}
+                    className={modoAnalise === 'unica' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
                   >
-                    {loading ? 'Carregando...' : 'Buscar'}
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Data Única
                   </Button>
+                  <Button
+                    size="sm"
+                    variant={modoAnalise === 'periodo' ? 'default' : 'outline'}
+                    onClick={() => setModoAnalise('periodo')}
+                    className={modoAnalise === 'periodo' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
+                  >
+                    <TrendingDown className="w-4 h-4 mr-2" />
+                    Período
+                  </Button>
+                </div>
+              </div>
+
+              {/* Controles de Data */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                  {modoAnalise === 'unica' ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                          Data:
+                        </label>
+                        <Input
+                          type="date"
+                          value={selectedDate}
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                          className="input-dark w-[180px]"
+                        />
+                      </div>
+                      <Button
+                        onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
+                        disabled={loading}
+                        className="btn-primary-dark"
+                      >
+                        {loading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Carregando...
+                          </>
+                        ) : (
+                          <>
+                            <Calendar className="w-4 h-4 mr-2" />
+                            Buscar
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                          De:
+                        </label>
+                        <Input
+                          type="date"
+                          value={dataInicioDiaria}
+                          onChange={(e) => setDataInicioDiaria(e.target.value)}
+                          className="input-dark w-[180px]"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                          Até:
+                        </label>
+                        <Input
+                          type="date"
+                          value={dataFimDiaria}
+                          onChange={(e) => setDataFimDiaria(e.target.value)}
+                          className="input-dark w-[180px]"
+                        />
+                      </div>
+                      <Button
+                        onClick={buscarDadosPeriodo}
+                        disabled={loading}
+                        className="btn-primary-dark"
+                      >
+                        {loading ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Carregando...
+                          </>
+                        ) : (
+                          <>
+                            <TrendingDown className="w-4 h-4 mr-2" />
+                            Buscar Período
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  )}
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -486,25 +666,50 @@ export default function StockoutPage() {
 
               {stockoutData && (
                 <>
+                  {/* Badge de Período */}
+                  {modoAnalise === 'periodo' && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
+                      <div className="flex items-center gap-2">
+                        <TrendingDown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <div>
+                          <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                            Análise de Período - Valores Médios
+                          </h3>
+                          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                            Período: {formatarData(dataInicioDiaria)} até {formatarData(dataFimDiaria)}
+                          </p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                            Os valores abaixo representam as médias calculadas para o período selecionado
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Cards de Estatísticas */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card className="card-dark">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Total de Produtos
+                          {modoAnalise === 'periodo' ? 'Média de Produtos' : 'Total de Produtos'}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold text-gray-900 dark:text-white">
                           {stockoutData?.estatisticas?.total_produtos || 0}
                         </div>
+                        {modoAnalise === 'periodo' && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            por dia
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
 
                     <Card className="card-dark">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">
-                          Produtos Ativos
+                          {modoAnalise === 'periodo' ? 'Média Produtos Ativos' : 'Produtos Ativos'}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -513,7 +718,7 @@ export default function StockoutPage() {
                           {stockoutData?.estatisticas?.produtos_ativos || 0}
                         </div>
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          {stockoutData?.estatisticas?.percentual_disponibilidade || '0%'} disponível
+                          {stockoutData?.estatisticas?.percentual_disponibilidade || '0%'} disponível{modoAnalise === 'periodo' ? ' (média)' : ''}
                         </p>
                       </CardContent>
                     </Card>
@@ -521,7 +726,7 @@ export default function StockoutPage() {
                     <Card className="card-dark">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-red-600 dark:text-red-400">
-                          Produtos Inativos
+                          {modoAnalise === 'periodo' ? 'Média Produtos Inativos' : 'Produtos Inativos'}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -530,7 +735,7 @@ export default function StockoutPage() {
                           {stockoutData?.estatisticas?.produtos_inativos || 0}
                         </div>
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          Em stockout
+                          Em stockout{modoAnalise === 'periodo' ? ' (média)' : ''}
                         </p>
                       </CardContent>
                     </Card>
@@ -538,7 +743,7 @@ export default function StockoutPage() {
                     <Card className="card-dark">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          % Stockout
+                          % Stockout {modoAnalise === 'periodo' ? '(Média)' : ''}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
