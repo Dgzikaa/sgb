@@ -351,26 +351,36 @@ export default function ContagemEstoquePage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <div className="card-dark p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="card-title-dark flex items-center gap-2">
-                <Package className="h-6 w-6" />
-                Contagem de Estoque
-              </h1>
-              <p className="card-description-dark">
-                Registre e acompanhe a contagem de estoque com validações inteligentes
-              </p>
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="card-title-dark flex items-center gap-2">
+                  <Package className="h-6 w-6" />
+                  Contagem de Estoque
+                </h1>
+                <p className="card-description-dark">
+                  Registre e acompanhe a contagem de estoque com validações inteligentes
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/ferramentas/areas-contagem">
+                  <Button variant="outline" className="btn-outline-dark">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Gerenciar Áreas
+                  </Button>
+                </Link>
+                <Link href="/ferramentas/contagem-estoque/consolidado">
+                  <Button className="btn-primary-dark">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Ver Consolidado
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <Link href="/ferramentas/areas-contagem">
-              <Button variant="outline" className="btn-outline-dark">
-                <Settings className="h-4 w-4 mr-2" />
-                Gerenciar Áreas
-              </Button>
-            </Link>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <TabsList className="tabs-list-dark">
                 <TabsTrigger value="registrar" className="tabs-trigger-dark">
                   <Package className="h-4 w-4 mr-2" />
@@ -381,13 +391,6 @@ export default function ContagemEstoquePage() {
                   Histórico
                 </TabsTrigger>
               </TabsList>
-              
-              <Link href="/ferramentas/contagem-estoque/consolidado">
-                <Button className="btn-primary-dark">
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  Ver Consolidado por Área
-                </Button>
-              </Link>
             </div>
 
             {/* TAB: REGISTRAR CONTAGEM */}

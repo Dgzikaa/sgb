@@ -6,6 +6,51 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Mapeamento de categorias genéricas para categorias específicas do banco
+const CATEGORIA_MAPPING: Record<string, string[]> = {
+  'Bebidas': [
+    'DESTILADOS',
+    'DESTILADOS LOG',
+    'Long Neck',
+    'Lata',
+    'Artesanal',
+    'Retornáveis',
+    'retornáveis',
+    'Vinhos',
+    'Não-alcóolicos',
+    'POLPAS',
+    'polpa'
+  ],
+  'Alimentos': [
+    'MERCADO (C)',
+    'MERCADO (F)',
+    'MERCADO (S)',
+    'MERCADO B',
+    'HORTIFRUTI (C)',
+    'HORTIFRUTI (F)',
+    'HORTIFRUTI B',
+    'hortifruti',
+    'PÃES',
+    'PROTEÍNA',
+    'PROTEÍNA (F)',
+    'PEIXE',
+    'tempero',
+    'fruta'
+  ],
+  'Insumos': [
+    'ARMAZÉM (C)',
+    'ARMAZÉM (B)',
+    'ARMAZÉM B',
+    'IMPÉRIO'
+  ],
+  'Descartáveis': [],
+  'Limpeza': [],
+  'Outros': [
+    'OUTROS',
+    'líquido'
+  ]
+};
+
 // GET - Buscar produtos únicos por categoria
 export async function GET(request: NextRequest) {
   try {
@@ -20,34 +65,40 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Buscar produtos distintos que já foram contados nesta categoria
+    // Buscar categorias específicas para a categoria genérica
+    const categoriasEspecificas = CATEGORIA_MAPPING[categoria] || [];
+
+    if (categoriasEspecificas.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: [],
+        total: 0,
+        message: 'Nenhuma categoria específica mapeada para esta categoria'
+      });
+    }
+
+    // Buscar produtos da tabela insumos usando as categorias específicas
     const { data, error } = await supabase
-      .from('contagem_estoque_produtos')
-      .select('descricao, preco, categoria')
+      .from('insumos')
+      .select('nome, custo_unitario, categoria')
       .eq('bar_id', bar_id)
-      .eq('categoria', categoria)
-      .order('descricao', { ascending: true });
+      .eq('ativo', true)
+      .in('categoria', categoriasEspecificas)
+      .order('nome', { ascending: true });
 
     if (error) throw error;
 
-    // Agrupar por descrição (pegar a mais recente de cada produto)
-    const produtosMap = new Map();
-    (data || []).forEach((item: any) => {
-      if (!produtosMap.has(item.descricao)) {
-        produtosMap.set(item.descricao, {
-          descricao: item.descricao,
-          preco: parseFloat(item.preco || '0'),
-          categoria: item.categoria
-        });
-      }
-    });
-
-    const produtosUnicos = Array.from(produtosMap.values());
+    // Formatar produtos
+    const produtos = (data || []).map((item: any) => ({
+      descricao: item.nome,
+      preco: parseFloat(item.custo_unitario || '0'),
+      categoria: item.categoria
+    }));
 
     return NextResponse.json({
       success: true,
-      data: produtosUnicos,
-      total: produtosUnicos.length
+      data: produtos,
+      total: produtos.length
     });
 
   } catch (error: any) {
