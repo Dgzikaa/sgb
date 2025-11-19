@@ -15,7 +15,8 @@ import {
   Calendar,
   DollarSign,
   ArrowLeft,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -152,16 +153,28 @@ export default function ConsolidadoContagemPage() {
 
                 <div className="space-y-2">
                   <Label className="text-gray-700 dark:text-gray-300">Categoria (Opcional)</Label>
-                  <Select value={categoria} onValueChange={setCategoria}>
-                    <SelectTrigger className="input-dark">
-                      <SelectValue placeholder="Todas categorias" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIAS.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-2">
+                    <Select value={categoria} onValueChange={setCategoria}>
+                      <SelectTrigger className="input-dark">
+                        <SelectValue placeholder="Todas categorias" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIAS.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {categoria && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCategoria('')}
+                        className="h-10 px-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-end">

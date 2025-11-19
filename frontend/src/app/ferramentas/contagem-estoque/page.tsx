@@ -24,7 +24,8 @@ import {
   Filter,
   Search,
   MapPin,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -666,17 +667,29 @@ export default function ContagemEstoquePage() {
                       </div>
                     </div>
                     
-                    <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
-                      <SelectTrigger className="input-dark w-[200px]">
-                        <Filter className="h-4 w-4 mr-2" />
-                        <SelectValue placeholder="Todas categorias" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CATEGORIAS.map(cat => (
-                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
+                        <SelectTrigger className="input-dark w-[200px]">
+                          <Filter className="h-4 w-4 mr-2" />
+                          <SelectValue placeholder="Todas categorias" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIAS.map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {filtroCategoria && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setFiltroCategoria('')}
+                          className="h-10 px-2"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
 
                     <Button
                       variant={filtroAlerta ? 'default' : 'outline'}
