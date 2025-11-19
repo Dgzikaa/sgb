@@ -834,25 +834,20 @@ export default function TerminalProducao() {
     <ProtectedRoute requiredModule="operacoes">
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-6">
-          {/* Botão Voltar */}
-          <div className="mb-4">
-            <Button
-              onClick={() => router.push('/ferramentas/producao-insumos')}
-              variant="outline"
-              className="btn-outline-dark"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar para Produção e Insumos
-            </Button>
-          </div>
-
-          <div className="space-y-6 mt-8">
+          <div className="space-y-6">
             {/* Seletor de Tipo e Receita */}
             <Card className="card-dark rounded-xl shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                  🏭 Terminal de Produção
-                </CardTitle>
+                <div className="flex items-center justify-end">
+                  <Button
+                    onClick={() => router.push('/ferramentas/producao-insumos')}
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<ArrowLeft className="w-4 h-4" />}
+                  >
+                    Voltar
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Seletor Bar vs Cozinha */}
