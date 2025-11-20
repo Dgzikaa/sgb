@@ -532,8 +532,8 @@ export default function StockoutPage() {
                           variant={modoAnalise === 'unica' ? 'default' : 'outline'}
                           onClick={() => setModoAnalise('unica')}
                           className={modoAnalise === 'unica' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
+                          leftIcon={<Calendar className="w-4 h-4" />}
                         >
-                          <Calendar className="w-4 h-4 mr-2" />
                           Data Única
                         </Button>
                         <Button
@@ -541,8 +541,8 @@ export default function StockoutPage() {
                           variant={modoAnalise === 'periodo' ? 'default' : 'outline'}
                           onClick={() => setModoAnalise('periodo')}
                           className={modoAnalise === 'periodo' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
+                          leftIcon={<TrendingDown className="w-4 h-4" />}
                         >
-                          <TrendingDown className="w-4 h-4 mr-2" />
                           Período
                         </Button>
                       </div>
@@ -566,19 +566,11 @@ export default function StockoutPage() {
                           <Button
                             onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
                             disabled={loading}
+                            loading={loading}
                             className="btn-primary-dark"
+                            leftIcon={!loading ? <Calendar className="w-4 h-4" /> : undefined}
                           >
-                            {loading ? (
-                              <>
-                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                Carregando...
-                              </>
-                            ) : (
-                              <>
-                                <Calendar className="w-4 h-4 mr-2" />
-                                Buscar
-                              </>
-                            )}
+                            {loading ? 'Carregando...' : 'Buscar'}
                           </Button>
                         </>
                       ) : (
@@ -608,19 +600,11 @@ export default function StockoutPage() {
                           <Button
                             onClick={buscarDadosPeriodo}
                             disabled={loading}
+                            loading={loading}
                             className="btn-primary-dark"
+                            leftIcon={!loading ? <TrendingDown className="w-4 h-4" /> : undefined}
                           >
-                            {loading ? (
-                              <>
-                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                Carregando...
-                              </>
-                            ) : (
-                              <>
-                                <TrendingDown className="w-4 h-4 mr-2" />
-                                Buscar Período
-                              </>
-                            )}
+                            {loading ? 'Carregando...' : 'Buscar Período'}
                           </Button>
                         </>
                       )}
@@ -801,9 +785,9 @@ export default function StockoutPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setLocalSelecionado('')}
-                                className="btn-outline-dark inline-flex items-center"
+                                className="btn-outline-dark"
                               >
-                                <span>Limpar</span>
+                                Limpar
                               </Button>
                             </div>
                           </CardHeader>
@@ -935,19 +919,11 @@ export default function StockoutPage() {
                 <Button
                   onClick={buscarHistoricoStockout}
                   disabled={loading}
-                  className="btn-primary-dark inline-flex items-center"
+                  loading={loading}
+                  className="btn-primary-dark"
+                  leftIcon={!loading ? <TrendingDown className="w-4 h-4" /> : undefined}
                 >
-                  {loading ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      <span>Carregando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingDown className="w-4 h-4 mr-2" />
-                      <span>Buscar Histórico</span>
-                    </>
-                  )}
+                  {loading ? 'Carregando...' : 'Buscar Histórico'}
                 </Button>
               </div>
 
