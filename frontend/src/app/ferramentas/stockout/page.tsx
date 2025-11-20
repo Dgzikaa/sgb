@@ -517,163 +517,117 @@ export default function StockoutPage() {
               </TabsList>
 
             <TabsContent value="diario" className="space-y-6">
-              {/* Seletor de Modo */}
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Modo de análise:
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant={modoAnalise === 'unica' ? 'default' : 'outline'}
-                    onClick={() => setModoAnalise('unica')}
-                    className={`inline-flex items-center ${modoAnalise === 'unica' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}`}
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span>Data Única</span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={modoAnalise === 'periodo' ? 'default' : 'outline'}
-                    onClick={() => setModoAnalise('periodo')}
-                    className={`inline-flex items-center ${modoAnalise === 'periodo' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}`}
-                  >
-                    <TrendingDown className="w-4 h-4 mr-2" />
-                    <span>Período</span>
-                  </Button>
-                </div>
-              </div>
+              {/* Controles de Busca */}
+              <Card className="card-dark">
+                <CardContent className="p-4">
+                  <div className="flex flex-col gap-4">
+                    {/* Seletor de Modo */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                        Modo de análise:
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant={modoAnalise === 'unica' ? 'default' : 'outline'}
+                          onClick={() => setModoAnalise('unica')}
+                          className={modoAnalise === 'unica' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
+                        >
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Data Única
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={modoAnalise === 'periodo' ? 'default' : 'outline'}
+                          onClick={() => setModoAnalise('periodo')}
+                          className={modoAnalise === 'periodo' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
+                        >
+                          <TrendingDown className="w-4 h-4 mr-2" />
+                          Período
+                        </Button>
+                      </div>
+                    </div>
 
-              {/* Controles de Data */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                  {modoAnalise === 'unica' ? (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                          Data:
-                        </label>
-                        <Input
-                          type="date"
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          className="input-dark w-[180px]"
-                        />
-                      </div>
-                      <Button
-                        onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
-                        disabled={loading}
-                        className="btn-primary-dark inline-flex items-center"
-                      >
-                        {loading ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            <span>Carregando...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Calendar className="w-4 h-4 mr-2" />
-                            <span>Buscar</span>
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                          De:
-                        </label>
-                        <Input
-                          type="date"
-                          value={dataInicioDiaria}
-                          onChange={(e) => setDataInicioDiaria(e.target.value)}
-                          className="input-dark w-[180px]"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                          Até:
-                        </label>
-                        <Input
-                          type="date"
-                          value={dataFimDiaria}
-                          onChange={(e) => setDataFimDiaria(e.target.value)}
-                          className="input-dark w-[180px]"
-                        />
-                      </div>
-                      <Button
-                        onClick={buscarDadosPeriodo}
-                        disabled={loading}
-                        className="btn-primary-dark inline-flex items-center"
-                      >
-                        {loading ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            <span>Carregando...</span>
-                          </>
-                        ) : (
-                          <>
-                            <TrendingDown className="w-4 h-4 mr-2" />
-                            <span>Buscar Período</span>
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                    className="btn-outline-dark inline-flex items-center"
-                  >
-                    <span>Filtros ({filtrosAtivos.length})</span>
-                  </Button>
-                  {filtrosAtivos.length > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={limparFiltros}
-                      className="btn-outline-dark text-red-600 dark:text-red-400 inline-flex items-center"
-                    >
-                      <span>Limpar</span>
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Seção de Filtros */}
-              {mostrarFiltros && (
-                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                    Excluir da análise:
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant={filtrosAtivos.includes('Pegue e Pague') ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => toggleFiltro('Pegue e Pague')}
-                      className={`inline-flex items-center ${filtrosAtivos.includes('Pegue e Pague') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}`}
-                    >
-                      <span>Pegue e Pague</span>
-                    </Button>
-                    <Button
-                      variant={filtrosAtivos.includes('sem_local') ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => toggleFiltro('sem_local')}
-                      className={`inline-flex items-center ${filtrosAtivos.includes('sem_local') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}`}
-                    >
-                      <span>Sem local definido</span>
-                    </Button>
+                    {/* Controles de Data */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      {modoAnalise === 'unica' ? (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                              Data:
+                            </label>
+                            <Input
+                              type="date"
+                              value={selectedDate}
+                              onChange={(e) => setSelectedDate(e.target.value)}
+                              className="input-dark w-[180px]"
+                            />
+                          </div>
+                          <Button
+                            onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
+                            disabled={loading}
+                            className="btn-primary-dark"
+                          >
+                            {loading ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                Carregando...
+                              </>
+                            ) : (
+                              <>
+                                <Calendar className="w-4 h-4 mr-2" />
+                                Buscar
+                              </>
+                            )}
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                              De:
+                            </label>
+                            <Input
+                              type="date"
+                              value={dataInicioDiaria}
+                              onChange={(e) => setDataInicioDiaria(e.target.value)}
+                              className="input-dark w-[180px]"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                              Até:
+                            </label>
+                            <Input
+                              type="date"
+                              value={dataFimDiaria}
+                              onChange={(e) => setDataFimDiaria(e.target.value)}
+                              className="input-dark w-[180px]"
+                            />
+                          </div>
+                          <Button
+                            onClick={buscarDadosPeriodo}
+                            disabled={loading}
+                            className="btn-primary-dark"
+                          >
+                            {loading ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                Carregando...
+                              </>
+                            ) : (
+                              <>
+                                <TrendingDown className="w-4 h-4 mr-2" />
+                                Buscar Período
+                              </>
+                            )}
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                    Produtos dos locais selecionados serão excluídos do cálculo de stockout
-                  </p>
-                </div>
-              )}
+                </CardContent>
+              </Card>
 
               {stockoutData && (
                 <>
