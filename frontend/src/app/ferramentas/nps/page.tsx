@@ -314,7 +314,37 @@ export default function NPSPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div className="flex gap-3 mb-4">
+              <Button
+                onClick={sincronizarPlanilha}
+                disabled={sincronizando}
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
+                leftIcon={<RefreshCcw className={`h-4 w-4 ${sincronizando ? 'animate-spin' : ''}`} />}
+              >
+                {sincronizando ? 'Sincronizando...' : 'Sincronizar Planilha'}
+              </Button>
+              <Button
+                onClick={() => {
+                  limparFormulario();
+                  setModalFormulario(true);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                leftIcon={<Smile className="h-4 w-4" />}
+              >
+                Nova Pesquisa
+              </Button>
+              <Button 
+                onClick={carregarDados} 
+                disabled={loading} 
+                className="btn-primary-dark"
+                leftIcon={<RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />}
+              >
+                {loading ? 'Carregando...' : 'Atualizar'}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label className="text-gray-700 dark:text-gray-300">Data Início</Label>
                 <Input
@@ -348,32 +378,6 @@ export default function NPSPage() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                onClick={sincronizarPlanilha}
-                disabled={sincronizando}
-                variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
-              >
-                <RefreshCcw className={`h-4 w-4 mr-2 ${sincronizando ? 'animate-spin' : ''}`} />
-                {sincronizando ? 'Sincronizando...' : 'Sincronizar Planilha'}
-              </Button>
-              <Button
-                onClick={() => {
-                  limparFormulario();
-                  setModalFormulario(true);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Smile className="h-4 w-4 mr-2" />
-                Nova Pesquisa
-              </Button>
-              <Button onClick={carregarDados} disabled={loading} className="btn-primary-dark">
-                <RefreshCcw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Carregando...' : 'Atualizar'}
-              </Button>
             </div>
           </CardContent>
         </Card>
