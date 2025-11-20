@@ -439,10 +439,10 @@ export default function SimulacaoCMOPage() {
               <div className="flex items-end">
                 <Button
                   onClick={adicionarFuncionario}
-                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white inline-flex items-center justify-center"
+                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                  leftIcon={<Plus className="h-4 w-4" />}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  <span>Adicionar Funcionário</span>
+                  Adicionar Funcionário
                 </Button>
               </div>
             </div>
@@ -535,28 +535,20 @@ export default function SimulacaoCMOPage() {
                   onClick={() => setMostrarHistorico(!mostrarHistorico)}
                   variant="outline"
                   size="sm"
-                  className="border-gray-300 dark:border-gray-600 inline-flex items-center"
+                  className="border-gray-300 dark:border-gray-600"
+                  leftIcon={<FileText className="h-4 w-4" />}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
-                  <span>{mostrarHistorico ? 'Ocultar' : 'Ver'} Histórico</span>
+                  {mostrarHistorico ? 'Ocultar' : 'Ver'} Histórico
                 </Button>
                 <Button
                   onClick={salvarSimulacao}
                   disabled={salvando || funcionarios.length === 0}
+                  loading={salvando}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white inline-flex items-center"
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                  leftIcon={!salvando ? <Save className="h-4 w-4" /> : undefined}
                 >
-                  {salvando ? (
-                    <>
-                      <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                      <span>Salvando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      <span>Salvar</span>
-                    </>
-                  )}
+                  {salvando ? 'Salvando...' : 'Salvar'}
                 </Button>
               </div>
             </div>
