@@ -27,6 +27,7 @@ import {
   FileText,
   Edit,
   Info,
+  History,
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
@@ -400,44 +401,6 @@ export default function SimulacaoCMOPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              💼 Simulação de CMO
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Custo de Mão de Obra - Simulação mensal com histórico
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => setMostrarHistorico(!mostrarHistorico)}
-              variant="outline"
-              className="border-gray-300 dark:border-gray-600"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              {mostrarHistorico ? 'Ocultar' : 'Ver'} Histórico
-            </Button>
-            <Button
-              onClick={salvarSimulacao}
-              disabled={salvando || funcionarios.length === 0}
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
-            >
-              {salvando ? (
-                <>
-                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar Simulação
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
 
         {/* Seleção de Mês/Ano */}
         <Card className="card-dark mb-6">
@@ -490,8 +453,8 @@ export default function SimulacaoCMOPage() {
         {mostrarHistorico && (
           <Card className="card-dark mb-6">
             <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                <FileText className="h-5 w-5" />
+              <CardTitle className="card-title-dark flex items-center gap-2">
+                <History className="h-5 w-5" />
                 Histórico de Simulações ({historico.length})
               </CardTitle>
             </CardHeader>
@@ -562,10 +525,41 @@ export default function SimulacaoCMOPage() {
         {/* Tabela de Funcionários */}
         <Card className="card-dark mb-6">
           <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <Users className="h-5 w-5" />
-              Funcionários ({funcionarios.length})
-            </CardTitle>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <CardTitle className="card-title-dark flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Funcionários ({funcionarios.length})
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setMostrarHistorico(!mostrarHistorico)}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 dark:border-gray-600"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  {mostrarHistorico ? 'Ocultar' : 'Ver'} Histórico
+                </Button>
+                <Button
+                  onClick={salvarSimulacao}
+                  disabled={salvando || funcionarios.length === 0}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                >
+                  {salvando ? (
+                    <>
+                      <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Salvar
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             {funcionarios.length === 0 ? (
@@ -798,7 +792,7 @@ export default function SimulacaoCMOPage() {
         {/* Observações */}
         <Card className="card-dark mb-6">
           <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <CardTitle className="card-title-dark flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Observações
             </CardTitle>
