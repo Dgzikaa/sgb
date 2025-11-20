@@ -305,39 +305,6 @@ export default function NPSPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Ações Rápidas */}
-        <Card className="mb-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <FileSpreadsheet className="w-5 h-5" />
-              Ações Rápidas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-3">
-              <Button
-                onClick={sincronizarPlanilha}
-                disabled={sincronizando}
-                variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
-              >
-                <RefreshCcw className="w-4 h-4 mr-2" />
-                {sincronizando ? 'Sincronizando...' : 'Sincronizar Planilha'}
-              </Button>
-              <Button
-                onClick={() => {
-                  limparFormulario();
-                  setModalFormulario(true);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Smile className="w-4 h-4 mr-2" />
-                Nova Pesquisa
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Filtros */}
         <Card className="mb-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
@@ -347,7 +314,7 @@ export default function NPSPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <div>
                 <Label className="text-gray-700 dark:text-gray-300">Data Início</Label>
                 <Input
@@ -381,11 +348,32 @@ export default function NPSPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-end">
-                <Button onClick={carregarDados} disabled={loading} className="w-full">
-                  {loading ? 'Carregando...' : 'Atualizar'}
-                </Button>
-              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={sincronizarPlanilha}
+                disabled={sincronizando}
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-950"
+              >
+                <RefreshCcw className={`h-4 w-4 mr-2 ${sincronizando ? 'animate-spin' : ''}`} />
+                {sincronizando ? 'Sincronizando...' : 'Sincronizar Planilha'}
+              </Button>
+              <Button
+                onClick={() => {
+                  limparFormulario();
+                  setModalFormulario(true);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Smile className="h-4 w-4 mr-2" />
+                Nova Pesquisa
+              </Button>
+              <Button onClick={carregarDados} disabled={loading} className="btn-primary-dark">
+                <RefreshCcw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Carregando...' : 'Atualizar'}
+              </Button>
             </div>
           </CardContent>
         </Card>
