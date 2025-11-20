@@ -648,85 +648,89 @@ export default function CMVSemanalPage() {
       <div className="container mx-auto px-4 py-6">
         {/* Filtros e Ações */}
         <Card className="card-dark mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Ano</Label>
-                  <Select value={anoFiltro.toString()} onValueChange={(value) => setAnoFiltro(parseInt(value))}>
-                    <SelectTrigger className="select-dark w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="modal-select-content">
-                      {[2024, 2025, 2026].map((ano) => (
-                        <SelectItem key={ano} value={ano.toString()} className="modal-select-item">
-                          {ano}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Status</Label>
-                  <Select value={statusFiltro} onValueChange={setStatusFiltro}>
-                    <SelectTrigger className="select-dark w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="modal-select-content">
-                      <SelectItem value="TODOS" className="modal-select-item">Todos</SelectItem>
-                      <SelectItem value="rascunho" className="modal-select-item">Rascunho</SelectItem>
-                      <SelectItem value="fechado" className="modal-select-item">Fechado</SelectItem>
-                      <SelectItem value="auditado" className="modal-select-item">Auditado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  onClick={carregarCMVs}
-                  variant="outline"
-                  className="btn-outline-dark mt-6"
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <TrendingUp className="w-5 h-5" />
+              Filtros
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Botões de Ação */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <Link href="/ferramentas/cmv-semanal/tabela">
+                <Button 
+                  variant="outline" 
+                  className="border-gray-300 dark:border-gray-600"
+                  leftIcon={<Table className="h-4 w-4" />}
                 >
-                  <RefreshCcw className="h-4 w-4 mr-2" />
-                  Atualizar
+                  Visualização Tabela
                 </Button>
+              </Link>
+              <Link href="/ferramentas/cmv-semanal/visualizar">
+                <Button 
+                  variant="outline" 
+                  className="border-gray-300 dark:border-gray-600"
+                  leftIcon={<BarChart3 className="h-4 w-4" />}
+                >
+                  Dashboard
+                </Button>
+              </Link>
+              <Button
+                onClick={processarSemanaAtual}
+                disabled={calculando}
+                className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                leftIcon={calculando ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              >
+                {calculando ? 'Processando...' : 'Processar Semana Atual'}
+              </Button>
+              <Button
+                onClick={abrirModalAdicionar}
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                leftIcon={<Plus className="h-4 w-4" />}
+              >
+                Adicionar CMV
+              </Button>
+            </div>
+
+            {/* Filtros */}
+            <div className="flex items-center gap-4">
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">Ano</Label>
+                <Select value={anoFiltro.toString()} onValueChange={(value) => setAnoFiltro(parseInt(value))}>
+                  <SelectTrigger className="select-dark w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="modal-select-content">
+                    {[2024, 2025, 2026].map((ano) => (
+                      <SelectItem key={ano} value={ano.toString()} className="modal-select-item">
+                        {ano}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Link href="/ferramentas/cmv-semanal/tabela">
-                  <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                    <Table className="h-4 w-4 mr-2" />
-                    Visualização Tabela
-                  </Button>
-                </Link>
-                <Link href="/ferramentas/cmv-semanal/visualizar">
-                  <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Dashboard
-                  </Button>
-                </Link>
-                <Button
-                  onClick={processarSemanaAtual}
-                  disabled={calculando}
-                  className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
-                >
-                  {calculando ? (
-                    <>
-                      <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                      Processando...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Processar Semana Atual
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={abrirModalAdicionar}
-                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar CMV
-                </Button>
+              <div>
+                <Label className="text-gray-700 dark:text-gray-300">Status</Label>
+                <Select value={statusFiltro} onValueChange={setStatusFiltro}>
+                  <SelectTrigger className="select-dark w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="modal-select-content">
+                    <SelectItem value="TODOS" className="modal-select-item">Todos</SelectItem>
+                    <SelectItem value="rascunho" className="modal-select-item">Rascunho</SelectItem>
+                    <SelectItem value="fechado" className="modal-select-item">Fechado</SelectItem>
+                    <SelectItem value="auditado" className="modal-select-item">Auditado</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+              <Button
+                onClick={carregarCMVs}
+                variant="outline"
+                className="btn-outline-dark mt-6"
+                leftIcon={<RefreshCcw className="h-4 w-4" />}
+              >
+                Atualizar
+              </Button>
             </div>
           </CardContent>
         </Card>
