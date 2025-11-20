@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       perc_stockout: stats.total > 0 ? parseFloat(((stats.stockout / stats.total) * 100).toFixed(1)) : 0
     })).sort((a, b) => b.perc_stockout - a.perc_stockout || b.total_produtos - a.total_produtos);
 
-    // 3. Produtos em stockout (top 50) - NOVA LÓGICA: ativos='S' E venda='N'
+    // 3. Produtos em stockout (todos) - NOVA LÓGICA: ativos='S' E venda='N'
     let queryIndisponiveis = supabase
       .from('contahub_stockout')
       .select('prd_desc, loc_desc, prd_precovenda, prd_estoque, prd_controlaestoque, prd_validaestoquevenda')
@@ -131,8 +131,7 @@ export async function POST(request: NextRequest) {
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'N') // E que não estão à venda = STOCKOUT
       .order('loc_desc')
-      .order('prd_desc')
-      .limit(50);
+      .order('prd_desc');
 
     // Aplicar filtros base
     queryIndisponiveis = aplicarFiltrosBase(queryIndisponiveis);
@@ -148,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     const { data: listaProdutosIndisponiveis, error: errorIndisponiveis } = await queryIndisponiveis;
 
-    // 4. Produtos disponíveis (amostra de 20) - NOVA LÓGICA: ativos='S' E venda='S'
+    // 4. Produtos disponíveis (todos) - NOVA LÓGICA: ativos='S' E venda='S'
     let queryDisponiveis = supabase
       .from('contahub_stockout')
       .select('prd_desc, loc_desc, prd_precovenda, prd_estoque')
@@ -156,8 +155,7 @@ export async function POST(request: NextRequest) {
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'S') // E que estão à venda = DISPONÍVEIS
       .order('loc_desc')
-      .order('prd_desc')
-      .limit(20);
+      .order('prd_desc');
 
     // Aplicar filtros base
     queryDisponiveis = aplicarFiltrosBase(queryDisponiveis);

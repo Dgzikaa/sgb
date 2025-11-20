@@ -422,8 +422,6 @@ export default function StockoutPage() {
   const agruparLocaisPorCategoria = () => {
     if (!stockoutData?.analise_por_local) return [];
 
-    console.log('🗺️ ANALISE_POR_LOCAL da API:', stockoutData.analise_por_local);
-
     const grupos: Record<string, any> = {};
 
     stockoutData.analise_por_local.forEach(local => {
@@ -474,54 +472,15 @@ export default function StockoutPage() {
     const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
     if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
 
-    console.log('🔍 ===== DEBUG FILTRO =====');
-    console.log('🔍 Grupo selecionado:', localSelecionado);
-    console.log('🔍 Locais do grupo:', grupoSelecionado.locais);
-    console.log('📦 Total produtos ATIVOS (disponíveis):', stockoutData.produtos?.ativos?.length || 0);
-    console.log('📦 Total produtos INATIVOS (stockout):', stockoutData.produtos?.inativos?.length || 0);
-    
-    // Mostrar TODOS os locais únicos dos produtos ATIVOS
-    console.log('📍 TODOS os locais únicos dos produtos ATIVOS:');
-    const locaisAtivos = new Set<string>();
-    (stockoutData.produtos?.ativos || []).forEach(p => {
-      const local = (p.loc_desc || p.local_producao || 'SEM_LOCAL').toLowerCase().trim();
-      locaisAtivos.add(local);
-    });
-    const arrayLocaisAtivos = Array.from(locaisAtivos).sort();
-    console.log('  Total de locais únicos:', arrayLocaisAtivos.length);
-    arrayLocaisAtivos.forEach(local => console.log(`    - "${local}"`));
-
-    // Mostrar TODOS os locais únicos dos produtos INATIVOS
-    console.log('📍 TODOS os locais únicos dos produtos INATIVOS:');
-    const locaisInativos = new Set<string>();
-    (stockoutData.produtos?.inativos || []).forEach(p => {
-      const local = (p.loc_desc || p.local_producao || 'SEM_LOCAL').toLowerCase().trim();
-      locaisInativos.add(local);
-    });
-    const arrayLocaisInativos = Array.from(locaisInativos).sort();
-    console.log('  Total de locais únicos:', arrayLocaisInativos.length);
-    arrayLocaisInativos.forEach(local => console.log(`    - "${local}"`));
-
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      const match = grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
-      if (match && localSelecionado === 'cozinha') {
-        console.log(`✅ DISPONÍVEL "${produto.prd_desc || produto.produto_descricao}" - Local: "${localProduto}"`);
-      }
-      return match;
+      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
     });
 
     const indisponiveis = (stockoutData.produtos?.inativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      const match = grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
-      if (match && localSelecionado === 'cozinha') {
-        console.log(`❌ INDISPONÍVEL "${produto.prd_desc || produto.produto_descricao}" - Local: "${localProduto}"`);
-      }
-      return match;
+      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
     });
-
-    console.log(`📊 RESULTADO FINAL: ${disponiveis.length} disponíveis, ${indisponiveis.length} indisponíveis`);
-    console.log('🔍 ===== FIM DEBUG =====\n');
 
     return { disponiveis, indisponiveis };
   };
