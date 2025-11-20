@@ -487,7 +487,9 @@ export default function StockoutPage() {
       const local = (p.loc_desc || p.local_producao || 'SEM_LOCAL').toLowerCase().trim();
       locaisAtivos.add(local);
     });
-    console.log('  Locais:', Array.from(locaisAtivos).sort());
+    const arrayLocaisAtivos = Array.from(locaisAtivos).sort();
+    console.log('  Total de locais únicos:', arrayLocaisAtivos.length);
+    arrayLocaisAtivos.forEach(local => console.log(`    - "${local}"`));
 
     // Mostrar TODOS os locais únicos dos produtos INATIVOS
     console.log('📍 TODOS os locais únicos dos produtos INATIVOS:');
@@ -496,7 +498,9 @@ export default function StockoutPage() {
       const local = (p.loc_desc || p.local_producao || 'SEM_LOCAL').toLowerCase().trim();
       locaisInativos.add(local);
     });
-    console.log('  Locais:', Array.from(locaisInativos).sort());
+    const arrayLocaisInativos = Array.from(locaisInativos).sort();
+    console.log('  Total de locais únicos:', arrayLocaisInativos.length);
+    arrayLocaisInativos.forEach(local => console.log(`    - "${local}"`));
 
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
