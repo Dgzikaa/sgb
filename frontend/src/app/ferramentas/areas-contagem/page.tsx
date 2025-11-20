@@ -20,9 +20,12 @@ import {
   Package,
   BarChart3,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePageTitle } from '@/contexts/PageTitleContext';
+import Link from 'next/link';
 
 interface Area {
   id: number;
@@ -49,6 +52,7 @@ const TIPOS_AREA = [
 ];
 
 export default function AreasContagemPage() {
+  const { setPageTitle } = usePageTitle();
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
@@ -62,8 +66,9 @@ export default function AreasContagemPage() {
   const [ordem, setOrdem] = useState(0);
 
   useEffect(() => {
+    setPageTitle('📍 Gerenciamento de Áreas');
     buscarAreas();
-  }, []);
+  }, [setPageTitle]);
 
   const buscarAreas = async () => {
     setLoading(true);
@@ -241,142 +246,29 @@ export default function AreasContagemPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        <div className="card-dark p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="card-title-dark flex items-center gap-2">
-                <MapPin className="h-6 w-6" />
-                Gerenciamento de Áreas de Contagem
-              </h1>
-              <p className="card-description-dark">
-                Crie e organize as áreas para facilitar a contagem de estoque
-              </p>
-            </div>
-            <Button onClick={abrirModalNovo} className="btn-primary-dark">
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Área
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
+        <div className="card-dark p-3 sm:p-6 mb-4 sm:mb-6">
+          <Link href="/ferramentas/contagem-estoque" className="inline-block mb-4">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              leftIcon={<ArrowLeft className="h-4 w-4" />}
+            >
+              Voltar para Contagem
             </Button>
-            <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-              <DialogContent className="modal-dark max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-gray-900 dark:text-white">
-                    {areaEditando ? 'Editar Área' : 'Nova Área'}
-                  </DialogTitle>
-                  <DialogDescription className="text-gray-600 dark:text-gray-400">
-                    {areaEditando 
-                      ? 'Atualize as informações da área de contagem'
-                      : 'Crie uma nova área para organizar suas contagens'
-                    }
-                  </DialogDescription>
-                </DialogHeader>
-
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-gray-700 dark:text-gray-300">Nome da Área *</Label>
-                    <Input
-                      placeholder="Ex: Freezer Principal, Geladeira Bar..."
-                      value={nome}
-                      onChange={(e) => setNome(e.target.value)}
-                      className="input-dark"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-gray-700 dark:text-gray-300">Tipo</Label>
-                    <Select value={tipo} onValueChange={setTipo}>
-                      <SelectTrigger className="input-dark">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIPOS_AREA.map(t => (
-                          <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-gray-700 dark:text-gray-300">Descrição</Label>
-                    <Textarea
-                      placeholder="Informações adicionais sobre a área..."
-                      value={descricao}
-                      onChange={(e) => setDescricao(e.target.value)}
-                      className="textarea-dark min-h-[80px]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-gray-700 dark:text-gray-300">Ordem</Label>
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        value={ordem}
-                        onChange={(e) => setOrdem(parseInt(e.target.value) || 0)}
-                        className="input-dark"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-gray-700 dark:text-gray-300">Status</Label>
-                      <Select 
-                        value={ativo ? 'true' : 'false'} 
-                        onValueChange={(v) => setAtivo(v === 'true')}
-                      >
-                        <SelectTrigger className="input-dark">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="true">Ativa</SelectItem>
-                          <SelectItem value="false">Inativa</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      onClick={salvarArea}
-                      disabled={loading}
-                      className="btn-primary-dark flex-1"
-                    >
-                      {loading ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="h-4 w-4 mr-2" />
-                          Salvar
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={() => setModalAberto(false)}
-                      variant="outline"
-                      className="btn-outline-dark"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+          </Link>
 
           {/* Estatísticas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <Card className="card-dark">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardHeader className="pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                   Total de Áreas
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {areas.length}
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -386,13 +278,13 @@ export default function AreasContagemPage() {
             </Card>
 
             <Card className="card-dark">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <CardHeader className="pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                   Itens Registrados
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {areas.reduce((sum, a) => sum + (a.estatisticas?.total_itens || 0), 0)}
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -401,14 +293,14 @@ export default function AreasContagemPage() {
               </CardContent>
             </Card>
 
-            <Card className="card-dark">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <Card className="card-dark xs:col-span-2 md:col-span-1">
+              <CardHeader className="pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                   Valor Total
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
                   {formatarValor(areas.reduce((sum, a) => sum + (a.estatisticas?.valor_total || 0), 0))}
                 </div>
               </CardContent>
@@ -418,23 +310,36 @@ export default function AreasContagemPage() {
           {/* Lista de Áreas */}
           <Card className="card-dark">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <CardTitle className="card-title-dark">Áreas Cadastradas</CardTitle>
                   <CardDescription className="card-description-dark">
                     Gerencie suas áreas de contagem
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={buscarAreas}
-                  disabled={loading}
-                  variant="outline"
-                  size="sm"
-                  className="btn-outline-dark"
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Atualizar
-                </Button>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Button
+                    onClick={abrirModalNovo}
+                    variant="default"
+                    size="sm"
+                    className="btn-primary-dark flex-1 sm:flex-none"
+                    leftIcon={<Plus className="h-4 w-4" />}
+                  >
+                    <span className="hidden xs:inline">Nova Área</span>
+                    <span className="xs:hidden">Nova</span>
+                  </Button>
+                  <Button
+                    onClick={buscarAreas}
+                    disabled={loading}
+                    variant="outline"
+                    size="sm"
+                    className="btn-outline-dark flex-1 sm:flex-none"
+                    leftIcon={<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />}
+                  >
+                    <span className="hidden xs:inline">Atualizar</span>
+                    <span className="xs:hidden">Atualizar</span>
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -449,27 +354,23 @@ export default function AreasContagemPage() {
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                     Nenhuma área cadastrada
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Crie sua primeira área para começar a organizar as contagens
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Clique em "Nova Área" acima para começar a organizar as contagens
                   </p>
-                  <Button onClick={abrirModalNovo} className="btn-primary-dark">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Criar Primeira Área
-                  </Button>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {areas.map((area) => (
                     <div
                       key={area.id}
-                      className={`p-4 rounded-lg border ${
+                      className={`p-3 sm:p-4 rounded-lg border ${
                         area.ativo
                           ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
                           : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 opacity-60'
                       }`}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0">
+                        <div className="flex-1 w-full sm:w-auto">
                           <div className="flex items-center gap-2 mb-2">
                             <h4 className="font-semibold text-gray-900 dark:text-white">
                               {area.nome}
@@ -508,12 +409,12 @@ export default function AreasContagemPage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 ml-4">
+                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-4">
                           <Button
                             onClick={() => toggleAtivo(area)}
                             variant="outline"
                             size="sm"
-                            className="btn-outline-dark"
+                            className="btn-outline-dark text-xs flex-1 sm:flex-none"
                           >
                             {area.ativo ? 'Desativar' : 'Ativar'}
                           </Button>
@@ -521,18 +422,20 @@ export default function AreasContagemPage() {
                             onClick={() => abrirModalEdicao(area)}
                             variant="outline"
                             size="sm"
-                            className="btn-outline-dark"
+                            className="btn-outline-dark flex-1 sm:flex-none"
+                            leftIcon={<Edit className="h-3 w-3 sm:h-4 sm:w-4" />}
                           >
-                            <Edit className="h-4 w-4" />
+                            <span className="hidden xs:inline">Editar</span>
                           </Button>
                           <Button
                             onClick={() => excluirArea(area.id, area.nome)}
                             variant="outline"
                             size="sm"
-                            className="btn-outline-dark text-red-600 dark:text-red-400"
+                            className="btn-outline-dark text-red-600 dark:text-red-400 flex-1 sm:flex-none"
                             disabled={loading}
+                            leftIcon={<Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <span className="hidden xs:inline">Excluir</span>
                           </Button>
                         </div>
                       </div>
@@ -544,6 +447,108 @@ export default function AreasContagemPage() {
           </Card>
         </div>
       </div>
+
+      {/* Modal de Criar/Editar Área */}
+      <Dialog open={modalAberto} onOpenChange={setModalAberto}>
+        <DialogContent className="modal-dark max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900 dark:text-white">
+              {areaEditando ? 'Editar Área' : 'Nova Área'}
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
+              {areaEditando 
+                ? 'Atualize as informações da área de contagem'
+                : 'Crie uma nova área para organizar suas contagens'
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-gray-700 dark:text-gray-300">Nome da Área *</Label>
+              <Input
+                placeholder="Ex: Freezer Principal, Geladeira Bar..."
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className="input-dark"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-700 dark:text-gray-300">Tipo</Label>
+              <Select value={tipo} onValueChange={setTipo}>
+                <SelectTrigger className="input-dark">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIPOS_AREA.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-700 dark:text-gray-300">Descrição</Label>
+              <Textarea
+                placeholder="Informações adicionais sobre a área..."
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                className="textarea-dark min-h-[80px]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-gray-700 dark:text-gray-300">Ordem</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={ordem}
+                  onChange={(e) => setOrdem(parseInt(e.target.value) || 0)}
+                  className="input-dark"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-gray-700 dark:text-gray-300">Status</Label>
+                <Select 
+                  value={ativo ? 'true' : 'false'} 
+                  onValueChange={(v) => setAtivo(v === 'true')}
+                >
+                  <SelectTrigger className="input-dark">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Ativa</SelectItem>
+                    <SelectItem value="false">Inativa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 pt-4">
+              <Button
+                onClick={salvarArea}
+                disabled={loading}
+                loading={loading}
+                className="btn-primary-dark flex-1"
+                leftIcon={!loading ? <Save className="h-4 w-4" /> : undefined}
+              >
+                {loading ? 'Salvando...' : 'Salvar'}
+              </Button>
+              <Button
+                onClick={() => setModalAberto(false)}
+                variant="outline"
+                className="btn-outline-dark xs:w-auto w-full"
+                leftIcon={<X className="h-4 w-4" />}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

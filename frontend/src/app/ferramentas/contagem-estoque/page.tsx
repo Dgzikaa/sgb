@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { usePageTitle } from '@/contexts/PageTitleContext';
 
 interface Alerta {
   tipo: string;
@@ -74,6 +75,8 @@ const CATEGORIAS = [
 ];
 
 export default function ContagemEstoquePage() {
+  const { setPageTitle } = usePageTitle();
+
   // Estados do formulário
   const [categoria, setCategoria] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -105,6 +108,11 @@ export default function ContagemEstoquePage() {
   // Tab ativa
   const [activeTab, setActiveTab] = useState('registrar');
 
+  // Definir título da página
+  useEffect(() => {
+    setPageTitle('📦 Contagem de Estoque');
+  }, [setPageTitle]);
+
   // Buscar áreas ao carregar
   useEffect(() => {
     buscarAreas();
@@ -116,6 +124,19 @@ export default function ContagemEstoquePage() {
       buscarContagens();
     }
   }, [activeTab, filtroCategoria, filtroAlerta, filtroArea]);
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('#descricao') && !target.closest('.absolute')) {
+        setMostrarSugestoes(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const buscarAreas = async () => {
     try {
@@ -349,63 +370,61 @@ export default function ContagemEstoquePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        <div className="card-dark p-6 mb-6">
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="card-title-dark flex items-center gap-2">
-                  <Package className="h-6 w-6" />
-                  Contagem de Estoque
-                </h1>
-                <p className="card-description-dark">
-                  Registre e acompanhe a contagem de estoque com validações inteligentes
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link href="/ferramentas/areas-contagem">
-                  <Button variant="outline" className="btn-outline-dark">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Gerenciar Áreas
-                  </Button>
-                </Link>
-                <Link href="/ferramentas/contagem-estoque/consolidado">
-                  <Button className="btn-primary-dark">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Ver Consolidado
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
+        <div className="card-dark p-3 sm:p-6 mb-4 sm:mb-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="mb-4">
-              <TabsList className="tabs-list-dark">
-                <TabsTrigger value="registrar" className="tabs-trigger-dark">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+              <TabsList className="tabs-list-dark w-full sm:w-auto">
+                <TabsTrigger value="registrar" className="tabs-trigger-dark flex-1 sm:flex-none">
                   <Package className="h-4 w-4 mr-2" />
-                  Registrar Contagem
+                  <span className="hidden xs:inline">Registrar</span>
+                  <span className="xs:hidden">Registrar</span>
                 </TabsTrigger>
-                <TabsTrigger value="lista" className="tabs-trigger-dark">
+                <TabsTrigger value="lista" className="tabs-trigger-dark flex-1 sm:flex-none">
                   <History className="h-4 w-4 mr-2" />
-                  Histórico
+                  <span className="hidden xs:inline">Histórico</span>
+                  <span className="xs:hidden">Histórico</span>
                 </TabsTrigger>
               </TabsList>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Link href="/ferramentas/areas-contagem" className="flex-1 sm:flex-none">
+                  <Button 
+                    variant="outline" 
+                    className="btn-outline-dark w-full sm:w-auto text-xs sm:text-sm"
+                    size="sm"
+                    leftIcon={<Settings className="h-4 w-4" />}
+                  >
+                    <span className="hidden sm:inline">Gerenciar Áreas</span>
+                    <span className="sm:hidden">Áreas</span>
+                  </Button>
+                </Link>
+                <Link href="/ferramentas/contagem-estoque/consolidado" className="flex-1 sm:flex-none">
+                  <Button 
+                    className="btn-primary-dark w-full sm:w-auto text-xs sm:text-sm"
+                    size="sm"
+                    leftIcon={<BarChart3 className="h-4 w-4" />}
+                  >
+                    <span className="hidden sm:inline">Ver Consolidado</span>
+                    <span className="sm:hidden">Consolidado</span>
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             {/* TAB: REGISTRAR CONTAGEM */}
-            <TabsContent value="registrar" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <TabsContent value="registrar" className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Formulário */}
                 <div className="lg:col-span-2">
                   <Card className="card-dark">
-                    <CardHeader>
-                      <CardTitle className="card-title-dark">Dados da Contagem</CardTitle>
-                      <CardDescription className="card-description-dark">
+                    <CardHeader className="p-4 sm:p-6">
+                      <CardTitle className="card-title-dark text-base sm:text-lg">Dados da Contagem</CardTitle>
+                      <CardDescription className="card-description-dark text-xs sm:text-sm">
                         Preencha os dados do produto e estoque
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Categoria */}
                         <div className="space-y-2">
@@ -470,67 +489,60 @@ export default function ContagemEstoquePage() {
                       </div>
 
                       {/* Descrição */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="descricao" className="text-gray-700 dark:text-gray-300">
-                            Descrição do Produto *
-                          </Label>
-                          {produtosSugeridos.length > 0 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setMostrarSugestoes(!mostrarSugestoes)}
-                              className="text-xs text-blue-600 dark:text-blue-400"
-                            >
-                              {mostrarSugestoes ? 'Ocultar' : 'Ver'} {produtosSugeridos.length} produto(s) cadastrado(s)
-                            </Button>
-                          )}
-                        </div>
+                      <div className="space-y-2 relative">
+                        <Label htmlFor="descricao" className="text-gray-700 dark:text-gray-300">
+                          Descrição do Produto *
+                        </Label>
                         <Input
                           id="descricao"
-                          placeholder={categoria ? "Digite ou selecione um produto abaixo..." : "Selecione uma categoria primeiro"}
+                          placeholder={categoria ? "Digite para buscar o produto..." : "Selecione uma categoria primeiro"}
                           value={descricao}
-                          onChange={(e) => setDescricao(e.target.value)}
+                          onChange={(e) => {
+                            setDescricao(e.target.value);
+                            if (e.target.value.length > 0) {
+                              setMostrarSugestoes(true);
+                            }
+                          }}
+                          onFocus={() => {
+                            if (descricao.length > 0 && produtosSugeridos.length > 0) {
+                              setMostrarSugestoes(true);
+                            }
+                          }}
                           className="input-dark"
                           disabled={!categoria}
+                          autoComplete="off"
                         />
+                        
+                        {/* Dropdown de Sugestões (Autocomplete) */}
+                        {mostrarSugestoes && descricao.length > 0 && produtosSugeridos.filter(p => 
+                          p.descricao.toLowerCase().includes(descricao.toLowerCase())
+                        ).length > 0 && (
+                          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            {produtosSugeridos
+                              .filter(p => p.descricao.toLowerCase().includes(descricao.toLowerCase()))
+                              .slice(0, 10)
+                              .map((produto, index) => (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  onClick={() => {
+                                    selecionarProduto(produto);
+                                    setMostrarSugestoes(false);
+                                  }}
+                                  className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+                                >
+                                  <div className="font-medium text-sm text-gray-900 dark:text-white">
+                                    {produto.descricao}
+                                  </div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                                    R$ {produto.preco.toFixed(2)}
+                                  </div>
+                                </button>
+                              ))
+                            }
+                          </div>
+                        )}
                       </div>
-
-                      {/* Seleção Rápida de Produtos */}
-                      {mostrarSugestoes && produtosSugeridos.length > 0 && (
-                        <div className="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                              <Package className="h-4 w-4" />
-                              Seleção Rápida - {produtosSugeridos.length} produto(s)
-                            </h4>
-                            {loadingProdutos && (
-                              <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />
-                            )}
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                            {produtosSugeridos.map((produto, index) => (
-                              <button
-                                key={index}
-                                type="button"
-                                onClick={() => selecionarProduto(produto)}
-                                className="text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-500 transition-colors"
-                              >
-                                <div className="font-medium text-sm text-gray-900 dark:text-white mb-1">
-                                  {produto.descricao}
-                                </div>
-                                <div className="text-xs text-gray-600 dark:text-gray-400">
-                                  R$ {produto.preco.toFixed(2)}
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
-                            💡 Clique em um produto para preencher automaticamente
-                          </p>
-                        </div>
-                      )}
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Estoque Fechado */}
@@ -599,23 +611,23 @@ export default function ContagemEstoquePage() {
 
                       {/* Total Calculado */}
                       {(estoqueFechado || estoqueFlutuante || preco) && (
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 sm:p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
                             <div>
-                              <p className="text-gray-600 dark:text-gray-400">Estoque Total:</p>
-                              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Estoque Total:</p>
+                              <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                                 {((parseFloat(estoqueFechado) || 0) + (parseFloat(estoqueFlutuante) || 0)).toFixed(2)}
                               </p>
                             </div>
                             <div>
-                              <p className="text-gray-600 dark:text-gray-400">Preço:</p>
-                              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Preço:</p>
+                              <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                                 {formatarValor(parseFloat(preco) || 0)}
                               </p>
                             </div>
-                            <div>
-                              <p className="text-gray-600 dark:text-gray-400">Valor Total:</p>
-                              <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                            <div className="xs:col-span-2 sm:col-span-1">
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Valor Total:</p>
+                              <p className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
                                 {formatarValor(
                                   ((parseFloat(estoqueFechado) || 0) + (parseFloat(estoqueFlutuante) || 0)) * 
                                   (parseFloat(preco) || 0)
@@ -641,28 +653,20 @@ export default function ContagemEstoquePage() {
                       </div>
 
                       {/* Botões */}
-                      <div className="flex gap-3 pt-4">
+                      <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 pt-4">
                         <Button
                           onClick={salvarContagem}
                           disabled={loading}
+                          loading={loading}
                           className="btn-primary-dark flex-1"
+                          leftIcon={!loading ? <Save className="w-4 w-4" /> : undefined}
                         >
-                          {loading ? (
-                            <>
-                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                              Salvando...
-                            </>
-                          ) : (
-                            <>
-                              <Save className="w-4 h-4 mr-2" />
-                              Salvar Contagem
-                            </>
-                          )}
+                          {loading ? 'Salvando...' : 'Salvar Contagem'}
                         </Button>
                         <Button
                           onClick={limparFormulario}
                           variant="outline"
-                          className="btn-outline-dark"
+                          className="btn-outline-dark xs:w-auto w-full"
                         >
                           Limpar
                         </Button>
@@ -672,15 +676,15 @@ export default function ContagemEstoquePage() {
                 </div>
 
                 {/* Alertas */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <Card className="card-dark">
-                    <CardHeader>
-                      <CardTitle className="card-title-dark text-base flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5" />
+                    <CardHeader className="p-4 sm:p-6">
+                      <CardTitle className="card-title-dark text-sm sm:text-base flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
                         Validações
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-4 sm:p-6">
                       {alertas.length === 0 ? (
                         <div className="text-center py-6">
                           <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
@@ -720,26 +724,26 @@ export default function ContagemEstoquePage() {
 
                   {/* Legenda */}
                   <Card className="card-dark">
-                    <CardHeader>
-                      <CardTitle className="card-title-dark text-sm">
+                    <CardHeader className="p-4 sm:p-6">
+                      <CardTitle className="card-title-dark text-xs sm:text-sm">
                         Severidade dos Alertas
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2 text-xs">
+                    <CardContent className="space-y-2 text-xs p-4 sm:p-6">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-500 rounded"></div>
+                        <div className="w-3 h-3 bg-red-500 rounded flex-shrink-0"></div>
                         <span className="text-gray-700 dark:text-gray-300">Crítico - Revisar obrigatoriamente</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                        <div className="w-3 h-3 bg-orange-500 rounded flex-shrink-0"></div>
                         <span className="text-gray-700 dark:text-gray-300">Alto - Atenção especial</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                        <div className="w-3 h-3 bg-yellow-500 rounded flex-shrink-0"></div>
                         <span className="text-gray-700 dark:text-gray-300">Médio - Verificar se possível</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                        <div className="w-3 h-3 bg-blue-500 rounded flex-shrink-0"></div>
                         <span className="text-gray-700 dark:text-gray-300">Info - Apenas informativo</span>
                       </div>
                     </CardContent>

@@ -11,7 +11,7 @@
 
 # ⚠️ REGRA CRÍTICA - GIT WORKFLOW MANUAL
 
-## 🚫 **NUNCA FAZER GIT AUTOMATICAMENTE**
+## 🚫 **NUNCA FAZER GIT SEM PERMISSÃO EXPLÍCITA**
 
 **Esta é uma regra OBRIGATÓRIA para TODOS os agentes/chats:**
 
@@ -22,46 +22,81 @@ git commit -m "..."
 git push
 ```
 
-### ✅ **APENAS quando o usuário EXPLICITAMENTE pedir:**
+### 🔒 **REGRAS ABSOLUTAS:**
 
-**Comandos que indicam para fazer git:**
-- *"Agora vamos fazer git"*
-- *"Pode commitar agora"*
-- *"Faz o commit"*
-- *"Sobe pro git"*
-- *"Commit e push"*
+**1. GIT ADD - Nunca executar sem permissão:**
+```bash
+# ❌ NUNCA fazer automaticamente
+git add .
+
+# ✅ APENAS quando o usuário EXPLICITAMENTE pedir
+"Pode fazer git add agora"
+"Adiciona os arquivos ao git"
+```
+
+**2. GIT COMMIT - Nunca executar sem permissão:**
+```bash
+# ❌ NUNCA fazer automaticamente
+git commit -m "mensagem"
+
+# ✅ APENAS quando o usuário EXPLICITAMENTE pedir
+"Pode commitar agora"
+"Faz o commit"
+"Commita as mudanças"
+```
+
+**3. GIT PUSH - Sempre perguntar antes:**
+```bash
+# ❌ NUNCA fazer sem confirmação
+git push origin main
+
+# ✅ SEMPRE PERGUNTAR antes de push
+"Posso fazer o push para origin/main? (y/n)"
+```
 
 ### 📋 **Workflow Correto:**
 
 ```bash
 # 1. Fazer alterações normalmente nos arquivos
-# 2. NÃO rodar git add/commit automaticamente
+# 2. NÃO rodar git add/commit/push automaticamente
 # 3. ESPERAR o usuário pedir explicitamente
 
-# 4. Quando o usuário pedir "agora vamos fazer git":
-git status                              # ✅ Mostrar o que mudou
-git add .                              # ✅ Adicionar tudo
-git commit -m "mensagem descritiva"    # ✅ Commitar
-# ⚠️ PERGUNTAR antes de push:
+# 4. Quando o usuário pedir "pode fazer git add":
+git add .
+
+# 5. Quando o usuário pedir "pode commitar":
+git commit -m "mensagem descritiva"
+
+# 6. SEMPRE PERGUNTAR antes de push:
 "Posso fazer o push para origin/main? (y/n)"
+# Só fazer push após receber "sim" ou "y"
 ```
+
+### ✅ **Comandos que indicam permissão para git:**
+- *"Pode fazer git add agora"*
+- *"Adiciona ao git"*
+- *"Pode commitar"*
+- *"Faz o commit"*
+- *"Commita isso"*
+- *"Pode fazer push"* (ainda assim, confirmar antes)
 
 ### 🎯 **Motivo desta regra:**
 
-- ✅ **Múltiplos agentes** trabalham em paralelo (6+ chats simultâneos)
-- ✅ **Evita conflitos** entre commits de diferentes chats
-- ✅ **Commits organizados** com todas as mudanças juntas
-- ✅ **Controle do usuário** sobre quando consolidar alterações
-- ✅ **Git rastreia arquivos**, não chats - qualquer chat pode fazer o commit final
+- ✅ **Controle total** do usuário sobre o workflow git
+- ✅ **Evita commits indesejados** ou prematuros
+- ✅ **Commits organizados** quando o usuário decidir
+- ✅ **Múltiplos agentes** não competem por commits
+- ✅ **Git rastreia arquivos**, não chats - usuário decide quando consolidar
 
 ### 📝 **Importante:**
 
 ```markdown
 ✅ Alterações de código são SEMPRE salvas nos arquivos
 ✅ Git detecta mudanças de TODOS os chats automaticamente
-✅ UM chat faz git add/commit e pega mudanças de TODOS
-❌ NUNCA assumir que deve fazer git após alterações
-⚠️ SEMPRE esperar comando explícito do usuário
+❌ NUNCA assumir que deve fazer git add após alterações
+❌ NUNCA assumir que deve fazer git commit após alterações
+❌ NUNCA fazer git push sem perguntar EXPLICITAMENTE ao usuário
+⚠️ SEMPRE esperar comando explícito do usuário para QUALQUER operação git
 ```
 
 ---

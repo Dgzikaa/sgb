@@ -646,102 +646,91 @@ export default function CMVSemanalPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              📊 CMV Semanal
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Custo de Mercadoria Vendida calculado semanalmente com precisão
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/ferramentas/cmv-semanal/tabela">
-              <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                <Table className="h-4 w-4 mr-2" />
-                Visualização Tabela
-              </Button>
-            </Link>
-            <Link href="/ferramentas/cmv-semanal/visualizar">
-              <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-            </Link>
-            <Button
-              onClick={processarSemanaAtual}
-              disabled={calculando}
-              className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
-            >
-              {calculando ? (
-                <>
-                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                  Processando...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Processar Semana Atual
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={abrirModalAdicionar}
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar CMV
-            </Button>
-          </div>
-        </div>
-
-        {/* Filtros */}
+        {/* Filtros e Ações */}
         <Card className="card-dark mb-6">
           <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label className="text-gray-700 dark:text-gray-300">Ano</Label>
-                <Select value={anoFiltro.toString()} onValueChange={(value) => setAnoFiltro(parseInt(value))}>
-                  <SelectTrigger className="select-dark">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="modal-select-content">
-                    {[2024, 2025, 2026].map((ano) => (
-                      <SelectItem key={ano} value={ano.toString()} className="modal-select-item">
-                        {ano}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-gray-700 dark:text-gray-300">Status</Label>
-                <Select value={statusFiltro} onValueChange={setStatusFiltro}>
-                  <SelectTrigger className="select-dark">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="modal-select-content">
-                    <SelectItem value="TODOS" className="modal-select-item">Todos</SelectItem>
-                    <SelectItem value="rascunho" className="modal-select-item">Rascunho</SelectItem>
-                    <SelectItem value="fechado" className="modal-select-item">Fechado</SelectItem>
-                    <SelectItem value="auditado" className="modal-select-item">Auditado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">Ano</Label>
+                  <Select value={anoFiltro.toString()} onValueChange={(value) => setAnoFiltro(parseInt(value))}>
+                    <SelectTrigger className="select-dark w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="modal-select-content">
+                      {[2024, 2025, 2026].map((ano) => (
+                        <SelectItem key={ano} value={ano.toString()} className="modal-select-item">
+                          {ano}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-gray-700 dark:text-gray-300">Status</Label>
+                  <Select value={statusFiltro} onValueChange={setStatusFiltro}>
+                    <SelectTrigger className="select-dark w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="modal-select-content">
+                      <SelectItem value="TODOS" className="modal-select-item">Todos</SelectItem>
+                      <SelectItem value="rascunho" className="modal-select-item">Rascunho</SelectItem>
+                      <SelectItem value="fechado" className="modal-select-item">Fechado</SelectItem>
+                      <SelectItem value="auditado" className="modal-select-item">Auditado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button
                   onClick={carregarCMVs}
                   variant="outline"
-                  className="w-full btn-outline-dark"
+                  className="btn-outline-dark mt-6"
                 >
                   <RefreshCcw className="h-4 w-4 mr-2" />
                   Atualizar
                 </Button>
               </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link href="/ferramentas/cmv-semanal/tabela">
+                  <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                    <Table className="h-4 w-4 mr-2" />
+                    Visualização Tabela
+                  </Button>
+                </Link>
+                <Link href="/ferramentas/cmv-semanal/visualizar">
+                  <Button variant="outline" className="border-gray-300 dark:border-gray-600">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button
+                  onClick={processarSemanaAtual}
+                  disabled={calculando}
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                >
+                  {calculando ? (
+                    <>
+                      <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                      Processando...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Processar Semana Atual
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={abrirModalAdicionar}
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar CMV
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
+
 
         {/* Tabela de CMVs */}
         <Card className="card-dark">
@@ -816,7 +805,7 @@ export default function CMVSemanalPage() {
                             className={`${
                               (cmv.gap || 0) < 0
                                 ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300'
-                                : (cmv.gap || 0) <= 5
+                                : (cmv.gap || 0) >= 0 && (cmv.gap || 0) <= 5
                                 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300'
                                 : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300'
                             }`}
@@ -1278,10 +1267,10 @@ export default function CMVSemanalPage() {
               <div className="p-4 bg-white dark:bg-gray-800 rounded-lg">
                 <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Gap</p>
                 <p className={`text-xl font-bold ${
-                  (formData.gap || 0) <= 0
-                    ? 'text-green-600 dark:text-green-400'
-                    : (formData.gap || 0) <= 3
+                  (formData.gap || 0) < 0
                     ? 'text-yellow-600 dark:text-yellow-400'
+                    : (formData.gap || 0) >= 0 && (formData.gap || 0) <= 5
+                    ? 'text-green-600 dark:text-green-400'
                     : 'text-red-600 dark:text-red-400'
                 }`}>
                   {formatarPercentual(formData.gap || 0)}
