@@ -472,38 +472,15 @@ export default function StockoutPage() {
     const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
     if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
 
-    console.log('🔍 DEBUG - Grupo selecionado:', localSelecionado, grupoSelecionado);
-    console.log('🔍 DEBUG - Total produtos ativos:', stockoutData.produtos?.ativos?.length || 0);
-    console.log('🔍 DEBUG - Total produtos inativos:', stockoutData.produtos?.inativos?.length || 0);
-
-    // LOG: Mostrar TODOS os locais dos produtos ativos para debug
-    console.log('📍 TODOS OS LOCAIS DOS PRODUTOS ATIVOS:');
-    const locaisUnicos = new Set<string>();
-    (stockoutData.produtos?.ativos || []).forEach(produto => {
-      const local = (produto.loc_desc || produto.local_producao || 'SEM_LOCAL').toLowerCase().trim();
-      locaisUnicos.add(local);
-    });
-    console.log('📍 Locais únicos encontrados:', Array.from(locaisUnicos).sort());
-
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      const match = grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
-      if (match) {
-        console.log('✅ Produto DISPONÍVEL encontrado:', produto.prd_desc || produto.produto_descricao, '- Local:', localProduto);
-      }
-      return match;
+      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
     });
 
     const indisponiveis = (stockoutData.produtos?.inativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      const match = grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
-      if (match) {
-        console.log('❌ Produto INDISPONÍVEL encontrado:', produto.prd_desc || produto.produto_descricao, '- Local:', localProduto);
-      }
-      return match;
+      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
     });
-
-    console.log('📊 RESULTADO - Disponíveis:', disponiveis.length, 'Indisponíveis:', indisponiveis.length);
 
     return { disponiveis, indisponiveis };
   };
