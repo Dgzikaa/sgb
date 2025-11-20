@@ -422,6 +422,8 @@ export default function StockoutPage() {
   const agruparLocaisPorCategoria = () => {
     if (!stockoutData?.analise_por_local) return [];
 
+    console.log('🗺️ ANALISE_POR_LOCAL da API:', stockoutData.analise_por_local);
+
     const grupos: Record<string, any> = {};
 
     stockoutData.analise_por_local.forEach(local => {
@@ -472,6 +474,16 @@ export default function StockoutPage() {
     const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
     if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
 
+    console.log('🔍 Filtrando produtos para grupo:', localSelecionado, grupoSelecionado);
+    console.log('📦 Total produtos ativos na API:', stockoutData.produtos?.ativos?.length || 0);
+    console.log('📦 Total produtos inativos na API:', stockoutData.produtos?.inativos?.length || 0);
+    
+    // Mostrar uma amostra dos locais dos produtos ativos
+    console.log('📍 Primeiros 5 produtos ativos e seus locais:');
+    (stockoutData.produtos?.ativos || []).slice(0, 5).forEach(p => {
+      console.log(`  - ${p.prd_desc || p.produto_descricao}: Local="${p.loc_desc || p.local_producao}"`);
+    });
+
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
       return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
@@ -481,6 +493,8 @@ export default function StockoutPage() {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
       return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
     });
+
+    console.log(`📊 RESULTADO FILTRO: ${disponiveis.length} disponíveis, ${indisponiveis.length} indisponíveis`);
 
     return { disponiveis, indisponiveis };
   };
