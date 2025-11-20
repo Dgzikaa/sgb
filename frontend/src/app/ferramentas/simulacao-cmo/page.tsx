@@ -439,10 +439,10 @@ export default function SimulacaoCMOPage() {
               <div className="flex items-end">
                 <Button
                   onClick={adicionarFuncionario}
-                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white inline-flex items-center justify-center"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Funcionário
+                  <span>Adicionar Funcionário</span>
                 </Button>
               </div>
             </div>
@@ -530,31 +530,31 @@ export default function SimulacaoCMOPage() {
                 <Users className="h-5 w-5" />
                 Funcionários ({funcionarios.length})
               </CardTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   onClick={() => setMostrarHistorico(!mostrarHistorico)}
                   variant="outline"
                   size="sm"
-                  className="border-gray-300 dark:border-gray-600"
+                  className="border-gray-300 dark:border-gray-600 inline-flex items-center"
                 >
                   <FileText className="h-4 w-4 mr-2" />
-                  {mostrarHistorico ? 'Ocultar' : 'Ver'} Histórico
+                  <span>{mostrarHistorico ? 'Ocultar' : 'Ver'} Histórico</span>
                 </Button>
                 <Button
                   onClick={salvarSimulacao}
                   disabled={salvando || funcionarios.length === 0}
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white inline-flex items-center"
                 >
                   {salvando ? (
                     <>
                       <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                      Salvando...
+                      <span>Salvando...</span>
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                      Salvar
+                      <span>Salvar</span>
                     </>
                   )}
                 </Button>
