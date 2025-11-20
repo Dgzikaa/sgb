@@ -476,6 +476,15 @@ export default function StockoutPage() {
     console.log('🔍 DEBUG - Total produtos ativos:', stockoutData.produtos?.ativos?.length || 0);
     console.log('🔍 DEBUG - Total produtos inativos:', stockoutData.produtos?.inativos?.length || 0);
 
+    // LOG: Mostrar TODOS os locais dos produtos ativos para debug
+    console.log('📍 TODOS OS LOCAIS DOS PRODUTOS ATIVOS:');
+    const locaisUnicos = new Set<string>();
+    (stockoutData.produtos?.ativos || []).forEach(produto => {
+      const local = (produto.loc_desc || produto.local_producao || 'SEM_LOCAL').toLowerCase().trim();
+      locaisUnicos.add(local);
+    });
+    console.log('📍 Locais únicos encontrados:', Array.from(locaisUnicos).sort());
+
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
       const match = grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
