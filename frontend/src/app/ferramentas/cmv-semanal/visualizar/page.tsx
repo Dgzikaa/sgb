@@ -191,8 +191,8 @@ export default function CMVSemanalVisualizarPage() {
               onClick={carregarCMVs}
               variant="outline"
               className="btn-outline-dark"
+              leftIcon={<RefreshCcw className="h-4 w-4" />}
             >
-              <RefreshCcw className="h-4 w-4 mr-2" />
               Atualizar
             </Button>
           </div>

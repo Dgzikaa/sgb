@@ -304,14 +304,20 @@ export default function CMVSemanalTabelaPage() {
               <div className="flex-1" />
               <div className="flex gap-2">
                 <Link href="/ferramentas/cmv-semanal">
-                  <Button variant="outline" size="sm">
-                    <Calendar className="w-4 h-4 mr-2" />
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    leftIcon={<Calendar className="w-4 h-4" />}
+                  >
                     Listagem
                   </Button>
                 </Link>
                 <Link href="/ferramentas/cmv-semanal/visualizar">
-                  <Button variant="outline" size="sm">
-                    <BarChart3 className="w-4 h-4 mr-2" />
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    leftIcon={<BarChart3 className="w-4 h-4" />}
+                  >
                     Dashboard
                   </Button>
                 </Link>
@@ -327,8 +333,8 @@ export default function CMVSemanalTabelaPage() {
             disabled={semanaAtualIndex === 0}
             variant="outline"
             className="min-w-[120px]"
+            leftIcon={<ChevronLeft className="w-4 h-4" />}
           >
-            <ChevronLeft className="w-4 h-4 mr-2" />
             Anterior
           </Button>
           
@@ -354,9 +360,9 @@ export default function CMVSemanalTabelaPage() {
             disabled={semanaAtualIndex === semanas.length - 1}
             variant="outline"
             className="min-w-[120px]"
+            rightIcon={<ChevronRight className="w-4 h-4" />}
           >
             Próximo
-            <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
 

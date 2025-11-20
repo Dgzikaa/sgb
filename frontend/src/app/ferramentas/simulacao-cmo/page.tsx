@@ -375,7 +375,8 @@ export default function SimulacaoCMOPage() {
       carregarSimulacao();
       carregarHistorico();
     }
-  }, [selectedBar, user, mesAtual, anoAtual, carregarSimulacao, carregarHistorico]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBar, user, mesAtual, anoAtual]);
 
   if (loading) {
     return (
