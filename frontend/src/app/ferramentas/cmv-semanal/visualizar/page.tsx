@@ -228,7 +228,7 @@ export default function CMVSemanalVisualizarPage() {
               <div className={`text-2xl font-bold ${
                 gapMedio < 0 
                   ? 'text-yellow-600 dark:text-yellow-400' 
-                  : gapMedio <= 5
+                  : gapMedio >= 0 && gapMedio <= 5
                   ? 'text-green-600 dark:text-green-400'
                   : 'text-red-600 dark:text-red-400'
               }`}>
@@ -431,7 +431,7 @@ export default function CMVSemanalVisualizarPage() {
                             className={`${
                               cmv.gap < 0
                                 ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300'
-                                : cmv.gap <= 5
+                                : cmv.gap >= 0 && cmv.gap <= 5
                                 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300'
                                 : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300'
                             }`}
@@ -442,7 +442,7 @@ export default function CMVSemanalVisualizarPage() {
                         <td className="py-3 px-4 text-center">
                           {cmv.gap < 0 ? (
                             <Info className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mx-auto" />
-                          ) : cmv.gap <= 5 ? (
+                          ) : cmv.gap >= 0 && cmv.gap <= 5 ? (
                             <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mx-auto" />
                           ) : (
                             <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mx-auto" />
