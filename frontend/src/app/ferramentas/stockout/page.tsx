@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Package, TrendingDown, TrendingUp, RefreshCw, AlertTriangle, CheckCircle, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePageTitle } from '@/contexts/PageTitleContext';
 
 interface StockoutData {
   data_referencia?: string;
@@ -131,6 +132,8 @@ const GRUPOS_LOCAIS = {
 };
 
 export default function StockoutPage() {
+  const { setPageTitle } = usePageTitle();
+  
   const [selectedDate, setSelectedDate] = useState(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -376,6 +379,11 @@ export default function StockoutPage() {
     }
   };
 
+  // Configurar título da página
+  useEffect(() => {
+    setPageTitle('📦 Controle de Stockout');
+  }, [setPageTitle]);
+
   // Carregar dados automaticamente na primeira renderização
   useEffect(() => {
     if (activeTab === 'diario') {
@@ -464,15 +472,29 @@ export default function StockoutPage() {
     const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
     if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
 
+    console.log('🔍 DEBUG - Grupo selecionado:', localSelecionado, grupoSelecionado);
+    console.log('🔍 DEBUG - Total produtos ativos:', stockoutData.produtos?.ativos?.length || 0);
+    console.log('🔍 DEBUG - Total produtos inativos:', stockoutData.produtos?.inativos?.length || 0);
+
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+      const match = grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+      if (match) {
+        console.log('✅ Produto DISPONÍVEL encontrado:', produto.prd_desc || produto.produto_descricao, '- Local:', localProduto);
+      }
+      return match;
     });
 
     const indisponiveis = (stockoutData.produtos?.inativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+      const match = grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+      if (match) {
+        console.log('❌ Produto INDISPONÍVEL encontrado:', produto.prd_desc || produto.produto_descricao, '- Local:', localProduto);
+      }
+      return match;
     });
+
+    console.log('📊 RESULTADO - Disponíveis:', disponiveis.length, 'Indisponíveis:', indisponiveis.length);
 
     return { disponiveis, indisponiveis };
   };
@@ -480,30 +502,19 @@ export default function StockoutPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        <div className="card-dark p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="card-title-dark flex items-center gap-2">
-                <Package className="h-6 w-6" />
-                Controle de Stockout
-              </h1>
-              <p className="card-description-dark">
-                Monitore a disponibilidade de produtos do bar (produtos ativos='S' e venda='N' = stockout)
-              </p>
-            </div>
-          </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="tabs-list-dark">
-              <TabsTrigger value="diario" className="tabs-trigger-dark">
-                <Calendar className="h-4 w-4 mr-2" />
-                Análise Diária
-              </TabsTrigger>
-              <TabsTrigger value="historico" className="tabs-trigger-dark">
-                <TrendingDown className="h-4 w-4 mr-2" />
-                Histórico
-              </TabsTrigger>
-            </TabsList>
+        <Card className="card-dark mb-6">
+          <CardContent className="p-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="tabs-list-dark mb-6">
+                <TabsTrigger value="diario" className="tabs-trigger-dark inline-flex items-center">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span>Análise Diária</span>
+                </TabsTrigger>
+                <TabsTrigger value="historico" className="tabs-trigger-dark inline-flex items-center">
+                  <TrendingDown className="h-4 w-4 mr-2" />
+                  <span>Histórico</span>
+                </TabsTrigger>
+              </TabsList>
 
             <TabsContent value="diario" className="space-y-6">
               {/* Seletor de Modo */}
@@ -516,19 +527,19 @@ export default function StockoutPage() {
                     size="sm"
                     variant={modoAnalise === 'unica' ? 'default' : 'outline'}
                     onClick={() => setModoAnalise('unica')}
-                    className={modoAnalise === 'unica' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
+                    className={`inline-flex items-center ${modoAnalise === 'unica' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}`}
                   >
                     <Calendar className="w-4 h-4 mr-2" />
-                    Data Única
+                    <span>Data Única</span>
                   </Button>
                   <Button
                     size="sm"
                     variant={modoAnalise === 'periodo' ? 'default' : 'outline'}
                     onClick={() => setModoAnalise('periodo')}
-                    className={modoAnalise === 'periodo' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}
+                    className={`inline-flex items-center ${modoAnalise === 'periodo' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'btn-outline-dark'}`}
                   >
                     <TrendingDown className="w-4 h-4 mr-2" />
-                    Período
+                    <span>Período</span>
                   </Button>
                 </div>
               </div>
@@ -552,17 +563,17 @@ export default function StockoutPage() {
                       <Button
                         onClick={() => buscarDadosStockout(selectedDate, filtrosAtivos)}
                         disabled={loading}
-                        className="btn-primary-dark"
+                        className="btn-primary-dark inline-flex items-center"
                       >
                         {loading ? (
                           <>
                             <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            Carregando...
+                            <span>Carregando...</span>
                           </>
                         ) : (
                           <>
                             <Calendar className="w-4 h-4 mr-2" />
-                            Buscar
+                            <span>Buscar</span>
                           </>
                         )}
                       </Button>
@@ -594,17 +605,17 @@ export default function StockoutPage() {
                       <Button
                         onClick={buscarDadosPeriodo}
                         disabled={loading}
-                        className="btn-primary-dark"
+                        className="btn-primary-dark inline-flex items-center"
                       >
                         {loading ? (
                           <>
                             <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            Carregando...
+                            <span>Carregando...</span>
                           </>
                         ) : (
                           <>
                             <TrendingDown className="w-4 h-4 mr-2" />
-                            Buscar Período
+                            <span>Buscar Período</span>
                           </>
                         )}
                       </Button>
@@ -617,18 +628,18 @@ export default function StockoutPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                    className="btn-outline-dark"
+                    className="btn-outline-dark inline-flex items-center"
                   >
-                    Filtros ({filtrosAtivos.length})
+                    <span>Filtros ({filtrosAtivos.length})</span>
                   </Button>
                   {filtrosAtivos.length > 0 && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={limparFiltros}
-                      className="btn-outline-dark text-red-600 dark:text-red-400"
+                      className="btn-outline-dark text-red-600 dark:text-red-400 inline-flex items-center"
                     >
-                      Limpar
+                      <span>Limpar</span>
                     </Button>
                   )}
                 </div>
@@ -645,17 +656,17 @@ export default function StockoutPage() {
                       variant={filtrosAtivos.includes('Pegue e Pague') ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => toggleFiltro('Pegue e Pague')}
-                      className={filtrosAtivos.includes('Pegue e Pague') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}
+                      className={`inline-flex items-center ${filtrosAtivos.includes('Pegue e Pague') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}`}
                     >
-                      Pegue e Pague
+                      <span>Pegue e Pague</span>
                     </Button>
                     <Button
                       variant={filtrosAtivos.includes('sem_local') ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => toggleFiltro('sem_local')}
-                      className={filtrosAtivos.includes('sem_local') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}
+                      className={`inline-flex items-center ${filtrosAtivos.includes('sem_local') ? 'bg-red-600 hover:bg-red-700 text-white' : 'btn-outline-dark'}`}
                     >
-                      Sem local definido
+                      <span>Sem local definido</span>
                     </Button>
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
@@ -836,9 +847,9 @@ export default function StockoutPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setLocalSelecionado('')}
-                                className="btn-outline-dark"
+                                className="btn-outline-dark inline-flex items-center"
                               >
-                                Limpar
+                                <span>Limpar</span>
                               </Button>
                             </div>
                           </CardHeader>
@@ -970,9 +981,19 @@ export default function StockoutPage() {
                 <Button
                   onClick={buscarHistoricoStockout}
                   disabled={loading}
-                  className="btn-primary-dark"
+                  className="btn-primary-dark inline-flex items-center"
                 >
-                  {loading ? 'Carregando...' : 'Buscar Histórico'}
+                  {loading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      <span>Carregando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingDown className="w-4 h-4 mr-2" />
+                      <span>Buscar Histórico</span>
+                    </>
+                  )}
                 </Button>
               </div>
 
@@ -1184,7 +1205,8 @@ export default function StockoutPage() {
               )}
             </TabsContent>
           </Tabs>
-        </div>
+        </CardContent>
+      </Card>
       </div>
     </div>
   );
