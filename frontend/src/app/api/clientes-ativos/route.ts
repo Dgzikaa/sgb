@@ -200,22 +200,22 @@ export async function GET(request: NextRequest) {
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`⚡ Queries principais com SQL DISTINCT: ${elapsedTime}s`);
 
-    // Processar resultados
+    // Processar resultados (já vem normalizados do banco)
     const clientesUnicosAtual = new Set(
       (resultAtual.data || [])
-        .map((row: any) => (row.cli_fone || '').toString().trim())
+        .map((row: any) => row.cli_fone_normalizado)
         .filter(Boolean)
     );
 
     const clientesUnicosAnterior = new Set(
       (resultAnterior.data || [])
-        .map((row: any) => (row.cli_fone || '').toString().trim())
+        .map((row: any) => row.cli_fone_normalizado)
         .filter(Boolean)
     );
 
     const clientesHistoricos = new Set(
       (resultHistorico.data || [])
-        .map((row: any) => (row.cli_fone || '').toString().trim())
+        .map((row: any) => row.cli_fone_normalizado)
         .filter(Boolean)
     );
 
@@ -283,10 +283,10 @@ export async function GET(request: NextRequest) {
     const elapsedTime2 = ((Date.now() - startTime2) / 1000).toFixed(2);
     console.log(`⚡ Queries secundárias com SQL otimizado: ${elapsedTime2}s`);
 
-    // Processar histórico anterior
+    // Processar histórico anterior (já vem normalizado do banco)
     const clientesHistoricosAnterior = new Set(
       (resultHistoricoAnterior.data || [])
-        .map((row: any) => (row.cli_fone || '').toString().trim())
+        .map((row: any) => row.cli_fone_normalizado)
         .filter(Boolean)
     );
 

@@ -60,6 +60,10 @@ interface AnaliseStockoutHistorico {
     produtos_indisponiveis: number;
     percentual_stockout: string;
     percentual_disponibilidade: string;
+    produtos_detalhados: {
+      disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+      indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+    };
   }>;
   historico_diario: Array<{
     data_referencia: string;
@@ -326,7 +330,9 @@ export async function POST(request: NextRequest) {
         dadosPorCategoria.set(categoria, {
           total_produtos: 0,
           disponiveis: 0,
-          indisponiveis: 0
+          indisponiveis: 0,
+          produtos_disponiveis: new Map(),
+          produtos_indisponiveis: new Map()
         });
       }
       
@@ -335,8 +341,22 @@ export async function POST(request: NextRequest) {
       
       if (item.prd_venda === 'S') {
         stats.disponiveis++;
+        // Adicionar produto à lista de disponíveis (usar Map para evitar duplicatas)
+        if (!stats.produtos_disponiveis.has(item.prd_desc)) {
+          stats.produtos_disponiveis.set(item.prd_desc, {
+            prd_desc: item.prd_desc,
+            loc_desc: item.loc_desc || 'Sem local'
+          });
+        }
       } else if (item.prd_venda === 'N') {
         stats.indisponiveis++;
+        // Adicionar produto à lista de indisponíveis (usar Map para evitar duplicatas)
+        if (!stats.produtos_indisponiveis.has(item.prd_desc)) {
+          stats.produtos_indisponiveis.set(item.prd_desc, {
+            prd_desc: item.prd_desc,
+            loc_desc: item.loc_desc || 'Sem local'
+          });
+        }
       }
     });
 
@@ -358,7 +378,11 @@ export async function POST(request: NextRequest) {
           produtos_disponiveis: mediaDisponiveis,
           produtos_indisponiveis: mediaIndisponiveis,
           percentual_stockout: `${percentualStockout}%`,
-          percentual_disponibilidade: `${(100 - parseFloat(percentualStockout)).toFixed(2)}%`
+          percentual_disponibilidade: `${(100 - parseFloat(percentualStockout)).toFixed(2)}%`,
+          produtos_detalhados: {
+            disponiveis: Array.from(stats.produtos_disponiveis.values()),
+            indisponiveis: Array.from(stats.produtos_indisponiveis.values())
+          }
         };
       })
       .sort((a, b) => 

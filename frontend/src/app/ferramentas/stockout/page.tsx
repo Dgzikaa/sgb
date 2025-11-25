@@ -424,9 +424,30 @@ export default function StockoutPage() {
   const agruparLocaisPorCategoria = () => {
     if (!stockoutData?.analise_por_local) return [];
 
+    // Se estiver no modo período, os dados já vêm agrupados por categoria
+    if (modoAnalise === 'periodo') {
+      return stockoutData.analise_por_local.map((item: any) => {
+        // Encontrar a chave da categoria pelo nome
+        const categoriaKey = Object.entries(GRUPOS_LOCAIS).find(
+          ([_, grupo]) => grupo.nome === item.local
+        )?.[0] || '';
+
+        return {
+          key: categoriaKey,
+          nome: item.local,
+          locais: [item],
+          total_produtos: item.total_produtos,
+          disponiveis: item.produtos_disponiveis,
+          indisponiveis: item.produtos_indisponiveis,
+          perc_stockout: parseFloat(item.percentual_stockout.replace('%', ''))
+        };
+      });
+    }
+
+    // Modo data única - agrupar manualmente
     const grupos: Record<string, any> = {};
 
-    stockoutData.analise_por_local.forEach(local => {
+    stockoutData.analise_por_local.forEach((local: any) => {
       const localNormalizado = local.local_producao.toLowerCase().trim();
       
       // Encontrar em qual grupo o local pertence
@@ -474,6 +495,21 @@ export default function StockoutPage() {
     const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
     if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
 
+    // Se estiver no modo período e tiver dados de analise_por_local com produtos_detalhados
+    if (modoAnalise === 'periodo' && stockoutData.analise_por_local) {
+      const localData = stockoutData.analise_por_local.find(
+        (item: any) => item.local === grupoSelecionado.nome
+      );
+      
+      if (localData && localData.produtos_detalhados) {
+        return {
+          disponiveis: localData.produtos_detalhados.disponiveis || [],
+          indisponiveis: localData.produtos_detalhados.indisponiveis || []
+        };
+      }
+    }
+
+    // Modo data única - usar o método original
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
       return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
