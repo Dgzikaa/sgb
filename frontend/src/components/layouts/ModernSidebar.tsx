@@ -254,6 +254,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Análise de clientes mais recorrentes',
           permission: 'relatorios',
         },
+        {
+          icon: Users,
+          label: 'Clientes Ativos',
+          href: '/relatorios/clientes-ativos',
+          description: 'Análise semanal de clientes novos vs retornantes',
+          permission: 'relatorios',
+        },
         // {
         //   icon: Package,
         //   label: 'Produtos',
