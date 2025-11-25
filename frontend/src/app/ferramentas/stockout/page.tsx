@@ -850,28 +850,12 @@ export default function StockoutPage() {
                                   <div className="space-y-2 max-h-64 overflow-y-auto">
                                     {getProdutosPorLocal().indisponiveis.map((produto, index) => (
                                       <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/20 rounded">
-                                        <div className="flex justify-between items-start">
-                                          <div className="flex-1">
-                                            <h5 className="font-medium text-gray-900 dark:text-white text-sm">
-                                              {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
-                                            </h5>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">
-                                              Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
-                                            </p>
-                                          </div>
-                                          <div className="text-right">
-                                            {produto.prd_precovenda && (
-                                              <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                                R$ {Number(produto.prd_precovenda).toFixed(2)}
-                                              </p>
-                                            )}
-                                            {produto.prd_estoque !== undefined && (
-                                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                Estoque: {produto.prd_estoque}
-                                              </p>
-                                            )}
-                                          </div>
-                                        </div>
+                                        <h5 className="font-medium text-gray-900 dark:text-white text-sm">
+                                          {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                        </h5>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                          Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                        </p>
                                       </div>
                                     ))}
                                   </div>
@@ -888,28 +872,12 @@ export default function StockoutPage() {
                                   <div className="space-y-2 max-h-64 overflow-y-auto">
                                     {getProdutosPorLocal().disponiveis.map((produto, index) => (
                                       <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/20 rounded">
-                                        <div className="flex justify-between items-start">
-                                          <div className="flex-1">
-                                            <h5 className="font-medium text-gray-900 dark:text-white text-sm">
-                                              {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
-                                            </h5>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400">
-                                              Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
-                                            </p>
-                                          </div>
-                                          <div className="text-right">
-                                            {produto.prd_precovenda && (
-                                              <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                                R$ {Number(produto.prd_precovenda).toFixed(2)}
-                                              </p>
-                                            )}
-                                            {produto.prd_estoque !== undefined && (
-                                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                Estoque: {produto.prd_estoque}
-                                              </p>
-                                            )}
-                                          </div>
-                                        </div>
+                                        <h5 className="font-medium text-gray-900 dark:text-white text-sm">
+                                          {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                        </h5>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                          Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                        </p>
                                       </div>
                                     ))}
                                   </div>
