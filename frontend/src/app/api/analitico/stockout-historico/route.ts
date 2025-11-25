@@ -322,7 +322,20 @@ export async function POST(request: NextRequest) {
     }).sort((a, b) => a.numero_semana - b.numero_semana);
 
     // Análise por local/categoria (médias do período)
-    const dadosPorCategoria = new Map();
+    interface ProdutoDetalhado {
+      prd_desc: string;
+      loc_desc: string;
+    }
+
+    interface StatsCategoria {
+      total_produtos: number;
+      disponiveis: number;
+      indisponiveis: number;
+      produtos_disponiveis: Map<string, ProdutoDetalhado>;
+      produtos_indisponiveis: Map<string, ProdutoDetalhado>;
+    }
+
+    const dadosPorCategoria = new Map<string, StatsCategoria>();
     dadosValidosFiltrados.forEach(item => {
       const categoria = classificarLocal(item.loc_desc);
       
@@ -331,12 +344,12 @@ export async function POST(request: NextRequest) {
           total_produtos: 0,
           disponiveis: 0,
           indisponiveis: 0,
-          produtos_disponiveis: new Map(),
-          produtos_indisponiveis: new Map()
+          produtos_disponiveis: new Map<string, ProdutoDetalhado>(),
+          produtos_indisponiveis: new Map<string, ProdutoDetalhado>()
         });
       }
       
-      const stats = dadosPorCategoria.get(categoria);
+      const stats = dadosPorCategoria.get(categoria)!;
       stats.total_produtos++;
       
       if (item.prd_venda === 'S') {

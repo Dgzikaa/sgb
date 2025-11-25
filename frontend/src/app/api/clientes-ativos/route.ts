@@ -174,72 +174,36 @@ export async function GET(request: NextRequest) {
       console.log(`📆 Comparação: ${diaSemana} vs ${diaSemana} da semana anterior`);
     }
 
-    // ⚡ SUPER OTIMIZAÇÃO: Usar SQL DISTINCT direto (10x mais rápido)
+    // ⚡ SUPER OTIMIZAÇÃO: Uma única query SQL que calcula tudo
     const startTime = Date.now();
     
-    const [resultAtual, resultAnterior, resultHistorico] = await Promise.all([
-      // 1. CLIENTES ÚNICOS DO PERÍODO ATUAL
-      supabase.rpc('get_clientes_unicos_periodo', {
-        p_bar_id: barId,
-        p_data_inicio: inicioAtual,
-        p_data_fim: fimAtual
-      }),
-      // 2. CLIENTES ÚNICOS DO PERÍODO ANTERIOR
-      supabase.rpc('get_clientes_unicos_periodo', {
-        p_bar_id: barId,
-        p_data_inicio: inicioAnterior,
-        p_data_fim: fimAnterior
-      }),
-      // 3. CLIENTES ÚNICOS DO HISTÓRICO
-      supabase.rpc('get_clientes_unicos_historico', {
-        p_bar_id: barId,
-        p_data_limite: inicioAtual
-      })
-    ]);
+    const { data: metricas, error: errorMetricas } = await supabase.rpc('calcular_metricas_clientes', {
+      p_bar_id: barId,
+      p_data_inicio_atual: inicioAtual,
+      p_data_fim_atual: fimAtual,
+      p_data_inicio_anterior: inicioAnterior,
+      p_data_fim_anterior: fimAnterior
+    });
+
+    if (errorMetricas) {
+      console.error('❌ Erro ao calcular métricas:', errorMetricas);
+      throw errorMetricas;
+    }
+
+    const resultado = metricas[0];
+    const totalClientesAtual = Number(resultado.total_atual);
+    const totalClientesAnterior = Number(resultado.total_anterior);
+    const novosClientes = Number(resultado.novos_atual);
+    const clientesRetornantes = Number(resultado.retornantes_atual);
+    const novosClientesAnterior = Number(resultado.novos_anterior);
+    const clientesRetornantesAnterior = Number(resultado.retornantes_anterior);
 
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`⚡ Queries principais com SQL DISTINCT: ${elapsedTime}s`);
-
-    // Processar resultados (já vem normalizados do banco)
-    const clientesUnicosAtual = new Set(
-      (resultAtual.data || [])
-        .map((row: any) => row.cli_fone_normalizado)
-        .filter(Boolean)
-    );
-
-    const clientesUnicosAnterior = new Set(
-      (resultAnterior.data || [])
-        .map((row: any) => row.cli_fone_normalizado)
-        .filter(Boolean)
-    );
-
-    const clientesHistoricos = new Set(
-      (resultHistorico.data || [])
-        .map((row: any) => row.cli_fone_normalizado)
-        .filter(Boolean)
-    );
-
-    const totalClientesAtual = clientesUnicosAtual.size;
-    const totalClientesAnterior = clientesUnicosAnterior.size;
-    
+    console.log(`⚡ Query única SQL otimizada: ${elapsedTime}s`);
     console.log(`👥 Total clientes período atual: ${totalClientesAtual}`);
-    console.log(`📚 Total clientes no histórico: ${clientesHistoricos.size}`);
-
-    // 4. SEPARAR NOVOS vs RETORNANTES (PERÍODO ATUAL)
-    let novosClientes = 0;
-    let clientesRetornantes = 0;
-
-    clientesUnicosAtual.forEach(cliente => {
-      if (clientesHistoricos.has(cliente)) {
-        clientesRetornantes++;
-      } else {
-        novosClientes++;
-      }
-    });
-    
     console.log(`🆕 Novos: ${novosClientes}, 🔄 Retornantes: ${clientesRetornantes}`);
 
-    // ⚡ SUPER OTIMIZAÇÃO: Queries secundárias com SQL otimizado
+    // ⚡ SUPER OTIMIZAÇÃO: Base ativa com SQL otimizado (retorna apenas contagem)
     const startTime2 = Date.now();
     
     // Preparar datas para base ativa
@@ -259,21 +223,16 @@ export async function GET(request: NextRequest) {
     data90DiasAtrasAnterior.setDate(data90DiasAtrasAnterior.getDate() - 90);
     const data90DiasAtrasAnteriorStr = data90DiasAtrasAnterior.toISOString().split('T')[0];
 
-    // Executar 3 queries otimizadas em paralelo
-    const [resultHistoricoAnterior, resultBaseAtiva, resultBaseAtivaAnterior] = await Promise.all([
-      // 5. Histórico anterior
-      supabase.rpc('get_clientes_unicos_historico', {
-        p_bar_id: barId,
-        p_data_limite: inicioAnterior
-      }),
-      // 6. BASE ATIVA DO MÊS ATUAL (já retorna só quem tem 2+ visitas)
-      supabase.rpc('get_base_ativa', {
+    // Executar queries de base ativa em paralelo (retornam apenas contagem)
+    const [resultBaseAtiva, resultBaseAtivaAnterior] = await Promise.all([
+      // BASE ATIVA DO MÊS ATUAL
+      supabase.rpc('get_count_base_ativa', {
         p_bar_id: barId,
         p_data_inicio: data90DiasAtrasStr,
         p_data_fim: fimMesAtual
       }),
-      // 7. BASE ATIVA DO MÊS ANTERIOR
-      supabase.rpc('get_base_ativa', {
+      // BASE ATIVA DO MÊS ANTERIOR
+      supabase.rpc('get_count_base_ativa', {
         p_bar_id: barId,
         p_data_inicio: data90DiasAtrasAnteriorStr,
         p_data_fim: fimMesAnterior
@@ -281,31 +240,11 @@ export async function GET(request: NextRequest) {
     ]);
 
     const elapsedTime2 = ((Date.now() - startTime2) / 1000).toFixed(2);
-    console.log(`⚡ Queries secundárias com SQL otimizado: ${elapsedTime2}s`);
+    console.log(`⚡ Base ativa com SQL otimizado: ${elapsedTime2}s`);
 
-    // Processar histórico anterior (já vem normalizado do banco)
-    const clientesHistoricosAnterior = new Set(
-      (resultHistoricoAnterior.data || [])
-        .map((row: any) => row.cli_fone_normalizado)
-        .filter(Boolean)
-    );
-
-    let novosClientesAnterior = 0;
-    let clientesRetornantesAnterior = 0;
-
-    clientesUnicosAnterior.forEach(cliente => {
-      if (clientesHistoricosAnterior.has(cliente)) {
-        clientesRetornantesAnterior++;
-      } else {
-        novosClientesAnterior++;
-      }
-    });
-
-    // Base ativa atual (já vem processada do banco)
-    const clientesAtivos = (resultBaseAtiva.data || []).length;
-
-    // Base ativa anterior (já vem processada do banco)
-    const clientesAtivosAnterior = (resultBaseAtivaAnterior.data || []).length;
+    // Base ativa (já vem como número do banco)
+    const clientesAtivos = Number(resultBaseAtiva.data || 0);
+    const clientesAtivosAnterior = Number(resultBaseAtivaAnterior.data || 0);
 
     // 8. CALCULAR VARIAÇÕES
     const variacaoTotal = totalClientesAnterior > 0 
@@ -333,7 +272,13 @@ export async function GET(request: NextRequest) {
       : 0;
 
     // 10. INSIGHTS E INDICADORES
-    const insights = [];
+    interface Insight {
+      tipo: string;
+      titulo: string;
+      descricao: string;
+    }
+
+    const insights: Insight[] = [];
 
     // Crescimento geral
     if (variacaoTotal > 10) {

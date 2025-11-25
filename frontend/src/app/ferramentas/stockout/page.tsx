@@ -68,11 +68,20 @@ interface StockoutData {
     }>;
   };
   analise_por_local?: Array<{
-    local_producao: string;
+    local_producao?: string;
+    local?: string;
     total_produtos: number;
-    disponiveis: number;
-    indisponiveis: number;
-    perc_stockout: number;
+    disponiveis?: number;
+    indisponiveis?: number;
+    produtos_disponiveis?: number;
+    produtos_indisponiveis?: number;
+    perc_stockout?: number;
+    percentual_stockout?: string;
+    percentual_disponibilidade?: string;
+    produtos_detalhados?: {
+      disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+      indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+    };
   }>;
 }
 
@@ -103,6 +112,18 @@ interface HistoricoData {
     dias_com_dados: number;
     media_stockout: string;
     media_disponibilidade: string;
+  }>;
+  analise_por_local?: Array<{
+    local: string;
+    total_produtos: number;
+    produtos_disponiveis: number;
+    produtos_indisponiveis: number;
+    percentual_stockout: string;
+    percentual_disponibilidade: string;
+    produtos_detalhados?: {
+      disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+      indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+    };
   }>;
   historico_diario: Array<{
     data_referencia: string;
