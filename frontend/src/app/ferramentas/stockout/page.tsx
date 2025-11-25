@@ -124,6 +124,11 @@ interface HistoricoData {
       disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
       indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
     };
+    produtos_por_dia?: Array<{
+      data: string;
+      disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+      indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+    }>;
   }>;
   historico_diario: Array<{
     data_referencia: string;
@@ -173,6 +178,9 @@ export default function StockoutPage() {
   
   // Estado para local selecionado
   const [localSelecionado, setLocalSelecionado] = useState<string>('');
+  
+  // Estado para dia selecionado dentro de uma categoria (modo período)
+  const [diaSelecionado, setDiaSelecionado] = useState<string>('');
   
   // Modo de análise diária: 'unica' ou 'periodo'
   const [modoAnalise, setModoAnalise] = useState<'unica' | 'periodo'>('unica');
@@ -424,7 +432,12 @@ export default function StockoutPage() {
   }, [activeTab, modoAnalise]);
 
   const formatarData = (data: string) => {
-    return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+    if (!data || data.includes('a')) return data; // Se já está formatado ou é um range
+    try {
+      return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+    } catch {
+      return data;
+    }
   };
 
   const getStockoutColor = (percentual: string) => {
@@ -447,29 +460,38 @@ export default function StockoutPage() {
 
     // Se estiver no modo período, os dados já vêm agrupados por categoria
     if (modoAnalise === 'periodo') {
-      return stockoutData.analise_por_local.map((item: any) => {
-        // Encontrar a chave da categoria pelo nome
-        const categoriaKey = Object.entries(GRUPOS_LOCAIS).find(
-          ([_, grupo]) => grupo.nome === item.local
-        )?.[0] || '';
+      return stockoutData.analise_por_local
+        .filter((item: any) => {
+          // Filtrar apenas as categorias principais
+          const nomesCategoriasValidas = Object.values(GRUPOS_LOCAIS).map(g => g.nome);
+          return nomesCategoriasValidas.includes(item.local);
+        })
+        .map((item: any) => {
+          // Encontrar a chave da categoria pelo nome
+          const categoriaKey = Object.entries(GRUPOS_LOCAIS).find(
+            ([_, grupo]) => grupo.nome === item.local
+          )?.[0] || '';
 
-        return {
-          key: categoriaKey,
-          nome: item.local,
-          locais: [item],
-          total_produtos: item.total_produtos,
-          disponiveis: item.produtos_disponiveis,
-          indisponiveis: item.produtos_indisponiveis,
-          perc_stockout: parseFloat(item.percentual_stockout.replace('%', ''))
-        };
-      });
+          return {
+            key: categoriaKey,
+            nome: item.local,
+            locais: [item],
+            total_produtos: item.total_produtos || 0,
+            disponiveis: item.produtos_disponiveis || 0,
+            indisponiveis: item.produtos_indisponiveis || 0,
+            perc_stockout: parseFloat((item.percentual_stockout || '0%').replace('%', ''))
+          };
+        });
     }
 
     // Modo data única - agrupar manualmente
     const grupos: Record<string, any> = {};
 
     stockoutData.analise_por_local.forEach((local: any) => {
-      const localNormalizado = local.local_producao.toLowerCase().trim();
+      const localProducao = local.local_producao || local.loc_desc || '';
+      if (!localProducao) return; // Pular se não tiver local
+      
+      const localNormalizado = localProducao.toLowerCase().trim();
       
       // Encontrar em qual grupo o local pertence
       let grupoEncontrado = '';
@@ -491,9 +513,9 @@ export default function StockoutPage() {
         }
 
         grupos[grupoEncontrado].locais.push(local);
-        grupos[grupoEncontrado].total_produtos += local.total_produtos;
-        grupos[grupoEncontrado].disponiveis += local.disponiveis;
-        grupos[grupoEncontrado].indisponiveis += local.indisponiveis;
+        grupos[grupoEncontrado].total_produtos += local.total_produtos || 0;
+        grupos[grupoEncontrado].disponiveis += local.disponiveis || 0;
+        grupos[grupoEncontrado].indisponiveis += local.indisponiveis || 0;
       }
     });
 
@@ -516,17 +538,33 @@ export default function StockoutPage() {
     const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
     if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
 
-    // Se estiver no modo período e tiver dados de analise_por_local com produtos_detalhados
+    // Se estiver no modo período e tiver dados de analise_por_local com produtos_por_dia
     if (modoAnalise === 'periodo' && stockoutData.analise_por_local) {
       const localData = stockoutData.analise_por_local.find(
         (item: any) => item.local === grupoSelecionado.nome
       );
       
-      if (localData && localData.produtos_detalhados) {
-        return {
-          disponiveis: localData.produtos_detalhados.disponiveis || [],
-          indisponiveis: localData.produtos_detalhados.indisponiveis || []
-        };
+      if (localData) {
+        // Se tem um dia selecionado, mostrar produtos daquele dia
+        if (diaSelecionado && localData.produtos_por_dia) {
+          const produtosDoDia = localData.produtos_por_dia.find(
+            (dia: any) => dia.data === diaSelecionado
+          );
+          if (produtosDoDia) {
+            return {
+              disponiveis: produtosDoDia.disponiveis || [],
+              indisponiveis: produtosDoDia.indisponiveis || []
+            };
+          }
+        }
+        
+        // Se não tem dia selecionado, mostrar produtos gerais do período
+        if (localData.produtos_detalhados) {
+          return {
+            disponiveis: localData.produtos_detalhados.disponiveis || [],
+            indisponiveis: localData.produtos_detalhados.indisponiveis || []
+          };
+        }
       }
     }
 
@@ -542,6 +580,22 @@ export default function StockoutPage() {
     });
 
     return { disponiveis, indisponiveis };
+  };
+  
+  // Função para pegar os dias disponíveis de uma categoria
+  const getDiasDaCategoria = () => {
+    if (!localSelecionado || !stockoutData?.analise_por_local || modoAnalise !== 'periodo') {
+      return [];
+    }
+    
+    const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
+    if (!grupoSelecionado) return [];
+    
+    const localData = stockoutData.analise_por_local.find(
+      (item: any) => item.local === grupoSelecionado.nome
+    );
+    
+    return localData?.produtos_por_dia || [];
   };
 
   return (
@@ -660,26 +714,6 @@ export default function StockoutPage() {
 
               {stockoutData && (
                 <>
-                  {/* Badge de Período */}
-                  {modoAnalise === 'periodo' && (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-                      <div className="flex items-center gap-2">
-                        <TrendingDown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        <div>
-                          <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-                            Análise de Período - Valores Médios
-                          </h3>
-                          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                            Período: {formatarData(dataInicioDiaria)} até {formatarData(dataFimDiaria)}
-                          </p>
-                          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                            Os valores abaixo representam as médias calculadas para o período selecionado
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Cards de Estatísticas */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <Card className="card-dark">
@@ -770,7 +804,10 @@ export default function StockoutPage() {
                             {agruparLocaisPorCategoria().map((grupo) => (
                               <div 
                                 key={grupo.key}
-                                onClick={() => setLocalSelecionado(grupo.key)}
+                                onClick={() => {
+                                  setLocalSelecionado(grupo.key);
+                                  setDiaSelecionado(''); // Limpar dia selecionado ao trocar de categoria
+                                }}
                                 className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                                   localSelecionado === grupo.key
                                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg'
@@ -831,7 +868,10 @@ export default function StockoutPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setLocalSelecionado('')}
+                                onClick={() => {
+                                  setLocalSelecionado('');
+                                  setDiaSelecionado('');
+                                }}
                                 className="btn-outline-dark w-full sm:w-auto"
                               >
                                 Limpar
@@ -840,6 +880,60 @@ export default function StockoutPage() {
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-4">
+                              {/* Timeline de Dias (apenas no modo período) */}
+                              {modoAnalise === 'periodo' && getDiasDaCategoria().length > 0 && (
+                                <div>
+                                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                                    Selecione um dia:
+                                  </h4>
+                                  <div className="overflow-x-auto -mx-4 sm:-mx-6">
+                                    <div className="inline-flex gap-2 px-4 sm:px-6 pb-2">
+                                      {getDiasDaCategoria().map((dia: any, index: number) => {
+                                        const data = new Date(dia.data + 'T00:00:00');
+                                        const diaNumero = data.getDate();
+                                        const totalStockout = dia.indisponiveis?.length || 0;
+                                        const selecionado = diaSelecionado === dia.data;
+                                        
+                                        return (
+                                          <div 
+                                            key={index} 
+                                            onClick={() => setDiaSelecionado(dia.data)}
+                                            className={`flex-shrink-0 w-20 p-3 rounded-lg border-2 text-center cursor-pointer transition-all ${
+                                              selecionado 
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg' 
+                                                : totalStockout > 0
+                                                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20 hover:shadow-md'
+                                                  : 'border-green-500 bg-green-50 dark:bg-green-900/20 hover:shadow-md'
+                                            }`}
+                                          >
+                                            <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                                              {diaNumero}
+                                            </div>
+                                            <div className={`text-xs font-semibold ${
+                                              totalStockout > 0 
+                                                ? 'text-red-600 dark:text-red-400' 
+                                                : 'text-green-600 dark:text-green-400'
+                                            }`}>
+                                              ✗ {totalStockout}
+                                            </div>
+                                            {selecionado && (
+                                              <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                                Ativo
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                  {!diaSelecionado && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                                      Clique em um dia para ver os produtos em stockout
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                              
                               {/* Produtos em Stockout */}
                               {getProdutosPorLocal().indisponiveis.length > 0 && (
                                 <div>

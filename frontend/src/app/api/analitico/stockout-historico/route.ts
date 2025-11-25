@@ -64,6 +64,11 @@ interface AnaliseStockoutHistorico {
       disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
       indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
     };
+    produtos_por_dia?: Array<{
+      data: string;
+      disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+      indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+    }>;
   }>;
   historico_diario: Array<{
     data_referencia: string;
@@ -327,17 +332,25 @@ export async function POST(request: NextRequest) {
       loc_desc: string;
     }
 
+    interface ProdutosPorDia {
+      data: string;
+      disponiveis: Map<string, ProdutoDetalhado>;
+      indisponiveis: Map<string, ProdutoDetalhado>;
+    }
+
     interface StatsCategoria {
       total_produtos: number;
       disponiveis: number;
       indisponiveis: number;
       produtos_disponiveis: Map<string, ProdutoDetalhado>;
       produtos_indisponiveis: Map<string, ProdutoDetalhado>;
+      produtos_por_dia: Map<string, ProdutosPorDia>;
     }
 
     const dadosPorCategoria = new Map<string, StatsCategoria>();
     dadosValidosFiltrados.forEach(item => {
       const categoria = classificarLocal(item.loc_desc);
+      const dataConsulta = item.data_consulta;
       
       if (!dadosPorCategoria.has(categoria)) {
         dadosPorCategoria.set(categoria, {
@@ -345,27 +358,53 @@ export async function POST(request: NextRequest) {
           disponiveis: 0,
           indisponiveis: 0,
           produtos_disponiveis: new Map<string, ProdutoDetalhado>(),
-          produtos_indisponiveis: new Map<string, ProdutoDetalhado>()
+          produtos_indisponiveis: new Map<string, ProdutoDetalhado>(),
+          produtos_por_dia: new Map<string, ProdutosPorDia>()
         });
       }
       
       const stats = dadosPorCategoria.get(categoria)!;
       stats.total_produtos++;
       
+      // Inicializar dados do dia se ainda não existir
+      if (!stats.produtos_por_dia.has(dataConsulta)) {
+        stats.produtos_por_dia.set(dataConsulta, {
+          data: dataConsulta,
+          disponiveis: new Map<string, ProdutoDetalhado>(),
+          indisponiveis: new Map<string, ProdutoDetalhado>()
+        });
+      }
+      
+      const produtosDoDia = stats.produtos_por_dia.get(dataConsulta)!;
+      
       if (item.prd_venda === 'S') {
         stats.disponiveis++;
-        // Adicionar produto à lista de disponíveis (usar Map para evitar duplicatas)
+        // Adicionar produto à lista de disponíveis geral
         if (!stats.produtos_disponiveis.has(item.prd_desc)) {
           stats.produtos_disponiveis.set(item.prd_desc, {
             prd_desc: item.prd_desc,
             loc_desc: item.loc_desc || 'Sem local'
           });
         }
+        // Adicionar produto ao dia específico
+        if (!produtosDoDia.disponiveis.has(item.prd_desc)) {
+          produtosDoDia.disponiveis.set(item.prd_desc, {
+            prd_desc: item.prd_desc,
+            loc_desc: item.loc_desc || 'Sem local'
+          });
+        }
       } else if (item.prd_venda === 'N') {
         stats.indisponiveis++;
-        // Adicionar produto à lista de indisponíveis (usar Map para evitar duplicatas)
+        // Adicionar produto à lista de indisponíveis geral
         if (!stats.produtos_indisponiveis.has(item.prd_desc)) {
           stats.produtos_indisponiveis.set(item.prd_desc, {
+            prd_desc: item.prd_desc,
+            loc_desc: item.loc_desc || 'Sem local'
+          });
+        }
+        // Adicionar produto ao dia específico
+        if (!produtosDoDia.indisponiveis.has(item.prd_desc)) {
+          produtosDoDia.indisponiveis.set(item.prd_desc, {
             prd_desc: item.prd_desc,
             loc_desc: item.loc_desc || 'Sem local'
           });
@@ -395,7 +434,12 @@ export async function POST(request: NextRequest) {
           produtos_detalhados: {
             disponiveis: Array.from(stats.produtos_disponiveis.values()),
             indisponiveis: Array.from(stats.produtos_indisponiveis.values())
-          }
+          },
+          produtos_por_dia: Array.from(stats.produtos_por_dia.values()).map(dia => ({
+            data: dia.data,
+            disponiveis: Array.from(dia.disponiveis.values()),
+            indisponiveis: Array.from(dia.indisponiveis.values())
+          })).sort((a, b) => a.data.localeCompare(b.data))
         };
       })
       .sort((a, b) => 
