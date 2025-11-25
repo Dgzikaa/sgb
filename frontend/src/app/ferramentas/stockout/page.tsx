@@ -1040,7 +1040,7 @@ export default function StockoutPage() {
                   </Card>
 
                   {/* Histórico Diário */}
-                  {historicoData.historico_diario.length > 0 && (
+                  {historicoData?.historico_diario && historicoData.historico_diario.length > 0 && (
                     <Card className="card-dark">
                       <CardHeader className="p-4 sm:p-6">
                         <CardTitle className="card-title-dark text-base sm:text-lg flex items-center gap-2">
@@ -1057,7 +1057,7 @@ export default function StockoutPage() {
                             {historicoData.historico_diario.map((dia, index) => {
                               const data = new Date(dia.data_referencia + 'T00:00:00');
                               const diaNumero = data.getDate();
-                              const stockoutPerc = parseFloat(dia.percentual_stockout.replace('%', ''));
+                              const stockoutPerc = parseFloat((dia.percentual_stockout || '0%').replace('%', ''));
                               
                               return (
                                 <div 
@@ -1071,11 +1071,11 @@ export default function StockoutPage() {
                                   <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                                     {diaNumero}
                                   </div>
-                                  <div className={`text-sm font-semibold ${getStockoutColor(dia.percentual_stockout)}`}>
+                                  <div className={`text-sm font-semibold ${getStockoutColor(dia.percentual_stockout || '0%')}`}>
                                     {stockoutPerc.toFixed(1)}%
                                   </div>
                                   <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                    {dia.dia_semana.substring(0, 3)}
+                                    {dia.dia_semana?.substring(0, 3) || ''}
                                   </div>
                                 </div>
                               );
@@ -1087,7 +1087,7 @@ export default function StockoutPage() {
                   )}
 
                   {/* Análise Semanal */}
-                  {historicoData.analise_semanal.length > 1 && (
+                  {historicoData?.analise_semanal && historicoData.analise_semanal.length > 1 && (
                     <Card className="card-dark">
                       <CardHeader className="p-4 sm:p-6">
                         <CardTitle className="card-title-dark text-base sm:text-lg flex items-center gap-2">
