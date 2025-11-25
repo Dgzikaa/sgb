@@ -53,6 +53,14 @@ interface AnaliseStockoutHistorico {
     media_stockout: string;
     media_disponibilidade: string;
   }>;
+  analise_por_local: Array<{
+    local: string;
+    total_produtos: number;
+    produtos_disponiveis: number;
+    produtos_indisponiveis: number;
+    percentual_stockout: string;
+    percentual_disponibilidade: string;
+  }>;
   historico_diario: Array<{
     data_referencia: string;
     dia_semana: string;
@@ -96,6 +104,37 @@ function getInicioFimSemana(data: string): { inicio: string; fim: string } {
     inicio: inicioSemana.toISOString().split('T')[0],
     fim: fimSemana.toISOString().split('T')[0]
   };
+}
+
+// Mapeamento de locais para categorias
+const GRUPOS_LOCAIS: Record<string, { nome: string; locais: string[] }> = {
+  drink: {
+    nome: 'Drink / Bebida',
+    locais: ['preshh', 'mexido', 'batidos', 'drink', 'bebida']
+  },
+  bar: {
+    nome: 'Bar',
+    locais: ['chopp', 'baldes', 'bar']
+  },
+  cozinha: {
+    nome: 'Cozinha',
+    locais: ['cozinha', 'chapeira', 'chapa']
+  }
+};
+
+// Função para classificar local em categoria
+function classificarLocal(locDesc: string | null): string {
+  if (!locDesc) return 'outros';
+  
+  const localLower = locDesc.toLowerCase();
+  
+  for (const [categoria, config] of Object.entries(GRUPOS_LOCAIS)) {
+    if (config.locais.some(loc => localLower.includes(loc))) {
+      return categoria;
+    }
+  }
+  
+  return 'outros';
 }
 
 export async function POST(request: NextRequest) {
@@ -278,6 +317,57 @@ export async function POST(request: NextRequest) {
       };
     }).sort((a, b) => a.numero_semana - b.numero_semana);
 
+    // Análise por local/categoria (médias do período)
+    const dadosPorCategoria = new Map();
+    dadosValidosFiltrados.forEach(item => {
+      const categoria = classificarLocal(item.loc_desc);
+      
+      if (!dadosPorCategoria.has(categoria)) {
+        dadosPorCategoria.set(categoria, {
+          total_produtos: 0,
+          disponiveis: 0,
+          indisponiveis: 0
+        });
+      }
+      
+      const stats = dadosPorCategoria.get(categoria);
+      stats.total_produtos++;
+      
+      if (item.prd_venda === 'S') {
+        stats.disponiveis++;
+      } else if (item.prd_venda === 'N') {
+        stats.indisponiveis++;
+      }
+    });
+
+    // Calcular médias por categoria (dividir pelo número de dias)
+    const analisePorLocal = Array.from(dadosPorCategoria.entries())
+      .filter(([categoria]) => categoria !== 'outros') // Remover categoria "outros"
+      .map(([categoria, stats]) => {
+        const totalDiasAnalise = historicoDiario.length;
+        const mediaTotalProdutos = Math.round(stats.total_produtos / totalDiasAnalise);
+        const mediaDisponiveis = Math.round(stats.disponiveis / totalDiasAnalise);
+        const mediaIndisponiveis = Math.round(stats.indisponiveis / totalDiasAnalise);
+        
+        const percentualStockout = mediaTotalProdutos > 0 ? 
+          ((mediaIndisponiveis / mediaTotalProdutos) * 100).toFixed(2) : '0.00';
+        
+        return {
+          local: GRUPOS_LOCAIS[categoria]?.nome || categoria,
+          total_produtos: mediaTotalProdutos,
+          produtos_disponiveis: mediaDisponiveis,
+          produtos_indisponiveis: mediaIndisponiveis,
+          percentual_stockout: `${percentualStockout}%`,
+          percentual_disponibilidade: `${(100 - parseFloat(percentualStockout)).toFixed(2)}%`
+        };
+      })
+      .sort((a, b) => 
+        parseFloat(b.percentual_stockout.replace('%', '')) - 
+        parseFloat(a.percentual_stockout.replace('%', ''))
+      );
+
+    console.log(`📍 Análise por local/categoria: ${analisePorLocal.length} categorias processadas`);
+
     // Resumo geral
     const totalDias = historicoDiario.length;
     const somaStockout = historicoDiario.reduce((sum, dia) => 
@@ -298,6 +388,7 @@ export async function POST(request: NextRequest) {
       },
       analise_por_dia_semana: analisePorDiaSemana,
       analise_semanal: analiseSemanal,
+      analise_por_local: analisePorLocal,
       historico_diario: historicoDiario
     };
 

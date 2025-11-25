@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const barId = parseInt(searchParams.get('bar_id') || '1');
+    const barId = parseInt(searchParams.get('bar_id') || '3');
 
     // Buscar grupos únicos da tabela tempo
     const { data: grupos, error } = await supabase

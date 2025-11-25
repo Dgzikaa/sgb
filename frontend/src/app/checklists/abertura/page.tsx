@@ -28,7 +28,7 @@ export default function ChecklistAberturaPage() {
   const carregarChecklists = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/checklists?tipo=abertura&bar_id=${selectedBar?.id || 1}`);
+      const response = await fetch(`/api/checklists?tipo=abertura&bar_id=${selectedBar?.id || 3}`);
       if (response.ok) {
         const data = await response.json();
         setChecklists(data.data || []);

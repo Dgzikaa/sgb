@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const dataEspecifica = searchParams.get('data_especifica');
     const periodoAnalise = searchParams.get('periodo_analise') || '30';
     const grupoFiltro = searchParams.get('grupo_filtro') || 'todos';
-    const barId = parseInt(searchParams.get('bar_id') || '1');
+    const barId = parseInt(searchParams.get('bar_id') || '3');
 
     if (!dataEspecifica) {
       return NextResponse.json(

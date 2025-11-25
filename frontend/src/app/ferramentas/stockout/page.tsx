@@ -274,7 +274,9 @@ export default function StockoutPage() {
           grupos: {
             ativos: [],
             inativos: []
-          }
+          },
+          // Incluir análise por local que vem da API
+          analise_por_local: result.data.analise_por_local || []
         };
         
         setStockoutData(dadosPeriodo);

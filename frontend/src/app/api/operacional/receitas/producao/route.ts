@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const barId = parseInt(searchParams.get('bar_id') || '1');
+    const barId = parseInt(searchParams.get('bar_id') || '3');
     const produtoCodigo = searchParams.get('produto_codigo');
     const funcionario = searchParams.get('funcionario');
     const data = searchParams.get('data'); // Novo parâmetro de data

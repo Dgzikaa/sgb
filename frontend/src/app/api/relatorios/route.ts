@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo');
-    const bar_id = searchParams.get('bar_id') || '1';
+    const bar_id = searchParams.get('bar_id') || '3';
     const data_inicio = searchParams.get('data_inicio');
     const data_fim = searchParams.get('data_fim');
     const limit = parseInt(searchParams.get('limit') || '100');

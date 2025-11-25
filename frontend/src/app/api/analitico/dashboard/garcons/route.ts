@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const dataInicio = searchParams.get('data_inicio');
     const dataFim = searchParams.get('data_fim');
-    const barId = parseInt(searchParams.get('bar_id') || '1');
+    const barId = parseInt(searchParams.get('bar_id') || '3');
 
     if (!dataInicio || !dataFim) {
       return NextResponse.json(

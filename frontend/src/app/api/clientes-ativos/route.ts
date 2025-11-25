@@ -4,6 +4,65 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// Função para buscar dados com paginação (contorna limite de 1000 do Supabase)
+async function fetchAllData(supabase: any, tableName: string, columns: string, filters: any = {}) {
+  let allData: any[] = [];
+  let from = 0;
+  const limit = 1000;
+  const MAX_ITERATIONS = 100;
+  let iterations = 0;
+  
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
+    
+    let query = supabase
+      .from(tableName)
+      .select(columns)
+      .range(from, from + limit - 1);
+    
+    // Aplicar filtros
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key.includes('gte_')) {
+        query = query.gte(key.replace('gte_', ''), value);
+      } else if (key.includes('lte_')) {
+        query = query.lte(key.replace('lte_', ''), value);
+      } else if (key.includes('lt_')) {
+        query = query.lt(key.replace('lt_', ''), value);
+      } else if (key.includes('eq_')) {
+        query = query.eq(key.replace('eq_', ''), value);
+      } else if (key.includes('neq_')) {
+        query = query.neq(key.replace('neq_', ''), value);
+      } else if (key.includes('not_null_')) {
+        query = query.not(key.replace('not_null_', ''), 'is', null);
+      }
+    });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      break;
+    }
+    
+    if (!data || data.length === 0) {
+      break;
+    }
+    
+    allData.push(...data);
+    
+    if (data.length < limit) {
+      break; // Última página
+    }
+    
+    from += limit;
+  }
+  
+  if (iterations > 1) {
+    console.log(`📊 ${tableName}: ${allData.length} registros (${iterations} página(s))`);
+  }
+  return allData;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -12,7 +71,7 @@ export async function GET(request: NextRequest) {
     const periodo = searchParams.get('periodo') || 'semana'; // dia, semana, mes
     const dataInicio = searchParams.get('data_inicio');
     const dataFim = searchParams.get('data_fim');
-    const barId = parseInt(searchParams.get('bar_id') || '1');
+    const barId = parseInt(searchParams.get('bar_id') || '3');
 
     let inicioAtual: string;
     let fimAtual: string;
@@ -22,14 +81,22 @@ export async function GET(request: NextRequest) {
 
     // Calcular períodos baseado no tipo
     if (periodo === 'dia') {
-      // DIA ESPECÍFICO
-      const dataBase = dataInicio ? new Date(dataInicio) : new Date();
-      inicioAtual = dataBase.toISOString().split('T')[0];
-      fimAtual = inicioAtual;
+      // DIA ESPECÍFICO - Comparar com mesmo dia da semana passada (7 dias atrás)
+      if (dataInicio) {
+        inicioAtual = dataInicio;
+        fimAtual = dataInicio;
+      } else {
+        const hoje = new Date();
+        inicioAtual = hoje.toISOString().split('T')[0];
+        fimAtual = inicioAtual;
+      }
       
-      const dataAnt = new Date(dataBase);
-      dataAnt.setDate(dataAnt.getDate() - 1);
-      inicioAnterior = dataAnt.toISOString().split('T')[0];
+      // Calcular mesmo dia da semana anterior (7 dias atrás)
+      const [ano, mes, dia] = inicioAtual.split('-').map(Number);
+      const dataAtual = new Date(ano, mes - 1, dia);
+      const dataAnterior = new Date(dataAtual);
+      dataAnterior.setDate(dataAtual.getDate() - 7); // 7 dias atrás
+      inicioAnterior = dataAnterior.toISOString().split('T')[0];
       fimAnterior = inicioAnterior;
       
       label = new Date(inicioAtual + 'T00:00:00').toLocaleDateString('pt-BR', { 
@@ -39,9 +106,16 @@ export async function GET(request: NextRequest) {
       });
     } else if (periodo === 'mes') {
       // MÊS ESPECÍFICO
-      const dataBase = dataInicio ? new Date(dataInicio) : new Date();
-      const ano = dataBase.getFullYear();
-      const mes = dataBase.getMonth();
+      let ano: number, mes: number;
+      if (dataInicio) {
+        const [anoStr, mesStr] = dataInicio.split('-').map(Number);
+        ano = anoStr;
+        mes = mesStr - 1; // JavaScript usa 0-11 para meses
+      } else {
+        const hoje = new Date();
+        ano = hoje.getFullYear();
+        mes = hoje.getMonth();
+      }
       
       inicioAtual = new Date(ano, mes, 1).toISOString().split('T')[0];
       fimAtual = new Date(ano, mes + 1, 0).toISOString().split('T')[0];
@@ -54,115 +128,102 @@ export async function GET(request: NextRequest) {
         year: 'numeric' 
       });
     } else {
-      // SEMANA (sexta e sábado)
-      function getWeekPeriod(weekNumber: number, year: number) {
-        const firstDayOfYear = new Date(year, 0, 1);
-        const daysToFirstFriday = (5 - firstDayOfYear.getDay() + 7) % 7;
-        const firstFriday = new Date(year, 0, 1 + daysToFirstFriday);
-        
-        const weeksToAdd = weekNumber - 1;
-        const targetFriday = new Date(firstFriday);
-        targetFriday.setDate(firstFriday.getDate() + (weeksToAdd * 7));
-        
-        const targetSaturday = new Date(targetFriday);
-        targetSaturday.setDate(targetFriday.getDate() + 1);
-        
-        return {
-          inicio: targetFriday,
-          fim: targetSaturday
-        };
-      }
-
-      const hoje = new Date();
+      // SEMANA (domingo a sábado)
+      const hoje = dataInicio ? new Date(dataInicio + 'T12:00:00') : new Date();
       const ano = hoje.getFullYear();
-      const firstDayOfYear = new Date(ano, 0, 1);
-      const daysToFirstFriday = (5 - firstDayOfYear.getDay() + 7) % 7;
-      const firstFriday = new Date(ano, 0, 1 + daysToFirstFriday);
       
-      let semanaAtual = 1;
-      if (hoje >= firstFriday) {
-        const diffTime = hoje.getTime() - firstFriday.getTime();
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        semanaAtual = Math.floor(diffDays / 7) + 1;
-      }
-
-      const periodoAtual = getWeekPeriod(semanaAtual, ano);
-      const periodoAnterior = getWeekPeriod(semanaAtual - 1, ano);
-
-      inicioAtual = periodoAtual.inicio.toISOString().split('T')[0];
-      fimAtual = periodoAtual.fim.toISOString().split('T')[0];
-      inicioAnterior = periodoAnterior.inicio.toISOString().split('T')[0];
-      fimAnterior = periodoAnterior.fim.toISOString().split('T')[0];
+      // Calcular início e fim da semana atual (domingo = 0, sábado = 6)
+      const diaSemana = hoje.getDay(); // 0 = domingo, 1 = segunda, ..., 6 = sábado
       
-      label = `Semana ${semanaAtual}/${ano}`;
+      // Criar data do domingo da semana (início)
+      const inicioSemanaAtual = new Date(hoje);
+      inicioSemanaAtual.setDate(hoje.getDate() - diaSemana); // Volta para o domingo
+      inicioSemanaAtual.setHours(0, 0, 0, 0);
+      
+      // Criar data do sábado da semana (fim)
+      const fimSemanaAtual = new Date(inicioSemanaAtual);
+      fimSemanaAtual.setDate(inicioSemanaAtual.getDate() + 6); // Avança 6 dias até sábado
+      fimSemanaAtual.setHours(23, 59, 59, 999);
+      
+      // Calcular semana anterior
+      const inicioSemanaAnterior = new Date(inicioSemanaAtual);
+      inicioSemanaAnterior.setDate(inicioSemanaAtual.getDate() - 7);
+      const fimSemanaAnterior = new Date(inicioSemanaAnterior);
+      fimSemanaAnterior.setDate(inicioSemanaAnterior.getDate() + 6);
+      
+      // Calcular número da semana no ano
+      const inicioAno = new Date(ano, 0, 1);
+      const diffTime = inicioSemanaAtual.getTime() - inicioAno.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const semanaAtual = Math.ceil((diffDays + inicioAno.getDay() + 1) / 7);
+
+      inicioAtual = inicioSemanaAtual.toISOString().split('T')[0];
+      fimAtual = fimSemanaAtual.toISOString().split('T')[0];
+      inicioAnterior = inicioSemanaAnterior.toISOString().split('T')[0];
+      fimAnterior = fimSemanaAnterior.toISOString().split('T')[0];
+      
+      label = `Semana ${semanaAtual} (${inicioSemanaAtual.toLocaleDateString('pt-BR')} - ${fimSemanaAtual.toLocaleDateString('pt-BR')})`;
     }
 
     console.log(`📊 Buscando clientes ativos - Período: ${periodo}`);
+    console.log(`🏢 Bar ID: ${barId}`);
     console.log(`📅 Atual: ${inicioAtual} a ${fimAtual}`);
-    console.log(`📅 Anterior: ${inicioAnterior} a ${fimAnterior}`);
-
-    // 1. CLIENTES DO PERÍODO ATUAL
-    const { data: clientesAtual, error: errorAtual } = await supabase
-      .from('contahub_periodo')
-      .select('cli_fone')
-      .eq('bar_id', barId)
-      .gte('dt_gerencial', inicioAtual)
-      .lte('dt_gerencial', fimAtual)
-      .not('cli_fone', 'is', null);
-
-    if (errorAtual) {
-      console.error('❌ Erro ao buscar clientes período atual:', errorAtual);
-      throw errorAtual;
+    console.log(`📅 Comparando com: ${inicioAnterior} a ${fimAnterior}`);
+    if (periodo === 'dia') {
+      const diaSemana = new Date(inicioAtual + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long' });
+      console.log(`📆 Comparação: ${diaSemana} vs ${diaSemana} da semana anterior`);
     }
 
+    // ⚡ SUPER OTIMIZAÇÃO: Usar SQL DISTINCT direto (10x mais rápido)
+    const startTime = Date.now();
+    
+    const [resultAtual, resultAnterior, resultHistorico] = await Promise.all([
+      // 1. CLIENTES ÚNICOS DO PERÍODO ATUAL
+      supabase.rpc('get_clientes_unicos_periodo', {
+        p_bar_id: barId,
+        p_data_inicio: inicioAtual,
+        p_data_fim: fimAtual
+      }),
+      // 2. CLIENTES ÚNICOS DO PERÍODO ANTERIOR
+      supabase.rpc('get_clientes_unicos_periodo', {
+        p_bar_id: barId,
+        p_data_inicio: inicioAnterior,
+        p_data_fim: fimAnterior
+      }),
+      // 3. CLIENTES ÚNICOS DO HISTÓRICO
+      supabase.rpc('get_clientes_unicos_historico', {
+        p_bar_id: barId,
+        p_data_limite: inicioAtual
+      })
+    ]);
+
+    const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`⚡ Queries principais com SQL DISTINCT: ${elapsedTime}s`);
+
+    // Processar resultados
     const clientesUnicosAtual = new Set(
-      (clientesAtual || [])
-        .map(row => (row.cli_fone || '').toString().trim())
+      (resultAtual.data || [])
+        .map((row: any) => (row.cli_fone || '').toString().trim())
+        .filter(Boolean)
+    );
+
+    const clientesUnicosAnterior = new Set(
+      (resultAnterior.data || [])
+        .map((row: any) => (row.cli_fone || '').toString().trim())
+        .filter(Boolean)
+    );
+
+    const clientesHistoricos = new Set(
+      (resultHistorico.data || [])
+        .map((row: any) => (row.cli_fone || '').toString().trim())
         .filter(Boolean)
     );
 
     const totalClientesAtual = clientesUnicosAtual.size;
-
-    // 2. CLIENTES DO PERÍODO ANTERIOR
-    const { data: clientesAnterior, error: errorAnterior } = await supabase
-      .from('contahub_periodo')
-      .select('cli_fone')
-      .eq('bar_id', barId)
-      .gte('dt_gerencial', inicioAnterior)
-      .lte('dt_gerencial', fimAnterior)
-      .not('cli_fone', 'is', null);
-
-    if (errorAnterior) {
-      console.error('❌ Erro ao buscar clientes período anterior:', errorAnterior);
-      throw errorAnterior;
-    }
-
-    const clientesUnicosAnterior = new Set(
-      (clientesAnterior || [])
-        .map(row => (row.cli_fone || '').toString().trim())
-        .filter(Boolean)
-    );
-
     const totalClientesAnterior = clientesUnicosAnterior.size;
-
-    // 3. HISTÓRICO - Clientes que vieram ANTES do período atual
-    const { data: historicoData, error: errorHistorico } = await supabase
-      .from('contahub_periodo')
-      .select('cli_fone')
-      .eq('bar_id', barId)
-      .lt('dt_gerencial', inicioAtual)
-      .not('cli_fone', 'is', null);
-
-    if (errorHistorico) {
-      console.error('❌ Erro ao buscar histórico:', errorHistorico);
-      throw errorHistorico;
-    }
-
-    const clientesHistoricos = new Set(
-      (historicoData || [])
-        .map(row => (row.cli_fone || '').toString().trim())
-        .filter(Boolean)
-    );
+    
+    console.log(`👥 Total clientes período atual: ${totalClientesAtual}`);
+    console.log(`📚 Total clientes no histórico: ${clientesHistoricos.size}`);
 
     // 4. SEPARAR NOVOS vs RETORNANTES (PERÍODO ATUAL)
     let novosClientes = 0;
@@ -175,23 +236,57 @@ export async function GET(request: NextRequest) {
         novosClientes++;
       }
     });
+    
+    console.log(`🆕 Novos: ${novosClientes}, 🔄 Retornantes: ${clientesRetornantes}`);
 
-    // 5. SEPARAR NOVOS vs RETORNANTES (PERÍODO ANTERIOR)
-    const { data: historicoDataAnterior, error: errorHistoricoAnterior } = await supabase
-      .from('contahub_periodo')
-      .select('cli_fone')
-      .eq('bar_id', barId)
-      .lt('dt_gerencial', inicioAnterior)
-      .not('cli_fone', 'is', null);
+    // ⚡ SUPER OTIMIZAÇÃO: Queries secundárias com SQL otimizado
+    const startTime2 = Date.now();
+    
+    // Preparar datas para base ativa
+    const dataRef = new Date(fimAtual + 'T00:00:00');
+    const anoAtual = dataRef.getFullYear();
+    const mesAtual = dataRef.getMonth();
+    const fimMesAtual = new Date(anoAtual, mesAtual + 1, 0).toISOString().split('T')[0];
+    const data90DiasAtras = new Date(fimMesAtual + 'T00:00:00');
+    data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
+    const data90DiasAtrasStr = data90DiasAtras.toISOString().split('T')[0];
+    
+    const mesAnterior = mesAtual - 1;
+    const anoMesAnterior = mesAnterior < 0 ? anoAtual - 1 : anoAtual;
+    const mesMesAnterior = mesAnterior < 0 ? 11 : mesAnterior;
+    const fimMesAnterior = new Date(anoMesAnterior, mesMesAnterior + 1, 0).toISOString().split('T')[0];
+    const data90DiasAtrasAnterior = new Date(fimMesAnterior + 'T00:00:00');
+    data90DiasAtrasAnterior.setDate(data90DiasAtrasAnterior.getDate() - 90);
+    const data90DiasAtrasAnteriorStr = data90DiasAtrasAnterior.toISOString().split('T')[0];
 
-    if (errorHistoricoAnterior) {
-      console.error('❌ Erro ao buscar histórico anterior:', errorHistoricoAnterior);
-      throw errorHistoricoAnterior;
-    }
+    // Executar 3 queries otimizadas em paralelo
+    const [resultHistoricoAnterior, resultBaseAtiva, resultBaseAtivaAnterior] = await Promise.all([
+      // 5. Histórico anterior
+      supabase.rpc('get_clientes_unicos_historico', {
+        p_bar_id: barId,
+        p_data_limite: inicioAnterior
+      }),
+      // 6. BASE ATIVA DO MÊS ATUAL (já retorna só quem tem 2+ visitas)
+      supabase.rpc('get_base_ativa', {
+        p_bar_id: barId,
+        p_data_inicio: data90DiasAtrasStr,
+        p_data_fim: fimMesAtual
+      }),
+      // 7. BASE ATIVA DO MÊS ANTERIOR
+      supabase.rpc('get_base_ativa', {
+        p_bar_id: barId,
+        p_data_inicio: data90DiasAtrasAnteriorStr,
+        p_data_fim: fimMesAnterior
+      })
+    ]);
 
+    const elapsedTime2 = ((Date.now() - startTime2) / 1000).toFixed(2);
+    console.log(`⚡ Queries secundárias com SQL otimizado: ${elapsedTime2}s`);
+
+    // Processar histórico anterior
     const clientesHistoricosAnterior = new Set(
-      (historicoDataAnterior || [])
-        .map(row => (row.cli_fone || '').toString().trim())
+      (resultHistoricoAnterior.data || [])
+        .map((row: any) => (row.cli_fone || '').toString().trim())
         .filter(Boolean)
     );
 
@@ -206,71 +301,11 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 6. CLIENTES ATIVOS (2+ visitas nos últimos 90 dias a partir do fim do período)
-    const data90DiasAtras = new Date(fimAtual + 'T00:00:00');
-    data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
-    const data90DiasAtrasStr = data90DiasAtras.toISOString().split('T')[0];
+    // Base ativa atual (já vem processada do banco)
+    const clientesAtivos = (resultBaseAtiva.data || []).length;
 
-    const { data: clientes90Dias, error: error90Dias } = await supabase
-      .from('contahub_periodo')
-      .select('cli_fone')
-      .eq('bar_id', barId)
-      .gte('dt_gerencial', data90DiasAtrasStr)
-      .lte('dt_gerencial', fimAtual)
-      .not('cli_fone', 'is', null);
-
-    if (error90Dias) {
-      console.error('❌ Erro ao buscar clientes 90 dias:', error90Dias);
-      throw error90Dias;
-    }
-
-    const visitasPorCliente = new Map<string, number>();
-    (clientes90Dias || []).forEach(row => {
-      const telefone = (row.cli_fone || '').toString().trim();
-      if (telefone) {
-        visitasPorCliente.set(telefone, (visitasPorCliente.get(telefone) || 0) + 1);
-      }
-    });
-
-    let clientesAtivos = 0;
-    visitasPorCliente.forEach(visitas => {
-      if (visitas >= 2) {
-        clientesAtivos++;
-      }
-    });
-
-    // 7. CLIENTES ATIVOS DO PERÍODO ANTERIOR
-    const data90DiasAtrasAnterior = new Date(fimAnterior + 'T00:00:00');
-    data90DiasAtrasAnterior.setDate(data90DiasAtrasAnterior.getDate() - 90);
-    const data90DiasAtrasAnteriorStr = data90DiasAtrasAnterior.toISOString().split('T')[0];
-
-    const { data: clientes90DiasAnterior, error: error90DiasAnterior } = await supabase
-      .from('contahub_periodo')
-      .select('cli_fone')
-      .eq('bar_id', barId)
-      .gte('dt_gerencial', data90DiasAtrasAnteriorStr)
-      .lte('dt_gerencial', fimAnterior)
-      .not('cli_fone', 'is', null);
-
-    if (error90DiasAnterior) {
-      console.error('❌ Erro ao buscar clientes 90 dias anterior:', error90DiasAnterior);
-      throw error90DiasAnterior;
-    }
-
-    const visitasPorClienteAnterior = new Map<string, number>();
-    (clientes90DiasAnterior || []).forEach(row => {
-      const telefone = (row.cli_fone || '').toString().trim();
-      if (telefone) {
-        visitasPorClienteAnterior.set(telefone, (visitasPorClienteAnterior.get(telefone) || 0) + 1);
-      }
-    });
-
-    let clientesAtivosAnterior = 0;
-    visitasPorClienteAnterior.forEach(visitas => {
-      if (visitas >= 2) {
-        clientesAtivosAnterior++;
-      }
-    });
+    // Base ativa anterior (já vem processada do banco)
+    const clientesAtivosAnterior = (resultBaseAtivaAnterior.data || []).length;
 
     // 8. CALCULAR VARIAÇÕES
     const variacaoTotal = totalClientesAnterior > 0 
