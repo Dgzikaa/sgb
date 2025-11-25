@@ -448,6 +448,7 @@ export async function POST(request: NextRequest) {
       );
 
     console.log(`📍 Análise por local/categoria: ${analisePorLocal.length} categorias processadas`);
+    console.log(`📅 Total de dias processados: ${historicoDiario.length}`);
 
     // Resumo geral
     const totalDias = historicoDiario.length;
