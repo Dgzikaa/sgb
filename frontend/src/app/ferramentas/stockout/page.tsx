@@ -82,6 +82,11 @@ interface StockoutData {
       disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
       indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
     };
+    produtos_por_dia?: Array<{
+      data: string;
+      disponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+      indisponiveis: Array<{ prd_desc: string; loc_desc: string }>;
+    }>;
   }>;
 }
 
