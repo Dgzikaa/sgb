@@ -1039,6 +1039,53 @@ export default function StockoutPage() {
                     </CardContent>
                   </Card>
 
+                  {/* Histórico Diário */}
+                  {historicoData.historico_diario.length > 0 && (
+                    <Card className="card-dark">
+                      <CardHeader className="p-4 sm:p-6">
+                        <CardTitle className="card-title-dark text-base sm:text-lg flex items-center gap-2">
+                          <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5" />
+                          Histórico Diário
+                        </CardTitle>
+                        <CardDescription className="card-description-dark text-xs sm:text-sm">
+                          Evolução diária do stockout
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-4 sm:p-6 pt-0">
+                        <div className="overflow-x-auto -mx-4 sm:-mx-6">
+                          <div className="inline-flex gap-2 px-4 sm:px-6 pb-2">
+                            {historicoData.historico_diario.map((dia, index) => {
+                              const data = new Date(dia.data_referencia + 'T00:00:00');
+                              const diaNumero = data.getDate();
+                              const stockoutPerc = parseFloat(dia.percentual_stockout.replace('%', ''));
+                              
+                              return (
+                                <div 
+                                  key={index} 
+                                  className={`flex-shrink-0 w-20 p-3 rounded-lg border-2 text-center ${
+                                    stockoutPerc <= 10 ? 'border-green-500 bg-green-50 dark:bg-green-900/20' :
+                                    stockoutPerc <= 25 ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
+                                    'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                  }`}
+                                >
+                                  <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                                    {diaNumero}
+                                  </div>
+                                  <div className={`text-sm font-semibold ${getStockoutColor(dia.percentual_stockout)}`}>
+                                    {stockoutPerc.toFixed(1)}%
+                                  </div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                    {dia.dia_semana.substring(0, 3)}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* Análise Semanal */}
                   {historicoData.analise_semanal.length > 1 && (
                     <Card className="card-dark">
