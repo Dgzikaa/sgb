@@ -280,19 +280,70 @@ export async function GET(request: NextRequest) {
 
     const insights: Insight[] = [];
 
-    // Crescimento geral
-    if (variacaoTotal > 10) {
-      insights.push({
-        tipo: 'positivo',
-        titulo: 'Crescimento Acelerado',
-        descricao: `O número de clientes cresceu ${variacaoTotal.toFixed(1)}% em relação ao período anterior. Continue investindo nas estratégias atuais!`
-      });
-    } else if (variacaoTotal < -10) {
-      insights.push({
-        tipo: 'atencao',
-        titulo: 'Queda no Fluxo',
-        descricao: `Redução de ${Math.abs(variacaoTotal).toFixed(1)}% no número de clientes. Considere ações de marketing e promoções.`
-      });
+    // 🎯 NOVO: Projeção de período (se ainda não terminou)
+    const hoje = new Date();
+    const dataFimPeriodo = new Date(fimAtual + 'T23:59:59');
+    const dataInicioPeriodo = new Date(inicioAtual + 'T00:00:00');
+    const periodoNaoTerminou = hoje < dataFimPeriodo;
+
+    if (periodoNaoTerminou && periodo !== 'dia') {
+      // Calcular dias decorridos e dias restantes
+      const diasDecorridos = Math.max(1, Math.ceil((hoje.getTime() - dataInicioPeriodo.getTime()) / (1000 * 60 * 60 * 24)));
+      const diasTotais = Math.ceil((dataFimPeriodo.getTime() - dataInicioPeriodo.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      const diasRestantes = Math.max(0, diasTotais - diasDecorridos);
+
+      if (diasRestantes > 0) {
+        // Calcular média diária do período atual
+        const mediaDiaria = totalClientesAtual / diasDecorridos;
+        
+        // Projetar total até o fim do período
+        const clientesProjetados = Math.round(totalClientesAtual + (mediaDiaria * diasRestantes));
+        
+        // Comparar com período anterior
+        const variacaoProjetada = totalClientesAnterior > 0 
+          ? ((clientesProjetados - totalClientesAnterior) / totalClientesAnterior) * 100 
+          : 0;
+
+        const nomePeriodo = periodo === 'semana' ? 'semana' : 'mês';
+        const preposicao = periodo === 'semana' ? 'a' : 'o';
+        
+        if (variacaoProjetada > 5) {
+          insights.push({
+            tipo: 'positivo',
+            titulo: `🎯 Projeção Positiva`,
+            descricao: `Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} n${preposicao} ${nomePeriodo}. No ritmo atual (${Math.round(mediaDiaria)} clientes/dia), você deve atingir cerca de ${clientesProjetados.toLocaleString('pt-BR')} clientes. Isso seria ${variacaoProjetada.toFixed(1)}% acima do período anterior!`
+          });
+        } else if (variacaoProjetada < -5) {
+          insights.push({
+            tipo: 'atencao',
+            titulo: `🎯 Atenção à Projeção`,
+            descricao: `Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} n${preposicao} ${nomePeriodo}. No ritmo atual (${Math.round(mediaDiaria)} clientes/dia), você deve atingir cerca de ${clientesProjetados.toLocaleString('pt-BR')} clientes. Isso seria ${Math.abs(variacaoProjetada).toFixed(1)}% abaixo do período anterior. Considere ações para acelerar!`
+          });
+        } else {
+          insights.push({
+            tipo: 'info',
+            titulo: `🎯 Projeção de ${nomePeriodo.charAt(0).toUpperCase() + nomePeriodo.slice(1)}`,
+            descricao: `Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} n${preposicao} ${nomePeriodo}. No ritmo atual (${Math.round(mediaDiaria)} clientes/dia), você deve atingir cerca de ${clientesProjetados.toLocaleString('pt-BR')} clientes até o final, similar ao período anterior.`
+          });
+        }
+      }
+    }
+
+    // Crescimento geral (só mostra se período já terminou ou queda muito grande)
+    if (!periodoNaoTerminou || variacaoTotal < -15) {
+      if (variacaoTotal > 10) {
+        insights.push({
+          tipo: 'positivo',
+          titulo: 'Crescimento Acelerado',
+          descricao: `O número de clientes cresceu ${variacaoTotal.toFixed(1)}% em relação ao período anterior. Continue investindo nas estratégias atuais!`
+        });
+      } else if (variacaoTotal < -10) {
+        insights.push({
+          tipo: 'atencao',
+          titulo: 'Queda no Fluxo',
+          descricao: `Redução de ${Math.abs(variacaoTotal).toFixed(1)}% no número de clientes. Considere ações de marketing e promoções.`
+        });
+      }
     }
 
     // Novos clientes
