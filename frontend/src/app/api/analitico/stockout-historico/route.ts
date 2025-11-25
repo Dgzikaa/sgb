@@ -6,6 +6,44 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// ⚡ Função otimizada para buscar dados com paginação (contorna limite de 1000 do Supabase)
+async function fetchAllData(query: any) {
+  let allData: any[] = [];
+  let from = 0;
+  const limit = 1000;
+  const MAX_ITERATIONS = 100; // Limitar a 100 mil registros no máximo
+  let iterations = 0;
+  
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
+    
+    const { data, error } = await query.range(from, from + limit - 1);
+    
+    if (error) {
+      console.error(`❌ Erro na paginação:`, error);
+      throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      break; // Sem mais dados
+    }
+    
+    allData.push(...data);
+    
+    if (data.length < limit) {
+      break; // Última página
+    }
+    
+    from += limit;
+  }
+  
+  if (iterations > 1) {
+    console.log(`📦 ${allData.length} registros buscados em ${iterations} lote(s)`);
+  }
+  
+  return allData;
+}
+
 // Função auxiliar para aplicar filtros base (locais e prefixos a ignorar)
 const aplicarFiltrosBase = (query: any) => {
   // LOCAIS A IGNORAR PERMANENTEMENTE
@@ -159,14 +197,15 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔍 Buscando histórico de stockout: ${data_inicio} até ${data_fim}`);
 
-    // Buscar dados históricos com NOVA LÓGICA: apenas produtos ativos='S'
+    // ⚡ Buscar dados históricos com paginação otimizada
     let query = supabase
       .from('contahub_stockout')
       .select('data_consulta, prd_ativo, prd_venda, loc_desc, prd_desc')
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .gte('data_consulta', data_inicio)
       .lte('data_consulta', data_fim)
-      .eq('bar_id', bar_id);
+      .eq('bar_id', bar_id)
+      .order('data_consulta', { ascending: true });
 
     // Aplicar filtros base
     query = aplicarFiltrosBase(query);
@@ -180,11 +219,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { data: dadosHistoricos, error } = await query;
-
-    if (error) {
-      throw new Error(`Erro ao buscar dados históricos: ${error.message}`);
-    }
+    // Buscar todos os dados com paginação automática
+    const dadosHistoricos = await fetchAllData(query);
 
     if (!dadosHistoricos || dadosHistoricos.length === 0) {
       return NextResponse.json({
@@ -209,6 +245,10 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(`🔍 Dados filtrados: ${dadosHistoricos.length} → ${dadosValidosFiltrados.length} (removidas ${dadosHistoricos.length - dadosValidosFiltrados.length} terças inválidas)`);
+    
+    // Verificar quais datas únicas temos após o filtro
+    const datasUnicas = [...new Set(dadosValidosFiltrados.map(item => item.data_consulta))].sort();
+    console.log(`📅 Datas únicas após filtro: ${datasUnicas.length} dias:`, datasUnicas);
 
     // Agrupar dados por data (usando apenas dados válidos)
     const dadosPorData = new Map();
