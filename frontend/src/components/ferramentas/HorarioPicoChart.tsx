@@ -413,24 +413,24 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">⭐ Resumo do Dia - {dataSelecionada}</h3>
               </div>
               
-              {/* Linha única com todas as métricas */}
-              <div className="grid grid-cols-3 md:grid-cols-10 gap-3">
+              {/* Grid responsivo com métricas principais */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                 {/* Produto Top */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <TrendingUpIcon className="w-4 h-4 text-green-600 dark:text-green-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Produto Top</p>
+                <div className="text-center bg-white dark:bg-gray-800/50 p-2 sm:p-3 rounded-lg">
+                  <div className="flex flex-col items-center mb-1">
+                    <TrendingUpIcon className="w-4 h-4 text-green-600 dark:text-green-400 mb-1" />
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-700 dark:text-gray-300">Produto Top</p>
                   </div>
-                  <p className="text-sm font-bold text-green-900 dark:text-green-100">
+                  <p className="text-xs sm:text-sm font-bold text-green-900 dark:text-green-100 truncate">
                     {estatisticas.produto_mais_vendido ? 
-                      (estatisticas.produto_mais_vendido.length > 20 ? 
-                        estatisticas.produto_mais_vendido.substring(0, 20) + '...' : 
+                      (estatisticas.produto_mais_vendido.length > 15 ? 
+                        estatisticas.produto_mais_vendido.substring(0, 15) + '...' : 
                         estatisticas.produto_mais_vendido
                       ) : 'N/A'
                     }
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {estatisticas.produto_mais_vendido_qtd > 0 ? `${Math.round(estatisticas.produto_mais_vendido_qtd)} unidades` : 'Mais vendido'}
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
+                    {estatisticas.produto_mais_vendido_qtd > 0 ? `${Math.round(estatisticas.produto_mais_vendido_qtd)} un` : 'Mais vendido'}
                   </p>
                 </div>
 

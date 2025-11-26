@@ -16,6 +16,14 @@ import {
   Zap,
   Target,
   Wrench,
+  Settings,
+  Package,
+  Calendar,
+  Users,
+  Clock,
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 interface BottomNavItem {
@@ -31,54 +39,74 @@ interface MobileHamburgerMenuProps {
   onClose: () => void;
 }
 
-// Menu hambúrguer overlay para funcionalidades avançadas
+// Menu hambúrguer overlay completo (igual ao sidebar desktop)
 function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
   const pathname = usePathname();
   const { isRole } = usePermissions();
-  const { badges } = useMenuBadges();
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const isActive = (href: string) => {
     if (href === '/home') return pathname === '/home';
     return pathname.startsWith(href);
   };
 
-  const advancedItems = [
+  const toggleSection = (label: string) => {
+    setExpandedSections(prev => 
+      prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label]
+    );
+  };
+
+  // Estrutura completa do menu (igual ao sidebar)
+  const menuSections = [
     {
-      icon: CheckSquare,
-      label: 'Funcionário Checklists',
-      href: '/operacoes/checklists/checklists-funcionario',
-      description: 'Meus checklists pessoais',
+      icon: Target,
+      label: 'Estratégico',
+      href: '/estrategico',
+      color: 'text-blue-600 dark:text-blue-400',
+      subItems: [
+        { icon: TrendingUp, label: 'Visão Geral', href: '/estrategico/visao-geral' },
+        { icon: BarChart3, label: 'Desempenho', href: '/estrategico/desempenho' },
+        { icon: Calendar, label: 'Planejamento Comercial', href: '/estrategico/planejamento-comercial' },
+      ],
     },
     {
-      icon: ChefHat,
-      label: 'Terminal Produção',
-      href: '/ferramentas/terminal',
-      description: 'Terminal de produção',
+      icon: Wrench,
+      label: 'Ferramentas',
+      href: '/ferramentas',
+      color: 'text-green-600 dark:text-green-400',
+      subItems: [
+        { icon: Package, label: 'Produção e Insumos', href: '/ferramentas/producao-insumos' },
+        { icon: Package, label: 'Contagem de Estoque', href: '/ferramentas/contagem-estoque' },
+        { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento' },
+        { icon: Users, label: 'NPS', href: '/ferramentas/nps' },
+        { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal' },
+        { icon: Users, label: 'Simulação de CMO', href: '/ferramentas/simulacao-cmo' },
+        { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout' },
+      ],
     },
     {
       icon: BarChart3,
-      label: 'Relatórios Financeiros',
-      href: '/relatorios/financeiro-competencia',
-      description: 'Windsor.ai relatórios',
+      label: 'Analítico',
+      href: '/analitico',
+      color: 'text-indigo-600 dark:text-indigo-400',
+      subItems: [
+        { icon: Clock, label: 'Eventos', href: '/analitico/eventos' },
+        { icon: Users, label: 'Clientes', href: '/analitico/clientes' },
+        { icon: Users, label: 'Clientes Ativos', href: '/relatorios/clientes-ativos' },
+      ],
     },
   ];
 
-  const configItems = isRole('admin')
-    ? [
-        {
-          icon: CheckSquare,
-          label: 'Config Checklists',
-          href: '/configuracoes/checklists',
-          description: 'Configurar checklists',
-        },
-        {
-          icon: BarChart3,
-          label: 'Integrações',
-          href: '/configuracoes/integracoes',
-          description: 'Configurar integrações',
-        },
-      ]
-    : [];
+  // Adicionar Configurações se for admin
+  if (isRole('admin')) {
+    menuSections.push({
+      icon: Settings,
+      label: 'Configurações',
+      href: '/configuracoes',
+      color: 'text-gray-600 dark:text-gray-400',
+      subItems: [],
+    });
+  }
 
   if (!isOpen) return null;
 
@@ -118,73 +146,81 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
           </button>
         </div>
 
-        {/* Menu items */}
-        <div className="p-4 space-y-6">
-          {/* Funcionalidades Avançadas */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-              Funcionalidades
-            </h3>
-            <div className="space-y-2">
-              {advancedItems.map(item => {
-                const active = isActive(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className={`flex items-center p-3 rounded-xl transition-colors ${
-                      active
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
-                    <div className="ml-3">
-                      <div className="font-medium">{item.label}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {item.description}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+        {/* Menu items - estrutura completa */}
+        <div className="p-4 space-y-2 pb-20">
+          {/* Home */}
+          <Link
+            href="/home"
+            onClick={onClose}
+            className={`flex items-center p-3 rounded-xl transition-colors ${
+              isActive('/home')
+                ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
+            <Home className="w-5 h-5 flex-shrink-0" />
+            <span className="ml-3 font-medium">Home</span>
+          </Link>
 
-          {/* Configurações (apenas admin) */}
-          {configItems.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-                Configurações
-              </h3>
-              <div className="space-y-2">
-                {configItems.map(item => {
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={onClose}
-                      className={`flex items-center p-3 rounded-xl transition-colors ${
-                        active
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
-                    >
-                      <item.icon className="w-5 h-5 flex-shrink-0" />
-                      <div className="ml-3">
-                        <div className="font-medium">{item.label}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {item.description}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+          {/* Seções expansíveis */}
+          {menuSections.map(section => {
+            const isExpanded = expandedSections.includes(section.label);
+            const sectionActive = isActive(section.href);
+            
+            return (
+              <div key={section.label}>
+                {/* Cabeçalho da seção */}
+                <button
+                  onClick={() => {
+                    if (section.subItems.length > 0) {
+                      toggleSection(section.label);
+                    } else {
+                      onClose();
+                      window.location.href = section.href;
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${
+                    sectionActive
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <section.icon className={`w-5 h-5 flex-shrink-0 ${section.color}`} />
+                    <span className="ml-3 font-medium">{section.label}</span>
+                  </div>
+                  {section.subItems.length > 0 && (
+                    isExpanded ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )
+                  )}
+                </button>
+
+                {/* Subitens */}
+                {isExpanded && section.subItems.length > 0 && (
+                  <div className="mt-1 ml-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-1">
+                    {section.subItems.map(subItem => (
+                      <Link
+                        key={subItem.href}
+                        href={subItem.href}
+                        onClick={onClose}
+                        className={`flex items-center p-2 rounded-lg transition-colors ${
+                          isActive(subItem.href)
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <subItem.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="ml-2 text-sm">{subItem.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })}
         </div>
 
         {/* Footer */}
@@ -216,7 +252,7 @@ export function BottomNavigation() {
     return pathname.startsWith(href);
   };
 
-  // Principais funcionalidades para bottom nav - ALINHADO COM SIDEBAR
+  // Principais funcionalidades para bottom nav - PÁGINAS PRINCIPAIS
   const bottomNavItems: BottomNavItem[] = [
     {
       icon: Home,
@@ -228,20 +264,20 @@ export function BottomNavigation() {
     {
       icon: Target,
       label: 'Estratégico',
-      href: '/estrategico/visao-geral',
+      href: '/estrategico',
       color: 'text-blue-600 dark:text-blue-400',
       badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined,
     },
     {
       icon: Wrench,
       label: 'Ferramentas',
-      href: '/ferramentas/producao-insumos',
+      href: '/ferramentas',
       color: 'text-green-600 dark:text-green-400',
     },
     {
       icon: BarChart3,
       label: 'Analítico',
-      href: '/analitico/eventos',
+      href: '/analitico',
       color: 'text-indigo-600 dark:text-indigo-400',
       badge: badges.marketing > 0 ? badges.marketing : undefined,
     },
@@ -320,17 +356,6 @@ export function BottomNavigation() {
                 </Link>
               );
             })}
-
-            {/* Menu button */}
-            <button
-              onClick={() => setIsMenuOpen(true)}
-              className="flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 min-w-[60px] touch-manipulation hover:bg-gray-50 dark:hover:bg-gray-800"
-            >
-              <Menu className="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400" />
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                Menu
-              </span>
-            </button>
           </div>
         </div>
       </div>
