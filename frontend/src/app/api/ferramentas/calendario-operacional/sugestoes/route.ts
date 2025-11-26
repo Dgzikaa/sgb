@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
     }) || [];
 
     // 4. GERAR SUGESTÕES
-    const sugestoes = [];
+    const sugestoes: any[] = [];
 
     // Sugestão de feriados
     if (feriadosNaoCadastrados.length > 0) {

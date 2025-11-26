@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const ano = parseInt(searchParams.get('ano') || new Date().getFullYear().toString());
-    const mes = searchParams.get('mes') ? parseInt(searchParams.get('mes')) : null;
+    const mes = searchParams.get('mes') ? parseInt(searchParams.get('mes')!) : null;
     const barId = parseInt(searchParams.get('bar_id') || '3');
 
     console.log(`📊 Analytics Calendário - Ano: ${ano}, Mês: ${mes || 'todos'}, Bar: ${barId}`);

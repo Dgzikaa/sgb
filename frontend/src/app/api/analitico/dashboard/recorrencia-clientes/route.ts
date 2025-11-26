@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const data2Aberto = statusDias.get(data2)?.aberto !== false;
     
     if (!data1Aberto || !data2Aberto) {
-      const diasFechados = [];
+      const diasFechados: string[] = [];
       if (!data1Aberto) diasFechados.push(data1);
       if (!data2Aberto) diasFechados.push(data2);
       

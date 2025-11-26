@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`📦 Bulk Update: ${datas.length} dias para status "${status}"`);
 
-    const resultados = [];
-    const historico = [];
+    const resultados: any[] = [];
+    const historico: any[] = [];
 
     // Processar cada data
     for (const data of datas) {
