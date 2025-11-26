@@ -114,14 +114,14 @@ export function IndicadorCard({
 
   return (
     <Card className={`card-dark shadow-sm hover:shadow-lg transition-shadow ${emDesenvolvimento ? 'opacity-70' : ''}`}>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-base font-medium text-gray-700 dark:text-gray-300">
+      <CardHeader className="pb-2 p-3 sm:p-6">
+        <div className="flex items-start sm:items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
+            <CardTitle className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300 break-words">
               {titulo}
             </CardTitle>
             {emDesenvolvimento && (
-              <Badge variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs">
+              <Badge variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs self-start sm:self-auto">
                 <Construction className="h-3 w-3 mr-1" />
                 Em Desenvolvimento
               </Badge>
@@ -149,7 +149,7 @@ export function IndicadorCard({
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6 pt-0">
         {/* Seção de comparação - ACIMA do valor principal */}
         {!emDesenvolvimento && comparacao && (
           <div className="flex items-center justify-center mb-2">
@@ -186,19 +186,19 @@ export function IndicadorCard({
         )}
         
         <div>
-          <div className="flex items-baseline justify-between mb-1">
-            <p className={`text-2xl font-bold ${emDesenvolvimento ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}>
+          <div className="flex items-baseline justify-between mb-1 gap-2">
+            <p className={`text-lg sm:text-xl lg:text-2xl font-bold ${emDesenvolvimento ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'} break-words`}>
               {emDesenvolvimento ? 'Disponível em breve' : `${prefixo}${formatarValor(valor)}${sufixo}`}
             </p>
             {!emDesenvolvimento && (
-              <Badge variant="secondary" className={cores.bgLight}>
+              <Badge variant="secondary" className={`${cores.bgLight} flex-shrink-0`}>
                 <span className={cores.text}>
                   {progresso.toFixed(0)}%
                 </span>
               </Badge>
             )}
           </div>
-          <p className={`text-sm ${emDesenvolvimento ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'}`}>
+          <p className={`text-xs sm:text-sm ${emDesenvolvimento ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'} break-words`}>
             {emDesenvolvimento ? 'Indicador sendo desenvolvido' : `Meta: ${prefixo}${formatarValor(meta)}${sufixo}`}
           </p>
         </div>

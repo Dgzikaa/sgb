@@ -14,6 +14,8 @@ import {
   Menu,
   X,
   Zap,
+  Target,
+  Wrench,
 } from 'lucide-react';
 
 interface BottomNavItem {
@@ -214,7 +216,7 @@ export function BottomNavigation() {
     return pathname.startsWith(href);
   };
 
-  // Principais funcionalidades para bottom nav
+  // Principais funcionalidades para bottom nav - ALINHADO COM SIDEBAR
   const bottomNavItems: BottomNavItem[] = [
     {
       icon: Home,
@@ -224,31 +226,30 @@ export function BottomNavigation() {
       badge: badges.home > 0 ? badges.home : undefined,
     },
     {
-      icon: CheckSquare,
-      label: 'Checklist',
-      href: '/checklists/abertura',
+      icon: Target,
+      label: 'Estratégico',
+      href: '/estrategico/visao-geral',
+      color: 'text-blue-600 dark:text-blue-400',
+      badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined,
+    },
+    {
+      icon: Wrench,
+      label: 'Ferramentas',
+      href: '/ferramentas/producao-insumos',
       color: 'text-green-600 dark:text-green-400',
-      badge: badges.checklist > 0 ? badges.checklist : undefined,
-    },
-    {
-      icon: Zap,
-      label: 'Operações',
-      href: '/operacoes',
-      color: 'text-orange-600 dark:text-orange-400',
-    },
-    {
-      icon: TrendingUp,
-      label: 'Marketing',
-      href: '/visao-geral/marketing-360',
-      color: 'text-pink-600 dark:text-pink-400',
-      badge: badges.marketing > 0 ? badges.marketing : undefined,
     },
     {
       icon: BarChart3,
-      label: 'Visão Geral',
-      href: '/visao-geral',
-      color: 'text-purple-600 dark:text-purple-400',
-      badge: badges.visaoGeral > 0 ? badges.visaoGeral : undefined,
+      label: 'Analítico',
+      href: '/analitico/eventos',
+      color: 'text-indigo-600 dark:text-indigo-400',
+      badge: badges.marketing > 0 ? badges.marketing : undefined,
+    },
+    {
+      icon: Menu,
+      label: 'Menu',
+      href: '#',
+      color: 'text-gray-600 dark:text-gray-400',
     },
   ];
 
@@ -264,6 +265,25 @@ export function BottomNavigation() {
           <div className="flex items-center justify-around">
             {bottomNavItems.map(item => {
               const active = isActive(item.href);
+              const isMenuButton = item.href === '#';
+              
+              if (isMenuButton) {
+                return (
+                  <button
+                    key="menu"
+                    onClick={() => setIsMenuOpen(true)}
+                    className="relative flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 min-w-[60px] touch-manipulation hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <div className="relative">
+                      <Menu className="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                      Menu
+                    </span>
+                  </button>
+                );
+              }
+              
               return (
                 <Link
                   key={item.href}

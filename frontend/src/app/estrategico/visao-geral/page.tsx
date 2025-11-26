@@ -327,7 +327,7 @@ export default function VisaoGeralEstrategica() {
               {loading ? (
                 <SkeletonCards.AnualSkeleton />
               ) : indicadoresAnuaisMemo ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <IndicadorCard
                     titulo="Faturamento 2025"
                     valor={indicadoresAnuaisMemo.faturamento.valor}

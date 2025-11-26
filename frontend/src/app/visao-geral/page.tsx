@@ -238,7 +238,7 @@ export default function VisaoGeralPage() {
                   ))}
                 </div>
               ) : indicadoresAnuais ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <IndicadorCard
                     titulo="Faturamento 2025"
                     valor={indicadoresAnuais.faturamento.valor}
