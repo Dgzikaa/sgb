@@ -434,115 +434,72 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                   </p>
                 </div>
 
-                {/* Faturamento Top */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <DollarSignIcon className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Faturamento Top</p>
+                {/* Total do Dia - DESTAQUE */}
+                <div className="col-span-2 sm:col-span-1 text-center bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 p-2 sm:p-3 rounded-lg border-2 border-purple-200 dark:border-purple-700">
+                  <div className="flex flex-col items-center mb-1">
+                    <DollarSignIcon className="w-5 h-5 text-purple-600 dark:text-purple-400 mb-1" />
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-700 dark:text-gray-300">Total do Dia</p>
                   </div>
-                  <p className="text-sm font-bold text-blue-900 dark:text-blue-100">
-                    {formatarMoeda(estatisticas.produto_mais_faturou_valor || 0)}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {estatisticas.produto_mais_faturou ? 
-                      (estatisticas.produto_mais_faturou.length > 15 ? 
-                        estatisticas.produto_mais_faturou.substring(0, 15) + '...' : 
-                        estatisticas.produto_mais_faturou
-                      ) : 'Produto que mais faturou'
-                    }
-                  </p>
-                </div>
-
-                {/* Total do Dia */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <DollarSignIcon className="w-4 h-4 text-purple-600 dark:text-purple-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Total do Dia</p>
-                  </div>
-                  <p className="text-sm font-bold text-purple-900 dark:text-purple-100">
+                  <p className="text-base sm:text-lg font-bold text-purple-900 dark:text-purple-100">
                     {formatarMoeda(estatisticas.faturamento_total_calculado || 0)}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Faturamento total</p>
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Faturamento</p>
                 </div>
 
-                {/* Pico Faturamento */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <LineChartIcon className="w-4 h-4 text-orange-600 dark:text-orange-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Pico Faturamento</p>
+                {/* Bar */}
+                <div className="text-center bg-white dark:bg-gray-800/50 p-2 sm:p-3 rounded-lg">
+                  <div className="flex flex-col items-center mb-1">
+                    <DollarSignIcon className="w-4 h-4 text-blue-600 dark:text-blue-400 mb-1" />
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-700 dark:text-gray-300">Bar</p>
                   </div>
-                  <p className="text-sm font-bold text-orange-900 dark:text-orange-100">
-                    {estatisticas.max_faturamento > 0 ? formatarHora(estatisticas.hora_pico_faturamento || 0) : '--:--'}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {estatisticas.max_faturamento > 0 ? formatarMoeda(estatisticas.max_faturamento) : 'R$ 0,00'}
-                  </p>
-                </div>
-
-                {/* Produtos Vendidos */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <UsersIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Produtos Vendidos</p>
-                  </div>
-                  <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100">{Math.round(estatisticas.total_produtos_vendidos || 0)}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Unidades totais</p>
-                </div>
-
-                {/* Faturamento Bar */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <DollarSignIcon className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Bar</p>
-                  </div>
-                  <p className="text-sm font-bold text-blue-900 dark:text-blue-100">
+                  <p className="text-xs sm:text-sm font-bold text-blue-900 dark:text-blue-100">
                     {formatarMoeda(estatisticas.faturamento_bar || 0)}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Produtos/Bebidas</p>
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Bebidas</p>
                 </div>
 
                 {/* Couvert */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <TrendingUpIcon className="w-4 h-4 text-green-600 dark:text-green-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Couvert</p>
+                <div className="text-center bg-white dark:bg-gray-800/50 p-2 sm:p-3 rounded-lg">
+                  <div className="flex flex-col items-center mb-1">
+                    <TrendingUpIcon className="w-4 h-4 text-green-600 dark:text-green-400 mb-1" />
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-700 dark:text-gray-300">Couvert</p>
                   </div>
-                  <p className="text-sm font-bold text-green-900 dark:text-green-100">
+                  <p className="text-xs sm:text-sm font-bold text-green-900 dark:text-green-100">
                     {formatarMoeda(estatisticas.total_couvert || 0)}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Entrada</p>
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Entrada</p>
                 </div>
 
                 {/* 10% Garçom */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <UsersIcon className="w-4 h-4 text-orange-600 dark:text-orange-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">10% Garçom</p>
+                <div className="text-center bg-white dark:bg-gray-800/50 p-2 sm:p-3 rounded-lg">
+                  <div className="flex flex-col items-center mb-1">
+                    <UsersIcon className="w-4 h-4 text-orange-600 dark:text-orange-400 mb-1" />
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-700 dark:text-gray-300">10% Garçom</p>
                   </div>
-                  <p className="text-sm font-bold text-orange-900 dark:text-orange-100">
+                  <p className="text-xs sm:text-sm font-bold text-orange-900 dark:text-orange-100">
                     {formatarMoeda(estatisticas.total_repique || 0)}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Serviço</p>
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Serviço</p>
                 </div>
 
-                {/* Total Pessoas */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <UsersIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Pessoas</p>
+                {/* Pessoas */}
+                <div className="text-center bg-white dark:bg-gray-800/50 p-2 sm:p-3 rounded-lg">
+                  <div className="flex flex-col items-center mb-1">
+                    <UsersIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400 mb-1" />
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-700 dark:text-gray-300">Pessoas</p>
                   </div>
-                  <p className="text-sm font-bold text-indigo-900 dark:text-indigo-100">
+                  <p className="text-xs sm:text-sm font-bold text-indigo-900 dark:text-indigo-100">
                     {estatisticas.total_pessoas_dia || 0}
                   </p>
                 </div>
 
                 {/* % Stockout */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-1">
-                    <PackageIcon className="w-4 h-4 text-red-600 dark:text-red-400 mr-1" />
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">% Stockout</p>
+                <div className="text-center bg-white dark:bg-gray-800/50 p-2 sm:p-3 rounded-lg">
+                  <div className="flex flex-col items-center mb-1">
+                    <PackageIcon className="w-4 h-4 text-red-600 dark:text-red-400 mb-1" />
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-700 dark:text-gray-300">% Stockout</p>
                   </div>
-                  <p className={`text-sm font-bold ${
+                  <p className={`text-xs sm:text-sm font-bold ${
                     stockoutResumo ? (
                       parseFloat(stockoutResumo.percentual_stockout.replace('%', '')) <= 10 
                         ? 'text-green-900 dark:text-green-100'
@@ -553,16 +510,16 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
                   }`}>
                     {stockoutResumo?.percentual_stockout || '--'}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {stockoutResumo ? `${stockoutResumo.produtos_stockout}/${stockoutResumo.total_produtos_ativos}` : 'Sem dados'}
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
+                    {stockoutResumo ? `${stockoutResumo.produtos_stockout}/${stockoutResumo.total_produtos_ativos}` : '--'}
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Gráfico */}
-          <div className="h-[360px]">
+          {/* Gráfico - altura responsiva */}
+          <div className="h-[280px] sm:h-[360px] lg:h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={dados} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
