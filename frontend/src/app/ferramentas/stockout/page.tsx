@@ -150,7 +150,7 @@ interface HistoricoData {
 const GRUPOS_LOCAIS = {
   drink: {
     nome: 'Drink / Bebida',
-    locais: ['preshh', 'mexido', 'batidos', 'drink', 'bebida']
+    locais: ['preshh', 'mexido', 'batidos', 'montados', 'shot e dose', 'drink', 'bebida']
   },
   bar: {
     nome: 'Bar',

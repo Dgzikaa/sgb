@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
       // LOCAIS A IGNORAR PERMANENTEMENTE
       query = query
         .neq('loc_desc', 'Pegue e Pague')
-        .neq('loc_desc', 'Shot e Dose')
         .neq('loc_desc', 'Venda Volante')
         .not('loc_desc', 'is', null); // Excluir "Sem local definido"
       

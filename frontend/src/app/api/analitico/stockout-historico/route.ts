@@ -49,9 +49,8 @@ const aplicarFiltrosBase = (query: any) => {
   // LOCAIS A IGNORAR PERMANENTEMENTE
   query = query
     .neq('loc_desc', 'Pegue e Pague')
-    .neq('loc_desc', 'Shot e Dose')
     .neq('loc_desc', 'Venda Volante')
-    .not('loc_desc', 'is', null); // Excluir "Sem local definido"
+    .not('loc_desc', 'is', null'); // Excluir "Sem local definido"
   
   // PRODUTOS COM PREFIXOS A IGNORAR
   query = query
@@ -157,7 +156,7 @@ function getInicioFimSemana(data: string): { inicio: string; fim: string } {
 const GRUPOS_LOCAIS: Record<string, { nome: string; locais: string[] }> = {
   drink: {
     nome: 'Drink / Bebida',
-    locais: ['preshh', 'mexido', 'batidos', 'drink', 'bebida']
+    locais: ['preshh', 'mexido', 'batidos', 'montados', 'shot e dose', 'drink', 'bebida']
   },
   bar: {
     nome: 'Bar',
@@ -165,7 +164,7 @@ const GRUPOS_LOCAIS: Record<string, { nome: string; locais: string[] }> = {
   },
   cozinha: {
     nome: 'Cozinha',
-    locais: ['cozinha', 'chapeira', 'chapa']
+    locais: ['cozinha', 'cozinha 1', 'cozinha 2', 'chapeira', 'chapa']
   }
 };
 
