@@ -50,7 +50,7 @@ const aplicarFiltrosBase = (query: any) => {
   query = query
     .neq('loc_desc', 'Pegue e Pague')
     .neq('loc_desc', 'Venda Volante')
-    .not('loc_desc', 'is', null'); // Excluir "Sem local definido"
+    .not('loc_desc', 'is', null); // Excluir "Sem local definido"
   
   // PRODUTOS COM PREFIXOS A IGNORAR
   query = query
