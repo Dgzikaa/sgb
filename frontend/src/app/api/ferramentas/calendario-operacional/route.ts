@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { limparCacheCalendario } from '@/lib/helpers/calendario-helper';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -186,6 +187,14 @@ export async function POST(request: NextRequest) {
 
     console.log(`📝 Salvando calendário: ${data} = ${status} (bar ${bar_id})`);
 
+    // Buscar registro existente para histórico
+    const { data: registroExistente } = await supabase
+      .from('calendario_operacional')
+      .select('*')
+      .eq('data', data)
+      .eq('bar_id', bar_id)
+      .maybeSingle();
+
     // Upsert (inserir ou atualizar)
     const { data: resultado, error } = await supabase
       .from('calendario_operacional')
@@ -206,6 +215,26 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erro ao salvar:', error);
       throw error;
     }
+
+    // Registrar no histórico
+    await supabase
+      .from('calendario_historico')
+      .insert({
+        data,
+        bar_id,
+        status_anterior: registroExistente?.status || null,
+        status_novo: status,
+        motivo_anterior: registroExistente?.motivo || null,
+        motivo_novo: motivo || null,
+        observacao_anterior: registroExistente?.observacao || null,
+        observacao_novo: observacao || null,
+        tipo_acao: registroExistente ? 'update' : 'create',
+        qtd_dias_afetados: 1,
+        usuario_nome: 'Usuário Web'
+      });
+
+    // Limpar cache após mudança
+    limparCacheCalendario();
 
     return NextResponse.json({
       success: true,
@@ -241,6 +270,14 @@ export async function DELETE(request: NextRequest) {
 
     console.log(`🗑️ Removendo registro: ${data} (bar ${barId})`);
 
+    // Buscar registro antes de deletar (para histórico)
+    const { data: registroExistente } = await supabase
+      .from('calendario_operacional')
+      .select('*')
+      .eq('data', data)
+      .eq('bar_id', barId)
+      .maybeSingle();
+
     const { error } = await supabase
       .from('calendario_operacional')
       .delete()
@@ -251,6 +288,26 @@ export async function DELETE(request: NextRequest) {
       console.error('❌ Erro ao remover:', error);
       throw error;
     }
+
+    // Registrar no histórico
+    if (registroExistente) {
+      await supabase
+        .from('calendario_historico')
+        .insert({
+          data,
+          bar_id: barId,
+          status_anterior: registroExistente.status,
+          status_novo: null,
+          motivo_anterior: registroExistente.motivo,
+          motivo_novo: null,
+          tipo_acao: 'delete',
+          qtd_dias_afetados: 1,
+          usuario_nome: 'Usuário Web'
+        });
+    }
+
+    // Limpar cache
+    limparCacheCalendario();
 
     return NextResponse.json({
       success: true,

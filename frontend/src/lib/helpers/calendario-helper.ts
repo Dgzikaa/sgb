@@ -11,6 +11,35 @@ export interface StatusDia {
   fonte: 'manual' | 'movimento' | 'padrao';
 }
 
+// ⚡ CACHE EM MEMÓRIA PARA PERFORMANCE
+interface CacheEntry {
+  data: StatusDia;
+  timestamp: number;
+}
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const statusCache = new Map<string, CacheEntry>();
+
+// Limpar cache periodicamente
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of statusCache.entries()) {
+      if (now - entry.timestamp > CACHE_DURATION) {
+        statusCache.delete(key);
+      }
+    }
+  }, 60 * 1000); // Limpar a cada minuto
+}
+
+/**
+ * Limpa o cache (útil após mudanças no calendário)
+ */
+export function limparCacheCalendario() {
+  statusCache.clear();
+  console.log('🗑️ Cache do calendário limpo');
+}
+
 /**
  * Verifica se o bar está aberto em uma determinada data
  * 
@@ -28,6 +57,14 @@ export async function verificarBarAberto(
   barId: number = 3
 ): Promise<StatusDia> {
   try {
+    // ⚡ VERIFICAR CACHE PRIMEIRO
+    const cacheKey = `${data}-${barId}`;
+    const cached = statusCache.get(cacheKey);
+    
+    if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+      return cached.data;
+    }
+
     // 1º PRIORIDADE: Verificar se existe registro manual no calendário
     const { data: registro, error: errorRegistro } = await supabase
       .from('calendario_operacional')
@@ -42,11 +79,15 @@ export async function verificarBarAberto(
 
     if (registro) {
       console.log(`📅 Calendário manual: ${data} = ${registro.status}`);
-      return {
+      const resultado = {
         aberto: registro.status === 'aberto',
         motivo: registro.motivo || `Definido manualmente como ${registro.status}`,
-        fonte: 'manual'
+        fonte: 'manual' as const
       };
+      
+      // Salvar no cache
+      statusCache.set(cacheKey, { data: resultado, timestamp: Date.now() });
+      return resultado;
     }
 
     // 2º PRIORIDADE: Para datas passadas, verificar movimento no ContaHub
@@ -73,13 +114,17 @@ export async function verificarBarAberto(
         
         console.log(`💰 Movimento detectado: ${data} = R$ ${valorVendas.toFixed(2)}`);
         
-        return {
+        const resultado = {
           aberto: temMovimento,
           motivo: temMovimento 
             ? `Movimento detectado (R$ ${valorVendas.toFixed(2)})` 
             : 'Sem movimento registrado',
-          fonte: 'movimento'
+          fonte: 'movimento' as const
         };
+        
+        // Salvar no cache
+        statusCache.set(cacheKey, { data: resultado, timestamp: Date.now() });
+        return resultado;
       }
     }
 
@@ -89,29 +134,33 @@ export async function verificarBarAberto(
     
     // Verificar se é terça após 15/04/2025
     const ultimaTercaOperacional = new Date('2025-04-15T12:00:00Z');
+    let resultado: StatusDia;
+    
     if (diaSemana === 2 && dataVerificacao > ultimaTercaOperacional) {
-      return {
+      resultado = {
         aberto: false,
         motivo: 'Terça-feira (bar fechado)',
         fonte: 'padrao'
       };
-    }
-
-    // Verificar se é segunda
-    if (diaSemana === 1) {
-      return {
+    } else if (diaSemana === 1) {
+      // Verificar se é segunda
+      resultado = {
         aberto: false,
         motivo: 'Segunda-feira (bar fechado)',
         fonte: 'padrao'
       };
+    } else {
+      // Outros dias: aberto
+      resultado = {
+        aberto: true,
+        motivo: `${diasSemana[diaSemana]} (dia normal de funcionamento)`,
+        fonte: 'padrao'
+      };
     }
 
-    // Outros dias: aberto
-    return {
-      aberto: true,
-      motivo: `${diasSemana[diaSemana]} (dia normal de funcionamento)`,
-      fonte: 'padrao'
-    };
+    // Salvar no cache
+    statusCache.set(cacheKey, { data: resultado, timestamp: Date.now() });
+    return resultado;
 
   } catch (error) {
     console.error('❌ Erro ao verificar se bar está aberto:', error);

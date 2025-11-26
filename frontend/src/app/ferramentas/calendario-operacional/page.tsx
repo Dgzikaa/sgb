@@ -18,8 +18,14 @@ import {
   Save,
   Trash2,
   TrendingUp,
-  DollarSign
+  DollarSign,
+  CheckSquare,
+  Square,
+  Lightbulb,
+  History,
+  BarChart3
 } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import {
@@ -83,6 +89,16 @@ export default function CalendarioOperacionalPage() {
   const [motivoEdicao, setMotivoEdicao] = useState('');
   const [observacaoEdicao, setObservacaoEdicao] = useState('');
   const [salvando, setSalvando] = useState(false);
+  
+  // Bulk selection
+  const [modoSelecao, setModoSelecao] = useState(false);
+  const [diasSelecionados, setDiasSelecionados] = useState<Set<string>>(new Set());
+  const [statusBulk, setStatusBulk] = useState<'aberto' | 'fechado'>('fechado');
+  const [motivoBulk, setMotivoBulk] = useState('');
+  
+  // Sugestões
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  const [sugestoes, setSugestoes] = useState<any>(null);
 
   useEffect(() => {
     setPageTitle('Calendário Operacional');
@@ -105,6 +121,105 @@ export default function CalendarioOperacionalPage() {
       toast.error('Erro ao carregar calendário');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const carregarSugestoes = async () => {
+    try {
+      const response = await fetch(
+        `/api/ferramentas/calendario-operacional/sugestoes?mes=${mesAtual}&ano=${anoAtual}&bar_id=3`
+      );
+      if (!response.ok) throw new Error('Erro ao carregar sugestões');
+      const result = await response.json();
+      setSugestoes(result.data);
+      setMostrarSugestoes(true);
+    } catch (error) {
+      console.error('Erro ao carregar sugestões:', error);
+      toast.error('Erro ao carregar sugestões');
+    }
+  };
+
+  const toggleDiaSelecao = (data: string) => {
+    const novoSet = new Set(diasSelecionados);
+    if (novoSet.has(data)) {
+      novoSet.delete(data);
+    } else {
+      novoSet.add(data);
+    }
+    setDiasSelecionados(novoSet);
+  };
+
+  const selecionarTodos = () => {
+    if (!calendarioData) return;
+    const todasDatas = new Set(calendarioData.dias.map(d => d.data));
+    setDiasSelecionados(todasDatas);
+  };
+
+  const limparSelecao = () => {
+    setDiasSelecionados(new Set());
+    setModoSelecao(false);
+  };
+
+  const aplicarBulkAction = async () => {
+    if (diasSelecionados.size === 0) {
+      toast.error('Selecione pelo menos um dia');
+      return;
+    }
+
+    setSalvando(true);
+    try {
+      const response = await fetch('/api/ferramentas/calendario-operacional/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          datas: Array.from(diasSelecionados),
+          bar_id: 3,
+          status: statusBulk,
+          motivo: motivoBulk,
+          usuario_nome: 'Usuário Web'
+        })
+      });
+
+      if (!response.ok) throw new Error('Erro ao aplicar ação em lote');
+
+      const result = await response.json();
+      toast.success(result.message);
+      limparSelecao();
+      carregarCalendario();
+    } catch (error) {
+      console.error('Erro ao aplicar bulk action:', error);
+      toast.error('Erro ao aplicar ação em lote');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const aplicarSugestao = async (datas: string[], status: string, motivo: string) => {
+    setSalvando(true);
+    try {
+      const response = await fetch('/api/ferramentas/calendario-operacional/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          datas,
+          bar_id: 3,
+          status,
+          motivo,
+          usuario_nome: 'Sugestão Automática'
+        })
+      });
+
+      if (!response.ok) throw new Error('Erro ao aplicar sugestão');
+
+      const result = await response.json();
+      toast.success(result.message);
+      setMostrarSugestoes(false);
+      carregarCalendario();
+    } catch (error) {
+      console.error('Erro ao aplicar sugestão:', error);
+      toast.error('Erro ao aplicar sugestão');
+    } finally {
+      setSalvando(false);
     }
   };
 
@@ -262,20 +377,128 @@ export default function CalendarioOperacionalPage() {
                   Gerencie os dias de abertura e fechamento do bar
                 </CardDescription>
               </div>
-              <Button
-                onClick={carregarCalendario}
-                variant="outline"
-                size="sm"
-                disabled={loading}
-                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Atualizar
-              </Button>
+              <div className="flex gap-2">
+                <Link href="/ferramentas/calendario-operacional/analytics">
+                  <Button variant="outline" size="sm" className="bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/30">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Analytics
+                  </Button>
+                </Link>
+                <Button
+                  onClick={carregarCalendario}
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Atualizar
+                </Button>
+              </div>
             </div>
           </CardHeader>
           
           <CardContent>
+            {/* Barra de Ferramentas */}
+            <div className="flex flex-wrap gap-2 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+              <Button
+                onClick={() => setModoSelecao(!modoSelecao)}
+                variant={modoSelecao ? 'default' : 'outline'}
+                size="sm"
+                className={modoSelecao ? 'bg-blue-600 hover:bg-blue-700' : ''}
+              >
+                {modoSelecao ? <CheckSquare className="w-4 h-4 mr-2" /> : <Square className="w-4 h-4 mr-2" />}
+                Modo Seleção
+              </Button>
+
+              <Button
+                onClick={carregarSugestoes}
+                variant="outline"
+                size="sm"
+                className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
+              >
+                <Lightbulb className="w-4 h-4 mr-2" />
+                Sugestões
+              </Button>
+
+              {modoSelecao && (
+                <>
+                  <div className="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2" />
+                  <Button
+                    onClick={selecionarTodos}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Selecionar Todos
+                  </Button>
+                  <Button
+                    onClick={limparSelecao}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Limpar
+                  </Button>
+                  {diasSelecionados.size > 0 && (
+                    <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 px-3 py-1">
+                      {diasSelecionados.size} {diasSelecionados.size === 1 ? 'dia selecionado' : 'dias selecionados'}
+                    </Badge>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Bulk Actions Panel */}
+            {modoSelecao && diasSelecionados.size > 0 && (
+              <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700 mb-6">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-semibold text-blue-900 dark:text-blue-300">
+                    Ação em Lote - {diasSelecionados.size} {diasSelecionados.size === 1 ? 'dia' : 'dias'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-4 items-end">
+                    <div className="flex-1 min-w-[200px]">
+                      <Label className="text-sm text-blue-900 dark:text-blue-300 mb-2 block">Status</Label>
+                      <select
+                        value={statusBulk}
+                        onChange={(e) => setStatusBulk(e.target.value as 'aberto' | 'fechado')}
+                        className="input-dark"
+                      >
+                        <option value="fechado">Fechado</option>
+                        <option value="aberto">Aberto</option>
+                      </select>
+                    </div>
+                    <div className="flex-1 min-w-[300px]">
+                      <Label className="text-sm text-blue-900 dark:text-blue-300 mb-2 block">Motivo</Label>
+                      <Input
+                        value={motivoBulk}
+                        onChange={(e) => setMotivoBulk(e.target.value)}
+                        placeholder="Motivo da alteração"
+                        className="input-dark"
+                      />
+                    </div>
+                    <Button
+                      onClick={aplicarBulkAction}
+                      disabled={salvando}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {salvando ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Aplicando...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Aplicar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </CardContent>
             {/* Navegação de Mês */}
             <div className="flex items-center justify-between mb-6">
               <Button
@@ -369,10 +592,21 @@ export default function CalendarioOperacionalPage() {
                       >
                         {dia && (
                           <button
-                            onClick={() => abrirModalEdicao(dia)}
-                            className={`w-full h-full p-2 text-left transition-all hover:opacity-80 ${getCorStatus(dia.status)}`}
+                            onClick={() => modoSelecao ? toggleDiaSelecao(dia.data) : abrirModalEdicao(dia)}
+                            className={`w-full h-full p-2 text-left transition-all hover:opacity-80 relative ${getCorStatus(dia.status)} ${
+                              modoSelecao && diasSelecionados.has(dia.data) ? 'ring-4 ring-blue-500 dark:ring-blue-400' : ''
+                            }`}
                           >
-                            <div className="flex items-start justify-between mb-1">
+                            {modoSelecao && (
+                              <div className="absolute top-1 left-1">
+                                {diasSelecionados.has(dia.data) ? (
+                                  <CheckSquare className="w-5 h-5 text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 rounded" />
+                                ) : (
+                                  <Square className="w-5 h-5 text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 rounded" />
+                                )}
+                              </div>
+                            )}
+                            <div className={`flex items-start justify-between mb-1 ${modoSelecao ? 'ml-6' : ''}`}>
                               <span className="text-sm font-semibold text-gray-900 dark:text-white">
                                 {new Date(dia.data + 'T12:00:00').getDate()}
                               </span>
@@ -563,6 +797,116 @@ export default function CalendarioOperacionalPage() {
                 )}
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Sugestões */}
+        <Dialog open={mostrarSugestoes} onOpenChange={setMostrarSugestoes}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                Sugestões Inteligentes
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
+                Sugestões baseadas em feriados, padrões detectados e histórico
+              </DialogDescription>
+            </DialogHeader>
+
+            {sugestoes && (
+              <div className="space-y-4">
+                {sugestoes.resumo && (
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900 border-blue-300">
+                      {sugestoes.resumo.total_sugestoes} sugestões
+                    </Badge>
+                    {sugestoes.resumo.feriados_nao_cadastrados > 0 && (
+                      <Badge variant="outline" className="bg-yellow-100 dark:bg-yellow-900 border-yellow-300">
+                        {sugestoes.resumo.feriados_nao_cadastrados} feriados
+                      </Badge>
+                    )}
+                    {sugestoes.resumo.inconsistencias > 0 && (
+                      <Badge variant="outline" className="bg-red-100 dark:bg-red-900 border-red-300">
+                        {sugestoes.resumo.inconsistencias} inconsistências
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                {sugestoes.sugestoes.length === 0 ? (
+                  <div className="text-center py-8">
+                    <CheckCircle className="w-12 h-12 mx-auto text-green-600 dark:text-green-400 mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Nenhuma sugestão no momento. Calendário está consistente!
+                    </p>
+                  </div>
+                ) : (
+                  sugestoes.sugestoes.map((sugestao: any, idx: number) => (
+                    <Card key={idx} className={`
+                      ${sugestao.prioridade === 'alta' ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : ''}
+                      ${sugestao.prioridade === 'media' ? 'border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20' : ''}
+                      ${sugestao.prioridade === 'baixa' ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20' : ''}
+                    `}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {sugestao.titulo}
+                            </CardTitle>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              {sugestao.descricao}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className={`
+                            ${sugestao.prioridade === 'alta' ? 'bg-red-100 dark:bg-red-900 border-red-300' : ''}
+                            ${sugestao.prioridade === 'media' ? 'bg-yellow-100 dark:bg-yellow-900 border-yellow-300' : ''}
+                            ${sugestao.prioridade === 'baixa' ? 'bg-blue-100 dark:bg-blue-900 border-blue-300' : ''}
+                          `}>
+                            {sugestao.prioridade}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {sugestao.acoes && sugestao.acoes.length > 0 && (
+                          <div className="space-y-2">
+                            {sugestao.acoes.slice(0, 5).map((acao: any, acaoIdx: number) => (
+                              <div key={acaoIdx} className="text-xs bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-gray-900 dark:text-white">
+                                    {new Date(acao.data + 'T12:00:00').toLocaleDateString('pt-BR')}
+                                  </span>
+                                  {acao.motivo && (
+                                    <span className="text-gray-600 dark:text-gray-400">{acao.motivo}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            {sugestao.acoes.length > 5 && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                ... e mais {sugestao.acoes.length - 5} {sugestao.acoes.length - 5 === 1 ? 'dia' : 'dias'}
+                              </p>
+                            )}
+                            <Button
+                              onClick={() => aplicarSugestao(
+                                sugestao.acoes.map((a: any) => a.data),
+                                sugestao.acoes[0].status || 'fechado',
+                                sugestao.acoes[0].motivo || sugestao.titulo
+                              )}
+                              size="sm"
+                              className="w-full bg-blue-600 hover:bg-blue-700 mt-2"
+                              disabled={salvando}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Aplicar Sugestão
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
