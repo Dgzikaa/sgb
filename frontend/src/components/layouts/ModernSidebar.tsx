@@ -177,6 +177,13 @@ const defaultSidebarItems: SidebarItem[] = [
         },
         {
           icon: Calendar,
+          label: 'Calendário Operacional',
+          href: '/ferramentas/calendario-operacional',
+          description: 'Gerencie dias de abertura e fechamento do bar',
+          permission: 'operacoes',
+        },
+        {
+          icon: Calendar,
           label: 'Agendamento',
           href: '/ferramentas/agendamento',
           description: 'Ferramenta de agendamento avançado',

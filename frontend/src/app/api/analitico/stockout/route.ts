@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verificarBarAberto } from '@/lib/helpers/calendario-helper';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,6 +19,43 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // ⚠️ VERIFICAR SE BAR ESTAVA ABERTO NESTA DATA
+    const statusDia = await verificarBarAberto(data_selecionada, 3);
+    
+    if (!statusDia.aberto) {
+      console.log(`⚠️ Bar fechado em ${data_selecionada}: ${statusDia.motivo}`);
+      return NextResponse.json({
+        success: true,
+        bar_fechado: true,
+        motivo: statusDia.motivo,
+        fonte: statusDia.fonte,
+        data: {
+          data_analisada: data_selecionada,
+          filtros_aplicados: filtros,
+          estatisticas: {
+            total_produtos: 0,
+            produtos_ativos: 0,
+            produtos_inativos: 0,
+            percentual_stockout: '0.00%',
+            percentual_disponibilidade: '100.00%'
+          },
+          produtos: {
+            inativos: [],
+            ativos: []
+          },
+          grupos: {
+            inativos: [],
+            ativos: []
+          },
+          analise_por_local: [],
+          timestamp_consulta: new Date().toISOString()
+        }
+      });
+    }
+
+    console.log(`✅ Bar aberto em ${data_selecionada}: ${statusDia.motivo} (fonte: ${statusDia.fonte})`);
+
 
     // Função auxiliar para aplicar filtros base (locais e prefixos a ignorar)
     const aplicarFiltrosBase = (query: any) => {
