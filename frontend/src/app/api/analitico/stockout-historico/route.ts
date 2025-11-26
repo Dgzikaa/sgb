@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -229,21 +230,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // FILTRAR TERÇAS-FEIRAS INVÁLIDAS (bar não abre às terças após 15/04/2025)
-    const ultimaTercaOperacional = new Date('2025-04-15T12:00:00Z');
-    const dadosValidosFiltrados = dadosHistoricos.filter(item => {
-      const dataConsulta = new Date(item.data_consulta + 'T12:00:00Z');
-      const diaSemana = dataConsulta.getUTCDay();
-      
-      // Excluir terças-feiras (2) após 15/04/2025
-      if (diaSemana === 2 && dataConsulta > ultimaTercaOperacional) {
-        return false;
-      }
-      
-      return true;
-    });
+    // ⚡ FILTRAR DIAS FECHADOS usando calendário operacional
+    const dadosValidosFiltrados = await filtrarDiasAbertos(dadosHistoricos, 'data_consulta', bar_id);
 
-    console.log(`🔍 Dados filtrados: ${dadosHistoricos.length} → ${dadosValidosFiltrados.length} (removidas ${dadosHistoricos.length - dadosValidosFiltrados.length} terças inválidas)`);
+    console.log(`🔍 Dados filtrados: ${dadosHistoricos.length} → ${dadosValidosFiltrados.length} (removidos ${dadosHistoricos.length - dadosValidosFiltrados.length} dias fechados)`);
     
     // Verificar quais datas únicas temos após o filtro
     const datasUnicas = [...new Set(dadosValidosFiltrados.map(item => item.data_consulta))].sort();

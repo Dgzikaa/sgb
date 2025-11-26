@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 
 export const dynamic = 'force-dynamic'
 
@@ -66,18 +67,22 @@ async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?:
     }
     
     // Buscar clientes do mês atual
-    const clientesMesAtualData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+    const clientesMesAtualDataBruto = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
       'eq_bar_id': barIdNum,
       'gte_dt_gerencial': mesAtualInicio,
       'lte_dt_gerencial': mesAtualFim
     });
     
     // Buscar clientes dos últimos 2 meses
-    const clientesUltimos2MesesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+    const clientesUltimos2MesesDataBruto = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
       'eq_bar_id': barIdNum,
       'gte_dt_gerencial': ultimos2MesesInicio,
       'lte_dt_gerencial': ultimos2MesesFim
     });
+    
+    // ⚡ FILTRAR DIAS FECHADOS
+    const clientesMesAtualData = await filtrarDiasAbertos(clientesMesAtualDataBruto, 'dt_gerencial', barIdNum);
+    const clientesUltimos2MesesData = await filtrarDiasAbertos(clientesUltimos2MesesDataBruto, 'dt_gerencial', barIdNum);
     
     // Filtrar apenas clientes com telefone
     const clientesMesAtual = new Set(
@@ -114,18 +119,22 @@ async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?:
     const ultimos2MesesAnteriorFimStr = formatDate(fimUltimos2MesesAnterior);
     
     // Buscar dados do mês anterior
-    const [clientesMesAnteriorData, clientesUltimos2MesesAnteriorData] = await Promise.all([
-      fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+    const [clientesMesAnteriorDataBruto, clientesUltimos2MesesAnteriorDataBruto] = await Promise.all([
+      fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
         'gte_dt_gerencial': mesAnteriorInicioStr,
         'lte_dt_gerencial': mesAnteriorFimStr
       }),
-      fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+      fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
         'eq_bar_id': barIdNum,
         'gte_dt_gerencial': ultimos2MesesAnteriorInicioStr,
         'lte_dt_gerencial': ultimos2MesesAnteriorFimStr
       })
     ]);
+    
+    // ⚡ FILTRAR DIAS FECHADOS
+    const clientesMesAnteriorData = await filtrarDiasAbertos(clientesMesAnteriorDataBruto, 'dt_gerencial', barIdNum);
+    const clientesUltimos2MesesAnteriorData = await filtrarDiasAbertos(clientesUltimos2MesesAnteriorDataBruto, 'dt_gerencial', barIdNum);
     
     const clientesMesAnterior = new Set(
       clientesMesAnteriorData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []

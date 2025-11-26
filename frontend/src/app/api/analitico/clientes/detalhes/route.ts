@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser, authErrorResponse } from '@/middleware/auth'
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper'
 
 export const dynamic = 'force-dynamic'
 
@@ -92,20 +93,8 @@ export async function GET(request: NextRequest) {
     const visitasCliente = data || []
     console.log(`✅ Total de visitas encontradas: ${visitasCliente.length}`)
 
-    // Transformar dados para o formato esperado pelo frontend (FILTRANDO TERÇAS INVÁLIDAS)
-    const visitasValidas = visitasCliente.filter(registro => {
-      // CORREÇÃO: Usar UTC para evitar problemas de timezone
-      const data = new Date(registro.dt_gerencial + 'T12:00:00Z') // Meio-dia UTC
-      const diaSemana = data.getUTCDay()
-      const ultimaTercaOperacional = new Date('2025-04-15T12:00:00Z')
-      
-              // Excluir terças-feiras após 15/04/2025 (bar não abre mais às terças)
-        if (diaSemana === 2 && data > ultimaTercaOperacional) {
-          return false
-        }
-      
-      return true
-    })
+    // ⚡ FILTRAR DIAS FECHADOS usando calendário operacional
+    const visitasValidas = await filtrarDiasAbertos(visitasCliente, 'dt_gerencial', finalBarId)
 
     const visitas = visitasValidas.map(registro => {
       const couvert = parseFloat(registro.vr_couvert || '0') || 0
@@ -122,7 +111,7 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    console.log(`📊 Visitas filtradas: ${visitasCliente.length} → ${visitasValidas.length} (removidas ${visitasCliente.length - visitasValidas.length} terças inválidas)`)
+    console.log(`📊 Visitas filtradas: ${visitasCliente.length} → ${visitasValidas.length} (removidos ${visitasCliente.length - visitasValidas.length} dias fechados)`)
 
     // Calcular dia da semana mais frequentado (usando apenas visitas válidas)
     const diasSemanaCount = new Map<number, number>()

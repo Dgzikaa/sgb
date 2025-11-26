@@ -238,3 +238,65 @@ export async function verificarMultiplasDatas(
   }
 }
 
+/**
+ * Filtra um array de dados removendo registros de dias fechados
+ * Função genérica que funciona com qualquer tipo de dado que tenha campo de data
+ * 
+ * @param dados - Array de dados a filtrar
+ * @param campoData - Nome do campo que contém a data (padrão: 'data')
+ * @param barId - ID do bar (padrão: 3)
+ * @returns Array filtrado apenas com dias abertos
+ */
+export async function filtrarDiasAbertos<T extends Record<string, any>>(
+  dados: T[],
+  campoData: keyof T = 'data' as keyof T,
+  barId: number = 3
+): Promise<T[]> {
+  if (!dados || dados.length === 0) {
+    return [];
+  }
+
+  try {
+    // Extrair datas únicas dos dados
+    const datasUnicas = [...new Set(
+      dados
+        .map(item => item[campoData] as string)
+        .filter(data => data) // Remove nulls/undefined
+    )];
+
+    if (datasUnicas.length === 0) {
+      console.warn('⚠️ Nenhuma data válida encontrada para filtrar');
+      return dados;
+    }
+
+    // Verificar status de todas as datas de uma vez
+    const statusDias = await verificarMultiplasDatas(datasUnicas, barId);
+
+    // Filtrar apenas registros de dias abertos
+    const dadosFiltrados = dados.filter(item => {
+      const data = item[campoData] as string;
+      if (!data) return false;
+
+      const status = statusDias.get(data);
+      
+      // Se não conseguiu verificar, mantém por segurança (pode ser erro de conexão)
+      if (!status) return true;
+      
+      // Remove apenas se explicitamente fechado
+      return status.aberto !== false;
+    });
+
+    const removidos = dados.length - dadosFiltrados.length;
+    if (removidos > 0) {
+      console.log(`🔍 Filtro de dias: ${dados.length} → ${dadosFiltrados.length} (${removidos} dias fechados removidos)`);
+    }
+
+    return dadosFiltrados;
+
+  } catch (error) {
+    console.error('❌ Erro ao filtrar dias abertos:', error);
+    // Em caso de erro, retorna dados originais para não quebrar a aplicação
+    return dados;
+  }
+}
+
