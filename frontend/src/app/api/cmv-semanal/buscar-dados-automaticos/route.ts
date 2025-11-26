@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,19 +73,22 @@ export async function POST(request: NextRequest) {
         'motivo.ilike.%socio%'
       ];
 
-      const { data: consumoSocios, error: errorSocios } = await supabase
+      const { data: consumoSociosBruto, error: errorSocios } = await supabase
         .from('contahub_periodo')
-        .select('vr_desconto')
+        .select('vr_desconto, dt_gerencial')
         .eq('bar_id', bar_id)
         .gte('dt_gerencial', data_inicio)
         .lte('dt_gerencial', data_fim)
         .or(conditions.join(','));
 
-      if (!errorSocios && consumoSocios) {
-        resultado.total_consumo_socios = consumoSocios.reduce((sum, item) => 
+      if (!errorSocios && consumoSociosBruto) {
+        // ⚡ FILTRAR DIAS FECHADOS
+        const consumoSocios = await filtrarDiasAbertos(consumoSociosBruto, 'dt_gerencial', bar_id);
+        
+        resultado.total_consumo_socios = consumoSocios.reduce((sum, item: any) => 
           sum + (parseFloat(item.vr_desconto) || 0), 0
         );
-        console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)}`);
+        console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)} (${consumoSocios.length} registros)`);
       }
     } catch (err) {
       console.error('Erro ao buscar consumo dos sócios:', err);
@@ -107,19 +111,22 @@ export async function POST(request: NextRequest) {
 
         const conditions = patterns.map(p => `motivo.ilike.%${p}%`);
 
-        const { data, error } = await supabase
+        const { data: dataBruto, error } = await supabase
           .from('contahub_periodo')
-          .select('vr_desconto')
+          .select('vr_desconto, dt_gerencial')
           .eq('bar_id', bar_id)
           .gte('dt_gerencial', data_inicio)
           .lte('dt_gerencial', data_fim)
           .or(conditions.join(','));
 
-        if (!error && data) {
+        if (!error && dataBruto) {
+          // ⚡ FILTRAR DIAS FECHADOS
+          const data = await filtrarDiasAbertos(dataBruto, 'dt_gerencial', bar_id);
+          
           resultado[campo as keyof typeof resultado] = data.reduce((sum: number, item: any) => 
             sum + (parseFloat(item.vr_desconto) || 0), 0
           );
-          console.log(`✅ ${campo}: R$ ${(resultado[campo as keyof typeof resultado] as number).toFixed(2)}`);
+          console.log(`✅ ${campo}: R$ ${(resultado[campo as keyof typeof resultado] as number).toFixed(2)} (${data.length} registros)`);
         }
       }
     } catch (err) {
@@ -129,23 +136,26 @@ export async function POST(request: NextRequest) {
     // 3. BUSCAR FATURAMENTO CMVível (Faturamento - Comissões)
     // Faturamento CMVível = soma de vr_repique
     try {
-      const { data: faturamento, error: errorFaturamento } = await supabase
+      const { data: faturamentoBruto, error: errorFaturamento } = await supabase
         .from('contahub_periodo')
-        .select('vr_repique, vr_pagamentos, vr_couvert')
+        .select('vr_repique, vr_pagamentos, vr_couvert, dt_gerencial')
         .eq('bar_id', bar_id)
         .gte('dt_gerencial', data_inicio)
         .lte('dt_gerencial', data_fim);
 
-      if (!errorFaturamento && faturamento) {
-        resultado.faturamento_cmvivel = faturamento.reduce((sum, item) => 
+      if (!errorFaturamento && faturamentoBruto) {
+        // ⚡ FILTRAR DIAS FECHADOS
+        const faturamento = await filtrarDiasAbertos(faturamentoBruto, 'dt_gerencial', bar_id);
+        
+        resultado.faturamento_cmvivel = faturamento.reduce((sum, item: any) => 
           sum + (parseFloat(item.vr_repique) || 0), 0
         );
 
-        resultado.vendas_brutas = faturamento.reduce((sum, item) => 
+        resultado.vendas_brutas = faturamento.reduce((sum, item: any) => 
           sum + (parseFloat(item.vr_pagamentos) || 0), 0
         );
 
-        resultado.vendas_liquidas = faturamento.reduce((sum, item) => 
+        resultado.vendas_liquidas = faturamento.reduce((sum, item: any) => 
           sum + (parseFloat(item.vr_pagamentos) || 0) - (parseFloat(item.vr_couvert) || 0), 0
         );
 

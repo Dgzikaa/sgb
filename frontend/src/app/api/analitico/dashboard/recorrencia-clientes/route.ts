@@ -1,5 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { verificarMultiplasDatas } from '@/lib/helpers/calendario-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,37 @@ export async function GET(request: NextRequest) {
     console.log(
       `🔍 Analisando recorrência entre ${data1} e ${data2} para bar ${barId}`
     );
+
+    // ⚡ VERIFICAR SE DIAS ESTÃO ABERTOS
+    const statusDias = await verificarMultiplasDatas([data1, data2], parseInt(barId));
+    const data1Aberto = statusDias.get(data1)?.aberto !== false;
+    const data2Aberto = statusDias.get(data2)?.aberto !== false;
+    
+    if (!data1Aberto || !data2Aberto) {
+      const diasFechados = [];
+      if (!data1Aberto) diasFechados.push(data1);
+      if (!data2Aberto) diasFechados.push(data2);
+      
+      console.log(`⚠️ Dias fechados detectados: ${diasFechados.join(', ')}`);
+      
+      return NextResponse.json({
+        success: true,
+        data: {
+          data1,
+          data2,
+          data1Aberto,
+          data2Aberto,
+          diasFechados,
+          clientesComuns: [],
+          clientesData1: [],
+          clientesData2: [],
+          totalData1: 0,
+          totalData2: 0,
+          percentualRecorrencia: 0,
+          mensagem: `Não é possível calcular recorrência: ${diasFechados.join(' e ')} ${diasFechados.length === 1 ? 'estava' : 'estavam'} fechado(s)`
+        }
+      });
+    }
 
     // Try multiple sources for customer data
     let emailsData1: EmailPeriodo[] = [];

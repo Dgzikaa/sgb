@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { authenticateUser } from '@/middleware/auth';
 import { parseISO, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 
 export const dynamic = 'force-dynamic'
 
@@ -81,6 +82,10 @@ export async function GET(request: NextRequest) {
       console.error('❌ Erro ao buscar eventos:', eventosError);
       return NextResponse.json({ error: 'Erro ao buscar eventos' }, { status: 500 });
     }
+
+    // ⚡ FILTRAR DIAS FECHADOS
+    const eventosFiltrados = await filtrarDiasAbertos(eventos || [], 'data_evento', user.bar_id);
+    console.log(`📅 Eventos filtrados: ${eventos?.length || 0} → ${eventosFiltrados.length} (removidos ${(eventos?.length || 0) - eventosFiltrados.length} dias fechados)`);
 
     // Função otimizada para buscar dados agregados por data
     const fetchAggregatedData = async (table: string, dateColumn: string, aggregateColumn: string, aggregateFunction = 'sum') => {
@@ -305,7 +310,7 @@ export async function GET(request: NextRequest) {
 
     // Debug específico removido para reduzir logs desnecessários
 
-    if (!eventos || eventos.length === 0) {
+    if (!eventosFiltrados || eventosFiltrados.length === 0) {
       // Log apenas em modo verbose
       if (process.env.NEXT_PUBLIC_VERBOSE_LOGS === 'true') {
         console.log('⚠️ Nenhum evento encontrado para o período');
@@ -321,7 +326,7 @@ export async function GET(request: NextRequest) {
 
     // Log apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ ${eventos.length} eventos encontrados`);
+      console.log(`✅ ${eventosFiltrados.length} eventos encontrados`);
     }
 
     // Função para calcular número da semana ISO (corrigida)
@@ -378,7 +383,7 @@ export async function GET(request: NextRequest) {
       metas_clientes: number;
     }>();
 
-    eventos.forEach(evento => {
+    eventosFiltrados.forEach(evento => {
       // 🎯 CORREÇÃO: Calcular semana automaticamente se não estiver preenchida
       let semana = evento.semana;
       if (!semana) {

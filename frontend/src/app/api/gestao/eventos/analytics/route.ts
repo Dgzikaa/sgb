@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     ).toISOString();
 
     // Buscar eventos do período
-    const { data: eventos, error } = await supabase
+    const { data: eventosBruto, error } = await supabase
       .from('eventos_base')
       .select('*')
       .eq('bar_id', barId)
@@ -43,6 +44,9 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // ⚡ FILTRAR DIAS FECHADOS
+    const eventos = await filtrarDiasAbertos(eventosBruto || [], 'data_evento', parseInt(barId));
 
     // Calcular estatísticas
     const estatisticas = {

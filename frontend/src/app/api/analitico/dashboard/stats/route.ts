@@ -1,5 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -161,14 +162,22 @@ export async function GET(request: NextRequest) {
       `✅ Dados carregados: ${periodoData.length} período, ${pagamentosData.length} pagamentos, ${symplaData.length} sympla, ${yuzerData.length} yuzer, ${fatporhoraData.length} fatporhora`
     );
 
+    // ⚡ FILTRAR DIAS FECHADOS
+    const periodoFiltrado = await filtrarDiasAbertos(periodoData as any[], 'dt_gerencial', parseInt(barId));
+    const pagamentosFiltrado = await filtrarDiasAbertos(pagamentosData as any[], 'dt_gerencial', parseInt(barId));
+    const symplaFiltrado = await filtrarDiasAbertos(symplaData as any[], 'data_evento', parseInt(barId));
+    const fatporhoraFiltrado = await filtrarDiasAbertos(fatporhoraData as any[], 'vd_dtgerencial', parseInt(barId));
+    
+    console.log(`📅 Dias filtrados: período ${periodoData.length}→${periodoFiltrado.length}, pagamentos ${pagamentosData.length}→${pagamentosFiltrado.length}, sympla ${symplaData.length}→${symplaFiltrado.length}, fatporhora ${fatporhoraData.length}→${fatporhoraFiltrado.length}`);
+
     return NextResponse.json({
       success: true,
       data: {
-        periodo: periodoData || [],
-        pagamentos: pagamentosData || [],
-        sympla: symplaData || [],
+        periodo: periodoFiltrado || [],
+        pagamentos: pagamentosFiltrado || [],
+        sympla: symplaFiltrado || [],
         yuzer: yuzerData || [],
-        fatporhora: fatporhoraData || [],
+        fatporhora: fatporhoraFiltrado || [],
       },
     });
   } catch (error: unknown) {

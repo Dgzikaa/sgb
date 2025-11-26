@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verificarMultiplasDatas } from '@/lib/helpers/calendario-helper';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -143,6 +144,15 @@ export async function GET(request: NextRequest) {
     
     console.log(`🔍 Datas encontradas para ${diaSemana === 'todos' ? 'TODOS OS DIAS' : NOMES_DIAS[diaSemanaNum!]}:`, datasParaBuscar);
 
+    // ⚡ FILTRAR DIAS FECHADOS
+    const statusDias = await verificarMultiplasDatas(datasParaBuscar, barIdNum);
+    const datasAberto = datasParaBuscar.filter(data => {
+      const status = statusDias.get(data);
+      return status?.aberto !== false;
+    });
+    
+    console.log(`📅 Dias abertos: ${datasAberto.length}/${datasParaBuscar.length}`);
+
     // Buscar dados de faturamento por hora para cada data
     const dadosPorSemana: { [data: string]: { [hora: number]: number } } = {};
     const datasComDados: string[] = [];
@@ -157,7 +167,7 @@ export async function GET(request: NextRequest) {
         console.log(`🔍 DEBUG: datasParaBuscar total: ${datasParaBuscar.length}`);
         console.log(`🔍 DEBUG: Primeiras 10 datas:`, datasParaBuscar.slice(0, 10));
         
-        datasParaProcessar = datasParaBuscar.slice(0, 60); // Aumentar para 60 datas
+        datasParaProcessar = datasAberto.slice(0, 60); // Aumentar para 60 datas (apenas abertos)
         console.log(`🚀 OTIMIZAÇÃO MÊS X MÊS: Processando ${datasParaProcessar.length} de ${datasParaBuscar.length} datas`);
         console.log(`🔍 DEBUG: Datas que serão processadas:`, datasParaProcessar.slice(0, 10));
       } else {

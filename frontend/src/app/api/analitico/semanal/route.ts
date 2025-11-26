@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verificarMultiplasDatas } from '@/lib/helpers/calendario-helper';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -68,10 +69,19 @@ export async function GET(request: NextRequest) {
 
     console.log(`🔍 Buscando dados para ${NOMES_DIAS[diaSemanaNum]} nas datas:`, datasParaBuscar);
 
+    // ⚡ FILTRAR DIAS FECHADOS
+    const statusDias = await verificarMultiplasDatas(datasParaBuscar, barIdNum);
+    const datasAberto = datasParaBuscar.filter(data => {
+      const status = statusDias.get(data);
+      return status?.aberto !== false;
+    });
+    
+    console.log(`📅 Dias abertos: ${datasAberto.length}/${datasParaBuscar.length}`);
+
     const indicadoresPorSemana: IndicadorSemanal[] = [];
     const limit = 1000;
 
-    for (const data of datasParaBuscar) {
+    for (const data of datasAberto) {
       const inicioData = data;
       const fimData = data;
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
       query = query.ilike('vd_localizacao', `%${localizacao}%`);
     }
 
-    const { data, error } = await query;
+    const { data: dataBruto, error } = await query;
 
     if (error) {
       console.error('❌ Erro ao buscar dados de período:', error);
@@ -52,6 +53,10 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // ⚡ FILTRAR DIAS FECHADOS
+    const data = await filtrarDiasAbertos(dataBruto || [], 'dt_gerencial', parseInt(bar_id));
+    console.log(`📅 Dados filtrados: ${dataBruto?.length || 0} → ${data.length} (removidos ${(dataBruto?.length || 0) - data.length} dias fechados)`);
 
     // Calcular estatísticas
     const estatisticas = {

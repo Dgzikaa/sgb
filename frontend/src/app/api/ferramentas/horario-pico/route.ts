@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verificarMultiplasDatas, verificarBarAberto } from '@/lib/helpers/calendario-helper';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,13 +35,38 @@ export async function POST(request: NextRequest) {
     const semanaPassada = new Date(dataAtual);
     semanaPassada.setDate(semanaPassada.getDate() - 7);
     
-    // Últimas 4 ocorrências do mesmo dia da semana
-    const ultimas4Datas = [] as string[];
-    for (let i = 1; i <= 4; i++) {
+    // ⚠️ VERIFICAR SE DATA ATUAL ESTÁ ABERTA
+    const statusDiaAtual = await verificarBarAberto(data_selecionada, bar_id);
+    if (!statusDiaAtual.aberto) {
+      return NextResponse.json({
+        success: true,
+        bar_fechado: true,
+        motivo: statusDiaAtual.motivo,
+        data: {
+          data_selecionada,
+          faturamento_por_hora: [],
+          total_dia: 0,
+          mensagem: `Bar fechado em ${data_selecionada}: ${statusDiaAtual.motivo}`
+        }
+      });
+    }
+
+    // Últimas 4 ocorrências do mesmo dia da semana (buscar 8 para garantir 4 abertos)
+    const ultimas8Datas = [] as string[];
+    for (let i = 1; i <= 8; i++) {
       const data = new Date(dataAtual);
       data.setDate(data.getDate() - (7 * i));
-      ultimas4Datas.push(data.toISOString().split('T')[0]);
+      ultimas8Datas.push(data.toISOString().split('T')[0]);
     }
+    
+    // ⚡ FILTRAR DIAS FECHADOS
+    const statusDias = await verificarMultiplasDatas(ultimas8Datas, bar_id);
+    const ultimas4Datas = ultimas8Datas.filter(data => {
+      const status = statusDias.get(data);
+      return status?.aberto !== false;
+    }).slice(0, 4); // Pegar apenas 4 dias abertos
+    
+    console.log(`📅 Comparando com ${ultimas4Datas.length} dias abertos:`, ultimas4Datas);
 
     // Horários de operação: 17:00 às 03:00
     const horariosOperacao = [] as number[];
