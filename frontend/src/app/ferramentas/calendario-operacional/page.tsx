@@ -498,7 +498,7 @@ export default function CalendarioOperacionalPage() {
                 </CardContent>
               </Card>
             )}
-          </CardContent>
+
             {/* Navegação de Mês */}
             <div className="flex items-center justify-between mb-6">
               <Button
