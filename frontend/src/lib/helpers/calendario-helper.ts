@@ -91,7 +91,9 @@ export async function verificarBarAberto(
     }
 
     // 2º PRIORIDADE: Para datas passadas, verificar movimento no ContaHub
-    const dataVerificacao = new Date(data + 'T12:00:00Z');
+    // Criar data garantindo interpretação correta (sem timezone issues)
+    const [ano, mes, dia] = data.split('-').map(Number);
+    const dataVerificacao = new Date(Date.UTC(ano, mes - 1, dia, 12, 0, 0));
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
@@ -137,20 +139,14 @@ export async function verificarBarAberto(
     let resultado: StatusDia;
     
     if (diaSemana === 2 && dataVerificacao > ultimaTercaOperacional) {
+      // APENAS TERÇAS FECHAM (dia 2 = terça)
       resultado = {
         aberto: false,
         motivo: 'Terça-feira (bar fechado)',
         fonte: 'padrao'
       };
-    } else if (diaSemana === 1) {
-      // Verificar se é segunda
-      resultado = {
-        aberto: false,
-        motivo: 'Segunda-feira (bar fechado)',
-        fonte: 'padrao'
-      };
     } else {
-      // Outros dias: aberto
+      // Todos os outros dias (incluindo segundas): aberto
       resultado = {
         aberto: true,
         motivo: `${diasSemana[diaSemana]} (dia normal de funcionamento)`,
@@ -241,7 +237,9 @@ export async function verificarMultiplasDatas(
         continue;
       }
 
-      const dataVerificacao = new Date(data + 'T12:00:00Z');
+      // Criar data garantindo interpretação correta (sem timezone issues)
+      const [ano, mes, dia] = data.split('-').map(Number);
+      const dataVerificacao = new Date(Date.UTC(ano, mes - 1, dia, 12, 0, 0));
       const diaSemana = dataVerificacao.getUTCDay();
 
       // 2º - Movimento (só para passado)
@@ -259,18 +257,14 @@ export async function verificarMultiplasDatas(
 
       // 3º - Padrão semanal
       if (diaSemana === 2 && dataVerificacao > ultimaTercaOperacional) {
+        // APENAS TERÇAS FECHAM (dia 2 = terça)
         resultado.set(data, {
           aberto: false,
           motivo: 'Terça-feira (bar fechado)',
           fonte: 'padrao'
         });
-      } else if (diaSemana === 1) {
-        resultado.set(data, {
-          aberto: false,
-          motivo: 'Segunda-feira (bar fechado)',
-          fonte: 'padrao'
-        });
       } else {
+        // Todos os outros dias (incluindo segundas): aberto
         resultado.set(data, {
           aberto: true,
           motivo: 'Dia normal de funcionamento',
