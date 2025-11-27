@@ -65,12 +65,12 @@ export async function POST(request: NextRequest) {
         .neq('loc_desc', 'Venda Volante')
         .not('loc_desc', 'is', null); // Excluir "Sem local definido"
       
-      // PRODUTOS COM PREFIXOS A IGNORAR
+      // PRODUTOS COM PREFIXOS A IGNORAR (usando % em ambos os lados para pegar espaços)
       query = query
-        .not('prd_desc', 'ilike', '[HH]%')  // Happy Hour
-        .not('prd_desc', 'ilike', '[PP]%')  // Pegue Pague
-        .not('prd_desc', 'ilike', '[DD]%')  // Dose Dupla
-        .not('prd_desc', 'ilike', '[IN]%'); // Insumos
+        .not('prd_desc', 'ilike', '%[HH]%')  // Happy Hour (com ou sem espaços)
+        .not('prd_desc', 'ilike', '%[PP]%')  // Pegue Pague
+        .not('prd_desc', 'ilike', '%[DD]%')  // Dose Dupla
+        .not('prd_desc', 'ilike', '%[IN]%'); // Insumos
       
       return query;
     };
