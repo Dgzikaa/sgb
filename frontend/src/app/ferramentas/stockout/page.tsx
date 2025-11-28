@@ -883,7 +883,7 @@ export default function StockoutPage() {
                               </Button>
                             </div>
                           </CardHeader>
-                          <CardContent>
+                          <CardContent className="p-4 sm:p-6">
                             <div className="space-y-4">
                               {/* Timeline de Dias (apenas no modo período) */}
                               {modoAnalise === 'periodo' && getDiasDaCategoria().length > 0 && (
@@ -939,51 +939,64 @@ export default function StockoutPage() {
                                 </div>
                               )}
                               
-                              {/* Produtos em Stockout */}
-                              {getProdutosPorLocal().indisponiveis.length > 0 && (
-                                <div>
-                                  <h4 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-3 flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4" />
-                                    Produtos em Stockout ({getProdutosPorLocal().indisponiveis.length})
-                                  </h4>
-                                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                                    {getProdutosPorLocal().indisponiveis.map((produto, index) => (
-                                      <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/20 rounded">
-                                        <h5 className="font-medium text-gray-900 dark:text-white text-sm">
-                                          {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
-                                        </h5>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                                          Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
-                                        </p>
-                                      </div>
-                                    ))}
+                              {/* Layout em Duas Colunas: Stockout (Esquerda) | Disponíveis (Direita) */}
+                              {(getProdutosPorLocal().indisponiveis.length > 0 || getProdutosPorLocal().disponiveis.length > 0) ? (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                  {/* Coluna da Esquerda: Produtos em Stockout */}
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-3 flex items-center gap-2 sticky top-0 bg-gray-50 dark:bg-gray-900 py-2 z-10">
+                                      <AlertTriangle className="h-4 w-4" />
+                                      Produtos em Stockout ({getProdutosPorLocal().indisponiveis.length})
+                                    </h4>
+                                    <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                                      {getProdutosPorLocal().indisponiveis.length > 0 ? (
+                                        getProdutosPorLocal().indisponiveis.map((produto, index) => (
+                                          <div key={index} className="border-l-4 border-red-500 pl-4 py-2 bg-red-50 dark:bg-red-900/20 rounded">
+                                            <h5 className="font-medium text-gray-900 dark:text-white text-sm">
+                                              {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                            </h5>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                              Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                            </p>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div className="text-center py-8 text-green-600 dark:text-green-400">
+                                          <CheckCircle className="h-12 w-12 mx-auto mb-2" />
+                                          <p className="font-medium">Nenhum produto em stockout! 🎉</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Coluna da Direita: Produtos Disponíveis */}
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-3 flex items-center gap-2 sticky top-0 bg-gray-50 dark:bg-gray-900 py-2 z-10">
+                                      <CheckCircle className="h-4 w-4" />
+                                      Produtos Disponíveis ({getProdutosPorLocal().disponiveis.length})
+                                    </h4>
+                                    <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                                      {getProdutosPorLocal().disponiveis.length > 0 ? (
+                                        getProdutosPorLocal().disponiveis.map((produto, index) => (
+                                          <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/20 rounded">
+                                            <h5 className="font-medium text-gray-900 dark:text-white text-sm">
+                                              {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
+                                            </h5>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                                              Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
+                                            </p>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                          <AlertTriangle className="h-12 w-12 mx-auto mb-2" />
+                                          <p>Nenhum produto disponível</p>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                              )}
-
-                              {/* Produtos Disponíveis */}
-                              {getProdutosPorLocal().disponiveis.length > 0 && (
-                                <div>
-                                  <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-3 flex items-center gap-2">
-                                    <CheckCircle className="h-4 w-4" />
-                                    Produtos Disponíveis ({getProdutosPorLocal().disponiveis.length})
-                                  </h4>
-                                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                                    {getProdutosPorLocal().disponiveis.map((produto, index) => (
-                                      <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-green-50 dark:bg-green-900/20 rounded">
-                                        <h5 className="font-medium text-gray-900 dark:text-white text-sm">
-                                          {produto.prd_desc || produto.produto_descricao || 'Produto sem nome'}
-                                        </h5>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                                          Local: {produto.loc_desc || produto.local_producao || 'Não informado'}
-                                        </p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {getProdutosPorLocal().disponiveis.length === 0 && getProdutosPorLocal().indisponiveis.length === 0 && (
+                              ) : (
                                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                   <Package className="h-12 w-12 mx-auto mb-2 text-gray-400" />
                                   <p>Nenhum produto encontrado para este local</p>
