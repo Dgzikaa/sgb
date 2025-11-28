@@ -131,21 +131,33 @@ serve(async (req) => {
   }
 })
 
-// Função para obter número da semana
+// Função para obter número da semana (padrão ISO - segunda a domingo)
 function getWeekNumber(date: Date): number {
-  const startOfYear = new Date(date.getFullYear(), 0, 1)
-  const pastDaysOfYear = (date.getTime() - startOfYear.getTime()) / 86400000
-  return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7)
+  // Clonar data para não modificar original
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  // Ajustar para segunda-feira
+  const dayNum = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+  // Obter primeiro dia do ano
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  // Calcular número da semana
+  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  return weekNo
 }
 
-// Função para obter datas de início e fim da semana
+// Função para obter datas de início e fim da semana (segunda a domingo)
 function getWeekDates(year: number, weekNumber: number) {
-  const startOfYear = new Date(year, 0, 1)
-  const daysToAdd = (weekNumber - 1) * 7 - startOfYear.getDay()
+  // Encontrar a primeira segunda-feira da primeira semana ISO do ano
+  const jan4 = new Date(year, 0, 4) // 4 de janeiro sempre está na primeira semana ISO
+  const jan4Day = jan4.getDay() || 7 // Domingo = 7
+  const firstMonday = new Date(jan4)
+  firstMonday.setDate(jan4.getDate() - jan4Day + 1) // Volta para a primeira segunda-feira
   
-  const startDate = new Date(startOfYear)
-  startDate.setDate(startOfYear.getDate() + daysToAdd)
+  // Calcular início da semana desejada (segunda-feira)
+  const startDate = new Date(firstMonday)
+  startDate.setDate(firstMonday.getDate() + (weekNumber - 1) * 7)
   
+  // Fim da semana (domingo)
   const endDate = new Date(startDate)
   endDate.setDate(startDate.getDate() + 6)
   

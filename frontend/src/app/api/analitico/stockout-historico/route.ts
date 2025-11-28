@@ -129,21 +129,25 @@ function getDiaSemana(data: string): { nome: string; numero: number } {
 }
 
 function getNumeroSemana(data: string): number {
+  // Cálculo ISO de semana (segunda a domingo)
   const date = new Date(data + 'T00:00:00');
-  const startOfYear = new Date(date.getFullYear(), 0, 1);
-  const pastDaysOfYear = (date.getTime() - startOfYear.getTime()) / 86400000;
-  return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
 
 function getInicioFimSemana(data: string): { inicio: string; fim: string } {
   const date = new Date(data + 'T00:00:00');
   const dayOfWeek = date.getDay();
   
-  // Início da semana (domingo)
+  // Início da semana (segunda-feira)
   const inicioSemana = new Date(date);
-  inicioSemana.setDate(date.getDate() - dayOfWeek);
+  const diasParaSegunda = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  inicioSemana.setDate(date.getDate() + diasParaSegunda);
   
-  // Fim da semana (sábado)
+  // Fim da semana (domingo)
   const fimSemana = new Date(inicioSemana);
   fimSemana.setDate(inicioSemana.getDate() + 6);
   

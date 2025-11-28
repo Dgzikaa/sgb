@@ -25,12 +25,17 @@ function getWeekNumber(date: Date): number {
 }
 
 /**
- * Calcular datas de início e fim da semana
+ * Calcular datas de início e fim da semana (segunda a domingo)
  */
 function getWeekDates(date: Date): { inicio: string; fim: string } {
-  const primeiroDia = new Date(date);
-  primeiroDia.setDate(date.getDate() - date.getDay());
+  const dayOfWeek = date.getDay();
   
+  // Segunda-feira (início)
+  const primeiroDia = new Date(date);
+  const diasParaSegunda = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  primeiroDia.setDate(date.getDate() + diasParaSegunda);
+  
+  // Domingo (fim)
   const ultimoDia = new Date(primeiroDia);
   ultimoDia.setDate(primeiroDia.getDate() + 6);
   

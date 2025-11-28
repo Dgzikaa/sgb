@@ -45,11 +45,13 @@ async function fetchAllData(supabase: any, tableName: string, columns: string, f
   return allData;
 }
 
-// Obter semana do ano de uma data
+// Obter semana do ano de uma data (padrão ISO - segunda a domingo)
 function getWeekNumber(date: Date): number {
-  const startOfYear = new Date(date.getFullYear(), 0, 1);
-  const pastDaysOfYear = (date.getTime() - startOfYear.getTime()) / 86400000;
-  return Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
 
 // POST - Recalcular dados automáticos da tabela de desempenho

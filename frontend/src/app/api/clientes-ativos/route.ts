@@ -128,21 +128,22 @@ export async function GET(request: NextRequest) {
         year: 'numeric' 
       });
     } else {
-      // SEMANA (domingo a sábado)
+      // SEMANA (segunda-feira a domingo) - Padrão ISO
       const hoje = dataInicio ? new Date(dataInicio + 'T12:00:00') : new Date();
       const ano = hoje.getFullYear();
       
-      // Calcular início e fim da semana atual (domingo = 0, sábado = 6)
+      // Calcular início e fim da semana atual (segunda = 1, domingo = 0)
       const diaSemana = hoje.getDay(); // 0 = domingo, 1 = segunda, ..., 6 = sábado
       
-      // Criar data do domingo da semana (início)
+      // Criar data da segunda-feira da semana (início)
       const inicioSemanaAtual = new Date(hoje);
-      inicioSemanaAtual.setDate(hoje.getDate() - diaSemana); // Volta para o domingo
+      const diasParaSegunda = diaSemana === 0 ? -6 : 1 - diaSemana; // Se domingo, volta 6 dias; senão, vai para segunda
+      inicioSemanaAtual.setDate(hoje.getDate() + diasParaSegunda);
       inicioSemanaAtual.setHours(0, 0, 0, 0);
       
-      // Criar data do sábado da semana (fim)
+      // Criar data do domingo da semana (fim)
       const fimSemanaAtual = new Date(inicioSemanaAtual);
-      fimSemanaAtual.setDate(inicioSemanaAtual.getDate() + 6); // Avança 6 dias até sábado
+      fimSemanaAtual.setDate(inicioSemanaAtual.getDate() + 6); // Avança 6 dias até domingo
       fimSemanaAtual.setHours(23, 59, 59, 999);
       
       // Calcular semana anterior
@@ -151,11 +152,13 @@ export async function GET(request: NextRequest) {
       const fimSemanaAnterior = new Date(inicioSemanaAnterior);
       fimSemanaAnterior.setDate(inicioSemanaAnterior.getDate() + 6);
       
-      // Calcular número da semana no ano
-      const inicioAno = new Date(ano, 0, 1);
-      const diffTime = inicioSemanaAtual.getTime() - inicioAno.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      const semanaAtual = Math.ceil((diffDays + inicioAno.getDay() + 1) / 7);
+      // Calcular número da semana no ano (padrão ISO - semana começa na segunda)
+      const jan4 = new Date(ano, 0, 4); // 4 de janeiro sempre está na primeira semana ISO
+      const jan4Day = jan4.getDay() || 7; // Domingo = 7
+      const firstMonday = new Date(jan4);
+      firstMonday.setDate(jan4.getDate() - jan4Day + 1); // Volta para a primeira segunda-feira
+      const weeksDiff = Math.floor((inicioSemanaAtual.getTime() - firstMonday.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      const semanaAtual = weeksDiff + 1;
 
       inicioAtual = inicioSemanaAtual.toISOString().split('T')[0];
       fimAtual = fimSemanaAtual.toISOString().split('T')[0];
