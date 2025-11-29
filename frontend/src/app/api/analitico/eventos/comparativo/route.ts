@@ -41,28 +41,44 @@ export async function GET(request: NextRequest) {
         periodo2Fim = periodo2Inicio;
       }
     } else if (tipo === 'semana') {
-      // Semana x Semana (7 dias)
-      const fim1 = new Date(data1Obj);
-      const inicio1 = new Date(data1Obj);
-      inicio1.setDate(inicio1.getDate() - 6);
-      periodo1Inicio = inicio1.toISOString().split('T')[0];
-      periodo1Fim = fim1.toISOString().split('T')[0];
+      // Semana x Semana (Segunda a Domingo)
+      // Função para obter segunda-feira da semana
+      const getSegunda = (date: Date) => {
+        const d = new Date(date);
+        const day = d.getDay(); // 0 = domingo, 1 = segunda, ..., 6 = sábado
+        const diff = day === 0 ? -6 : 1 - day; // Se domingo, volta 6 dias; senão, calcula diferença para segunda
+        d.setDate(d.getDate() + diff);
+        return d;
+      };
+
+      // Função para obter domingo da semana
+      const getDomingo = (date: Date) => {
+        const segunda = getSegunda(date);
+        const domingo = new Date(segunda);
+        domingo.setDate(domingo.getDate() + 6);
+        return domingo;
+      };
+
+      // Período 1
+      const segunda1 = getSegunda(data1Obj);
+      const domingo1 = getDomingo(data1Obj);
+      periodo1Inicio = segunda1.toISOString().split('T')[0];
+      periodo1Fim = domingo1.toISOString().split('T')[0];
 
       if (data2) {
         const data2Obj = new Date(data2 + 'T12:00:00');
-        const fim2 = new Date(data2Obj);
-        const inicio2 = new Date(data2Obj);
-        inicio2.setDate(inicio2.getDate() - 6);
-        periodo2Inicio = inicio2.toISOString().split('T')[0];
-        periodo2Fim = fim2.toISOString().split('T')[0];
+        const segunda2 = getSegunda(data2Obj);
+        const domingo2 = getDomingo(data2Obj);
+        periodo2Inicio = segunda2.toISOString().split('T')[0];
+        periodo2Fim = domingo2.toISOString().split('T')[0];
       } else {
-        // Semana anterior
-        const fim2 = new Date(data1Obj);
-        fim2.setDate(fim2.getDate() - 7);
-        const inicio2 = new Date(fim2);
-        inicio2.setDate(inicio2.getDate() - 6);
-        periodo2Inicio = inicio2.toISOString().split('T')[0];
-        periodo2Fim = fim2.toISOString().split('T')[0];
+        // Semana anterior (7 dias antes da segunda-feira da semana 1)
+        const segundaAnterior = new Date(segunda1);
+        segundaAnterior.setDate(segundaAnterior.getDate() - 7);
+        const domingoAnterior = new Date(segundaAnterior);
+        domingoAnterior.setDate(domingoAnterior.getDate() + 6);
+        periodo2Inicio = segundaAnterior.toISOString().split('T')[0];
+        periodo2Fim = domingoAnterior.toISOString().split('T')[0];
       }
     } else if (tipo === 'mes') {
       // Mês x Mês
