@@ -206,9 +206,16 @@ const defaultSidebarItems: SidebarItem[] = [
         },
         {
           icon: Users,
-          label: 'NPS',
+          label: 'NPS Funcionários',
           href: '/ferramentas/nps',
           description: 'Pesquisa NPS e Felicidade dos funcionários',
+          permission: 'gestao',
+        },
+        {
+          icon: Target,
+          label: 'NPS Clientes',
+          href: '/ferramentas/nps/categorizado',
+          description: 'Pesquisa de satisfação de clientes por categoria',
           permission: 'gestao',
         },
         {

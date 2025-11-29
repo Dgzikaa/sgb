@@ -50,15 +50,19 @@ interface NPSRow {
   data_pesquisa: string
   setor: string
   quorum: number
-  qual_sua_area_atuacao: number
-  sinto_me_motivado: number
-  empresa_se_preocupa: number
-  conectado_colegas: number
-  relacionamento_positivo: number
-  quando_identifico: number
+  nps_geral: number
+  nps_ambiente: number
+  nps_atendimento: number
+  nps_limpeza: number
+  nps_musica: number
+  nps_comida: number
+  nps_drink: number
+  nps_preco: number
+  nps_reservas: number
   media_geral: number
   resultado_percentual: number
   funcionario_nome: string
+  comentarios: string
 }
 
 // Função para obter Access Token usando Service Account
@@ -274,38 +278,70 @@ serve(async (req) => {
         
         console.log(`✅ Linha ${i + 1}: Data processada = ${dataFormatada}, Timestamp = ${timestampCompleto.substring(0, 30)}`)
 
-        // Converter valores (podem ser números 0-10, ou "Não" quando não consumiu)
+        // Converter valores (podem ser números 1-5, texto descritivo, ou "Não" quando não consumiu)
         const parseValue = (val: any): number => {
           if (!val) return 0
           
-          // Se é "Não" ou texto, retornar 0 (não avaliado)
-          const str = String(val).trim()
-          if (str.toLowerCase() === 'não' || str.toLowerCase() === 'nao') {
+          const str = String(val).trim().toLowerCase()
+          
+          // Se é "Não" ou texto negativo, retornar 0 (não avaliado)
+          if (str === 'não' || str === 'nao' || str === 'não consumiu' || str === '') {
             return 0
           }
           
+          // Mapear textos descritivos para números
+          const textoParaNota: { [key: string]: number } = {
+            'péssimo': 1,
+            'pessimo': 1,
+            'ruim': 2,
+            'regular': 3,
+            'bom': 4,
+            'ótimo': 5,
+            'otimo': 5,
+            'excelente': 5
+          }
+          
+          if (textoParaNota[str]) {
+            return textoParaNota[str]
+          }
+          
+          // Tentar converter para número
           const num = parseFloat(str.replace('%', '').replace(',', '.'))
           
           if (isNaN(num)) return 0
           
-          // Valores vêm na escala 0-10, converter para 0-5
-          // 0-10 -> 0-5 (dividir por 2)
-          return Math.round(num / 2 * 10) / 10  // Arredondar para 1 casa decimal
+          // Se o número está entre 0-10, converter para 0-5
+          if (num > 5 && num <= 10) {
+            return Math.round((num / 2) * 10) / 10
+          }
+          
+          // Se já está entre 0-5, retornar direto
+          if (num >= 0 && num <= 5) {
+            return Math.round(num * 10) / 10
+          }
+          
+          // Número fora do range esperado
+          return 0
         }
 
         // Estrutura do Google Forms NPS Ordi:
-        // Col 0: Carimbo | Cols 1-3: Dia/Gênero/Idade | Cols 4-9: 6 perguntas NPS
+        // Col 0: Carimbo | Cols 1-3: Dia/Gênero/Idade | Cols 4-12: 9 perguntas NPS | Col 13: Comentários
         // Col 4 (E): Ambiente | Col 5 (F): Atendimento | Col 6 (G): Limpeza
         // Col 7 (H): Música | Col 8 (I): Comidas | Col 9 (J): Drinks
-        const pergunta1 = parseValue(row[4])  // Ambiente
-        const pergunta2 = parseValue(row[5])  // Atendimento
-        const pergunta3 = parseValue(row[6])  // Limpeza
-        const pergunta4 = parseValue(row[7])  // Música
-        const pergunta5 = parseValue(row[8])  // Comidas
-        const pergunta6 = parseValue(row[9])  // Drinks
+        // Col 10 (K): Preço | Col 11 (L): Reservas | Col 12 (M): Geral | Col 13 (N): Comentários
+        const nps_ambiente = parseValue(row[4])      // Ambiente
+        const nps_atendimento = parseValue(row[5])   // Atendimento
+        const nps_limpeza = parseValue(row[6])       // Limpeza
+        const nps_musica = parseValue(row[7])        // Música
+        const nps_comida = parseValue(row[8])        // Comidas
+        const nps_drink = parseValue(row[9])         // Drinks
+        const nps_preco = parseValue(row[10])        // Preço
+        const nps_reservas = parseValue(row[11])     // Reservas
+        const nps_geral = parseValue(row[12])        // Geral/Recomendação
+        const comentarios = row[13] ? String(row[13]).trim() : ''  // Comentários
         
         // Calcular média apenas das perguntas respondidas (ignorar zeros)
-        const valores = [pergunta1, pergunta2, pergunta3, pergunta4, pergunta5, pergunta6]
+        const valores = [nps_ambiente, nps_atendimento, nps_limpeza, nps_musica, nps_comida, nps_drink, nps_preco, nps_reservas, nps_geral]
         const valoresRespondidos = valores.filter(v => v > 0)
         const mediaGeral = valoresRespondidos.length > 0 
           ? valoresRespondidos.reduce((a, b) => a + b, 0) / valoresRespondidos.length 
@@ -317,17 +353,21 @@ serve(async (req) => {
         const registro: NPSRow = {
           bar_id: 3,
           data_pesquisa: dataFormatada,
-          setor: 'TODOS', // Google Forms geralmente não tem setor
-          quorum: 1, // 1 resposta por linha
-          qual_sua_area_atuacao: pergunta1,
-          sinto_me_motivado: pergunta2,
-          empresa_se_preocupa: pergunta3,
-          conectado_colegas: pergunta4,
-          relacionamento_positivo: pergunta5,
-          quando_identifico: pergunta6,
+          setor: 'TODOS',
+          quorum: 1,
+          nps_geral,
+          nps_ambiente,
+          nps_atendimento,
+          nps_limpeza,
+          nps_musica,
+          nps_comida,
+          nps_drink,
+          nps_preco,
+          nps_reservas,
           media_geral: parseFloat(mediaGeral.toFixed(2)),
           resultado_percentual: parseFloat(resultadoPercentual.toFixed(2)),
-          funcionario_nome: `Cliente_${timestampCompleto.substring(0, 20)}`, // Identificador único baseado em timestamp
+          funcionario_nome: timestampCompleto.substring(0, 40), // Timestamp sem prefixo "Cliente_"
+          comentarios
         }
 
         registros.push(registro)
