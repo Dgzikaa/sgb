@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -17,12 +17,14 @@ import {
   Star,
   AlertCircle,
   Info,
-  CheckCircle
+  CheckCircle,
+  BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from 'recharts';
 
 interface ClientesAtivosData {
   periodo: string;
@@ -62,14 +64,28 @@ interface ClientesAtivosData {
   }>;
 }
 
+interface EvolucaoMensal {
+  mes: string;
+  mesLabel: string;
+  totalClientes: number;
+  novosClientes: number;
+  clientesRetornantes: number;
+  percentualNovos: number;
+  percentualRetornantes: number;
+  baseAtiva: number;
+}
+
 export default function ClientesAtivosPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
 
   const [loading, setLoading] = useState(false);
+  const [loadingEvolucao, setLoadingEvolucao] = useState(false);
   const [data, setData] = useState<ClientesAtivosData | null>(null);
+  const [evolucaoData, setEvolucaoData] = useState<EvolucaoMensal[]>([]);
   const [periodo, setPeriodo] = useState<'dia' | 'semana' | 'mes'>('semana');
   const [dataCustom, setDataCustom] = useState(new Date().toISOString().split('T')[0]);
+  const [mesesEvolucao, setMesesEvolucao] = useState(12);
 
   useEffect(() => {
     setPageTitle('👥 Clientes Ativos');
@@ -77,7 +93,12 @@ export default function ClientesAtivosPage() {
 
   useEffect(() => {
     buscarDados();
+    buscarEvolucao();
   }, [periodo, selectedBar]);
+
+  useEffect(() => {
+    buscarEvolucao();
+  }, [mesesEvolucao]);
 
   const buscarDados = async (dataEspecifica?: string) => {
     setLoading(true);
@@ -105,6 +126,31 @@ export default function ClientesAtivosPage() {
       toast.error('Erro ao buscar dados de clientes');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const buscarEvolucao = async () => {
+    setLoadingEvolucao(true);
+    try {
+      const barId = selectedBar?.id || 3;
+      const params = new URLSearchParams({
+        bar_id: barId.toString(),
+        meses: mesesEvolucao.toString()
+      });
+
+      const response = await fetch(`/api/clientes-ativos/evolucao?${params}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setEvolucaoData(result.data);
+      } else {
+        toast.error(result.error || 'Erro ao buscar dados de evolução');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar evolução:', error);
+      toast.error('Erro ao buscar dados de evolução');
+    } finally {
+      setLoadingEvolucao(false);
     }
   };
 
@@ -284,7 +330,7 @@ export default function ClientesAtivosPage() {
                         <TrendingDown className="w-4 h-4 text-red-600" />
                       )}
                       <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {data.atual.percentualNovos}%
+                        {data.atual.percentualNovos.toFixed(2)}%
                       </Badge>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Anterior: {data.anterior.novosClientes}
@@ -310,7 +356,7 @@ export default function ClientesAtivosPage() {
                         <TrendingDown className="w-4 h-4 text-red-600" />
                       )}
                       <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {data.atual.percentualRetornantes}%
+                        {data.atual.percentualRetornantes.toFixed(2)}%
                       </Badge>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         Anterior: {data.anterior.clientesRetornantes}
@@ -374,6 +420,215 @@ export default function ClientesAtivosPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Gráficos de Evolução Mensal */}
+                <div className="mt-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5" />
+                      Evolução Mensal de Clientes
+                    </h3>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant={mesesEvolucao === 6 ? 'default' : 'outline'}
+                        onClick={() => setMesesEvolucao(6)}
+                        className="bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
+                      >
+                        6 meses
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={mesesEvolucao === 12 ? 'default' : 'outline'}
+                        onClick={() => setMesesEvolucao(12)}
+                        className="bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
+                      >
+                        12 meses
+                      </Button>
+                    </div>
+                  </div>
+
+                  {loadingEvolucao ? (
+                    <div className="flex items-center justify-center py-12">
+                      <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+                      <span className="ml-3 text-gray-600 dark:text-gray-400">Carregando evolução...</span>
+                    </div>
+                  ) : evolucaoData.length > 0 ? (
+                    <div className="space-y-6">
+                      {/* Gráfico de Novos Clientes x Retornantes */}
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <CardHeader>
+                          <CardTitle className="text-base text-gray-900 dark:text-white">
+                            Novos Clientes vs Retornantes (Total)
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <RechartsBarChart data={evolucaoData}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                              <XAxis 
+                                dataKey="mesLabel" 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                              />
+                              <YAxis 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                              />
+                              <Tooltip 
+                                contentStyle={{
+                                  backgroundColor: 'var(--background)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '8px'
+                                }}
+                              />
+                              <Legend />
+                              <Bar dataKey="novosClientes" name="Novos Clientes" fill="#10b981" />
+                              <Bar dataKey="clientesRetornantes" name="Retornantes" fill="#3b82f6" />
+                            </RechartsBarChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+
+                      {/* Gráfico de Percentuais */}
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <CardHeader>
+                          <CardTitle className="text-base text-gray-900 dark:text-white">
+                            % Novos Clientes vs % Retornantes
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={evolucaoData}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                              <XAxis 
+                                dataKey="mesLabel" 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                              />
+                              <YAxis 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                                tickFormatter={(value) => `${value.toFixed(1)}%`}
+                              />
+                              <Tooltip 
+                                contentStyle={{
+                                  backgroundColor: 'var(--background)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '8px'
+                                }}
+                                formatter={(value: any) => `${parseFloat(value).toFixed(2)}%`}
+                              />
+                              <Legend />
+                              <Line 
+                                type="monotone" 
+                                dataKey="percentualNovos" 
+                                name="% Novos" 
+                                stroke="#10b981" 
+                                strokeWidth={2}
+                                dot={{ fill: '#10b981' }}
+                              />
+                              <Line 
+                                type="monotone" 
+                                dataKey="percentualRetornantes" 
+                                name="% Retornantes" 
+                                stroke="#3b82f6" 
+                                strokeWidth={2}
+                                dot={{ fill: '#3b82f6' }}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+
+                      {/* Gráfico de Base Ativa */}
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <CardHeader>
+                          <CardTitle className="text-base text-gray-900 dark:text-white">
+                            Evolução da Base Ativa (90 dias)
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={evolucaoData}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                              <XAxis 
+                                dataKey="mesLabel" 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                              />
+                              <YAxis 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                              />
+                              <Tooltip 
+                                contentStyle={{
+                                  backgroundColor: 'var(--background)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '8px'
+                                }}
+                              />
+                              <Legend />
+                              <Line 
+                                type="monotone" 
+                                dataKey="baseAtiva" 
+                                name="Base Ativa" 
+                                stroke="#f59e0b" 
+                                strokeWidth={3}
+                                dot={{ fill: '#f59e0b', r: 4 }}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+
+                      {/* Gráfico de Total de Clientes */}
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <CardHeader>
+                          <CardTitle className="text-base text-gray-900 dark:text-white">
+                            Total de Clientes por Mês
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={evolucaoData}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                              <XAxis 
+                                dataKey="mesLabel" 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                              />
+                              <YAxis 
+                                className="text-gray-600 dark:text-gray-400"
+                                tick={{ fill: 'currentColor' }}
+                              />
+                              <Tooltip 
+                                contentStyle={{
+                                  backgroundColor: 'var(--background)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: '8px'
+                                }}
+                              />
+                              <Legend />
+                              <Line 
+                                type="monotone" 
+                                dataKey="totalClientes" 
+                                name="Total de Clientes" 
+                                stroke="#8b5cf6" 
+                                strokeWidth={3}
+                                dot={{ fill: '#8b5cf6', r: 4 }}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                      Nenhum dado de evolução disponível
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">

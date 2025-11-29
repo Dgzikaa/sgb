@@ -29,6 +29,7 @@ import {
   Wrench,
   Package,
   AlertTriangle,
+  ChefHat,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -173,6 +174,20 @@ const defaultSidebarItems: SidebarItem[] = [
           label: 'Contagem de Estoque',
           href: '/ferramentas/contagem-estoque',
           description: 'Registro de contagem com validações inteligentes',
+          permission: 'operacoes',
+        },
+        {
+          icon: ChefHat,
+          label: 'Teste de Produção',
+          href: '/ferramentas/teste-producao',
+          description: 'Teste de fichas técnicas em produção',
+          permission: 'operacoes',
+        },
+        {
+          icon: Package,
+          label: 'Contagem Rápida',
+          href: '/ferramentas/contagem-rapida',
+          description: 'Contagem rápida de estoque de insumos',
           permission: 'operacoes',
         },
         {

@@ -97,6 +97,7 @@ export default function SimulacaoCMOPage() {
   const [historico, setHistorico] = useState<SimulacaoCMO[]>([]);
   const [mostrarHistorico, setMostrarHistorico] = useState(false);
   const [simulacaoAtualId, setSimulacaoAtualId] = useState<number | undefined>();
+  const [mostrarGuiaCalculos, setMostrarGuiaCalculos] = useState(false);
 
   // Lookup de adicional noturno por área
   const obterAdicionalNoturno = (area: string): number => {
@@ -436,18 +437,179 @@ export default function SimulacaoCMOPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
                 <Button
                   onClick={adicionarFuncionario}
-                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
+                  className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white"
                   leftIcon={<Plus className="h-4 w-4" />}
                 >
                   Adicionar Funcionário
+                </Button>
+                <Button
+                  onClick={() => setMostrarGuiaCalculos(!mostrarGuiaCalculos)}
+                  variant="outline"
+                  className="bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
+                  leftIcon={<Info className="h-4 w-4" />}
+                  title="Guia de Cálculos Detalhado"
+                >
+                  {mostrarGuiaCalculos ? 'Ocultar' : 'Guia'}
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Guia de Cálculos */}
+        {mostrarGuiaCalculos && (
+          <Card className="card-dark mb-6 border-2 border-blue-500 dark:border-blue-400">
+            <CardHeader className="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-700">
+              <CardTitle className="text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                <Calculator className="h-5 w-5" />
+                📊 Guia Completo de Cálculos - CMO
+              </CardTitle>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-2">
+                Todas as fórmulas utilizadas na simulação, conforme verificação de 29/11/2025
+              </p>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Coluna 1 - Proventos */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-green-600 dark:text-green-400 flex items-center gap-2 text-lg">
+                    💰 PROVENTOS (Adições)
+                  </h3>
+
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">1. Salário Bruto + Estimativa</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded">salario_bruto + estimativa</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">Base salarial + variáveis previstas</p>
+                  </div>
+
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">2. Adicional Noturno</h4>
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Salão:</strong> R$ 125,00</p>
+                      <p><strong>Bar:</strong> R$ 125,00</p>
+                      <p><strong>Cozinha:</strong> R$ 115,00</p>
+                      <p><strong>Liderança:</strong> R$ 0,00</p>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">Conforme área de atuação</p>
+                  </div>
+
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">3. DRS sobre Ads Noturno</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded">adicional_noturno * 0,2</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">20% de descanso remunerado</p>
+                  </div>
+
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">4. Produtividade</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded">salario_bruto * 0,05</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">5% de bonificação</p>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">9. Provisão Certa (27%)</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded block mb-2">
+                      (bruto + ads_noturno + drs + tempo_casa + prod) * 0,27
+                    </code>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                      <p>• Férias: 11,11%</p>
+                      <p>• 13º Salário: 8,33%</p>
+                      <p>• Aviso Prévio: 2,78%</p>
+                      <p>• Multa FGTS: 4%</p>
+                      <p>• Outros: 0,78%</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">10. FGTS (8%)</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded">|INSS|</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">Mesmo valor do INSS (pago pela empresa)</p>
+                  </div>
+                </div>
+
+                {/* Coluna 2 - Descontos e Cálculos */}
+                <div className="space-y-4">
+                  <h3 className="font-bold text-red-600 dark:text-red-400 flex items-center gap-2 text-lg">
+                    📉 DESCONTOS (Deduções)
+                  </h3>
+
+                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">5. Vale Transporte</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded">salario_bruto * -0,06</code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">6% de desconto (limite legal)</p>
+                  </div>
+
+                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">6. INSS (8%)</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded block mb-2">
+                      (bruto_est + ads_not + drs + tempo_casa + prod) * -0,08
+                    </code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Alíquota simplificada sobre base</p>
+                  </div>
+
+                  <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">7. Imposto de Renda</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded block mb-2">
+                      ((bruto - 528) * 0,075 - 158,4) * -1
+                    </code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Se positivo, aplica desconto</p>
+                  </div>
+
+                  <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">8. Salário Líquido</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded block">
+                      proventos - descontos
+                    </code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">Valor que o funcionário recebe</p>
+                  </div>
+
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">11. Custo Empresa (CLT)</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded block mb-2">
+                      ((INSS + FGTS + VT + Prov + Sindical) / 30 * dias) + aviso + adicionais
+                    </code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Custo total para empresa (proporcional)</p>
+                  </div>
+
+                  <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">11. Custo Empresa (PJ)</h4>
+                    <code className="text-sm bg-white dark:bg-gray-800 px-2 py-1 rounded block mb-2">
+                      ((bruto + tempo_casa + vale + adic + aviso) / 30) * dias
+                    </code>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Sem encargos trabalhistas</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rodapé com status */}
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                      ✅ Cálculos Verificados
+                    </Badge>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Última verificação: 29/11/2025
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setMostrarGuiaCalculos(false)}
+                    className="text-gray-600 dark:text-gray-400"
+                  >
+                    Fechar Guia
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                  📄 Documento completo: docs/SIMULACAO_CMO_CALCULOS_VERIFICADOS.md
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Histórico */}
         {mostrarHistorico && (

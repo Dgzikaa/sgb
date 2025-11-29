@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Edit, Calendar, CalendarDays, BarChart3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Edit, Calendar, CalendarDays, BarChart3, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface CMVSemanal {
   id: string;
@@ -79,6 +80,23 @@ export default function CMVSemanalTabelaPage() {
   const [semanaAtualIndex, setSemanaAtualIndex] = useState(0);
   const [anoFiltro, setAnoFiltro] = useState(new Date().getFullYear());
   const SEMANAS_POR_PAGINA = 3;
+
+  // Estados para drill-down
+  const [modalDrillDown, setModalDrillDown] = useState<{
+    open: boolean;
+    titulo: string;
+    campo: string;
+    semana: CMVSemanal | null;
+    loading: boolean;
+    dados: any[];
+  }>({
+    open: false,
+    titulo: '',
+    campo: '',
+    semana: null,
+    loading: false,
+    dados: []
+  });
 
   // Calcular semana atual do ano
   function getSemanaAtual(): number {
@@ -170,6 +188,52 @@ export default function CMVSemanalTabelaPage() {
     return semana.cmv_real / mediaEstoque;
   }
 
+  // Função para abrir drill-down
+  const abrirDrillDown = (titulo: string, campo: string, semana: CMVSemanal) => {
+    const detalhes = gerarDetalhes(campo, semana);
+    setModalDrillDown({
+      open: true,
+      titulo,
+      campo,
+      semana,
+      loading: false,
+      dados: detalhes
+    });
+  };
+
+  // Função para gerar detalhes baseado no campo
+  const gerarDetalhes = (campo: string, semana: CMVSemanal) => {
+    switch (campo) {
+      case 'estoque_final':
+        return [
+          { label: 'Cozinha', valor: semana.estoque_final_cozinha },
+          { label: 'Bebidas + Tabacaria', valor: semana.estoque_final_bebidas },
+          { label: 'Drinks', valor: semana.estoque_final_drinks }
+        ];
+      
+      case 'compras_periodo':
+        return [
+          { label: 'Cozinha', valor: semana.compras_custo_comida },
+          { label: 'Bebidas + Tabacaria', valor: semana.compras_custo_bebidas },
+          { label: 'Drinks', valor: semana.compras_custo_drinks },
+          { label: 'Outros', valor: semana.compras_custo_outros }
+        ];
+      
+      case 'consumo_socios':
+        return [
+          { label: 'Total Consumo Sócios', valor: semana.total_consumo_socios },
+          { label: 'Mesa de Benefícios Cliente', valor: semana.mesa_beneficios_cliente },
+          { label: 'Mesa da Banda/DJ', valor: semana.mesa_banda_dj },
+          { label: 'Chegadeira', valor: semana.chegadeira },
+          { label: 'Mesa ADM/Casa', valor: semana.mesa_adm_casa },
+          { label: 'Mesa RH', valor: semana.mesa_rh }
+        ];
+      
+      default:
+        return [];
+    }
+  };
+
   const linhas = [
     { titulo: 'IDENTIFICAÇÃO', items: [
       { label: 'Semana', campo: 'semana' as keyof CMVSemanal, tipo: 'numero' },
@@ -179,9 +243,9 @@ export default function CMVSemanalTabelaPage() {
     ]},
     { titulo: 'CMV PRINCIPAL', items: [
       { label: 'Estoque Inicial', campo: 'estoque_inicial' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Compras', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Estoque Final', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Compras', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Estoque Final', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
       { label: 'Consumo Benefícios', campo: 'consumo_beneficios' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo ADM', campo: 'consumo_adm' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Consumo RH', campo: 'consumo_rh' as keyof CMVSemanal, tipo: 'moeda', manual: true },
@@ -199,14 +263,14 @@ export default function CMVSemanalTabelaPage() {
       { label: 'Cozinha', campo: 'estoque_final_cozinha' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Bebidas + Tabacaria', campo: 'estoque_final_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Drinks', campo: 'estoque_final_drinks' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'TOTAL', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'TOTAL', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
     ]},
     { titulo: 'COMPRAS', items: [
       { label: 'Cozinha', campo: 'compras_custo_comida' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Bebidas + Tabacaria', campo: 'compras_custo_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Drinks', campo: 'compras_custo_drinks' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Outros', campo: 'compras_custo_outros' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'TOTAL', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'TOTAL', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
     ]},
     { titulo: 'CONTAS ESPECIAIS', items: [
       { label: 'Total Consumo Sócios', campo: 'total_consumo_socios' as keyof CMVSemanal, tipo: 'moeda' },
@@ -441,9 +505,16 @@ export default function CMVSemanalTabelaPage() {
                                 className={`
                                   px-4 py-2 text-center text-gray-700 dark:text-gray-300 border-r border-gray-300 dark:border-gray-600
                                   ${isSemanaAtual ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                                  ${item.drilldown ? 'cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40' : ''}
                                 `}
+                                onClick={() => item.drilldown && abrirDrillDown(item.label, String(item.campo), semana)}
                               >
-                                {renderCelula(semana, item.campo, item.tipo, item.manual)}
+                                <div className="flex items-center justify-center gap-2">
+                                  {renderCelula(semana, item.campo, item.tipo, item.manual)}
+                                  {item.drilldown && (
+                                    <Eye className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                  )}
+                                </div>
                               </td>
                             );
                           })}
@@ -456,6 +527,62 @@ export default function CMVSemanalTabelaPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Modal de Drill-Down */}
+        <Dialog open={modalDrillDown.open} onOpenChange={(open) => setModalDrillDown({ ...modalDrillDown, open })}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-gray-900 dark:text-white">
+                📊 Detalhamento: {modalDrillDown.titulo}
+              </DialogTitle>
+              {modalDrillDown.semana && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Semana {modalDrillDown.semana.semana} ({formatarData(modalDrillDown.semana.data_inicio)} - {formatarData(modalDrillDown.semana.data_fim)})
+                </p>
+              )}
+            </DialogHeader>
+            
+            <div className="mt-4">
+              {modalDrillDown.loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-3 text-gray-600 dark:text-gray-400">Carregando detalhes...</span>
+                </div>
+              ) : modalDrillDown.dados.length > 0 ? (
+                <div className="space-y-2">
+                  {modalDrillDown.dados.map((item: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {item.label}
+                      </span>
+                      <span className="text-sm font-mono font-semibold text-gray-900 dark:text-white">
+                        {formatarMoeda(item.valor)}
+                      </span>
+                    </div>
+                  ))}
+                  
+                  {/* Total */}
+                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-t-2 border-blue-500 mt-4">
+                    <span className="text-base font-bold text-blue-900 dark:text-blue-200">
+                      TOTAL
+                    </span>
+                    <span className="text-base font-mono font-bold text-blue-900 dark:text-blue-200">
+                      {formatarMoeda(modalDrillDown.dados.reduce((sum, item) => sum + (item.valor || 0), 0))}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p className="mb-2">Nenhum detalhe disponível para este item.</p>
+                  <p className="text-sm">Este recurso será expandido em atualizações futuras.</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
