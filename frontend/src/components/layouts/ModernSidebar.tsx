@@ -30,6 +30,7 @@ import {
   Package,
   AlertTriangle,
   ChefHat,
+  Sparkles,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -289,6 +290,13 @@ const defaultSidebarItems: SidebarItem[] = [
           href: '/relatorios/clientes-ativos',
           description: 'Análise semanal de clientes novos vs retornantes',
           permission: 'relatorios',
+        },
+        {
+          icon: Sparkles,
+          label: 'CRM Inteligente',
+          href: '/crm/inteligente',
+          description: 'Segmentação RFM e ações estratégicas personalizadas',
+          permission: 'gestao',
         },
         // {
         //   icon: Package,
