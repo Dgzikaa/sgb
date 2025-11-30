@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { 
@@ -532,7 +533,7 @@ export default function CRMInteligentePage() {
                 {clienteSelecionado.telefone && (
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => window.open(`https://wa.me/55${clienteSelecionado.telefone.replace(/\D/g, '')}`, '_blank')}
+                      onClick={() => window.open(`https://wa.me/55${clienteSelecionado.telefone?.replace(/\D/g, '')}`, '_blank')}
                       className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
                     >
                       <MessageCircle className="w-4 h-4 mr-2" />

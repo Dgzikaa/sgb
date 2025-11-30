@@ -253,13 +253,15 @@ export default function CampanhasPage() {
             </p>
           </div>
 
+          <Button 
+            onClick={() => setModalAberto(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Campanha
+          </Button>
+
           <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Nova Campanha
-              </Button>
-            </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800">
               <DialogHeader>
                 <DialogTitle className="text-gray-900 dark:text-white">Criar Nova Campanha</DialogTitle>
