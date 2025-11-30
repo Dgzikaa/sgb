@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -152,12 +154,16 @@ const funcionalidadesImplementadas = [
 
 export default function GuiaFuncionalidadesPage() {
   const router = useRouter();
+  const { setPageTitle } = usePageTitle();
+
+  useEffect(() => {
+    setPageTitle('📚 Guia de Funcionalidades');
+  }, [setPageTitle]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-8">
+    <>
+      {/* Header */}
+      <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl">
               <CheckCircle className="w-8 h-8 text-white" />
@@ -288,8 +294,7 @@ export default function GuiaFuncionalidadesPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </>
   );
 }
 

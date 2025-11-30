@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePageTitle } from '@/contexts/PageTitleContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -99,16 +101,20 @@ const modulosCRM = [
 
 export default function CRMHubPage() {
   const router = useRouter();
+  const { setPageTitle } = usePageTitle();
+
+  useEffect(() => {
+    setPageTitle('🤖 CRM Inteligente');
+  }, [setPageTitle]);
 
   const handleNavigate = (url: string) => {
     router.push(url);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="mb-8">
+    <>
+      {/* Header */}
+      <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
               <Sparkles className="w-8 h-8 text-white" />
@@ -260,8 +266,7 @@ export default function CRMHubPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </>
   );
 }
 
