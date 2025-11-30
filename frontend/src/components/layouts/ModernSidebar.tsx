@@ -320,6 +320,20 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Análise de hábitos e preferências dos clientes',
           permission: 'gestao',
         },
+        {
+          icon: DollarSign,
+          label: 'LTV e Engajamento',
+          href: '/crm/ltv-engajamento',
+          description: 'Lifetime Value e score de engajamento',
+          permission: 'gestao',
+        },
+        {
+          icon: Sparkles,
+          label: 'Recomendações IA',
+          href: '/crm/recomendacoes',
+          description: 'Recomendações personalizadas de eventos e produtos',
+          permission: 'gestao',
+        },
         // {
         //   icon: Package,
         //   label: 'Produtos',
