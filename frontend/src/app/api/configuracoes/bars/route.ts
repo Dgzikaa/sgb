@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
+import { createCacheHeaders } from '@/lib/api-cache';
 
-export const dynamic = 'force-dynamic'
+// Cache de 5 minutos para lista de bares (muda pouco)
+// Nota: revalidate precisa ser valor literal, não pode usar constante
+export const revalidate = 300;
 
 // ========================================
 // 🏪 API PARA GERENCIAMENTO DE BARES
@@ -86,6 +89,8 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: data,
+    }, {
+      headers: createCacheHeaders('MEDIUM'),
     });
   } catch (error: unknown) {
     const apiError = error as ApiError;

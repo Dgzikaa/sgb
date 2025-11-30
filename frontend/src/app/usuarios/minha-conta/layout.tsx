@@ -1,9 +1,2 @@
-import { DarkSidebarLayout } from '@/components/layouts';
-
-export default function MinhaContaLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <DarkSidebarLayout>{children}</DarkSidebarLayout>;
-}
+// Layout padrão para minha-conta - usa DarkSidebarLayout
+export { SimpleDashboardLayout as default } from '@/components/layouts';

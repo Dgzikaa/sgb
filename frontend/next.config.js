@@ -91,14 +91,29 @@ const nextConfig = {
     return config;
   },
   
-  // ✅ Configurações experimentais (simplificadas para evitar travamentos)
+  // ✅ Configurações experimentais (otimizadas)
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    // Otimiza imports de pacotes grandes - reduz bundle size significativamente
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-checkbox',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-slider',
+      'framer-motion',
+      'date-fns',
+      'recharts',
+      '@supabase/supabase-js',
+    ],
     esmExternals: true,
     webpackBuildWorker: false, // Desabilitar para evitar problemas
-    // Testar otimizações individualmente
     // optimizeCss: true, // Desabilitado - causa erro com critters
-    // turbotrace causa travamento - manter desabilitado
   },
   
   // ✅ Pacotes externos do servidor (movido de experimental)

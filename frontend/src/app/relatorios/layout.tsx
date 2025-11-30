@@ -1,7 +1,2 @@
-// Layout para relatórios
-import { DarkSidebarLayout } from '@/components/layouts';
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <DarkSidebarLayout>{children}</DarkSidebarLayout>;
-}
-
+// Layout padrão para relatórios - usa DarkSidebarLayout
+export { SimpleDashboardLayout as default } from '@/components/layouts';

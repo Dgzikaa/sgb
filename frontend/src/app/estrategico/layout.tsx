@@ -13,9 +13,15 @@ interface EstrategicoLayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ * Layout para área Estratégica - requer role admin
+ * 
+ * Este layout tem lógica específica de permissões que não pode ser simplificada
+ * para o padrão genérico, pois precisa mostrar mensagem de acesso restrito.
+ */
 export default function EstrategicoLayout({ children }: EstrategicoLayoutProps) {
   const router = useRouter();
-  const { isRole, user, loading } = usePermissions();
+  const { isRole, loading } = usePermissions();
   const { setPageTitle } = usePageTitle();
 
   const isAdmin = isRole('admin');
@@ -25,50 +31,20 @@ export default function EstrategicoLayout({ children }: EstrategicoLayoutProps) 
     return () => setPageTitle('');
   }, [setPageTitle]);
 
-  // Verificar permissão de admin
+  // Redirecionar se não for admin (após carregamento)
   useEffect(() => {
-    // Só verificar após o carregamento estar completo
     if (!loading && !isAdmin) {
       router.push('/home');
     }
   }, [isAdmin, router, loading]);
 
-  // Se não for admin, mostrar aviso dentro do layout padrão
-  if (!loading && !isAdmin) {
-    return (
-      <DarkSidebarLayout>
-        <Card className="bg-white dark:bg-gray-800 border-red-200 dark:border-red-700">
-          <CardContent className="p-6">
-            <Alert className="border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20">
-              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-              <AlertDescription className="text-red-800 dark:text-red-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <Shield className="h-5 w-5" />
-                  <span className="font-semibold">Acesso Restrito</span>
-                </div>
-                <p>
-                  Esta seção é exclusiva para administradores. Você não possui
-                  as permissões necessárias para acessar a área Estratégica.
-                </p>
-                <p className="mt-2 text-sm">
-                  Entre em contato com o administrador do sistema se você
-                  acredita que deveria ter acesso a esta área.
-                </p>
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-      </DarkSidebarLayout>
-    );
-  }
-
-  // Mostrar loading dentro do layout padrão
+  // Loading state
   if (loading) {
     return (
       <DarkSidebarLayout>
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400">
               Carregando permissões...
             </p>
@@ -78,6 +54,37 @@ export default function EstrategicoLayout({ children }: EstrategicoLayoutProps) 
     );
   }
 
-  // Layout normal com sidebar e header
+  // Acesso negado
+  if (!isAdmin) {
+    return (
+      <DarkSidebarLayout>
+        <div className="p-6">
+          <Card className="card-dark border-red-200 dark:border-red-700">
+            <CardContent className="p-6">
+              <Alert className="border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20">
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <AlertDescription className="text-red-800 dark:text-red-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="h-5 w-5" />
+                    <span className="font-semibold">Acesso Restrito</span>
+                  </div>
+                  <p>
+                    Esta seção é exclusiva para administradores. Você não possui
+                    as permissões necessárias para acessar a área Estratégica.
+                  </p>
+                  <p className="mt-2 text-sm">
+                    Entre em contato com o administrador do sistema se você
+                    acredita que deveria ter acesso a esta área.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </div>
+      </DarkSidebarLayout>
+    );
+  }
+
+  // Layout normal
   return <DarkSidebarLayout>{children}</DarkSidebarLayout>;
 }

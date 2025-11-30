@@ -1,27 +1,6 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { usePageTitle } from '@/contexts/PageTitleContext'
-import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { DarkSidebarLayout } from '@/components/layouts/DarkSidebarLayout'
+// Layout para analítico com proteção de role admin
+import { createProtectedDashboardLayout } from '@/components/layouts';
 
-export default function AnaliticoLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const { setPageTitle } = usePageTitle()
-
-  useEffect(() => {
-    setPageTitle('📊 Analítico')
-    return () => setPageTitle('')
-  }, [setPageTitle])
-
-  return (
-    <ProtectedRoute requiredRole="admin">
-      <DarkSidebarLayout>
-        {children}
-      </DarkSidebarLayout>
-    </ProtectedRoute>
-  )
-}
+export default createProtectedDashboardLayout({ requiredRole: 'admin' });
