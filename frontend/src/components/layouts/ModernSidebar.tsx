@@ -334,6 +334,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Recomendações personalizadas de eventos e produtos',
           permission: 'gestao',
         },
+        {
+          icon: TrendingUp,
+          label: 'Dashboard Retenção',
+          href: '/crm/retencao',
+          description: 'Cohort analysis e funil de jornada do cliente',
+          permission: 'gestao',
+        },
         // {
         //   icon: Package,
         //   label: 'Produtos',
