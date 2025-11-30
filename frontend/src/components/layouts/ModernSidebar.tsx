@@ -31,6 +31,7 @@ import {
   AlertTriangle,
   ChefHat,
   Sparkles,
+  Send,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -304,6 +305,13 @@ const defaultSidebarItems: SidebarItem[] = [
           href: '/crm/churn-prediction',
           description: 'IA para identificar clientes em risco de abandono',
           permission: 'gestao',
+        },
+        {
+          icon: Send,
+          label: 'Campanhas Automáticas',
+          href: '/crm/campanhas',
+          description: 'WhatsApp, Email e Cupons personalizados',
+          permission: 'marketing',
         },
         // {
         //   icon: Package,
