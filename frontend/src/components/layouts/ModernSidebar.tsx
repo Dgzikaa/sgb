@@ -313,6 +313,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'WhatsApp, Email e Cupons personalizados',
           permission: 'marketing',
         },
+        {
+          icon: Target,
+          label: 'Padrões de Comportamento',
+          href: '/crm/padroes-comportamento',
+          description: 'Análise de hábitos e preferências dos clientes',
+          permission: 'gestao',
+        },
         // {
         //   icon: Package,
         //   label: 'Produtos',
