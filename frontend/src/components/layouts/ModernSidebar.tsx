@@ -298,6 +298,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Segmentação RFM e ações estratégicas personalizadas',
           permission: 'gestao',
         },
+        {
+          icon: AlertTriangle,
+          label: 'Predição de Churn',
+          href: '/crm/churn-prediction',
+          description: 'IA para identificar clientes em risco de abandono',
+          permission: 'gestao',
+        },
         // {
         //   icon: Package,
         //   label: 'Produtos',
