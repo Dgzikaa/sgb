@@ -91,6 +91,13 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
 // Estrutura base do sidebar
 const defaultSidebarItems: SidebarItem[] = [
     {
+      icon: CheckSquare,
+      label: 'Guia de Funcionalidades',
+      href: '/guia-funcionalidades',
+      color: 'text-green-600 dark:text-green-400',
+      permission: 'home',
+    },
+    {
       icon: Target,
       label: 'Estratégico',
       href: '/estrategico',
@@ -295,50 +302,8 @@ const defaultSidebarItems: SidebarItem[] = [
         {
           icon: Sparkles,
           label: 'CRM Inteligente',
-          href: '/crm/inteligente',
-          description: 'Segmentação RFM e ações estratégicas personalizadas',
-          permission: 'gestao',
-        },
-        {
-          icon: AlertTriangle,
-          label: 'Predição de Churn',
-          href: '/crm/churn-prediction',
-          description: 'IA para identificar clientes em risco de abandono',
-          permission: 'gestao',
-        },
-        {
-          icon: Send,
-          label: 'Campanhas Automáticas',
-          href: '/crm/campanhas',
-          description: 'WhatsApp, Email e Cupons personalizados',
-          permission: 'marketing',
-        },
-        {
-          icon: Target,
-          label: 'Padrões de Comportamento',
-          href: '/crm/padroes-comportamento',
-          description: 'Análise de hábitos e preferências dos clientes',
-          permission: 'gestao',
-        },
-        {
-          icon: DollarSign,
-          label: 'LTV e Engajamento',
-          href: '/crm/ltv-engajamento',
-          description: 'Lifetime Value e score de engajamento',
-          permission: 'gestao',
-        },
-        {
-          icon: Sparkles,
-          label: 'Recomendações IA',
-          href: '/crm/recomendacoes',
-          description: 'Recomendações personalizadas de eventos e produtos',
-          permission: 'gestao',
-        },
-        {
-          icon: TrendingUp,
-          label: 'Dashboard Retenção',
-          href: '/crm/retencao',
-          description: 'Cohort analysis e funil de jornada do cliente',
+          href: '/crm',
+          description: 'Hub completo de gestão e relacionamento com clientes',
           permission: 'gestao',
         },
         // {
@@ -362,8 +327,30 @@ const defaultSidebarItems: SidebarItem[] = [
       label: 'Configurações',
       href: '/configuracoes',
       color: 'text-gray-600 dark:text-gray-400',
-    permission: 'configuracoes',
-      // REMOVIDO: subItems - agora Configurações é apenas clicável para ir direto para /configuracoes
+      permission: 'configuracoes',
+      subItems: [
+        {
+          icon: ChefHat,
+          label: 'Fichas Técnicas',
+          href: '/configuracoes/fichas-tecnicas',
+          description: 'Gerenciar e atualizar fichas técnicas de produção',
+          permission: 'operacoes',
+        },
+        {
+          icon: CheckSquare,
+          label: 'Checklists',
+          href: '/configuracoes/checklists',
+          description: 'Configurar templates de checklists',
+          permission: 'configuracoes',
+        },
+        {
+          icon: Target,
+          label: 'Metas de Desempenho',
+          href: '/configuracoes/desempenho',
+          description: 'Definir metas e indicadores',
+          permission: 'configuracoes',
+        },
+      ],
     },
   ];
 
