@@ -113,12 +113,17 @@ export const LazyCalendar = dynamic(
 );
 
 /**
- * Editor de texto rico lazy-loaded (se existir)
+ * Editor de texto rico lazy-loaded
+ * Retorna um textarea simples como fallback
  */
 export const LazyRichTextEditor = dynamic(
-  () => import('@/components/ui/rich-text-editor').catch(() => {
-    // Fallback se não existir
-    return { default: () => <textarea className="w-full h-32 border rounded-lg p-2" /> };
+  () => Promise.resolve({
+    default: ({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+      <textarea 
+        className={`w-full h-32 border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${className || ''}`}
+        {...props}
+      />
+    )
   }),
   {
     loading: () => <ComponentLoadingFallback />,
