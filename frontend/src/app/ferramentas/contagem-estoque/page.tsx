@@ -385,6 +385,11 @@ export default function ContagemEstoquePage() {
                   <span className="hidden xs:inline">Histórico</span>
                   <span className="xs:hidden">Histórico</span>
                 </TabsTrigger>
+                <TabsTrigger value="anomalias" className="tabs-trigger-dark flex-1 sm:flex-none">
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  <span className="hidden xs:inline">Anomalias</span>
+                  <span className="xs:hidden">Anomalias</span>
+                </TabsTrigger>
               </TabsList>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -936,6 +941,61 @@ export default function ContagemEstoquePage() {
                       ))}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* TAB: ANOMALIAS */}
+            <TabsContent value="anomalias" className="space-y-6">
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="card-title-dark flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-500" />
+                    Detecção de Anomalias
+                  </CardTitle>
+                  <CardDescription className="card-description-dark">
+                    Sistema inteligente que detecta valores anormais automaticamente
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12">
+                    <AlertTriangle className="h-16 w-16 mx-auto mb-4 text-orange-500" />
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Anomalias Detectadas Automaticamente
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+                      O sistema detecta automaticamente valores suspeitos nas contagens, incluindo:
+                      valores muito altos/baixos, variações bruscas, valores repetidos, possíveis erros de digitação e mais.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 max-w-3xl mx-auto">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                        <div className="text-2xl mb-1">📈</div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Valores Fora da Curva</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Detecta automaticamente</p>
+                      </div>
+                      <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                        <div className="text-2xl mb-1">⚠️</div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Erros de Digitação</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Ex: 1000 ao invés de 10</p>
+                      </div>
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                        <div className="text-2xl mb-1">🔁</div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Valores Repetidos</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Mesmo valor por 5+ dias</p>
+                      </div>
+                      <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+                        <div className="text-2xl mb-1">🚫</div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">Variações Bruscas</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Mudanças >200% ou <30%</p>
+                      </div>
+                    </div>
+                    <Link href="/ferramentas/contagem-estoque/anomalias">
+                      <Button className="btn-primary-dark">
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                        Ver Todas as Anomalias Detectadas
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
