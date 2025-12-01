@@ -236,50 +236,29 @@ serve(async (req) => {
       if (!row[0] || String(row[0]).trim() === '') continue
 
       try {
-        // Processar carimbo de data/hora da coluna A
+        // USAR COLUNA O (índice 14) - Data ajustada já no formato DD/MM/YYYY
         // Coluna O = EXT.TEXTO(A;1;10) que extrai apenas "DD/MM/YYYY"
         let dataFormatada = ''
         let timestampCompleto = String(row[0] || '') // Carimbo para timestamp único
         
-        if (row[0]) {
-          // Verificar se é número (formato Excel serial date)
-          if (typeof row[0] === 'number') {
-            // Converter número Excel para data usando UTC para evitar problemas de timezone
-            const date = new Date((row[0] - 25569) * 86400 * 1000)
-            const year = date.getUTCFullYear()
-            const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-            const day = String(date.getUTCDate()).padStart(2, '0')
+        // Usar coluna O que já tem data limpa
+        const dataAjustada = row[14] // Coluna O
+        
+        if (dataAjustada) {
+          const dateStr = String(dataAjustada).trim()
+          const dateMatch = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+          
+          if (dateMatch) {
+            const day = dateMatch[1].padStart(2, '0')
+            const month = dateMatch[2].padStart(2, '0')
+            const year = dateMatch[3]
             
-            console.log(`📅 Excel número: ${row[0]} → UTC: ${year}-${month}-${day}`)
-            
+            // Formato YYYY-MM-DD para PostgreSQL (sempre DD/MM/YYYY → YYYY-MM-DD)
             dataFormatada = `${year}-${month}-${day}`
-            timestampCompleto = `${day}/${month}/${year} ${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`
-          } else {
-            // String: extrair primeiros 10 caracteres (data sem hora)
-            const dateStr = String(row[0]).substring(0, 10).trim()
-            const dateMatch = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
             
-            if (dateMatch) {
-              const part1 = dateMatch[1].padStart(2, '0')  // Primeiro número
-              const part2 = dateMatch[2].padStart(2, '0')  // Segundo número
-              const year = dateMatch[3]
-              
-              // Log para debug (primeiras 5 linhas ou linhas problemáticas)
-              if (i <= 5 || dateStr.includes('26/06') || dateStr.includes('03/11')) {
-                console.log(`🔍 Linha ${i}: String="${dateStr}" → part1=${part1}, part2=${part2}, year=${year}`)
-              }
-              
-              // SEMPRE interpretar como DD/MM/YYYY (formato brasileiro)
-              // Google Forms BR sempre retorna DD/MM/YYYY HH:MM:SS
-              const day = part1
-              const month = part2
-              
-              // Formato YYYY-MM-DD para PostgreSQL
-              dataFormatada = `${year}-${month}-${day}`
-              
-              if (i <= 5 || dateStr.includes('26/06') || dateStr.includes('03/11')) {
-                console.log(`   → dataFormatada="${dataFormatada}"`)
-              }
+            // Log primeiras linhas para confirmar
+            if (i <= 5) {
+              console.log(`✅ Linha ${i}: Coluna O="${dateStr}" → ${dataFormatada}`)
             }
           }
         }
@@ -337,20 +316,20 @@ serve(async (req) => {
         }
 
         // Estrutura do Google Forms NPS Ordi:
-        // Col 0: Carimbo | Cols 1-3: Dia/Gênero/Idade | Cols 4-12: 9 perguntas NPS | Col 13: Comentários
+        // Col 0: Carimbo | Cols 1-3: Dia/Gênero/Idade | Cols 4-11: 8 perguntas NPS | Col 12: Comentários
         // Col 4 (E): Ambiente | Col 5 (F): Atendimento | Col 6 (G): Limpeza
         // Col 7 (H): Música | Col 8 (I): Comidas | Col 9 (J): Drinks
-        // Col 10 (K): Preço | Col 11 (L): Reservas | Col 12 (M): Geral | Col 13 (N): Comentários
-        const nps_ambiente = parseValue(row[4])      // Ambiente
-        const nps_atendimento = parseValue(row[5])   // Atendimento
-        const nps_limpeza = parseValue(row[6])       // Limpeza
-        const nps_musica = parseValue(row[7])        // Música
-        const nps_comida = parseValue(row[8])        // Comidas
-        const nps_drink = parseValue(row[9])         // Drinks
-        const nps_preco = parseValue(row[10])        // Preço
-        const nps_reservas = parseValue(row[11])     // Reservas
-        const nps_geral = parseValue(row[12])        // Geral/Recomendação
-        const comentarios = row[13] ? String(row[13]).trim() : ''  // Comentários
+        // Col 10 (K): Preço | Col 11 (L): Geral | Col 12 (M): Comentários | Col 13 (N): Reserva?
+        const nps_ambiente = parseValue(row[4])      // E - Ambiente
+        const nps_atendimento = parseValue(row[5])   // F - Atendimento
+        const nps_limpeza = parseValue(row[6])       // G - Limpeza
+        const nps_musica = parseValue(row[7])        // H - Música
+        const nps_comida = parseValue(row[8])        // I - Comidas
+        const nps_drink = parseValue(row[9])         // J - Drinks
+        const nps_preco = parseValue(row[10])        // K - Preço
+        const nps_geral = parseValue(row[11])        // L - O quanto você indicaria o Ordi
+        const comentarios = row[12] ? String(row[12]).trim() : ''  // M - Comentários
+        const nps_reservas = parseValue(row[13])     // N - Reserva (Sim/Não convertido para nota)
         
         // Calcular média apenas das perguntas respondidas (ignorar zeros)
         const valores = [nps_ambiente, nps_atendimento, nps_limpeza, nps_musica, nps_comida, nps_drink, nps_preco, nps_reservas, nps_geral]
