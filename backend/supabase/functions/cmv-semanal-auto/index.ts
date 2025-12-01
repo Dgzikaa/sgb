@@ -332,8 +332,13 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
     
+    // Permitir processar semana específica via parâmetro
+    const body = await req.json().catch(() => ({}));
+    const offsetSemanas = body.offsetSemanas !== undefined ? body.offsetSemanas : -1; // Padrão: -1 (semana passada)
+    
     // Definir semana e ano
     const hoje = new Date();
+    hoje.setDate(hoje.getDate() + (offsetSemanas * 7)); // Ajustar data baseado no offset
     const ano = hoje.getFullYear();
     const semana = getWeekNumber(hoje);
     const { inicio, fim } = getWeekDates(hoje);
