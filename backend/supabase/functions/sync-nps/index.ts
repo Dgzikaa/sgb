@@ -236,35 +236,37 @@ serve(async (req) => {
       if (!row[0] || String(row[0]).trim() === '') continue
 
       try {
-        // Processar carimbo de data/hora do Google Forms
+        // Processar carimbo de data/hora da coluna A
+        // Coluna O = EXT.TEXTO(A;1;10) que extrai apenas "DD/MM/YYYY"
         let dataFormatada = ''
-        let timestampCompleto = ''
+        let timestampCompleto = String(row[0] || '') // Carimbo para timestamp único
+        
         if (row[0]) {
+          // Verificar se é número (formato Excel serial date)
           if (typeof row[0] === 'number') {
-            // Data Excel
+            // Converter número Excel para data
             const date = new Date((row[0] - 25569) * 86400 * 1000)
             const year = date.getFullYear()
             const month = String(date.getMonth() + 1).padStart(2, '0')
             const day = String(date.getDate()).padStart(2, '0')
             dataFormatada = `${year}-${month}-${day}`
-            timestampCompleto = row[0].toString() // Usar número como timestamp único
+            timestampCompleto = `${day}/${month}/${year} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`
           } else {
-            // String do Google Forms: "DD/MM/YYYY HH:MM:SS" (formato brasileiro)
-            const dateStr = String(row[0])
-            timestampCompleto = dateStr // Salvar timestamp completo
+            // String: extrair primeiros 10 caracteres (data sem hora)
+            const dateStr = String(row[0]).substring(0, 10).trim()
             const dateMatch = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+            
             if (dateMatch) {
-              const part1 = dateMatch[1].padStart(2, '0')
-              const part2 = dateMatch[2].padStart(2, '0')
+              const part1 = dateMatch[1].padStart(2, '0')  // Primeiro número
+              const part2 = dateMatch[2].padStart(2, '0')  // Segundo número
               const year = dateMatch[3]
               
-              // Formato brasileiro: DD/MM/YYYY
-              // Se part1 > 12, é certamente dia (DD/MM/YYYY)
-              // Se part2 > 12, é certamente mês (MM/DD/YYYY) - improvável em PT-BR
-              const isDayFirst = parseInt(part1) > 12 || parseInt(part2) <= 12
+              // SEMPRE interpretar como DD/MM/YYYY (formato brasileiro)
+              // Google Forms BR sempre retorna DD/MM/YYYY HH:MM:SS
+              const day = part1
+              const month = part2
               
-              const day = isDayFirst ? part1 : part2
-              const month = isDayFirst ? part2 : part1
+              // Formato YYYY-MM-DD para PostgreSQL
               dataFormatada = `${year}-${month}-${day}`
             }
           }
@@ -272,11 +274,13 @@ serve(async (req) => {
 
         if (!dataFormatada) {
           console.warn(`⚠️ Linha ${i + 1}: Data inválida - ${row[0]}`)
-          console.warn(`⚠️ Tipo: ${typeof row[0]}, Valor: ${JSON.stringify(row[0])}`)
           continue
         }
         
-        console.log(`✅ Linha ${i + 1}: Data processada = ${dataFormatada}, Timestamp = ${timestampCompleto.substring(0, 30)}`)
+        // Log apenas das primeiras 5 linhas e linhas com problemas
+        if (i <= 5 || dataFormatada.includes('2025-11-03') || dataFormatada.includes('2025-11-05') || dataFormatada.includes('2025-11-06')) {
+          console.log(`✅ Linha ${i + 1}: ${row[0]} → ${dataFormatada}`)
+        }
 
         // Converter valores (podem ser números 1-5, texto descritivo, ou "Não" quando não consumiu)
         const parseValue = (val: any): number => {
@@ -369,6 +373,13 @@ serve(async (req) => {
         registros.push(registro)
       } catch (error) {
         console.error(`⚠️ Erro ao processar linha ${i + 1}:`, error)
+        console.error(`⚠️ Dados da linha:`, {
+          carimbo: row[0],
+          dia: row[1],
+          ambiente: row[4],
+          atendimento: row[5],
+          comentarios: row[13]
+        })
       }
     }
 
@@ -385,34 +396,45 @@ serve(async (req) => {
       )
     }
 
-    // 5. Inserir no Supabase
-    console.log('💾 Inserindo no Supabase...')
+    // 5. Inserir no Supabase em LOTES (paginação)
+    console.log(`💾 Inserindo ${registros.length} registros no Supabase em lotes...`)
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { data: insertedData, error: insertError } = await supabaseClient
-      .from('nps')
-      .upsert(registros, {
-        onConflict: 'bar_id,data_pesquisa,funcionario_nome,setor',
-        ignoreDuplicates: false
-      })
-      .select()
+    const BATCH_SIZE = 500 // Lotes de 500 registros por vez
+    let totalInserted = 0
+    
+    for (let i = 0; i < registros.length; i += BATCH_SIZE) {
+      const batch = registros.slice(i, i + BATCH_SIZE)
+      console.log(`📦 Inserindo lote ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(registros.length / BATCH_SIZE)} (${batch.length} registros)...`)
+      
+      const { data: insertedData, error: insertError } = await supabaseClient
+        .from('nps')
+        .upsert(batch, {
+          onConflict: 'bar_id,data_pesquisa,funcionario_nome,setor',
+          ignoreDuplicates: false
+        })
+        .select()
 
-    if (insertError) {
-      console.error('❌ Erro ao inserir dados:', insertError)
-      throw insertError
+      if (insertError) {
+        console.error(`❌ Erro ao inserir lote ${Math.floor(i / BATCH_SIZE) + 1}:`, insertError)
+        throw insertError
+      }
+
+      totalInserted += insertedData?.length || 0
+      console.log(`✅ Lote ${Math.floor(i / BATCH_SIZE) + 1}: ${insertedData?.length || 0} registros inseridos`)
     }
 
-    console.log(`✅ ${insertedData?.length || 0} registros inseridos/atualizados`)
+    console.log(`✅ Total: ${totalInserted} registros inseridos/atualizados`)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `${registros.length} registros processados, ${insertedData?.length || 0} inseridos/atualizados`,
+        message: `${registros.length} registros processados, ${totalInserted} inseridos/atualizados`,
         total: registros.length,
-        inserted: insertedData?.length || 0
+        inserted: totalInserted
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
