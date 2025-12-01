@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Smile, TrendingUp, Calendar, Users, BarChart3, Download, Upload, FileSpreadsheet, RefreshCcw } from 'lucide-react';
+import { Smile, TrendingUp, Calendar, Users, BarChart3, Download, Upload, FileSpreadsheet, RefreshCcw, Star, MessageSquare, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -50,6 +50,8 @@ export default function NPSPage() {
   const [loading, setLoading] = useState(false);
   const [dadosNPS, setDadosNPS] = useState<NPSData[]>([]);
   const [dadosFelicidade, setDadosFelicidade] = useState<FelicidadeData[]>([]);
+  const [dadosCategorizados, setDadosCategorizados] = useState<any[]>([]);
+  const [loadingCategorizado, setLoadingCategorizado] = useState(false);
   
   // Estados para formulário de pesquisa
   const [modalFormulario, setModalFormulario] = useState(false);
@@ -384,7 +386,7 @@ export default function NPSPage() {
 
         {/* Tabs NPS e Felicidade */}
         <Tabs defaultValue="felicidade" className="space-y-4">
-          <TabsList className="bg-gray-200 dark:bg-gray-700">
+          <TabsList className="bg-gray-200 dark:bg-gray-700 flex-wrap h-auto">
             <TabsTrigger value="felicidade" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
               <Smile className="w-4 h-4 mr-2" />
               Pesquisa da Felicidade
@@ -392,6 +394,10 @@ export default function NPSPage() {
             <TabsTrigger value="nps" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
               <TrendingUp className="w-4 h-4 mr-2" />
               NPS
+            </TabsTrigger>
+            <TabsTrigger value="categorizado" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
+              <Star className="w-4 h-4 mr-2" />
+              NPS Categorizado
             </TabsTrigger>
           </TabsList>
 
