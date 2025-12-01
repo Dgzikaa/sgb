@@ -41,6 +41,270 @@ interface FelicidadeData {
   resultado_percentual: number;
 }
 
+interface NPSMetrica {
+  media: number;
+  classificacao: 'verde' | 'amarelo' | 'vermelho';
+  total: number;
+  comentarios: string[];
+}
+
+interface NPSDadoCategorizado {
+  semana?: string;
+  numero_semana?: number;
+  ano?: number;
+  total_respostas: number;
+  nps_geral: NPSMetrica;
+  nps_ambiente: NPSMetrica;
+  nps_atendimento: NPSMetrica;
+  nps_limpeza: NPSMetrica;
+  nps_musica: NPSMetrica;
+  nps_comida: NPSMetrica;
+  nps_drink: NPSMetrica;
+  nps_preco: NPSMetrica;
+  nps_reservas: NPSMetrica;
+}
+
+// Componente Tab de NPS Categorizado
+function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: { 
+  dataInicio: string; 
+  dataFim: string; 
+  selectedBar: any;
+}) {
+  const [dados, setDados] = useState<NPSDadoCategorizado[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 10;
+
+  useEffect(() => {
+    buscarDadosCategorizados();
+  }, [dataInicio, dataFim, selectedBar]);
+
+  const buscarDadosCategorizados = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        bar_id: (selectedBar?.id || 3).toString(),
+        tipo: 'semana',
+        data_inicio: dataInicio,
+        data_fim: dataFim
+      });
+
+      const response = await fetch(`/api/nps/agregado?${params}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setDados(result.data);
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCorClassificacao = (classificacao: string) => {
+    switch (classificacao) {
+      case 'verde':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'amarelo':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'vermelho':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+    }
+  };
+
+  // Paginação
+  const totalPaginas = Math.ceil(dados.length / itensPorPagina);
+  const indiceInicial = (paginaAtual - 1) * itensPorPagina;
+  const indiceFinal = indiceInicial + itensPorPagina;
+  const dadosPaginados = dados.slice(indiceInicial, indiceFinal);
+
+  return (
+    <div className="space-y-4">
+      {/* Header com informações */}
+      <Card className="bg-white dark:bg-gray-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <Star className="h-5 w-5" />
+            Indicadores de Qualidade - NPS por Categoria
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Visualização semanal do NPS por categoria. Valores em escala de 0 a 100.
+          </p>
+        </CardContent>
+      </Card>
+
+      {loading ? (
+        <Card className="bg-white dark:bg-gray-800">
+          <CardContent className="p-8 text-center">
+            <RefreshCcw className="h-8 w-8 animate-spin mx-auto mb-2 text-gray-400" />
+            <p className="text-gray-600 dark:text-gray-400">Carregando dados...</p>
+          </CardContent>
+        </Card>
+      ) : dadosPaginados.length === 0 ? (
+        <Card className="bg-white dark:bg-gray-800">
+          <CardContent className="p-8 text-center">
+            <BarChart3 className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+            <p className="text-gray-600 dark:text-gray-400">Nenhum dado encontrado para o período selecionado</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Tabela de dados */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Semana</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Respostas</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">
+                    <div className="flex flex-col items-center">
+                      <Star className="h-4 w-4 mb-1" />
+                      <span>NPS Geral</span>
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Ambiente</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Atendimento</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Limpeza</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Música</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Comida</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Drink</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Preço</th>
+                  <th className="px-4 py-3 text-center text-gray-900 dark:text-white font-semibold">Reservas</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {dadosPaginados.map((linha, index) => (
+                  <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">{linha.semana}</td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30">
+                        {linha.total_respostas}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_geral.classificacao)}>
+                        {linha.nps_geral.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_ambiente.classificacao)}>
+                        {linha.nps_ambiente.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_atendimento.classificacao)}>
+                        {linha.nps_atendimento.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_limpeza.classificacao)}>
+                        {linha.nps_limpeza.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_musica.classificacao)}>
+                        {linha.nps_musica.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_comida.classificacao)}>
+                        {linha.nps_comida.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_drink.classificacao)}>
+                        {linha.nps_drink.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_preco.classificacao)}>
+                        {linha.nps_preco.media}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Badge className={getCorClassificacao(linha.nps_reservas.classificacao)}>
+                        {linha.nps_reservas.media}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginação */}
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-between bg-white dark:bg-gray-800 px-4 py-3 rounded-lg">
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                Mostrando <span className="font-medium">{indiceInicial + 1}</span> a <span className="font-medium">{Math.min(indiceFinal, dados.length)}</span> de{' '}
+                <span className="font-medium">{dados.length}</span> semanas
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPaginaAtual(p => Math.max(1, p - 1))}
+                  disabled={paginaAtual === 1}
+                  className="btn-outline-dark"
+                >
+                  Anterior
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(pagina => (
+                    <Button
+                      key={pagina}
+                      variant={pagina === paginaAtual ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setPaginaAtual(pagina)}
+                      className={pagina === paginaAtual ? 'btn-primary-dark' : 'btn-outline-dark'}
+                    >
+                      {pagina}
+                    </Button>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))}
+                  disabled={paginaAtual === totalPaginas}
+                  className="btn-outline-dark"
+                >
+                  Próxima
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Legenda */}
+          <Card className="bg-white dark:bg-gray-800">
+            <CardContent className="p-4">
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-green-500"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Verde: ≥ 80 (Excelente)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-yellow-500"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Amarelo: 40-79 (Bom)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-red-500"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Vermelho: &lt; 40 (Precisa melhorar)</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function NPSPage() {
   const { setPageTitle } = usePageTitle();
   const { user } = useUser();
@@ -543,6 +807,15 @@ export default function NPSPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* NPS Categorizado */}
+          <TabsContent value="categorizado" className="space-y-4">
+            <NPSCategorizadoTab 
+              dataInicio={dataInicio}
+              dataFim={dataFim}
+              selectedBar={selectedBar}
+            />
           </TabsContent>
         </Tabs>
 
