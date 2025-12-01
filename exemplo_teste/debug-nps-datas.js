@@ -2,7 +2,7 @@ const { google } = require('googleapis');
 const fs = require('fs');
 
 // Credenciais
-const credentialsBase64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64 || fs.readFileSync('certificates/google-service-account-base64.txt', 'utf8');
+const credentialsBase64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64 || fs.readFileSync('../frontend/certificates/google-service-account-base64.txt', 'utf8');
 const credentials = JSON.parse(Buffer.from(credentialsBase64, 'base64').toString('utf8'));
 
 const SPREADSHEET_ID = '1GSsU3G2uEl6RHkQUop_WDWjzLBsMVomJN-rf-_J8Sx4';

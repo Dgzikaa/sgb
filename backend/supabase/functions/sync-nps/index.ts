@@ -203,7 +203,7 @@ serve(async (req) => {
       raw: false
     }) as any[][]
 
-    console.log(`📊 ${jsonData.length} linhas encontradas`)
+    console.log(`📊 ${jsonData.length} linhas encontradas na planilha NPS`)
     
     // Log da primeira linha (cabeçalho)
     if (jsonData.length > 0) {
@@ -244,13 +244,16 @@ serve(async (req) => {
         if (row[0]) {
           // Verificar se é número (formato Excel serial date)
           if (typeof row[0] === 'number') {
-            // Converter número Excel para data
+            // Converter número Excel para data usando UTC para evitar problemas de timezone
             const date = new Date((row[0] - 25569) * 86400 * 1000)
-            const year = date.getFullYear()
-            const month = String(date.getMonth() + 1).padStart(2, '0')
-            const day = String(date.getDate()).padStart(2, '0')
+            const year = date.getUTCFullYear()
+            const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+            const day = String(date.getUTCDate()).padStart(2, '0')
+            
+            console.log(`📅 Excel número: ${row[0]} → UTC: ${year}-${month}-${day}`)
+            
             dataFormatada = `${year}-${month}-${day}`
-            timestampCompleto = `${day}/${month}/${year} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`
+            timestampCompleto = `${day}/${month}/${year} ${String(date.getUTCHours()).padStart(2, '0')}:${String(date.getUTCMinutes()).padStart(2, '0')}:${String(date.getUTCSeconds()).padStart(2, '0')}`
           } else {
             // String: extrair primeiros 10 caracteres (data sem hora)
             const dateStr = String(row[0]).substring(0, 10).trim()
@@ -261,6 +264,11 @@ serve(async (req) => {
               const part2 = dateMatch[2].padStart(2, '0')  // Segundo número
               const year = dateMatch[3]
               
+              // Log para debug (primeiras 5 linhas ou linhas problemáticas)
+              if (i <= 5 || dateStr.includes('26/06') || dateStr.includes('03/11')) {
+                console.log(`🔍 Linha ${i}: String="${dateStr}" → part1=${part1}, part2=${part2}, year=${year}`)
+              }
+              
               // SEMPRE interpretar como DD/MM/YYYY (formato brasileiro)
               // Google Forms BR sempre retorna DD/MM/YYYY HH:MM:SS
               const day = part1
@@ -268,6 +276,10 @@ serve(async (req) => {
               
               // Formato YYYY-MM-DD para PostgreSQL
               dataFormatada = `${year}-${month}-${day}`
+              
+              if (i <= 5 || dateStr.includes('26/06') || dateStr.includes('03/11')) {
+                console.log(`   → dataFormatada="${dataFormatada}"`)
+              }
             }
           }
         }
