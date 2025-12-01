@@ -58,36 +58,51 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Função para classificar nota em percentual (0-100)
-    // Verde: >= 80, Amarelo: >= 40, Vermelho: < 40
-    const classificarNota = (notaPercentual: number) => {
-      if (notaPercentual >= 80) return 'verde';
-      if (notaPercentual >= 40) return 'amarelo';
+    // Função para classificar NPS
+    // Verde: >= 50, Amarelo: >= 0, Vermelho: < 0
+    const classificarNPS = (nps: number) => {
+      if (nps >= 50) return 'verde';
+      if (nps >= 0) return 'amarelo';
       return 'vermelho';
     };
 
-    // Função para calcular média, classificação e comentários
-    // Converte de escala 0-5 para 0-100 (percentual)
-    const calcularMetricas = (valores: number[], comentarios: string[]) => {
+    // Função para calcular NPS TRADICIONAL (escala 0-10)
+    // NPS = ((% Promotores) - (% Detratores)) × 100
+    // Promotores: notas > 8 (9 e 10)
+    // Neutros: notas 7 e 8 (não contam)
+    // Detratores: notas < 7 (0 a 6)
+    const calcularNPS = (valores: number[], comentarios: string[]) => {
       const valoresValidos = valores.filter(v => v > 0);
       if (valoresValidos.length === 0) return { 
         media: 0, 
         classificacao: 'vermelho', 
         total: 0,
-        comentarios: []
+        comentarios: [],
+        promotores: 0,
+        neutros: 0,
+        detratores: 0
       };
 
-      // Calcular média na escala 0-5
-      const mediaEscala5 = valoresValidos.reduce((a, b) => a + b, 0) / valoresValidos.length;
+      // Contar promotores, neutros e detratores
+      const promotores = valoresValidos.filter(v => v > 8).length;
+      const neutros = valoresValidos.filter(v => v >= 7 && v <= 8).length;
+      const detratores = valoresValidos.filter(v => v < 7).length;
       
-      // Converter para escala 0-100 (percentual)
-      const mediaPercentual = (mediaEscala5 / 5) * 100;
+      // Calcular percentuais
+      const percPromotores = (promotores / valoresValidos.length) * 100;
+      const percDetratores = (detratores / valoresValidos.length) * 100;
+      
+      // NPS = % Promotores - % Detratores
+      const nps = Math.round(percPromotores - percDetratores);
       
       return {
-        media: Math.round(mediaPercentual), // Retorna em escala 0-100
-        classificacao: classificarNota(mediaPercentual),
+        media: nps, // Retorna NPS (-100 a +100)
+        classificacao: classificarNPS(nps),
         total: valoresValidos.length,
-        comentarios: comentarios.filter(c => c && c.trim() !== '')
+        comentarios: comentarios.filter(c => c && c.trim() !== ''),
+        promotores,
+        neutros,
+        detratores
       };
     };
 
@@ -167,37 +182,26 @@ export async function GET(request: NextRequest) {
       });
 
       const resultado = Array.from(porDia.values()).map(dia => {
-        // Calcular métricas de cada categoria
+        // Calcular NPS de cada categoria usando fórmula tradicional
         const metricas = {
-          nps_ambiente: calcularMetricas(dia.nps_ambiente, dia.comentarios_ambiente),
-          nps_atendimento: calcularMetricas(dia.nps_atendimento, dia.comentarios_atendimento),
-          nps_limpeza: calcularMetricas(dia.nps_limpeza, dia.comentarios_limpeza),
-          nps_musica: calcularMetricas(dia.nps_musica, dia.comentarios_musica),
-          nps_comida: calcularMetricas(dia.nps_comida, dia.comentarios_comida),
-          nps_drink: calcularMetricas(dia.nps_drink, dia.comentarios_drink),
-          nps_preco: calcularMetricas(dia.nps_preco, dia.comentarios_preco),
-          nps_reservas: calcularMetricas(dia.nps_reservas, dia.comentarios_reservas),
+          nps_ambiente: calcularNPS(dia.nps_ambiente, dia.comentarios_ambiente),
+          nps_atendimento: calcularNPS(dia.nps_atendimento, dia.comentarios_atendimento),
+          nps_limpeza: calcularNPS(dia.nps_limpeza, dia.comentarios_limpeza),
+          nps_musica: calcularNPS(dia.nps_musica, dia.comentarios_musica),
+          nps_comida: calcularNPS(dia.nps_comida, dia.comentarios_comida),
+          nps_drink: calcularNPS(dia.nps_drink, dia.comentarios_drink),
+          nps_preco: calcularNPS(dia.nps_preco, dia.comentarios_preco),
+          nps_reservas: calcularNPS(dia.nps_reservas, dia.comentarios_reservas),
         };
 
-        // Calcular NPS Geral como MÉDIA de todas as categorias
-        const mediasCategoriasValidas = Object.values(metricas)
-          .map(m => m.media)
-          .filter(m => m > 0);
-        
-        const npsGeralMedia = mediasCategoriasValidas.length > 0
-          ? Math.round(mediasCategoriasValidas.reduce((a, b) => a + b, 0) / mediasCategoriasValidas.length)
-          : 0;
+        // Calcular NPS Geral diretamente dos dados brutos (não como média das categorias)
+        const npsGeral = calcularNPS(dia.nps_geral, dia.comentarios_geral);
 
         return {
           data: dia.data,
           semana: null,
           total_respostas: dia.total_respostas,
-          nps_geral: {
-            media: npsGeralMedia,
-            classificacao: classificarNota(npsGeralMedia),
-            total: dia.total_respostas,
-            comentarios: dia.comentarios_geral
-          },
+          nps_geral: npsGeral,
           ...metricas
         };
       });
@@ -306,26 +310,20 @@ export async function GET(request: NextRequest) {
           return b.numero_semana - a.numero_semana;
         })
         .map(sem => {
-          // Calcular métricas de cada categoria
+          // Calcular NPS de cada categoria usando fórmula tradicional
           const metricas = {
-            nps_ambiente: calcularMetricas(sem.nps_ambiente, sem.comentarios_ambiente),
-            nps_atendimento: calcularMetricas(sem.nps_atendimento, sem.comentarios_atendimento),
-            nps_limpeza: calcularMetricas(sem.nps_limpeza, sem.comentarios_limpeza),
-            nps_musica: calcularMetricas(sem.nps_musica, sem.comentarios_musica),
-            nps_comida: calcularMetricas(sem.nps_comida, sem.comentarios_comida),
-            nps_drink: calcularMetricas(sem.nps_drink, sem.comentarios_drink),
-            nps_preco: calcularMetricas(sem.nps_preco, sem.comentarios_preco),
-            nps_reservas: calcularMetricas(sem.nps_reservas, sem.comentarios_reservas),
+            nps_ambiente: calcularNPS(sem.nps_ambiente, sem.comentarios_ambiente),
+            nps_atendimento: calcularNPS(sem.nps_atendimento, sem.comentarios_atendimento),
+            nps_limpeza: calcularNPS(sem.nps_limpeza, sem.comentarios_limpeza),
+            nps_musica: calcularNPS(sem.nps_musica, sem.comentarios_musica),
+            nps_comida: calcularNPS(sem.nps_comida, sem.comentarios_comida),
+            nps_drink: calcularNPS(sem.nps_drink, sem.comentarios_drink),
+            nps_preco: calcularNPS(sem.nps_preco, sem.comentarios_preco),
+            nps_reservas: calcularNPS(sem.nps_reservas, sem.comentarios_reservas),
           };
 
-          // Calcular NPS Geral como MÉDIA de todas as categorias
-          const mediasCategoriasValidas = Object.values(metricas)
-            .map(m => m.media)
-            .filter(m => m > 0);
-          
-          const npsGeralMedia = mediasCategoriasValidas.length > 0
-            ? Math.round(mediasCategoriasValidas.reduce((a, b) => a + b, 0) / mediasCategoriasValidas.length)
-            : 0;
+          // Calcular NPS Geral diretamente dos dados brutos (não como média das categorias)
+          const npsGeral = calcularNPS(sem.nps_geral, sem.comentarios_geral);
 
           return {
             semana: sem.semana,
@@ -333,12 +331,7 @@ export async function GET(request: NextRequest) {
             numero_semana: sem.numero_semana,
             data: null,
             total_respostas: sem.total_respostas,
-            nps_geral: {
-              media: npsGeralMedia,
-              classificacao: classificarNota(npsGeralMedia),
-              total: sem.total_respostas,
-              comentarios: sem.comentarios_geral
-            },
+            nps_geral: npsGeral,
             ...metricas
           };
         });
