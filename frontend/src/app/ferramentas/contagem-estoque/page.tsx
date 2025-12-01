@@ -910,7 +910,7 @@ export default function ContagemEstoquePage() {
                           key={contagem.id}
                           className={`p-4 rounded-lg border ${
                             contagem.contagem_anomala
-                              ? contagem.score_anomalia >= 50
+                              ? (contagem.score_anomalia ?? 0) >= 50
                                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                                 : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
                               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
@@ -928,8 +928,8 @@ export default function ContagemEstoquePage() {
                                 {contagem.contagem_anomala && (
                                   <>
                                     <Badge className={`text-xs ${
-                                      contagem.score_anomalia >= 70 ? 'bg-red-600 text-white' :
-                                      contagem.score_anomalia >= 40 ? 'bg-orange-600 text-white' :
+                                      (contagem.score_anomalia ?? 0) >= 70 ? 'bg-red-600 text-white' :
+                                      (contagem.score_anomalia ?? 0) >= 40 ? 'bg-orange-600 text-white' :
                                       'bg-yellow-600 text-white'
                                     }`}>
                                       <AlertTriangle className="h-3 w-3 mr-1" />
@@ -987,7 +987,7 @@ export default function ContagemEstoquePage() {
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Valor:</p>
                                   <p className="font-medium text-green-600 dark:text-green-400">
-                                    {formatarValor(Number(contagem.valor_total || (contagem.estoque_final * contagem.custo_unitario) || 0))}
+                                    {formatarValor(Number(contagem.valor_total || ((contagem.estoque_final ?? 0) * (contagem.custo_unitario ?? 0)) || 0))}
                                   </p>
                                 </div>
                               </div>
