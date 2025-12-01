@@ -91,15 +91,18 @@ export async function GET(request: NextRequest) {
 
     // Formatar resultado para o frontend
     const resultado = agregados.map((item: any) => {
-      // Separar comentários positivos e negativos
+      // Separar comentários NPS principal
       const comentariosArray = item.comentarios_array || [];
       const comentariosPositivos = comentariosArray.filter((c: string) => c && c.trim() !== '' && c !== 'Não');
-      const comentariosNegativos: string[] = []; // TODO: implementar lógica de sentimento
+      
+      // Comentários de Reservas
+      const comentariosReservasArray = item.comentarios_reservas_array || [];
+      const comentariosReservas = comentariosReservasArray.filter((c: string) => c && c.trim() !== '');
 
-      const formatarMetrica = (valor: number | null) => ({
+      const formatarMetrica = (valor: number | null, comentarios: string[] = comentariosPositivos) => ({
         media: valor || 0,
         classificacao: classificarNPS(valor),
-        comentarios: comentariosPositivos,
+        comentarios: comentarios,
         promotores: 0, // TODO: calcular se necessário
         neutros: 0,
         detratores: 0,
@@ -121,7 +124,7 @@ export async function GET(request: NextRequest) {
         nps_comida: formatarMetrica(item.nps_comida),
         nps_drink: formatarMetrica(item.nps_drink),
         nps_preco: formatarMetrica(item.nps_preco),
-        nps_reservas: formatarMetrica(item.nps_reservas),
+        nps_reservas: formatarMetrica(item.nps_reservas, comentariosReservas), // Usar comentários específicos de reservas
       };
     });
 

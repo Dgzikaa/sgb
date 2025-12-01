@@ -183,29 +183,28 @@ serve(async (req) => {
       
       if (!row || row.length === 0) continue
 
-      // Estrutura esperada da planilha de reservas:
-      // Col 0: Carimbo de data/hora
-      // Col 1: Nome
-      // Col 2: Telefone
-      // Col 3: Avaliação (0-10)
-      // Col 4: Comentários (opcional)
+      // Estrutura da planilha de reservas:
+      // Col 0: Carimbo de data/hora (MM/DD/YYYY HH:MM:SS - formato americano)
+      // Col 1: Dia da semana
+      // Col 2: Avaliação (0-10)
+      // Col 3: Comentários (opcional)
       
-      // Extrair data do carimbo (coluna 0)
+      // Extrair data do carimbo (coluna 0) - FORMATO AMERICANO MM/DD/YYYY
       let dataFormatada = ''
       const carimbo = String(row[0] || '').trim()
       
       if (carimbo) {
-        // Formato esperado: "DD/MM/YYYY HH:MM:SS"
+        // Formato: "MM/DD/YYYY HH:MM:SS" (americano)
         const dateMatch = carimbo.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
         
         if (dateMatch) {
-          const day = dateMatch[1].padStart(2, '0')
-          const month = dateMatch[2].padStart(2, '0')
+          const month = dateMatch[1].padStart(2, '0')  // Primeiro número = MÊS
+          const day = dateMatch[2].padStart(2, '0')    // Segundo número = DIA
           const year = dateMatch[3]
           dataFormatada = `${year}-${month}-${day}`
           
           if (i <= 5) {
-            console.log(`✅ Linha ${i}: "${carimbo}" → ${dataFormatada}`)
+            console.log(`✅ Linha ${i}: "${carimbo}" (MM/DD/YYYY) → ${dataFormatada}`)
           }
         }
       }
@@ -215,68 +214,38 @@ serve(async (req) => {
         continue
       }
 
-      // Extrair avaliação (coluna 3)
-      const nps_reservas = parseValue(row[3])
-      const comentario = row[4] ? String(row[4]).trim() : ''
+      // Extrair avaliação (coluna 2)
+      const nota = parseValue(row[2])
+      const dia_semana = row[1] ? String(row[1]).trim() : null
+      const comentarios = row[3] ? String(row[3]).trim() : null
 
-      // Buscar se já existe registro nessa data para atualizar apenas nps_reservas
-      const { data: existente, error: erroConsulta } = await supabase
-        .from('nps')
-        .select('id')
-        .eq('bar_id', 3) // Ordinário
-        .eq('data_pesquisa', dataFormatada)
-        .limit(1)
-        .maybeSingle()
-
-      if (erroConsulta) {
-        console.error(`❌ Erro ao consultar registro ${i}:`, erroConsulta)
-        continue
+      // Inserir na tabela nps_reservas
+      const novoRegistro = {
+        bar_id: 3,
+        data_pesquisa: dataFormatada,
+        nota,
+        dia_semana,
+        comentarios
       }
 
-      if (existente) {
-        // Atualizar apenas nps_reservas no registro existente
-        const { error: erroUpdate } = await supabase
-          .from('nps')
-          .update({ nps_reservas })
-          .eq('id', existente.id)
+      const { error: erroInsert } = await supabase
+        .from('nps_reservas')
+        .insert(novoRegistro)
+        .select()
 
-        if (erroUpdate) {
-          console.error(`❌ Erro ao atualizar nps_reservas na linha ${i}:`, erroUpdate)
-        } else {
-          atualizados++
+      if (erroInsert) {
+        // Ignorar duplicatas
+        if (erroInsert.code === '23505') {
           if (i <= 5) {
-            console.log(`✅ Atualizado: ${dataFormatada} → NPS Reservas: ${nps_reservas}`)
+            console.log(`⚠️ Linha ${i}: Registro duplicado - pulando`)
           }
+        } else {
+          console.error(`❌ Erro ao inserir linha ${i}:`, erroInsert)
         }
       } else {
-        console.log(`⚠️ Registro não encontrado para ${dataFormatada} - criando novo`)
-        
-        // Se não existe, criar novo registro apenas com reservas
-        const novoRegistro = {
-          bar_id: 3,
-          data_pesquisa: dataFormatada,
-          nps_reservas,
-          comentarios: comentario,
-          nps_geral: 0,
-          nps_ambiente: 0,
-          nps_atendimento: 0,
-          nps_limpeza: 0,
-          nps_musica: 0,
-          nps_comida: 0,
-          nps_drink: 0,
-          nps_preco: 0,
-          media_geral: 0,
-          resultado_percentual: 0
-        }
-
-        const { error: erroInsert } = await supabase
-          .from('nps')
-          .insert(novoRegistro)
-
-        if (erroInsert) {
-          console.error(`❌ Erro ao inserir linha ${i}:`, erroInsert)
-        } else {
-          atualizados++
+        atualizados++
+        if (i <= 5) {
+          console.log(`✅ Inserido: ${dataFormatada} → Nota: ${nota}, Dia: ${dia_semana}`)
         }
       }
     }
