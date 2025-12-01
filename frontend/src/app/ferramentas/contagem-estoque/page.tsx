@@ -103,6 +103,7 @@ export default function ContagemEstoquePage() {
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroAlerta, setFiltroAlerta] = useState(false);
   const [filtroArea, setFiltroArea] = useState('');
+  const [filtroData, setFiltroData] = useState('');
   const [busca, setBusca] = useState('');
 
   // Tab ativa
@@ -358,13 +359,33 @@ export default function ContagemEstoquePage() {
   };
 
   const contagensFiltradas = contagens.filter(c => {
+    // Filtro de data
+    if (filtroData && c.data_contagem) {
+      const dataContagem = new Date(c.data_contagem).toISOString().split('T')[0];
+      if (dataContagem !== filtroData) {
+        return false;
+      }
+    }
+
+    // Filtro de busca
     if (busca) {
       const buscaLower = busca.toLowerCase();
-      return (
-        c.descricao.toLowerCase().includes(buscaLower) ||
-        c.categoria.toLowerCase().includes(buscaLower)
-      );
+      if (!(c.descricao.toLowerCase().includes(buscaLower) ||
+            c.categoria.toLowerCase().includes(buscaLower))) {
+        return false;
+      }
     }
+
+    // Filtro de categoria
+    if (filtroCategoria && c.categoria !== filtroCategoria) {
+      return false;
+    }
+
+    // Filtro de alertas (anomalias)
+    if (filtroAlerta && !c.contagem_anomala) {
+      return false;
+    }
+
     return true;
   });
 
@@ -762,60 +783,88 @@ export default function ContagemEstoquePage() {
               {/* Filtros */}
               <Card className="card-dark">
                 <CardContent className="pt-6">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex-1 min-w-[200px]">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <div className="space-y-4">
+                    {/* Primeira linha: Data e Busca */}
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="w-full sm:w-auto">
                         <Input
-                          placeholder="Buscar por descrição ou categoria..."
-                          value={busca}
-                          onChange={(e) => setBusca(e.target.value)}
-                          className="input-dark pl-10"
+                          type="date"
+                          value={filtroData}
+                          onChange={(e) => setFiltroData(e.target.value)}
+                          className="input-dark w-full sm:w-[200px]"
+                          placeholder="Filtrar por data"
                         />
                       </div>
+                      
+                      <div className="flex-1 min-w-[200px]">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Buscar por descrição ou categoria..."
+                            value={busca}
+                            onChange={(e) => setBusca(e.target.value)}
+                            className="input-dark pl-10"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
-                        <SelectTrigger className="input-dark w-[200px]">
-                          <Filter className="h-4 w-4 mr-2" />
-                          <SelectValue placeholder="Todas categorias" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CATEGORIAS.map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {filtroCategoria && (
+
+                    {/* Segunda linha: Filtros e Ações */}
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
+                          <SelectTrigger className="input-dark w-[200px]">
+                            <Filter className="h-4 w-4 mr-2" />
+                            <SelectValue placeholder="Todas categorias" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CATEGORIAS.map(cat => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {filtroCategoria && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setFiltroCategoria('')}
+                            className="h-10 px-2"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      <Button
+                        variant={filtroAlerta ? 'default' : 'outline'}
+                        onClick={() => setFiltroAlerta(!filtroAlerta)}
+                        className={filtroAlerta ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'btn-outline-dark'}
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Apenas com Alertas
+                      </Button>
+
+                      {filtroData && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setFiltroCategoria('')}
-                          className="h-10 px-2"
+                          onClick={() => setFiltroData('')}
+                          className="btn-outline-dark"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-4 w-4 mr-2" />
+                          Limpar Data
                         </Button>
                       )}
+
+                      <Button
+                        onClick={buscarContagens}
+                        disabled={loadingContagens}
+                        className="btn-primary-dark"
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${loadingContagens ? 'animate-spin' : ''}`} />
+                        Atualizar
+                      </Button>
                     </div>
-
-                    <Button
-                      variant={filtroAlerta ? 'default' : 'outline'}
-                      onClick={() => setFiltroAlerta(!filtroAlerta)}
-                      className={filtroAlerta ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'btn-outline-dark'}
-                    >
-                      <AlertTriangle className="h-4 w-4 mr-2" />
-                      Apenas com Alertas
-                    </Button>
-
-                    <Button
-                      onClick={buscarContagens}
-                      disabled={loadingContagens}
-                      className="btn-primary-dark"
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${loadingContagens ? 'animate-spin' : ''}`} />
-                      Atualizar
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -848,21 +897,40 @@ export default function ContagemEstoquePage() {
                         <div
                           key={contagem.id}
                           className={`p-4 rounded-lg border ${
-                            contagem.alerta_variacao || contagem.alerta_preenchimento
-                              ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                            contagem.contagem_anomala
+                              ? contagem.score_anomalia >= 50
+                                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
                               : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
                           }`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <h4 className="font-semibold text-gray-900 dark:text-white">
-                                  {contagem.descricao}
+                                  {contagem.insumo_nome || contagem.descricao}
                                 </h4>
                                 <Badge className="badge-secondary text-xs">
                                   {contagem.categoria}
                                 </Badge>
-                                {(contagem.alerta_variacao || contagem.alerta_preenchimento) && (
+                                {contagem.contagem_anomala && (
+                                  <>
+                                    <Badge className={`text-xs ${
+                                      contagem.score_anomalia >= 70 ? 'bg-red-600 text-white' :
+                                      contagem.score_anomalia >= 40 ? 'bg-orange-600 text-white' :
+                                      'bg-yellow-600 text-white'
+                                    }`}>
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      Anomalia {contagem.score_anomalia}%
+                                    </Badge>
+                                    {contagem.tipo_anomalia && contagem.tipo_anomalia.map((tipo, i) => (
+                                      <Badge key={i} variant="outline" className="text-xs">
+                                        {tipo.replace(/_/g, ' ')}
+                                      </Badge>
+                                    ))}
+                                  </>
+                                )}
+                                {(contagem.alerta_variacao || contagem.alerta_preenchimento) && !contagem.contagem_anomala && (
                                   <Badge className="badge-warning text-xs">
                                     <AlertTriangle className="h-3 w-3 mr-1" />
                                     Alerta
@@ -870,29 +938,44 @@ export default function ContagemEstoquePage() {
                                 )}
                               </div>
                               
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                              {/* Motivo da Anomalia */}
+                              {contagem.contagem_anomala && contagem.motivo_anomalia && (
+                                <div className="mb-3 p-2 rounded bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500">
+                                  <p className="text-xs text-gray-700 dark:text-gray-300">
+                                    <strong>⚠️ Motivo:</strong> {contagem.motivo_anomalia}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                                <div>
+                                  <p className="text-gray-600 dark:text-gray-400">Data:</p>
+                                  <p className="font-medium text-gray-900 dark:text-white">
+                                    {contagem.data_contagem ? new Date(contagem.data_contagem).toLocaleDateString('pt-BR') : '-'}
+                                  </p>
+                                </div>
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Fechado:</p>
                                   <p className="font-medium text-gray-900 dark:text-white">
-                                    {Number(contagem.estoque_fechado).toFixed(2)}
+                                    {Number(contagem.estoque_fechado || contagem.estoque_final || 0).toFixed(2)}
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Flutuante:</p>
                                   <p className="font-medium text-gray-900 dark:text-white">
-                                    {Number(contagem.estoque_flutuante).toFixed(2)}
+                                    {Number(contagem.estoque_flutuante || 0).toFixed(2)}
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Total:</p>
                                   <p className="font-medium text-gray-900 dark:text-white">
-                                    {Number(contagem.estoque_total).toFixed(2)}
+                                    {Number(contagem.estoque_total || contagem.estoque_final || 0).toFixed(2)}
                                   </p>
                                 </div>
                                 <div>
                                   <p className="text-gray-600 dark:text-gray-400">Valor:</p>
                                   <p className="font-medium text-green-600 dark:text-green-400">
-                                    {formatarValor(Number(contagem.valor_total))}
+                                    {formatarValor(Number(contagem.valor_total || (contagem.estoque_final * contagem.custo_unitario) || 0))}
                                   </p>
                                 </div>
                               </div>
