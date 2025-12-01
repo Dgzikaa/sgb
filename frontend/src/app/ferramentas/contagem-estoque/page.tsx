@@ -986,7 +986,7 @@ export default function ContagemEstoquePage() {
                       <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
                         <div className="text-2xl mb-1">🚫</div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">Variações Bruscas</p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">Mudanças >200% ou <30%</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Mudanças +200% ou -70%</p>
                       </div>
                     </div>
                     <Link href="/ferramentas/contagem-estoque/anomalias">
