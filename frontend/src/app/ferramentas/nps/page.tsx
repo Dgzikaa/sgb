@@ -78,7 +78,7 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
   const [loading, setLoading] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [semanaExpandida, setSemanaExpandida] = useState<number | null>(null);
-  const itensPorPagina = 10;
+  const itensPorPagina = 20; // Exibir mais semanas por página
 
   useEffect(() => {
     buscarDadosCategorizados();
@@ -107,16 +107,12 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
     }
   };
 
-  const getCorClassificacao = (classificacao: string) => {
-    switch (classificacao) {
-      case 'verde':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'amarelo':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'vermelho':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+  const getCorPorValor = (valor: number) => {
+    // Meta: 70 - Verde >= 70, Vermelho < 70
+    if (valor >= 70) {
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    } else {
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
     }
   };
 
@@ -221,47 +217,47 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_geral.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_geral.media)}>
                             {linha.nps_geral.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_ambiente.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_ambiente.media)}>
                             {linha.nps_ambiente.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_atendimento.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_atendimento.media)}>
                             {linha.nps_atendimento.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_limpeza.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_limpeza.media)}>
                             {linha.nps_limpeza.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_musica.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_musica.media)}>
                             {linha.nps_musica.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_comida.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_comida.media)}>
                             {linha.nps_comida.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_drink.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_drink.media)}>
                             {linha.nps_drink.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_preco.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_preco.media)}>
                             {linha.nps_preco.media}
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge className={getCorClassificacao(linha.nps_reservas.classificacao)}>
+                          <Badge className={getCorPorValor(linha.nps_reservas.media)}>
                             {linha.nps_reservas.media}
                           </Badge>
                         </td>
@@ -347,15 +343,11 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded bg-green-500"></div>
-                      <span className="text-gray-700 dark:text-gray-300">Verde: ≥ 50 (Zona de Excelência)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded bg-yellow-500"></div>
-                      <span className="text-gray-700 dark:text-gray-300">Amarelo: 0-49 (Zona de Aperfeiçoamento)</span>
+                      <span className="text-gray-700 dark:text-gray-300">Verde: ≥ 70 (Meta Atingida)</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded bg-red-500"></div>
-                      <span className="text-gray-700 dark:text-gray-300">Vermelho: &lt; 0 (Zona Crítica)</span>
+                      <span className="text-gray-700 dark:text-gray-300">Vermelho: &lt; 70 (Abaixo da Meta)</span>
                     </div>
                   </div>
                 </div>
@@ -413,11 +405,7 @@ export default function NPSPage() {
     justica_reconhecimento: 0,
   });
   
-  const [dataInicio, setDataInicio] = useState(() => {
-    const data = new Date();
-    data.setMonth(data.getMonth() - 1);
-    return data.toISOString().split('T')[0];
-  });
+  const [dataInicio, setDataInicio] = useState('2025-06-26'); // Primeira data da planilha
   const [dataFim, setDataFim] = useState(() => new Date().toISOString().split('T')[0]);
   const [setorFiltro, setSetorFiltro] = useState('TODOS');
 

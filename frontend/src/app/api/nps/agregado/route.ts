@@ -8,11 +8,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Função para classificar NPS (Verde >= 50, Amarelo >= 0, Vermelho < 0)
+// Função para classificar NPS - Meta: 70 (Verde >= 70, Vermelho < 70)
 const classificarNPS = (nps: number | null) => {
   if (nps === null) return 'vermelho';
-  if (nps >= 50) return 'verde';
-  if (nps >= 0) return 'amarelo';
+  if (nps >= 70) return 'verde';
   return 'vermelho';
 };
 
