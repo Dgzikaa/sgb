@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import React from 'react';
 import { Smile, TrendingUp, Calendar, Users, BarChart3, Download, Upload, FileSpreadsheet, RefreshCcw, Star, MessageSquare, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -46,6 +47,9 @@ interface NPSMetrica {
   classificacao: 'verde' | 'amarelo' | 'vermelho';
   total: number;
   comentarios: string[];
+  promotores?: number;
+  neutros?: number;
+  detratores?: number;
 }
 
 interface NPSDadoCategorizado {
@@ -73,6 +77,7 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
   const [dados, setDados] = useState<NPSDadoCategorizado[]>([]);
   const [loading, setLoading] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [semanaExpandida, setSemanaExpandida] = useState<number | null>(null);
   const itensPorPagina = 10;
 
   useEffect(() => {
@@ -178,61 +183,114 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {dadosPaginados.map((linha, index) => (
-                  <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">{linha.semana}</td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30">
-                        {linha.total_respostas}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_geral.classificacao)}>
-                        {linha.nps_geral.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_ambiente.classificacao)}>
-                        {linha.nps_ambiente.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_atendimento.classificacao)}>
-                        {linha.nps_atendimento.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_limpeza.classificacao)}>
-                        {linha.nps_limpeza.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_musica.classificacao)}>
-                        {linha.nps_musica.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_comida.classificacao)}>
-                        {linha.nps_comida.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_drink.classificacao)}>
-                        {linha.nps_drink.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_preco.classificacao)}>
-                        {linha.nps_preco.media}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Badge className={getCorClassificacao(linha.nps_reservas.classificacao)}>
-                        {linha.nps_reservas.media}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
+                {dadosPaginados.map((linha, indexPagina) => {
+                  const indexReal = indiceInicial + indexPagina;
+                  const isExpanded = semanaExpandida === indexReal;
+                  const totalComentarios = [
+                    ...linha.nps_geral.comentarios,
+                    ...linha.nps_ambiente.comentarios,
+                    ...linha.nps_atendimento.comentarios,
+                    ...linha.nps_limpeza.comentarios,
+                    ...linha.nps_musica.comentarios,
+                    ...linha.nps_comida.comentarios,
+                    ...linha.nps_drink.comentarios,
+                    ...linha.nps_preco.comentarios,
+                    ...linha.nps_reservas.comentarios,
+                  ].filter((c, i, arr) => arr.indexOf(c) === i); // Remove duplicados
+
+                  return (
+                    <React.Fragment key={indexPagina}>
+                      <tr className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${isExpanded ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => setSemanaExpandida(isExpanded ? null : indexReal)}
+                            className="flex items-center gap-2 text-gray-900 dark:text-white font-medium hover:text-blue-600 dark:hover:text-blue-400"
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                            {linha.semana}
+                            {totalComentarios.length > 0 && (
+                              <Badge variant="outline" className="ml-1 text-xs">
+                                {totalComentarios.length}
+                              </Badge>
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30">
+                            {linha.total_respostas}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_geral.classificacao)}>
+                            {linha.nps_geral.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_ambiente.classificacao)}>
+                            {linha.nps_ambiente.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_atendimento.classificacao)}>
+                            {linha.nps_atendimento.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_limpeza.classificacao)}>
+                            {linha.nps_limpeza.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_musica.classificacao)}>
+                            {linha.nps_musica.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_comida.classificacao)}>
+                            {linha.nps_comida.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_drink.classificacao)}>
+                            {linha.nps_drink.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_preco.classificacao)}>
+                            {linha.nps_preco.media}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge className={getCorClassificacao(linha.nps_reservas.classificacao)}>
+                            {linha.nps_reservas.media}
+                          </Badge>
+                        </td>
+                      </tr>
+                      {isExpanded && totalComentarios.length > 0 && (
+                        <tr className="bg-gray-50 dark:bg-gray-800">
+                          <td colSpan={11} className="px-4 py-4">
+                            <div className="space-y-3">
+                              <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4" />
+                                Comentários da {linha.semana}
+                              </h4>
+                              <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
+                                {totalComentarios.map((comentario, i) => (
+                                  <div
+                                    key={i}
+                                    className="p-3 rounded-lg bg-white dark:bg-gray-700 border-l-4 border-blue-500 text-sm text-gray-700 dark:text-gray-300"
+                                  >
+                                    {comentario}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -280,21 +338,32 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
             </div>
           )}
 
-          {/* Legenda */}
+          {/* Legenda e Instruções */}
           <Card className="bg-white dark:bg-gray-800">
             <CardContent className="p-4">
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-green-500"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Verde: ≥ 80 (Excelente)</span>
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">📊 Legenda NPS</h4>
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-green-500"></div>
+                      <span className="text-gray-700 dark:text-gray-300">Verde: ≥ 50 (Zona de Excelência)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-yellow-500"></div>
+                      <span className="text-gray-700 dark:text-gray-300">Amarelo: 0-49 (Zona de Aperfeiçoamento)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-red-500"></div>
+                      <span className="text-gray-700 dark:text-gray-300">Vermelho: &lt; 0 (Zona Crítica)</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-yellow-500"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Amarelo: 40-79 (Bom)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-red-500"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Vermelho: &lt; 40 (Precisa melhorar)</span>
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <MessageSquare className="h-3 w-3 inline mr-1" />
+                    Clique no nome da semana para ver todos os comentários
+                  </p>
                 </div>
               </div>
             </CardContent>
