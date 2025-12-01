@@ -68,6 +68,39 @@ interface NPSDadoCategorizado {
   nps_reservas: NPSMetrica;
 }
 
+// Função de análise de sentimento em português
+function analisarSentimento(comentario: string): 'positivo' | 'negativo' | 'neutro' {
+  const texto = comentario.toLowerCase();
+  
+  // Palavras-chave negativas
+  const palavrasNegativas = [
+    'ruim', 'péssimo', 'horrível', 'terrível', 'pior', 'problema', 'demora', 'demorou',
+    'errado', 'erro', 'falha', 'defeito', 'nunca', 'não', 'insatisfeito', 'decepção',
+    'decepcionado', 'chato', 'desagradável', 'difícil', 'complicado', 'caro', 'sujo',
+    'frio', 'gelado', 'quente demais', 'fraco', 'pouquissi', 'nada', 'falta', 'sem',
+    'racismo', 'discrimin', 'preconceito', 'desrespeito', 'absurdo', 'inaceitável',
+    'reclamação', 'reclamar', 'irritante', 'desorganiz', 'confus', 'bagunça',
+    'demorado', 'espera', 'esperando', 'atrasado', 'esqueceu', 'esqueceram'
+  ];
+  
+  // Palavras-chave positivas
+  const palavrasPositivas = [
+    'bom', 'ótimo', 'excelente', 'perfeito', 'maravilhoso', 'incrível', 'adorei',
+    'amei', 'melhor', 'top', 'sucesso', 'parabéns', 'obrigado', 'obrigada', 'agradeço',
+    'agradável', 'confortável', 'bonito', 'lindo', 'legal', 'bacana', 'show',
+    'recomendo', 'voltarei', 'voltar', 'gostei', 'gostamos', 'aprovado', 'satisfeito',
+    'feliz', 'alegre', 'animado', 'divertido', 'delicioso', 'saboroso', 'gostoso',
+    'elogio', 'elogiar', 'nota 10', 'sensacional', 'espetacular', 'fantástico'
+  ];
+  
+  const contagemPositiva = palavrasPositivas.filter(p => texto.includes(p)).length;
+  const contagemNegativa = palavrasNegativas.filter(p => texto.includes(p)).length;
+  
+  if (contagemNegativa > contagemPositiva) return 'negativo';
+  if (contagemPositiva > contagemNegativa) return 'positivo';
+  return 'neutro';
+}
+
 // Componente Tab de NPS Categorizado
 function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: { 
   dataInicio: string; 
@@ -271,14 +304,39 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
                                 Comentários da {linha.semana}
                               </h4>
                               <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-                                {totalComentarios.map((comentario, i) => (
-                                  <div
-                                    key={i}
-                                    className="p-3 rounded-lg bg-white dark:bg-gray-700 border-l-4 border-blue-500 text-sm text-gray-700 dark:text-gray-300"
-                                  >
-                                    {comentario}
-                                  </div>
-                                ))}
+                                {totalComentarios
+                                  .map((comentario, i) => ({
+                                    texto: comentario,
+                                    sentimento: analisarSentimento(comentario),
+                                    index: i
+                                  }))
+                                  .sort((a, b) => {
+                                    // Negativos primeiro, depois neutros, depois positivos
+                                    const ordem = { negativo: 0, neutro: 1, positivo: 2 };
+                                    return ordem[a.sentimento] - ordem[b.sentimento];
+                                  })
+                                  .map(({ texto, sentimento, index }) => {
+                                    const corBorda = sentimento === 'positivo' 
+                                      ? 'border-green-500' 
+                                      : sentimento === 'negativo' 
+                                        ? 'border-red-500' 
+                                        : 'border-gray-400';
+                                    const corFundo = sentimento === 'positivo'
+                                      ? 'bg-green-50 dark:bg-green-900/20'
+                                      : sentimento === 'negativo'
+                                        ? 'bg-red-50 dark:bg-red-900/20'
+                                        : 'bg-white dark:bg-gray-700';
+                                    
+                                    return (
+                                      <div
+                                        key={index}
+                                        className={`p-3 rounded-lg ${corFundo} border-l-4 ${corBorda} text-sm text-gray-700 dark:text-gray-300`}
+                                      >
+                                        {texto}
+                                      </div>
+                                    );
+                                  })
+                                }
                               </div>
                             </div>
                           </td>
@@ -712,10 +770,6 @@ export default function NPSPage() {
               <Smile className="w-4 h-4 mr-2" />
               Pesquisa da Felicidade
             </TabsTrigger>
-            <TabsTrigger value="nps" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              NPS
-            </TabsTrigger>
             <TabsTrigger value="categorizado" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
               <Star className="w-4 h-4 mr-2" />
               NPS Categorizado
@@ -796,75 +850,6 @@ export default function NPSPage() {
           </TabsContent>
 
           {/* NPS */}
-          <TabsContent value="nps" className="space-y-4">
-            {/* Resumo por Setor */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {calcularMediaPorSetor(dadosNPS).map((item) => (
-                <Card key={item.setor} className="bg-white dark:bg-gray-800">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {item.setor}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {item.media}
-                      <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">/ 5.0</span>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {item.count} respostas
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Tabela NPS */}
-            <Card className="bg-white dark:bg-gray-800">
-              <CardHeader>
-                <CardTitle className="text-gray-900 dark:text-white">Respostas NPS</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
-                        <th className="text-left p-2 text-gray-700 dark:text-gray-300">Data</th>
-                        <th className="text-left p-2 text-gray-700 dark:text-gray-300">Funcionário</th>
-                        <th className="text-left p-2 text-gray-700 dark:text-gray-300">Setor</th>
-                        <th className="text-center p-2 text-gray-700 dark:text-gray-300">Quórum</th>
-                        <th className="text-center p-2 text-gray-700 dark:text-gray-300">Média</th>
-                        <th className="text-center p-2 text-gray-700 dark:text-gray-300">Resultado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dadosNPS.map((item) => (
-                        <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800">
-                          <td className="p-2 text-gray-900 dark:text-white">{formatDate(item.data_pesquisa)}</td>
-                          <td className="p-2 text-gray-900 dark:text-white">{item.funcionario_nome}</td>
-                          <td className="p-2">
-                            <Badge variant="outline">{item.setor}</Badge>
-                          </td>
-                          <td className="text-center p-2 text-gray-900 dark:text-white">{item.quorum}</td>
-                          <td className="text-center p-2 font-semibold text-gray-900 dark:text-white">
-                            {item.media_geral?.toFixed(2)}
-                          </td>
-                          <td className="text-center p-2 text-gray-900 dark:text-white">
-                            {item.resultado_percentual?.toFixed(1)}%
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {dadosNPS.length === 0 && (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                      Nenhum dado encontrado para o período selecionado
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* NPS Categorizado */}
           <TabsContent value="categorizado" className="space-y-4">
