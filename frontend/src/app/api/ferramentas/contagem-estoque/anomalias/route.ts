@@ -19,13 +19,7 @@ export async function GET(request: NextRequest) {
     const tipo = searchParams.get('tipo'); // Filtrar por tipo específico
     const limit = parseInt(searchParams.get('limit') || '100');
     
-    const supabase = await getSupabaseClient();
-    if (!supabase) {
-      return NextResponse.json({
-        success: false,
-        error: 'Erro ao conectar com banco'
-      }, { status: 500 });
-    }
+    const supabase = createServiceRoleClient();
     
     // Query base
     let query = supabase
