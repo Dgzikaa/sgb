@@ -170,7 +170,14 @@ serve(async (req) => {
     const requestBody = await req.text();
     const { cronSecret, data_inicio, data_fim } = requestBody ? JSON.parse(requestBody) : {};
     
-    if (!authHeader?.includes(serviceRoleKey || '') && cronSecret !== 'manual_retroativo') {
+    // Aceitar: SERVICE_ROLE_KEY, cronSecret do pg_cron, ou manual
+    const isAuthorized = 
+      (authHeader && authHeader.includes(serviceRoleKey || '')) ||
+      cronSecret === 'pgcron_retroativo' ||
+      cronSecret === 'manual_retroativo' ||
+      cronSecret === 'admin_trigger';
+    
+    if (!isAuthorized) {
       return new Response(
         JSON.stringify({ error: 'Acesso não autorizado' }),
         { 
