@@ -56,6 +56,18 @@ interface ContagemData {
   created_at: string;
   updated_at: string;
   area_id: number | null;
+  // Campos de anomalia
+  contagem_anomala?: boolean;
+  score_anomalia?: number;
+  tipo_anomalia?: string[];
+  motivo_anomalia?: string;
+  // Campos do histórico retroativo
+  insumo_id?: number;
+  insumo_codigo?: string;
+  insumo_nome?: string;
+  estoque_inicial?: number;
+  estoque_final?: number;
+  custo_unitario?: number;
 }
 
 interface Area {

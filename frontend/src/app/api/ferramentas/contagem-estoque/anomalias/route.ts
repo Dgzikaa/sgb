@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,13 +113,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { bar_id = 3, data_inicio, data_fim } = body;
     
-    const supabase = await getSupabaseClient();
-    if (!supabase) {
-      return NextResponse.json({
-        success: false,
-        error: 'Erro ao conectar com banco'
-      }, { status: 500 });
-    }
+    const supabase = createServiceRoleClient();
     
     console.log('🔍 Executando detecção de anomalias...');
     console.log(`📅 Período: ${data_inicio || 'últimos 90 dias'} até ${data_fim || 'hoje'}`);
