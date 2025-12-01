@@ -60,6 +60,11 @@ const aplicarFiltrosBase = (query: any) => {
     .not('prd_desc', 'ilike', '%[DD]%')  // Dose Dupla
     .not('prd_desc', 'ilike', '%[IN]%'); // Insumos
   
+  // CATEGORIAS A IGNORAR (por descrição do produto)
+  query = query
+    .not('prd_desc', 'ilike', '%Balde%')     // Baldes
+    .not('prd_desc', 'ilike', '%Garrafa%');  // Garrafas
+  
   return query;
 };
 
