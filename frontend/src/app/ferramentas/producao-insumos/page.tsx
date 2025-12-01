@@ -96,6 +96,10 @@ export default function ProducaoInsumosPage() {
   const [receitaDetalhes, setReceitaDetalhes] = useState<ReceitaCompleta | null>(null);
   const [modalDetalhes, setModalDetalhes] = useState(false);
 
+  // Estados para histórico
+  const [historico, setHistorico] = useState<any[]>([]);
+  const [historicoSearch, setHistoricoSearch] = useState('');
+
   // Form states para insumo
   const [formInsumo, setFormInsumo] = useState({
     codigo: '',
@@ -120,7 +124,7 @@ export default function ProducaoInsumosPage() {
 
   const carregarDados = async () => {
     setLoading(true);
-    await Promise.all([carregarInsumos(), carregarReceitas()]);
+    await Promise.all([carregarInsumos(), carregarReceitas(), carregarHistorico()]);
     setLoading(false);
   };
 
@@ -156,6 +160,18 @@ export default function ProducaoInsumosPage() {
       }
     } catch (error) {
       console.error('Erro ao carregar receitas:', error);
+    }
+  };
+
+  const carregarHistorico = async () => {
+    try {
+      const response = await fetch('/api/operacional/receitas/historico?limit=100');
+      if (response.ok) {
+        const data = await response.json();
+        setHistorico(data.historico || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar histórico:', error);
     }
   };
 
@@ -337,6 +353,13 @@ export default function ProducaoInsumosPage() {
             >
               <ChefHat className="w-4 h-4 mr-2" />
               Receitas ({stats.total_receitas})
+            </TabsTrigger>
+            <TabsTrigger
+              value="historico"
+              className="data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30 dark:data-[state=active]:text-purple-400"
+            >
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Histórico
             </TabsTrigger>
             
             {/* Botão Terminal - Navega para página dedicada */}
@@ -789,6 +812,120 @@ export default function ProducaoInsumosPage() {
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Histórico Tab */}
+          <TabsContent value="historico" className="space-y-6">
+            <Card className="card-dark">
+              <CardHeader>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <CardTitle>Histórico de Alterações</CardTitle>
+                    <CardDescription>
+                      Veja todas as alterações feitas nas fichas técnicas
+                    </CardDescription>
+                  </div>
+                  <Badge variant="outline" className="text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-700">
+                    {historico.length} registros
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* Busca */}
+                <div className="mb-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Buscar por nome ou código da receita..."
+                      value={historicoSearch}
+                      onChange={(e) => setHistoricoSearch(e.target.value)}
+                      className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                    />
+                  </div>
+                </div>
+
+                {/* Lista de Histórico */}
+                {historico.length === 0 ? (
+                  <div className="text-center py-12">
+                    <AlertCircle className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Nenhuma alteração registrada
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {historico
+                      .filter(h => 
+                        historicoSearch === '' ||
+                        h.receita_nome?.toLowerCase().includes(historicoSearch.toLowerCase()) ||
+                        h.receita_codigo?.toLowerCase().includes(historicoSearch.toLowerCase())
+                      )
+                      .map((item) => (
+                        <Card key={item.id} className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
+                          <CardContent className="p-4">
+                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="outline" className="font-mono text-xs">
+                                    {item.receita_codigo}
+                                  </Badge>
+                                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                                    {item.receita_nome}
+                                  </h3>
+                                </div>
+                                
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <AlertCircle className="w-3 h-3" />
+                                    <span>
+                                      {new Date(item.data_atualizacao).toLocaleDateString('pt-BR', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                    {item.origem && (
+                                      <>
+                                        <span className="text-gray-400">•</span>
+                                        <Badge variant="outline" className="text-xs">
+                                          {item.origem === 'sheets' ? '📊 Google Sheets' : '👤 Manual'}
+                                        </Badge>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {item.observacoes && (
+                                  <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                                    <p className="text-xs font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                                      {item.observacoes}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex flex-col gap-2">
+                                {item.receita_categoria && (
+                                  <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                                    {item.receita_categoria}
+                                  </Badge>
+                                )}
+                                {item.versao && (
+                                  <Badge variant="outline" className="text-xs font-mono">
+                                    {item.versao}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                   </div>
                 )}
               </CardContent>
