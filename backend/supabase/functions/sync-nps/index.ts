@@ -310,13 +310,9 @@ serve(async (req) => {
           
           if (isNaN(num)) return 0
           
-          // Se o número está entre 0-10, converter para 0-5
-          if (num > 5 && num <= 10) {
-            return Math.round((num / 2) * 10) / 10
-          }
-          
-          // Se já está entre 0-5, retornar direto
-          if (num >= 0 && num <= 5) {
+          // Google Forms usa escala 0-10, manter valor original
+          // NÃO converter para 0-5, pois o NPS tradicional usa escala 0-10
+          if (num >= 0 && num <= 10) {
             return Math.round(num * 10) / 10
           }
           
