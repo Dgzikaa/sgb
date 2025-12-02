@@ -92,26 +92,21 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 1. BUSCAR CONSUMO DOS SÓCIOS
   try {
-    // Sócios: rodrigo, digão, diogo, corbal, cadu, gonza, augusto
+    // Sócios: rodrigo, digão, diogo, corbal, cadu, gonza, augusto, lg, vini
     // Sócios consomem com 100% desconto, então valor está em vr_desconto
-    // Filtro: Nome começa com "X-" E motivo contém "sócio" ou "socio"
+    // Filtro: Motivo contém "sócio" ou "socio" (não precisa ter X- no nome)
     const { data: consumoSocios } = await supabase
       .from('contahub_periodo')
-      .select('vr_desconto, motivo')
+      .select('vr_desconto, vr_produtos, motivo')
       .eq('bar_id', barId)
       .gte('dt_gerencial', dataInicio)
       .lte('dt_gerencial', dataFim)
-      .ilike('cli_nome', 'x-%');
+      .or('motivo.ilike.%sócio%,motivo.ilike.%socio%');
 
     if (consumoSocios) {
-      // Filtrar apenas os que têm "sócio" ou "socio" no motivo
-      const consumosFiltrados = consumoSocios.filter((item: any) => {
-        const motivo = (item.motivo || '').toLowerCase();
-        return motivo.includes('sócio') || motivo.includes('socio');
-      });
-      
-      resultado.total_consumo_socios = consumosFiltrados.reduce((sum: number, item: any) => 
-        sum + (parseFloat(item.vr_desconto) || 0), 0
+      // Somar desconto + produtos (alguns podem ter desconto parcial)
+      resultado.total_consumo_socios = consumoSocios.reduce((sum: number, item: any) => 
+        sum + (parseFloat(item.vr_desconto) || 0) + (parseFloat(item.vr_produtos) || 0), 0
       );
       console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)}`);
     }
