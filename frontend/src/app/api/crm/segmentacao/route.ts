@@ -8,6 +8,69 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Função para buscar TODOS os dados com paginação (contorna limite de 1000 do Supabase)
+async function fetchAllData(tableName: string, columns: string, filters: any = {}) {
+  let allData: any[] = [];
+  let from = 0;
+  const limit = 1000;
+  const MAX_ITERATIONS = 200; // Aumentado para suportar até 200k registros
+  let iterations = 0;
+
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
+    
+    let query = supabase
+      .from(tableName)
+      .select(columns)
+      .range(from, from + limit - 1);
+    
+    // Aplicar filtros
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key.includes('gte_')) {
+        query = query.gte(key.replace('gte_', ''), value);
+      } else if (key.includes('lte_')) {
+        query = query.lte(key.replace('lte_', ''), value);
+      } else if (key.includes('eq_')) {
+        query = query.eq(key.replace('eq_', ''), value);
+      } else if (key.includes('in_')) {
+        query = query.in(key.replace('in_', ''), Array.isArray(value) ? value : [value]);
+      } else if (key.includes('not_')) {
+        if (key.includes('not_is_')) {
+          query = query.not(key.replace('not_is_', ''), 'is', value);
+        } else if (key.includes('not_eq_')) {
+          query = query.not(key.replace('not_eq_', ''), 'eq', value);
+        }
+      }
+    });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      break;
+    }
+    
+    if (!data || data.length === 0) {
+      break;
+    }
+    
+    allData.push(...data);
+    
+    // Log de progresso a cada 10k registros
+    if (allData.length % 10000 === 0 || data.length < limit) {
+      console.log(`  ✓ ${tableName}: ${allData.length} registros carregados`);
+    }
+    
+    if (data.length < limit) {
+      break; // Última página
+    }
+    
+    from += limit;
+  }
+  
+  return allData;
+}
+
 interface ClienteUnificado {
   identificador: string;
   nome: string;
@@ -43,40 +106,35 @@ export async function GET(request: NextRequest) {
 
     console.log(`🔍 CRM: Iniciando análise de segmentação (Página ${page}, Limite ${limit})...`);
 
-    // 1. Buscar TODOS os dados de eventos Sympla (usando range para remover limite padrão de 1000)
-    const { data: symplaData } = await supabase
-      .from('sympla_participantes')
-      .select('nome_completo, email, pedido_id')
-      .eq('bar_id', barId)
-      .eq('status_pedido', 'APPROVED')
-      .range(0, 99999); // Remove limite padrão de 1000 registros
+    // Buscar TODOS os dados usando paginação automática
+    const [symplaData, getinData, eventosData, contahubData] = await Promise.all([
+      // 1. Sympla
+      fetchAllData('sympla_participantes', 'nome_completo, email, pedido_id', {
+        eq_bar_id: barId,
+        eq_status_pedido: 'APPROVED'
+      }),
+      
+      // 2. GetIn
+      fetchAllData('getin_reservas', 'customer_name, customer_email, customer_phone, reservation_date, status', {
+        eq_bar_id: barId,
+        in_status: ['seated', 'confirmed']
+      }),
+      
+      // 3. Eventos
+      fetchAllData('eventos_base', 'data_evento, real_r, cl_real', {
+        eq_bar_id: barId,
+        eq_ativo: true
+      }),
+      
+      // 4. ContaHub (DADOS REAIS!)
+      fetchAllData('contahub_pagamentos', 'cli, cliente, vr_pagamentos, dt_transacao', {
+        eq_bar_id: barId,
+        not_is_cliente: null,
+        not_eq_cliente: ''
+      })
+    ]);
 
-    // 2. Buscar TODAS as reservas GetIn
-    const { data: getinData } = await supabase
-      .from('getin_reservas')
-      .select('customer_name, customer_email, customer_phone, reservation_date, status')
-      .eq('bar_id', barId)
-      .in('status', ['seated', 'confirmed'])
-      .range(0, 99999); // Remove limite padrão
-
-    // 3. Buscar dados de eventos_base para receita
-    const { data: eventosData } = await supabase
-      .from('eventos_base')
-      .select('data_evento, real_r, cl_real')
-      .eq('bar_id', barId)
-      .eq('ativo', true)
-      .range(0, 99999); // Remove limite padrão
-
-    // 4. Buscar TODOS os dados de pagamentos do ContaHub (DADOS REAIS!)
-    const { data: contahubData } = await supabase
-      .from('contahub_pagamentos')
-      .select('cli, cliente, vr_pagamentos, dt_transacao')
-      .eq('bar_id', barId)  // ⚠️ FIX: era 'vd' (errado) agora é 'bar_id' (correto)
-      .not('cliente', 'is', null)
-      .not('cliente', 'eq', '')
-      .range(0, 99999); // Remove limite padrão de 1000
-
-    console.log(`📊 Dados carregados: Sympla=${symplaData?.length || 0}, GetIn=${getinData?.length || 0}, ContaHub=${contahubData?.length || 0}`);
+    console.log(`📊 Dados carregados: Sympla=${symplaData.length}, GetIn=${getinData.length}, ContaHub=${contahubData.length}`);
 
     // 5. Criar mapa de clientes unificados
     const clientesMap = new Map<string, ClienteUnificado>();
