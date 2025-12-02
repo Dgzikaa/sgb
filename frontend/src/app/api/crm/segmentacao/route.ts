@@ -271,7 +271,7 @@ export async function GET(request: NextRequest) {
     };
 
     // 8. Segmentar clientes
-    const clientesSegmentados = clientes.map(cliente => {
+    clientesSegmentados = clientes.map(cliente => {
       const r_score = getScore(cliente.dias_desde_ultima_visita, recencies, true); // Menor recência = melhor
       const f_score = getScore(cliente.total_visitas, frequencies);
       const m_score = getScore(cliente.total_gasto, monetaries);
