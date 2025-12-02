@@ -8,6 +8,35 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Cache em memória para evitar reprocessar dados a cada request
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
+function getCached(key: string) {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  
+  const age = Date.now() - entry.timestamp;
+  if (age > CACHE_TTL) {
+    cache.delete(key);
+    return null;
+  }
+  
+  return entry.data;
+}
+
+function setCache(key: string, data: any) {
+  cache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+}
+
 // Função para buscar TODOS os dados com paginação (contorna limite de 1000 do Supabase)
 async function fetchAllData(tableName: string, columns: string, filters: any = {}) {
   let allData: any[] = [];
@@ -104,27 +133,38 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const segmento = searchParams.get('segmento') || 'todos';
 
-    console.log(`🔍 CRM: Iniciando análise RFM baseada em CONSUMO REAL (ContaHub)...`);
+    // Verificar cache primeiro (evita reprocessar 90k registros a cada clique)
+    const cacheKey = `crm_segmentacao_${barId}`;
+    const cached = getCached(cacheKey);
 
-    // Buscar APENAS ContaHub - ÚNICA fonte com dados REAIS de consumo
-    // Sympla/GetIn não têm dados de quanto o cliente gastou no bar
-    const contahubDataRaw = await fetchAllData(
-      'contahub_pagamentos', 
-      'cli, cliente, vr_pagamentos, dt_transacao', 
-      {
-        eq_bar_id: barId
-      }
-    );
+    let clientesSegmentados;
+    let stats;
 
-    // Filtrar clientes válidos (remover null e vazio)
-    const contahubData = contahubDataRaw.filter(item => 
-      item.cliente && item.cliente.trim() !== ''
-    );
+    if (cached) {
+      console.log(`⚡ Cache HIT: Usando dados em cache (${cached.clientes.length} clientes)`);
+      clientesSegmentados = cached.clientes;
+      stats = cached.stats;
+    } else {
+      console.log(`🔍 Cache MISS: Processando dados do ContaHub...`);
 
-    console.log(`💳 ContaHub: ${contahubData.length} pagamentos válidos (de ${contahubDataRaw.length} totais)`);
+      // Buscar APENAS ContaHub - ÚNICA fonte com dados REAIS de consumo
+      const contahubDataRaw = await fetchAllData(
+        'contahub_pagamentos', 
+        'cli, cliente, vr_pagamentos, dt_transacao', 
+        {
+          eq_bar_id: barId
+        }
+      );
 
-    // 5. Processar APENAS ContaHub - dados REAIS de consumo
-    const clientesMap = new Map<string, ClienteUnificado>();
+      // Filtrar clientes válidos (remover null e vazio)
+      const contahubData = contahubDataRaw.filter(item => 
+        item.cliente && item.cliente.trim() !== ''
+      );
+
+      console.log(`💳 ContaHub: ${contahubData.length} pagamentos válidos (de ${contahubDataRaw.length} totais)`);
+
+      // 5. Processar APENAS ContaHub - dados REAIS de consumo
+      const clientesMap = new Map<string, ClienteUnificado>();
     
     console.log(`💳 Processando ${contahubData.length} pagamentos do ContaHub...`);
     
@@ -192,29 +232,40 @@ export async function GET(request: NextRequest) {
 
     console.log(`👥 Total de clientes únicos com dados REAIS: ${clientesMap.size}`);
 
-    // 7. Calcular scores RFM
+    // 7. Calcular scores RFM (MELHORADO - usa percentis em vez de indexOf)
     const clientes = Array.from(clientesMap.values());
     
-    // Calcular quintis para cada métrica
+    // Ordenar métricas
     const recencies = clientes.map(c => c.dias_desde_ultima_visita).sort((a, b) => a - b);
-    const frequencies = clientes.map(c => c.total_visitas).sort((a, b) => b - a); // Maior é melhor
-    const monetaries = clientes.map(c => c.total_gasto).sort((a, b) => b - a); // Maior é melhor
+    const frequencies = clientes.map(c => c.total_visitas).sort((a, b) => a - b);
+    const monetaries = clientes.map(c => c.total_gasto).sort((a, b) => a - b);
 
+    // Função de score baseada em percentis (mais preciso)
     const getScore = (value: number, sortedArray: number[], reverse: boolean = false) => {
-      const quintil = sortedArray.length / 5;
-      const index = sortedArray.indexOf(value);
+      const total = sortedArray.length;
+      
+      // Encontrar posição do valor no array ordenado
+      let position = 0;
+      for (let i = 0; i < sortedArray.length; i++) {
+        if (sortedArray[i] <= value) position = i;
+        else break;
+      }
+      
+      const percentil = position / total;
       
       if (reverse) {
-        if (index < quintil) return 5;
-        if (index < quintil * 2) return 4;
-        if (index < quintil * 3) return 3;
-        if (index < quintil * 4) return 2;
+        // Para Recency: menor valor = melhor score
+        if (percentil <= 0.2) return 5;
+        if (percentil <= 0.4) return 4;
+        if (percentil <= 0.6) return 3;
+        if (percentil <= 0.8) return 2;
         return 1;
       } else {
-        if (index < quintil) return 1;
-        if (index < quintil * 2) return 2;
-        if (index < quintil * 3) return 3;
-        if (index < quintil * 4) return 4;
+        // Para Frequency/Monetary: maior valor = melhor score
+        if (percentil <= 0.2) return 1;
+        if (percentil <= 0.4) return 2;
+        if (percentil <= 0.6) return 3;
+        if (percentil <= 0.8) return 4;
         return 5;
       }
     };
@@ -314,29 +365,34 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // 9. Ordenar por prioridade e RFM total
-    clientesSegmentados.sort((a, b) => {
-      if (a.prioridade !== b.prioridade) return b.prioridade - a.prioridade;
-      return b.rfm_total - a.rfm_total;
-    });
+      // 9. Ordenar por prioridade e RFM total
+      clientesSegmentados.sort((a, b) => {
+        if (a.prioridade !== b.prioridade) return b.prioridade - a.prioridade;
+        return b.rfm_total - a.rfm_total;
+      });
 
-    // 10. Filtrar por segmento se especificado
+      // 11. Estatísticas gerais (sempre retorna o total)
+      stats = {
+        total_clientes: clientesSegmentados.length,
+        vips: clientesSegmentados.filter(c => c.segmento.includes('VIP')).length,
+        em_risco: clientesSegmentados.filter(c => c.segmento.includes('Risco')).length,
+        fieis: clientesSegmentados.filter(c => c.segmento.includes('Fiéis')).length,
+        novos: clientesSegmentados.filter(c => c.segmento.includes('Novos')).length,
+        inativos: clientesSegmentados.filter(c => c.segmento.includes('Inativos')).length,
+        regulares: clientesSegmentados.filter(c => c.segmento.includes('Regulares')).length,
+        potencial: clientesSegmentados.filter(c => c.segmento.includes('Potencial')).length,
+      };
+
+      // Salvar no cache (5 minutos)
+      setCache(cacheKey, { clientes: clientesSegmentados, stats });
+      console.log(`💾 Cache SAVED: ${clientesSegmentados.length} clientes processados`);
+    }
+
+    // 10. Filtrar por segmento se especificado (APÓS o cache)
     let clientesFiltrados = clientesSegmentados;
     if (segmento !== 'todos') {
       clientesFiltrados = clientesSegmentados.filter(c => c.segmento === segmento);
     }
-
-    // 11. Estatísticas gerais (sempre retorna o total)
-    const stats = {
-      total_clientes: clientesSegmentados.length,
-      vips: clientesSegmentados.filter(c => c.segmento.includes('VIP')).length,
-      em_risco: clientesSegmentados.filter(c => c.segmento.includes('Risco')).length,
-      fieis: clientesSegmentados.filter(c => c.segmento.includes('Fiéis')).length,
-      novos: clientesSegmentados.filter(c => c.segmento.includes('Novos')).length,
-      inativos: clientesSegmentados.filter(c => c.segmento.includes('Inativos')).length,
-      regulares: clientesSegmentados.filter(c => c.segmento.includes('Regulares')).length,
-      potencial: clientesSegmentados.filter(c => c.segmento.includes('Potencial')).length,
-    };
 
     // 12. Aplicar paginação
     const totalClientes = clientesFiltrados.length;

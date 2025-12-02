@@ -8,6 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { 
   Users, 
   TrendingUp, 
   AlertTriangle,
@@ -70,6 +76,38 @@ interface Paginacao {
   totalPages: number;
   hasMore: boolean;
 }
+
+// Explicações dos segmentos RFM para tooltips
+const SEGMENT_TOOLTIPS = {
+  vips: {
+    title: '💎 VIP Champions',
+    description: 'Clientes TOP que vieram recentemente, frequentam bastante e gastam muito. Score RFM alto em todas métricas (R≥4, F≥4, M≥4). São seus melhores clientes!'
+  },
+  fieis: {
+    title: '⭐ Clientes Fiéis',
+    description: 'Frequentadores assíduos com boa recência. Vêm regularmente e mantêm engajamento. Score de recência alto (R≥4) e frequência/monetário médio-alto.'
+  },
+  potencial: {
+    title: '💰 Grande Potencial',
+    description: 'Gastam bem mas vêm pouco. Têm potencial para aumentar frequência. Score monetário alto (M≥3) mas frequência baixa (F≤2).'
+  },
+  em_risco: {
+    title: '⚠️ Em Risco (Churn)',
+    description: 'URGENTE! Eram clientes frequentes mas sumiram. Não vêm há muito tempo (R≤2) mas tinham frequência alta antes (F≥4). Precisam de reconquista!'
+  },
+  novos: {
+    title: '🌱 Novos Promissores',
+    description: 'Primeira ou segunda visita recente. Vieram há pouco (R≥4) mas ainda com baixa frequência (F≤2). Foco em onboarding e fidelização.'
+  },
+  inativos: {
+    title: '😴 Inativos',
+    description: 'Não vêm há muito tempo, baixa frequência e baixo gasto. Scores baixos em todas métricas (R≤2, F≤2, M≤2). Considerar campanhas de baixo custo.'
+  },
+  regulares: {
+    title: '📊 Regulares',
+    description: 'Clientes com comportamento médio. Não se destacam em nenhuma métrica específica mas mantêm presença regular. Potencial de upgrade.'
+  }
+};
 
 export default function CRMInteligentePage() {
   const { setPageTitle } = usePageTitle();
@@ -227,87 +265,153 @@ export default function CRMInteligentePage() {
 
         {/* Estatísticas */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <Crown className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-2" />
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{stats.vips}</p>
-                  <p className="text-xs text-purple-700 dark:text-purple-300 text-center">VIPs</p>
-                </div>
-              </CardContent>
-            </Card>
+          <TooltipProvider>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+              {/* VIP Champions */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <Crown className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-2" />
+                        <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{stats.vips}</p>
+                        <p className="text-xs text-purple-700 dark:text-purple-300 text-center">VIPs</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-semibold mb-1">{SEGMENT_TOOLTIPS.vips.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{SEGMENT_TOOLTIPS.vips.description}</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <Star className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-2" />
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{stats.fieis}</p>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 text-center">Fiéis</p>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Fiéis */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <Star className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-2" />
+                        <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{stats.fieis}</p>
+                        <p className="text-xs text-blue-700 dark:text-blue-300 text-center">Fiéis</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-semibold mb-1">{SEGMENT_TOOLTIPS.fieis.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{SEGMENT_TOOLTIPS.fieis.description}</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <Zap className="w-8 h-8 text-green-600 dark:text-green-400 mb-2" />
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">{stats.potencial}</p>
-                  <p className="text-xs text-green-700 dark:text-green-300 text-center">Potencial</p>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Potencial */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <Zap className="w-8 h-8 text-green-600 dark:text-green-400 mb-2" />
+                        <p className="text-2xl font-bold text-green-900 dark:text-green-100">{stats.potencial}</p>
+                        <p className="text-xs text-green-700 dark:text-green-300 text-center">Potencial</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-semibold mb-1">{SEGMENT_TOOLTIPS.potencial.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{SEGMENT_TOOLTIPS.potencial.description}</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <AlertTriangle className="w-8 h-8 text-orange-600 dark:text-orange-400 mb-2" />
-                  <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">{stats.em_risco}</p>
-                  <p className="text-xs text-orange-700 dark:text-orange-300 text-center">Em Risco</p>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Em Risco */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <AlertTriangle className="w-8 h-8 text-orange-600 dark:text-orange-400 mb-2" />
+                        <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">{stats.em_risco}</p>
+                        <p className="text-xs text-orange-700 dark:text-orange-300 text-center">Em Risco</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-semibold mb-1">{SEGMENT_TOOLTIPS.em_risco.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{SEGMENT_TOOLTIPS.em_risco.description}</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Card className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 border-teal-200 dark:border-teal-700">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <Target className="w-8 h-8 text-teal-600 dark:text-teal-400 mb-2" />
-                  <p className="text-2xl font-bold text-teal-900 dark:text-teal-100">{stats.novos}</p>
-                  <p className="text-xs text-teal-700 dark:text-teal-300 text-center">Novos</p>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Novos */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 border-teal-200 dark:border-teal-700 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <Target className="w-8 h-8 text-teal-600 dark:text-teal-400 mb-2" />
+                        <p className="text-2xl font-bold text-teal-900 dark:text-teal-100">{stats.novos}</p>
+                        <p className="text-xs text-teal-700 dark:text-teal-300 text-center">Novos</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-semibold mb-1">{SEGMENT_TOOLTIPS.novos.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{SEGMENT_TOOLTIPS.novos.description}</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 border-indigo-200 dark:border-indigo-700">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <Activity className="w-8 h-8 text-indigo-600 dark:text-indigo-400 mb-2" />
-                  <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{stats.regulares}</p>
-                  <p className="text-xs text-indigo-700 dark:text-indigo-300 text-center">Regulares</p>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Regulares */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 border-indigo-200 dark:border-indigo-700 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <Activity className="w-8 h-8 text-indigo-600 dark:text-indigo-400 mb-2" />
+                        <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{stats.regulares}</p>
+                        <p className="text-xs text-indigo-700 dark:text-indigo-300 text-center">Regulares</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-semibold mb-1">{SEGMENT_TOOLTIPS.regulares.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{SEGMENT_TOOLTIPS.regulares.description}</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Card className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/20 dark:to-gray-600/20 border-gray-200 dark:border-gray-600">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <UserX className="w-8 h-8 text-gray-600 dark:text-gray-400 mb-2" />
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.inativos}</p>
-                  <p className="text-xs text-gray-700 dark:text-gray-300 text-center">Inativos</p>
-                </div>
-              </CardContent>
-            </Card>
+              {/* Inativos */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/20 dark:to-gray-600/20 border-gray-200 dark:border-gray-600 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col items-center">
+                        <UserX className="w-8 h-8 text-gray-600 dark:text-gray-400 mb-2" />
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.inativos}</p>
+                        <p className="text-xs text-gray-700 dark:text-gray-300 text-center">Inativos</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-semibold mb-1">{SEGMENT_TOOLTIPS.inativos.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{SEGMENT_TOOLTIPS.inativos.description}</p>
+                </TooltipContent>
+              </Tooltip>
 
-            <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700/20 dark:to-slate-600/20 border-slate-200 dark:border-slate-600">
-              <CardContent className="p-4">
-                <div className="flex flex-col items-center">
-                  <Users className="w-8 h-8 text-slate-600 dark:text-slate-400 mb-2" />
-                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{stats.total_clientes}</p>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 text-center">Total</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              {/* Total (sem tooltip) */}
+              <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700/20 dark:to-slate-600/20 border-slate-200 dark:border-slate-600">
+                <CardContent className="p-4">
+                  <div className="flex flex-col items-center">
+                    <Users className="w-8 h-8 text-slate-600 dark:text-slate-400 mb-2" />
+                    <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{stats.total_clientes}</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 text-center">Total</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TooltipProvider>
         )}
 
         {/* Filtros e Ações */}
