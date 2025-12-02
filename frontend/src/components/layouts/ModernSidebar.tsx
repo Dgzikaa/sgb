@@ -330,6 +330,13 @@ const defaultSidebarItems: SidebarItem[] = [
       permission: 'configuracoes',
       subItems: [
         {
+          icon: Users,
+          label: 'Usuários',
+          href: '/configuracoes/usuarios',
+          description: 'Gerenciar usuários e permissões do sistema',
+          permission: 'configuracoes',
+        },
+        {
           icon: ChefHat,
           label: 'Fichas Técnicas',
           href: '/configuracoes/fichas-tecnicas',

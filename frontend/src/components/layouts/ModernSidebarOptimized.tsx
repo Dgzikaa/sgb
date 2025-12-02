@@ -121,6 +121,7 @@ const defaultSidebarItems: SidebarItem[] = [
     color: 'text-gray-600 dark:text-gray-400',
     permission: 'configuracoes',
     subItems: [
+      { icon: Users, label: 'Usuários', href: '/configuracoes/usuarios', permission: 'configuracoes' },
       { icon: ChefHat, label: 'Fichas Técnicas', href: '/configuracoes/fichas-tecnicas', permission: 'operacoes' },
       { icon: CheckSquare, label: 'Checklists', href: '/configuracoes/checklists', permission: 'configuracoes' },
       { icon: Target, label: 'Metas', href: '/configuracoes/desempenho', permission: 'configuracoes' },

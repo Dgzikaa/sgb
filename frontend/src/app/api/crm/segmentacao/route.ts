@@ -12,14 +12,23 @@ const supabase = createClient(
 interface CacheEntry {
   data: any;
   timestamp: number;
+  version: number; // Para invalidar cache quando mudar lógica
 }
 
 const cache = new Map<string, CacheEntry>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+const CACHE_VERSION = 2; // Incrementar quando mudar lógica RFM
 
 function getCached(key: string) {
   const entry = cache.get(key);
   if (!entry) return null;
+  
+  // Invalidar se versão mudou
+  if (entry.version !== CACHE_VERSION) {
+    cache.delete(key);
+    console.log(`🔄 Cache invalidado (versão ${entry.version} → ${CACHE_VERSION})`);
+    return null;
+  }
   
   const age = Date.now() - entry.timestamp;
   if (age > CACHE_TTL) {
@@ -33,7 +42,8 @@ function getCached(key: string) {
 function setCache(key: string, data: any) {
   cache.set(key, {
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    version: CACHE_VERSION
   });
 }
 
@@ -282,7 +292,8 @@ export async function GET(request: NextRequest) {
       let acoes_sugeridas: string[] = [];
       let prioridade = 0;
 
-      // Segmentação inteligente
+      // Segmentação RFM (ordem importa!)
+      // 1. VIP Champions - TOP em TUDO
       if (r_score >= 4 && f_score >= 4 && m_score >= 4) {
         segmento = '💎 VIP Champions';
         cor = 'purple';
@@ -292,25 +303,9 @@ export async function GET(request: NextRequest) {
           'Convite para eventos VIP',
           'Benefícios e recompensas especiais'
         ];
-      } else if (r_score >= 4 && (f_score >= 3 || m_score >= 3)) {
-        segmento = '⭐ Clientes Fiéis';
-        cor = 'blue';
-        prioridade = 4;
-        acoes_sugeridas = [
-          'Manter engajamento com novidades',
-          'Oferecer programa de indicação',
-          'Recompensas por frequência'
-        ];
-      } else if (r_score >= 3 && f_score <= 2 && m_score >= 3) {
-        segmento = '💰 Grande Potencial';
-        cor = 'green';
-        prioridade = 4;
-        acoes_sugeridas = [
-          'Incentivo para aumentar frequência',
-          'Benefícios por volume de gasto',
-          'Campanhas de reativação'
-        ];
-      } else if (r_score <= 2 && f_score >= 4) {
+      }
+      // 2. Em Risco - Eram bons mas sumiram (URGENTE!)
+      else if (r_score <= 2 && f_score >= 3) {
         segmento = '⚠️ Em Risco (Churn)';
         cor = 'orange';
         prioridade = 5;
@@ -320,7 +315,31 @@ export async function GET(request: NextRequest) {
           'Promoção exclusiva de retorno',
           'Pesquisa de satisfação'
         ];
-      } else if (r_score >= 4 && f_score <= 2) {
+      }
+      // 3. Clientes Fiéis - Vêm com frequência
+      else if (r_score >= 3 && f_score >= 4) {
+        segmento = '⭐ Clientes Fiéis';
+        cor = 'blue';
+        prioridade = 4;
+        acoes_sugeridas = [
+          'Manter engajamento com novidades',
+          'Oferecer programa de indicação',
+          'Recompensas por frequência'
+        ];
+      }
+      // 4. Grande Potencial - Gastam bem mas vêm pouco
+      else if (m_score >= 4 && f_score <= 2) {
+        segmento = '💰 Grande Potencial';
+        cor = 'green';
+        prioridade = 4;
+        acoes_sugeridas = [
+          'Incentivo para aumentar frequência',
+          'Benefícios por volume de gasto',
+          'Campanhas de reativação'
+        ];
+      }
+      // 5. Novos Promissores - Recentes com baixa frequência
+      else if (r_score >= 4 && f_score <= 2) {
         segmento = '🌱 Novos Promissores';
         cor = 'teal';
         prioridade = 3;
@@ -329,7 +348,9 @@ export async function GET(request: NextRequest) {
           'Incentivo para segunda visita',
           'Apresentar experiências do bar'
         ];
-      } else if (r_score <= 2 && f_score <= 2 && m_score <= 2) {
+      }
+      // 6. Inativos - Sumiram há muito tempo
+      else if (r_score <= 2 && f_score <= 2) {
         segmento = '😴 Inativos';
         cor = 'gray';
         prioridade = 1;
@@ -337,7 +358,9 @@ export async function GET(request: NextRequest) {
           'Considerar remoção da base ativa',
           'Campanha de baixo custo (email/redes)',
         ];
-      } else {
+      }
+      // 7. Regulares - O resto
+      else {
         segmento = '📊 Regulares';
         cor = 'indigo';
         prioridade = 2;
@@ -392,6 +415,27 @@ export async function GET(request: NextRequest) {
     let clientesFiltrados = clientesSegmentados || [];
     if (segmento !== 'todos' && clientesSegmentados) {
       clientesFiltrados = clientesSegmentados.filter(c => c.segmento === segmento);
+      
+      // Ordenação inteligente por segmento
+      if (segmento.includes('VIP') || segmento.includes('Fiéis')) {
+        // VIPs e Fiéis: ordenar por RFM total (melhores primeiro)
+        clientesFiltrados.sort((a, b) => b.rfm_total - a.rfm_total);
+      } else if (segmento.includes('Risco')) {
+        // Em Risco: ordenar por dias desde última visita (mais urgente primeiro)
+        clientesFiltrados.sort((a, b) => b.dias_desde_ultima_visita - a.dias_desde_ultima_visita);
+      } else if (segmento.includes('Potencial')) {
+        // Potencial: ordenar por gasto total (maior potencial primeiro)
+        clientesFiltrados.sort((a, b) => b.total_gasto - a.total_gasto);
+      } else if (segmento.includes('Novos')) {
+        // Novos: ordenar por recência (mais recente primeiro)
+        clientesFiltrados.sort((a, b) => a.dias_desde_ultima_visita - b.dias_desde_ultima_visita);
+      } else if (segmento.includes('Inativos')) {
+        // Inativos: ordenar por dias inativos (mais tempo primeiro)
+        clientesFiltrados.sort((a, b) => b.dias_desde_ultima_visita - a.dias_desde_ultima_visita);
+      } else {
+        // Regulares: ordenar por RFM
+        clientesFiltrados.sort((a, b) => b.rfm_total - a.rfm_total);
+      }
     }
 
     // Validação de segurança
