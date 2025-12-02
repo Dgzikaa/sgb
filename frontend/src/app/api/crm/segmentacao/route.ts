@@ -104,180 +104,74 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const segmento = searchParams.get('segmento') || 'todos';
 
-    console.log(`🔍 CRM: Iniciando análise de segmentação (Página ${page}, Limite ${limit})...`);
+    console.log(`🔍 CRM: Iniciando análise RFM baseada em CONSUMO REAL (ContaHub)...`);
 
-    // Buscar TODOS os dados usando paginação automática
-    const [symplaData, getinData, eventosData, contahubData] = await Promise.all([
-      // 1. Sympla
-      fetchAllData('sympla_participantes', 'nome_completo, email, pedido_id', {
-        eq_bar_id: barId,
-        eq_status_pedido: 'APPROVED'
-      }),
-      
-      // 2. GetIn
-      fetchAllData('getin_reservas', 'customer_name, customer_email, customer_phone, reservation_date, status', {
-        eq_bar_id: barId,
-        in_status: ['seated', 'confirmed']
-      }),
-      
-      // 3. Eventos
-      fetchAllData('eventos_base', 'data_evento, real_r, cl_real', {
-        eq_bar_id: barId,
-        eq_ativo: true
-      }),
-      
-      // 4. ContaHub (DADOS REAIS!)
-      fetchAllData('contahub_pagamentos', 'cli, cliente, vr_pagamentos, dt_transacao', {
+    // Buscar APENAS ContaHub - ÚNICA fonte com dados REAIS de consumo
+    // Sympla/GetIn não têm dados de quanto o cliente gastou no bar
+    const contahubData = await fetchAllData(
+      'contahub_pagamentos', 
+      'cli, cliente, vr_pagamentos, dt_transacao', 
+      {
         eq_bar_id: barId,
         not_is_cliente: null,
         not_eq_cliente: ''
-      })
-    ]);
+      }
+    );
 
-    console.log(`📊 Dados carregados: Sympla=${symplaData.length}, GetIn=${getinData.length}, ContaHub=${contahubData.length}`);
+    console.log(`💳 ContaHub: ${contahubData.length} pagamentos carregados`);
 
-    // 5. Criar mapa de clientes unificados
+    // 5. Processar APENAS ContaHub - dados REAIS de consumo
     const clientesMap = new Map<string, ClienteUnificado>();
-
-    // Processar Sympla
-    if (symplaData) {
-      for (const item of symplaData) {
-        const nome = item.nome_completo?.trim();
-        const email = item.email?.trim().toLowerCase();
-        
-        if (!nome) continue;
-
-        const id = email || nome.toLowerCase();
-        
-        if (!clientesMap.has(id)) {
-          clientesMap.set(id, {
-            identificador: id,
-            nome,
-            email,
-            total_visitas: 0,
-            total_gasto: 0,
-            ultima_visita: '',
-            primeira_visita: '',
-            dias_desde_ultima_visita: 0,
-            ticket_medio: 0,
-            frequencia_dias: 0
-          });
-        }
-
-        const cliente = clientesMap.get(id)!;
-        cliente.total_visitas++;
-      }
-    }
-
-    // Processar GetIn
-    if (getinData) {
-      for (const item of getinData) {
-        const nome = item.customer_name?.trim();
-        const email = item.customer_email?.trim().toLowerCase();
-        const telefone = item.customer_phone?.trim();
-        
-        if (!nome) continue;
-
-        const id = email || telefone || nome.toLowerCase();
-        
-        if (!clientesMap.has(id)) {
-          clientesMap.set(id, {
-            identificador: id,
-            nome,
-            email,
-            telefone,
-            total_visitas: 0,
-            total_gasto: 0,
-            ultima_visita: '',
-            primeira_visita: '',
-            dias_desde_ultima_visita: 0,
-            ticket_medio: 0,
-            frequencia_dias: 0
-          });
-        }
-
-        const cliente = clientesMap.get(id)!;
-        cliente.total_visitas++;
-        
-        if (item.reservation_date) {
-          if (!cliente.ultima_visita || item.reservation_date > cliente.ultima_visita) {
-            cliente.ultima_visita = item.reservation_date;
-          }
-          if (!cliente.primeira_visita || item.reservation_date < cliente.primeira_visita) {
-            cliente.primeira_visita = item.reservation_date;
-          }
-        }
-      }
-    }
-
-    // Processar ContaHub (dados REAIS de pagamentos)
-    if (contahubData) {
-      console.log(`💳 Processando ${contahubData.length} pagamentos do ContaHub...`);
+    
+    console.log(`💳 Processando ${contahubData.length} pagamentos do ContaHub...`);
+    
+    for (const item of contahubData) {
+      const nome = item.cliente?.trim();
       
-      for (const item of contahubData) {
-        const nome = item.cliente?.trim();
-        if (!nome || nome === 'MESA' || nome === 'SEM NOME') continue;
+      // Filtrar clientes inválidos
+      if (!nome || nome === 'MESA' || nome === 'SEM NOME' || nome === 'BALCAO') continue;
 
-        const id = `contahub_${item.cli || nome.toLowerCase()}`;
-        
-        if (!clientesMap.has(id)) {
-          clientesMap.set(id, {
-            identificador: id,
-            nome,
-            total_visitas: 0,
-            total_gasto: 0,
-            ultima_visita: '',
-            primeira_visita: '',
-            dias_desde_ultima_visita: 0,
-            ticket_medio: 0,
-            frequencia_dias: 0
-          });
-        }
-
-        const cliente = clientesMap.get(id)!;
-        cliente.total_visitas++;
-        cliente.total_gasto += parseFloat(item.vr_pagamentos || '0');
-        
-        if (item.dt_transacao) {
-          const dataTransacao = item.dt_transacao.toString();
-          
-          if (!cliente.ultima_visita || dataTransacao > cliente.ultima_visita) {
-            cliente.ultima_visita = dataTransacao;
-          }
-          if (!cliente.primeira_visita || dataTransacao < cliente.primeira_visita) {
-            cliente.primeira_visita = dataTransacao;
-          }
-        }
+      // Usar ID do cliente como identificador único
+      const id = `cli_${item.cli}`;
+      
+      if (!clientesMap.has(id)) {
+        clientesMap.set(id, {
+          identificador: id,
+          nome,
+          total_visitas: 0,
+          total_gasto: 0,
+          ultima_visita: '',
+          primeira_visita: '',
+          dias_desde_ultima_visita: 0,
+          ticket_medio: 0,
+          frequencia_dias: 0
+        });
       }
 
-      // Atualizar ticket médio dos clientes ContaHub
-      clientesMap.forEach(cliente => {
-        if (cliente.identificador.startsWith('contahub_') && cliente.total_visitas > 0) {
-          cliente.ticket_medio = cliente.total_gasto / cliente.total_visitas;
-        }
-      });
-    }
-
-    // 6. Enriquecer com dados estimados SOMENTE para Sympla/GetIn (que não têm valor real)
-    if (eventosData) {
-      const gastoPorEvento = new Map<string, number>();
+      const cliente = clientesMap.get(id)!;
+      cliente.total_visitas++;
+      cliente.total_gasto += parseFloat(item.vr_pagamentos || '0');
       
-      eventosData.forEach(evento => {
-        const ticketMedio = evento.cl_real > 0 ? evento.real_r / evento.cl_real : 0;
-        gastoPorEvento.set(evento.data_evento, ticketMedio);
-      });
-
-      // Distribuir gastos proporcionalmente APENAS para quem não tem gasto real
-      clientesMap.forEach(cliente => {
-        // Se já tem gasto real (ContaHub), não sobrescrever
-        if (cliente.total_gasto === 0) {
-          cliente.total_gasto = cliente.total_visitas * 150; // Estimativa inicial
-          cliente.ticket_medio = cliente.total_visitas > 0 ? cliente.total_gasto / cliente.total_visitas : 0;
+      if (item.dt_transacao) {
+        const dataTransacao = item.dt_transacao.toString();
+        
+        if (!cliente.ultima_visita || dataTransacao > cliente.ultima_visita) {
+          cliente.ultima_visita = dataTransacao;
         }
-      });
+        if (!cliente.primeira_visita || dataTransacao < cliente.primeira_visita) {
+          cliente.primeira_visita = dataTransacao;
+        }
+      }
     }
 
-    // 7. Calcular métricas temporais
+    // Calcular ticket médio para cada cliente
+    clientesMap.forEach(cliente => {
+      if (cliente.total_visitas > 0) {
+        cliente.ticket_medio = cliente.total_gasto / cliente.total_visitas;
+      }
+    });
+
+    // 6. Calcular métricas temporais
     const hoje = new Date();
     clientesMap.forEach(cliente => {
       if (cliente.ultima_visita) {
@@ -293,9 +187,9 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    console.log(`👥 Total de clientes únicos unificados: ${clientesMap.size}`);
+    console.log(`👥 Total de clientes únicos com dados REAIS: ${clientesMap.size}`);
 
-    // 8. Calcular scores RFM
+    // 7. Calcular scores RFM
     const clientes = Array.from(clientesMap.values());
     
     // Calcular quintis para cada métrica
@@ -322,7 +216,7 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    // 9. Segmentar clientes
+    // 8. Segmentar clientes
     const clientesSegmentados = clientes.map(cliente => {
       const r_score = getScore(cliente.dias_desde_ultima_visita, recencies, true); // Menor recência = melhor
       const f_score = getScore(cliente.total_visitas, frequencies);
@@ -417,19 +311,19 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // 10. Ordenar por prioridade e RFM total
+    // 9. Ordenar por prioridade e RFM total
     clientesSegmentados.sort((a, b) => {
       if (a.prioridade !== b.prioridade) return b.prioridade - a.prioridade;
       return b.rfm_total - a.rfm_total;
     });
 
-    // 11. Filtrar por segmento se especificado
+    // 10. Filtrar por segmento se especificado
     let clientesFiltrados = clientesSegmentados;
     if (segmento !== 'todos') {
       clientesFiltrados = clientesSegmentados.filter(c => c.segmento === segmento);
     }
 
-    // 12. Estatísticas gerais (sempre retorna o total)
+    // 11. Estatísticas gerais (sempre retorna o total)
     const stats = {
       total_clientes: clientesSegmentados.length,
       vips: clientesSegmentados.filter(c => c.segmento.includes('VIP')).length,
@@ -441,7 +335,7 @@ export async function GET(request: NextRequest) {
       potencial: clientesSegmentados.filter(c => c.segmento.includes('Potencial')).length,
     };
 
-    // 13. Aplicar paginação
+    // 12. Aplicar paginação
     const totalClientes = clientesFiltrados.length;
     const totalPages = Math.ceil(totalClientes / limit);
     const startIndex = (page - 1) * limit;
