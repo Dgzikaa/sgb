@@ -132,14 +132,34 @@ export async function GET(request: NextRequest) {
       .eq('ativo', true)
       .order('data_evento', { ascending: true });
 
-    const [{ data: eventos1, error: error1 }, { data: eventos2, error: error2 }] = await Promise.all([
+    // Buscar clientes por período
+    const queryClientes1 = supabase.rpc('get_clientes_periodo', {
+      p_bar_id: barId,
+      p_data_inicio: periodo1Inicio,
+      p_data_fim: periodo1Fim
+    });
+
+    const queryClientes2 = supabase.rpc('get_clientes_periodo', {
+      p_bar_id: barId,
+      p_data_inicio: periodo2Inicio,
+      p_data_fim: periodo2Fim
+    });
+
+    const [
+      { data: eventos1, error: error1 }, 
+      { data: eventos2, error: error2 },
+      { data: clientes1, error: errorClientes1 },
+      { data: clientes2, error: errorClientes2 }
+    ] = await Promise.all([
       query1,
-      query2
+      query2,
+      queryClientes1,
+      queryClientes2
     ]);
 
-    if (error1 || error2) {
-      console.error('❌ Erro ao buscar eventos:', error1 || error2);
-      return NextResponse.json({ error: 'Erro ao buscar eventos' }, { status: 500 });
+    if (error1 || error2 || errorClientes1 || errorClientes2) {
+      console.error('❌ Erro ao buscar dados:', error1 || error2 || errorClientes1 || errorClientes2);
+      return NextResponse.json({ error: 'Erro ao buscar dados' }, { status: 500 });
     }
 
     // Filtrar por couvert
@@ -156,24 +176,26 @@ export async function GET(request: NextRequest) {
     const eventosFiltrados2 = filtrarCouvert(eventos2 || []);
 
     // Calcular totais
-    const calcularTotais = (eventos: any[]) => {
+    const calcularTotais = (eventos: any[], clientesData: any) => {
       const faturamento = eventos.reduce((sum, e) => sum + (e.real_r || 0), 0);
       const clientes = eventos.reduce((sum, e) => sum + (e.cl_real || 0), 0);
-      const total_entradas = eventos.reduce((sum, e) => sum + (e.te_real || 0), 0);
-      const total_bebidas = eventos.reduce((sum, e) => sum + (e.tb_real || 0), 0);
       const ticket_medio = clientes > 0 ? faturamento / clientes : 0;
+
+      // Dados de clientes novos e retornantes
+      const novosClientes = clientesData?.novos || 0;
+      const clientesRetornantes = clientesData?.retornantes || 0;
 
       return {
         faturamento,
         clientes,
         ticket_medio,
-        total_entradas,
-        total_bebidas
+        novos_clientes: novosClientes,
+        clientes_retornantes: clientesRetornantes
       };
     };
 
-    const totais1 = calcularTotais(eventosFiltrados1);
-    const totais2 = calcularTotais(eventosFiltrados2);
+    const totais1 = calcularTotais(eventosFiltrados1, clientes1);
+    const totais2 = calcularTotais(eventosFiltrados2, clientes2);
 
     // Calcular variações
     const calcularVariacao = (atual: number, anterior: number) => {
@@ -185,8 +207,8 @@ export async function GET(request: NextRequest) {
       faturamento_variacao: calcularVariacao(totais1.faturamento, totais2.faturamento),
       clientes_variacao: calcularVariacao(totais1.clientes, totais2.clientes),
       ticket_medio_variacao: calcularVariacao(totais1.ticket_medio, totais2.ticket_medio),
-      entradas_variacao: calcularVariacao(totais1.total_entradas, totais2.total_entradas),
-      bebidas_variacao: calcularVariacao(totais1.total_bebidas, totais2.total_bebidas)
+      novos_clientes_variacao: calcularVariacao(totais1.novos_clientes, totais2.novos_clientes),
+      clientes_retornantes_variacao: calcularVariacao(totais1.clientes_retornantes, totais2.clientes_retornantes)
     };
 
     // Adicionar flag de couvert nos eventos

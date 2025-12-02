@@ -98,23 +98,23 @@ export async function verificarBarAberto(
     hoje.setHours(0, 0, 0, 0);
 
     if (dataVerificacao < hoje) {
-      // Data no passado - verificar movimento
+      // Data no passado - verificar movimento no ContaHub Analítico
       const { data: movimento, error: errorMovimento } = await supabase
-        .from('contahub_dados')
-        .select('total_vendas')
-        .eq('data', data)
-        .eq('bar_id', barId)
-        .maybeSingle();
+        .from('contahub_analitico')
+        .select('valorfinal')
+        .eq('trn_dtgerencial', data)
+        .eq('bar_id', barId);
 
       if (errorMovimento) {
         console.error('⚠️ Erro ao verificar movimento:', errorMovimento);
       }
 
-      if (movimento) {
-        const valorVendas = parseFloat(movimento.total_vendas || '0');
+      if (movimento && movimento.length > 0) {
+        // Somar todos os valores de venda do dia
+        const valorVendas = movimento.reduce((sum, item) => sum + parseFloat(item.valorfinal || '0'), 0);
         const temMovimento = valorVendas > 0;
         
-        console.log(`💰 Movimento detectado: ${data} = R$ ${valorVendas.toFixed(2)}`);
+        console.log(`💰 Movimento detectado: ${data} = R$ ${valorVendas.toFixed(2)} (${movimento.length} transações)`);
         
         const resultado = {
           aberto: temMovimento,
@@ -204,21 +204,24 @@ export async function verificarMultiplasDatas(
       (registros || []).map(r => [r.data, r])
     );
 
-    // Buscar movimentações de uma vez
+    // Buscar movimentações de uma vez no ContaHub Analítico
     const { data: movimentacoes, error: errorMovimentacoes } = await supabase
-      .from('contahub_dados')
-      .select('data, total_vendas')
+      .from('contahub_analitico')
+      .select('trn_dtgerencial, valorfinal')
       .eq('bar_id', barId)
-      .in('data', datas);
+      .in('trn_dtgerencial', datas);
 
     if (errorMovimentacoes) {
       console.error('⚠️ Erro ao buscar movimentações:', errorMovimentacoes);
     }
 
-    // Criar map de movimentações
-    const movimentacoesMap = new Map(
-      (movimentacoes || []).map(m => [m.data, parseFloat(m.total_vendas || '0')])
-    );
+    // Criar map de movimentações (agrupando por data)
+    const movimentacoesMap = new Map<string, number>();
+    (movimentacoes || []).forEach(m => {
+      const data = m.trn_dtgerencial;
+      const valorAtual = movimentacoesMap.get(data) || 0;
+      movimentacoesMap.set(data, valorAtual + parseFloat(m.valorfinal || '0'));
+    });
 
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);

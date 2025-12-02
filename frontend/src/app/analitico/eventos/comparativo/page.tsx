@@ -17,7 +17,9 @@ import {
   RefreshCw,
   ArrowLeftRight,
   Filter,
-  CheckCircle2
+  CheckCircle2,
+  UserPlus,
+  RotateCcw
 } from 'lucide-react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
@@ -42,8 +44,8 @@ interface DadosComparativos {
       faturamento: number;
       clientes: number;
       ticket_medio: number;
-      total_entradas: number;
-      total_bebidas: number;
+      novos_clientes: number;
+      clientes_retornantes: number;
     };
   };
   periodo2: {
@@ -52,16 +54,16 @@ interface DadosComparativos {
       faturamento: number;
       clientes: number;
       ticket_medio: number;
-      total_entradas: number;
-      total_bebidas: number;
+      novos_clientes: number;
+      clientes_retornantes: number;
     };
   };
   comparacao: {
     faturamento_variacao: number;
     clientes_variacao: number;
     ticket_medio_variacao: number;
-    entradas_variacao: number;
-    bebidas_variacao: number;
+    novos_clientes_variacao: number;
+    clientes_retornantes_variacao: number;
   };
 }
 
@@ -301,46 +303,48 @@ export default function EventosComparativoPage() {
                 </CardContent>
               </Card>
 
-              {/* Entradas */}
+              {/* Novos Clientes */}
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                    🎫 Entradas
+                    <UserPlus className="w-4 h-4" />
+                    Novos Clientes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                    {formatCurrency(dados.periodo1.totais.total_entradas)}
+                    {dados.periodo1.totais.novos_clientes}
                   </div>
-                  <div className={`flex items-center gap-1 text-sm font-medium ${getVariacaoColor(dados.comparacao.entradas_variacao)}`}>
-                    {getVariacaoIcon(dados.comparacao.entradas_variacao)}
-                    {dados.comparacao.entradas_variacao > 0 ? '+' : ''}
-                    {dados.comparacao.entradas_variacao.toFixed(1)}%
+                  <div className={`flex items-center gap-1 text-sm font-medium ${getVariacaoColor(dados.comparacao.novos_clientes_variacao)}`}>
+                    {getVariacaoIcon(dados.comparacao.novos_clientes_variacao)}
+                    {dados.comparacao.novos_clientes_variacao > 0 ? '+' : ''}
+                    {dados.comparacao.novos_clientes_variacao.toFixed(1)}%
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    vs {formatCurrency(dados.periodo2.totais.total_entradas)}
+                    vs {dados.periodo2.totais.novos_clientes}
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Bebidas */}
+              {/* Clientes Retornantes */}
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                    🍺 Bebidas
+                    <RotateCcw className="w-4 h-4" />
+                    Clientes Retornantes
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                    {formatCurrency(dados.periodo1.totais.total_bebidas)}
+                    {dados.periodo1.totais.clientes_retornantes}
                   </div>
-                  <div className={`flex items-center gap-1 text-sm font-medium ${getVariacaoColor(dados.comparacao.bebidas_variacao)}`}>
-                    {getVariacaoIcon(dados.comparacao.bebidas_variacao)}
-                    {dados.comparacao.bebidas_variacao > 0 ? '+' : ''}
-                    {dados.comparacao.bebidas_variacao.toFixed(1)}%
+                  <div className={`flex items-center gap-1 text-sm font-medium ${getVariacaoColor(dados.comparacao.clientes_retornantes_variacao)}`}>
+                    {getVariacaoIcon(dados.comparacao.clientes_retornantes_variacao)}
+                    {dados.comparacao.clientes_retornantes_variacao > 0 ? '+' : ''}
+                    {dados.comparacao.clientes_retornantes_variacao.toFixed(1)}%
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    vs {formatCurrency(dados.periodo2.totais.total_bebidas)}
+                    vs {dados.periodo2.totais.clientes_retornantes}
                   </div>
                 </CardContent>
               </Card>
