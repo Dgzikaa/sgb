@@ -170,10 +170,10 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
   // 4. BUSCAR COMPRAS DO NIBO
   try {
     const categoriasCompras: Record<string, string[]> = {
-      'CUSTO COMIDA': ['CUSTO COMIDA', 'COMIDA', 'ALIMENTOS'],
-      'CUSTO BEBIDAS': ['CUSTO BEBIDAS', 'BEBIDAS', 'CERVEJA'],
-      'CUSTO OUTROS': ['CUSTO OUTROS', 'OUTROS CUSTOS', 'DESCARTÁVEIS'],
-      'CUSTO DRINKS': ['CUSTO DRINKS', 'DRINKS', 'DESTILADOS']
+      'CUSTO COMIDA': ['custo comida', 'custo de comida', 'comida', 'alimentos', 'alimentação', 'alimentacao'],
+      'CUSTO BEBIDAS': ['custo bebidas', 'custo de bebidas', 'bebidas', 'cerveja'],
+      'CUSTO OUTROS': ['materiais de limpeza', 'descartáveis', 'descartaveis', 'limpeza e descartáveis', 'custo outros'],
+      'CUSTO DRINKS': ['custo drinks', 'custo de drinks', 'drinks', 'destilados']
     };
 
     const { data: comprasNibo } = await supabase
@@ -187,12 +187,11 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     if (comprasNibo) {
       for (const [campo, categorias] of Object.entries(categoriasCompras)) {
         const valorCategoria = comprasNibo
-          .filter((item: any) => 
-            item.categoria_nome && 
-            categorias.some((cat: string) => 
-              item.categoria_nome.toUpperCase().includes(cat.toUpperCase())
-            )
-          )
+          .filter((item: any) => {
+            if (!item.categoria_nome) return false;
+            const categoriaNome = item.categoria_nome.toLowerCase();
+            return categorias.some((cat: string) => categoriaNome.includes(cat));
+          })
           .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
         if (campo === 'CUSTO COMIDA') resultado.compras_custo_comida = valorCategoria;
