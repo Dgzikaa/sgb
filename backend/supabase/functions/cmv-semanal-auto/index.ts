@@ -92,11 +92,11 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 1. BUSCAR CONSUMO DOS SÓCIOS
   try {
-    const sociosPatterns = ['x-corbal', 'x-bruno', 'x-matheus', 'x-leonardo', 'x-thiago'];
+    const sociosPatterns = ['corbal', 'bruno', 'matheus', 'leonardo', 'thiago', 'augusto', 'dani'];
     
     const { data: consumoSocios } = await supabase
       .from('contahub_periodo')
-      .select('vr_consumo')
+      .select('vr_produtos')
       .eq('bar_id', barId)
       .gte('dt_gerencial', dataInicio)
       .lte('dt_gerencial', dataFim)
@@ -104,7 +104,7 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
     if (consumoSocios) {
       resultado.total_consumo_socios = consumoSocios.reduce((sum: number, item: any) => 
-        sum + (parseFloat(item.vr_consumo) || 0), 0
+        sum + (parseFloat(item.vr_produtos) || 0), 0
       );
       console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)}`);
     }
@@ -125,7 +125,7 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     for (const [campo, patterns] of Object.entries(contasEspeciais)) {
       const { data } = await supabase
         .from('contahub_periodo')
-        .select('vr_consumo')
+        .select('vr_produtos')
         .eq('bar_id', barId)
         .gte('dt_gerencial', dataInicio)
         .lte('dt_gerencial', dataFim)
@@ -133,7 +133,7 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
       if (data) {
         resultado[campo] = data.reduce((sum: number, item: any) => 
-          sum + (parseFloat(item.vr_consumo) || 0), 0
+          sum + (parseFloat(item.vr_produtos) || 0), 0
         );
         console.log(`✅ ${campo}: R$ ${resultado[campo].toFixed(2)}`);
       }
