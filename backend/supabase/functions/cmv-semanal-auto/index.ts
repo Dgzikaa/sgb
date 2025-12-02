@@ -209,12 +209,17 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 4. BUSCAR COMPRAS DO NIBO
   try {
-    const categoriasCompras: Record<string, string[]> = {
-      'CUSTO COMIDA': ['custo comida', 'custo de comida', 'comida', 'alimentos', 'alimentação', 'alimentacao'],
-      'CUSTO BEBIDAS': ['custo bebidas', 'custo de bebidas', 'bebidas', 'cerveja'],
-      'CUSTO OUTROS': ['materiais de limpeza', 'descartáveis', 'descartaveis', 'limpeza e descartáveis', 'custo outros'],
-      'CUSTO DRINKS': ['custo drinks', 'custo de drinks', 'drinks', 'destilados']
-    };
+    // Filtrar APENAS categorias de MERCADORIAS (excluir impostos, salários, etc)
+    const categoriasPermitidas = [
+      'Custo Bebidas',
+      'Custo Comida',
+      'CUSTO COMIDA',
+      'Custo Drinks',
+      'ALIMENTAÇÃO',
+      'Materiais de Limpeza e Descartáveis',
+      'Utensílios',
+      'Materiais Operação'
+    ];
 
     const comprasNibo = await fetchAllWithPagination(
       supabase
@@ -227,23 +232,41 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     );
 
     if (comprasNibo) {
-      for (const [campo, categorias] of Object.entries(categoriasCompras)) {
-        const valorCategoria = comprasNibo
-          .filter((item: any) => {
-            if (!item.categoria_nome) return false;
-            const categoriaNome = item.categoria_nome.toLowerCase();
-            return categorias.some((cat: string) => categoriaNome.includes(cat));
-          })
-          .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+      // Filtrar apenas categorias de mercadorias
+      const comprasMercadorias = comprasNibo.filter((item: any) => 
+        categoriasPermitidas.includes(item.categoria_nome)
+      );
 
-        if (campo === 'CUSTO COMIDA') resultado.compras_custo_comida = valorCategoria;
-        else if (campo === 'CUSTO BEBIDAS') resultado.compras_custo_bebidas = valorCategoria;
-        else if (campo === 'CUSTO OUTROS') resultado.compras_custo_outros = valorCategoria;
-        else if (campo === 'CUSTO DRINKS') resultado.compras_custo_drinks = valorCategoria;
+      // Separar por tipo de custo
+      resultado.compras_custo_bebidas = comprasMercadorias
+        .filter((item: any) => item.categoria_nome === 'Custo Bebidas')
+        .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
-        console.log(`✅ Compras ${campo}: R$ ${valorCategoria.toFixed(2)}`);
-      }
-      console.log(`📊 Total compras NIBO: ${comprasNibo.length} registros`);
+      resultado.compras_custo_comida = comprasMercadorias
+        .filter((item: any) => 
+          item.categoria_nome === 'Custo Comida' || 
+          item.categoria_nome === 'CUSTO COMIDA' ||
+          item.categoria_nome === 'ALIMENTAÇÃO'
+        )
+        .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+
+      resultado.compras_custo_drinks = comprasMercadorias
+        .filter((item: any) => item.categoria_nome === 'Custo Drinks')
+        .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+
+      resultado.compras_custo_outros = comprasMercadorias
+        .filter((item: any) => 
+          item.categoria_nome === 'Materiais de Limpeza e Descartáveis' ||
+          item.categoria_nome === 'Utensílios' ||
+          item.categoria_nome === 'Materiais Operação'
+        )
+        .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+
+      console.log(`✅ Compras Bebidas: R$ ${resultado.compras_custo_bebidas.toFixed(2)}`);
+      console.log(`✅ Compras Comida: R$ ${resultado.compras_custo_comida.toFixed(2)}`);
+      console.log(`✅ Compras Drinks: R$ ${resultado.compras_custo_drinks.toFixed(2)}`);
+      console.log(`✅ Compras Outros: R$ ${resultado.compras_custo_outros.toFixed(2)}`);
+      console.log(`📊 Total compras MERCADORIAS: ${comprasMercadorias.length} registros (filtrado de ${comprasNibo.length})`);
     }
   } catch (err) {
     console.error('Erro ao buscar compras do NIBO:', err);

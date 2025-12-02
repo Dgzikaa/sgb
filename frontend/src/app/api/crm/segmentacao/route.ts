@@ -43,26 +43,29 @@ export async function GET(request: NextRequest) {
 
     console.log(`🔍 CRM: Iniciando análise de segmentação (Página ${page}, Limite ${limit})...`);
 
-    // 1. Buscar dados de eventos Sympla
+    // 1. Buscar TODOS os dados de eventos Sympla (usando range para remover limite padrão de 1000)
     const { data: symplaData } = await supabase
       .from('sympla_participantes')
       .select('nome_completo, email, pedido_id')
       .eq('bar_id', barId)
-      .eq('status_pedido', 'APPROVED');
+      .eq('status_pedido', 'APPROVED')
+      .range(0, 99999); // Remove limite padrão de 1000 registros
 
-    // 2. Buscar dados de reservas GetIn
+    // 2. Buscar TODAS as reservas GetIn
     const { data: getinData } = await supabase
       .from('getin_reservas')
       .select('customer_name, customer_email, customer_phone, reservation_date, status')
       .eq('bar_id', barId)
-      .in('status', ['seated', 'confirmed']);
+      .in('status', ['seated', 'confirmed'])
+      .range(0, 99999); // Remove limite padrão
 
     // 3. Buscar dados de eventos_base para receita
     const { data: eventosData } = await supabase
       .from('eventos_base')
       .select('data_evento, real_r, cl_real')
       .eq('bar_id', barId)
-      .eq('ativo', true);
+      .eq('ativo', true)
+      .range(0, 99999); // Remove limite padrão
 
     // 4. Criar mapa de clientes unificados
     const clientesMap = new Map<string, ClienteUnificado>();
