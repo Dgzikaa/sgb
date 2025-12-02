@@ -33,6 +33,13 @@ interface ReceitaInfo {
   insumos_count: number;
 }
 
+interface Receita {
+  id: number;
+  receita_nome: string;
+  receita_codigo: string;
+  receita_categoria: string | null;
+}
+
 export default function FichasTecnicasPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
@@ -49,10 +56,38 @@ export default function FichasTecnicasPage() {
   const [filtro, setFiltro] = useState<'todas' | 'especifica' | 'por_insumo'>('todas');
   const [receitaId, setReceitaId] = useState('');
   const [insumoId, setInsumoId] = useState('');
+  
+  // Estados para busca de receitas
+  const [receitas, setReceitas] = useState<Receita[]>([]);
+  const [loadingReceitas, setLoadingReceitas] = useState(false);
 
   useEffect(() => {
     setPageTitle('📋 Gestão de Fichas Técnicas');
   }, [setPageTitle]);
+
+  // Buscar receitas quando o filtro for "especifica"
+  useEffect(() => {
+    if (filtro === 'especifica') {
+      buscarReceitas();
+    }
+  }, [filtro]);
+
+  const buscarReceitas = async () => {
+    try {
+      setLoadingReceitas(true);
+      const response = await fetch('/api/receitas');
+      const data = await response.json();
+      
+      if (data.receitas) {
+        setReceitas(data.receitas);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar receitas:', error);
+      toast.error('Erro ao carregar receitas');
+    } finally {
+      setLoadingReceitas(false);
+    }
+  };
 
   const atualizarFichasTecnicas = async () => {
     try {
@@ -138,14 +173,43 @@ export default function FichasTecnicasPage() {
 
             {filtro === 'especifica' && (
               <div>
-                <Label className="text-gray-700 dark:text-gray-300">ID da Receita</Label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 123"
-                  value={receitaId}
-                  onChange={(e) => setReceitaId(e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                />
+                <Label className="text-gray-700 dark:text-gray-300">Selecionar Receita</Label>
+                <Select 
+                  value={receitaId} 
+                  onValueChange={setReceitaId}
+                >
+                  <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                    <SelectValue placeholder="Selecione uma receita..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-gray-800 max-h-[300px]">
+                    {loadingReceitas ? (
+                      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                        Carregando receitas...
+                      </div>
+                    ) : receitas.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        Nenhuma receita encontrada
+                      </div>
+                    ) : (
+                      receitas.map((receita) => (
+                        <SelectItem 
+                          key={receita.id} 
+                          value={receita.id.toString()}
+                          className="text-gray-900 dark:text-gray-100"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{receita.receita_nome}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {receita.receita_codigo}
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+
               </div>
             )}
 

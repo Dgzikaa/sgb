@@ -119,7 +119,7 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     // Contas especiais geralmente têm desconto, então buscar em vr_desconto + vr_produtos
     const contasEspeciais: Record<string, string[]> = {
       'mesa_beneficios_cliente': ['benefício', 'beneficio'],
-      'mesa_banda_dj': ['banda', 'dj', 'artista'],
+      'mesa_banda_dj': ['consumação banda', 'consumação dj', 'consumacao banda', 'consumacao dj', ' banda ', ' dj '],
       'chegadeira': ['chegadeira', 'chegador'],
       'mesa_adm_casa': ['adm', 'administrativo', 'casa', 'marketing'],
       'mesa_rh': ['rh', 'recursos humanos']
@@ -132,7 +132,7 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
         .eq('bar_id', barId)
         .gte('dt_gerencial', dataInicio)
         .lte('dt_gerencial', dataFim)
-        .or(patterns.map((p: string) => `cli_nome.ilike.%${p}%,motivo.ilike.%${p}%`).join(','));
+        .or(patterns.map((p: string) => `motivo.ilike.%${p}%`).join(','));
 
       if (data) {
         // Somar desconto + produtos (podem ter desconto parcial)
