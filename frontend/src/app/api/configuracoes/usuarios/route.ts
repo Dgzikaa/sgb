@@ -216,6 +216,53 @@ export async function PUT(request: NextRequest) {
     // Garantir que modulos_permitidos seja um array
     const modulosArray = Array.isArray(modulos_permitidos) ? modulos_permitidos : [];
 
+    // 1. Buscar user_id atual para atualizar Auth
+    const { data: currentUser, error: fetchError } = await supabase
+      .from('usuarios_bar')
+      .select('user_id, email as current_email')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !currentUser) {
+      return NextResponse.json(
+        { error: 'Usuário não encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // 2. Atualizar Supabase Auth (se houver user_id)
+    if (currentUser.user_id) {
+      try {
+        const authUpdates: any = {
+          user_metadata: {
+            nome,
+            role,
+          }
+        };
+
+        // Se o email mudou, atualizar também
+        if (email && email !== currentUser.current_email) {
+          authUpdates.email = email;
+          console.log(`📧 Atualizando email no Auth: ${currentUser.current_email} → ${email}`);
+        }
+
+        const { error: authError } = await supabase.auth.admin.updateUserById(
+          currentUser.user_id,
+          authUpdates
+        );
+
+        if (authError) {
+          console.warn('⚠️ Erro ao atualizar Auth (continuando):', authError.message);
+        } else {
+          console.log('✅ Supabase Auth atualizado com sucesso');
+        }
+      } catch (authUpdateError) {
+        console.warn('⚠️ Erro ao atualizar Auth:', authUpdateError);
+        // Não falhar a operação por isso
+      }
+    }
+
+    // 3. Atualizar tabela usuarios_bar
     const { data: usuario, error } = await supabase
       .from('usuarios_bar')
       .update({
@@ -240,7 +287,13 @@ export async function PUT(request: NextRequest) {
 
     if (error) throw error;
 
-    return NextResponse.json({ usuario, message: 'Usuário atualizado com sucesso' });
+    console.log(`✅ Usuário ${nome} atualizado com sucesso (ID: ${id})`);
+
+    return NextResponse.json({ 
+      usuario, 
+      message: 'Usuário atualizado com sucesso',
+      auth_updated: !!currentUser.user_id 
+    });
   } catch (error) {
     console.error('Erro ao atualizar usuário:', error);
     return NextResponse.json(
