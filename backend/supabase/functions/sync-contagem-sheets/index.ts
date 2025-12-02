@@ -195,59 +195,62 @@ serve(async (req) => {
     // Buscar contagens do Google Sheets
     const insumosSheet = await buscarContagemData(dataProcessar);
     
-    if (insumosSheet.length === 0) {
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: `Nenhuma contagem encontrada para ${dataProcessar}`,
-          imported: 0,
-        }),
-        {
-          headers: { 'Content-Type': 'application/json' },
-          status: 200,
-        }
-      );
-    }
+    console.log(`📊 Planilha: ${insumosSheet.length} insumos com contagem`);
     
-    // Buscar todos os insumos do sistema
+    // Buscar TODOS os insumos ativos do sistema
     const { data: insumosSistema, error: errorInsumos } = await supabase
       .from('insumos')
-      .select('id, codigo, nome, tipo_local, unidade_medida, custo_unitario')
+      .select('id, codigo, nome, tipo_local, categoria, unidade_medida, custo_unitario')
+      .eq('bar_id', BAR_ID)
       .eq('ativo', true);
     
     if (errorInsumos) {
       throw new Error(`Erro ao buscar insumos: ${errorInsumos.message}`);
     }
     
-    // Criar mapa de código -> insumo
-    const mapaInsumos = new Map();
-    insumosSistema?.forEach((insumo: any) => {
-      mapaInsumos.set(insumo.codigo, insumo);
-    });
+    console.log(`✅ ${insumosSistema?.length || 0} insumos ativos no sistema`);
     
-    console.log(`✅ ${mapaInsumos.size} insumos carregados do sistema`);
+    // Criar mapa de código -> contagem da planilha
+    const mapaContagensSheet = new Map();
+    insumosSheet.forEach((insumo: InsumoSheet) => {
+      mapaContagensSheet.set(insumo.codigo, insumo);
+    });
     
     // Estatísticas
     const stats = {
       total: 0,
       sucesso: 0,
       erro: 0,
+      zerados: 0,
       naoEncontrados: [] as string[],
     };
     
-    // Processar cada insumo
-    for (const insumoSheet of insumosSheet) {
-      const insumoSistema = mapaInsumos.get(insumoSheet.codigo);
-      
-      if (!insumoSistema) {
-        stats.naoEncontrados.push(insumoSheet.codigo);
-        continue;
-      }
-      
-      const contagemData = insumoSheet.contagens[dataProcessar];
-      if (!contagemData) continue;
-      
+    // Processar TODOS os insumos do sistema (mesmo os zerados)
+    for (const insumoSistema of insumosSistema || []) {
       stats.total++;
+      
+      // Buscar contagem da planilha (pode não existir = zerado)
+      const insumoSheet = mapaContagensSheet.get(insumoSistema.codigo);
+      
+      let estoqueFechado = 0;
+      let estoqueFlutuante = 0;
+      let pedido = 0;
+      let custoUnitario = insumoSistema.custo_unitario || 0;
+      
+      if (insumoSheet) {
+        const contagemData = insumoSheet.contagens[dataProcessar];
+        if (contagemData) {
+          estoqueFechado = contagemData.estoque_fechado || 0;
+          estoqueFlutuante = contagemData.estoque_flutuante || 0;
+          pedido = contagemData.pedido || 0;
+          // Usar preço da planilha se disponível
+          if (insumoSheet.preco && insumoSheet.preco > 0) {
+            custoUnitario = insumoSheet.preco;
+          }
+        }
+      } else {
+        stats.zerados++;
+      }
       
       // Buscar estoque_final do dia anterior para estoque_inicial
       const dataAnterior = new Date(dataProcessar);
@@ -273,11 +276,8 @@ serve(async (req) => {
         .eq('insumo_id', insumoSistema.id)
         .single();
       
-      // Calcular estoque total (fechado + flutuante, conforme planilha)
-      const estoqueFinal = contagemData.estoque_fechado + (contagemData.estoque_flutuante || 0);
-      
-      // Usar preço da planilha se disponível, senão usar do sistema
-      const custoUnitario = insumoSheet.preco || insumoSistema.custo_unitario || 0;
+      // Calcular estoque total (fechado + flutuante)
+      const estoqueFinal = estoqueFechado + estoqueFlutuante;
       
       const payload = {
         bar_id: BAR_ID,
@@ -286,13 +286,13 @@ serve(async (req) => {
         insumo_codigo: insumoSistema.codigo,
         insumo_nome: insumoSistema.nome,
         estoque_inicial,
-        estoque_final: estoqueFinal,  // ✅ Fechado + Flutuante (igual planilha!)
-        quantidade_pedido: contagemData.pedido || 0,
+        estoque_final: estoqueFinal,  // ✅ Fechado + Flutuante (ou zero se não tem)
+        quantidade_pedido: pedido,
         tipo_local: insumoSistema.tipo_local,
-        categoria: insumoSistema.categoria || insumoSheet.categoria,
+        categoria: insumoSistema.categoria,
         unidade_medida: insumoSistema.unidade_medida,
-        custo_unitario: custoUnitario,  // ✅ Preço da planilha (coluna A)!
-        observacoes: 'Importado do Google Sheets (Cron)',
+        custo_unitario: custoUnitario,  // ✅ Preço da planilha ou do sistema
+        observacoes: insumoSheet ? 'Importado do Google Sheets' : 'Insumo sem contagem (zerado)',
         usuario_contagem: 'Sistema Automático',
         updated_at: new Date().toISOString(),
       };
@@ -305,7 +305,7 @@ serve(async (req) => {
           .eq('id', contagemExistente.id);
         
         if (error) {
-          console.error(`❌ Erro ao atualizar ${insumoSheet.codigo}:`, error.message);
+          console.error(`❌ Erro ao atualizar ${insumoSistema.codigo}:`, error.message);
           stats.erro++;
         } else {
           stats.sucesso++;
@@ -317,7 +317,7 @@ serve(async (req) => {
           .insert([payload]);
         
         if (error) {
-          console.error(`❌ Erro ao inserir ${insumoSheet.codigo}:`, error.message);
+          console.error(`❌ Erro ao inserir ${insumoSistema.codigo}:`, error.message);
           stats.erro++;
         } else {
           stats.sucesso++;
@@ -326,19 +326,20 @@ serve(async (req) => {
     }
     
     console.log('\n📊 Resumo:');
+    console.log(`   📦 Total insumos: ${stats.total}`);
     console.log(`   ✅ Sucesso: ${stats.sucesso}`);
+    console.log(`   ⚠️  Zerados (sem contagem): ${stats.zerados}`);
     console.log(`   ❌ Erro: ${stats.erro}`);
-    console.log(`   ⚠️  Não encontrados: ${stats.naoEncontrados.length}`);
     
     // Enviar notificação no Discord se houver erros
-    if (stats.erro > 0 || stats.naoEncontrados.length > 0) {
+    if (stats.erro > 0) {
       const webhookUrl = Deno.env.get('DISCORD_WEBHOOK_CONTAGEM');
       if (webhookUrl) {
         await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `⚠️ **Sync Contagem ${dataProcessar}**\n✅ Sucesso: ${stats.sucesso}\n❌ Erro: ${stats.erro}\n⚠️ Não encontrados: ${stats.naoEncontrados.length}`,
+            content: `⚠️ **Sync Contagem ${dataProcessar}**\n📦 Total: ${stats.total}\n✅ Sucesso: ${stats.sucesso}\n⚠️ Zerados: ${stats.zerados}\n❌ Erro: ${stats.erro}`,
           }),
         }).catch(() => {});
       }
@@ -347,8 +348,13 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        data: stats,
-        message: `Sincronização concluída para ${dataProcessar}`,
+        data: {
+          total: stats.total,
+          sucesso: stats.sucesso,
+          zerados: stats.zerados,
+          erro: stats.erro,
+        },
+        message: `Sincronização concluída: ${stats.sucesso}/${stats.total} insumos importados`,
       }),
       {
         headers: { 'Content-Type': 'application/json' },
