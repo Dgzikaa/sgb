@@ -24,6 +24,7 @@ interface InsumoSheet {
   codigo: string;
   nome: string;
   categoria: string;
+  preco?: number;
   contagens: Record<string, ContagemData>;
 }
 
@@ -93,6 +94,7 @@ async function buscarContagemData(data: string): Promise<InsumoSheet[]> {
       
       if (!linha || linha.length < 7) continue;
       
+      const preco = parseFloat(linha[0]?.toString().replace(/[^\d,.-]/g, '').replace(',', '.')) || 0; // Coluna A (PREÇO)
       const codigo = linha[3]?.toString().trim(); // Coluna D
       const nome = linha[6]?.toString().trim();   // Coluna G
       const categoria = linha[4]?.toString().trim(); // Coluna E
@@ -104,15 +106,16 @@ async function buscarContagemData(data: string): Promise<InsumoSheet[]> {
       const estoqueFlutuante = parseFloat(linha[colunaData + 1]) || null;
       const pedido = parseFloat(linha[colunaData + 2]) || null;
       
-      // Só adiciona se tiver estoque fechado
-      if (estoqueFechado !== null && estoqueFechado > 0) {
+      // Só adiciona se tiver estoque fechado ou flutuante
+      if ((estoqueFechado !== null && estoqueFechado > 0) || (estoqueFlutuante !== null && estoqueFlutuante > 0)) {
         insumos.push({
           codigo,
           nome,
           categoria,
+          preco,  // ✅ Preço da planilha (coluna A)
           contagens: {
             [data]: {
-              estoque_fechado: estoqueFechado,
+              estoque_fechado: estoqueFechado || 0,
               estoque_flutuante: estoqueFlutuante,
               pedido: pedido || 0,
             },
@@ -270,6 +273,12 @@ serve(async (req) => {
         .eq('insumo_id', insumoSistema.id)
         .single();
       
+      // Calcular estoque total (fechado + flutuante, conforme planilha)
+      const estoqueFinal = contagemData.estoque_fechado + (contagemData.estoque_flutuante || 0);
+      
+      // Usar preço da planilha se disponível, senão usar do sistema
+      const custoUnitario = insumoSheet.preco || insumoSistema.custo_unitario || 0;
+      
       const payload = {
         bar_id: BAR_ID,
         data_contagem: dataProcessar,
@@ -277,12 +286,12 @@ serve(async (req) => {
         insumo_codigo: insumoSistema.codigo,
         insumo_nome: insumoSistema.nome,
         estoque_inicial,
-        estoque_final: contagemData.estoque_fechado,
+        estoque_final: estoqueFinal,  // ✅ Fechado + Flutuante (igual planilha!)
         quantidade_pedido: contagemData.pedido || 0,
         tipo_local: insumoSistema.tipo_local,
         categoria: insumoSistema.categoria || insumoSheet.categoria,
         unidade_medida: insumoSistema.unidade_medida,
-        custo_unitario: insumoSistema.custo_unitario || 0,
+        custo_unitario: custoUnitario,  // ✅ Preço da planilha (coluna A)!
         observacoes: 'Importado do Google Sheets (Cron)',
         usuario_contagem: 'Sistema Automático',
         updated_at: new Date().toISOString(),

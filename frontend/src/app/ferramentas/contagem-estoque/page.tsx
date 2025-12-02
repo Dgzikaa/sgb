@@ -120,6 +120,10 @@ export default function ContagemEstoquePage() {
 
   // Tab ativa
   const [activeTab, setActiveTab] = useState('registrar');
+  
+  // Sincronização Google Sheets
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncData, setSyncData] = useState(new Date().toISOString().split('T')[0]);
 
   // Definir título da página
   useEffect(() => {
@@ -201,18 +205,20 @@ export default function ContagemEstoquePage() {
     setLoadingContagens(true);
     try {
       const params = new URLSearchParams({
-        limit: '50'
+        limit: '200'  // Aumentar limite para ver mais insumos
       });
       
-      if (filtroCategoria) {
-        params.append('categoria', filtroCategoria);
+      if (filtroData) {
+        params.append('data_inicio', filtroData);
+        params.append('data_fim', filtroData);
       }
       
-      if (filtroAlerta) {
-        params.append('alertas', 'true');
+      if (filtroArea && filtroArea !== 'todas') {
+        params.append('tipo_local', filtroArea);
       }
 
-      const response = await fetch(`/api/operacoes/contagem-estoque?${params}`);
+      // Usar rota de INSUMOS (sincronizados do Google Sheets)
+      const response = await fetch(`/api/operacoes/contagem-estoque/insumos?${params}`);
       const result = await response.json();
 
       if (result.success) {
@@ -992,7 +998,7 @@ export default function ContagemEstoquePage() {
                                 </div>
                               </div>
 
-                              {contagem.variacao_percentual !== null && (
+                              {contagem.variacao_percentual !== null && contagem.variacao_percentual !== undefined && (
                                 <div className="mt-2 flex items-center gap-2">
                                   {contagem.variacao_percentual > 0 ? (
                                     <TrendingUp className="h-4 w-4 text-green-500" />

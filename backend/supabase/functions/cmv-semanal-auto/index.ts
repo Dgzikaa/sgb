@@ -266,20 +266,20 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 5. BUSCAR ESTOQUES
   try {
-    // Buscar a contagem MAIS COMPLETA (com mais insumos) dentro do período
-    const { data: contagens } = await supabase
+    // ESTOQUE INICIAL: Última contagem ANTES ou NO INÍCIO da semana
+    const { data: contagensInicio } = await supabase
       .from('contagem_estoque_insumos')
       .select('data_contagem')
       .eq('bar_id', barId)
-      .gte('data_contagem', dataInicio)
-      .lte('data_contagem', dataFim);
+      .lte('data_contagem', dataInicio)
+      .order('data_contagem', { ascending: false })
+      .limit(10);
     
-    // Encontrar a data com mais insumos contados
-    let dataContagemMaisCompleta = null;
-    let maxInsumos = 0;
+    let dataContagemInicial = null;
+    let maxInsumosInicio = 0;
     
-    if (contagens && contagens.length > 0) {
-      const datasUnicas = [...new Set(contagens.map((c: any) => c.data_contagem))];
+    if (contagensInicio && contagensInicio.length > 0) {
+      const datasUnicas = [...new Set(contagensInicio.map((c: any) => c.data_contagem))];
       
       for (const data of datasUnicas) {
         const { count } = await supabase
@@ -288,14 +288,54 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
           .eq('bar_id', barId)
           .eq('data_contagem', data);
         
-        if (count && count > maxInsumos) {
-          maxInsumos = count;
-          dataContagemMaisCompleta = data;
+        if (count && count > 100 && count > maxInsumosInicio) {
+          maxInsumosInicio = count;
+          dataContagemInicial = data;
         }
+      }
+      
+      if (!dataContagemInicial && datasUnicas.length > 0) {
+        dataContagemInicial = datasUnicas[0];
       }
     }
     
-    const ultimaContagem = dataContagemMaisCompleta ? { data_contagem: dataContagemMaisCompleta } : null;
+    // ESTOQUE FINAL: Primeira contagem DEPOIS ou NO FIM da semana
+    const { data: contagensFinal } = await supabase
+      .from('contagem_estoque_insumos')
+      .select('data_contagem')
+      .eq('bar_id', barId)
+      .gte('data_contagem', dataFim)
+      .order('data_contagem', { ascending: true })
+      .limit(10);
+    
+    let dataContagemFinal = null;
+    let maxInsumosFinal = 0;
+    
+    if (contagensFinal && contagensFinal.length > 0) {
+      const datasUnicas = [...new Set(contagensFinal.map((c: any) => c.data_contagem))];
+      
+      for (const data of datasUnicas) {
+        const { count } = await supabase
+          .from('contagem_estoque_insumos')
+          .select('*', { count: 'exact', head: true })
+          .eq('bar_id', barId)
+          .eq('data_contagem', data);
+        
+        if (count && count > 100 && count > maxInsumosFinal) {
+          maxInsumosFinal = count;
+          dataContagemFinal = data;
+        }
+      }
+      
+      if (!dataContagemFinal && datasUnicas.length > 0) {
+        dataContagemFinal = datasUnicas[0];
+      }
+    }
+    
+    console.log(`📅 Estoque Inicial: ${dataContagemInicial} (${maxInsumosInicio} insumos)`);
+    console.log(`📅 Estoque Final: ${dataContagemFinal} (${maxInsumosFinal} insumos)`);
+    
+    const ultimaContagem = dataContagemFinal ? { data_contagem: dataContagemFinal } : null;
 
     if (ultimaContagem) {
       const dataContagem = ultimaContagem.data_contagem;

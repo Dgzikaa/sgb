@@ -67,14 +67,14 @@ export async function GET(request: NextRequest) {
       .eq('ativo', true)
       .range(0, 99999); // Remove limite padrão
 
-    // 4. Buscar TODOS os dados de pagamentos do ContaHub
+    // 4. Buscar TODOS os dados de pagamentos do ContaHub (DADOS REAIS!)
     const { data: contahubData } = await supabase
       .from('contahub_pagamentos')
       .select('cli, cliente, vr_pagamentos, dt_transacao')
-      .eq('vd', barId.toString())
+      .eq('bar_id', barId)  // ⚠️ FIX: era 'vd' (errado) agora é 'bar_id' (correto)
       .not('cliente', 'is', null)
       .not('cliente', 'eq', '')
-      .range(0, 99999); // Remove limite padrão
+      .range(0, 99999); // Remove limite padrão de 1000
 
     console.log(`📊 Dados carregados: Sympla=${symplaData?.length || 0}, GetIn=${getinData?.length || 0}, ContaHub=${contahubData?.length || 0}`);
 
