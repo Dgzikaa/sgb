@@ -17,7 +17,7 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
-const CACHE_VERSION = 2; // Incrementar quando mudar lógica RFM
+const CACHE_VERSION = 4; // v4: Agrupamento por telefone (como analítico)
 
 function getCached(key: string) {
   const entry = cache.get(key);
@@ -157,72 +157,88 @@ export async function GET(request: NextRequest) {
     } else {
       console.log(`🔍 Cache MISS: Processando dados do ContaHub...`);
 
-      // Buscar APENAS ContaHub - ÚNICA fonte com dados REAIS de consumo
+      // Buscar APENAS ContaHub - ÚNICA fonte com dados REAIS de consumo (usar contahub_periodo que tem telefone)
       const contahubDataRaw = await fetchAllData(
-        'contahub_pagamentos', 
-        'cli, cliente, vr_pagamentos, dt_transacao', 
+        'contahub_periodo', 
+        'cli_nome, cli_fone, dt_gerencial, vr_couvert, vr_pagamentos', 
         {
           eq_bar_id: barId
         }
       );
 
-      // Filtrar clientes válidos (remover null e vazio)
+      // Filtrar clientes válidos (remover null e vazio, e com telefone)
       const contahubData = contahubDataRaw.filter(item => 
-        item.cliente && item.cliente.trim() !== ''
+        item.cli_fone && item.cli_fone.trim() !== '' && item.cli_nome && item.cli_nome.trim() !== ''
       );
 
-      console.log(`💳 ContaHub: ${contahubData.length} pagamentos válidos (de ${contahubDataRaw.length} totais)`);
+      console.log(`💳 ContaHub: ${contahubData.length} registros válidos (de ${contahubDataRaw.length} totais)`);
 
-      // 5. Processar APENAS ContaHub - dados REAIS de consumo
+      // 5. Processar APENAS ContaHub - agrupar por TELEFONE (mesma lógica do analítico)
       const clientesMap = new Map<string, ClienteUnificado>();
-    
-    console.log(`💳 Processando ${contahubData.length} pagamentos do ContaHub...`);
-    
-    for (const item of contahubData) {
-      const nome = item.cliente?.trim();
       
-      // Filtrar clientes inválidos
-      if (!nome || nome === 'MESA' || nome === 'SEM NOME' || nome === 'BALCAO') continue;
-
-      // Usar ID do cliente como identificador único
-      const id = `cli_${item.cli}`;
+      console.log(`💳 Processando ${contahubData.length} registros do ContaHub...`);
       
-      if (!clientesMap.has(id)) {
-        clientesMap.set(id, {
-          identificador: id,
-          nome,
-          total_visitas: 0,
-          total_gasto: 0,
-          ultima_visita: '',
-          primeira_visita: '',
-          dias_desde_ultima_visita: 0,
-          ticket_medio: 0,
-          frequencia_dias: 0
-        });
-      }
-
-      const cliente = clientesMap.get(id)!;
-      cliente.total_visitas++;
-      cliente.total_gasto += parseFloat(item.vr_pagamentos || '0');
-      
-      if (item.dt_transacao) {
-        const dataTransacao = item.dt_transacao.toString();
+      for (const item of contahubData) {
+        const nome = item.cli_nome?.trim();
+        const rawFone = item.cli_fone?.toString().trim();
         
-        if (!cliente.ultima_visita || dataTransacao > cliente.ultima_visita) {
-          cliente.ultima_visita = dataTransacao;
-        }
-        if (!cliente.primeira_visita || dataTransacao < cliente.primeira_visita) {
-          cliente.primeira_visita = dataTransacao;
-        }
-      }
-    }
+        // Filtrar clientes inválidos
+        if (!nome || !rawFone || nome === 'MESA' || nome === 'SEM NOME' || nome === 'BALCAO') continue;
 
-    // Calcular ticket médio para cada cliente
-    clientesMap.forEach(cliente => {
-      if (cliente.total_visitas > 0) {
-        cliente.ticket_medio = cliente.total_gasto / cliente.total_visitas;
+        // Normalizar telefone (mesma lógica do analítico)
+        let fone = rawFone.replace(/\D/g, ''); // Remove não-numéricos
+        if (!fone) continue;
+
+        // Padronizar: 10 dígitos → 11 dígitos (adicionar 9 após DDD)
+        if (fone.length === 10 && ['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(fone.substring(0, 2))) {
+          fone = fone.substring(0, 2) + '9' + fone.substring(2);
+        }
+
+        // Usar TELEFONE como identificador único (como no analítico)
+        const id = fone;
+        
+        if (!clientesMap.has(id)) {
+          clientesMap.set(id, {
+            identificador: id,
+            nome,
+            telefone: fone,
+            total_visitas: 0,
+            total_gasto: 0,
+            ultima_visita: '',
+            primeira_visita: '',
+            dias_desde_ultima_visita: 0,
+            ticket_medio: 0,
+            frequencia_dias: 0
+          });
+        }
+
+        const cliente = clientesMap.get(id)!;
+        cliente.total_visitas++;
+        
+        // Calcular gasto (vr_pagamentos - vr_couvert = consumo líquido)
+        const vrCouvert = parseFloat(item.vr_couvert || '0') || 0;
+        const vrPagamentos = parseFloat(item.vr_pagamentos || '0') || 0;
+        const vrConsumo = vrPagamentos - vrCouvert;
+        cliente.total_gasto += vrConsumo;
+        
+        if (item.dt_gerencial) {
+          const dataGerencial = item.dt_gerencial.toString();
+          
+          if (!cliente.ultima_visita || dataGerencial > cliente.ultima_visita) {
+            cliente.ultima_visita = dataGerencial;
+          }
+          if (!cliente.primeira_visita || dataGerencial < cliente.primeira_visita) {
+            cliente.primeira_visita = dataGerencial;
+          }
+        }
       }
-    });
+
+      // Calcular ticket médio para cada cliente
+      clientesMap.forEach(cliente => {
+        if (cliente.total_visitas > 0) {
+          cliente.ticket_medio = cliente.total_gasto / cliente.total_visitas;
+        }
+      });
 
     // 6. Calcular métricas temporais
     const hoje = new Date();
@@ -292,9 +308,9 @@ export async function GET(request: NextRequest) {
       let acoes_sugeridas: string[] = [];
       let prioridade = 0;
 
-      // Segmentação RFM (ordem importa!)
-      // 1. VIP Champions - TOP em TUDO
-      if (r_score >= 4 && f_score >= 4 && m_score >= 4) {
+      // Segmentação RFM ajustada para realidade de bares (90% têm 1-2 visitas)
+      // 1. VIP Champions - Frequência alta (top 20%) + Gasto alto + Recente
+      if (cliente.total_visitas >= 3 && m_score >= 4 && r_score >= 3) {
         segmento = '💎 VIP Champions';
         cor = 'purple';
         prioridade = 5;
@@ -304,8 +320,19 @@ export async function GET(request: NextRequest) {
           'Benefícios e recompensas especiais'
         ];
       }
-      // 2. Em Risco - Eram bons mas sumiram (URGENTE!)
-      else if (r_score <= 2 && f_score >= 3) {
+      // 2. Clientes Fiéis - Vêm 3+ vezes e são recentes
+      else if (cliente.total_visitas >= 3 && r_score >= 3) {
+        segmento = '⭐ Clientes Fiéis';
+        cor = 'blue';
+        prioridade = 4;
+        acoes_sugeridas = [
+          'Manter engajamento com novidades',
+          'Oferecer programa de indicação',
+          'Recompensas por frequência'
+        ];
+      }
+      // 3. Em Risco - Tinham 2+ visitas mas sumiram
+      else if (cliente.total_visitas >= 2 && r_score <= 2) {
         segmento = '⚠️ Em Risco (Churn)';
         cor = 'orange';
         prioridade = 5;
@@ -316,19 +343,8 @@ export async function GET(request: NextRequest) {
           'Pesquisa de satisfação'
         ];
       }
-      // 3. Clientes Fiéis - Vêm com frequência
-      else if (r_score >= 3 && f_score >= 4) {
-        segmento = '⭐ Clientes Fiéis';
-        cor = 'blue';
-        prioridade = 4;
-        acoes_sugeridas = [
-          'Manter engajamento com novidades',
-          'Oferecer programa de indicação',
-          'Recompensas por frequência'
-        ];
-      }
-      // 4. Grande Potencial - Gastam bem mas vêm pouco
-      else if (m_score >= 4 && f_score <= 2) {
+      // 4. Grande Potencial - 1-2 visitas mas gastam MUITO (top 20% em gasto)
+      else if (cliente.total_visitas <= 2 && m_score >= 4) {
         segmento = '💰 Grande Potencial';
         cor = 'green';
         prioridade = 4;
@@ -338,8 +354,8 @@ export async function GET(request: NextRequest) {
           'Campanhas de reativação'
         ];
       }
-      // 5. Novos Promissores - Recentes com baixa frequência
-      else if (r_score >= 4 && f_score <= 2) {
+      // 5. Novos Promissores - 1 visita recente (últimos 30 dias)
+      else if (cliente.total_visitas === 1 && cliente.dias_desde_ultima_visita <= 30) {
         segmento = '🌱 Novos Promissores';
         cor = 'teal';
         prioridade = 3;
@@ -349,8 +365,8 @@ export async function GET(request: NextRequest) {
           'Apresentar experiências do bar'
         ];
       }
-      // 6. Inativos - Sumiram há muito tempo
-      else if (r_score <= 2 && f_score <= 2) {
+      // 6. Inativos - 1 visita há mais de 90 dias
+      else if (cliente.total_visitas === 1 && cliente.dias_desde_ultima_visita > 90) {
         segmento = '😴 Inativos';
         cor = 'gray';
         prioridade = 1;
@@ -359,7 +375,7 @@ export async function GET(request: NextRequest) {
           'Campanha de baixo custo (email/redes)',
         ];
       }
-      // 7. Regulares - O resto
+      // 7. Regulares - 1-2 visitas, entre 30-90 dias
       else {
         segmento = '📊 Regulares';
         cor = 'indigo';
@@ -417,9 +433,15 @@ export async function GET(request: NextRequest) {
       clientesFiltrados = clientesSegmentados.filter(c => c.segmento === segmento);
       
       // Ordenação inteligente por segmento
-      if (segmento.includes('VIP') || segmento.includes('Fiéis')) {
-        // VIPs e Fiéis: ordenar por RFM total (melhores primeiro)
-        clientesFiltrados.sort((a, b) => b.rfm_total - a.rfm_total);
+      if (segmento.includes('VIP')) {
+        // VIPs: ordenar por visitas DESC, depois por gasto DESC
+        clientesFiltrados.sort((a, b) => {
+          if (b.total_visitas !== a.total_visitas) return b.total_visitas - a.total_visitas;
+          return b.total_gasto - a.total_gasto;
+        });
+      } else if (segmento.includes('Fiéis')) {
+        // Fiéis: ordenar por visitas DESC
+        clientesFiltrados.sort((a, b) => b.total_visitas - a.total_visitas);
       } else if (segmento.includes('Risco')) {
         // Em Risco: ordenar por dias desde última visita (mais urgente primeiro)
         clientesFiltrados.sort((a, b) => b.dias_desde_ultima_visita - a.dias_desde_ultima_visita);

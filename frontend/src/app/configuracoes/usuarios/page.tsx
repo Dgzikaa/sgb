@@ -227,12 +227,25 @@ function UsuariosPage() {
 
   const handleEdit = (usuario: Usuario) => {
     setEditingUser(usuario);
+    
+    // Garantir que modulos_permitidos seja sempre um array
+    let modulosPermitidos: string[] = [];
+    if (Array.isArray(usuario.modulos_permitidos)) {
+      modulosPermitidos = usuario.modulos_permitidos;
+    } else if (typeof usuario.modulos_permitidos === 'string') {
+      try {
+        modulosPermitidos = JSON.parse(usuario.modulos_permitidos);
+      } catch {
+        modulosPermitidos = [];
+      }
+    }
+    
     setFormData({
       email: usuario.email,
       nome: usuario.nome,
       role: usuario.role,
       bar_id: usuario.bar_id?.toString() || '',
-      modulos_permitidos: usuario.modulos_permitidos || [],
+      modulos_permitidos: modulosPermitidos,
       ativo: usuario.ativo,
       celular: usuario.celular || '',
       telefone: usuario.telefone || '',
@@ -305,31 +318,55 @@ function UsuariosPage() {
   };
 
   const handleResetPassword = async (userId: number) => {
-    if (!confirm('Tem certeza que deseja redefinir a senha deste usuário?')) return;
+    if (!confirm('⚠️ Tem certeza que deseja redefinir a senha deste usuário?\n\nUma nova senha temporária será gerada e enviada por email.')) return;
 
     try {
-      // Simulação da redefinição de senha
-      toast({
-        title: 'Sucesso',
-        description: 'Nova senha enviada por email para o usuário',
+      const response = await fetch('/api/configuracoes/usuarios/redefinir-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
       });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Se o email não foi enviado, mostrar credenciais no toast
+        if (!result.emailSent && result.credentials) {
+          toast({
+            title: '⚠️ Senha Redefinida - Email Não Enviado',
+            description: `Senha temporária: ${result.credentials.senha_temporaria}\n\nInforme ao usuário manualmente.`,
+          });
+        } else {
+          toast({
+            title: 'Sucesso',
+            description: result.message || 'Senha redefinida com sucesso',
+          });
+        }
+      } else {
+        throw new Error(result.error || 'Erro ao redefinir senha');
+      }
     } catch (error) {
       console.error('Erro ao redefinir senha:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao redefinir senha',
+        description: error instanceof Error ? error.message : 'Erro ao redefinir senha',
         variant: 'destructive',
       });
     }
   };
 
   const handleModuloChange = (moduloId: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      modulos_permitidos: checked 
-        ? [...prev.modulos_permitidos, moduloId]
-        : prev.modulos_permitidos.filter(id => id !== moduloId)
-    }));
+    setFormData(prev => {
+      // Garantir que modulos_permitidos é um array
+      const currentModulos = Array.isArray(prev.modulos_permitidos) ? prev.modulos_permitidos : [];
+      
+      return {
+        ...prev,
+        modulos_permitidos: checked 
+          ? [...currentModulos, moduloId]
+          : currentModulos.filter(id => id !== moduloId)
+      };
+    });
   };
 
   const filteredUsuarios = usuarios.filter(usuario => {
@@ -621,7 +658,7 @@ function UsuariosPage() {
                               {categoriaModulos.map(modulo => (
                                 <div key={modulo.id} className="flex items-center space-x-2">
                                   <Checkbox
-                                    checked={formData.modulos_permitidos.includes(modulo.id)}
+                                    checked={Array.isArray(formData.modulos_permitidos) && formData.modulos_permitidos.includes(modulo.id)}
                                     onCheckedChange={(checked) => handleModuloChange(modulo.id, checked as boolean)}
                                   />
                                   <Label 

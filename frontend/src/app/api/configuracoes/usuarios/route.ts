@@ -18,7 +18,15 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ usuarios });
+    // Garantir que modulos_permitidos seja sempre um array
+    const usuariosFormatados = usuarios?.map(u => ({
+      ...u,
+      modulos_permitidos: Array.isArray(u.modulos_permitidos) 
+        ? u.modulos_permitidos 
+        : (u.modulos_permitidos ? JSON.parse(u.modulos_permitidos) : [])
+    })) || [];
+
+    return NextResponse.json({ usuarios: usuariosFormatados });
   } catch (error) {
     console.error('Erro ao buscar usuários:', error);
     return NextResponse.json(
@@ -42,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { email, nome, role, bar_id, modulos_permitidos, ativo = true } = body;
+    const { email, nome, role, bar_id, modulos_permitidos, ativo = true, celular, telefone, cpf, data_nascimento, endereco, cep, cidade, estado } = body;
 
     if (!email || !nome || !role || !bar_id) {
       return NextResponse.json(
@@ -50,6 +58,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Garantir que modulos_permitidos seja um array
+    const modulosArray = Array.isArray(modulos_permitidos) ? modulos_permitidos : [];
 
     // 1. Primeiro criar usuário no Supabase Auth
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
@@ -86,8 +97,16 @@ export async function POST(request: NextRequest) {
         email,
         nome,
         role,
-        modulos_permitidos: modulos_permitidos || [],
+        modulos_permitidos: modulosArray,
         ativo,
+        celular,
+        telefone,
+        cpf,
+        data_nascimento,
+        endereco,
+        cep,
+        cidade,
+        estado,
         senha_redefinida: false, // Marcar que precisa redefinir senha
         criado_em: new Date().toISOString(),
       })
@@ -169,7 +188,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, email, nome, role, modulos_permitidos, ativo } = body;
+    const { id, email, nome, role, modulos_permitidos, ativo, celular, telefone, cpf, data_nascimento, endereco, cep, cidade, estado } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -178,14 +197,25 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Garantir que modulos_permitidos seja um array
+    const modulosArray = Array.isArray(modulos_permitidos) ? modulos_permitidos : [];
+
     const { data: usuario, error } = await supabase
       .from('usuarios_bar')
       .update({
         email,
         nome,
         role,
-        modulos_permitidos,
+        modulos_permitidos: modulosArray,
         ativo,
+        celular,
+        telefone,
+        cpf,
+        data_nascimento,
+        endereco,
+        cep,
+        cidade,
+        estado,
         atualizado_em: new Date().toISOString(),
       })
       .eq('id', id)
@@ -194,7 +224,7 @@ export async function PUT(request: NextRequest) {
 
     if (error) throw error;
 
-    return NextResponse.json({ usuario });
+    return NextResponse.json({ usuario, message: 'Usuário atualizado com sucesso' });
   } catch (error) {
     console.error('Erro ao atualizar usuário:', error);
     return NextResponse.json(

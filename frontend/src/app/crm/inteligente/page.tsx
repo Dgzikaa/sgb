@@ -77,35 +77,35 @@ interface Paginacao {
   hasMore: boolean;
 }
 
-// Explicações dos segmentos RFM para tooltips
+// Explicações dos segmentos RFM para tooltips (ajustado para realidade de bares)
 const SEGMENT_TOOLTIPS = {
   vips: {
     title: '💎 VIP Champions',
-    description: 'Clientes TOP que vieram recentemente, frequentam bastante e gastam muito. Score RFM alto em todas métricas (R≥4, F≥4, M≥4). São seus melhores clientes!'
+    description: 'Seus MELHORES clientes! Vêm 3+ vezes, gastam muito (top 20%) e são recentes. Foco total em reter e recompensar!'
   },
   fieis: {
     title: '⭐ Clientes Fiéis',
-    description: 'Frequentadores assíduos com boa recência. Vêm regularmente e mantêm engajamento. Score de recência alto (R≥4) e frequência/monetário médio-alto.'
+    description: 'Frequentadores assíduos (3+ visitas) que voltam regularmente. Mantêm engajamento constante. Próximos de se tornarem VIPs!'
   },
   potencial: {
     title: '💰 Grande Potencial',
-    description: 'Gastam bem mas vêm pouco. Têm potencial para aumentar frequência. Score monetário alto (M≥3) mas frequência baixa (F≤2).'
+    description: 'Vieram 1-2 vezes mas GASTAM MUITO (top 20%)! Grande oportunidade de fidelizar e transformar em clientes regulares.'
   },
   em_risco: {
     title: '⚠️ Em Risco (Churn)',
-    description: 'URGENTE! Eram clientes frequentes mas sumiram. Não vêm há muito tempo (R≤2) mas tinham frequência alta antes (F≥4). Precisam de reconquista!'
+    description: 'URGENTE! Eram clientes recorrentes (2+ visitas) mas SUMIRAM. Ação imediata de reconquista necessária!'
   },
   novos: {
     title: '🌱 Novos Promissores',
-    description: 'Primeira ou segunda visita recente. Vieram há pouco (R≥4) mas ainda com baixa frequência (F≤2). Foco em onboarding e fidelização.'
+    description: 'Primeira visita RECENTE (últimos 30 dias). Crucial agir AGORA para garantir segunda visita e fidelizar!'
   },
   inativos: {
     title: '😴 Inativos',
-    description: 'Não vêm há muito tempo, baixa frequência e baixo gasto. Scores baixos em todas métricas (R≤2, F≤2, M≤2). Considerar campanhas de baixo custo.'
+    description: 'Vieram 1 vez há MUITO tempo (90+ dias) e não voltaram. Considerar campanhas de baixo custo ou reativação.'
   },
   regulares: {
     title: '📊 Regulares',
-    description: 'Clientes com comportamento médio. Não se destacam em nenhuma métrica específica mas mantêm presença regular. Potencial de upgrade.'
+    description: 'Clientes com 1-2 visitas nos últimos 30-90 dias. Comportamento médio. Oportunidade de engajar e aumentar frequência.'
   }
 };
 
