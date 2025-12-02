@@ -664,7 +664,6 @@ function UsuariosPage() {
                               {categoriaModulos.map(modulo => (
                                 <div key={modulo.id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                   <Checkbox
-                                    id={modulo.id}
                                     checked={Array.isArray(formData.modulos_permitidos) && formData.modulos_permitidos.includes(modulo.id)}
                                     onCheckedChange={(checked) => handleModuloChange(modulo.id, checked as boolean)}
                                     className="border-gray-300 dark:border-gray-600"
@@ -688,14 +687,13 @@ function UsuariosPage() {
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-600 flex-1">
                           <Checkbox
-                            id="ativo"
                             checked={formData.ativo}
                             onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ativo: checked as boolean }))}
                             className="border-gray-300 dark:border-gray-600"
                           />
-                          <Label htmlFor="ativo" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                          <label htmlFor="ativo" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                             Usuário ativo no sistema
-                          </Label>
+                          </label>
                         </div>
                         {editingUser && (
                           <Button

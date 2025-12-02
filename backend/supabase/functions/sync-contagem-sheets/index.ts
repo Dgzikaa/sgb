@@ -46,8 +46,8 @@ function converterData(dataStr: string): string | null {
  */
 async function buscarContagemData(data: string): Promise<InsumoSheet[]> {
   try {
-    // Buscar estrutura da planilha
-    const range = 'INSUMOS!A1:ZZZ200';
+    // Buscar estrutura da planilha (500 linhas conforme planilha real)
+    const range = 'INSUMOS!A1:ZZZ500';
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
     
     const response = await fetch(url);

@@ -219,7 +219,7 @@ export async function PUT(request: NextRequest) {
     // 1. Buscar user_id atual para atualizar Auth
     const { data: currentUser, error: fetchError } = await supabase
       .from('usuarios_bar')
-      .select('user_id, email as current_email')
+      .select('user_id, email')
       .eq('id', id)
       .single();
 
@@ -241,9 +241,9 @@ export async function PUT(request: NextRequest) {
         };
 
         // Se o email mudou, atualizar também
-        if (email && email !== currentUser.current_email) {
+        if (email && email !== currentUser.email) {
           authUpdates.email = email;
-          console.log(`📧 Atualizando email no Auth: ${currentUser.current_email} → ${email}`);
+          console.log(`📧 Atualizando email no Auth: ${currentUser.email} → ${email}`);
         }
 
         const { error: authError } = await supabase.auth.admin.updateUserById(
