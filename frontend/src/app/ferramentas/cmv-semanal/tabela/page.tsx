@@ -594,28 +594,70 @@ export default function CMVSemanalTabelaPage() {
                                 </span>
                               )}
                               <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                {item.label}
+                                {item.descricao || item.label}
                               </span>
+                              
+                              {/* Badge de tipo para vendas agregadas */}
+                              {item.tipo === 'venda_dia' && item.quantidade_contas && (
+                                <Badge variant="outline" className="ml-2 text-xs">
+                                  {item.quantidade_contas} {item.quantidade_contas === 1 ? 'conta' : 'contas'}
+                                </Badge>
+                              )}
+
+                              {/* Badge de status para compras */}
+                              {item.tipo === 'compra' && item.status && (
+                                <Badge variant={item.status === 'Pago' ? 'default' : 'outline'} className="ml-2 text-xs">
+                                  {item.status}
+                                </Badge>
+                              )}
                             </div>
                             
                             {/* Detalhes adicionais */}
                             <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                              {/* Para compras: mostrar fornecedor e categoria */}
+                              {item.tipo === 'compra' && (
+                                <>
+                                  {item.fornecedor && (
+                                    <p>
+                                      <strong>Fornecedor:</strong> {item.fornecedor}
+                                    </p>
+                                  )}
+                                  {item.categoria && (
+                                    <p>
+                                      <strong>Categoria:</strong> {item.categoria}
+                                    </p>
+                                  )}
+                                  {item.documento && item.documento !== '-' && (
+                                    <p>
+                                      <strong>Doc:</strong> {item.documento}
+                                    </p>
+                                  )}
+                                </>
+                              )}
+
+                              {/* Data */}
                               {item.data && (
                                 <p>
                                   <strong>Data:</strong> {formatarData(item.data)}
                                 </p>
                               )}
-                              {item.categoria && (
+
+                              {/* Categoria genérica (para outros tipos) */}
+                              {item.tipo !== 'compra' && item.categoria && (
                                 <p>
                                   <strong>Categoria:</strong> {item.categoria}
                                 </p>
                               )}
+
+                              {/* Detalhes complementares */}
                               {item.detalhes && (
                                 <p className="text-gray-500 dark:text-gray-500 italic">
                                   {item.detalhes}
                                 </p>
                               )}
-                              {item.quantidade && (
+
+                              {/* Quantidade (para estoque) */}
+                              {item.quantidade && item.tipo !== 'venda_dia' && (
                                 <p>
                                   <strong>Quantidade:</strong> {item.quantidade.toFixed(2)} {item.unidade || 'un'}
                                   {item.custo_unitario && (
@@ -623,6 +665,20 @@ export default function CMVSemanalTabelaPage() {
                                       × {formatarMoeda(item.custo_unitario)}
                                     </span>
                                   )}
+                                </p>
+                              )}
+
+                              {/* Motivo (para consumos) */}
+                              {item.motivo && (
+                                <p>
+                                  <strong>Motivo:</strong> {item.motivo}
+                                </p>
+                              )}
+
+                              {/* Local (para estoque) */}
+                              {item.local && (
+                                <p>
+                                  <strong>Local:</strong> {item.local}
                                 </p>
                               )}
                             </div>

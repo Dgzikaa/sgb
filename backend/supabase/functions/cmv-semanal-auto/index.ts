@@ -190,37 +190,36 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     console.log(`📊 Registros de faturamento encontrados: ${faturamento?.length || 0}`);
 
     if (faturamento) {
-      resultado.faturamento_cmvivel = faturamento.reduce((sum: number, item: any) => 
-        sum + (parseFloat(item.vr_repique) || 0), 0
-      );
       resultado.vendas_brutas = faturamento.reduce((sum: number, item: any) => 
         sum + (parseFloat(item.vr_pagamentos) || 0), 0
       );
-      resultado.vendas_liquidas = faturamento.reduce((sum: number, item: any) => 
-        sum + (parseFloat(item.vr_pagamentos) || 0) - (parseFloat(item.vr_couvert) || 0), 0
+      
+      const totalCouvert = faturamento.reduce((sum: number, item: any) => 
+        sum + (parseFloat(item.vr_couvert) || 0), 0
       );
-      console.log(`✅ Faturamento CMVível: R$ ${resultado.faturamento_cmvivel.toFixed(2)} (${faturamento.length} registros)`);
-      console.log(`✅ Vendas Brutas: R$ ${resultado.vendas_brutas.toFixed(2)}`);
-      console.log(`✅ Vendas Líquidas: R$ ${resultado.vendas_liquidas.toFixed(2)}`);
+      
+      const totalComissao = faturamento.reduce((sum: number, item: any) => 
+        sum + (parseFloat(item.vr_repique) || 0), 0
+      );
+      
+      // Vendas Líquidas = Faturamento Bar - Couvert
+      resultado.vendas_liquidas = resultado.vendas_brutas - totalCouvert;
+      
+      // Faturamento CMVível = Vendas Líquidas - Comissão (exatamente como na planilha)
+      resultado.faturamento_cmvivel = resultado.vendas_liquidas - totalComissao;
+      
+      console.log(`✅ Vendas Brutas (vr_pagamentos): R$ ${resultado.vendas_brutas.toFixed(2)}`);
+      console.log(`✅ Couvert: R$ ${totalCouvert.toFixed(2)}`);
+      console.log(`✅ Vendas Líquidas (Bar - Couvert): R$ ${resultado.vendas_liquidas.toFixed(2)}`);
+      console.log(`✅ Comissão (vr_repique): R$ ${totalComissao.toFixed(2)}`);
+      console.log(`✅ Faturamento CMVível (Líquidas - Comissão): R$ ${resultado.faturamento_cmvivel.toFixed(2)}`);
     }
   } catch (err) {
     console.error('Erro ao buscar faturamento:', err);
   }
 
-  // 4. BUSCAR COMPRAS DO NIBO
+  // 4. BUSCAR COMPRAS DO NIBO (exatamente como na planilha)
   try {
-    // Filtrar APENAS categorias de MERCADORIAS (excluir impostos, salários, etc)
-    const categoriasPermitidas = [
-      'Custo Bebidas',
-      'Custo Comida',
-      'CUSTO COMIDA',
-      'Custo Drinks',
-      'ALIMENTAÇÃO',
-      'Materiais de Limpeza e Descartáveis',
-      'Utensílios',
-      'Materiais Operação'
-    ];
-
     const comprasNibo = await fetchAllWithPagination(
       supabase
         .from('nibo_agendamentos')
@@ -232,41 +231,34 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     );
 
     if (comprasNibo) {
-      // Filtrar apenas categorias de mercadorias
-      const comprasMercadorias = comprasNibo.filter((item: any) => 
-        categoriasPermitidas.includes(item.categoria_nome)
-      );
-
-      // Separar por tipo de custo
-      resultado.compras_custo_bebidas = comprasMercadorias
-        .filter((item: any) => item.categoria_nome === 'Custo Bebidas')
-        .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
-
-      resultado.compras_custo_comida = comprasMercadorias
+      // BEBIDAS + TABACARIA = "Custo Bebidas" + "Custo Outros"
+      resultado.compras_custo_bebidas = comprasNibo
         .filter((item: any) => 
-          item.categoria_nome === 'Custo Comida' || 
-          item.categoria_nome === 'CUSTO COMIDA' ||
-          item.categoria_nome === 'ALIMENTAÇÃO'
+          item.categoria_nome === 'Custo Bebidas' ||
+          item.categoria_nome === 'Custo Outros'
         )
         .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
-      resultado.compras_custo_drinks = comprasMercadorias
+      // COZINHA = APENAS "CUSTO COMIDA" (exato, não inclui "ALIMENTAÇÃO")
+      resultado.compras_custo_comida = comprasNibo
+        .filter((item: any) => item.categoria_nome === 'CUSTO COMIDA')
+        .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+
+      // DRINKS = "Custo Drinks"
+      resultado.compras_custo_drinks = comprasNibo
         .filter((item: any) => item.categoria_nome === 'Custo Drinks')
         .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
-      resultado.compras_custo_outros = comprasMercadorias
-        .filter((item: any) => 
-          item.categoria_nome === 'Materiais de Limpeza e Descartáveis' ||
-          item.categoria_nome === 'Utensílios' ||
-          item.categoria_nome === 'Materiais Operação'
-        )
-        .reduce((sum: number, item: any) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+      // OUTROS = Zero (Materiais de Limpeza e Operação NÃO entram no CMV)
+      resultado.compras_custo_outros = 0;
 
-      console.log(`✅ Compras Bebidas: R$ ${resultado.compras_custo_bebidas.toFixed(2)}`);
-      console.log(`✅ Compras Comida: R$ ${resultado.compras_custo_comida.toFixed(2)}`);
+      const totalCompras = resultado.compras_custo_bebidas + resultado.compras_custo_comida + 
+                           resultado.compras_custo_drinks;
+
+      console.log(`✅ Compras Bebidas + Tabacaria: R$ ${resultado.compras_custo_bebidas.toFixed(2)}`);
+      console.log(`✅ Compras Cozinha (CUSTO COMIDA): R$ ${resultado.compras_custo_comida.toFixed(2)}`);
       console.log(`✅ Compras Drinks: R$ ${resultado.compras_custo_drinks.toFixed(2)}`);
-      console.log(`✅ Compras Outros: R$ ${resultado.compras_custo_outros.toFixed(2)}`);
-      console.log(`📊 Total compras MERCADORIAS: ${comprasMercadorias.length} registros (filtrado de ${comprasNibo.length})`);
+      console.log(`📊 TOTAL COMPRAS CMV: R$ ${totalCompras.toFixed(2)}`);
     }
   } catch (err) {
     console.error('Erro ao buscar compras do NIBO:', err);
@@ -274,14 +266,36 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 5. BUSCAR ESTOQUES
   try {
-    const { data: ultimaContagem } = await supabase
+    // Buscar a contagem MAIS COMPLETA (com mais insumos) dentro do período
+    const { data: contagens } = await supabase
       .from('contagem_estoque_insumos')
       .select('data_contagem')
       .eq('bar_id', barId)
-      .lte('data_contagem', dataFim)
-      .order('data_contagem', { ascending: false })
-      .limit(1)
-      .single();
+      .gte('data_contagem', dataInicio)
+      .lte('data_contagem', dataFim);
+    
+    // Encontrar a data com mais insumos contados
+    let dataContagemMaisCompleta = null;
+    let maxInsumos = 0;
+    
+    if (contagens && contagens.length > 0) {
+      const datasUnicas = [...new Set(contagens.map((c: any) => c.data_contagem))];
+      
+      for (const data of datasUnicas) {
+        const { count } = await supabase
+          .from('contagem_estoque_insumos')
+          .select('*', { count: 'exact', head: true })
+          .eq('bar_id', barId)
+          .eq('data_contagem', data);
+        
+        if (count && count > maxInsumos) {
+          maxInsumos = count;
+          dataContagemMaisCompleta = data;
+        }
+      }
+    }
+    
+    const ultimaContagem = dataContagemMaisCompleta ? { data_contagem: dataContagemMaisCompleta } : null;
 
     if (ultimaContagem) {
       const dataContagem = ultimaContagem.data_contagem;

@@ -67,7 +67,18 @@ export async function GET(request: NextRequest) {
       .eq('ativo', true)
       .range(0, 99999); // Remove limite padrão
 
-    // 4. Criar mapa de clientes unificados
+    // 4. Buscar TODOS os dados de pagamentos do ContaHub
+    const { data: contahubData } = await supabase
+      .from('contahub_pagamentos')
+      .select('cli, cliente, vr_pagamentos, dt_transacao')
+      .eq('vd', barId.toString())
+      .not('cliente', 'is', null)
+      .not('cliente', 'eq', '')
+      .range(0, 99999); // Remove limite padrão
+
+    console.log(`📊 Dados carregados: Sympla=${symplaData?.length || 0}, GetIn=${getinData?.length || 0}, ContaHub=${contahubData?.length || 0}`);
+
+    // 5. Criar mapa de clientes unificados
     const clientesMap = new Map<string, ClienteUnificado>();
 
     // Processar Sympla
@@ -141,7 +152,55 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 5. Enriquecer com dados de gastos dos eventos
+    // Processar ContaHub (dados REAIS de pagamentos)
+    if (contahubData) {
+      console.log(`💳 Processando ${contahubData.length} pagamentos do ContaHub...`);
+      
+      for (const item of contahubData) {
+        const nome = item.cliente?.trim();
+        if (!nome || nome === 'MESA' || nome === 'SEM NOME') continue;
+
+        const id = `contahub_${item.cli || nome.toLowerCase()}`;
+        
+        if (!clientesMap.has(id)) {
+          clientesMap.set(id, {
+            identificador: id,
+            nome,
+            total_visitas: 0,
+            total_gasto: 0,
+            ultima_visita: '',
+            primeira_visita: '',
+            dias_desde_ultima_visita: 0,
+            ticket_medio: 0,
+            frequencia_dias: 0
+          });
+        }
+
+        const cliente = clientesMap.get(id)!;
+        cliente.total_visitas++;
+        cliente.total_gasto += parseFloat(item.vr_pagamentos || '0');
+        
+        if (item.dt_transacao) {
+          const dataTransacao = item.dt_transacao.toString();
+          
+          if (!cliente.ultima_visita || dataTransacao > cliente.ultima_visita) {
+            cliente.ultima_visita = dataTransacao;
+          }
+          if (!cliente.primeira_visita || dataTransacao < cliente.primeira_visita) {
+            cliente.primeira_visita = dataTransacao;
+          }
+        }
+      }
+
+      // Atualizar ticket médio dos clientes ContaHub
+      clientesMap.forEach(cliente => {
+        if (cliente.identificador.startsWith('contahub_') && cliente.total_visitas > 0) {
+          cliente.ticket_medio = cliente.total_gasto / cliente.total_visitas;
+        }
+      });
+    }
+
+    // 6. Enriquecer com dados estimados SOMENTE para Sympla/GetIn (que não têm valor real)
     if (eventosData) {
       const gastoPorEvento = new Map<string, number>();
       
@@ -150,14 +209,17 @@ export async function GET(request: NextRequest) {
         gastoPorEvento.set(evento.data_evento, ticketMedio);
       });
 
-      // Distribuir gastos proporcionalmente
+      // Distribuir gastos proporcionalmente APENAS para quem não tem gasto real
       clientesMap.forEach(cliente => {
-        cliente.total_gasto = cliente.total_visitas * 150; // Estimativa inicial
-        cliente.ticket_medio = cliente.total_visitas > 0 ? cliente.total_gasto / cliente.total_visitas : 0;
+        // Se já tem gasto real (ContaHub), não sobrescrever
+        if (cliente.total_gasto === 0) {
+          cliente.total_gasto = cliente.total_visitas * 150; // Estimativa inicial
+          cliente.ticket_medio = cliente.total_visitas > 0 ? cliente.total_gasto / cliente.total_visitas : 0;
+        }
       });
     }
 
-    // 6. Calcular métricas temporais
+    // 7. Calcular métricas temporais
     const hoje = new Date();
     clientesMap.forEach(cliente => {
       if (cliente.ultima_visita) {
@@ -173,7 +235,9 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 7. Calcular scores RFM
+    console.log(`👥 Total de clientes únicos unificados: ${clientesMap.size}`);
+
+    // 8. Calcular scores RFM
     const clientes = Array.from(clientesMap.values());
     
     // Calcular quintis para cada métrica
@@ -200,7 +264,7 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    // 8. Segmentar clientes
+    // 9. Segmentar clientes
     const clientesSegmentados = clientes.map(cliente => {
       const r_score = getScore(cliente.dias_desde_ultima_visita, recencies, true); // Menor recência = melhor
       const f_score = getScore(cliente.total_visitas, frequencies);
@@ -295,19 +359,19 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // 9. Ordenar por prioridade e RFM total
+    // 10. Ordenar por prioridade e RFM total
     clientesSegmentados.sort((a, b) => {
       if (a.prioridade !== b.prioridade) return b.prioridade - a.prioridade;
       return b.rfm_total - a.rfm_total;
     });
 
-    // 10. Filtrar por segmento se especificado
+    // 11. Filtrar por segmento se especificado
     let clientesFiltrados = clientesSegmentados;
     if (segmento !== 'todos') {
       clientesFiltrados = clientesSegmentados.filter(c => c.segmento === segmento);
     }
 
-    // 11. Estatísticas gerais (sempre retorna o total)
+    // 12. Estatísticas gerais (sempre retorna o total)
     const stats = {
       total_clientes: clientesSegmentados.length,
       vips: clientesSegmentados.filter(c => c.segmento.includes('VIP')).length,
@@ -319,7 +383,7 @@ export async function GET(request: NextRequest) {
       potencial: clientesSegmentados.filter(c => c.segmento.includes('Potencial')).length,
     };
 
-    // 12. Aplicar paginação
+    // 13. Aplicar paginação
     const totalClientes = clientesFiltrados.length;
     const totalPages = Math.ceil(totalClientes / limit);
     const startIndex = (page - 1) * limit;

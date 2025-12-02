@@ -129,16 +129,17 @@ export async function GET(request: NextRequest) {
 // ==================== FUNÇÕES AUXILIARES ====================
 
 /**
- * Buscar detalhes de compras
+ * Buscar detalhes de compras do Nibo
  */
 async function buscarDetalhesCompras(barId: number, dataInicio: string, dataFim: string, campo: string) {
   const { data, error } = await supabase
-    .from('compras_nibo')
+    .from('nibo_agendamentos')
     .select('*')
     .eq('bar_id', barId)
-    .gte('data_emissao', dataInicio)
-    .lte('data_emissao', dataFim)
-    .order('data_emissao', { ascending: true });
+    .gte('data_vencimento', dataInicio)
+    .lte('data_vencimento', dataFim)
+    .eq('tipo', 'Debit')
+    .order('data_vencimento', { ascending: true });
 
   if (error) {
     console.error('Erro ao buscar compras:', error);
@@ -147,47 +148,55 @@ async function buscarDetalhesCompras(barId: number, dataInicio: string, dataFim:
 
   if (!data || data.length === 0) return [];
 
-  // Mapear categorias
-  const categoriasCozinha = ['Comida', 'Alimentação', 'Cozinha', 'Alimentos'];
-  const categoriasBebidas = ['Bebidas', 'Bebidas Alcoólicas', 'Bebidas Não Alcoólicas', 'Tabacaria'];
-  const categoriasDrinks = ['Destilados', 'Drinks', 'Bar'];
+  // Mapear categorias - baseado nas categorias reais do Nibo
+  const categoriasCozinha = ['Custo Comida', 'Custo Cozinha', 'COMIDA', 'ALIMENTAÇÃO'];
+  const categoriasBebidas = ['Custo Bebidas', 'BEBIDAS', 'Cerveja', 'Vinho'];
+  const categoriasDrinks = ['Custo Drinks', 'DESTILADOS', 'DRINKS'];
 
   let detalhes: any[] = [];
 
-  data.forEach((compra: any) => {
-    const valor = parseFloat(compra.valor_total || 0);
-    const categoria = compra.categoria || '';
-    const subcategoria = compra.subcategoria || '';
+  data.forEach((agendamento: any) => {
+    const valor = parseFloat(agendamento.valor || 0);
+    const categoria = agendamento.categoria_nome || '';
+    const fornecedor = agendamento.stakeholder_nome || 'Fornecedor não especificado';
+    const descricao = agendamento.descricao || agendamento.titulo || categoria;
 
     // Filtrar por campo específico
-    if (campo === 'compras_custo_comida' && !categoriasCozinha.some(c => categoria.includes(c))) {
-      return;
+    let incluir = false;
+    if (campo === 'compras_periodo') {
+      // Todas as compras
+      incluir = true;
+    } else if (campo === 'compras_custo_comida' && categoriasCozinha.some(c => categoria.toUpperCase().includes(c.toUpperCase()))) {
+      incluir = true;
+    } else if (campo === 'compras_custo_bebidas' && categoriasBebidas.some(c => categoria.toUpperCase().includes(c.toUpperCase()))) {
+      incluir = true;
+    } else if (campo === 'compras_custo_drinks' && categoriasDrinks.some(c => categoria.toUpperCase().includes(c.toUpperCase()))) {
+      incluir = true;
+    } else if (campo === 'compras_custo_outros') {
+      // Outros = tudo que não é comida/bebida/drinks
+      const isComida = categoriasCozinha.some(c => categoria.toUpperCase().includes(c.toUpperCase()));
+      const isBebida = categoriasBebidas.some(c => categoria.toUpperCase().includes(c.toUpperCase()));
+      const isDrink = categoriasDrinks.some(c => categoria.toUpperCase().includes(c.toUpperCase()));
+      incluir = !isComida && !isBebida && !isDrink;
     }
-    if (campo === 'compras_custo_bebidas' && !categoriasBebidas.some(c => categoria.includes(c))) {
-      return;
-    }
-    if (campo === 'compras_custo_drinks' && !categoriasDrinks.some(c => categoria.includes(c))) {
-      return;
-    }
-    if (campo === 'compras_custo_outros' && (
-      categoriasCozinha.some(c => categoria.includes(c)) ||
-      categoriasBebidas.some(c => categoria.includes(c)) ||
-      categoriasDrinks.some(c => categoria.includes(c))
-    )) {
-      return;
-    }
+
+    if (!incluir) return;
 
     detalhes.push({
       tipo: 'compra',
-      descricao: compra.fornecedor || 'Fornecedor não especificado',
-      data: compra.data_emissao,
+      descricao: descricao,
+      fornecedor: fornecedor,
+      data: agendamento.data_vencimento || agendamento.data_pagamento,
       categoria: categoria,
-      subcategoria: subcategoria,
-      documento: compra.numero_documento || '-',
+      documento: agendamento.numero_documento || '-',
+      status: agendamento.status || 'Pendente',
       valor: valor,
-      detalhes: `${categoria}${subcategoria ? ' / ' + subcategoria : ''}`
+      detalhes: `${fornecedor} - ${categoria}`
     });
   });
+
+  // Ordenar por valor decrescente
+  detalhes.sort((a, b) => b.valor - a.valor);
 
   return detalhes;
 }
@@ -446,7 +455,7 @@ async function buscarDetalhesConsumoRH(barId: number, dataInicio: string, dataFi
 }
 
 /**
- * Buscar detalhes de vendas
+ * Buscar detalhes de vendas (agregado por dia)
  */
 async function buscarDetalhesVendas(barId: number, dataInicio: string, dataFim: string, campo: string) {
   const { data, error } = await supabase
@@ -459,39 +468,85 @@ async function buscarDetalhesVendas(barId: number, dataInicio: string, dataFim: 
 
   if (error || !data) return [];
 
-  let detalhes: any[] = [];
+  // Agrupar por dia
+  const vendasPorDia = new Map<string, {
+    totalBruto: number;
+    totalLiquido: number;
+    totalProdutos: number;
+    totalServicos: number;
+    totalDesconto: number;
+    quantidadeContas: number;
+  }>();
 
   data.forEach((conta: any) => {
+    const dia = conta.dt_gerencial;
     const valorProdutos = parseFloat(conta.vr_produtos || 0);
     const valorServicos = parseFloat(conta.vr_servicos || 0);
     const valorDesconto = parseFloat(conta.vr_desconto || 0);
     const valorBruto = valorProdutos + valorServicos;
     const valorLiquido = valorBruto - valorDesconto;
 
+    if (!vendasPorDia.has(dia)) {
+      vendasPorDia.set(dia, {
+        totalBruto: 0,
+        totalLiquido: 0,
+        totalProdutos: 0,
+        totalServicos: 0,
+        totalDesconto: 0,
+        quantidadeContas: 0
+      });
+    }
+
+    const agregado = vendasPorDia.get(dia)!;
+    agregado.totalBruto += valorBruto;
+    agregado.totalLiquido += valorLiquido;
+    agregado.totalProdutos += valorProdutos;
+    agregado.totalServicos += valorServicos;
+    agregado.totalDesconto += valorDesconto;
+    agregado.quantidadeContas += 1;
+  });
+
+  // Converter para array de detalhes
+  const detalhes: any[] = [];
+
+  vendasPorDia.forEach((agregado, dia) => {
+    // Formatar data para exibição
+    const dataFormatada = new Date(dia + 'T00:00:00').toLocaleDateString('pt-BR', { 
+      weekday: 'short', 
+      day: '2-digit', 
+      month: '2-digit' 
+    });
+
     if (campo === 'vendas_brutas') {
       detalhes.push({
-        tipo: 'venda',
-        descricao: conta.nm_conta || 'Conta não especificada',
-        data: conta.dt_gerencial,
-        valor: valorBruto,
-        detalhes: `Produtos: R$ ${valorProdutos.toFixed(2)} + Serviços: R$ ${valorServicos.toFixed(2)}`
+        tipo: 'venda_dia',
+        descricao: dataFormatada,
+        data: dia,
+        valor: agregado.totalBruto,
+        quantidade_contas: agregado.quantidadeContas,
+        valor_produtos: agregado.totalProdutos,
+        valor_servicos: agregado.totalServicos,
+        detalhes: `${agregado.quantidadeContas} conta(s) - Produtos: R$ ${agregado.totalProdutos.toFixed(2)} + Serviços: R$ ${agregado.totalServicos.toFixed(2)}`
       });
     } else if (campo === 'vendas_liquidas') {
       detalhes.push({
-        tipo: 'venda',
-        descricao: conta.nm_conta || 'Conta não especificada',
-        data: conta.dt_gerencial,
-        valor: valorLiquido,
-        detalhes: `Bruto: R$ ${valorBruto.toFixed(2)} - Desconto: R$ ${valorDesconto.toFixed(2)}`
+        tipo: 'venda_dia',
+        descricao: dataFormatada,
+        data: dia,
+        valor: agregado.totalLiquido,
+        quantidade_contas: agregado.quantidadeContas,
+        valor_bruto: agregado.totalBruto,
+        valor_desconto: agregado.totalDesconto,
+        detalhes: `${agregado.quantidadeContas} conta(s) - Bruto: R$ ${agregado.totalBruto.toFixed(2)} - Desconto: R$ ${agregado.totalDesconto.toFixed(2)}`
       });
     } else if (campo === 'faturamento_cmvivel') {
-      // Faturamento CMVível = apenas produtos
       detalhes.push({
-        tipo: 'venda',
-        descricao: conta.nm_conta || 'Conta não especificada',
-        data: conta.dt_gerencial,
-        valor: valorProdutos,
-        detalhes: `Produtos (sem serviços): R$ ${valorProdutos.toFixed(2)}`
+        tipo: 'venda_dia',
+        descricao: dataFormatada,
+        data: dia,
+        valor: agregado.totalProdutos,
+        quantidade_contas: agregado.quantidadeContas,
+        detalhes: `${agregado.quantidadeContas} conta(s) - Produtos (sem serviços): R$ ${agregado.totalProdutos.toFixed(2)}`
       });
     }
   });
