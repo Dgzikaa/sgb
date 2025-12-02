@@ -92,19 +92,26 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 1. BUSCAR CONSUMO DOS SÓCIOS
   try {
-    const sociosPatterns = ['corbal', 'bruno', 'matheus', 'leonardo', 'thiago', 'augusto', 'dani'];
-    
+    // Sócios: rodrigo, digão, diogo, corbal, cadu, gonza, augusto
+    // Sócios consomem com 100% desconto, então valor está em vr_desconto
+    // Filtro: Nome começa com "X-" E motivo contém "sócio" ou "socio"
     const { data: consumoSocios } = await supabase
       .from('contahub_periodo')
-      .select('vr_produtos')
+      .select('vr_desconto, motivo')
       .eq('bar_id', barId)
       .gte('dt_gerencial', dataInicio)
       .lte('dt_gerencial', dataFim)
-      .or(sociosPatterns.map((s: string) => `cli_nome.ilike.%${s}%`).join(','));
+      .ilike('cli_nome', 'x-%');
 
     if (consumoSocios) {
-      resultado.total_consumo_socios = consumoSocios.reduce((sum: number, item: any) => 
-        sum + (parseFloat(item.vr_produtos) || 0), 0
+      // Filtrar apenas os que têm "sócio" ou "socio" no motivo
+      const consumosFiltrados = consumoSocios.filter((item: any) => {
+        const motivo = (item.motivo || '').toLowerCase();
+        return motivo.includes('sócio') || motivo.includes('socio');
+      });
+      
+      resultado.total_consumo_socios = consumosFiltrados.reduce((sum: number, item: any) => 
+        sum + (parseFloat(item.vr_desconto) || 0), 0
       );
       console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)}`);
     }
@@ -114,26 +121,28 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 2. BUSCAR CONTAS ESPECIAIS
   try {
+    // Contas especiais geralmente têm desconto, então buscar em vr_desconto + vr_produtos
     const contasEspeciais: Record<string, string[]> = {
       'mesa_beneficios_cliente': ['benefício', 'beneficio'],
       'mesa_banda_dj': ['banda', 'dj', 'artista'],
       'chegadeira': ['chegadeira', 'chegador'],
-      'mesa_adm_casa': ['adm', 'administrativo', 'casa'],
+      'mesa_adm_casa': ['adm', 'administrativo', 'casa', 'marketing'],
       'mesa_rh': ['rh', 'recursos humanos']
     };
 
     for (const [campo, patterns] of Object.entries(contasEspeciais)) {
       const { data } = await supabase
         .from('contahub_periodo')
-        .select('vr_produtos')
+        .select('vr_desconto, vr_produtos, cli_nome, motivo')
         .eq('bar_id', barId)
         .gte('dt_gerencial', dataInicio)
         .lte('dt_gerencial', dataFim)
-        .or(patterns.map((p: string) => `cli_nome.ilike.%${p}%`).join(','));
+        .or(patterns.map((p: string) => `cli_nome.ilike.%${p}%,motivo.ilike.%${p}%`).join(','));
 
       if (data) {
+        // Somar desconto + produtos (podem ter desconto parcial)
         resultado[campo] = data.reduce((sum: number, item: any) => 
-          sum + (parseFloat(item.vr_produtos) || 0), 0
+          sum + (parseFloat(item.vr_desconto) || 0) + (parseFloat(item.vr_produtos) || 0), 0
         );
         console.log(`✅ ${campo}: R$ ${resultado[campo].toFixed(2)}`);
       }
