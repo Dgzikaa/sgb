@@ -63,44 +63,67 @@ interface Estatisticas {
   potencial: number;
 }
 
+interface Paginacao {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+}
+
 export default function CRMInteligentePage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
 
   const [clientes, setClientes] = useState<ClienteCRM[]>([]);
-  const [clientesFiltrados, setClientesFiltrados] = useState<ClienteCRM[]>([]);
   const [stats, setStats] = useState<Estatisticas | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [filtroSegmento, setFiltroSegmento] = useState<string>('todos');
   const [clienteSelecionado, setClienteSelecionado] = useState<ClienteCRM | null>(null);
   const [modalDetalhes, setModalDetalhes] = useState(false);
+  const [paginacao, setPaginacao] = useState<Paginacao>({
+    page: 1,
+    limit: 50,
+    total: 0,
+    totalPages: 0,
+    hasMore: false
+  });
 
   useEffect(() => {
     setPageTitle('🎯 CRM Inteligente');
   }, [setPageTitle]);
 
   useEffect(() => {
-    carregarDados();
-  }, [selectedBar]);
+    carregarDados(true);
+  }, [selectedBar, filtroSegmento]);
 
-  useEffect(() => {
-    if (filtroSegmento === 'todos') {
-      setClientesFiltrados(clientes);
+  const carregarDados = async (reset: boolean = false) => {
+    if (reset) {
+      setLoading(true);
+      setClientes([]);
+      setPaginacao(prev => ({ ...prev, page: 1 }));
     } else {
-      setClientesFiltrados(clientes.filter(c => c.segmento === filtroSegmento));
+      setLoadingMore(true);
     }
-  }, [filtroSegmento, clientes]);
 
-  const carregarDados = async () => {
-    setLoading(true);
     try {
-      const response = await fetch(`/api/crm/segmentacao?bar_id=${selectedBar?.id || 3}`);
+      const page = reset ? 1 : paginacao.page + 1;
+      const response = await fetch(
+        `/api/crm/segmentacao?bar_id=${selectedBar?.id || 3}&page=${page}&limit=50&segmento=${filtroSegmento}`
+      );
       const result = await response.json();
 
       if (result.success) {
-        setClientes(result.clientes);
+        if (reset) {
+          setClientes(result.clientes);
+          toast.success('Dados do CRM carregados!');
+        } else {
+          setClientes(prev => [...prev, ...result.clientes]);
+        }
+        
         setStats(result.estatisticas);
-        toast.success('Dados do CRM carregados!');
+        setPaginacao(result.paginacao);
       } else {
         toast.error('Erro ao carregar dados');
       }
@@ -109,6 +132,13 @@ export default function CRMInteligentePage() {
       toast.error('Erro ao carregar CRM');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const carregarMais = () => {
+    if (!loadingMore && paginacao.hasMore) {
+      carregarDados(false);
     }
   };
 
@@ -140,7 +170,7 @@ export default function CRMInteligentePage() {
 
   const exportarCSV = () => {
     const headers = ['Nome', 'Email', 'Telefone', 'Segmento', 'Visitas', 'Gasto Total', 'Ticket Médio', 'Última Visita', 'Dias Ausente', 'RFM Total'];
-    const rows = clientesFiltrados.map(c => [
+    const rows = clientes.map(c => [
       c.nome,
       c.email || '',
       c.telefone || '',
@@ -160,7 +190,7 @@ export default function CRMInteligentePage() {
     link.download = `crm_${filtroSegmento}_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
 
-    toast.success('CSV exportado!');
+    toast.success(`CSV exportado com ${clientes.length} clientes!`);
   };
 
   const abrirDetalhes = (cliente: ClienteCRM) => {
@@ -298,7 +328,7 @@ export default function CRMInteligentePage() {
               </div>
               <div className="flex gap-2">
                 <Button
-                  onClick={carregarDados}
+                  onClick={() => carregarDados(true)}
                   variant="outline"
                   size="sm"
                   disabled={loading}
@@ -311,10 +341,11 @@ export default function CRMInteligentePage() {
                   onClick={exportarCSV}
                   variant="outline"
                   size="sm"
+                  disabled={clientes.length === 0}
                   className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Exportar
+                  Exportar ({clientes.length})
                 </Button>
               </div>
             </div>
@@ -326,7 +357,7 @@ export default function CRMInteligentePage() {
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
               <Target className="w-5 h-5" />
-              Clientes Segmentados ({clientesFiltrados.length})
+              Clientes Segmentados ({paginacao.total > 0 ? `${clientes.length} de ${paginacao.total}` : clientes.length})
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400">
               Análise RFM com ações estratégicas personalizadas
@@ -347,7 +378,7 @@ export default function CRMInteligentePage() {
               </div>
             ) : (
               <div className="space-y-2">
-                {clientesFiltrados.map((cliente) => (
+                {clientes.map((cliente) => (
                   <div
                     key={cliente.identificador}
                     className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
@@ -413,12 +444,36 @@ export default function CRMInteligentePage() {
                   </div>
                 ))}
 
-                {clientesFiltrados.length === 0 && !loading && (
+                {clientes.length === 0 && !loading && (
                   <div className="text-center py-12">
                     <Users className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
                       Nenhum cliente encontrado neste segmento
                     </p>
+                  </div>
+                )}
+
+                {/* Botão Carregar Mais */}
+                {paginacao.hasMore && !loading && (
+                  <div className="flex justify-center pt-6">
+                    <Button
+                      onClick={carregarMais}
+                      disabled={loadingMore}
+                      variant="outline"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                    >
+                      {loadingMore ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Carregando...
+                        </>
+                      ) : (
+                        <>
+                          <TrendingDown className="w-4 h-4 mr-2" />
+                          Carregar mais ({paginacao.total - clientes.length} restantes)
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>

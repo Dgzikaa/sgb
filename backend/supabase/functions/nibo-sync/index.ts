@@ -353,24 +353,35 @@ class NiboSyncService {
       
       console.log(`📅 Buscando agendamentos com data de competência entre ${filterDateStart} e ${filterDateEnd}...`)
       
-      // Buscar dados da API NIBO com limite otimizado
+      // 🔥 PAGINAÇÃO OTIMIZADA - Processar em batches pequenos
       const allAgendamentos = []
       let skip = 0
-      const top = 200 // Reduzido para evitar timeout
+      const top = 200
       let hasMore = true
       let pageCount = 0
-      const maxPages = 5 // Limitar a 5 páginas para evitar timeout
+      const maxPagesPerExecution = 5 // 🔥 PROCESSAR APENAS 5 PÁGINAS POR VEZ (1000 registros)
+      const startTime = Date.now()
+      const maxExecutionTime = 45000 // 45 segundos de limite
 
-      while (hasMore && pageCount < maxPages) {
+      console.log(`⏱️ Configuração: ${maxPagesPerExecution} páginas por execução, timeout ${maxExecutionTime}ms`)
+
+      while (hasMore && pageCount < maxPagesPerExecution) {
+        // Verificar tempo de execução
+        const elapsedTime = Date.now() - startTime
+        if (elapsedTime > maxExecutionTime) {
+          console.log(`⏱️ Timeout atingido após ${elapsedTime}ms, parando na página ${pageCount}`)
+          break
+        }
+
         pageCount++
         const pageParams = {
-          $filter: `accrualDate ge ${filterDateStart} and accrualDate le ${filterDateEnd}`, // ✅ CORRIGIDO: intervalo de datas
+          $filter: `accrualDate ge ${filterDateStart} and accrualDate le ${filterDateEnd}`,
           $orderby: "accrualDate desc",
           $top: top,
           $skip: skip
         }
 
-        console.log(`📄 Buscando página ${pageCount}/${maxPages} (skip: ${skip}, top: ${top})...`)
+        console.log(`📄 Buscando página ${pageCount}/${maxPagesPerExecution} (skip: ${skip}, top: ${top})...`)
 
         const data = await this.fetchNiboData('schedules', pageParams)
         const items = data?.items || []
@@ -392,12 +403,12 @@ class NiboSyncService {
           hasMore = false
         }
 
-        // Pausa maior para não sobrecarregar
-        await new Promise(resolve => setTimeout(resolve, 200))
+        // Pausa pequena entre páginas
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
 
-      if (pageCount >= maxPages && hasMore) {
-        console.log(`⚠️ Limitado a ${maxPages} páginas para evitar timeout. Total: ${allAgendamentos.length} registros`)
+      if (hasMore) {
+        console.log(`📊 Processamento parcial: ${pageCount} páginas (${allAgendamentos.length} registros). Mais dados disponíveis.`)
       }
 
       if (allAgendamentos.length === 0) {
@@ -499,21 +510,28 @@ class NiboSyncService {
         console.log(`💾 Inseridos ${Math.min(i + insertBatchSize, tempData.length)}/${tempData.length} registros temporários`)
       }
 
-      // Processar apenas um pequeno batch inicial para evitar timeout
-      console.log('🚀 Processamento otimizado: apenas primeiros 100 registros para evitar timeout')
+      // Processar em batches otimizados para evitar timeout
+      console.log('🚀 Processamento: iniciando em batches otimizados')
       try {
         let processedRecords = 0
         
-        // Processar apenas os primeiros 100 registros para evitar timeout
-        const maxRecordsPerExecution = 100
-        const recordsToProcess = agendamentosParaProcessar.slice(0, maxRecordsPerExecution)
+        // Processar em batches de 100 registros por vez
+        const processBatchSize = 100
+        let totalBatches = Math.ceil(agendamentosParaProcessar.length / processBatchSize)
         
-        console.log(`⚙️ Processando ${recordsToProcess.length} registros de ${agendamentosParaProcessar.length} total`)
+        console.log(`⚙️ Total: ${agendamentosParaProcessar.length} registros em ${totalBatches} batches de ${processBatchSize}`)
         
-        // Processar em batches menores de 20
-        const processBatchSize = 20
-        for (let i = 0; i < recordsToProcess.length; i += processBatchSize) {
-          const batch = recordsToProcess.slice(i, i + processBatchSize)
+        // Processar todos em batches
+        for (let i = 0; i < agendamentosParaProcessar.length; i += processBatchSize) {
+          // Verificar tempo de execução
+          const elapsedTime = Date.now() - startTime
+          if (elapsedTime > maxExecutionTime) {
+            console.log(`⏱️ Timeout durante processamento após ${elapsedTime}ms, processados ${processedRecords} registros`)
+            break
+          }
+
+          const batch = agendamentosParaProcessar.slice(i, i + processBatchSize)
+          const batchNumber = Math.floor(i / processBatchSize) + 1
           
           // Preparar batch para upsert em massa
           const processedBatch = batch.map(agendamento => ({
@@ -563,9 +581,9 @@ class NiboSyncService {
 
           if (!upsertError) {
             processedRecords += processedBatch.length
-            console.log(`✅ Batch ${Math.floor(i/processBatchSize) + 1}: ${processedBatch.length} registros processados`)
+            console.log(`✅ Batch ${batchNumber}/${totalBatches}: ${processedBatch.length} registros (${processedRecords}/${agendamentosParaProcessar.length} total)`)
           } else {
-            console.error('❌ Erro no batch:', upsertError.message)
+            console.error(`❌ Erro no batch ${batchNumber}:`, upsertError.message)
           }
           
           // Pequena pausa entre batches
@@ -576,18 +594,14 @@ class NiboSyncService {
         await this.supabase
           .from('nibo_background_jobs')
           .update({
-            status: recordsToProcess.length < agendamentosParaProcessar.length ? 'partial' : 'completed',
+            status: 'completed',
             processed_records: processedRecords,
             completed_at: new Date().toISOString()
           })
           .eq('batch_id', batchId)
         
-        console.log(`✅ Processamento otimizado concluído: ${processedRecords} registros processados`)
+        console.log(`✅ Processamento concluído: ${processedRecords} registros processados de ${agendamentosParaProcessar.length} total`)
         
-        // Se há mais registros para processar, agendar próxima execução
-        if (recordsToProcess.length < agendamentosParaProcessar.length) {
-          console.log(`📋 Restam ${agendamentosParaProcessar.length - recordsToProcess.length} registros para próxima execução`)
-        }
         
       } catch (error: unknown) {
         console.error('❌ Erro no processamento otimizado:', error)

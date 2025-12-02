@@ -37,8 +37,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const barId = parseInt(searchParams.get('bar_id') || '3');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const segmento = searchParams.get('segmento') || 'todos';
 
-    console.log('🔍 CRM: Iniciando análise de segmentação de clientes...');
+    console.log(`🔍 CRM: Iniciando análise de segmentação (Página ${page}, Limite ${limit})...`);
 
     // 1. Buscar dados de eventos Sympla
     const { data: symplaData } = await supabase
@@ -295,7 +298,13 @@ export async function GET(request: NextRequest) {
       return b.rfm_total - a.rfm_total;
     });
 
-    // 10. Estatísticas gerais
+    // 10. Filtrar por segmento se especificado
+    let clientesFiltrados = clientesSegmentados;
+    if (segmento !== 'todos') {
+      clientesFiltrados = clientesSegmentados.filter(c => c.segmento === segmento);
+    }
+
+    // 11. Estatísticas gerais (sempre retorna o total)
     const stats = {
       total_clientes: clientesSegmentados.length,
       vips: clientesSegmentados.filter(c => c.segmento.includes('VIP')).length,
@@ -307,12 +316,26 @@ export async function GET(request: NextRequest) {
       potencial: clientesSegmentados.filter(c => c.segmento.includes('Potencial')).length,
     };
 
-    console.log(`✅ CRM: ${stats.total_clientes} clientes segmentados`);
+    // 12. Aplicar paginação
+    const totalClientes = clientesFiltrados.length;
+    const totalPages = Math.ceil(totalClientes / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const clientesPaginados = clientesFiltrados.slice(startIndex, endIndex);
+
+    console.log(`✅ CRM: ${clientesPaginados.length} de ${totalClientes} clientes (página ${page}/${totalPages})`);
 
     return NextResponse.json({
       success: true,
-      clientes: clientesSegmentados,
-      estatisticas: stats
+      clientes: clientesPaginados,
+      estatisticas: stats,
+      paginacao: {
+        page,
+        limit,
+        total: totalClientes,
+        totalPages,
+        hasMore: page < totalPages
+      }
     });
 
   } catch (error: any) {
