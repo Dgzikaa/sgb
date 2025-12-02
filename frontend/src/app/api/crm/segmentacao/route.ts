@@ -108,17 +108,20 @@ export async function GET(request: NextRequest) {
 
     // Buscar APENAS ContaHub - ÚNICA fonte com dados REAIS de consumo
     // Sympla/GetIn não têm dados de quanto o cliente gastou no bar
-    const contahubData = await fetchAllData(
+    const contahubDataRaw = await fetchAllData(
       'contahub_pagamentos', 
       'cli, cliente, vr_pagamentos, dt_transacao', 
       {
-        eq_bar_id: barId,
-        not_is_cliente: null,
-        not_eq_cliente: ''
+        eq_bar_id: barId
       }
     );
 
-    console.log(`💳 ContaHub: ${contahubData.length} pagamentos carregados`);
+    // Filtrar clientes válidos (remover null e vazio)
+    const contahubData = contahubDataRaw.filter(item => 
+      item.cliente && item.cliente.trim() !== ''
+    );
+
+    console.log(`💳 ContaHub: ${contahubData.length} pagamentos válidos (de ${contahubDataRaw.length} totais)`);
 
     // 5. Processar APENAS ContaHub - dados REAIS de consumo
     const clientesMap = new Map<string, ClienteUnificado>();
