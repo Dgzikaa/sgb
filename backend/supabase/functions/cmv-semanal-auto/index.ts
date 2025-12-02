@@ -109,6 +109,11 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     faturamento_cmvivel: 0,
     vendas_brutas: 0,
     vendas_liquidas: 0,
+    // Estoque INICIAL (início da semana)
+    estoque_inicial_cozinha: 0,
+    estoque_inicial_bebidas: 0,
+    estoque_inicial_drinks: 0,
+    // Estoque FINAL (fim da semana)
     estoque_final_cozinha: 0,
     estoque_final_bebidas: 0,
     estoque_final_drinks: 0,
@@ -266,14 +271,15 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 5. BUSCAR ESTOQUES
   try {
-    // ESTOQUE INICIAL: Última contagem ANTES ou NO INÍCIO da semana
+    // ESTOQUE INICIAL: Última contagem ANTES ou NO INÍCIO da semana COM VALOR > 0
     const { data: contagensInicio } = await supabase
       .from('contagem_estoque_insumos')
       .select('data_contagem')
       .eq('bar_id', barId)
       .lte('data_contagem', dataInicio)
+      .gt('estoque_final', 0)  // Apenas insumos com estoque > 0
       .order('data_contagem', { ascending: false })
-      .limit(10);
+      .limit(50);
     
     let dataContagemInicial = null;
     let maxInsumosInicio = 0;
@@ -282,13 +288,15 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
       const datasUnicas = [...new Set(contagensInicio.map((c: any) => c.data_contagem))];
       
       for (const data of datasUnicas) {
+        // Contar insumos COM estoque > 0 nesta data
         const { count } = await supabase
           .from('contagem_estoque_insumos')
           .select('*', { count: 'exact', head: true })
           .eq('bar_id', barId)
-          .eq('data_contagem', data);
+          .eq('data_contagem', data)
+          .gt('estoque_final', 0);
         
-        if (count && count > 100 && count > maxInsumosInicio) {
+        if (count && count > 50 && count > maxInsumosInicio) {
           maxInsumosInicio = count;
           dataContagemInicial = data;
         }
@@ -299,14 +307,15 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
       }
     }
     
-    // ESTOQUE FINAL: Primeira contagem DEPOIS ou NO FIM da semana
+    // ESTOQUE FINAL: Primeira contagem DEPOIS ou NO FIM da semana COM VALOR > 0
     const { data: contagensFinal } = await supabase
       .from('contagem_estoque_insumos')
       .select('data_contagem')
       .eq('bar_id', barId)
       .gte('data_contagem', dataFim)
+      .gt('estoque_final', 0)  // Apenas insumos com estoque > 0
       .order('data_contagem', { ascending: true })
-      .limit(10);
+      .limit(50);
     
     let dataContagemFinal = null;
     let maxInsumosFinal = 0;
@@ -315,13 +324,15 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
       const datasUnicas = [...new Set(contagensFinal.map((c: any) => c.data_contagem))];
       
       for (const data of datasUnicas) {
+        // Contar insumos COM estoque > 0 nesta data
         const { count } = await supabase
           .from('contagem_estoque_insumos')
           .select('*', { count: 'exact', head: true })
           .eq('bar_id', barId)
-          .eq('data_contagem', data);
+          .eq('data_contagem', data)
+          .gt('estoque_final', 0);
         
-        if (count && count > 100 && count > maxInsumosFinal) {
+        if (count && count > 50 && count > maxInsumosFinal) {
           maxInsumosFinal = count;
           dataContagemFinal = data;
         }
@@ -335,55 +346,55 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     console.log(`📅 Estoque Inicial: ${dataContagemInicial} (${maxInsumosInicio} insumos)`);
     console.log(`📅 Estoque Final: ${dataContagemFinal} (${maxInsumosFinal} insumos)`);
     
-    const ultimaContagem = dataContagemFinal ? { data_contagem: dataContagemFinal } : null;
-
-    if (ultimaContagem) {
-      const dataContagem = ultimaContagem.data_contagem;
-      console.log(`📅 Usando contagem de estoque de: ${dataContagem}`);
-
-      const insumos = await fetchAllWithPagination(
+    // Função auxiliar para calcular estoque de uma data
+    async function calcularEstoqueData(dataContagem: string) {
+      const contagens = await fetchAllWithPagination(
         supabase
-          .from('insumos')
-          .select('id, tipo_local, categoria, custo_unitario')
+          .from('contagem_estoque_insumos')
+          .select('insumo_id, estoque_final, custo_unitario, tipo_local, categoria')
           .eq('bar_id', barId)
+          .eq('data_contagem', dataContagem)
       );
 
-      if (insumos) {
-        const contagens = await fetchAllWithPagination(
-          supabase
-            .from('contagem_estoque_insumos')
-            .select('insumo_id, estoque_final')
-            .eq('bar_id', barId)
-            .eq('data_contagem', dataContagem)
-        );
+      let totalCozinha = 0;
+      let totalDrinks = 0;
+      let totalBebidas = 0;
 
-        if (contagens) {
-          const insumosMap = new Map(insumos.map((i: any) => [i.id, i]));
-          const categoriasCozinha = ['ARMAZÉM (C)', 'HORTIFRUTI (C)', 'MERCADO (C)', 'PÃES', 'PEIXE', 'PROTEÍNA', 'Mercado (S)', 'tempero', 'hortifruti', 'líquido'];
-          const categoriasDrinks = ['ARMAZÉM B', 'DESTILADOS', 'DESTILADOS LOG', 'HORTIFRUTI B', 'IMPÉRIO', 'MERCADO B', 'POLPAS', 'Não-alcóolicos', 'OUTROS', 'polpa', 'fruta'];
-          const categoriasExcluir = ['HORTIFRUTI (F)', 'MERCADO (F)', 'PROTEÍNA (F)'];
-
-          contagens.forEach((contagem: any) => {
-            const insumo = insumosMap.get(contagem.insumo_id);
-            if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
-
-            const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
-
-            if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
-              resultado.estoque_final_cozinha += valor;
-            } else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
-              resultado.estoque_final_drinks += valor;
-            } else if (insumo.tipo_local === 'bar') {
-              resultado.estoque_final_bebidas += valor;
-            }
-          });
-
-          console.log(`✅ Estoque Cozinha: R$ ${resultado.estoque_final_cozinha.toFixed(2)}`);
-          console.log(`✅ Estoque Drinks: R$ ${resultado.estoque_final_drinks.toFixed(2)}`);
-          console.log(`✅ Estoque Bebidas + Tabacaria: R$ ${resultado.estoque_final_bebidas.toFixed(2)}`);
-        }
+      if (contagens) {
+        contagens.forEach((contagem: any) => {
+          const valor = (contagem.estoque_final || 0) * (contagem.custo_unitario || 0);
+          
+          if (contagem.tipo_local === 'cozinha') {
+            totalCozinha += valor;
+          } else if (contagem.tipo_local === 'bar') {
+            totalBebidas += valor;
+          }
+        });
       }
+
+      return { cozinha: totalCozinha, drinks: totalDrinks, bebidas: totalBebidas, total: totalCozinha + totalDrinks + totalBebidas };
     }
+
+    // Calcular ESTOQUE INICIAL
+    if (dataContagemInicial) {
+      console.log(`📦 Calculando estoque INICIAL de ${dataContagemInicial}...`);
+      const estoqueInicial = await calcularEstoqueData(dataContagemInicial);
+      resultado.estoque_inicial_cozinha = estoqueInicial.cozinha;
+      resultado.estoque_inicial_drinks = estoqueInicial.drinks;
+      resultado.estoque_inicial_bebidas = estoqueInicial.bebidas;
+      console.log(`✅ Estoque Inicial: R$ ${estoqueInicial.total.toFixed(2)}`);
+    }
+
+    // Calcular ESTOQUE FINAL
+    if (dataContagemFinal) {
+      console.log(`📦 Calculando estoque FINAL de ${dataContagemFinal}...`);
+      const estoqueFinal = await calcularEstoqueData(dataContagemFinal);
+      resultado.estoque_final_cozinha = estoqueFinal.cozinha;
+      resultado.estoque_final_drinks = estoqueFinal.drinks;
+      resultado.estoque_final_bebidas = estoqueFinal.bebidas;
+      console.log(`✅ Estoque Final: R$ ${estoqueFinal.total.toFixed(2)}`);
+    }
+    
   } catch (err) {
     console.error('Erro ao buscar estoques:', err);
   }
@@ -401,7 +412,12 @@ function calcularCMV(dados: any) {
   dados.consumo_adm = (dados.mesa_adm_casa || 0) * 0.35;
   dados.consumo_artista = (dados.mesa_banda_dj || 0) * 0.35;
   
-  // Estoque final
+  // Estoque INICIAL (calculado da contagem de insumos)
+  dados.estoque_inicial = (dados.estoque_inicial_cozinha || 0) + 
+                          (dados.estoque_inicial_bebidas || 0) + 
+                          (dados.estoque_inicial_drinks || 0);
+  
+  // Estoque FINAL (calculado da contagem de insumos)
   dados.estoque_final = (dados.estoque_final_cozinha || 0) + 
                          (dados.estoque_final_bebidas || 0) + 
                          (dados.estoque_final_drinks || 0);
@@ -412,7 +428,7 @@ function calcularCMV(dados: any) {
                           (dados.compras_custo_outros || 0) + 
                           (dados.compras_custo_drinks || 0);
   
-  // CMV Real
+  // CMV Real = Estoque Inicial + Compras - Estoque Final
   const cmvBruto = (dados.estoque_inicial || 0) + 
                    (dados.compras_periodo || 0) - 
                    (dados.estoque_final || 0);
