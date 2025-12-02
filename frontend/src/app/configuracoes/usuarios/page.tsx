@@ -598,72 +598,80 @@ function UsuariosPage() {
                           <p className="text-sm text-gray-600 dark:text-gray-400">Informações de localização</p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="cep" className="text-gray-300 mb-2 block">CEP</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="cep" className="text-sm font-medium text-gray-700 dark:text-gray-300">CEP</Label>
                           <Input
                             id="cep"
                             value={formData.cep}
                             onChange={(e) => setFormData(prev => ({ ...prev, cep: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="00000-000"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="cidade" className="text-gray-300 mb-2 block">Cidade</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="cidade" className="text-sm font-medium text-gray-700 dark:text-gray-300">Cidade</Label>
                           <Input
                             id="cidade"
                             value={formData.cidade}
                             onChange={(e) => setFormData(prev => ({ ...prev, cidade: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="Nome da cidade"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="estado" className="text-gray-300 mb-2 block">Estado</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="estado" className="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</Label>
                           <Input
                             id="estado"
                             value={formData.estado}
                             onChange={(e) => setFormData(prev => ({ ...prev, estado: e.target.value }))}
-                            className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             placeholder="SP"
                           />
                         </div>
                       </div>
-                      <div>
-                        <Label htmlFor="endereco" className="text-gray-300 mb-2 block">Endereço Completo</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="endereco" className="text-sm font-medium text-gray-700 dark:text-gray-300">Endereço Completo</Label>
                         <Input
                           id="endereco"
                           value={formData.endereco}
                           onChange={(e) => setFormData(prev => ({ ...prev, endereco: e.target.value }))}
-                          className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                          className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                           placeholder="Rua, número, complemento"
                         />
                       </div>
                     </div>
 
                     {/* Permissões */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Shield className="w-4 h-4 text-yellow-400" />
-                        <h3 className="text-lg font-semibold text-white">Permissões</h3>
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                          <Shield className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Permissões</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Selecione os módulos que o usuário pode acessar</p>
+                        </div>
                       </div>
-                      <div className="bg-gray-700/50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                      <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 max-h-80 overflow-y-auto">
                         {Object.entries(modulosPorCategoria).map(([categoria, categoriaModulos]) => (
-                          <div key={categoria} className="mb-4 last:mb-0">
-                            <h4 className="font-medium text-white mb-2 capitalize border-b border-gray-600 pb-1">
+                          <div key={categoria} className="mb-6 last:mb-0">
+                            <h4 className="font-semibold text-gray-900 dark:text-white mb-3 capitalize border-b border-gray-200 dark:border-gray-600 pb-2 flex items-center gap-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                               {categoria.replace('_', ' ')}
                             </h4>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-4">
                               {categoriaModulos.map(modulo => (
-                                <div key={modulo.id} className="flex items-center space-x-2">
+                                <div key={modulo.id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                   <Checkbox
+                                    id={modulo.id}
                                     checked={Array.isArray(formData.modulos_permitidos) && formData.modulos_permitidos.includes(modulo.id)}
                                     onCheckedChange={(checked) => handleModuloChange(modulo.id, checked as boolean)}
+                                    className="border-gray-300 dark:border-gray-600"
                                   />
                                   <Label 
                                     htmlFor={modulo.id} 
-                                    className="text-sm text-gray-300 cursor-pointer"
+                                    className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer flex-1"
                                   >
                                     {modulo.nome}
                                   </Label>
@@ -676,14 +684,16 @@ function UsuariosPage() {
                     </div>
 
                     {/* Status e Ações */}
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
+                    <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-600 flex-1">
                           <Checkbox
+                            id="ativo"
                             checked={formData.ativo}
                             onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ativo: checked as boolean }))}
+                            className="border-gray-300 dark:border-gray-600"
                           />
-                          <Label htmlFor="ativo" className="text-gray-300">
+                          <Label htmlFor="ativo" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                             Usuário ativo no sistema
                           </Label>
                         </div>
@@ -692,7 +702,7 @@ function UsuariosPage() {
                             type="button"
                             variant="outline"
                             onClick={() => handleResetPassword(editingUser.id)}
-                            className="bg-yellow-500/10 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20"
+                            className="bg-yellow-500/10 border-yellow-500 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20 transition-all"
                           >
                             <Key className="w-4 h-4 mr-2" />
                             Redefinir Senha
@@ -703,23 +713,23 @@ function UsuariosPage() {
                   </form>
                 </div>
 
-                <DialogFooter className="border-t border-gray-700 pt-4">
+                <DialogFooter className="border-t border-gray-200 dark:border-gray-700 pt-6 bg-gray-50 dark:bg-gray-800/50 -m-6 mt-0 p-6 flex gap-3">
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={() => setIsDialogOpen(false)}
-                    className="bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
+                    className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all"
                   >
                     Cancelar
                   </Button>
                   <Button 
                     onClick={handleSubmit}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white transition-all shadow-lg hover:shadow-xl"
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     {editingUser ? 'Atualizar' : 'Criar'} Usuário
                   </Button>
-                                  </DialogFooter>
+                </DialogFooter>
                 </DialogContent>
             </Dialog>
           </div>
