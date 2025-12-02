@@ -19,12 +19,28 @@ export async function GET() {
     if (error) throw error;
 
     // Garantir que modulos_permitidos seja sempre um array
-    const usuariosFormatados = usuarios?.map(u => ({
-      ...u,
-      modulos_permitidos: Array.isArray(u.modulos_permitidos) 
-        ? u.modulos_permitidos 
-        : (u.modulos_permitidos ? JSON.parse(u.modulos_permitidos) : [])
-    })) || [];
+    const usuariosFormatados = usuarios?.map(u => {
+      let modulosPermitidos: string[] = [];
+      
+      if (Array.isArray(u.modulos_permitidos)) {
+        modulosPermitidos = u.modulos_permitidos;
+      } else if (u.modulos_permitidos && typeof u.modulos_permitidos === 'string') {
+        // Se vier como string JSON, fazer parse
+        try {
+          modulosPermitidos = JSON.parse(u.modulos_permitidos);
+        } catch {
+          modulosPermitidos = [];
+        }
+      } else if (u.modulos_permitidos && typeof u.modulos_permitidos === 'object') {
+        // Se vier como objeto (já parseado pelo Postgres JSONB), usar direto
+        modulosPermitidos = u.modulos_permitidos;
+      }
+      
+      return {
+        ...u,
+        modulos_permitidos: modulosPermitidos
+      };
+    }) || [];
 
     return NextResponse.json({ usuarios: usuariosFormatados });
   } catch (error) {

@@ -60,7 +60,7 @@ export async function GET() {
     const { data: barData, error } = await supabase
       .from('bars')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('id', { ascending: false });
 
     if (error) {
       throw error;
@@ -88,7 +88,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      data: data,
+      bars: data,
     }, {
       headers: createCacheHeaders('MEDIUM'),
     });
