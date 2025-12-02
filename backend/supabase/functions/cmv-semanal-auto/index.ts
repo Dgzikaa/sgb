@@ -46,6 +46,30 @@ function getWeekDates(date: Date): { inicio: string; fim: string } {
 }
 
 /**
+ * Helper: Buscar TODOS os registros com paginação automática (sem limite de 1000)
+ */
+async function fetchAllWithPagination(baseQuery: any) {
+  let allRecords: any[] = [];
+  let from = 0;
+  const batchSize = 1000;
+  let hasMore = true;
+  
+  while (hasMore) {
+    const { data: batch } = await baseQuery.range(from, from + batchSize - 1);
+    
+    if (batch && batch.length > 0) {
+      allRecords = allRecords.concat(batch);
+      from += batchSize;
+      hasMore = batch.length === batchSize;
+    } else {
+      hasMore = false;
+    }
+  }
+  
+  return allRecords;
+}
+
+/**
  * Buscar CMV da semana anterior (para estoque inicial)
  */
 async function buscarCMVSemanaAnterior(supabase: any, barId: number, ano: number, semana: number) {
@@ -95,20 +119,22 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     // Sócios: rodrigo, digão, diogo, corbal, cadu, gonza, augusto, lg, vini
     // Sócios consomem com 100% desconto, então valor está em vr_desconto
     // Filtro: Motivo contém "sócio" ou "socio" (não precisa ter X- no nome)
-    const { data: consumoSocios } = await supabase
-      .from('contahub_periodo')
-      .select('vr_desconto, vr_produtos, motivo')
-      .eq('bar_id', barId)
-      .gte('dt_gerencial', dataInicio)
-      .lte('dt_gerencial', dataFim)
-      .or('motivo.ilike.%sócio%,motivo.ilike.%socio%');
+    const consumoSocios = await fetchAllWithPagination(
+      supabase
+        .from('contahub_periodo')
+        .select('vr_desconto, vr_produtos, motivo')
+        .eq('bar_id', barId)
+        .gte('dt_gerencial', dataInicio)
+        .lte('dt_gerencial', dataFim)
+        .or('motivo.ilike.%sócio%,motivo.ilike.%socio%')
+    );
 
     if (consumoSocios) {
       // Somar desconto + produtos (alguns podem ter desconto parcial)
       resultado.total_consumo_socios = consumoSocios.reduce((sum: number, item: any) => 
         sum + (parseFloat(item.vr_desconto) || 0) + (parseFloat(item.vr_produtos) || 0), 0
       );
-      console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)}`);
+      console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)} (${consumoSocios.length} registros)`);
     }
   } catch (err) {
     console.error('Erro ao buscar consumo dos sócios:', err);
@@ -126,20 +152,22 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
     };
 
     for (const [campo, patterns] of Object.entries(contasEspeciais)) {
-      const { data } = await supabase
-        .from('contahub_periodo')
-        .select('vr_desconto, vr_produtos, cli_nome, motivo')
-        .eq('bar_id', barId)
-        .gte('dt_gerencial', dataInicio)
-        .lte('dt_gerencial', dataFim)
-        .or(patterns.map((p: string) => `motivo.ilike.%${p}%`).join(','));
+      const data = await fetchAllWithPagination(
+        supabase
+          .from('contahub_periodo')
+          .select('vr_desconto, vr_produtos, cli_nome, motivo')
+          .eq('bar_id', barId)
+          .gte('dt_gerencial', dataInicio)
+          .lte('dt_gerencial', dataFim)
+          .or(patterns.map((p: string) => `motivo.ilike.%${p}%`).join(','))
+      );
 
       if (data) {
         // Somar desconto + produtos (podem ter desconto parcial)
         resultado[campo] = data.reduce((sum: number, item: any) => 
           sum + (parseFloat(item.vr_desconto) || 0) + (parseFloat(item.vr_produtos) || 0), 0
         );
-        console.log(`✅ ${campo}: R$ ${resultado[campo].toFixed(2)}`);
+        console.log(`✅ ${campo}: R$ ${resultado[campo].toFixed(2)} (${data.length} registros)`);
       }
     }
   } catch (err) {
@@ -148,12 +176,18 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
   // 3. BUSCAR FATURAMENTO
   try {
-    const { data: faturamento } = await supabase
-      .from('contahub_periodo')
-      .select('vr_repique, vr_pagamentos, vr_couvert')
-      .eq('bar_id', barId)
-      .gte('dt_gerencial', dataInicio)
-      .lte('dt_gerencial', dataFim);
+    console.log(`🔍 Buscando faturamento de ${dataInicio} até ${dataFim} (bar_id: ${barId})`);
+    
+    const faturamento = await fetchAllWithPagination(
+      supabase
+        .from('contahub_periodo')
+        .select('vr_repique, vr_pagamentos, vr_couvert')
+        .eq('bar_id', barId)
+        .gte('dt_gerencial', dataInicio)
+        .lte('dt_gerencial', dataFim)
+    );
+
+    console.log(`📊 Registros de faturamento encontrados: ${faturamento?.length || 0}`);
 
     if (faturamento) {
       resultado.faturamento_cmvivel = faturamento.reduce((sum: number, item: any) => 
@@ -165,7 +199,9 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
       resultado.vendas_liquidas = faturamento.reduce((sum: number, item: any) => 
         sum + (parseFloat(item.vr_pagamentos) || 0) - (parseFloat(item.vr_couvert) || 0), 0
       );
-      console.log(`✅ Faturamento CMVível: R$ ${resultado.faturamento_cmvivel.toFixed(2)}`);
+      console.log(`✅ Faturamento CMVível: R$ ${resultado.faturamento_cmvivel.toFixed(2)} (${faturamento.length} registros)`);
+      console.log(`✅ Vendas Brutas: R$ ${resultado.vendas_brutas.toFixed(2)}`);
+      console.log(`✅ Vendas Líquidas: R$ ${resultado.vendas_liquidas.toFixed(2)}`);
     }
   } catch (err) {
     console.error('Erro ao buscar faturamento:', err);
@@ -180,13 +216,15 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
       'CUSTO DRINKS': ['custo drinks', 'custo de drinks', 'drinks', 'destilados']
     };
 
-    const { data: comprasNibo } = await supabase
-      .from('nibo_agendamentos')
-      .select('categoria_nome, valor')
-      .eq('bar_id', barId)
-      .eq('tipo', 'Debit')
-      .gte('data_competencia', dataInicio)
-      .lte('data_competencia', dataFim);
+    const comprasNibo = await fetchAllWithPagination(
+      supabase
+        .from('nibo_agendamentos')
+        .select('categoria_nome, valor')
+        .eq('bar_id', barId)
+        .eq('tipo', 'Debit')
+        .gte('data_competencia', dataInicio)
+        .lte('data_competencia', dataFim)
+    );
 
     if (comprasNibo) {
       for (const [campo, categorias] of Object.entries(categoriasCompras)) {
@@ -205,6 +243,7 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
 
         console.log(`✅ Compras ${campo}: R$ ${valorCategoria.toFixed(2)}`);
       }
+      console.log(`📊 Total compras NIBO: ${comprasNibo.length} registros`);
     }
   } catch (err) {
     console.error('Erro ao buscar compras do NIBO:', err);
@@ -225,17 +264,21 @@ async function buscarDadosAutomaticos(supabase: any, barId: number, dataInicio: 
       const dataContagem = ultimaContagem.data_contagem;
       console.log(`📅 Usando contagem de estoque de: ${dataContagem}`);
 
-      const { data: insumos } = await supabase
-        .from('insumos')
-        .select('id, tipo_local, categoria, custo_unitario')
-        .eq('bar_id', barId);
+      const insumos = await fetchAllWithPagination(
+        supabase
+          .from('insumos')
+          .select('id, tipo_local, categoria, custo_unitario')
+          .eq('bar_id', barId)
+      );
 
       if (insumos) {
-        const { data: contagens } = await supabase
-          .from('contagem_estoque_insumos')
-          .select('insumo_id, estoque_final')
-          .eq('bar_id', barId)
-          .eq('data_contagem', dataContagem);
+        const contagens = await fetchAllWithPagination(
+          supabase
+            .from('contagem_estoque_insumos')
+            .select('insumo_id, estoque_final')
+            .eq('bar_id', barId)
+            .eq('data_contagem', dataContagem)
+        );
 
         if (contagens) {
           const insumosMap = new Map(insumos.map((i: any) => [i.id, i]));
@@ -348,6 +391,7 @@ serve(async (req) => {
     
     console.log(`📅 Processando: Ano ${ano}, Semana ${semana}`);
     console.log(`   Período: ${inicio} até ${fim}`);
+    console.log(`   Data de referência (offsetSemanas: ${offsetSemanas}): ${hoje.toISOString().split('T')[0]}`);
     
     const barId = 3; // Ordinário (pode ser parametrizado)
     

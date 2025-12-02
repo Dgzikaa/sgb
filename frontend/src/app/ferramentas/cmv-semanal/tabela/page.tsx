@@ -188,49 +188,65 @@ export default function CMVSemanalTabelaPage() {
     return semana.cmv_real / mediaEstoque;
   }
 
-  // Função para abrir drill-down
-  const abrirDrillDown = (titulo: string, campo: string, semana: CMVSemanal) => {
-    const detalhes = gerarDetalhes(campo, semana);
+  // Função para abrir drill-down com dados reais da API
+  const abrirDrillDown = async (titulo: string, campo: string, semana: CMVSemanal) => {
     setModalDrillDown({
       open: true,
       titulo,
       campo,
       semana,
-      loading: false,
-      dados: detalhes
+      loading: true,
+      dados: []
     });
-  };
 
-  // Função para gerar detalhes baseado no campo
-  const gerarDetalhes = (campo: string, semana: CMVSemanal) => {
-    switch (campo) {
-      case 'estoque_final':
-        return [
-          { label: 'Cozinha', valor: semana.estoque_final_cozinha },
-          { label: 'Bebidas + Tabacaria', valor: semana.estoque_final_bebidas },
-          { label: 'Drinks', valor: semana.estoque_final_drinks }
-        ];
+    try {
+      const params = new URLSearchParams({
+        bar_id: semana.bar_id.toString(),
+        data_inicio: semana.data_inicio,
+        data_fim: semana.data_fim,
+        campo: campo
+      });
+
+      const response = await fetch(`/api/cmv-semanal/detalhes?${params}`);
       
-      case 'compras_periodo':
-        return [
-          { label: 'Cozinha', valor: semana.compras_custo_comida },
-          { label: 'Bebidas + Tabacaria', valor: semana.compras_custo_bebidas },
-          { label: 'Drinks', valor: semana.compras_custo_drinks },
-          { label: 'Outros', valor: semana.compras_custo_outros }
-        ];
+      if (!response.ok) {
+        throw new Error('Erro ao buscar detalhes');
+      }
+
+      const result = await response.json();
       
-      case 'consumo_socios':
-        return [
-          { label: 'Total Consumo Sócios', valor: semana.total_consumo_socios },
-          { label: 'Mesa de Benefícios Cliente', valor: semana.mesa_beneficios_cliente },
-          { label: 'Mesa da Banda/DJ', valor: semana.mesa_banda_dj },
-          { label: 'Chegadeira', valor: semana.chegadeira },
-          { label: 'Mesa ADM/Casa', valor: semana.mesa_adm_casa },
-          { label: 'Mesa RH', valor: semana.mesa_rh }
-        ];
-      
-      default:
-        return [];
+      // Transformar detalhes da API para o formato do modal
+      const detalhesFormatados = result.detalhes.map((item: any) => ({
+        label: item.descricao,
+        valor: item.valor,
+        data: item.data,
+        detalhes: item.detalhes,
+        categoria: item.categoria,
+        tipo: item.tipo,
+        sinal: item.sinal,
+        quantidade: item.quantidade,
+        unidade: item.unidade,
+        custo_unitario: item.custo_unitario
+      }));
+
+      setModalDrillDown({
+        open: true,
+        titulo,
+        campo,
+        semana,
+        loading: false,
+        dados: detalhesFormatados
+      });
+    } catch (error) {
+      console.error('Erro ao carregar detalhes:', error);
+      setModalDrillDown({
+        open: true,
+        titulo,
+        campo,
+        semana,
+        loading: false,
+        dados: []
+      });
     }
   };
 
@@ -241,44 +257,48 @@ export default function CMVSemanalTabelaPage() {
       { label: 'Data Fim', campo: 'data_fim' as keyof CMVSemanal, tipo: 'data' },
       { label: 'Status', campo: 'status' as keyof CMVSemanal, tipo: 'status' },
     ]},
+    { titulo: 'VENDAS', items: [
+      { label: 'Vendas Brutas', campo: 'vendas_brutas' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Vendas Líquidas', campo: 'vendas_liquidas' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Faturamento CMVível', campo: 'faturamento_cmvivel' as keyof CMVSemanal, tipo: 'moeda', drilldown: true, manual: true },
+    ]},
     { titulo: 'CMV PRINCIPAL', items: [
       { label: 'Estoque Inicial', campo: 'estoque_inicial' as keyof CMVSemanal, tipo: 'moeda' },
       { label: 'Compras', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
       { label: 'Estoque Final', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
       { label: 'Consumo Sócios', campo: 'consumo_socios' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
-      { label: 'Consumo Benefícios', campo: 'consumo_beneficios' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Consumo ADM', campo: 'consumo_adm' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Consumo RH', campo: 'consumo_rh' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'Consumo Artista', campo: 'consumo_artista' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Consumo Benefícios', campo: 'consumo_beneficios' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Consumo ADM', campo: 'consumo_adm' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Consumo RH', campo: 'consumo_rh' as keyof CMVSemanal, tipo: 'moeda', drilldown: true, manual: true },
+      { label: 'Consumo Artista', campo: 'consumo_artista' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
       { label: 'Outros Ajustes', campo: 'outros_ajustes' as keyof CMVSemanal, tipo: 'moeda', manual: true },
       { label: 'Ajuste Bonificações', campo: 'ajuste_bonificacoes' as keyof CMVSemanal, tipo: 'moeda', manual: true },
-      { label: 'CMV Real (R$)', campo: 'cmv_real' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Faturamento CMVível', campo: 'faturamento_cmvivel' as keyof CMVSemanal, tipo: 'moeda', manual: true },
+      { label: 'CMV Real (R$)', campo: 'cmv_real' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
       { label: 'CMV Limpo (%)', campo: 'cmv_limpo_percentual' as keyof CMVSemanal, tipo: 'percentual' },
       { label: 'CMV Teórico (%)', campo: 'cmv_teorico_percentual' as keyof CMVSemanal, tipo: 'percentual', manual: true },
       { label: 'Gap', campo: 'gap' as keyof CMVSemanal, tipo: 'gap' },
       { label: 'Giro de Estoque', campo: 'giro_estoque' as keyof CMVSemanal, tipo: 'decimal' },
     ]},
     { titulo: 'ESTOQUE FINAL', items: [
-      { label: 'Cozinha', campo: 'estoque_final_cozinha' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Bebidas + Tabacaria', campo: 'estoque_final_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Drinks', campo: 'estoque_final_drinks' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Cozinha', campo: 'estoque_final_cozinha' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Bebidas + Tabacaria', campo: 'estoque_final_bebidas' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Drinks', campo: 'estoque_final_drinks' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
       { label: 'TOTAL', campo: 'estoque_final' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
     ]},
     { titulo: 'COMPRAS', items: [
-      { label: 'Cozinha', campo: 'compras_custo_comida' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Bebidas + Tabacaria', campo: 'compras_custo_bebidas' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Drinks', campo: 'compras_custo_drinks' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Outros', campo: 'compras_custo_outros' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Cozinha', campo: 'compras_custo_comida' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Bebidas + Tabacaria', campo: 'compras_custo_bebidas' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Drinks', campo: 'compras_custo_drinks' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Outros', campo: 'compras_custo_outros' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
       { label: 'TOTAL', campo: 'compras_periodo' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
     ]},
     { titulo: 'CONTAS ESPECIAIS', items: [
-      { label: 'Total Consumo Sócios', campo: 'total_consumo_socios' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Mesa de Benefícios Cliente', campo: 'mesa_beneficios_cliente' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Mesa da Banda/DJ', campo: 'mesa_banda_dj' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Chegadeira', campo: 'chegadeira' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Mesa ADM/Casa', campo: 'mesa_adm_casa' as keyof CMVSemanal, tipo: 'moeda' },
-      { label: 'Mesa RH', campo: 'mesa_rh' as keyof CMVSemanal, tipo: 'moeda' },
+      { label: 'Total Consumo Sócios', campo: 'total_consumo_socios' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Mesa de Benefícios Cliente', campo: 'mesa_beneficios_cliente' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Mesa da Banda/DJ', campo: 'mesa_banda_dj' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Chegadeira', campo: 'chegadeira' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Mesa ADM/Casa', campo: 'mesa_adm_casa' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
+      { label: 'Mesa RH', campo: 'mesa_rh' as keyof CMVSemanal, tipo: 'moeda', drilldown: true },
     ]},
   ];
 
@@ -550,34 +570,96 @@ export default function CMVSemanalTabelaPage() {
                 </div>
               ) : modalDrillDown.dados.length > 0 ? (
                 <div className="space-y-2">
-                  {modalDrillDown.dados.map((item: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {item.label}
-                      </span>
-                      <span className="text-sm font-mono font-semibold text-gray-900 dark:text-white">
-                        {formatarMoeda(item.valor)}
-                      </span>
-                    </div>
-                  ))}
+                  {/* Resumo de quantidade */}
+                  <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-900 dark:text-blue-200">
+                      <strong>{modalDrillDown.dados.length}</strong> {modalDrillDown.dados.length === 1 ? 'registro encontrado' : 'registros encontrados'}
+                    </p>
+                  </div>
+
+                  {/* Lista de itens detalhados */}
+                  <div className="max-h-[400px] overflow-y-auto space-y-2">
+                    {modalDrillDown.dados.map((item: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            {/* Título principal */}
+                            <div className="flex items-center gap-2 mb-2">
+                              {item.sinal && (
+                                <span className={`text-lg font-bold ${item.sinal === '+' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                  {item.sinal}
+                                </span>
+                              )}
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                {item.label}
+                              </span>
+                            </div>
+                            
+                            {/* Detalhes adicionais */}
+                            <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                              {item.data && (
+                                <p>
+                                  <strong>Data:</strong> {formatarData(item.data)}
+                                </p>
+                              )}
+                              {item.categoria && (
+                                <p>
+                                  <strong>Categoria:</strong> {item.categoria}
+                                </p>
+                              )}
+                              {item.detalhes && (
+                                <p className="text-gray-500 dark:text-gray-500 italic">
+                                  {item.detalhes}
+                                </p>
+                              )}
+                              {item.quantidade && (
+                                <p>
+                                  <strong>Quantidade:</strong> {item.quantidade.toFixed(2)} {item.unidade || 'un'}
+                                  {item.custo_unitario && (
+                                    <span className="ml-2">
+                                      × {formatarMoeda(item.custo_unitario)}
+                                    </span>
+                                  )}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Valor */}
+                          <div className="text-right">
+                            <span className={`text-base font-mono font-bold ${
+                              item.valor >= 0 
+                                ? 'text-gray-900 dark:text-white' 
+                                : 'text-red-600 dark:text-red-400'
+                            }`}>
+                              {formatarMoeda(Math.abs(item.valor))}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                   
                   {/* Total */}
-                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-t-2 border-blue-500 mt-4">
-                    <span className="text-base font-bold text-blue-900 dark:text-blue-200">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/20 rounded-lg border-2 border-blue-500 dark:border-blue-600 mt-4">
+                    <span className="text-lg font-bold text-blue-900 dark:text-blue-200">
                       TOTAL
                     </span>
-                    <span className="text-base font-mono font-bold text-blue-900 dark:text-blue-200">
+                    <span className="text-lg font-mono font-bold text-blue-900 dark:text-blue-200">
                       {formatarMoeda(modalDrillDown.dados.reduce((sum, item) => sum + (item.valor || 0), 0))}
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p className="mb-2">Nenhum detalhe disponível para este item.</p>
-                  <p className="text-sm">Este recurso será expandido em atualizações futuras.</p>
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <div className="mb-4">
+                    <Eye className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600" />
+                  </div>
+                  <p className="mb-2 font-semibold">Nenhum registro encontrado</p>
+                  <p className="text-sm">Não há dados disponíveis para este item no período selecionado.</p>
                 </div>
               )}
             </div>
