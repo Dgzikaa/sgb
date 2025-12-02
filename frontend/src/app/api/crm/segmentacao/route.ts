@@ -389,9 +389,29 @@ export async function GET(request: NextRequest) {
     }
 
     // 10. Filtrar por segmento se especificado (APÓS o cache)
-    let clientesFiltrados = clientesSegmentados;
-    if (segmento !== 'todos') {
+    let clientesFiltrados = clientesSegmentados || [];
+    if (segmento !== 'todos' && clientesSegmentados) {
       clientesFiltrados = clientesSegmentados.filter(c => c.segmento === segmento);
+    }
+
+    // Validação de segurança
+    if (!clientesFiltrados || !Array.isArray(clientesFiltrados)) {
+      console.error('❌ clientesFiltrados está undefined ou não é array:', clientesFiltrados);
+      clientesFiltrados = [];
+    }
+
+    if (!stats) {
+      console.error('❌ stats está undefined');
+      stats = {
+        total_clientes: 0,
+        vips: 0,
+        em_risco: 0,
+        fieis: 0,
+        novos: 0,
+        inativos: 0,
+        regulares: 0,
+        potencial: 0,
+      };
     }
 
     // 12. Aplicar paginação
