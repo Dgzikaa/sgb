@@ -33,6 +33,7 @@ import PageHeader from '@/components/layouts/PageHeader';
 import { usePermissions } from '@/hooks/usePermissions';
 import { safeLocalStorage } from '@/lib/client-utils';
 import { DataTablePro } from '@/components/ui/datatable-pro';
+import { useRouter } from 'next/navigation';
 
 interface Usuario {
   id: number;
@@ -67,7 +68,8 @@ const ROLES_OPCOES = [
 ];
 
 function UsuariosPage() {
-  const { user: currentUser, refreshUserData } = usePermissions();
+  const router = useRouter();
+  const { user: currentUser, refreshUserData, isRole, loading: permissionsLoading } = usePermissions();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [bares, setBares] = useState<{id: number, nome: string}[]>([]);
@@ -76,6 +78,7 @@ function UsuariosPage() {
   const [roleFilter, setRoleFilter] = useState('todos');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const [isAdminUser, setIsAdminUser] = useState(false); // Checkbox de admin
   const [formData, setFormData] = useState({
     email: '',
     nome: '',
@@ -94,6 +97,20 @@ function UsuariosPage() {
   });
 
   const { toast } = useToast();
+  
+  // 🔒 Verificar se é admin - apenas admins podem acessar esta página
+  const isCurrentUserAdmin = isRole('admin');
+  
+  useEffect(() => {
+    if (!permissionsLoading && !isCurrentUserAdmin) {
+      toast({
+        title: 'Acesso Negado',
+        description: 'Apenas administradores podem acessar esta página',
+        variant: 'destructive',
+      });
+      router.push('/home');
+    }
+  }, [permissionsLoading, isCurrentUserAdmin, router, toast]);
 
   const fetchUsuarios = useCallback(async () => {
     try {
@@ -153,10 +170,22 @@ function UsuariosPage() {
     e.preventDefault();
     
     try {
+      // 🔒 Se marcou como admin, garantir role="admin" e adicionar "todos" aos módulos
+      let finalFormData = { ...formData };
+      if (isAdminUser) {
+        finalFormData.role = 'admin';
+        if (!finalFormData.modulos_permitidos.includes('todos')) {
+          finalFormData.modulos_permitidos = ['todos', ...finalFormData.modulos_permitidos];
+        }
+      } else {
+        // Se desmarcou admin, remover "todos" dos módulos
+        finalFormData.modulos_permitidos = finalFormData.modulos_permitidos.filter(m => m !== 'todos');
+      }
+      
       const method = editingUser ? 'PUT' : 'POST';
       const body = editingUser 
-        ? { ...formData, id: editingUser.id }
-        : formData;
+        ? { ...finalFormData, id: editingUser.id }
+        : finalFormData;
 
       const response = await fetch('/api/configuracoes/usuarios', {
         method,
@@ -240,6 +269,10 @@ function UsuariosPage() {
       }
     }
     
+    // Verificar se o usuário é admin (tem permissão "todos" ou role "admin")
+    const isAdmin = modulosPermitidos.includes('todos') || usuario.role === 'admin';
+    setIsAdminUser(isAdmin);
+    
     setFormData({
       email: usuario.email,
       nome: usuario.nome,
@@ -299,6 +332,7 @@ function UsuariosPage() {
 
   const resetForm = () => {
     setEditingUser(null);
+    setIsAdminUser(false); // Resetar checkbox de admin
     setFormData({
       email: '',
       nome: '',
@@ -394,6 +428,38 @@ function UsuariosPage() {
     acc[modulo.categoria].push(modulo);
     return acc;
   }, {} as Record<string, Modulo[]>);
+
+  // Mostrar loading enquanto verifica permissões
+  if (permissionsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Verificando permissões...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Bloquear acesso se não for admin
+  if (!isCurrentUserAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center p-8 max-w-md">
+          <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+            <Shield className="w-10 h-10 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Acesso Restrito</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Apenas administradores podem acessar a configuração de usuários.
+          </p>
+          <Button onClick={() => router.push('/home')} className="btn-primary-dark">
+            Voltar para Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -653,7 +719,35 @@ function UsuariosPage() {
                           <p className="text-sm text-gray-600 dark:text-gray-400">Selecione os módulos que o usuário pode acessar</p>
                         </div>
                       </div>
-                      <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 max-h-80 overflow-y-auto">
+                      
+                      {/* 🔐 Checkbox de Administrador */}
+                      <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={isAdminUser}
+                            onCheckedChange={(checked) => setIsAdminUser(checked as boolean)}
+                            className="border-red-300 dark:border-red-600 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
+                          />
+                          <div className="flex-1">
+                            <label className="text-sm font-semibold text-red-700 dark:text-red-400 cursor-pointer">
+                              🔐 Marcar como Administrador
+                            </label>
+                            <p className="text-xs text-red-600 dark:text-red-500 mt-1">
+                              Administradores têm acesso total ao sistema, incluindo esta página de configurações
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Módulos específicos - desabilitado se for admin */}
+                      <div className={`bg-white dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 max-h-80 overflow-y-auto ${isAdminUser ? 'opacity-50 pointer-events-none' : ''}`}>
+                        {isAdminUser && (
+                          <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <p className="text-sm text-yellow-700 dark:text-yellow-400 font-medium">
+                              ✓ Administrador tem acesso a todos os módulos automaticamente
+                            </p>
+                          </div>
+                        )}
                         {Object.entries(modulosPorCategoria).map(([categoria, categoriaModulos]) => (
                           <div key={categoria} className="mb-6 last:mb-0">
                             <h4 className="font-semibold text-gray-900 dark:text-white mb-3 capitalize border-b border-gray-200 dark:border-gray-600 pb-2 flex items-center gap-2">
@@ -664,8 +758,9 @@ function UsuariosPage() {
                               {categoriaModulos.map(modulo => (
                                 <div key={modulo.id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                   <Checkbox
-                                    checked={Array.isArray(formData.modulos_permitidos) && formData.modulos_permitidos.includes(modulo.id)}
+                                    checked={isAdminUser || (Array.isArray(formData.modulos_permitidos) && formData.modulos_permitidos.includes(modulo.id))}
                                     onCheckedChange={(checked) => handleModuloChange(modulo.id, checked as boolean)}
+                                    disabled={isAdminUser}
                                     className="border-gray-300 dark:border-gray-600"
                                   />
                                   <Label 
@@ -721,7 +816,8 @@ function UsuariosPage() {
                     Cancelar
                   </Button>
                   <Button 
-                    onClick={handleSubmit}
+                    type="button"
+                    onClick={(e) => handleSubmit(e as unknown as React.FormEvent)}
                     className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white transition-all shadow-lg hover:shadow-xl"
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />

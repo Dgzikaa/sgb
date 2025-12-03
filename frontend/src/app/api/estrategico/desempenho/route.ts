@@ -525,33 +525,71 @@ export async function GET(request: NextRequest) {
     console.log(`🔍 Total contahubClientesData: ${contahubClientesData?.length || 0} registros`);
     console.log(`🔍 Total niboData: ${niboData?.length || 0} registros`);
 
-    // Calcular clientes ativos por semana (2+ visitas nos últimos 90 dias)
+    // 🔧 CORREÇÃO: Buscar dados históricos de clientes (3 meses antes do período)
+    // para calcular clientes ativos corretamente
+    let contahubClientesHistoricoData: { cli_fone: any; dt_gerencial: any; }[] = [];
+    page = 0;
+    hasMore = true;
+    const data3MesesAntes = new Date(ano - 1, 0, 1); // Buscar desde o início do ano anterior
+
+    while (hasMore) {
+      const { data: pageData } = await supabase
+        .from('contahub_periodo')
+        .select('cli_fone, dt_gerencial')
+        .eq('bar_id', user.bar_id)
+        .gte('dt_gerencial', data3MesesAntes.toISOString().split('T')[0])
+        .lt('dt_gerencial', `${ano}-01-01`)
+        .not('cli_fone', 'is', null)
+        .order('dt_gerencial')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (pageData && pageData.length > 0) {
+        contahubClientesHistoricoData = [...contahubClientesHistoricoData, ...pageData];
+        hasMore = pageData.length === pageSize;
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
+    
+    // Combinar dados do ano atual com histórico
+    const todosClientesData = [...contahubClientesHistoricoData, ...contahubClientesData];
+
+    // Calcular clientes ativos por semana
+    // DEFINIÇÃO: Clientes que visitaram na semana atual E também visitaram nos 3 meses anteriores
     semanasConsolidadas.forEach(semana => {
-      // Buscar dados de clientes para esta semana específica
       const periodoSemana = getWeekPeriod(semana.semana, ano);
       const inicioSemana = periodoSemana.inicio;
       const fimSemana = periodoSemana.fim;
       
-      // Calcular data de 90 dias atrás a partir do fim da semana
-      const data90DiasAtras = new Date(fimSemana);
-      data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
+      // Calcular data de 3 meses atrás a partir do início da semana
+      const data3MesesAtras = new Date(inicioSemana);
+      data3MesesAtras.setMonth(data3MesesAtras.getMonth() - 3);
       
-      const clientesUltimos90Dias = contahubClientesData?.filter(item => {
-        const dataItem = new Date(item.dt_gerencial);
-        return dataItem >= data90DiasAtras && dataItem <= fimSemana;
-      }) || [];
+      const inicioSemanaStr = inicioSemana.toISOString().split('T')[0];
+      const fimSemanaStr = fimSemana.toISOString().split('T')[0];
+      const data3MesesAtrasStr = data3MesesAtras.toISOString().split('T')[0];
       
-      // Agrupar por telefone e contar visitas nos últimos 90 dias
-      const clientesMap90Dias = new Map();
-      clientesUltimos90Dias.forEach(item => {
-        const count = clientesMap90Dias.get(item.cli_fone) || 0;
-        clientesMap90Dias.set(item.cli_fone, count + 1);
-      });
+      // Clientes que visitaram na semana atual
+      const clientesDaSemana = new Set(
+        todosClientesData
+          .filter(item => item.dt_gerencial >= inicioSemanaStr && item.dt_gerencial <= fimSemanaStr)
+          .map(item => item.cli_fone)
+      );
       
-      // Contar clientes com 2+ visitas nos últimos 90 dias
+      // Clientes que visitaram nos 3 meses anteriores (antes do início da semana)
+      const clientes3MesesAnteriores = new Set(
+        todosClientesData
+          .filter(item => item.dt_gerencial >= data3MesesAtrasStr && item.dt_gerencial < inicioSemanaStr)
+          .map(item => item.cli_fone)
+      );
+      
+      // Clientes ativos = interseção (visitaram na semana E nos 3 meses anteriores)
       let clientesAtivosSemana = 0;
-      clientesMap90Dias.forEach(count => {
-        if (count >= 2) clientesAtivosSemana++;
+      clientesDaSemana.forEach(cliente => {
+        if (clientes3MesesAnteriores.has(cliente)) {
+          clientesAtivosSemana++;
+        }
       });
       
       semana.clientes_ativos = clientesAtivosSemana;
