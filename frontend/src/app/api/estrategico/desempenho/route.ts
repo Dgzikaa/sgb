@@ -594,10 +594,8 @@ export async function GET(request: NextRequest) {
       
       semana.clientes_ativos = clientesAtivosSemana;
       
-      // Calcular Faturamento Couvert da semana
+      // Calcular Faturamento Couvert da semana (usando inicioSemanaStr e fimSemanaStr já declarados acima)
       let couvertSemana = 0;
-      const inicioSemanaStr = inicioSemana.toISOString().split('T')[0];
-      const fimSemanaStr = fimSemana.toISOString().split('T')[0];
       
       const periodosCouvertDaSemana = contahubPeriodoData?.filter(item => {
         return item.dt_gerencial >= inicioSemanaStr && item.dt_gerencial <= fimSemanaStr;
