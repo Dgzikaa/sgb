@@ -17,7 +17,7 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 4; // Incrementado para nova lógica
 
 function getCached(key: string) {
   const entry = cache.get(key);
@@ -42,6 +42,10 @@ function setCache(key: string, data: any) {
   cache.set(key, { data, timestamp: Date.now(), version: CACHE_VERSION });
 }
 
+// ===== CONSTANTES =====
+const MINIMO_VISITAS_CONFIAVEL = 3; // Mínimo de visitas para dados confiáveis
+const FATOR_CONSERVADOR = 0.5; // 50% para clientes com poucos dados
+
 // ===== FUNÇÃO PARA BUSCAR TODOS OS DADOS COM PAGINAÇÃO =====
 async function fetchAllData(tableName: string, columns: string, filters: any = {}) {
   let allData: any[] = [];
@@ -58,7 +62,6 @@ async function fetchAllData(tableName: string, columns: string, filters: any = {
       .select(columns)
       .range(from, from + limit - 1);
     
-    // Aplicar filtros
     Object.entries(filters).forEach(([key, value]) => {
       if (key.includes('gte_')) {
         query = query.gte(key.replace('gte_', ''), value);
@@ -118,6 +121,7 @@ interface ClienteLTV {
   dias_como_cliente: number;
   frequencia_visitas: number;
   ticket_medio: number;
+  ticket_medio_usado: number; // Ticket usado para projeção (pode ser do bar)
   valor_medio_mensal: number;
   
   // Tendências
@@ -127,6 +131,10 @@ interface ClienteLTV {
   // Potencial
   potencial_crescimento: 'baixo' | 'medio' | 'alto';
   roi_marketing: number;
+  
+  // Confiança dos dados
+  confianca: 'alta' | 'media' | 'baixa';
+  dados_preliminares: boolean;
 }
 
 // Calcular score de engajamento (0-100)
@@ -136,6 +144,7 @@ function calcularScoreEngajamento(dados: {
   totalVisitas: number;
   tendenciaFrequencia: string;
   tendenciaValor: string;
+  limitarScore: boolean; // Para clientes com poucos dados
 }): { score: number; nivel: 'baixo' | 'medio' | 'alto' | 'muito_alto' } {
   let score = 0;
 
@@ -166,6 +175,11 @@ function calcularScoreEngajamento(dados: {
   // 5. TENDÊNCIA VALOR (5 pontos)
   if (dados.tendenciaValor === 'crescente') score += 5;
   else if (dados.tendenciaValor === 'estavel') score += 3;
+
+  // LIMITAR SCORE para clientes com poucos dados (máximo 40 = médio)
+  if (dados.limitarScore && score > 40) {
+    score = 40;
+  }
 
   let nivel: 'baixo' | 'medio' | 'alto' | 'muito_alto';
   if (score >= 80) nivel = 'muito_alto';
@@ -202,6 +216,13 @@ const normalizarTelefone = (fone: string): string | null => {
   return limpo.slice(-9);
 };
 
+// Determinar nível de confiança
+function determinarConfianca(totalVisitas: number): 'alta' | 'media' | 'baixa' {
+  if (totalVisitas >= 10) return 'alta';
+  if (totalVisitas >= MINIMO_VISITAS_CONFIAVEL) return 'media';
+  return 'baixa';
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -209,10 +230,10 @@ export async function GET(request: NextRequest) {
     const limite = parseInt(searchParams.get('limite') || '100');
     const barId = parseInt(searchParams.get('bar_id') || '3');
 
-    console.log(`🔍 API LTV Engajamento - telefone: ${telefone}, limite: ${limite}, bar_id: ${barId}`);
+    console.log(`🔍 API LTV Engajamento v4 - telefone: ${telefone}, limite: ${limite}, bar_id: ${barId}`);
 
     if (telefone) {
-      return await calcularLTVCliente(telefone);
+      return await calcularLTVCliente(telefone, barId);
     } else {
       return await calcularLTVTodosClientes(limite, barId);
     }
@@ -226,132 +247,130 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function calcularLTVCliente(telefone: string) {
+async function calcularLTVCliente(telefone: string, barId: number = 3) {
   const telefoneNorm = normalizarTelefone(telefone) || telefone;
   
-  // Buscar dados do ContaHub
+  // Buscar dados do ContaHub APENAS
   const { data: contahubData } = await supabase
     .from('contahub_periodo')
     .select('cli_nome, cli_fone, dt_gerencial, vr_couvert, vr_pagamentos')
+    .eq('bar_id', barId)
     .ilike('cli_fone', `%${telefoneNorm}%`)
     .order('dt_gerencial', { ascending: true });
 
-  // Buscar histórico do Sympla
-  const { data: symplaData } = await supabase
-    .from('sympla_participantes')
-    .select('data_evento, nome_completo')
-    .ilike('telefone_normalizado', `%${telefoneNorm}%`)
-    .order('data_evento', { ascending: true });
-
-  // Buscar histórico do GetIn
-  const { data: getinData } = await supabase
-    .from('getin_reservations')
-    .select('data, nome, numero_convidados')
-    .ilike('telefone_normalizado', `%${telefoneNorm}%`)
-    .order('data', { ascending: true });
-
-  if (!contahubData?.length && !symplaData?.length && !getinData?.length) {
-    throw new Error('Cliente não encontrado');
+  if (!contahubData?.length) {
+    throw new Error('Cliente não encontrado no ContaHub');
   }
 
-  // Consolidar visitas com valores reais
+  // Buscar ticket médio do bar para referência
+  const { data: ticketBarData } = await supabase
+    .from('contahub_periodo')
+    .select('vr_couvert, vr_pagamentos')
+    .eq('bar_id', barId)
+    .limit(10000);
+
+  const ticketMedioBar = ticketBarData && ticketBarData.length > 0
+    ? ticketBarData.reduce((sum, item) => sum + (item.vr_couvert || 0) + (item.vr_pagamentos || 0), 0) / ticketBarData.length
+    : 150; // Fallback
+
+  // Consolidar visitas
   const visitas: Array<{ data: Date; valor: number }> = [];
   let nomeCliente = 'Cliente';
 
-  // Priorizar ContaHub (tem valores reais)
-  contahubData?.forEach(v => {
+  contahubData.forEach(v => {
     const valor = (v.vr_couvert || 0) + (v.vr_pagamentos || 0);
-    visitas.push({
-      data: new Date(v.dt_gerencial),
-      valor: valor
-    });
+    visitas.push({ data: new Date(v.dt_gerencial), valor });
     if (!nomeCliente || nomeCliente === 'Cliente') {
       nomeCliente = v.cli_nome || 'Cliente';
     }
   });
 
-  // Sympla (valor estimado se não tiver ContaHub)
-  symplaData?.forEach(v => {
-    visitas.push({
-      data: new Date(v.data_evento),
-      valor: 100
-    });
-    if (!nomeCliente || nomeCliente === 'Cliente') {
-      nomeCliente = v.nome_completo || 'Cliente';
-    }
-  });
-
-  // GetIn
-  getinData?.forEach(v => {
-    const valorEstimado = (v.numero_convidados || 1) * 120;
-    visitas.push({
-      data: new Date(v.data),
-      valor: valorEstimado
-    });
-    if (!nomeCliente || nomeCliente === 'Cliente') {
-      nomeCliente = v.nome || 'Cliente';
-    }
-  });
-
   visitas.sort((a, b) => a.data.getTime() - b.data.getTime());
+
+  const totalVisitas = visitas.length;
+  const dadosPreliminares = totalVisitas < MINIMO_VISITAS_CONFIAVEL;
+  const confianca = determinarConfianca(totalVisitas);
 
   // Cálculos base
   const hoje = new Date();
   const primeiraVisita = visitas[0].data;
   const ultimaVisita = visitas[visitas.length - 1].data;
   const diasComoCliente = Math.floor((hoje.getTime() - primeiraVisita.getTime()) / (1000 * 60 * 60 * 24));
-  const mesesComoCliente = diasComoCliente / 30;
+  const mesesComoCliente = Math.max(diasComoCliente / 30, 1);
 
   const ltvAtual = visitas.reduce((sum, v) => sum + v.valor, 0);
-  const frequenciaVisitas = visitas.length / Math.max(mesesComoCliente, 1);
-  const ticketMedio = ltvAtual / visitas.length;
-  const valorMedioMensal = ltvAtual / Math.max(mesesComoCliente, 1);
+  const ticketMedioReal = ltvAtual / totalVisitas;
+  
+  // Para projeções: usar ticket do bar se dados preliminares
+  const ticketMedioUsado = dadosPreliminares ? ticketMedioBar : ticketMedioReal;
+  
+  const frequenciaVisitas = totalVisitas / mesesComoCliente;
+  const valorMedioMensal = ltvAtual / mesesComoCliente;
 
-  // Tendências
-  const metade = Math.floor(visitas.length / 2);
-  const valoresAntigos = visitas.slice(0, metade).map(v => v.valor);
-  const valoresRecentes = visitas.slice(metade).map(v => v.valor);
-  const tendenciaValor = calcularTendencia(valoresAntigos, valoresRecentes);
+  // Tendências (só calcular se tiver dados suficientes)
+  let tendenciaValor: 'crescente' | 'estavel' | 'decrescente' = 'estavel';
+  let tendenciaFrequencia: 'crescente' | 'estavel' | 'decrescente' = 'estavel';
 
-  // Tendência de frequência
-  const data90DiasAtras = new Date();
-  data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
-  const data180DiasAtras = new Date();
-  data180DiasAtras.setDate(data180DiasAtras.getDate() - 180);
+  if (totalVisitas >= MINIMO_VISITAS_CONFIAVEL) {
+    const metade = Math.floor(totalVisitas / 2);
+    const valoresAntigos = visitas.slice(0, metade).map(v => v.valor);
+    const valoresRecentes = visitas.slice(metade).map(v => v.valor);
+    tendenciaValor = calcularTendencia(valoresAntigos, valoresRecentes);
 
-  const visitasUltimos90 = visitas.filter(v => v.data >= data90DiasAtras).length;
-  const visitas90a180 = visitas.filter(v => v.data >= data180DiasAtras && v.data < data90DiasAtras).length;
+    const data90DiasAtras = new Date();
+    data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
+    const data180DiasAtras = new Date();
+    data180DiasAtras.setDate(data180DiasAtras.getDate() - 180);
 
-  const tendenciaFrequencia = visitasUltimos90 > visitas90a180 ? 'crescente' :
-    visitasUltimos90 < visitas90a180 ? 'decrescente' : 'estavel';
+    const visitasUltimos90 = visitas.filter(v => v.data >= data90DiasAtras).length;
+    const visitas90a180 = visitas.filter(v => v.data >= data180DiasAtras && v.data < data90DiasAtras).length;
+
+    tendenciaFrequencia = visitasUltimos90 > visitas90a180 ? 'crescente' :
+      visitasUltimos90 < visitas90a180 ? 'decrescente' : 'estavel';
+  }
 
   // Projeções de LTV
   let fatorAjuste = 1.0;
-  if (tendenciaValor === 'crescente' && tendenciaFrequencia === 'crescente') {
-    fatorAjuste = 1.3;
-  } else if (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente') {
-    fatorAjuste = 1.15;
-  } else if (tendenciaValor === 'decrescente' && tendenciaFrequencia === 'decrescente') {
-    fatorAjuste = 0.7;
-  } else if (tendenciaValor === 'decrescente' || tendenciaFrequencia === 'decrescente') {
-    fatorAjuste = 0.85;
+  if (!dadosPreliminares) {
+    if (tendenciaValor === 'crescente' && tendenciaFrequencia === 'crescente') {
+      fatorAjuste = 1.3;
+    } else if (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente') {
+      fatorAjuste = 1.15;
+    } else if (tendenciaValor === 'decrescente' && tendenciaFrequencia === 'decrescente') {
+      fatorAjuste = 0.7;
+    } else if (tendenciaValor === 'decrescente' || tendenciaFrequencia === 'decrescente') {
+      fatorAjuste = 0.85;
+    }
+  } else {
+    // Para dados preliminares: usar fator conservador
+    fatorAjuste = FATOR_CONSERVADOR;
   }
 
-  const ltvProjetado12m = valorMedioMensal * 12 * fatorAjuste;
-  const ltvProjetado24m = valorMedioMensal * 24 * fatorAjuste;
+    // Projeção APENAS para clientes confiáveis (3+ visitas)
+    // Clientes preliminares: sem projeção (não temos dados suficientes)
+    let ltvProjetado12m = 0;
+    let ltvProjetado24m = 0;
+    
+    if (!dadosPreliminares) {
+      ltvProjetado12m = ticketMedioUsado * frequenciaVisitas * 12 * fatorAjuste;
+      ltvProjetado24m = ticketMedioUsado * frequenciaVisitas * 24 * fatorAjuste;
+    }
 
   // Score de engajamento
   const { score, nivel } = calcularScoreEngajamento({
     frequenciaVisitas,
     diasComoCliente,
-    totalVisitas: visitas.length,
+    totalVisitas,
     tendenciaFrequencia,
-    tendenciaValor
+    tendenciaValor,
+    limitarScore: dadosPreliminares
   });
 
   // Potencial de crescimento
   let potencialCrescimento: 'baixo' | 'medio' | 'alto';
-  if (score >= 70 && (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente')) {
+  if (dadosPreliminares) {
+    potencialCrescimento = 'medio'; // Conservador para dados preliminares
+  } else if (score >= 70 && (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente')) {
     potencialCrescimento = 'alto';
   } else if (score >= 40) {
     potencialCrescimento = 'medio';
@@ -359,9 +378,11 @@ async function calcularLTVCliente(telefone: string) {
     potencialCrescimento = 'baixo';
   }
 
-  // ROI de Marketing
+  // ROI de Marketing (apenas para clientes confiáveis)
   const custoMarketingEstimado = 50;
-  const roiMarketing = (ltvProjetado12m / custoMarketingEstimado);
+  const roiMarketing = dadosPreliminares 
+    ? 0 // Sem ROI para dados preliminares
+    : (ltvProjetado12m / custoMarketingEstimado);
 
   const resultado: ClienteLTV = {
     telefone,
@@ -371,17 +392,20 @@ async function calcularLTVCliente(telefone: string) {
     ltv_projetado_24m: Math.round(ltvProjetado24m),
     score_engajamento: score,
     nivel_engajamento: nivel,
-    total_visitas: visitas.length,
+    total_visitas: totalVisitas,
     primeira_visita: primeiraVisita.toISOString(),
     ultima_visita: ultimaVisita.toISOString(),
     dias_como_cliente: diasComoCliente,
     frequencia_visitas: Math.round(frequenciaVisitas * 10) / 10,
-    ticket_medio: Math.round(ticketMedio),
+    ticket_medio: Math.round(ticketMedioReal),
+    ticket_medio_usado: Math.round(ticketMedioUsado),
     valor_medio_mensal: Math.round(valorMedioMensal),
     tendencia_valor: tendenciaValor,
     tendencia_frequencia: tendenciaFrequencia,
     potencial_crescimento: potencialCrescimento,
-    roi_marketing: Math.round(roiMarketing * 10) / 10
+    roi_marketing: Math.round(roiMarketing * 10) / 10,
+    confianca,
+    dados_preliminares: dadosPreliminares
   };
 
   return NextResponse.json({
@@ -392,27 +416,24 @@ async function calcularLTVCliente(telefone: string) {
 
 async function calcularLTVTodosClientes(limite: number, barId: number = 3) {
   // Verificar cache
-  const cacheKey = `ltv_engajamento_${barId}`;
+  const cacheKey = `ltv_engajamento_v4_${barId}`;
   const cached = getCached(cacheKey);
 
   if (cached) {
     console.log(`⚡ Cache HIT: Usando dados de LTV em cache (${cached.resultados.length} clientes)`);
     
-    const resultado = cached.resultados.slice(0, limite);
-    
     return NextResponse.json({
       success: true,
-      data: resultado,
+      data: cached.resultados.slice(0, limite),
       stats: cached.stats,
+      ticket_medio_bar: cached.ticketMedioBar,
       fromCache: true
     });
   }
 
-  console.log(`🔍 Cache MISS: Processando dados de LTV do ContaHub...`);
+  console.log(`🔍 Cache MISS: Processando dados de LTV do ContaHub (v4 - com confiança)...`);
 
-  // ===== BUSCAR TODOS OS DADOS COM PAGINAÇÃO =====
-  
-  // 1. Buscar dados do ContaHub (fonte principal - tem valores reais)
+  // Buscar dados do ContaHub
   console.log(`📊 Buscando dados do ContaHub para bar ${barId}...`);
   const contahubDataRaw = await fetchAllData(
     'contahub_periodo',
@@ -420,39 +441,19 @@ async function calcularLTVTodosClientes(limite: number, barId: number = 3) {
     { eq_bar_id: barId }
   );
 
-  // Filtrar clientes válidos
   const contahubData = contahubDataRaw.filter(item => 
     item.cli_fone && item.cli_fone.trim() !== '' && 
     item.cli_nome && item.cli_nome.trim() !== ''
   );
-  console.log(`💳 ContaHub: ${contahubData.length} registros válidos (de ${contahubDataRaw.length} totais)`);
+  console.log(`💳 ContaHub: ${contahubData.length} registros válidos`);
 
-  // 2. Buscar dados do Sympla (complementar)
-  console.log(`📊 Buscando dados do Sympla...`);
-  const symplaData = await fetchAllData(
-    'sympla_participantes',
-    'telefone_normalizado, nome_completo, data_evento',
-    { not_null_telefone_normalizado: true }
-  );
-  console.log(`🎫 Sympla: ${symplaData.length} registros`);
-
-  // 3. Buscar dados do GetIn (complementar)
-  console.log(`📊 Buscando dados do GetIn...`);
-  const getinData = await fetchAllData(
-    'getin_reservations',
-    'telefone_normalizado, nome, data, numero_convidados',
-    { not_null_telefone_normalizado: true }
-  );
-  console.log(`📅 GetIn: ${getinData.length} registros`);
-
-  // ===== CONSOLIDAR POR TELEFONE =====
+  // Consolidar por telefone
   const clientesMap = new Map<string, {
     telefone: string;
     nome: string;
     visitas: Array<{ data: Date; valor: number }>;
   }>();
 
-  // Processar ContaHub (fonte principal com valores reais)
   for (const item of contahubData) {
     const telefoneNorm = normalizarTelefone(item.cli_fone);
     if (!telefoneNorm) continue;
@@ -466,55 +467,34 @@ async function calcularLTVTodosClientes(limite: number, barId: number = 3) {
     }
 
     const valor = (item.vr_couvert || 0) + (item.vr_pagamentos || 0);
-    
     clientesMap.get(telefoneNorm)!.visitas.push({
       data: new Date(item.dt_gerencial),
-      valor: valor
-    });
-  }
-
-  // Processar Sympla
-  for (const item of symplaData) {
-    if (!item.telefone_normalizado) continue;
-    const telefoneNorm = item.telefone_normalizado.slice(-9);
-
-    if (!clientesMap.has(telefoneNorm)) {
-      clientesMap.set(telefoneNorm, {
-        telefone: telefoneNorm,
-        nome: item.nome_completo || 'Cliente',
-        visitas: []
-      });
-    }
-
-    clientesMap.get(telefoneNorm)!.visitas.push({
-      data: new Date(item.data_evento),
-      valor: 100
-    });
-  }
-
-  // Processar GetIn
-  for (const item of getinData) {
-    if (!item.telefone_normalizado) continue;
-    const telefoneNorm = item.telefone_normalizado.slice(-9);
-
-    if (!clientesMap.has(telefoneNorm)) {
-      clientesMap.set(telefoneNorm, {
-        telefone: telefoneNorm,
-        nome: item.nome || 'Cliente',
-        visitas: []
-      });
-    }
-
-    const valorEstimado = (item.numero_convidados || 1) * 120;
-    clientesMap.get(telefoneNorm)!.visitas.push({
-      data: new Date(item.data),
-      valor: valorEstimado
+      valor
     });
   }
 
   console.log(`👥 Total de clientes únicos: ${clientesMap.size}`);
 
-  // ===== CALCULAR LTV PARA CADA CLIENTE =====
+  // CALCULAR TICKET MÉDIO DO BAR (baseado em clientes com 3+ visitas)
+  let somaTicketsConfiaveis = 0;
+  let countTicketsConfiaveis = 0;
+
+  for (const [, dados] of clientesMap.entries()) {
+    if (dados.visitas.length >= MINIMO_VISITAS_CONFIAVEL) {
+      const ltvCliente = dados.visitas.reduce((sum, v) => sum + v.valor, 0);
+      const ticketCliente = ltvCliente / dados.visitas.length;
+      somaTicketsConfiaveis += ticketCliente;
+      countTicketsConfiaveis++;
+    }
+  }
+
+  const ticketMedioBar = countTicketsConfiaveis > 0 
+    ? somaTicketsConfiaveis / countTicketsConfiaveis 
+    : 150; // Fallback
+
+  console.log(`🎫 Ticket médio do bar (${countTicketsConfiaveis} clientes confiáveis): R$ ${Math.round(ticketMedioBar)}`);
+
+  // Calcular LTV para cada cliente
   const resultados: ClienteLTV[] = [];
   const hoje = new Date();
 
@@ -523,58 +503,84 @@ async function calcularLTVTodosClientes(limite: number, barId: number = 3) {
 
     dados.visitas.sort((a, b) => a.data.getTime() - b.data.getTime());
 
+    const totalVisitas = dados.visitas.length;
+    const dadosPreliminares = totalVisitas < MINIMO_VISITAS_CONFIAVEL;
+    const confianca = determinarConfianca(totalVisitas);
+
     const primeiraVisita = dados.visitas[0].data;
     const ultimaVisita = dados.visitas[dados.visitas.length - 1].data;
     const diasComoCliente = Math.floor((hoje.getTime() - primeiraVisita.getTime()) / (1000 * 60 * 60 * 24));
-    const mesesComoCliente = diasComoCliente / 30;
+    const mesesComoCliente = Math.max(diasComoCliente / 30, 1);
 
     const ltvAtual = dados.visitas.reduce((sum, v) => sum + v.valor, 0);
-    const frequenciaVisitas = dados.visitas.length / Math.max(mesesComoCliente, 1);
-    const ticketMedio = ltvAtual / dados.visitas.length;
-    const valorMedioMensal = ltvAtual / Math.max(mesesComoCliente, 1);
+    const ticketMedioReal = ltvAtual / totalVisitas;
+    
+    // Para projeções: usar ticket do bar se dados preliminares
+    const ticketMedioUsado = dadosPreliminares ? ticketMedioBar : ticketMedioReal;
+    
+    const frequenciaVisitas = totalVisitas / mesesComoCliente;
+    const valorMedioMensal = ltvAtual / mesesComoCliente;
 
     // Tendências
-    const metade = Math.floor(dados.visitas.length / 2);
-    const valoresAntigos = dados.visitas.slice(0, metade).map(v => v.valor);
-    const valoresRecentes = dados.visitas.slice(metade).map(v => v.valor);
-    const tendenciaValor = calcularTendencia(valoresAntigos, valoresRecentes);
+    let tendenciaValor: 'crescente' | 'estavel' | 'decrescente' = 'estavel';
+    let tendenciaFrequencia: 'crescente' | 'estavel' | 'decrescente' = 'estavel';
 
-    const data90DiasAtras = new Date();
-    data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
-    const data180DiasAtras = new Date();
-    data180DiasAtras.setDate(data180DiasAtras.getDate() - 180);
+    if (!dadosPreliminares) {
+      const metade = Math.floor(totalVisitas / 2);
+      const valoresAntigos = dados.visitas.slice(0, metade).map(v => v.valor);
+      const valoresRecentes = dados.visitas.slice(metade).map(v => v.valor);
+      tendenciaValor = calcularTendencia(valoresAntigos, valoresRecentes);
 
-    const visitasUltimos90 = dados.visitas.filter(v => v.data >= data90DiasAtras).length;
-    const visitas90a180 = dados.visitas.filter(v => v.data >= data180DiasAtras && v.data < data90DiasAtras).length;
+      const data90DiasAtras = new Date();
+      data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
+      const data180DiasAtras = new Date();
+      data180DiasAtras.setDate(data180DiasAtras.getDate() - 180);
 
-    const tendenciaFrequencia = visitasUltimos90 > visitas90a180 ? 'crescente' :
-      visitasUltimos90 < visitas90a180 ? 'decrescente' : 'estavel';
+      const visitasUltimos90 = dados.visitas.filter(v => v.data >= data90DiasAtras).length;
+      const visitas90a180 = dados.visitas.filter(v => v.data >= data180DiasAtras && v.data < data90DiasAtras).length;
+
+      tendenciaFrequencia = visitasUltimos90 > visitas90a180 ? 'crescente' :
+        visitasUltimos90 < visitas90a180 ? 'decrescente' : 'estavel';
+    }
 
     // Projeções
     let fatorAjuste = 1.0;
-    if (tendenciaValor === 'crescente' && tendenciaFrequencia === 'crescente') {
-      fatorAjuste = 1.3;
-    } else if (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente') {
-      fatorAjuste = 1.15;
-    } else if (tendenciaValor === 'decrescente' && tendenciaFrequencia === 'decrescente') {
-      fatorAjuste = 0.7;
-    } else if (tendenciaValor === 'decrescente' || tendenciaFrequencia === 'decrescente') {
-      fatorAjuste = 0.85;
+    if (!dadosPreliminares) {
+      if (tendenciaValor === 'crescente' && tendenciaFrequencia === 'crescente') {
+        fatorAjuste = 1.3;
+      } else if (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente') {
+        fatorAjuste = 1.15;
+      } else if (tendenciaValor === 'decrescente' && tendenciaFrequencia === 'decrescente') {
+        fatorAjuste = 0.7;
+      } else if (tendenciaValor === 'decrescente' || tendenciaFrequencia === 'decrescente') {
+        fatorAjuste = 0.85;
+      }
+    } else {
+      fatorAjuste = FATOR_CONSERVADOR;
     }
 
-    const ltvProjetado12m = valorMedioMensal * 12 * fatorAjuste;
-    const ltvProjetado24m = valorMedioMensal * 24 * fatorAjuste;
+    // Projeção APENAS para clientes confiáveis
+    let ltvProjetado12m = 0;
+    let ltvProjetado24m = 0;
+    
+    if (!dadosPreliminares) {
+      ltvProjetado12m = ticketMedioUsado * frequenciaVisitas * 12 * fatorAjuste;
+      ltvProjetado24m = ticketMedioUsado * frequenciaVisitas * 24 * fatorAjuste;
+    }
 
     const { score, nivel } = calcularScoreEngajamento({
       frequenciaVisitas,
       diasComoCliente,
-      totalVisitas: dados.visitas.length,
+      totalVisitas,
       tendenciaFrequencia,
-      tendenciaValor
+      tendenciaValor,
+      limitarScore: dadosPreliminares
     });
 
     let potencialCrescimento: 'baixo' | 'medio' | 'alto';
-    if (score >= 70 && (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente')) {
+    if (dadosPreliminares) {
+      potencialCrescimento = 'medio';
+    } else if (score >= 70 && (tendenciaValor === 'crescente' || tendenciaFrequencia === 'crescente')) {
       potencialCrescimento = 'alto';
     } else if (score >= 40) {
       potencialCrescimento = 'medio';
@@ -583,7 +589,9 @@ async function calcularLTVTodosClientes(limite: number, barId: number = 3) {
     }
 
     const custoMarketingEstimado = 50;
-    const roiMarketing = (ltvProjetado12m / custoMarketingEstimado);
+    const roiMarketing = dadosPreliminares 
+      ? 0 // Sem ROI para dados preliminares
+      : (ltvProjetado12m / custoMarketingEstimado);
 
     resultados.push({
       telefone,
@@ -593,32 +601,43 @@ async function calcularLTVTodosClientes(limite: number, barId: number = 3) {
       ltv_projetado_24m: Math.round(ltvProjetado24m),
       score_engajamento: score,
       nivel_engajamento: nivel,
-      total_visitas: dados.visitas.length,
+      total_visitas: totalVisitas,
       primeira_visita: primeiraVisita.toISOString(),
       ultima_visita: ultimaVisita.toISOString(),
       dias_como_cliente: diasComoCliente,
       frequencia_visitas: Math.round(frequenciaVisitas * 10) / 10,
-      ticket_medio: Math.round(ticketMedio),
+      ticket_medio: Math.round(ticketMedioReal),
+      ticket_medio_usado: Math.round(ticketMedioUsado),
       valor_medio_mensal: Math.round(valorMedioMensal),
       tendencia_valor: tendenciaValor,
       tendencia_frequencia: tendenciaFrequencia,
       potencial_crescimento: potencialCrescimento,
-      roi_marketing: Math.round(roiMarketing * 10) / 10
+      roi_marketing: Math.round(roiMarketing * 10) / 10,
+      confianca,
+      dados_preliminares: dadosPreliminares
     });
   }
 
-  // Ordenar por LTV projetado (maior valor primeiro)
-  resultados.sort((a, b) => b.ltv_projetado_12m - a.ltv_projetado_12m);
+  // Ordenar por LTV ATUAL (não projetado) - mais realista
+  resultados.sort((a, b) => b.ltv_atual - a.ltv_atual);
 
-  console.log(`✅ LTV calculado: ${resultados.length} clientes processados`);
+  console.log(`✅ LTV calculado: ${resultados.length} clientes`);
+  console.log(`   📊 Dados confiáveis (3+ visitas): ${resultados.filter(r => !r.dados_preliminares).length}`);
+  console.log(`   📋 Dados preliminares (1-2 visitas): ${resultados.filter(r => r.dados_preliminares).length}`);
 
-  // Estatísticas
+  // Estatísticas (projeções só de clientes confiáveis)
+  const clientesConfiaveis = resultados.filter(r => !r.dados_preliminares);
   const stats = {
     total_clientes: resultados.length,
+    clientes_confiaveis: clientesConfiaveis.length,
+    clientes_preliminares: resultados.length - clientesConfiaveis.length,
     ltv_total_atual: resultados.reduce((sum, c) => sum + c.ltv_atual, 0),
-    ltv_total_projetado_12m: resultados.reduce((sum, c) => sum + c.ltv_projetado_12m, 0),
+    // Projeção APENAS de clientes confiáveis (3+ visitas)
+    ltv_total_projetado_12m: clientesConfiaveis.reduce((sum, c) => sum + c.ltv_projetado_12m, 0),
     ltv_medio_atual: resultados.length > 0 ? Math.round(resultados.reduce((sum, c) => sum + c.ltv_atual, 0) / resultados.length) : 0,
-    ltv_medio_projetado_12m: resultados.length > 0 ? Math.round(resultados.reduce((sum, c) => sum + c.ltv_projetado_12m, 0) / resultados.length) : 0,
+    ltv_medio_confiaveis: clientesConfiaveis.length > 0 ? Math.round(clientesConfiaveis.reduce((sum, c) => sum + c.ltv_atual, 0) / clientesConfiaveis.length) : 0,
+    ltv_medio_projetado_confiaveis: clientesConfiaveis.length > 0 ? Math.round(clientesConfiaveis.reduce((sum, c) => sum + c.ltv_projetado_12m, 0) / clientesConfiaveis.length) : 0,
+    ticket_medio_bar: Math.round(ticketMedioBar),
     engajamento_muito_alto: resultados.filter(c => c.nivel_engajamento === 'muito_alto').length,
     engajamento_alto: resultados.filter(c => c.nivel_engajamento === 'alto').length,
     engajamento_medio: resultados.filter(c => c.nivel_engajamento === 'medio').length,
@@ -626,12 +645,13 @@ async function calcularLTVTodosClientes(limite: number, barId: number = 3) {
   };
 
   // Salvar no cache
-  setCache(cacheKey, { resultados, stats });
+  setCache(cacheKey, { resultados, stats, ticketMedioBar });
 
   return NextResponse.json({
     success: true,
     data: resultados.slice(0, limite),
     stats,
+    ticket_medio_bar: Math.round(ticketMedioBar),
     fromCache: false
   });
 }

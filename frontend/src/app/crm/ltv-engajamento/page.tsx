@@ -23,7 +23,10 @@ import {
   Star,
   RefreshCcw,
   Zap,
-  HelpCircle
+  HelpCircle,
+  AlertCircle,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 
 interface ClienteLTV {
@@ -37,19 +40,25 @@ interface ClienteLTV {
   total_visitas: number;
   frequencia_visitas: number;
   ticket_medio: number;
+  ticket_medio_usado: number;
   valor_medio_mensal: number;
   tendencia_valor: 'crescente' | 'estavel' | 'decrescente';
   tendencia_frequencia: 'crescente' | 'estavel' | 'decrescente';
   potencial_crescimento: 'baixo' | 'medio' | 'alto';
   roi_marketing: number;
+  confianca: 'alta' | 'media' | 'baixa';
+  dados_preliminares: boolean;
 }
 
 interface Stats {
   total_clientes: number;
+  clientes_confiaveis: number;
+  clientes_preliminares: number;
   ltv_total_atual: number;
   ltv_total_projetado_12m: number;
   ltv_medio_atual: number;
-  ltv_medio_projetado_12m: number;
+  ltv_medio_confiaveis: number;
+  ticket_medio_bar: number;
   engajamento_muito_alto: number;
   engajamento_alto: number;
   engajamento_medio: number;
@@ -62,7 +71,9 @@ export default function LTVEngajamentoPage() {
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
   const [fromCache, setFromCache] = useState(false);
+  const [ticketMedioBar, setTicketMedioBar] = useState(0);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [filtroConfianca, setFiltroConfianca] = useState<'todos' | 'confiaveis' | 'preliminares'>('todos');
   const itensPorPagina = 20;
 
   const fetchLTV = async () => {
@@ -75,6 +86,7 @@ export default function LTVEngajamentoPage() {
         setClientes(result.data || []);
         setStats(result.stats);
         setFromCache(result.fromCache || false);
+        setTicketMedioBar(result.ticket_medio_bar || 0);
       } else {
         console.error('Erro na API:', result.error);
       }
@@ -89,17 +101,22 @@ export default function LTVEngajamentoPage() {
     fetchLTV();
   }, []);
 
-  // Reset página quando busca muda
   useEffect(() => {
     setPaginaAtual(1);
-  }, [busca]);
+  }, [busca, filtroConfianca]);
 
-  const clientesFiltrados = clientes.filter(c =>
-    c.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    c.telefone.includes(busca)
-  );
+  // Filtrar por busca e confiança
+  const clientesFiltrados = clientes.filter(c => {
+    const matchBusca = c.nome.toLowerCase().includes(busca.toLowerCase()) || c.telefone.includes(busca);
+    
+    if (filtroConfianca === 'confiaveis') {
+      return matchBusca && !c.dados_preliminares;
+    } else if (filtroConfianca === 'preliminares') {
+      return matchBusca && c.dados_preliminares;
+    }
+    return matchBusca;
+  });
 
-  // Paginação
   const totalPaginas = Math.ceil(clientesFiltrados.length / itensPorPagina);
   const clientesPaginados = clientesFiltrados.slice(
     (paginaAtual - 1) * itensPorPagina,
@@ -118,6 +135,36 @@ export default function LTVEngajamentoPage() {
         return <Badge className="bg-gray-600">💤 {score} - Baixo</Badge>;
       default:
         return <Badge>-</Badge>;
+    }
+  };
+
+  const getConfiancaBadge = (confianca: string, dadosPreliminares: boolean) => {
+    if (dadosPreliminares) {
+      return (
+        <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-700">
+          <Clock className="w-3 h-3 mr-1" />
+          Preliminar
+        </Badge>
+      );
+    }
+    
+    switch (confianca) {
+      case 'alta':
+        return (
+          <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-300 dark:border-green-700">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Confiável
+          </Badge>
+        );
+      case 'media':
+        return (
+          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-700">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Confiável
+          </Badge>
+        );
+      default:
+        return null;
     }
   };
 
@@ -143,17 +190,16 @@ export default function LTVEngajamentoPage() {
   };
 
   const exportarCSV = () => {
-    const headers = ['Nome', 'Telefone', 'LTV Atual', 'LTV 12m', 'LTV 24m', 'Score', 'Nível', 'Visitas', 'Ticket Médio', 'ROI Marketing'];
+    const headers = ['Nome', 'Telefone', 'LTV Atual', 'LTV 12m', 'Visitas', 'Ticket Médio', 'Confiança', 'Score', 'ROI Marketing'];
     const rows = clientesFiltrados.map(c => [
       c.nome,
       c.telefone,
       c.ltv_atual,
       c.ltv_projetado_12m,
-      c.ltv_projetado_24m,
-      c.score_engajamento,
-      c.nivel_engajamento,
       c.total_visitas,
       c.ticket_medio,
+      c.dados_preliminares ? 'Preliminar' : 'Confiável',
+      c.score_engajamento,
       c.roi_marketing
     ]);
 
@@ -175,7 +221,7 @@ export default function LTVEngajamentoPage() {
               💰 LTV e Score de Engajamento
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Lifetime Value e métricas de engajamento dos clientes
+              Lifetime Value e métricas de engajamento dos clientes (dados reais ContaHub)
             </p>
           </div>
 
@@ -205,23 +251,23 @@ export default function LTVEngajamentoPage() {
         {/* Stats com Tooltips */}
         <TooltipProvider>
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-              {[...Array(5)].map((_, i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+              {[...Array(6)].map((_, i) => (
                 <Skeleton key={i} className="h-32" />
               ))}
             </div>
           ) : stats ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
               {/* LTV Atual Total */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-help">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">LTV Atual Total</div>
-                        <HelpCircle className="w-4 h-4 text-gray-400" />
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">LTV Atual Total</div>
+                        <HelpCircle className="w-3 h-3 text-gray-400" />
                       </div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">
                         {formatarMoeda(stats.ltv_total_atual)}
                       </div>
                     </CardContent>
@@ -229,12 +275,8 @@ export default function LTVEngajamentoPage() {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
                   <p className="font-semibold mb-1">💰 LTV Atual Total</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Soma de todos os valores gastos pelos clientes.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    <strong>Fontes:</strong> ContaHub (couvert + pagamentos), Sympla (R$100 estimado), GetIn (R$120 × convidados)
-                  </p>
+                  <p className="text-sm">Soma de todos os valores gastos pelos clientes.</p>
+                  <p className="text-xs text-gray-500 mt-1">Fonte: ContaHub (couvert + pagamentos)</p>
                 </TooltipContent>
               </Tooltip>
 
@@ -242,100 +284,103 @@ export default function LTVEngajamentoPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 cursor-help">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-green-600 dark:text-green-400 mb-1">LTV Projetado 12m</div>
-                        <HelpCircle className="w-4 h-4 text-green-400" />
+                        <div className="text-xs text-green-600 dark:text-green-400 mb-1">LTV Projetado 12m</div>
+                        <HelpCircle className="w-3 h-3 text-green-400" />
                       </div>
-                      <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                      <div className="text-xl font-bold text-green-700 dark:text-green-300">
                         {formatarMoeda(stats.ltv_total_projetado_12m)}
                       </div>
+                      <div className="text-xs text-green-600 dark:text-green-400">só confiáveis</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
                   <p className="font-semibold mb-1">📈 LTV Projetado 12 Meses</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Projeção de quanto os clientes gastarão nos próximos 12 meses.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    <strong>Cálculo:</strong> Valor médio mensal × 12 × Fator de tendência
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    <strong>Fatores:</strong> +30% (tendência crescente), -30% (decrescente)
-                  </p>
+                  <p className="text-sm">Projeção calculada APENAS para clientes confiáveis (3+ visitas).</p>
+                  <p className="text-xs text-gray-500 mt-2">Clientes com 1-2 visitas não são projetados - não há dados suficientes.</p>
                 </TooltipContent>
               </Tooltip>
 
-              {/* LTV Médio Atual */}
+              {/* Ticket Médio Bar */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 cursor-help">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-blue-600 dark:text-blue-400 mb-1">LTV Médio Atual</div>
-                        <HelpCircle className="w-4 h-4 text-blue-400" />
+                        <div className="text-xs text-blue-600 dark:text-blue-400 mb-1">Ticket Médio Bar</div>
+                        <HelpCircle className="w-3 h-3 text-blue-400" />
                       </div>
-                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                        {formatarMoeda(stats.ltv_medio_atual)}
+                      <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                        {formatarMoeda(stats.ticket_medio_bar)}
                       </div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
-                  <p className="font-semibold mb-1">📊 LTV Médio por Cliente</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Valor médio gasto por cada cliente na base.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    <strong>Cálculo:</strong> LTV Total ÷ Número de clientes
-                  </p>
+                  <p className="font-semibold mb-1">🎫 Ticket Médio do Bar</p>
+                  <p className="text-sm">Média de gasto por visita calculada apenas com clientes confiáveis (3+ visitas).</p>
+                  <p className="text-xs text-gray-500 mt-1">Usado como referência para projeções de clientes novos.</p>
                 </TooltipContent>
               </Tooltip>
 
-              {/* Engajamento Alto+ */}
+              {/* Clientes Confiáveis */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 cursor-help">
-                    <CardContent className="p-6">
+                  <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 cursor-help">
+                    <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-purple-600 dark:text-purple-400 mb-1">Engajamento Alto+</div>
-                        <HelpCircle className="w-4 h-4 text-purple-400" />
+                        <div className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">Dados Confiáveis</div>
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                       </div>
-                      <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">
-                        {stats.engajamento_muito_alto + stats.engajamento_alto}
+                      <div className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
+                        {stats.clientes_confiaveis.toLocaleString('pt-BR')}
                       </div>
+                      <div className="text-xs text-emerald-600 dark:text-emerald-400">3+ visitas</div>
                     </CardContent>
                   </Card>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
-                  <p className="font-semibold mb-1">🔥 Clientes Engajados</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Clientes com score de engajamento ≥ 60 pontos.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    <strong>Score é baseado em:</strong>
-                  </p>
-                  <ul className="text-xs text-gray-500 mt-1 list-disc list-inside">
-                    <li>Frequência de visitas (40pts)</li>
-                    <li>Tempo como cliente (25pts)</li>
-                    <li>Total de visitas (20pts)</li>
-                    <li>Tendência de frequência (10pts)</li>
-                    <li>Tendência de valor (5pts)</li>
-                  </ul>
+                  <p className="font-semibold mb-1">✅ Clientes com Dados Confiáveis</p>
+                  <p className="text-sm">Clientes com 3 ou mais visitas - dados estatisticamente relevantes.</p>
+                  <p className="text-xs text-gray-500 mt-1">Projeções são baseadas no histórico real do cliente.</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Clientes Preliminares */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 cursor-help">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-orange-600 dark:text-orange-400 mb-1">Dados Preliminares</div>
+                        <AlertCircle className="w-3 h-3 text-orange-400" />
+                      </div>
+                      <div className="text-xl font-bold text-orange-700 dark:text-orange-300">
+                        {stats.clientes_preliminares.toLocaleString('pt-BR')}
+                      </div>
+                      <div className="text-xs text-orange-600 dark:text-orange-400">1-2 visitas</div>
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs p-3">
+                  <p className="font-semibold mb-1">📊 Clientes com Dados Preliminares</p>
+                  <p className="text-sm">Clientes com 1-2 visitas - dados ainda não são representativos.</p>
+                  <p className="text-xs text-gray-500 mt-1">Projeções usam ticket médio do bar com fator conservador de 50%.</p>
                 </TooltipContent>
               </Tooltip>
 
               {/* Total Clientes */}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 cursor-help">
-                    <CardContent className="p-6">
+                  <Card className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 cursor-help">
+                    <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-orange-600 dark:text-orange-400 mb-1">Total Clientes</div>
-                        <HelpCircle className="w-4 h-4 text-orange-400" />
+                        <div className="text-xs text-purple-600 dark:text-purple-400 mb-1">Total Clientes</div>
+                        <HelpCircle className="w-3 h-3 text-purple-400" />
                       </div>
-                      <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">
+                      <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
                         {stats.total_clientes.toLocaleString('pt-BR')}
                       </div>
                     </CardContent>
@@ -343,49 +388,69 @@ export default function LTVEngajamentoPage() {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
                   <p className="font-semibold mb-1">👥 Total de Clientes</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Quantidade de clientes únicos com dados de consumo.
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    <strong>Fontes:</strong> ContaHub, Sympla e GetIn
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Clientes são identificados pelo telefone normalizado.
-                  </p>
+                  <p className="text-sm">Clientes únicos identificados pelo telefone.</p>
                 </TooltipContent>
               </Tooltip>
             </div>
           ) : null}
-        </TooltipProvider>
 
-        {/* Busca */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
-          <CardContent className="p-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                placeholder="Buscar por nome ou telefone..."
-                className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-              />
-            </div>
-          </CardContent>
-        </Card>
+          {/* Filtros */}
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    placeholder="Buscar por nome ou telefone..."
+                    className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={filtroConfianca === 'todos' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFiltroConfianca('todos')}
+                    className={filtroConfianca === 'todos' ? 'bg-gray-900 dark:bg-gray-100' : ''}
+                  >
+                    Todos
+                  </Button>
+                  <Button
+                    variant={filtroConfianca === 'confiaveis' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFiltroConfianca('confiaveis')}
+                    className={filtroConfianca === 'confiaveis' ? 'bg-green-600 hover:bg-green-700' : ''}
+                  >
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    Confiáveis
+                  </Button>
+                  <Button
+                    variant={filtroConfianca === 'preliminares' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFiltroConfianca('preliminares')}
+                    className={filtroConfianca === 'preliminares' ? 'bg-orange-600 hover:bg-orange-700' : ''}
+                  >
+                    <Clock className="w-3 h-3 mr-1" />
+                    Preliminares
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Lista */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-gray-900 dark:text-white">
-              Top Clientes por LTV ({clientesFiltrados.length.toLocaleString('pt-BR')})
-            </CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-400">
-              Ordenados por LTV projetado em 12 meses
-              {totalPaginas > 1 && ` • Página ${paginaAtual} de ${totalPaginas}`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TooltipProvider>
+          {/* Lista */}
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Clientes por LTV Atual ({clientesFiltrados.length.toLocaleString('pt-BR')})
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                Ordenados por valor real já gasto
+                {totalPaginas > 1 && ` • Página ${paginaAtual} de ${totalPaginas}`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               {loading ? (
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
@@ -402,18 +467,28 @@ export default function LTVEngajamentoPage() {
                     {clientesPaginados.map((cliente, index) => {
                       const posicaoGeral = (paginaAtual - 1) * itensPorPagina + index;
                       return (
-                        <Card key={cliente.telefone} className="border border-gray-200 dark:border-gray-700">
+                        <Card 
+                          key={cliente.telefone} 
+                          className={`border ${cliente.dados_preliminares 
+                            ? 'border-orange-200 dark:border-orange-800 bg-orange-50/30 dark:bg-orange-900/10' 
+                            : 'border-gray-200 dark:border-gray-700'}`}
+                        >
                           <CardContent className="p-6">
                             <div className="flex items-start justify-between mb-4">
                               <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                  {posicaoGeral < 3 && <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />}
+                                  {posicaoGeral < 3 && !cliente.dados_preliminares && (
+                                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                                  )}
                                   <span className="text-sm text-gray-500 dark:text-gray-400">#{posicaoGeral + 1}</span>
                                   <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                     {cliente.nome}
                                   </h3>
+                                  {getConfiancaBadge(cliente.confianca, cliente.dados_preliminares)}
                                 </div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{cliente.telefone}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  {cliente.telefone} • {cliente.total_visitas} visita{cliente.total_visitas !== 1 ? 's' : ''}
+                                </p>
                               </div>
                               {getEngajamentoBadge(cliente.nivel_engajamento, cliente.score_engajamento)}
                             </div>
@@ -434,29 +509,52 @@ export default function LTVEngajamentoPage() {
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs p-3">
                                   <p className="font-semibold mb-1">💰 LTV Atual</p>
-                                  <p className="text-sm">Valor total já gasto pelo cliente desde a primeira visita.</p>
+                                  <p className="text-sm">Valor real já gasto pelo cliente.</p>
                                 </TooltipContent>
                               </Tooltip>
 
                               {/* Projeção 12m */}
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg cursor-help">
+                                  <div className={`p-3 rounded-lg cursor-help ${cliente.dados_preliminares 
+                                    ? 'bg-gray-100 dark:bg-gray-700/50' 
+                                    : 'bg-green-50 dark:bg-green-900/20'}`}>
                                     <div className="flex items-center justify-between">
-                                      <div className="text-xs text-green-600 dark:text-green-400 mb-1">Projeção 12m</div>
-                                      <HelpCircle className="w-3 h-3 text-green-400" />
+                                      <div className={`text-xs mb-1 ${cliente.dados_preliminares 
+                                        ? 'text-gray-500 dark:text-gray-400' 
+                                        : 'text-green-600 dark:text-green-400'}`}>
+                                        Projeção 12m
+                                      </div>
+                                      <HelpCircle className={`w-3 h-3 ${cliente.dados_preliminares ? 'text-gray-400' : 'text-green-400'}`} />
                                     </div>
-                                    <div className="text-xl font-bold text-green-700 dark:text-green-300">
-                                      {formatarMoeda(cliente.ltv_projetado_12m)}
-                                    </div>
+                                    {cliente.dados_preliminares ? (
+                                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        Aguardando dados
+                                      </div>
+                                    ) : (
+                                      <div className="text-xl font-bold text-green-700 dark:text-green-300">
+                                        {formatarMoeda(cliente.ltv_projetado_12m)}
+                                      </div>
+                                    )}
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs p-3">
                                   <p className="font-semibold mb-1">📈 Projeção 12 Meses</p>
-                                  <p className="text-sm">Estimativa de quanto o cliente gastará nos próximos 12 meses.</p>
-                                  <p className="text-xs text-gray-500 mt-2">
-                                    <strong>Cálculo:</strong> (R$ {cliente.valor_medio_mensal}/mês × 12) ajustado pela tendência
-                                  </p>
+                                  {cliente.dados_preliminares ? (
+                                    <>
+                                      <p className="text-sm text-gray-600">Não é possível projetar com apenas {cliente.total_visitas} visita(s).</p>
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Necessário mínimo de 3 visitas para projeção confiável.
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p className="text-sm">Baseada no histórico real do cliente.</p>
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Ticket: R$ {cliente.ticket_medio} × {cliente.frequencia_visitas} visitas/mês × tendência
+                                      </p>
+                                    </>
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
 
@@ -474,36 +572,53 @@ export default function LTVEngajamentoPage() {
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs p-3">
-                                  <p className="font-semibold mb-1">🎟️ Ticket Médio</p>
-                                  <p className="text-sm">Valor médio gasto por visita.</p>
-                                  <p className="text-xs text-gray-500 mt-2">
-                                    <strong>Cálculo:</strong> LTV Atual ÷ {cliente.total_visitas} visitas
-                                  </p>
+                                  <p className="font-semibold mb-1">🎟️ Ticket Médio Real</p>
+                                  <p className="text-sm">Valor real gasto por visita: R$ {cliente.ltv_atual} ÷ {cliente.total_visitas} visitas</p>
+                                  {cliente.dados_preliminares && (
+                                    <p className="text-xs text-orange-500 mt-1">
+                                      ⚠️ Com {cliente.total_visitas} visita(s) este valor pode não ser representativo
+                                    </p>
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
 
                               {/* ROI Marketing */}
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg cursor-help">
+                                  <div className={`p-3 rounded-lg cursor-help ${cliente.dados_preliminares 
+                                    ? 'bg-gray-100 dark:bg-gray-700/50' 
+                                    : 'bg-purple-50 dark:bg-purple-900/20'}`}>
                                     <div className="flex items-center justify-between">
-                                      <div className="text-xs text-purple-600 dark:text-purple-400 mb-1">ROI Marketing</div>
-                                      <HelpCircle className="w-3 h-3 text-purple-400" />
+                                      <div className={`text-xs mb-1 ${cliente.dados_preliminares 
+                                        ? 'text-gray-500 dark:text-gray-400' 
+                                        : 'text-purple-600 dark:text-purple-400'}`}>
+                                        ROI Marketing
+                                      </div>
+                                      <HelpCircle className={`w-3 h-3 ${cliente.dados_preliminares ? 'text-gray-400' : 'text-purple-400'}`} />
                                     </div>
-                                    <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                                      {cliente.roi_marketing}x
-                                    </div>
+                                    {cliente.dados_preliminares ? (
+                                      <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        Aguardando dados
+                                      </div>
+                                    ) : (
+                                      <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
+                                        {cliente.roi_marketing}x
+                                      </div>
+                                    )}
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-xs p-3">
                                   <p className="font-semibold mb-1">🎯 ROI de Marketing</p>
-                                  <p className="text-sm">Retorno estimado para cada R$1 investido em campanhas.</p>
-                                  <p className="text-xs text-gray-500 mt-2">
-                                    <strong>Cálculo:</strong> LTV Projetado 12m ÷ R$50 (custo estimado por campanha)
-                                  </p>
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    ROI alto = cliente vale o investimento em retenção
-                                  </p>
+                                  {cliente.dados_preliminares ? (
+                                    <>
+                                      <p className="text-sm text-gray-600">Não é possível calcular ROI sem projeção.</p>
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Necessário mínimo de 3 visitas.
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <p className="text-sm">Retorno estimado para cada R$1 investido em campanhas.</p>
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
                             </div>
@@ -512,23 +627,34 @@ export default function LTVEngajamentoPage() {
                               <div className="flex items-center gap-2">
                                 <Activity className="w-4 h-4 text-gray-500" />
                                 <span className="text-gray-700 dark:text-gray-300">
-                                  {cliente.total_visitas} visitas
+                                  {cliente.total_visitas} visita{cliente.total_visitas !== 1 ? 's' : ''}
                                 </span>
                               </div>
 
-                              <div className="flex items-center gap-2">
-                                {getTendenciaIcon(cliente.tendencia_valor)}
-                                <span className="text-gray-700 dark:text-gray-300">
-                                  Valor {cliente.tendencia_valor}
-                                </span>
-                              </div>
+                              {!cliente.dados_preliminares && (
+                                <>
+                                  <div className="flex items-center gap-2">
+                                    {getTendenciaIcon(cliente.tendencia_valor)}
+                                    <span className="text-gray-700 dark:text-gray-300">
+                                      Valor {cliente.tendencia_valor}
+                                    </span>
+                                  </div>
 
-                              <div className="flex items-center gap-2">
-                                <Target className="w-4 h-4 text-gray-500" />
-                                <span className="text-gray-700 dark:text-gray-300">
-                                  Potencial: {cliente.potencial_crescimento}
-                                </span>
-                              </div>
+                                  <div className="flex items-center gap-2">
+                                    <Target className="w-4 h-4 text-gray-500" />
+                                    <span className="text-gray-700 dark:text-gray-300">
+                                      Potencial: {cliente.potencial_crescimento}
+                                    </span>
+                                  </div>
+                                </>
+                              )}
+
+                              {cliente.dados_preliminares && (
+                                <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+                                  <AlertCircle className="w-4 h-4" />
+                                  <span>Aguardando mais visitas para análise completa</span>
+                                </div>
+                              )}
                             </div>
                           </CardContent>
                         </Card>
@@ -584,9 +710,9 @@ export default function LTVEngajamentoPage() {
                   )}
                 </>
               )}
-            </TooltipProvider>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </TooltipProvider>
       </div>
     </div>
   );
