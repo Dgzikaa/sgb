@@ -70,12 +70,13 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', userId);
 
-    // 5. Enviar email com nova senha
+    // 5. Tentar enviar email com nova senha
     let emailSent = false;
+    let emailError = null;
     try {
       const baseUrl = process.env.NODE_ENV === 'development' 
         ? 'http://localhost:3000' 
-        : (process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app');
+        : (process.env.NEXT_PUBLIC_APP_URL || 'https://zykor.com.br');
 
       const emailResponse = await fetch(`${baseUrl}/api/emails/password-reset`, {
         method: 'POST',
@@ -85,7 +86,9 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           to: usuario.email,
           nome: usuario.nome,
-          novaSenha: novaSenhaTemporia,
+          email: usuario.email,
+          senha_temporaria: novaSenhaTemporia,
+          role: 'funcionario',
           loginUrl: baseUrl
         })
       });
@@ -94,22 +97,28 @@ export async function POST(request: NextRequest) {
         emailSent = true;
         console.log('✅ Email de redefinição enviado para:', usuario.email);
       } else {
-        console.warn('⚠️ Falha ao enviar email de redefinição');
+        const errorData = await emailResponse.json().catch(() => ({}));
+        emailError = errorData.error || 'Falha ao enviar email';
+        console.warn('⚠️ Falha ao enviar email de redefinição:', emailError);
       }
-    } catch (emailError) {
-      console.warn('⚠️ Erro ao enviar email:', emailError);
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : 'Erro desconhecido';
+      console.warn('⚠️ Erro ao enviar email:', err);
     }
 
+    // SEMPRE retornar as credenciais para o admin poder copiar/informar ao usuário
     return NextResponse.json({ 
       success: true,
       message: emailSent 
-        ? `Senha redefinida! Email enviado para ${usuario.email}` 
-        : 'Senha redefinida, mas email não pôde ser enviado',
+        ? `✅ Senha redefinida! Email enviado para ${usuario.email}` 
+        : `⚠️ Senha redefinida, mas email não pôde ser enviado: ${emailError}`,
       emailSent,
-      credentials: emailSent ? undefined : {
+      credentials: {
         email: usuario.email,
         senha_temporaria: novaSenhaTemporia,
-        message: 'Informe estas credenciais ao usuário manualmente'
+        message: emailSent 
+          ? 'Email enviado! Credenciais abaixo caso o usuário não receba:' 
+          : '⚠️ Email não enviado! Informe estas credenciais ao usuário manualmente:'
       }
     });
 

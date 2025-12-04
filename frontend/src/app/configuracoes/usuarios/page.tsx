@@ -351,8 +351,17 @@ function UsuariosPage() {
     });
   };
 
+  // Estado para modal de credenciais
+  const [credentialsModal, setCredentialsModal] = useState<{
+    open: boolean;
+    email: string;
+    senha: string;
+    emailSent: boolean;
+    message: string;
+  }>({ open: false, email: '', senha: '', emailSent: false, message: '' });
+
   const handleResetPassword = async (userId: number) => {
-    if (!confirm('⚠️ Tem certeza que deseja redefinir a senha deste usuário?\n\nUma nova senha temporária será gerada e enviada por email.')) return;
+    if (!confirm('⚠️ Tem certeza que deseja redefinir a senha deste usuário?\n\nUma nova senha temporária será gerada.')) return;
 
     try {
       const response = await fetch('/api/configuracoes/usuarios/redefinir-senha', {
@@ -363,19 +372,27 @@ function UsuariosPage() {
 
       const result = await response.json();
 
-      if (response.ok) {
-        // Se o email não foi enviado, mostrar credenciais no toast
-        if (!result.emailSent && result.credentials) {
-          toast({
-            title: '⚠️ Senha Redefinida - Email Não Enviado',
-            description: `Senha temporária: ${result.credentials.senha_temporaria}\n\nInforme ao usuário manualmente.`,
-          });
-        } else {
-          toast({
-            title: 'Sucesso',
-            description: result.message || 'Senha redefinida com sucesso',
-          });
-        }
+      if (response.ok && result.credentials) {
+        // Mostrar modal com as credenciais para o admin copiar
+        setCredentialsModal({
+          open: true,
+          email: result.credentials.email,
+          senha: result.credentials.senha_temporaria,
+          emailSent: result.emailSent,
+          message: result.credentials.message
+        });
+        
+        toast({
+          title: result.emailSent ? '✅ Senha Redefinida' : '⚠️ Senha Redefinida',
+          description: result.emailSent 
+            ? 'Email enviado! Credenciais também estão disponíveis no modal.' 
+            : 'Email não enviado. Veja as credenciais no modal.',
+        });
+      } else if (response.ok) {
+        toast({
+          title: 'Sucesso',
+          description: result.message || 'Senha redefinida com sucesso',
+        });
       } else {
         throw new Error(result.error || 'Erro ao redefinir senha');
       }
@@ -384,6 +401,22 @@ function UsuariosPage() {
       toast({
         title: 'Erro',
         description: error instanceof Error ? error.message : 'Erro ao redefinir senha',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: 'Copiado!',
+        description: `${label} copiado para a área de transferência`,
+      });
+    } catch (err) {
+      toast({
+        title: 'Erro ao copiar',
+        description: 'Não foi possível copiar para a área de transferência',
         variant: 'destructive',
       });
     }
@@ -825,6 +858,102 @@ function UsuariosPage() {
                   </Button>
                 </DialogFooter>
                 </DialogContent>
+            </Dialog>
+
+            {/* Modal de Credenciais */}
+            <Dialog open={credentialsModal.open} onOpenChange={(open) => setCredentialsModal(prev => ({ ...prev, open }))}>
+              <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white max-w-md">
+                <DialogHeader>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`p-2 rounded-full ${credentialsModal.emailSent ? 'bg-green-100 dark:bg-green-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                      <Key className={`w-5 h-5 ${credentialsModal.emailSent ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`} />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
+                        {credentialsModal.emailSent ? '✅ Senha Redefinida' : '⚠️ Credenciais Temporárias'}
+                      </DialogTitle>
+                    </div>
+                  </div>
+                  <DialogDescription className="text-gray-600 dark:text-gray-400">
+                    {credentialsModal.message}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4 py-4">
+                  {/* Email */}
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        Email
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(credentialsModal.email, 'Email')}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 h-8 px-2"
+                      >
+                        Copiar
+                      </Button>
+                    </div>
+                    <p className="text-lg font-mono text-gray-900 dark:text-white break-all">
+                      {credentialsModal.email}
+                    </p>
+                  </div>
+
+                  {/* Senha */}
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border-2 border-yellow-200 dark:border-yellow-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
+                        <Key className="w-4 h-4" />
+                        Senha Temporária
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(credentialsModal.senha, 'Senha')}
+                        className="text-yellow-700 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 h-8 px-2 font-semibold"
+                      >
+                        📋 Copiar
+                      </Button>
+                    </div>
+                    <p className="text-xl font-mono font-bold text-yellow-800 dark:text-yellow-300 break-all select-all">
+                      {credentialsModal.senha}
+                    </p>
+                  </div>
+
+                  {/* Aviso */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      <strong>📝 Instruções para o usuário:</strong>
+                      <br />
+                      1. Acesse o sistema com estas credenciais
+                      <br />
+                      2. Ao fazer login, será solicitada uma nova senha
+                      <br />
+                      3. Escolha uma senha segura
+                    </p>
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <Button
+                    onClick={() => {
+                      copyToClipboard(`Email: ${credentialsModal.email}\nSenha: ${credentialsModal.senha}`, 'Credenciais');
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
+                  >
+                    📋 Copiar Tudo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCredentialsModal(prev => ({ ...prev, open: false }))}
+                    className="bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                  >
+                    Fechar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
             </Dialog>
           </div>
 
