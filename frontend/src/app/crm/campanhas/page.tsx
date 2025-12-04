@@ -66,18 +66,20 @@ interface Template {
 }
 
 const SEGMENTOS = [
-  { value: 'VIP Champions', label: '⭐ VIP Champions', cor: 'purple' },
-  { value: 'Clientes Fiéis', label: '💎 Clientes Fiéis', cor: 'blue' },
-  { value: 'Grande Potencial', label: '🚀 Grande Potencial', cor: 'green' },
-  { value: 'Em Risco (Churn)', label: '⚠️ Em Risco (Churn)', cor: 'orange' },
-  { value: 'Novos Promissores', label: '✨ Novos Promissores', cor: 'cyan' },
-  { value: 'Regulares', label: '📊 Regulares', cor: 'gray' },
-  { value: 'Inativos', label: '💤 Inativos', cor: 'red' },
+  { value: 'VIP Champions', label: '⭐ VIP Champions', cor: 'purple', desc: 'Visitas frequentes e recentes' },
+  { value: 'Clientes Fiéis', label: '💎 Clientes Fiéis', cor: 'blue', desc: 'Muitas visitas, ativos' },
+  { value: 'Grande Potencial', label: '🚀 Grande Potencial', cor: 'green', desc: 'Engajados recentemente' },
+  { value: 'Em Risco (Churn)', label: '⚠️ Em Risco (Churn)', cor: 'orange', desc: 'Eram ativos, sumiram' },
+  { value: 'Novos Promissores', label: '✨ Novos Promissores', cor: 'cyan', desc: 'Novos e ativos' },
+  { value: 'Regulares', label: '📊 Regulares', cor: 'gray', desc: 'Frequência moderada' },
+  { value: 'Inativos', label: '💤 Inativos', cor: 'red', desc: 'Muito tempo sem visitar' },
 ];
 
 export default function CampanhasPage() {
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
   const [templates, setTemplates] = useState<{ whatsapp: Template[]; email: Template[] }>({ whatsapp: [], email: [] });
+  const [segmentosStats, setSegmentosStats] = useState<Record<string, number>>({});
+  const [whatsappConfigurado, setWhatsappConfigurado] = useState(false);
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
   const [criandoCampanha, setCriandoCampanha] = useState(false);
@@ -91,11 +93,12 @@ export default function CampanhasPage() {
   const [cupomDesconto, setCupomDesconto] = useState(20);
   const [cupomValidade, setCupomValidade] = useState(7);
   const [executarAgora, setExecutarAgora] = useState(true);
+  const [limiteEnvios, setLimiteEnvios] = useState<number | undefined>(undefined);
 
   const fetchCampanhas = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/crm/campanhas');
+      const response = await fetch('/api/crm/campanhas?stats=true');
       const result = await response.json();
 
       if (result.success) {
@@ -104,6 +107,8 @@ export default function CampanhasPage() {
           whatsapp: result.templates_whatsapp || [],
           email: result.templates_email || []
         });
+        setSegmentosStats(result.segmentos_stats || {});
+        setWhatsappConfigurado(result.whatsapp_configurado || false);
       }
     } catch (error) {
       console.error('Erro ao carregar campanhas:', error);
@@ -111,6 +116,12 @@ export default function CampanhasPage() {
       setLoading(false);
     }
   };
+
+  // Calcular total de clientes selecionados
+  const totalClientesSelecionados = segmentosSelecionados.reduce(
+    (sum, seg) => sum + (segmentosStats[seg] || 0), 
+    0
+  );
 
   useEffect(() => {
     fetchCampanhas();
@@ -120,6 +131,21 @@ export default function CampanhasPage() {
     if (!nome || segmentosSelecionados.length === 0) {
       alert('Preencha o nome e selecione pelo menos um segmento');
       return;
+    }
+
+    if (tipo === 'whatsapp' && !whatsappConfigurado) {
+      alert('WhatsApp não configurado! Vá em Configurações > WhatsApp para configurar.');
+      return;
+    }
+
+    // Confirmar envio em massa
+    if (executarAgora && totalClientesSelecionados > 10) {
+      const confirmar = confirm(
+        `Você está prestes a enviar mensagens para ${totalClientesSelecionados.toLocaleString()} clientes.\n\n` +
+        `Isso pode demorar alguns minutos e gerar custos.\n\n` +
+        `Deseja continuar?`
+      );
+      if (!confirmar) return;
     }
 
     setCriandoCampanha(true);
@@ -135,7 +161,8 @@ export default function CampanhasPage() {
           template_custom: mensagemCustom || undefined,
           cupom_desconto: cupomDesconto,
           cupom_validade_dias: cupomValidade,
-          executar_agora: executarAgora
+          executar_agora: executarAgora,
+          limite_envios: limiteEnvios
         })
       });
 
@@ -166,6 +193,7 @@ export default function CampanhasPage() {
     setCupomDesconto(20);
     setCupomValidade(7);
     setExecutarAgora(true);
+    setLimiteEnvios(undefined);
   };
 
   const cancelarCampanha = async (id: string) => {
@@ -313,23 +341,34 @@ export default function CampanhasPage() {
                 <div>
                   <label className="text-sm font-medium text-gray-900 dark:text-white mb-2 block">
                     Segmentos Alvo
+                    {segmentosSelecionados.length > 0 && (
+                      <span className="ml-2 text-blue-600 dark:text-blue-400 font-bold">
+                        ({totalClientesSelecionados.toLocaleString()} clientes)
+                      </span>
+                    )}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
-                    {SEGMENTOS.map(seg => (
-                      <Button
-                        key={seg.value}
-                        type="button"
-                        variant={segmentosSelecionados.includes(seg.value) ? "default" : "outline"}
-                        className={`justify-start ${
-                          segmentosSelecionados.includes(seg.value)
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                            : 'bg-white dark:bg-gray-700'
-                        }`}
-                        onClick={() => toggleSegmento(seg.value)}
-                      >
-                        {seg.label}
-                      </Button>
-                    ))}
+                    {SEGMENTOS.map(seg => {
+                      const count = segmentosStats[seg.value] || 0;
+                      return (
+                        <Button
+                          key={seg.value}
+                          type="button"
+                          variant={segmentosSelecionados.includes(seg.value) ? "default" : "outline"}
+                          className={`justify-between ${
+                            segmentosSelecionados.includes(seg.value)
+                              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                              : 'bg-white dark:bg-gray-700'
+                          }`}
+                          onClick={() => toggleSegmento(seg.value)}
+                        >
+                          <span>{seg.label}</span>
+                          <Badge variant="secondary" className="ml-2 text-xs">
+                            {count.toLocaleString()}
+                          </Badge>
+                        </Button>
+                      );
+                    })}
                   </div>
                 </div>
 

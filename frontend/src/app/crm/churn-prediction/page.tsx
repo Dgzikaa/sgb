@@ -414,7 +414,7 @@ export default function ChurnPredictionPage() {
                 </div>
 
                 <Button
-                  onClick={fetchData}
+                  onClick={() => fetchData(true)}
                   variant="outline"
                   className="bg-white dark:bg-gray-700"
                 >

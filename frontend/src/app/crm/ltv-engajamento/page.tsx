@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { 
-  DollarSign,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -15,7 +14,9 @@ import {
   Download,
   Activity,
   Target,
-  Star
+  Star,
+  RefreshCcw,
+  Zap
 } from 'lucide-react';
 
 interface ClienteLTV {
@@ -36,21 +37,39 @@ interface ClienteLTV {
   roi_marketing: number;
 }
 
+interface Stats {
+  total_clientes: number;
+  ltv_total_atual: number;
+  ltv_total_projetado_12m: number;
+  ltv_medio_atual: number;
+  ltv_medio_projetado_12m: number;
+  engajamento_muito_alto: number;
+  engajamento_alto: number;
+  engajamento_medio: number;
+  engajamento_baixo: number;
+}
+
 export default function LTVEngajamentoPage() {
   const [clientes, setClientes] = useState<ClienteLTV[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [busca, setBusca] = useState('');
+  const [fromCache, setFromCache] = useState(false);
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const itensPorPagina = 20;
 
   const fetchLTV = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/crm/ltv-engajamento?limite=100');
+      const response = await fetch('/api/crm/ltv-engajamento?limite=5000');
       const result = await response.json();
 
       if (result.success) {
-        setClientes(result.data);
+        setClientes(result.data || []);
         setStats(result.stats);
+        setFromCache(result.fromCache || false);
+      } else {
+        console.error('Erro na API:', result.error);
       }
     } catch (error) {
       console.error('Erro ao carregar LTV:', error);
@@ -63,9 +82,21 @@ export default function LTVEngajamentoPage() {
     fetchLTV();
   }, []);
 
+  // Reset página quando busca muda
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [busca]);
+
   const clientesFiltrados = clientes.filter(c =>
     c.nome.toLowerCase().includes(busca.toLowerCase()) ||
     c.telefone.includes(busca)
+  );
+
+  // Paginação
+  const totalPaginas = Math.ceil(clientesFiltrados.length / itensPorPagina);
+  const clientesPaginados = clientesFiltrados.slice(
+    (paginaAtual - 1) * itensPorPagina,
+    paginaAtual * itensPorPagina
   );
 
   const getEngajamentoBadge = (nivel: string, score: number) => {
@@ -94,9 +125,19 @@ export default function LTVEngajamentoPage() {
     }
   };
 
+  const formatarMoeda = (valor: number) => {
+    if (valor >= 1000000) {
+      return `R$ ${(valor / 1000000).toFixed(1)}M`;
+    }
+    if (valor >= 1000) {
+      return `R$ ${(valor / 1000).toFixed(1)}k`;
+    }
+    return `R$ ${valor.toLocaleString('pt-BR')}`;
+  };
+
   const exportarCSV = () => {
     const headers = ['Nome', 'Telefone', 'LTV Atual', 'LTV 12m', 'LTV 24m', 'Score', 'Nível', 'Visitas', 'Ticket Médio', 'ROI Marketing'];
-    const rows = clientes.map(c => [
+    const rows = clientesFiltrados.map(c => [
       c.nome,
       c.telefone,
       c.ltv_atual,
@@ -131,10 +172,27 @@ export default function LTVEngajamentoPage() {
             </p>
           </div>
 
-          <Button onClick={exportarCSV} className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Download className="w-4 h-4 mr-2" />
-            Exportar CSV
-          </Button>
+          <div className="flex items-center gap-3">
+            {fromCache && (
+              <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700">
+                <Zap className="w-3 h-3 mr-1" />
+                Cache
+              </Badge>
+            )}
+            <Button 
+              onClick={fetchLTV} 
+              variant="outline" 
+              disabled={loading}
+              className="border-gray-300 dark:border-gray-600"
+            >
+              <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+            <Button onClick={exportarCSV} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Download className="w-4 h-4 mr-2" />
+              Exportar CSV
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -150,7 +208,7 @@ export default function LTVEngajamentoPage() {
               <CardContent className="p-6">
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">LTV Atual Total</div>
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  R$ {(stats.ltv_total_atual / 1000).toFixed(1)}k
+                  {formatarMoeda(stats.ltv_total_atual)}
                 </div>
               </CardContent>
             </Card>
@@ -159,7 +217,7 @@ export default function LTVEngajamentoPage() {
               <CardContent className="p-6">
                 <div className="text-sm text-green-600 dark:text-green-400 mb-1">LTV Projetado 12m</div>
                 <div className="text-2xl font-bold text-green-700 dark:text-green-300">
-                  R$ {(stats.ltv_total_projetado_12m / 1000).toFixed(1)}k
+                  {formatarMoeda(stats.ltv_total_projetado_12m)}
                 </div>
               </CardContent>
             </Card>
@@ -168,7 +226,7 @@ export default function LTVEngajamentoPage() {
               <CardContent className="p-6">
                 <div className="text-sm text-blue-600 dark:text-blue-400 mb-1">LTV Médio Atual</div>
                 <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  R$ {stats.ltv_medio_atual}
+                  {formatarMoeda(stats.ltv_medio_atual)}
                 </div>
               </CardContent>
             </Card>
@@ -186,7 +244,7 @@ export default function LTVEngajamentoPage() {
               <CardContent className="p-6">
                 <div className="text-sm text-orange-600 dark:text-orange-400 mb-1">Total Clientes</div>
                 <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">
-                  {stats.total_clientes}
+                  {stats.total_clientes.toLocaleString('pt-BR')}
                 </div>
               </CardContent>
             </Card>
@@ -202,7 +260,7 @@ export default function LTVEngajamentoPage() {
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar por nome ou telefone..."
-                className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
           </CardContent>
@@ -212,10 +270,11 @@ export default function LTVEngajamentoPage() {
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">
-              Top Clientes por LTV ({clientesFiltrados.length})
+              Top Clientes por LTV ({clientesFiltrados.length.toLocaleString('pt-BR')})
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400">
               Ordenados por LTV projetado em 12 meses
+              {totalPaginas > 1 && ` • Página ${paginaAtual} de ${totalPaginas}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -225,80 +284,137 @@ export default function LTVEngajamentoPage() {
                   <Skeleton key={i} className="h-48" />
                 ))}
               </div>
-            ) : (
-              <div className="space-y-4">
-                {clientesFiltrados.map((cliente, index) => (
-                  <Card key={cliente.telefone} className="border border-gray-200 dark:border-gray-700">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            {index < 3 && <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />}
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                              {cliente.nome}
-                            </h3>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{cliente.telefone}</p>
-                        </div>
-                        {getEngajamentoBadge(cliente.nivel_engajamento, cliente.score_engajamento)}
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">LTV Atual</div>
-                          <div className="text-xl font-bold text-gray-900 dark:text-white">
-                            R$ {cliente.ltv_atual}
-                          </div>
-                        </div>
-
-                        <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-                          <div className="text-xs text-green-600 dark:text-green-400 mb-1">Projeção 12m</div>
-                          <div className="text-xl font-bold text-green-700 dark:text-green-300">
-                            R$ {cliente.ltv_projetado_12m}
-                          </div>
-                        </div>
-
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                          <div className="text-xs text-blue-600 dark:text-blue-400 mb-1">Ticket Médio</div>
-                          <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
-                            R$ {cliente.ticket_medio}
-                          </div>
-                        </div>
-
-                        <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
-                          <div className="text-xs text-purple-600 dark:text-purple-400 mb-1">ROI Marketing</div>
-                          <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                            {cliente.roi_marketing}x
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-6 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-gray-500" />
-                          <span className="text-gray-700 dark:text-gray-300">
-                            {cliente.total_visitas} visitas
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {getTendenciaIcon(cliente.tendencia_valor)}
-                          <span className="text-gray-700 dark:text-gray-300">
-                            Valor {cliente.tendencia_valor}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Target className="w-4 h-4 text-gray-500" />
-                          <span className="text-gray-700 dark:text-gray-300">
-                            Potencial: {cliente.potencial_crescimento}
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+            ) : clientesPaginados.length === 0 ? (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                {busca ? 'Nenhum cliente encontrado com essa busca' : 'Nenhum dado de cliente disponível'}
               </div>
+            ) : (
+              <>
+                <div className="space-y-4">
+                  {clientesPaginados.map((cliente, index) => {
+                    const posicaoGeral = (paginaAtual - 1) * itensPorPagina + index;
+                    return (
+                      <Card key={cliente.telefone} className="border border-gray-200 dark:border-gray-700">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                {posicaoGeral < 3 && <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />}
+                                <span className="text-sm text-gray-500 dark:text-gray-400">#{posicaoGeral + 1}</span>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                  {cliente.nome}
+                                </h3>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{cliente.telefone}</p>
+                            </div>
+                            {getEngajamentoBadge(cliente.nivel_engajamento, cliente.score_engajamento)}
+                          </div>
+
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">LTV Atual</div>
+                              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                                {formatarMoeda(cliente.ltv_atual)}
+                              </div>
+                            </div>
+
+                            <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                              <div className="text-xs text-green-600 dark:text-green-400 mb-1">Projeção 12m</div>
+                              <div className="text-xl font-bold text-green-700 dark:text-green-300">
+                                {formatarMoeda(cliente.ltv_projetado_12m)}
+                              </div>
+                            </div>
+
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                              <div className="text-xs text-blue-600 dark:text-blue-400 mb-1">Ticket Médio</div>
+                              <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                                {formatarMoeda(cliente.ticket_medio)}
+                              </div>
+                            </div>
+
+                            <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                              <div className="text-xs text-purple-600 dark:text-purple-400 mb-1">ROI Marketing</div>
+                              <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
+                                {cliente.roi_marketing}x
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Activity className="w-4 h-4 text-gray-500" />
+                              <span className="text-gray-700 dark:text-gray-300">
+                                {cliente.total_visitas} visitas
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {getTendenciaIcon(cliente.tendencia_valor)}
+                              <span className="text-gray-700 dark:text-gray-300">
+                                Valor {cliente.tendencia_valor}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Target className="w-4 h-4 text-gray-500" />
+                              <span className="text-gray-700 dark:text-gray-300">
+                                Potencial: {cliente.potencial_crescimento}
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {/* Paginação */}
+                {totalPaginas > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPaginaAtual(1)}
+                      disabled={paginaAtual === 1}
+                      className="border-gray-300 dark:border-gray-600"
+                    >
+                      Primeira
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPaginaAtual(p => Math.max(1, p - 1))}
+                      disabled={paginaAtual === 1}
+                      className="border-gray-300 dark:border-gray-600"
+                    >
+                      Anterior
+                    </Button>
+                    
+                    <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                      Página {paginaAtual} de {totalPaginas}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPaginaAtual(p => Math.min(totalPaginas, p + 1))}
+                      disabled={paginaAtual === totalPaginas}
+                      className="border-gray-300 dark:border-gray-600"
+                    >
+                      Próxima
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPaginaAtual(totalPaginas)}
+                      disabled={paginaAtual === totalPaginas}
+                      className="border-gray-300 dark:border-gray-600"
+                    >
+                      Última
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -306,4 +422,3 @@ export default function LTVEngajamentoPage() {
     </div>
   );
 }
-

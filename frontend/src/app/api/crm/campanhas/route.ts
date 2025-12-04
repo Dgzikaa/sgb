@@ -6,34 +6,30 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-interface Campanha {
-  id?: string;
-  nome: string;
-  tipo: 'whatsapp' | 'email' | 'cupom';
-  segmento_alvo: string[]; // VIP, Em Risco, Novos, etc
-  template_mensagem: string;
-  cupom_desconto?: number;
-  cupom_codigo?: string;
-  cupom_validade?: string;
-  agendamento?: string;
-  status: 'rascunho' | 'agendada' | 'em_execucao' | 'concluida' | 'cancelada';
-  criado_em?: string;
-  criado_por?: string;
-  enviados?: number;
-  abertos?: number;
-  cliques?: number;
-  conversoes?: number;
-}
+// ============================================
+// INTERFACES
+// ============================================
 
 interface Template {
   nome: string;
   tipo: 'whatsapp' | 'email';
   conteudo: string;
-  variaveis: string[]; // {nome}, {cupom}, etc
+  variaveis: string[];
   categoria: string;
+  whatsapp_template_name?: string; // Nome do template aprovado na Meta
 }
 
-// Templates pré-definidos
+interface WhatsAppConfig {
+  phone_number_id: string;
+  access_token: string;
+  api_version: string;
+  rate_limit_per_minute: number;
+}
+
+// ============================================
+// TEMPLATES PRÉ-DEFINIDOS
+// ============================================
+
 const TEMPLATES_WHATSAPP: Template[] = [
   {
     nome: 'Reengajamento - Cliente em Risco',
@@ -144,7 +140,10 @@ const TEMPLATES_EMAIL: Template[] = [
   }
 ];
 
-// Gerar código de cupom único
+// ============================================
+// FUNÇÕES AUXILIARES
+// ============================================
+
 function gerarCodigoCupom(prefixo: string = 'DBO'): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let codigo = prefixo;
@@ -154,7 +153,6 @@ function gerarCodigoCupom(prefixo: string = 'DBO'): string {
   return codigo;
 }
 
-// Substituir variáveis no template
 function substituirVariaveis(template: string, dados: Record<string, string>): string {
   let resultado = template;
   Object.entries(dados).forEach(([key, value]) => {
@@ -163,13 +161,142 @@ function substituirVariaveis(template: string, dados: Record<string, string>): s
   return resultado;
 }
 
-// GET - Listar campanhas
+// Função para delay entre mensagens (rate limiting)
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ============================================
+// WHATSAPP BUSINESS API - ENVIO REAL
+// ============================================
+
+async function getWhatsAppConfig(barId?: number): Promise<WhatsAppConfig | null> {
+  let query = supabase.from('whatsapp_configuracoes').select('*').eq('ativo', true);
+  
+  if (barId) {
+    query = query.eq('bar_id', barId);
+  }
+  
+  const { data, error } = await query.single();
+  
+  if (error || !data) {
+    console.log('Config WhatsApp não encontrada');
+    return null;
+  }
+  
+  return {
+    phone_number_id: data.phone_number_id,
+    access_token: data.access_token,
+    api_version: data.api_version || 'v18.0',
+    rate_limit_per_minute: data.rate_limit_per_minute || 80
+  };
+}
+
+async function enviarWhatsAppMessage(
+  config: WhatsAppConfig,
+  telefone: string,
+  mensagem: string,
+  campanhaId: string,
+  clienteNome: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const url = `https://graph.facebook.com/${config.api_version}/${config.phone_number_id}/messages`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${config.access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: telefone,
+        type: 'text',
+        text: {
+          preview_url: false,
+          body: mensagem
+        }
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error('Erro WhatsApp API:', result);
+      
+      // Registrar erro no banco
+      await supabase.from('crm_envios').insert({
+        campanha_id: campanhaId,
+        cliente_telefone: telefone,
+        cliente_nome: clienteNome,
+        tipo: 'whatsapp',
+        mensagem,
+        status: 'erro',
+        erro_detalhes: result.error?.message || JSON.stringify(result),
+        criado_em: new Date().toISOString()
+      });
+      
+      return { success: false, error: result.error?.message || 'Erro desconhecido' };
+    }
+    
+    const messageId = result.messages?.[0]?.id;
+    
+    // Registrar sucesso no banco
+    await supabase.from('crm_envios').insert({
+      campanha_id: campanhaId,
+      cliente_telefone: telefone,
+      cliente_nome: clienteNome,
+      tipo: 'whatsapp',
+      mensagem,
+      status: 'enviado',
+      whatsapp_message_id: messageId,
+      enviado_em: new Date().toISOString()
+    });
+    
+    // Log na tabela de mensagens do WhatsApp também
+    await supabase.from('whatsapp_messages').insert({
+      to_number: telefone,
+      message: mensagem,
+      type: 'campanha',
+      provider: 'meta',
+      status: 'sent',
+      provider_response: result,
+      sent_at: new Date().toISOString()
+    });
+    
+    return { success: true, messageId };
+    
+  } catch (error: any) {
+    console.error('Erro ao enviar WhatsApp:', error);
+    
+    await supabase.from('crm_envios').insert({
+      campanha_id: campanhaId,
+      cliente_telefone: telefone,
+      cliente_nome: clienteNome,
+      tipo: 'whatsapp',
+      mensagem,
+      status: 'erro',
+      erro_detalhes: error.message,
+      criado_em: new Date().toISOString()
+    });
+    
+    return { success: false, error: error.message };
+  }
+}
+
+// ============================================
+// GET - LISTAR CAMPANHAS E ESTATÍSTICAS
+// ============================================
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo');
     const status = searchParams.get('status');
+    const incluirStats = searchParams.get('stats') === 'true';
 
+    // Listar campanhas
     let query = supabase
       .from('crm_campanhas')
       .select('*')
@@ -182,17 +309,40 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status);
     }
 
-    const { data, error } = await query;
+    const { data: campanhas, error } = await query;
 
     if (error) {
       throw error;
     }
 
+    // Contar clientes por segmento
+    let segmentosStats = null;
+    if (incluirStats) {
+      const { data: stats } = await supabase
+        .from('crm_segmentacao')
+        .select('segmento')
+        .then(res => {
+          if (!res.data) return { data: null };
+          const counts: Record<string, number> = {};
+          res.data.forEach(item => {
+            counts[item.segmento] = (counts[item.segmento] || 0) + 1;
+          });
+          return { data: counts };
+        });
+      segmentosStats = stats;
+    }
+
+    // Verificar se WhatsApp está configurado
+    const whatsappConfig = await getWhatsAppConfig();
+    const whatsappConfigurado = !!whatsappConfig;
+
     return NextResponse.json({
       success: true,
-      data: data || [],
+      data: campanhas || [],
       templates_whatsapp: TEMPLATES_WHATSAPP,
-      templates_email: TEMPLATES_EMAIL
+      templates_email: TEMPLATES_EMAIL,
+      segmentos_stats: segmentosStats,
+      whatsapp_configurado: whatsappConfigurado
     });
 
   } catch (error: any) {
@@ -204,7 +354,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Criar nova campanha
+// ============================================
+// POST - CRIAR E EXECUTAR CAMPANHA
+// ============================================
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -218,10 +371,17 @@ export async function POST(request: NextRequest) {
       cupom_validade_dias,
       agendamento,
       executar_agora,
-      dados_extras // Para variáveis como {evento_data}, {evento_atracao}
+      dados_extras,
+      bar_id,
+      limite_envios // Opcional: limitar quantidade para teste
     } = body;
 
-    // 1. Selecionar template
+    // 1. Validações
+    if (!nome || !tipo || !segmento_alvo || segmento_alvo.length === 0) {
+      throw new Error('Nome, tipo e segmento são obrigatórios');
+    }
+
+    // 2. Selecionar template
     let template: Template | undefined;
     if (template_id) {
       if (tipo === 'whatsapp') {
@@ -237,7 +397,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Template ou mensagem personalizada é obrigatório');
     }
 
-    // 2. Gerar cupom se necessário
+    // 3. Gerar cupom se necessário
     let codigoCupom: string | undefined;
     let validadeCupom: string | undefined;
 
@@ -248,8 +408,9 @@ export async function POST(request: NextRequest) {
       dataValidade.setDate(dataValidade.getDate() + (cupom_validade_dias || 7));
       validadeCupom = dataValidade.toISOString().split('T')[0];
 
-      // Salvar cupom na tabela de cupons
+      // Salvar cupom
       await supabase.from('crm_cupons').insert({
+        bar_id,
         codigo: codigoCupom,
         desconto_percentual: cupom_desconto,
         validade: validadeCupom,
@@ -258,36 +419,47 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 3. Buscar clientes do segmento alvo
-    const { data: segmentoData } = await supabase
+    // 4. Buscar clientes do segmento alvo (usando tabela real!)
+    let clientesQuery = supabase
       .from('crm_segmentacao')
-      .select('telefone, nome, segmento')
-      .in('segmento', segmento_alvo);
+      .select('cliente_telefone, cliente_telefone_normalizado, cliente_nome, segmento')
+      .in('segmento', segmento_alvo)
+      .eq('aceita_whatsapp', true);
 
-    if (!segmentoData || segmentoData.length === 0) {
+    if (bar_id) {
+      clientesQuery = clientesQuery.eq('bar_id', bar_id);
+    }
+
+    const { data: clientes, error: clientesError } = await clientesQuery;
+
+    if (clientesError) {
+      throw clientesError;
+    }
+
+    if (!clientes || clientes.length === 0) {
       throw new Error('Nenhum cliente encontrado no segmento alvo');
     }
 
-    // 4. Criar campanha
-    const campanha: Campanha = {
-      nome,
-      tipo,
-      segmento_alvo,
-      template_mensagem: mensagemTemplate,
-      cupom_desconto,
-      cupom_codigo: codigoCupom,
-      cupom_validade: validadeCupom,
-      agendamento,
-      status: executar_agora ? 'em_execucao' : agendamento ? 'agendada' : 'rascunho',
-      enviados: 0,
-      abertos: 0,
-      cliques: 0,
-      conversoes: 0
-    };
-
+    // 5. Criar campanha
     const { data: campanhaData, error: campanhaError } = await supabase
       .from('crm_campanhas')
-      .insert(campanha)
+      .insert({
+        bar_id,
+        nome,
+        tipo,
+        segmento_alvo,
+        template_mensagem: mensagemTemplate,
+        cupom_desconto,
+        cupom_codigo: codigoCupom,
+        cupom_validade: validadeCupom,
+        agendamento,
+        status: executar_agora ? 'em_execucao' : agendamento ? 'agendada' : 'rascunho',
+        enviados: 0,
+        entregues: 0,
+        abertos: 0,
+        cliques: 0,
+        conversoes: 0
+      })
       .select()
       .single();
 
@@ -295,55 +467,88 @@ export async function POST(request: NextRequest) {
       throw campanhaError;
     }
 
-    // 5. Se executar agora, enviar mensagens
-    if (executar_agora) {
-      let enviadosCount = 0;
+    // 6. Se executar agora, enviar mensagens
+    if (executar_agora && tipo === 'whatsapp') {
+      // Buscar config do WhatsApp
+      const whatsappConfig = await getWhatsAppConfig(bar_id);
+      
+      if (!whatsappConfig) {
+        // Atualizar status da campanha para rascunho
+        await supabase
+          .from('crm_campanhas')
+          .update({ status: 'rascunho' })
+          .eq('id', campanhaData.id);
+          
+        throw new Error('WhatsApp não configurado. Configure as credenciais em Configurações > WhatsApp');
+      }
 
-      for (const cliente of segmentoData) {
+      let enviadosCount = 0;
+      let errosCount = 0;
+      
+      // Limitar envios para teste (ou usar todos)
+      const clientesParaEnviar = limite_envios 
+        ? clientes.slice(0, limite_envios) 
+        : clientes;
+      
+      // Calcular delay entre mensagens baseado no rate limit
+      const delayMs = Math.ceil(60000 / whatsappConfig.rate_limit_per_minute);
+      
+      console.log(`Iniciando envio para ${clientesParaEnviar.length} clientes...`);
+      console.log(`Rate limit: ${whatsappConfig.rate_limit_per_minute}/min (delay: ${delayMs}ms)`);
+
+      for (let i = 0; i < clientesParaEnviar.length; i++) {
+        const cliente = clientesParaEnviar[i];
+        
         try {
           // Substituir variáveis na mensagem
+          const primeiroNome = cliente.cliente_nome?.split(' ')[0] || 'Cliente';
+          
           const mensagemPersonalizada = substituirVariaveis(mensagemTemplate, {
-            nome: cliente.nome.split(' ')[0], // Primeiro nome
+            nome: primeiroNome,
             cupom_desconto: cupom_desconto?.toString() || '',
             cupom_codigo: codigoCupom || '',
             cupom_validade: validadeCupom ? new Date(validadeCupom).toLocaleDateString('pt-BR') : '',
             ...dados_extras
           });
 
-          if (tipo === 'whatsapp') {
-            // Registrar envio (a API do WhatsApp seria chamada aqui)
-            await supabase.from('crm_envios').insert({
-              campanha_id: campanhaData.id,
-              cliente_telefone: cliente.telefone,
-              cliente_nome: cliente.nome,
-              tipo: 'whatsapp',
-              mensagem: mensagemPersonalizada,
-              status: 'enviado',
-              enviado_em: new Date().toISOString()
-            });
+          // Enviar via WhatsApp Business API
+          const resultado = await enviarWhatsAppMessage(
+            whatsappConfig,
+            cliente.cliente_telefone_normalizado,
+            mensagemPersonalizada,
+            campanhaData.id,
+            cliente.cliente_nome || 'Cliente'
+          );
 
+          if (resultado.success) {
             enviadosCount++;
-          } else if (tipo === 'email') {
-            // Email seria enviado aqui via serviço de email
-            await supabase.from('crm_envios').insert({
-              campanha_id: campanhaData.id,
-              cliente_telefone: cliente.telefone,
-              cliente_nome: cliente.nome,
-              tipo: 'email',
-              mensagem: mensagemPersonalizada,
-              status: 'enviado',
-              enviado_em: new Date().toISOString()
-            });
+          } else {
+            errosCount++;
+          }
 
-            enviadosCount++;
+          // Rate limiting - aguardar entre mensagens
+          if (i < clientesParaEnviar.length - 1) {
+            await delay(delayMs);
+          }
+
+          // Log de progresso a cada 10 mensagens
+          if ((i + 1) % 10 === 0) {
+            console.log(`Progresso: ${i + 1}/${clientesParaEnviar.length} (${enviadosCount} OK, ${errosCount} erros)`);
+            
+            // Atualizar contador no banco
+            await supabase
+              .from('crm_campanhas')
+              .update({ enviados: enviadosCount })
+              .eq('id', campanhaData.id);
           }
 
         } catch (error) {
-          console.error(`Erro ao enviar para ${cliente.nome}:`, error);
+          console.error(`Erro ao enviar para ${cliente.cliente_nome}:`, error);
+          errosCount++;
         }
       }
 
-      // Atualizar contadores da campanha
+      // Atualizar campanha com totais finais
       await supabase
         .from('crm_campanhas')
         .update({ 
@@ -354,14 +559,17 @@ export async function POST(request: NextRequest) {
 
       campanhaData.enviados = enviadosCount;
       campanhaData.status = 'concluida';
+
+      console.log(`✅ Campanha finalizada: ${enviadosCount} enviados, ${errosCount} erros`);
     }
 
     return NextResponse.json({
       success: true,
       data: campanhaData,
+      total_clientes: clientes.length,
       mensagem: executar_agora 
-        ? `Campanha executada com sucesso! ${campanhaData.enviados} mensagens enviadas.`
-        : 'Campanha criada com sucesso!'
+        ? `Campanha executada! ${campanhaData.enviados} mensagens enviadas para ${clientes.length} clientes.`
+        : `Campanha criada com sucesso! ${clientes.length} clientes no segmento alvo.`
     });
 
   } catch (error: any) {
@@ -373,11 +581,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT - Atualizar campanha
+// ============================================
+// PUT - ATUALIZAR CAMPANHA
+// ============================================
+
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { id, ...updates } = body;
+
+    if (!id) {
+      throw new Error('ID da campanha é obrigatório');
+    }
 
     const { data, error } = await supabase
       .from('crm_campanhas')
@@ -404,7 +619,10 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - Cancelar campanha
+// ============================================
+// DELETE - CANCELAR CAMPANHA
+// ============================================
+
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -438,4 +656,3 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
-
