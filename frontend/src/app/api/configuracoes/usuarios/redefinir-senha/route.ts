@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +9,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// POST - Redefinir senha de um usuário (só admin)
+// POST - Enviar link de redefinição de senha para o usuário
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     // 1. Buscar dados do usuário
     const { data: usuario, error: fetchError } = await supabase
       .from('usuarios_bar')
-      .select('user_id, email, nome')
+      .select('id, user_id, email, nome')
       .eq('id', userId)
       .single();
 
@@ -42,43 +43,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Gerar nova senha temporária
-    const novaSenhaTemporia = `Temp${Math.random().toString(36).slice(2, 10)}!`;
+    // 2. Gerar token único de redefinição
+    const resetToken = crypto.randomUUID();
+    const resetTokenExpiry = new Date();
+    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // Expira em 1 hora
 
-    // 3. Atualizar senha no Supabase Auth
-    const { error: authError } = await supabase.auth.admin.updateUserById(
-      usuario.user_id,
-      {
-        password: novaSenhaTemporia,
-      }
-    );
-
-    if (authError) {
-      console.error('❌ Erro ao atualizar senha no Auth:', authError);
-      return NextResponse.json(
-        { error: `Erro ao redefinir senha: ${authError.message}` },
-        { status: 500 }
-      );
-    }
-
-    // 4. Marcar que senha precisa ser redefinida
-    await supabase
+    // 3. Salvar token no banco
+    const { error: updateError } = await supabase
       .from('usuarios_bar')
       .update({
-        senha_redefinida: false,
+        reset_token: resetToken,
+        reset_token_expiry: resetTokenExpiry.toISOString(),
         atualizado_em: new Date().toISOString(),
       })
       .eq('id', userId);
 
-    // 5. Tentar enviar email com nova senha
-    let emailSent = false;
-    let emailError = null;
-    try {
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : (process.env.NEXT_PUBLIC_APP_URL || 'https://zykor.com.br');
+    if (updateError) {
+      console.error('❌ Erro ao salvar token de reset:', updateError);
+      return NextResponse.json(
+        { error: 'Erro ao gerar token de redefinição' },
+        { status: 500 }
+      );
+    }
 
-      const emailResponse = await fetch(`${baseUrl}/api/emails/password-reset`, {
+    // 4. Gerar URL de redefinição
+    const baseUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000' 
+      : (process.env.NEXT_PUBLIC_APP_URL || 'https://zykor.com.br');
+    
+    const resetLink = `${baseUrl}/usuarios/redefinir-senha?email=${encodeURIComponent(usuario.email)}&token=${resetToken}`;
+
+    // 5. Tentar enviar email com link de redefinição
+    let emailSent = false;
+    let emailError: string | null = null;
+    
+    try {
+      const emailResponse = await fetch(`${baseUrl}/api/emails/password-reset-link`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,15 +87,14 @@ export async function POST(request: NextRequest) {
           to: usuario.email,
           nome: usuario.nome,
           email: usuario.email,
-          senha_temporaria: novaSenhaTemporia,
-          role: 'funcionario',
-          loginUrl: baseUrl
+          resetLink: resetLink,
+          expiresIn: '1 hora'
         })
       });
 
       if (emailResponse.ok) {
         emailSent = true;
-        console.log('✅ Email de redefinição enviado para:', usuario.email);
+        console.log('✅ Email de redefinição (link) enviado para:', usuario.email);
       } else {
         const errorData = await emailResponse.json().catch(() => ({}));
         emailError = errorData.error || 'Falha ao enviar email';
@@ -106,28 +105,32 @@ export async function POST(request: NextRequest) {
       console.warn('⚠️ Erro ao enviar email:', err);
     }
 
-    // SEMPRE retornar as credenciais para o admin poder copiar/informar ao usuário
+    // 6. Retornar resultado
+    // Se o email foi enviado com sucesso, não precisa mostrar o link
+    // Se não foi enviado, mostrar o link para o admin copiar e enviar manualmente
     return NextResponse.json({ 
       success: true,
       message: emailSent 
-        ? `✅ Senha redefinida! Email enviado para ${usuario.email}` 
-        : `⚠️ Senha redefinida, mas email não pôde ser enviado: ${emailError}`,
+        ? `✅ Link de redefinição enviado para ${usuario.email}` 
+        : `⚠️ Não foi possível enviar o email: ${emailError}`,
       emailSent,
-      credentials: {
+      // Sempre fornecer o link para o admin poder copiar se necessário
+      resetData: {
         email: usuario.email,
-        senha_temporaria: novaSenhaTemporia,
+        nome: usuario.nome,
+        resetLink: resetLink,
+        expiresAt: resetTokenExpiry.toISOString(),
         message: emailSent 
-          ? 'Email enviado! Credenciais abaixo caso o usuário não receba:' 
-          : '⚠️ Email não enviado! Informe estas credenciais ao usuário manualmente:'
+          ? '📧 Email enviado! Link abaixo caso o usuário não receba:' 
+          : '⚠️ Email não enviado! Copie o link e envie para o usuário:'
       }
     });
 
   } catch (error) {
-    console.error('❌ Erro ao redefinir senha:', error);
+    console.error('❌ Erro ao gerar link de redefinição:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
     );
   }
 }
-

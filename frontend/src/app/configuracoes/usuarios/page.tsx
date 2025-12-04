@@ -351,17 +351,19 @@ function UsuariosPage() {
     });
   };
 
-  // Estado para modal de credenciais
-  const [credentialsModal, setCredentialsModal] = useState<{
+  // Estado para modal de redefinição de senha
+  const [resetModal, setResetModal] = useState<{
     open: boolean;
     email: string;
-    senha: string;
+    nome: string;
+    resetLink: string;
+    expiresAt: string;
     emailSent: boolean;
     message: string;
-  }>({ open: false, email: '', senha: '', emailSent: false, message: '' });
+  }>({ open: false, email: '', nome: '', resetLink: '', expiresAt: '', emailSent: false, message: '' });
 
   const handleResetPassword = async (userId: number) => {
-    if (!confirm('⚠️ Tem certeza que deseja redefinir a senha deste usuário?\n\nUma nova senha temporária será gerada.')) return;
+    if (!confirm('⚠️ Tem certeza que deseja enviar um link de redefinição de senha para este usuário?\n\nO usuário receberá um email com um link para criar uma nova senha.')) return;
 
     try {
       const response = await fetch('/api/configuracoes/usuarios/redefinir-senha', {
@@ -372,29 +374,31 @@ function UsuariosPage() {
 
       const result = await response.json();
 
-      if (response.ok && result.credentials) {
-        // Mostrar modal com as credenciais para o admin copiar
-        setCredentialsModal({
+      if (response.ok && result.resetData) {
+        // Mostrar modal com o link de redefinição
+        setResetModal({
           open: true,
-          email: result.credentials.email,
-          senha: result.credentials.senha_temporaria,
+          email: result.resetData.email,
+          nome: result.resetData.nome,
+          resetLink: result.resetData.resetLink,
+          expiresAt: result.resetData.expiresAt,
           emailSent: result.emailSent,
-          message: result.credentials.message
+          message: result.resetData.message
         });
         
         toast({
-          title: result.emailSent ? '✅ Senha Redefinida' : '⚠️ Senha Redefinida',
+          title: result.emailSent ? '✅ Email Enviado!' : '⚠️ Link Gerado',
           description: result.emailSent 
-            ? 'Email enviado! Credenciais também estão disponíveis no modal.' 
-            : 'Email não enviado. Veja as credenciais no modal.',
+            ? `Link de redefinição enviado para ${result.resetData.email}` 
+            : 'Email não enviado. Copie o link no modal e envie manualmente.',
         });
       } else if (response.ok) {
         toast({
           title: 'Sucesso',
-          description: result.message || 'Senha redefinida com sucesso',
+          description: result.message || 'Link de redefinição gerado',
         });
       } else {
-        throw new Error(result.error || 'Erro ao redefinir senha');
+        throw new Error(result.error || 'Erro ao gerar link de redefinição');
       }
     } catch (error) {
       console.error('Erro ao redefinir senha:', error);
@@ -860,94 +864,104 @@ function UsuariosPage() {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de Credenciais */}
-            <Dialog open={credentialsModal.open} onOpenChange={(open) => setCredentialsModal(prev => ({ ...prev, open }))}>
-              <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white max-w-md">
+            {/* Modal de Link de Redefinição */}
+            <Dialog open={resetModal.open} onOpenChange={(open) => setResetModal(prev => ({ ...prev, open }))}>
+              <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white max-w-lg">
                 <DialogHeader>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className={`p-2 rounded-full ${credentialsModal.emailSent ? 'bg-green-100 dark:bg-green-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}>
-                      <Key className={`w-5 h-5 ${credentialsModal.emailSent ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`} />
+                    <div className={`p-2 rounded-full ${resetModal.emailSent ? 'bg-green-100 dark:bg-green-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                      <Key className={`w-5 h-5 ${resetModal.emailSent ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`} />
                     </div>
                     <div>
                       <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
-                        {credentialsModal.emailSent ? '✅ Senha Redefinida' : '⚠️ Credenciais Temporárias'}
+                        {resetModal.emailSent ? '✅ Email Enviado!' : '⚠️ Link de Redefinição'}
                       </DialogTitle>
                     </div>
                   </div>
                   <DialogDescription className="text-gray-600 dark:text-gray-400">
-                    {credentialsModal.message}
+                    {resetModal.message}
                   </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
-                  {/* Email */}
+                  {/* Info do Usuário */}
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-3">
+                      <User className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{resetModal.nome}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{resetModal.email}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Link de Redefinição */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-700">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
-                        Email
+                      <span className="text-sm font-medium text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                        🔗 Link de Redefinição
                       </span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => copyToClipboard(credentialsModal.email, 'Email')}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 h-8 px-2"
+                        onClick={() => copyToClipboard(resetModal.resetLink, 'Link')}
+                        className="text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 h-8 px-2 font-semibold"
                       >
-                        Copiar
+                        📋 Copiar Link
                       </Button>
                     </div>
-                    <p className="text-lg font-mono text-gray-900 dark:text-white break-all">
-                      {credentialsModal.email}
+                    <p className="text-sm font-mono text-blue-800 dark:text-blue-300 break-all select-all bg-white dark:bg-gray-800 p-2 rounded border border-blue-200 dark:border-blue-700">
+                      {resetModal.resetLink}
+                    </p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                      ⏰ Expira em: {new Date(resetModal.expiresAt).toLocaleString('pt-BR')}
                     </p>
                   </div>
 
-                  {/* Senha */}
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border-2 border-yellow-200 dark:border-yellow-700">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
-                        <Key className="w-4 h-4" />
-                        Senha Temporária
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(credentialsModal.senha, 'Senha')}
-                        className="text-yellow-700 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 h-8 px-2 font-semibold"
-                      >
-                        📋 Copiar
-                      </Button>
+                  {/* Status do Email */}
+                  {resetModal.emailSent ? (
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
+                      <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" />
+                        <strong>Email enviado com sucesso!</strong>
+                      </p>
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                        O usuário receberá um email com o link para redefinir a senha.
+                      </p>
                     </div>
-                    <p className="text-xl font-mono font-bold text-yellow-800 dark:text-yellow-300 break-all select-all">
-                      {credentialsModal.senha}
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-700">
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        <strong>⚠️ Email não foi enviado</strong>
+                        <br />
+                        Copie o link acima e envie para o usuário pelo WhatsApp ou outro canal.
+                      </p>
+                    </div>
+                  )}
 
-                  {/* Aviso */}
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
-                      <strong>📝 Instruções para o usuário:</strong>
-                      <br />
-                      1. Acesse o sistema com estas credenciais
-                      <br />
-                      2. Ao fazer login, será solicitada uma nova senha
-                      <br />
-                      3. Escolha uma senha segura
+                  {/* Instruções */}
+                  <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>📝 O que o usuário deve fazer:</strong>
                     </p>
+                    <ol className="text-sm text-gray-600 dark:text-gray-400 mt-2 list-decimal list-inside space-y-1">
+                      <li>Clicar no link recebido</li>
+                      <li>Digitar uma nova senha</li>
+                      <li>Fazer login com a nova senha</li>
+                    </ol>
                   </div>
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="flex gap-2">
                   <Button
-                    onClick={() => {
-                      copyToClipboard(`Email: ${credentialsModal.email}\nSenha: ${credentialsModal.senha}`, 'Credenciais');
-                    }}
+                    onClick={() => copyToClipboard(resetModal.resetLink, 'Link')}
                     className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                   >
-                    📋 Copiar Tudo
+                    📋 Copiar Link
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setCredentialsModal(prev => ({ ...prev, open: false }))}
+                    onClick={() => setResetModal(prev => ({ ...prev, open: false }))}
                     className="bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                   >
                     Fechar

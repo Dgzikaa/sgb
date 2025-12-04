@@ -1,10 +1,102 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// ===== CACHE =====
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+  version: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+const CACHE_VERSION = 1;
+
+function getCached(key: string) {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  
+  if (entry.version !== CACHE_VERSION) {
+    cache.delete(key);
+    console.log(`🔄 Cache padroes invalidado (versão ${entry.version} → ${CACHE_VERSION})`);
+    return null;
+  }
+  
+  const age = Date.now() - entry.timestamp;
+  if (age > CACHE_TTL) {
+    cache.delete(key);
+    return null;
+  }
+  
+  return entry.data;
+}
+
+function setCache(key: string, data: any) {
+  cache.set(key, { data, timestamp: Date.now(), version: CACHE_VERSION });
+}
+
+// ===== FUNÇÃO PARA BUSCAR TODOS OS DADOS COM PAGINAÇÃO =====
+async function fetchAllData(tableName: string, columns: string, filters: any = {}) {
+  let allData: any[] = [];
+  let from = 0;
+  const limit = 1000;
+  const MAX_ITERATIONS = 200;
+  let iterations = 0;
+
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
+    
+    let query = supabase
+      .from(tableName)
+      .select(columns)
+      .range(from, from + limit - 1);
+    
+    // Aplicar filtros
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key.includes('gte_')) {
+        query = query.gte(key.replace('gte_', ''), value);
+      } else if (key.includes('lte_')) {
+        query = query.lte(key.replace('lte_', ''), value);
+      } else if (key.includes('eq_')) {
+        query = query.eq(key.replace('eq_', ''), value);
+      } else if (key.includes('not_null_')) {
+        query = query.not(key.replace('not_null_', ''), 'is', null);
+      }
+    });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      break;
+    }
+    
+    if (!data || data.length === 0) {
+      break;
+    }
+    
+    allData.push(...data);
+    
+    if (allData.length % 10000 === 0 || data.length < limit) {
+      console.log(`  ✓ ${tableName}: ${allData.length} registros carregados`);
+    }
+    
+    if (data.length < limit) {
+      break;
+    }
+    
+    from += limit;
+  }
+  
+  return allData;
+}
 
 interface PadraoCliente {
   telefone: string;
@@ -50,6 +142,10 @@ interface PadraoCliente {
   // Acompanhamento
   vem_sozinho: boolean;
   tamanho_grupo_medio: number;
+  
+  // Valor gasto (opcional, do ContaHub)
+  total_gasto?: number;
+  ticket_medio?: number;
 }
 
 const DIAS_SEMANA = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
@@ -71,8 +167,11 @@ function getMes(data: Date): string {
   return MESES[data.getMonth()];
 }
 
-function getMaxKey<T extends Record<string, number>>(obj: T): string {
-  return Object.entries(obj).reduce((a, b) => b[1] > a[1] ? b : a)[0];
+// ===== FUNÇÃO CORRIGIDA - LIDA COM OBJETOS VAZIOS =====
+function getMaxKey<T extends Record<string, number>>(obj: T, defaultValue: string = 'N/A'): string {
+  const entries = Object.entries(obj);
+  if (entries.length === 0) return defaultValue;
+  return entries.reduce((a, b) => b[1] > a[1] ? b : a)[0];
 }
 
 function calcularFrequencia(intervaloMedio: number): 'alto' | 'medio' | 'baixo' {
@@ -85,18 +184,21 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const telefone = searchParams.get('telefone');
-    const limite = parseInt(searchParams.get('limite') || '50');
+    const limite = parseInt(searchParams.get('limite') || '100');
+    const barId = parseInt(searchParams.get('bar_id') || '3');
+
+    console.log(`🔍 API Padrões de Comportamento - telefone: ${telefone}, limite: ${limite}, bar_id: ${barId}`);
 
     if (!telefone) {
       // Buscar padrões de todos os clientes (top N)
-      return await buscarPadroesTodosClientes(limite);
+      return await buscarPadroesTodosClientes(limite, barId);
     } else {
       // Buscar padrão de um cliente específico
       return await buscarPadraoCliente(telefone);
     }
 
   } catch (error: any) {
-    console.error('Erro ao buscar padrões de comportamento:', error);
+    console.error('❌ Erro ao buscar padrões de comportamento:', error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
@@ -233,64 +335,150 @@ async function buscarPadraoCliente(telefone: string) {
   });
 }
 
-async function buscarPadroesTodosClientes(limite: number) {
-  // Buscar todos os clientes com histórico
-  const { data: symplaData } = await supabase
-    .from('sympla_participantes')
-    .select('telefone_normalizado, nome_completo, data_evento, evento_nome')
-    .not('telefone_normalizado', 'is', null)
-    .order('data_evento', { ascending: false });
+async function buscarPadroesTodosClientes(limite: number, barId: number = 3) {
+  // Verificar cache
+  const cacheKey = `padroes_comportamento_${barId}`;
+  const cached = getCached(cacheKey);
 
-  const { data: getinData } = await supabase
-    .from('getin_reservations')
-    .select('telefone_normalizado, nome, data, numero_convidados')
-    .not('telefone_normalizado', 'is', null)
-    .order('data', { ascending: false });
+  if (cached) {
+    console.log(`⚡ Cache HIT: Usando dados de padrões em cache (${cached.padroes.length} clientes)`);
+    
+    // Aplicar limite no resultado cacheado
+    const resultado = cached.padroes.slice(0, limite);
+    
+    return NextResponse.json({
+      success: true,
+      data: resultado,
+      stats: cached.stats,
+      fromCache: true
+    });
+  }
 
-  // Consolidar por telefone
+  console.log(`🔍 Cache MISS: Processando dados de padrões do ContaHub...`);
+
+  // ===== BUSCAR TODOS OS DADOS COM PAGINAÇÃO =====
+  
+  // 1. Buscar dados do ContaHub (fonte principal - tem telefone)
+  console.log(`📊 Buscando dados do ContaHub para bar ${barId}...`);
+  const contahubDataRaw = await fetchAllData(
+    'contahub_periodo',
+    'cli_nome, cli_fone, dt_gerencial, vr_couvert, vr_pagamentos',
+    { eq_bar_id: barId }
+  );
+
+  // Filtrar clientes válidos
+  const contahubData = contahubDataRaw.filter(item => 
+    item.cli_fone && item.cli_fone.trim() !== '' && 
+    item.cli_nome && item.cli_nome.trim() !== ''
+  );
+  console.log(`💳 ContaHub: ${contahubData.length} registros válidos (de ${contahubDataRaw.length} totais)`);
+
+  // 2. Buscar dados do Sympla (complementar)
+  console.log(`📊 Buscando dados do Sympla...`);
+  const symplaData = await fetchAllData(
+    'sympla_participantes',
+    'telefone_normalizado, nome_completo, data_evento, evento_nome',
+    { not_null_telefone_normalizado: true }
+  );
+  console.log(`🎫 Sympla: ${symplaData.length} registros`);
+
+  // 3. Buscar dados do GetIn (complementar)
+  console.log(`📊 Buscando dados do GetIn...`);
+  const getinData = await fetchAllData(
+    'getin_reservations',
+    'telefone_normalizado, nome, data, numero_convidados',
+    { not_null_telefone_normalizado: true }
+  );
+  console.log(`📅 GetIn: ${getinData.length} registros`);
+
+  // ===== CONSOLIDAR POR TELEFONE =====
   const clientesMap = new Map<string, {
     telefone: string;
     nome: string;
-    visitas: Array<{ data: Date; tipo: string; convidados: number }>;
+    visitas: Array<{ data: Date; tipo: string; convidados: number; valor?: number }>;
+    totalGasto: number;
   }>();
 
-  symplaData?.forEach(item => {
-    if (!item.telefone_normalizado) return;
+  // Função para normalizar telefone
+  const normalizarTelefone = (fone: string): string | null => {
+    if (!fone) return null;
+    const limpo = fone.replace(/\D/g, '');
+    if (limpo.length < 10) return null;
+    // Pegar últimos 9 dígitos
+    return limpo.slice(-9);
+  };
 
-    if (!clientesMap.has(item.telefone_normalizado)) {
-      clientesMap.set(item.telefone_normalizado, {
-        telefone: item.telefone_normalizado,
-        nome: item.nome_completo || 'Cliente',
-        visitas: []
+  // Processar ContaHub (fonte principal)
+  for (const item of contahubData) {
+    const telefoneNorm = normalizarTelefone(item.cli_fone);
+    if (!telefoneNorm) continue;
+
+    if (!clientesMap.has(telefoneNorm)) {
+      clientesMap.set(telefoneNorm, {
+        telefone: telefoneNorm,
+        nome: item.cli_nome || 'Cliente',
+        visitas: [],
+        totalGasto: 0
       });
     }
 
-    clientesMap.get(item.telefone_normalizado)!.visitas.push({
+    const cliente = clientesMap.get(telefoneNorm)!;
+    const valor = (item.vr_couvert || 0) + (item.vr_pagamentos || 0);
+    
+    cliente.visitas.push({
+      data: new Date(item.dt_gerencial),
+      tipo: 'ContaHub',
+      convidados: 1,
+      valor
+    });
+    cliente.totalGasto += valor;
+  }
+
+  // Processar Sympla (complementar - não duplicar se já existir no ContaHub)
+  for (const item of symplaData) {
+    if (!item.telefone_normalizado) continue;
+    const telefoneNorm = item.telefone_normalizado.slice(-9);
+
+    if (!clientesMap.has(telefoneNorm)) {
+      clientesMap.set(telefoneNorm, {
+        telefone: telefoneNorm,
+        nome: item.nome_completo || 'Cliente',
+        visitas: [],
+        totalGasto: 0
+      });
+    }
+
+    clientesMap.get(telefoneNorm)!.visitas.push({
       data: new Date(item.data_evento),
-      tipo: item.evento_nome || 'Evento',
+      tipo: item.evento_nome || 'Evento Sympla',
       convidados: 1
     });
-  });
+  }
 
-  getinData?.forEach(item => {
-    if (!item.telefone_normalizado) return;
+  // Processar GetIn (complementar)
+  for (const item of getinData) {
+    if (!item.telefone_normalizado) continue;
+    const telefoneNorm = item.telefone_normalizado.slice(-9);
 
-    if (!clientesMap.has(item.telefone_normalizado)) {
-      clientesMap.set(item.telefone_normalizado, {
-        telefone: item.telefone_normalizado,
+    if (!clientesMap.has(telefoneNorm)) {
+      clientesMap.set(telefoneNorm, {
+        telefone: telefoneNorm,
         nome: item.nome || 'Cliente',
-        visitas: []
+        visitas: [],
+        totalGasto: 0
       });
     }
 
-    clientesMap.get(item.telefone_normalizado)!.visitas.push({
+    clientesMap.get(telefoneNorm)!.visitas.push({
       data: new Date(item.data),
       tipo: 'Reserva GetIn',
       convidados: item.numero_convidados || 1
     });
-  });
+  }
 
-  // Calcular padrões para cada cliente
+  console.log(`👥 Total de clientes únicos: ${clientesMap.size}`);
+
+  // ===== CALCULAR PADRÕES PARA CADA CLIENTE =====
   const padroes: PadraoCliente[] = [];
 
   for (const [telefone, dados] of clientesMap.entries()) {
@@ -341,8 +529,8 @@ async function buscarPadroesTodosClientes(limite: number) {
     }
     const intervaloMedio = Math.round(intervaloTotal / (dados.visitas.length - 1));
 
-    const horarioPrefKey = getMaxKey(distribuicaoHorarios);
-    const horarioDescricoes = {
+    const horarioPrefKey = getMaxKey(distribuicaoHorarios, 'noite');
+    const horarioDescricoes: Record<string, string> = {
       manha: 'Manhã (06:00-12:00)',
       tarde: 'Tarde (12:00-18:00)',
       noite: 'Noite (18:00-00:00)',
@@ -353,51 +541,72 @@ async function buscarPadroesTodosClientes(limite: number) {
       telefone,
       nome: dados.nome,
       total_visitas: dados.visitas.length,
-      dia_semana_preferido: getMaxKey(distribuicaoDias),
+      dia_semana_preferido: getMaxKey(distribuicaoDias, 'sabado'),
       distribuicao_dias: distribuicaoDias,
-      tipo_evento_preferido: getMaxKey(distribuicaoEventos),
+      tipo_evento_preferido: getMaxKey(distribuicaoEventos, 'ContaHub'),
       distribuicao_eventos: distribuicaoEventos,
-      horario_preferido: horarioDescricoes[horarioPrefKey as keyof typeof horarioDescricoes],
+      horario_preferido: horarioDescricoes[horarioPrefKey] || 'Noite (18:00-00:00)',
       distribuicao_horarios: distribuicaoHorarios,
       intervalo_medio_visitas: intervaloMedio,
       frequencia: calcularFrequencia(intervaloMedio),
-      mes_mais_ativo: getMaxKey(distribuicaoMensal),
+      mes_mais_ativo: getMaxKey(distribuicaoMensal, 'Janeiro'),
       distribuicao_mensal: distribuicaoMensal,
       vem_sozinho: totalConvidados === dados.visitas.length,
-      tamanho_grupo_medio: Math.round(totalConvidados / dados.visitas.length)
+      tamanho_grupo_medio: Math.round(totalConvidados / dados.visitas.length) || 1,
+      total_gasto: dados.totalGasto,
+      ticket_medio: dados.totalGasto > 0 ? Math.round(dados.totalGasto / dados.visitas.length) : 0
     });
   }
 
   // Ordenar por total de visitas (clientes mais frequentes primeiro)
   padroes.sort((a, b) => b.total_visitas - a.total_visitas);
 
+  console.log(`✅ Padrões calculados: ${padroes.length} clientes com 2+ visitas`);
+
+  // Estatísticas gerais (só calcular se tiver padrões)
+  let stats: any = {
+    total_clientes_analisados: padroes.length,
+    dia_mais_popular: 'N/A',
+    horario_mais_popular: 'N/A',
+    frequencia_alta: 0,
+    frequencia_media: 0,
+    frequencia_baixa: 0,
+  };
+
+  if (padroes.length > 0) {
+    stats = {
+      total_clientes_analisados: padroes.length,
+      dia_mais_popular: getMaxKey(
+        padroes.reduce((acc, p) => {
+          acc[p.dia_semana_preferido] = (acc[p.dia_semana_preferido] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        'sabado'
+      ),
+      horario_mais_popular: getMaxKey(
+        padroes.reduce((acc, p) => {
+          acc[p.horario_preferido] = (acc[p.horario_preferido] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        'Noite (18:00-00:00)'
+      ),
+      frequencia_alta: padroes.filter(p => p.frequencia === 'alto').length,
+      frequencia_media: padroes.filter(p => p.frequencia === 'medio').length,
+      frequencia_baixa: padroes.filter(p => p.frequencia === 'baixo').length,
+    };
+  }
+
+  // Salvar no cache
+  setCache(cacheKey, { padroes, stats });
+
   // Limitar resultados
   const resultado = padroes.slice(0, limite);
-
-  // Estatísticas gerais
-  const stats = {
-    total_clientes_analisados: padroes.length,
-    dia_mais_popular: getMaxKey(
-      padroes.reduce((acc, p) => {
-        acc[p.dia_semana_preferido] = (acc[p.dia_semana_preferido] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>)
-    ),
-    horario_mais_popular: getMaxKey(
-      padroes.reduce((acc, p) => {
-        acc[p.horario_preferido] = (acc[p.horario_preferido] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>)
-    ),
-    frequencia_alta: padroes.filter(p => p.frequencia === 'alto').length,
-    frequencia_media: padroes.filter(p => p.frequencia === 'medio').length,
-    frequencia_baixa: padroes.filter(p => p.frequencia === 'baixo').length,
-  };
 
   return NextResponse.json({
     success: true,
     data: resultado,
-    stats
+    stats,
+    fromCache: false
   });
 }
 

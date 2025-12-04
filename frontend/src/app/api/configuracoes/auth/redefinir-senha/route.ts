@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Buscar usuário pelo email e validar token
     console.log('🔍 Buscando usuário e validando token...');
     const { data: usuarioData, error: usuarioError } = await adminClient
-      .from('usuario_bares')
+      .from('usuarios_bar')
       .select('user_id, nome, reset_token, reset_token_expiry')
       .eq('email', email)
       .eq('reset_token', token)
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     // Limpar token de reset e marcar que o usuário já redefiniu a senha
     await adminClient
-      .from('usuario_bares')
+      .from('usuarios_bar')
       .update({
         senha_redefinida: true,
         reset_token: null,
