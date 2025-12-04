@@ -448,6 +448,24 @@ export default function CampanhasPage() {
                   </div>
                 </div>
 
+                {/* Limite de Envios (para teste) */}
+                <div>
+                  <label className="text-sm font-medium text-gray-900 dark:text-white mb-2 block">
+                    Limite de Envios (opcional - para teste)
+                  </label>
+                  <Input
+                    type="number"
+                    value={limiteEnvios || ''}
+                    onChange={(e) => setLimiteEnvios(e.target.value ? parseInt(e.target.value) : undefined)}
+                    placeholder="Deixe vazio para enviar para todos"
+                    min={1}
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    💡 Dica: Teste com 5-10 clientes antes de enviar para todos
+                  </p>
+                </div>
+
                 {/* Executar */}
                 <div className="flex items-center gap-2">
                   <input
@@ -461,6 +479,22 @@ export default function CampanhasPage() {
                     Executar campanha imediatamente
                   </label>
                 </div>
+
+                {/* Aviso WhatsApp não configurado */}
+                {tipo === 'whatsapp' && !whatsappConfigurado && (
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-orange-800 dark:text-orange-200">
+                      <Clock className="w-5 h-5" />
+                      <span className="font-medium">WhatsApp não configurado</span>
+                    </div>
+                    <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                      Configure as credenciais do WhatsApp em{' '}
+                      <a href="/configuracoes/whatsapp" className="underline font-medium">
+                        Configurações → WhatsApp
+                      </a>
+                    </p>
+                  </div>
+                )}
 
                 {/* Botões */}
                 <div className="flex gap-3 pt-4">

@@ -1,10 +1,102 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic';
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// ===== CACHE =====
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+  version: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+const CACHE_VERSION = 2; // v2: Busca TODOS os clientes
+
+function getCached(key: string) {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  
+  if (entry.version !== CACHE_VERSION) {
+    cache.delete(key);
+    console.log(`🔄 Cache retenção invalidado (versão ${entry.version} → ${CACHE_VERSION})`);
+    return null;
+  }
+  
+  const age = Date.now() - entry.timestamp;
+  if (age > CACHE_TTL) {
+    cache.delete(key);
+    return null;
+  }
+  
+  return entry.data;
+}
+
+function setCache(key: string, data: any) {
+  cache.set(key, { data, timestamp: Date.now(), version: CACHE_VERSION });
+}
+
+// ===== FUNÇÃO PARA BUSCAR TODOS OS DADOS COM PAGINAÇÃO =====
+async function fetchAllData(tableName: string, columns: string, filters: any = {}) {
+  let allData: any[] = [];
+  let from = 0;
+  const limit = 1000;
+  const MAX_ITERATIONS = 200;
+  let iterations = 0;
+
+  while (iterations < MAX_ITERATIONS) {
+    iterations++;
+    
+    let query = supabase
+      .from(tableName)
+      .select(columns)
+      .range(from, from + limit - 1);
+    
+    // Aplicar filtros
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key.includes('gte_')) {
+        query = query.gte(key.replace('gte_', ''), value);
+      } else if (key.includes('lte_')) {
+        query = query.lte(key.replace('lte_', ''), value);
+      } else if (key.includes('eq_')) {
+        query = query.eq(key.replace('eq_', ''), value);
+      } else if (key.includes('not_null_')) {
+        query = query.not(key.replace('not_null_', ''), 'is', null);
+      }
+    });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error(`❌ Erro ao buscar ${tableName}:`, error);
+      break;
+    }
+    
+    if (!data || data.length === 0) {
+      break;
+    }
+    
+    allData.push(...data);
+    
+    if (allData.length % 10000 === 0 || data.length < limit) {
+      console.log(`  ✓ ${tableName}: ${allData.length} registros carregados`);
+    }
+    
+    if (data.length < limit) {
+      break;
+    }
+    
+    from += limit;
+  }
+  
+  return allData;
+}
 
 interface CohortData {
   cohort: string; // Mês/Ano da primeira visita
@@ -23,12 +115,12 @@ interface JornadaCliente {
   etapa_atual: 'novo' | 'engajado' | 'fiel' | 'em_risco' | 'perdido';
   dias_no_funil: number;
   visitas_totais: number;
+  dias_sem_visitar: number;
+  ultima_visita: string;
+  primeira_visita: string;
+  ticket_medio: number;
+  total_gasto: number;
   proxima_acao_sugerida: string;
-  historico_visitas: Array<{
-    data: string;
-    tipo: string;
-    dias_desde_anterior: number | null;
-  }>;
 }
 
 function getMesAno(data: Date): string {
@@ -66,19 +158,39 @@ function determinarEtapaJornada(dados: {
   return 'novo';
 }
 
+function getProximaAcao(etapa: string): string {
+  switch (etapa) {
+    case 'novo':
+      return 'Enviar boas-vindas e cupom de segunda visita (15% OFF)';
+    case 'engajado':
+      return 'Manter engajamento com convites para eventos especiais';
+    case 'fiel':
+      return 'Incluir em programa VIP e oferecer benefícios exclusivos';
+    case 'em_risco':
+      return 'Campanha de reengajamento URGENTE com cupom 20-25% OFF';
+    case 'perdido':
+      return 'Campanha de reativação com cupom agressivo 30% OFF + convite VIP';
+    default:
+      return '';
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get('tipo') || 'cohort'; // cohort ou jornada
+    const barId = parseInt(searchParams.get('bar_id') || '3');
+
+    console.log(`🔍 API Retenção - tipo: ${tipo}, bar_id: ${barId}`);
 
     if (tipo === 'cohort') {
-      return await calcularCohorts();
+      return await calcularCohorts(barId);
     } else if (tipo === 'jornada') {
       const telefone = searchParams.get('telefone');
       if (telefone) {
-        return await buscarJornadaCliente(telefone);
+        return await buscarJornadaCliente(telefone, barId);
       } else {
-        return await listarJornadasClientes();
+        return await listarJornadasClientes(barId);
       }
     }
 
@@ -93,35 +205,46 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function calcularCohorts() {
-  // Buscar todos os clientes
-  const { data: symplaData } = await supabase
-    .from('sympla_participantes')
-    .select('telefone_normalizado, data_evento, nome_completo')
-    .not('telefone_normalizado', 'is', null);
+async function calcularCohorts(barId: number) {
+  // Verificar cache
+  const cacheKey = `cohorts_${barId}`;
+  const cached = getCached(cacheKey);
+  
+  if (cached) {
+    console.log(`⚡ Cache HIT: Usando dados de cohorts em cache`);
+    return NextResponse.json({
+      success: true,
+      data: cached,
+      fromCache: true
+    });
+  }
 
-  const { data: getinData } = await supabase
-    .from('getin_reservations')
-    .select('telefone_normalizado, data, nome')
-    .not('telefone_normalizado', 'is', null);
+  console.log(`🔍 Cache MISS: Calculando cohorts do ContaHub...`);
+
+  // Buscar dados do ContaHub
+  const contahubData = await fetchAllData(
+    'contahub_periodo',
+    'cli_nome, cli_fone, dt_gerencial, vr_couvert, vr_pagamentos',
+    { eq_bar_id: barId }
+  );
+
+  // Filtrar clientes válidos
+  const dadosValidos = contahubData.filter(item => 
+    item.cli_fone && item.cli_fone.trim() !== ''
+  );
+  console.log(`💳 ContaHub: ${dadosValidos.length} registros válidos`);
 
   // Consolidar por cliente
   const clientesMap = new Map<string, Date[]>();
 
-  symplaData?.forEach(item => {
-    if (!item.telefone_normalizado) return;
-    if (!clientesMap.has(item.telefone_normalizado)) {
-      clientesMap.set(item.telefone_normalizado, []);
+  dadosValidos.forEach(item => {
+    const telefone = item.cli_fone.replace(/\D/g, '').slice(-9);
+    if (telefone.length < 9) return;
+    
+    if (!clientesMap.has(telefone)) {
+      clientesMap.set(telefone, []);
     }
-    clientesMap.get(item.telefone_normalizado)!.push(new Date(item.data_evento));
-  });
-
-  getinData?.forEach(item => {
-    if (!item.telefone_normalizado) return;
-    if (!clientesMap.has(item.telefone_normalizado)) {
-      clientesMap.set(item.telefone_normalizado, []);
-    }
-    clientesMap.get(item.telefone_normalizado)!.push(new Date(item.data));
+    clientesMap.get(telefone)!.push(new Date(item.dt_gerencial));
   });
 
   // Para cada cliente, determinar cohort (mês da primeira visita)
@@ -186,54 +309,50 @@ async function calcularCohorts() {
   // Ordenar por cohort (mais recente primeiro)
   cohorts.sort((a, b) => b.cohort.localeCompare(a.cohort));
 
+  // Salvar no cache
+  setCache(cacheKey, cohorts);
+
   return NextResponse.json({
     success: true,
-    data: cohorts
+    data: cohorts,
+    fromCache: false
   });
 }
 
-async function buscarJornadaCliente(telefone: string) {
-  // Buscar histórico do cliente
-  const { data: symplaData } = await supabase
-    .from('sympla_participantes')
-    .select('data_evento, evento_nome, nome_completo')
-    .eq('telefone_normalizado', telefone)
-    .order('data_evento', { ascending: true });
+async function buscarJornadaCliente(telefone: string, barId: number) {
+  // Normalizar telefone para busca
+  const telefoneNorm = telefone.replace(/\D/g, '').slice(-9);
+  
+  // Buscar visitas do cliente no ContaHub
+  const { data: contahubData, error } = await supabase
+    .from('contahub_periodo')
+    .select('cli_nome, dt_gerencial, vr_couvert, vr_pagamentos')
+    .eq('bar_id', barId)
+    .ilike('cli_fone', `%${telefoneNorm}%`)
+    .order('dt_gerencial', { ascending: true });
 
-  const { data: getinData } = await supabase
-    .from('getin_reservations')
-    .select('data, nome')
-    .eq('telefone_normalizado', telefone)
-    .order('data', { ascending: true});
+  if (error) {
+    throw new Error(`Erro ao buscar cliente: ${error.message}`);
+  }
 
-  if (!symplaData?.length && !getinData?.length) {
+  if (!contahubData || contahubData.length === 0) {
     throw new Error('Cliente não encontrado');
   }
 
-  // Consolidar visitas
-  const visitas: Array<{ data: Date; tipo: string }> = [];
-
-  symplaData?.forEach(v => {
-    visitas.push({
-      data: new Date(v.data_evento),
-      tipo: v.evento_nome || 'Evento'
-    });
-  });
-
-  getinData?.forEach(v => {
-    visitas.push({
-      data: new Date(v.data),
-      tipo: 'Reserva GetIn'
-    });
-  });
-
-  visitas.sort((a, b) => a.data.getTime() - b.data.getTime());
+  // Processar visitas
+  const visitas = contahubData.map(v => ({
+    data: new Date(v.dt_gerencial),
+    valor: (v.vr_couvert || 0) + (v.vr_pagamentos || 0)
+  }));
 
   const hoje = new Date();
   const primeiraVisita = visitas[0].data;
   const ultimaVisita = visitas[visitas.length - 1].data;
   const diasComoCliente = Math.floor((hoje.getTime() - primeiraVisita.getTime()) / (1000 * 60 * 60 * 24));
   const diasSemVisitar = Math.floor((hoje.getTime() - ultimaVisita.getTime()) / (1000 * 60 * 60 * 24));
+
+  const totalGasto = visitas.reduce((sum, v) => sum + v.valor, 0);
+  const ticketMedio = visitas.length > 0 ? Math.round(totalGasto / visitas.length) : 0;
 
   // Determinar etapa da jornada
   const etapa = determinarEtapaJornada({
@@ -242,47 +361,18 @@ async function buscarJornadaCliente(telefone: string) {
     diasComoCliente
   });
 
-  // Próxima ação sugerida
-  let proximaAcao: string;
-  switch (etapa) {
-    case 'novo':
-      proximaAcao = 'Enviar boas-vindas e cupom de segunda visita (15% OFF)';
-      break;
-    case 'engajado':
-      proximaAcao = 'Manter engajamento com convites para eventos especiais';
-      break;
-    case 'fiel':
-      proximaAcao = 'Incluir em programa VIP e oferecer benefícios exclusivos';
-      break;
-    case 'em_risco':
-      proximaAcao = 'Campanha de reengajamento URGENTE com cupom 20-25% OFF';
-      break;
-    case 'perdido':
-      proximaAcao = 'Campanha de reativação com cupom agressivo 30% OFF + convite VIP';
-      break;
-  }
-
-  // Histórico detalhado
-  const historico = visitas.map((v, index) => {
-    const diasDesdeAnterior = index > 0
-      ? Math.floor((v.data.getTime() - visitas[index - 1].data.getTime()) / (1000 * 60 * 60 * 24))
-      : null;
-
-    return {
-      data: v.data.toISOString(),
-      tipo: v.tipo,
-      dias_desde_anterior: diasDesdeAnterior
-    };
-  });
-
   const jornada: JornadaCliente = {
     telefone,
-    nome: symplaData?.[0]?.nome_completo || getinData?.[0]?.nome || 'Cliente',
+    nome: contahubData[0].cli_nome || 'Cliente',
     etapa_atual: etapa,
     dias_no_funil: diasComoCliente,
     visitas_totais: visitas.length,
-    proxima_acao_sugerida: proximaAcao,
-    historico_visitas: historico
+    dias_sem_visitar: diasSemVisitar,
+    ultima_visita: ultimaVisita.toISOString(),
+    primeira_visita: primeiraVisita.toISOString(),
+    ticket_medio: ticketMedio,
+    total_gasto: totalGasto,
+    proxima_acao_sugerida: getProximaAcao(etapa)
   };
 
   return NextResponse.json({
@@ -291,61 +381,74 @@ async function buscarJornadaCliente(telefone: string) {
   });
 }
 
-async function listarJornadasClientes() {
-  // Buscar todos os clientes
-  const { data: symplaData } = await supabase
-    .from('sympla_participantes')
-    .select('telefone_normalizado, data_evento, nome_completo')
-    .not('telefone_normalizado', 'is', null);
+async function listarJornadasClientes(barId: number) {
+  // Verificar cache
+  const cacheKey = `jornadas_${barId}`;
+  const cached = getCached(cacheKey);
+  
+  if (cached) {
+    console.log(`⚡ Cache HIT: Usando dados de jornadas em cache (${cached.jornadas.length} clientes)`);
+    return NextResponse.json({
+      success: true,
+      data: cached.jornadas,
+      stats: cached.stats,
+      fromCache: true
+    });
+  }
 
-  const { data: getinData } = await supabase
-    .from('getin_reservations')
-    .select('telefone_normalizado, data, nome')
-    .not('telefone_normalizado', 'is', null);
+  console.log(`🔍 Cache MISS: Processando jornadas de TODOS os clientes...`);
+
+  // Buscar TODOS os dados do ContaHub
+  const contahubData = await fetchAllData(
+    'contahub_periodo',
+    'cli_nome, cli_fone, dt_gerencial, vr_couvert, vr_pagamentos',
+    { eq_bar_id: barId }
+  );
+
+  // Filtrar clientes válidos
+  const dadosValidos = contahubData.filter(item => 
+    item.cli_fone && item.cli_fone.trim() !== '' && 
+    item.cli_nome && item.cli_nome.trim() !== ''
+  );
+  console.log(`💳 ContaHub: ${dadosValidos.length} registros válidos (de ${contahubData.length} totais)`);
 
   // Consolidar
   const clientesMap = new Map<string, {
     nome: string;
-    visitas: Date[];
+    visitas: Array<{ data: Date; valor: number }>;
+    totalGasto: number;
   }>();
 
-  symplaData?.forEach(item => {
-    if (!item.telefone_normalizado) return;
-    if (!clientesMap.has(item.telefone_normalizado)) {
-      clientesMap.set(item.telefone_normalizado, {
-        nome: item.nome_completo || 'Cliente',
-        visitas: []
+  dadosValidos.forEach(item => {
+    const telefone = item.cli_fone.replace(/\D/g, '').slice(-9);
+    if (telefone.length < 9) return;
+    
+    if (!clientesMap.has(telefone)) {
+      clientesMap.set(telefone, {
+        nome: item.cli_nome || 'Cliente',
+        visitas: [],
+        totalGasto: 0
       });
     }
-    clientesMap.get(item.telefone_normalizado)!.visitas.push(new Date(item.data_evento));
+    const cliente = clientesMap.get(telefone)!;
+    const valor = (item.vr_couvert || 0) + (item.vr_pagamentos || 0);
+    cliente.visitas.push({
+      data: new Date(item.dt_gerencial),
+      valor
+    });
+    cliente.totalGasto += valor;
   });
 
-  getinData?.forEach(item => {
-    if (!item.telefone_normalizado) return;
-    if (!clientesMap.has(item.telefone_normalizado)) {
-      clientesMap.set(item.telefone_normalizado, {
-        nome: item.nome || 'Cliente',
-        visitas: []
-      });
-    }
-    clientesMap.get(item.telefone_normalizado)!.visitas.push(new Date(item.data));
-  });
+  console.log(`👥 Total de clientes únicos: ${clientesMap.size}`);
 
-  const jornadas: Array<{
-    telefone: string;
-    nome: string;
-    etapa: string;
-    visitas: number;
-    dias_sem_visitar: number;
-  }> = [];
-
+  const jornadas: JornadaCliente[] = [];
   const hoje = new Date();
 
   for (const [telefone, dados] of clientesMap.entries()) {
-    dados.visitas.sort((a, b) => a.getTime() - b.getTime());
+    dados.visitas.sort((a, b) => a.data.getTime() - b.data.getTime());
     
-    const primeiraVisita = dados.visitas[0];
-    const ultimaVisita = dados.visitas[dados.visitas.length - 1];
+    const primeiraVisita = dados.visitas[0].data;
+    const ultimaVisita = dados.visitas[dados.visitas.length - 1].data;
     const diasComoCliente = Math.floor((hoje.getTime() - primeiraVisita.getTime()) / (1000 * 60 * 60 * 24));
     const diasSemVisitar = Math.floor((hoje.getTime() - ultimaVisita.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -355,29 +458,45 @@ async function listarJornadasClientes() {
       diasComoCliente
     });
 
+    const ticketMedio = dados.visitas.length > 0 ? Math.round(dados.totalGasto / dados.visitas.length) : 0;
+
     jornadas.push({
       telefone,
       nome: dados.nome,
-      etapa,
-      visitas: dados.visitas.length,
-      dias_sem_visitar: diasSemVisitar
+      etapa_atual: etapa,
+      dias_no_funil: diasComoCliente,
+      visitas_totais: dados.visitas.length,
+      dias_sem_visitar: diasSemVisitar,
+      ultima_visita: ultimaVisita.toISOString(),
+      primeira_visita: primeiraVisita.toISOString(),
+      ticket_medio: ticketMedio,
+      total_gasto: dados.totalGasto,
+      proxima_acao_sugerida: getProximaAcao(etapa)
     });
   }
+
+  // Ordenar por visitas (mais frequentes primeiro)
+  jornadas.sort((a, b) => b.visitas_totais - a.visitas_totais);
+
+  console.log(`✅ Jornadas processadas: ${jornadas.length} clientes`);
 
   // Estatísticas
   const stats = {
     total: jornadas.length,
-    novo: jornadas.filter(j => j.etapa === 'novo').length,
-    engajado: jornadas.filter(j => j.etapa === 'engajado').length,
-    fiel: jornadas.filter(j => j.etapa === 'fiel').length,
-    em_risco: jornadas.filter(j => j.etapa === 'em_risco').length,
-    perdido: jornadas.filter(j => j.etapa === 'perdido').length,
+    novo: jornadas.filter(j => j.etapa_atual === 'novo').length,
+    engajado: jornadas.filter(j => j.etapa_atual === 'engajado').length,
+    fiel: jornadas.filter(j => j.etapa_atual === 'fiel').length,
+    em_risco: jornadas.filter(j => j.etapa_atual === 'em_risco').length,
+    perdido: jornadas.filter(j => j.etapa_atual === 'perdido').length,
   };
+
+  // Salvar no cache
+  setCache(cacheKey, { jornadas, stats });
 
   return NextResponse.json({
     success: true,
-    data: jornadas.slice(0, 100),
-    stats
+    data: jornadas,
+    stats,
+    fromCache: false
   });
 }
-

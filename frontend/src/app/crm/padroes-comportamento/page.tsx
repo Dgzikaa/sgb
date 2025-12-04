@@ -31,14 +31,10 @@ import {
 import {
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from 'recharts';
 
@@ -48,8 +44,6 @@ interface PadraoCliente {
   total_visitas: number;
   dia_semana_preferido: string;
   distribuicao_dias: Record<string, number>;
-  tipo_evento_preferido: string;
-  distribuicao_eventos: Record<string, number>;
   horario_preferido: string;
   distribuicao_horarios: Record<string, number>;
   intervalo_medio_visitas: number;
@@ -58,18 +52,9 @@ interface PadraoCliente {
   distribuicao_mensal: Record<string, number>;
   vem_sozinho: boolean;
   tamanho_grupo_medio: number;
+  total_gasto?: number;
+  ticket_medio?: number;
 }
-
-const CORES = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
-const CORES_DIAS = {
-  segunda: '#3b82f6',
-  terca: '#10b981',
-  quarta: '#f59e0b',
-  quinta: '#ef4444',
-  sexta: '#8b5cf6',
-  sabado: '#ec4899',
-  domingo: '#06b6d4'
-};
 
 export default function PadroesComportamentoPage() {
   const [clientes, setClientes] = useState<PadraoCliente[]>([]);
@@ -143,13 +128,6 @@ export default function PadroesComportamentoPage() {
     return Object.entries(dist).map(([dia, count]) => ({
       dia: dia.charAt(0).toUpperCase() + dia.slice(1),
       visitas: count
-    }));
-  };
-
-  const prepararDadosEventos = (dist: Record<string, number>) => {
-    return Object.entries(dist).map(([evento, count]) => ({
-      name: evento.length > 20 ? evento.substring(0, 20) + '...' : evento,
-      value: count
     }));
   };
 
@@ -409,32 +387,22 @@ export default function PadroesComportamentoPage() {
                       </CardContent>
                     </Card>
 
-                    {/* Distribuição por Tipo de Evento */}
+                    {/* Distribuição por Mês */}
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-gray-900 dark:text-white text-lg">
-                          Tipos de Evento Preferidos
+                          Distribuição por Mês
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <ResponsiveContainer width="100%" height={250}>
-                          <PieChart>
-                            <Pie
-                              data={prepararDadosEventos(clienteSelecionado.distribuicao_eventos)}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={false}
-                              label={(entry) => `${entry.name}: ${entry.value}`}
-                              outerRadius={80}
-                              fill="#8884d8"
-                              dataKey="value"
-                            >
-                              {prepararDadosEventos(clienteSelecionado.distribuicao_eventos).map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={CORES[index % CORES.length]} />
-                              ))}
-                            </Pie>
+                          <BarChart data={Object.entries(clienteSelecionado.distribuicao_mensal || {}).map(([mes, count]) => ({ mes, visitas: count }))}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="mes" tick={{ fontSize: 10 }} />
+                            <YAxis />
                             <Tooltip />
-                          </PieChart>
+                            <Bar dataKey="visitas" fill="#10b981" />
+                          </BarChart>
                         </ResponsiveContainer>
                       </CardContent>
                     </Card>
@@ -477,12 +445,15 @@ export default function PadroesComportamentoPage() {
                             }
                           </span>
                         </li>
-                        <li className="flex items-start gap-2">
-                          <BarChart3 className="w-5 h-5 text-pink-600 mt-0.5 flex-shrink-0" />
-                          <span>
-                            <strong>Tipo de evento favorito:</strong> {clienteSelecionado.tipo_evento_preferido}
-                          </span>
-                        </li>
+                        {clienteSelecionado.ticket_medio && clienteSelecionado.ticket_medio > 0 && (
+                          <li className="flex items-start gap-2">
+                            <BarChart3 className="w-5 h-5 text-pink-600 mt-0.5 flex-shrink-0" />
+                            <span>
+                              <strong>Ticket médio:</strong> R$ {clienteSelecionado.ticket_medio?.toLocaleString('pt-BR')} | 
+                              <strong> Total gasto:</strong> R$ {clienteSelecionado.total_gasto?.toLocaleString('pt-BR')}
+                            </span>
+                          </li>
+                        )}
                       </ul>
                     </CardContent>
                   </Card>
