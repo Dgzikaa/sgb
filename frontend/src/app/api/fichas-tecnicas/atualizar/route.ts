@@ -10,7 +10,8 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Acionando atualização de fichas técnicas:', { receita_id, insumo_id });
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    // Usar SERVICE_ROLE_KEY para autenticação de Edge Functions (server-side apenas)
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
     const response = await fetch(
       `${supabaseUrl}/functions/v1/atualizar-fichas-tecnicas`,
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${supabaseKey}`,
+          Authorization: `Bearer ${supabaseServiceKey}`,
         },
         body: JSON.stringify({ receita_id, insumo_id }),
       }

@@ -352,8 +352,8 @@ const defaultSidebarItems: SidebarItem[] = [
         },
         {
           icon: Target,
-          label: 'Metas de Desempenho',
-          href: '/configuracoes/desempenho',
+          label: 'Metas',
+          href: '/configuracoes/metas',
           description: 'Definir metas e indicadores',
           permission: 'configuracoes',
         },
