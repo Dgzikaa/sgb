@@ -316,7 +316,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Contar clientes por segmento
-    let segmentosStats = null;
+    let segmentosStats: Record<string, number> | null = null;
     if (incluirStats) {
       const { data: stats } = await supabase
         .from('crm_segmentacao')
