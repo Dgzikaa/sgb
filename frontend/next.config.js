@@ -1,9 +1,14 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // ✅ Otimizações básicas
   poweredByHeader: false,
   compress: true,
   reactStrictMode: false, // Desabilitar para evitar chamadas duplas da API
+  
+  // ✅ Definir raiz do workspace para evitar warning de múltiplos lockfiles
+  outputFileTracingRoot: path.join(__dirname, '../'),
   
   // ✅ TypeScript e ESLint
   typescript: {
@@ -83,7 +88,23 @@ const nextConfig = {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
-        ignored: /(node_modules|\.git|\.next|dist|build)/i,
+        // Ignorar pastas de sistema do Windows e diretórios comuns
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/.next/**',
+          '**/dist/**',
+          '**/build/**',
+          '**/System Volume Information/**',
+          '**/$RECYCLE.BIN/**',
+          '**/$Recycle.Bin/**',
+          '**/Recovery/**',
+          '**/Config.Msi/**',
+          '**/Windows/**',
+          '**/ProgramData/**',
+          '**/Program Files/**',
+          '**/Program Files (x86)/**',
+        ],
       };
       // Não ajustar devtool em desenvolvimento para evitar regressões e warnings do Next.js
     }
