@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, DataTableColumn } from '@/components/ui/data-table';
+import { useBar } from '@/contexts/BarContext';
 import {
   PackageIcon,
   TrendingUpIcon,
@@ -40,12 +41,15 @@ interface ProdutosDoDiaDataTableProps {
 }
 
 export default function ProdutosDoDiaDataTable({ dataSelecionada }: ProdutosDoDiaDataTableProps) {
+  const { selectedBar } = useBar();
   const [dados, setDados] = useState<ProdutoDoDia[]>([]);
   const [resumo, setResumo] = useState<ResumoDoDia | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const buscarDados = async () => {
+    if (!selectedBar) return;
+    
     setLoading(true);
     setError(null);
     
@@ -57,7 +61,7 @@ export default function ProdutosDoDiaDataTable({ dataSelecionada }: ProdutosDoDi
         },
         body: JSON.stringify({
           data_selecionada: dataSelecionada,
-          bar_id: 3
+          bar_id: selectedBar.id
         }),
       });
 
@@ -158,10 +162,10 @@ export default function ProdutosDoDiaDataTable({ dataSelecionada }: ProdutosDoDi
   };
 
   useEffect(() => {
-    if (dataSelecionada) {
+    if (dataSelecionada && selectedBar) {
       buscarDados();
     }
-  }, [dataSelecionada]);
+  }, [dataSelecionada, selectedBar?.id]);
 
   // Colunas para cada categoria
   const colunasProdutos: DataTableColumn<ProdutoDoDia>[] = [

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import {
@@ -65,7 +65,7 @@ export default function RelatorioProdutos() {
       const params = new URLSearchParams({
         data_especifica: dataEspecifica,
         ...(typeof filtros === 'object' && filtros !== null ? filtros : {}),
-        bar_id: (selectedBar?.id || 3).toString(),
+        bar_id: selectedBar?.id?.toString() || '',
       });
 
       const [produtosRes, historicoRes, estatisticasRes] = await Promise.all([

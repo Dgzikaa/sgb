@@ -88,7 +88,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const bar_id = body.bar_id || 3;
+    if (!body.bar_id) {
+      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 });
+    }
+    const bar_id = body.bar_id;
 
     // Verificar se já existe área com esse nome
     const { data: existente } = await supabase

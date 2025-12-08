@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useToast } from '@/components/ui/toast';
 import {
@@ -68,6 +69,7 @@ interface InterAuthResponse {
 
 export default function WebhooksPage() {
   const { setPageTitle } = usePageTitle();
+  const { selectedBar } = useBar();
   const { showToast } = useToast();
   const toast = useCallback((options: {
     title: string;
@@ -104,13 +106,13 @@ export default function WebhooksPage() {
     try {
       // Carregar webhook PIX
       const pixResponse = await fetch(
-        `/api/financeiro/inter/webhook?bar_id=3&tipoWebhook=pix-pagamento`
+        `/api/financeiro/inter/webhook?bar_id=${selectedBar?.id}&tipoWebhook=pix-pagamento`
       );
       const pixData = await pixResponse.json();
 
       // Carregar webhook Boleto
       const boletoResponse = await fetch(
-        `/api/financeiro/inter/webhook?bar_id=3&tipoWebhook=boleto-pagamento`
+        `/api/financeiro/inter/webhook?bar_id=${selectedBar?.id}&tipoWebhook=boleto-pagamento`
       );
       const boletoData = await boletoResponse.json();
 
@@ -157,7 +159,7 @@ export default function WebhooksPage() {
 
       // Primeiro, buscar as credenciais do Inter
       const credenciaisResponse = await fetch(
-        '/api/configuracoes/credenciais/inter?bar_id=3'
+        `/api/configuracoes/credenciais/inter?bar_id=${selectedBar?.id}`
       );
       const credenciaisData = await credenciaisResponse.json();
 

@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBar } from '@/contexts/BarContext';
 import { 
   ComposedChart,
   Line,
@@ -94,6 +95,7 @@ interface HorarioPicoChartProps {
 }
 
 export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoChartProps) {
+  const { selectedBar } = useBar();
   const [dados, setDados] = useState<HorarioPicoData[]>([]);
   const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null);
   const [stockoutResumo, setStockoutResumo] = useState<StockoutResumo | null>(null);
@@ -171,7 +173,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
         },
         body: JSON.stringify({
           data_selecionada: dataSelecionada,
-          bar_id: 3
+          bar_id: selectedBar?.id
         }),
       });
 
@@ -197,7 +199,7 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
 
       // Buscar dados de stockout em paralelo
       try {
-        const stockoutResponse = await fetch(`/api/analitico/stockout-resumo?data=${dataSelecionada}&bar_id=3`);
+        const stockoutResponse = await fetch(`/api/analitico/stockout-resumo?data=${dataSelecionada}&bar_id=${selectedBar?.id}`);
         if (stockoutResponse.ok) {
           const stockoutResult = await stockoutResponse.json();
           if (stockoutResult.success) {
@@ -218,10 +220,10 @@ export function HorarioPicoChart({ dataSelecionada, onDataChange }: HorarioPicoC
   };
 
   useEffect(() => {
-    if (dataSelecionada) {
+    if (dataSelecionada && selectedBar) {
       buscarDados();
     }
-  }, [dataSelecionada]);
+  }, [dataSelecionada, selectedBar?.id]);
 
   const formatarMoeda = (valor: number) => {
     return valor.toLocaleString('pt-BR', {

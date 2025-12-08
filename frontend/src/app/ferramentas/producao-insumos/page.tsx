@@ -142,7 +142,7 @@ export default function ProducaoInsumosPage() {
 
   const carregarReceitas = async () => {
     try {
-      const response = await fetch(`/api/operacional/receitas?bar_id=${selectedBar?.id || 3}`);
+      const response = await fetch(`/api/operacional/receitas?bar_id=${selectedBar?.id}`);
       if (response.ok) {
         const data = await response.json();
         const receitasProcessadas = (data.receitas || []).map((r: any) => ({
@@ -208,8 +208,8 @@ export default function ProducaoInsumosPage() {
       const url = '/api/operacional/receitas/insumos';
       const method = insumoEdit ? 'PUT' : 'POST';
       const body = insumoEdit
-        ? { ...formInsumo, id: insumoEdit.id, bar_id: selectedBar?.id || 3 }
-        : { ...formInsumo, bar_id: selectedBar?.id || 3 };
+        ? { ...formInsumo, id: insumoEdit.id, bar_id: selectedBar?.id }
+        : { ...formInsumo, bar_id: selectedBar?.id };
 
       const response = await fetch(url, {
         method,
@@ -240,7 +240,7 @@ export default function ProducaoInsumosPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: insumo.id,
-          bar_id: selectedBar?.id || 3,
+          bar_id: selectedBar?.id,
           ativo: false,
         }),
       });

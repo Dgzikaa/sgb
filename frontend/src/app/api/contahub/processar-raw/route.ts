@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         .from('contahub_raw_data')
         .select('id, data_type, data_date, record_count')
         .eq('processed', false)
-        .eq('bar_id', body.bar_id || 3)
+        .eq('bar_id', body.bar_id)
         .order('created_at', { ascending: true })
 
       if (error) {

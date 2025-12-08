@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@/contexts/UserContext';
+import { useBar } from '@/contexts/BarContext';
 import { apiCall } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -91,6 +92,7 @@ interface CalendarDay {
 
 export default function CalendarioPage() {
   const { user } = useUser();
+  const { selectedBar } = useBar();
   
   // Estados principais
   const [dados, setDados] = useState<Record<string, DiaData>>({});
@@ -157,7 +159,7 @@ export default function CalendarioPage() {
 
       const response = await apiCall(`/api/ferramentas/calendario?${params}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
       
@@ -191,10 +193,10 @@ export default function CalendarioPage() {
 
   // Carregar dados iniciais
   useEffect(() => {
-    if (user) {
+    if (user && selectedBar) {
       buscarDados();
     }
-  }, [user, currentMonth, currentYear]);
+  }, [user, selectedBar?.id, currentMonth, currentYear]);
 
   // Alterar mês/ano
   const alterarPeriodo = (novoMes: number, novoAno: number) => {
@@ -211,7 +213,7 @@ export default function CalendarioPage() {
       const response = await apiCall('/api/trigger-getin-sync', {
         method: 'GET',
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
 
@@ -290,7 +292,7 @@ export default function CalendarioPage() {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'x-user-data': encodeURIComponent(JSON.stringify(user))
+            'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
           },
           body: JSON.stringify(updateData)
         });
@@ -315,7 +317,7 @@ export default function CalendarioPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-user-data': encodeURIComponent(JSON.stringify(user))
+            'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
           },
           body: JSON.stringify(novoEvento)
         });
@@ -377,7 +379,7 @@ export default function CalendarioPage() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
 
@@ -417,7 +419,7 @@ export default function CalendarioPage() {
     try {
       const response = await apiCall(`/api/ferramentas/calendario/eventos?data=${data}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
       

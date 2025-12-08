@@ -59,7 +59,7 @@ export async function getUserAuth(
       email: parsedUser.email,
       nome: parsedUser.nome || parsedUser.email,
       role: parsedUser.role || parsedUser.permissao || 'funcionario',
-      bar_id: parsedUser.bar_id || 3, // Default para Ordinário Bar se não especificado
+      bar_id: parsedUser.bar_id, // bar_id obrigatório - não usar fallback
       permissao: parsedUser.role || parsedUser.permissao || 'funcionario',
       modulos_permitidos: parsedUser.modulos_permitidos || [],
       ativo: parsedUser.ativo !== false,

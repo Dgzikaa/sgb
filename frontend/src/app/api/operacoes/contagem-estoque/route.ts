@@ -48,7 +48,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const bar_id = body.bar_id || 3;
+    if (!body.bar_id) {
+      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 });
+    }
+    const bar_id = body.bar_id;
     const data_contagem = body.data_contagem || new Date().toISOString().split('T')[0];
 
     // Buscar última contagem do mesmo produto

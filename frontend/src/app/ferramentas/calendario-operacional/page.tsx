@@ -28,6 +28,7 @@ import {
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
 import {
   Dialog,
   DialogContent,
@@ -76,7 +77,8 @@ const MOTIVOS_PREDEFINIDOS = [
 
 export default function CalendarioOperacionalPage() {
   const { setPageTitle } = usePageTitle();
-  
+  const { selectedBar } = useBar();
+
   const [mesAtual, setMesAtual] = useState(new Date().getMonth() + 1);
   const [anoAtual, setAnoAtual] = useState(new Date().getFullYear());
   const [calendarioData, setCalendarioData] = useState<CalendarioData | null>(null);
@@ -109,7 +111,7 @@ export default function CalendarioOperacionalPage() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/ferramentas/calendario-operacional?mes=${mesAtual}&ano=${anoAtual}&bar_id=3`
+        `/api/ferramentas/calendario-operacional?mes=${mesAtual}&ano=${anoAtual}&bar_id=${selectedBar?.id}`
       );
       
       if (!response.ok) throw new Error('Erro ao carregar calendário');
@@ -127,7 +129,7 @@ export default function CalendarioOperacionalPage() {
   const carregarSugestoes = async () => {
     try {
       const response = await fetch(
-        `/api/ferramentas/calendario-operacional/sugestoes?mes=${mesAtual}&ano=${anoAtual}&bar_id=3`
+        `/api/ferramentas/calendario-operacional/sugestoes?mes=${mesAtual}&ano=${anoAtual}&bar_id=${selectedBar?.id}`
       );
       if (!response.ok) throw new Error('Erro ao carregar sugestões');
       const result = await response.json();
@@ -173,7 +175,7 @@ export default function CalendarioOperacionalPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           datas: Array.from(diasSelecionados),
-          bar_id: 3,
+          bar_id: selectedBar?.id,
           status: statusBulk,
           motivo: motivoBulk,
           usuario_nome: 'Usuário Web'
@@ -202,7 +204,7 @@ export default function CalendarioOperacionalPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           datas,
-          bar_id: 3,
+          bar_id: selectedBar?.id,
           status,
           motivo,
           usuario_nome: 'Sugestão Automática'
@@ -241,7 +243,7 @@ export default function CalendarioOperacionalPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: diaEdicao.data,
-          bar_id: 3,
+          bar_id: selectedBar?.id,
           status: statusEdicao,
           motivo: motivoEdicao,
           observacao: observacaoEdicao
@@ -267,7 +269,7 @@ export default function CalendarioOperacionalPage() {
     setSalvando(true);
     try {
       const response = await fetch(
-        `/api/ferramentas/calendario-operacional?data=${diaEdicao.data}&bar_id=3`,
+        `/api/ferramentas/calendario-operacional?data=${diaEdicao.data}&bar_id=${selectedBar?.id}`,
         { method: 'DELETE' }
       );
 

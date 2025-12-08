@@ -137,6 +137,22 @@ export async function POST(req: NextRequest) {
       .eq('email', 'admin@ordinario.com')
       .single();
 
+    // bar_id pode vir do body ou do header x-user-data
+    let barId = body.bar_id;
+    if (!barId) {
+      const userDataHeader = request.headers.get('x-user-data');
+      if (userDataHeader) {
+        try {
+          const parsed = JSON.parse(userDataHeader);
+          barId = parsed?.bar_id;
+        } catch {}
+      }
+    }
+    
+    if (!barId) {
+      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 });
+    }
+
     const checklistData = {
       nome: body.nome,
       descricao: body.descricao || '',
@@ -145,7 +161,7 @@ export async function POST(req: NextRequest) {
       frequencia: body.frequencia || 'diaria',
       tempo_estimado: body.tempo_estimado || 30,
       responsavel_padrao: body.responsavel_padrao || '',
-      bar_id: 3, // Ordinário Bar
+      bar_id: barId,
       criado_por: adminUser?.id || null,
       status: 'ativo',
     };

@@ -10,7 +10,7 @@ const corsHeaders = {
 
 // Função para processar dados de uma tabela específica
 async function processRawData(supabase: any, dataType: string, rawData: any, dataDate: string, barId: number = 3) {
-  console.log(`📊 Processando ${dataType} para ${dataDate}...`);
+  console.log(`📊 Processando ${dataType} para ${dataDate} (bar_id: ${barId})...`);
   
   if (!rawData?.list || !Array.isArray(rawData.list)) {
     console.log(`⚠️ Dados ${dataType} inválidos ou vazios`);
@@ -22,235 +22,282 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
   let errors = 0;
 
   try {
-    // Processar cada tipo de dados
+    // Processar cada tipo de dados usando INSERT (mais seguro para multi-bar)
     switch (dataType) {
       case 'analitico':
-        for (const item of records) {
-          try {
-            const { error } = await supabase
-              .from('contahub_analitico')
-              .upsert({
-                vd_mesadesc: item.vd_mesadesc || '',
-                vd_localizacao: item.vd_localizacao || '',
-                itm: parseInt(item.itm) || 0,
-                trn: parseInt(item.trn) || 0,
-                trn_desc: item.trn_desc || '',
-                prefixo: item.prefixo || '',
-                tipo: item.tipo || '',
-                tipovenda: item.tipovenda || '',
-                ano: parseInt(item.ano) || new Date().getFullYear(),
-                mes: parseInt(item.mes) || new Date().getMonth() + 1,
-                trn_dtgerencial: item.trn_dtgerencial || dataDate,
-                usr_lancou: item.usr_lancou || '',
-                prd: item.prd || '',
-                prd_desc: item.prd_desc || '',
-                grp_desc: item.grp_desc || '',
-                loc_desc: item.loc_desc || '',
-                qtd: parseFloat(item.qtd) || 0,
-                desconto: parseFloat(item.desconto) || 0,
-                valorfinal: parseFloat(item.valorfinal) || 0,
-                custo: parseFloat(item.custo) || 0,
-                itm_obs: item.itm_obs || '',
-                comandaorigem: item.comandaorigem || '',
-                itemorigem: item.itemorigem || '',
-                bar_id: barId,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'trn,itm,bar_id',
-                ignoreDuplicates: false
-              });
-
-            if (error) {
-              console.error(`❌ Erro ao inserir analítico:`, error.message);
-              errors++;
-            } else {
-              processedCount++;
-            }
-          } catch (itemError) {
-            console.error(`❌ Erro no item analítico:`, itemError);
-            errors++;
+        // Primeiro deletar registros existentes para essa data/bar
+        await supabase
+          .from('contahub_analitico')
+          .delete()
+          .eq('bar_id', barId)
+          .eq('trn_dtgerencial', dataDate);
+        
+        // Depois inserir novos registros em batch
+        const analiticoRecords = records.map((item: any) => ({
+          vd_mesadesc: item.vd_mesadesc || '',
+          vd_localizacao: item.vd_localizacao || '',
+          itm: parseInt(item.itm) || 0,
+          trn: parseInt(item.trn) || 0,
+          trn_desc: item.trn_desc || '',
+          prefixo: item.prefixo || '',
+          tipo: item.tipo || '',
+          tipovenda: item.tipovenda || '',
+          ano: parseInt(item.ano) || new Date().getFullYear(),
+          mes: parseInt(item.mes) || new Date().getMonth() + 1,
+          trn_dtgerencial: item.trn_dtgerencial || dataDate,
+          usr_lancou: item.usr_lancou || '',
+          prd: item.prd || '',
+          prd_desc: item.prd_desc || '',
+          grp_desc: item.grp_desc || '',
+          loc_desc: item.loc_desc || '',
+          qtd: parseFloat(item.qtd) || 0,
+          desconto: parseFloat(item.desconto) || 0,
+          valorfinal: parseFloat(item.valorfinal) || 0,
+          custo: parseFloat(item.custo) || 0,
+          itm_obs: item.itm_obs || '',
+          comandaorigem: item.comandaorigem || '',
+          itemorigem: item.itemorigem || '',
+          bar_id: barId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+        
+        if (analiticoRecords.length > 0) {
+          const { error } = await supabase
+            .from('contahub_analitico')
+            .insert(analiticoRecords);
+          
+          if (error) {
+            console.error(`❌ Erro ao inserir analítico:`, error.message);
+            errors = analiticoRecords.length;
+          } else {
+            processedCount = analiticoRecords.length;
           }
         }
         break;
 
       case 'periodo':
-        for (const item of records) {
-          try {
-            const { error } = await supabase
-              .from('contahub_periodo')
-              .upsert({
-                dt_gerencial: item.dt_gerencial || dataDate,
-                tipovenda: item.tipovenda || '',
-                vd_mesadesc: item.vd_mesadesc || '',
-                vd_localizacao: item.vd_localizacao || '',
-                cht_nome: item.cht_nome || '',
-                cli_nome: item.cli_nome || '',
-                cli_dtnasc: item.cli_dtnasc || null,
-                cli_email: item.cli_email || '',
-                cli_fone: item.cli_fone || '',
-                usr_abriu: item.usr_abriu || '',
-                pessoas: parseFloat(item.pessoas) || 0,
-                qtd_itens: parseFloat(item.qtd_itens) || 0,
-                vr_pagamentos: parseFloat(item.vr_pagamentos) || 0,
-                vr_produtos: parseFloat(item.vr_produtos) || 0,
-                vr_repique: parseFloat(item.vr_repique) || 0,
-                vr_couvert: parseFloat(item.vr_couvert) || 0,
-                vr_desconto: parseFloat(item.vr_desconto) || 0,
-                motivo: item.motivo || '',
-                dt_contabil: item.dt_contabil || null,
-                ultimo_pedido: item.ultimo_pedido || '',
-                vd_dtcontabil: item.vd_dtcontabil || null,
-                bar_id: barId,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'dt_gerencial,cli_nome,vr_pagamentos,vd_mesadesc,usr_abriu,bar_id',
-                ignoreDuplicates: true
-              });
-
-            if (error) {
-              console.error(`❌ Erro ao inserir período:`, error.message);
-              errors++;
-            } else {
-              processedCount++;
-            }
-          } catch (itemError) {
-            console.error(`❌ Erro no item período:`, itemError);
-            errors++;
+        await supabase
+          .from('contahub_periodo')
+          .delete()
+          .eq('bar_id', barId)
+          .eq('dt_gerencial', dataDate);
+        
+        const periodoRecords = records.map((item: any) => ({
+          dt_gerencial: item.dt_gerencial || dataDate,
+          tipovenda: item.tipovenda || '',
+          vd_mesadesc: item.vd_mesadesc || '',
+          vd_localizacao: item.vd_localizacao || '',
+          cht_nome: item.cht_nome || '',
+          cli_nome: item.cli_nome || '',
+          cli_dtnasc: item.cli_dtnasc || null,
+          cli_email: item.cli_email || '',
+          cli_fone: item.cli_fone || '',
+          usr_abriu: item.usr_abriu || '',
+          pessoas: parseFloat(item.pessoas) || 0,
+          qtd_itens: parseFloat(item.qtd_itens) || 0,
+          vr_pagamentos: parseFloat(item['$vr_pagamentos'] || item.vr_pagamentos || 0),
+          vr_produtos: parseFloat(item['$vr_produtos'] || item.vr_produtos || 0),
+          vr_repique: parseFloat(item['$vr_repique'] || item.vr_repique || 0),
+          vr_couvert: parseFloat(item['$vr_couvert'] || item.vr_couvert || 0),
+          vr_desconto: parseFloat(item['$vr_desconto'] || item.vr_desconto || 0),
+          motivo: item.motivo || '',
+          dt_contabil: item.dt_contabil || null,
+          ultimo_pedido: item.vd_hrultimo || item.ultimo_pedido || '',
+          vd_dtcontabil: item.vd_dtcontabil || null,
+          bar_id: barId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+        
+        if (periodoRecords.length > 0) {
+          const { error } = await supabase
+            .from('contahub_periodo')
+            .insert(periodoRecords);
+          
+          if (error) {
+            console.error(`❌ Erro ao inserir período:`, error.message);
+            return { success: true, count: 0, errors: periodoRecords.length, errorMessage: error.message, errorDetails: JSON.stringify(error) };
+          } else {
+            processedCount = periodoRecords.length;
           }
         }
         break;
 
       case 'fatporhora':
-        for (const item of records) {
-          try {
-            const { error } = await supabase
-              .from('contahub_fatporhora')
-              .upsert({
-                vd_dtgerencial: item.vd_dtgerencial || dataDate,
-                dds: parseInt(item.dds) || 0,
-                dia: item.dia || '',
-                hora: parseInt(item.hora) || 0,
-                qtd: parseFloat(item.qtd) || 0,
-                valor: parseFloat(item['$valor'] || item.valor) || 0,
-                bar_id: barId,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'vd_dtgerencial,hora,bar_id',
-                ignoreDuplicates: false
-              });
-
-            if (error) {
-              console.error(`❌ Erro ao inserir fatporhora:`, error.message);
-              errors++;
-            } else {
-              processedCount++;
-            }
-          } catch (itemError) {
-            console.error(`❌ Erro no item fatporhora:`, itemError);
-            errors++;
+        await supabase
+          .from('contahub_fatporhora')
+          .delete()
+          .eq('bar_id', barId)
+          .eq('vd_dtgerencial', dataDate);
+        
+        const fatporhoraRecords = records.map((item: any) => ({
+          vd_dtgerencial: item.vd_dtgerencial || dataDate,
+          dds: parseInt(item.dds) || 0,
+          dia: item.dia || '',
+          hora: parseInt(item.hora) || 0,
+          qtd: parseFloat(item.qtd) || 0,
+          valor: parseFloat(item['$valor'] || item.valor) || 0,
+          bar_id: barId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+        
+        if (fatporhoraRecords.length > 0) {
+          const { error } = await supabase
+            .from('contahub_fatporhora')
+            .insert(fatporhoraRecords);
+          
+          if (error) {
+            console.error(`❌ Erro ao inserir fatporhora:`, error.message);
+            errors = fatporhoraRecords.length;
+          } else {
+            processedCount = fatporhoraRecords.length;
           }
         }
         break;
 
       case 'pagamentos':
-        for (const item of records) {
-          try {
-            const { error } = await supabase
-              .from('contahub_pagamentos')
-              .upsert({
-                dt_gerencial: item.dt_gerencial || dataDate,
-                meio: item.meio || '',
-                bruto: parseFloat(item.bruto) || 0,
-                liquido: parseFloat(item.liquido) || 0,
-                taxa: parseFloat(item.taxa) || 0,
-                bar_id: barId,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'dt_gerencial,meio,bar_id',
-                ignoreDuplicates: false
-              });
-
-            if (error) {
-              console.error(`❌ Erro ao inserir pagamento:`, error.message);
-              errors++;
-            } else {
-              processedCount++;
-            }
-          } catch (itemError) {
-            console.error(`❌ Erro no item pagamento:`, itemError);
-            errors++;
+        await supabase
+          .from('contahub_pagamentos')
+          .delete()
+          .eq('bar_id', barId)
+          .eq('dt_gerencial', dataDate);
+        
+        const pagamentosRecords = records.map((item: any) => ({
+          dt_gerencial: item.dt_gerencial || dataDate,
+          vd: String(item.vd || ''),
+          trn: String(item.trn || ''),
+          hr_lancamento: item.hr_lancamento || '',
+          hr_transacao: item.hr_transacao || '',
+          dt_transacao: item.dt_transacao || null,
+          mesa: item.mesa || '',
+          cli: item.cli ? parseInt(item.cli) : null,
+          cliente: item.cliente || item.cli_nome || '',
+          vr_pagamentos: parseFloat(item['$vr_pagamentos'] || item.vr_pagamentos) || 0,
+          pag: String(item.pag || ''),
+          valor: parseFloat(item['$valor'] || item.valor) || 0,
+          taxa: parseFloat(item['$taxa'] || item.taxa) || 0,
+          perc: parseFloat(item['$perc'] || item.perc) || 0,
+          liquido: parseFloat(item['$liquido'] || item.liquido) || 0,
+          tipo: item.tipo || '',
+          meio: item.meio || '',
+          cartao: item.cartao || '',
+          autorizacao: String(item.autorizacao || ''),
+          dt_credito: item.dt_credito || null,
+          usr_abriu: item.usr_abriu || '',
+          usr_lancou: item.usr_lancou || '',
+          usr_aceitou: item.usr_aceitou || '',
+          motivodesconto: item.motivodesconto || '',
+          bar_id: barId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+        
+        if (pagamentosRecords.length > 0) {
+          const { error } = await supabase
+            .from('contahub_pagamentos')
+            .insert(pagamentosRecords);
+          
+          if (error) {
+            console.error(`❌ Erro ao inserir pagamentos:`, error.message, JSON.stringify(error));
+            return { success: true, count: 0, errors: pagamentosRecords.length, errorMessage: error.message, errorDetails: JSON.stringify(error) };
+          } else {
+            processedCount = pagamentosRecords.length;
           }
         }
         break;
 
       case 'tempo':
-        for (const item of records) {
-          try {
-            const { error } = await supabase
-              .from('contahub_tempo')
-              .upsert({
-                dt_gerencial: item.dt_gerencial || dataDate,
-                prd: item.prd || '',
-                prd_desc: item.prd_desc || '',
-                grp_desc: item.grp_desc || '',
-                tempo_medio: parseFloat(item.tempo_medio) || 0,
-                qtd_vendas: parseInt(item.qtd_vendas) || 0,
-                bar_id: barId,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'dt_gerencial,prd,bar_id',
-                ignoreDuplicates: false
-              });
-
-            if (error) {
-              console.error(`❌ Erro ao inserir tempo:`, error.message);
-              errors++;
-            } else {
-              processedCount++;
-            }
-          } catch (itemError) {
-            console.error(`❌ Erro no item tempo:`, itemError);
-            errors++;
+        await supabase
+          .from('contahub_tempo')
+          .delete()
+          .eq('bar_id', barId)
+          .eq('data', dataDate);
+        
+        const tempoRecords = records.map((item: any) => ({
+          data: dataDate,
+          prd: parseInt(item.prd) || null,
+          prd_desc: item.prd_desc || '',
+          grp_desc: item.grp_desc || '',
+          loc_desc: item.loc_desc || '',
+          vd_mesadesc: item.vd_mesadesc || '',
+          vd_localizacao: item.vd_localizacao || '',
+          itm: String(item.itm || ''),
+          t0_lancamento: item['t0-lancamento'] || item.t0_lancamento || null,
+          t1_prodini: item['t1-prodini'] || item.t1_prodini || null,
+          t2_prodfim: item['t2-prodfim'] || item.t2_prodfim || null,
+          t3_entrega: item['t3-entrega'] || item.t3_entrega || null,
+          t0_t1: parseFloat(item['t0-t1'] || item.t0_t1) || 0,
+          t0_t2: parseFloat(item['t0-t2'] || item.t0_t2) || 0,
+          t0_t3: parseFloat(item['t0-t3'] || item.t0_t3) || 0,
+          t1_t2: parseFloat(item['t1-t2'] || item.t1_t2) || 0,
+          t1_t3: parseFloat(item['t1-t3'] || item.t1_t3) || 0,
+          t2_t3: parseFloat(item['t2-t3'] || item.t2_t3) || 0,
+          prd_idexterno: item.prd_idexterno || '',
+          usr_abriu: item.usr_abriu || '',
+          usr_lancou: item.usr_lancou || '',
+          usr_produziu: item.usr_produziu || '',
+          usr_entregou: item.usr_entregou || '',
+          usr_transfcancelou: item.usr_transfcancelou || '',
+          prefixo: item.prefixo || '',
+          tipovenda: item.tipovenda || '',
+          ano: parseInt(item.ano) || new Date().getFullYear(),
+          mes: item.mes ? parseInt(String(item.mes).split('-')[1]) : new Date().getMonth() + 1,
+          dds: parseInt(item.dds) || 0,
+          diadasemana: item.diadasemana || '',
+          hora: item.hora ? String(item.hora) : '',
+          itm_qtd: parseInt(item.itm_qtd) || 0,
+          bar_id: barId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+        
+        if (tempoRecords.length > 0) {
+          const { error } = await supabase
+            .from('contahub_tempo')
+            .insert(tempoRecords);
+          
+          if (error) {
+            console.error(`❌ Erro ao inserir tempo:`, error.message, JSON.stringify(error));
+            return { success: true, count: 0, errors: tempoRecords.length, errorMessage: error.message, errorDetails: JSON.stringify(error) };
+          } else {
+            processedCount = tempoRecords.length;
           }
         }
         break;
 
       case 'prodporhora':
-        for (const item of records) {
-          try {
-            const { error } = await supabase
-              .from('contahub_prodporhora')
-              .upsert({
-                data_gerencial: item.data_gerencial || dataDate,
-                hora: parseInt(item.hora) || 0,
-                produto_id: String(item.produto_id || item.prd || ''),
-                produto_descricao: String(item.produto_descricao || item.prd_desc || ''),
-                grupo_descricao: String(item.grupo_descricao || item.grp_desc || ''),
-                quantidade: parseFloat(item.quantidade || item.qtd || 0),
-                valor_unitario: parseFloat(item.valor_unitario || item.valor_unit || 0),
-                valor_total: parseFloat(item.valor_total || item.valor || 0),
-                bar_id: barId,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'data_gerencial,hora,produto_id,bar_id',
-                ignoreDuplicates: false
-              });
-
-            if (error) {
-              console.error(`❌ Erro ao inserir prodporhora:`, error.message);
-              errors++;
-            } else {
-              processedCount++;
-            }
-          } catch (itemError) {
-            console.error(`❌ Erro no item prodporhora:`, itemError);
-            errors++;
+        await supabase
+          .from('contahub_prodporhora')
+          .delete()
+          .eq('bar_id', barId)
+          .eq('data_gerencial', dataDate);
+        
+        const prodporhoraRecords = records.map((item: any) => ({
+          data_gerencial: item.data_gerencial || dataDate,
+          hora: parseInt(item.hora) || 0,
+          produto_id: String(item.produto_id || item.prd || ''),
+          produto_descricao: String(item.produto_descricao || item.prd_desc || ''),
+          grupo_descricao: String(item.grupo_descricao || item.grp_desc || ''),
+          quantidade: parseFloat(item.quantidade || item.qtd || 0),
+          valor_unitario: parseFloat(item.valor_unitario || item.valor_unit || 0),
+          valor_total: parseFloat(item.valor_total || item.valor || 0),
+          bar_id: barId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+        
+        if (prodporhoraRecords.length > 0) {
+          const { error } = await supabase
+            .from('contahub_prodporhora')
+            .insert(prodporhoraRecords);
+          
+          if (error) {
+            console.error(`❌ Erro ao inserir prodporhora:`, error.message);
+            errors = prodporhoraRecords.length;
+          } else {
+            processedCount = prodporhoraRecords.length;
           }
         }
         break;
@@ -304,7 +351,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         .select('*')
         .eq('processed', false)
         .order('created_at', { ascending: true })
-        .limit(50); // Processar até 50 registros por vez
+        .limit(50);
       
       if (fetchError) {
         throw new Error(`Erro ao buscar dados raw: ${fetchError.message}`);
@@ -323,10 +370,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
           results.processed.push({
             data_type: rawRecord.data_type,
             data_date: rawRecord.data_date,
+            bar_id: rawRecord.bar_id,
             result
           });
           
-          // Marcar como processado se sucesso
           if (result.success) {
             await supabase
               .from('contahub_raw_data')
@@ -344,7 +391,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
       }
     } else {
-      // Processar dados específicos
       if (!data_date) {
         throw new Error('data_date é obrigatório quando process_all = false');
       }
@@ -359,10 +405,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
             .eq('data_type', dataType)
             .eq('data_date', data_date)
             .eq('bar_id', bar_id)
-            .eq('processed', false)
             .single();
           
-          if (fetchError) {
+          if (fetchError || !rawRecord) {
             console.log(`⚠️ Nenhum dado raw encontrado para ${dataType} em ${data_date}`);
             continue;
           }
@@ -377,8 +422,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           
           results.processed.push({ data_type: dataType, result });
           
-          // Marcar como processado se sucesso
-          if (result.success) {
+          if (result.success && result.count > 0) {
             await supabase
               .from('contahub_raw_data')
               .update({ processed: true, processed_at: new Date().toISOString() })
@@ -398,7 +442,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const summary = {
       total_processed: results.processed.length,
       total_errors: results.errors.length,
-      success_rate: results.processed.length / (results.processed.length + results.errors.length) * 100
+      success_rate: results.processed.length > 0 
+        ? (results.processed.length / (results.processed.length + results.errors.length) * 100).toFixed(1)
+        : 0
     };
     
     console.log(`📊 Processamento concluído: ${summary.total_processed} processados, ${summary.total_errors} erros`);

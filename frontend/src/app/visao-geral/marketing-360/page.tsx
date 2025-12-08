@@ -11,7 +11,7 @@ import {
   Mail,
   AlertCircle
 } from 'lucide-react';
-import { useBar } from '@/hooks/useBar';
+import { useBar } from '@/contexts/BarContext';
 
 interface MetricCard {
   title: string;

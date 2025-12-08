@@ -23,35 +23,34 @@ export interface PermissionCheck {
 /**
  * Middleware de autenticação para APIs
  * Valida o usuário logado via cookie/header
+ * PRIORIDADE: x-user-data header > Authorization > cookie
  */
 export async function authenticateUser(
   request: NextRequest
 ): Promise<AuthenticatedUser | null> {
   try {
-    // Tentar pegar token do header Authorization
+    // PRIORIDADE 1: Header x-user-data (contém bar_id selecionado pelo usuário)
+    const userDataHeader = request.headers.get('x-user-data');
+    if (userDataHeader) {
+      try {
+        const userData = JSON.parse(decodeURIComponent(userDataHeader));
+        if (userData && userData.email && userData.bar_id) {
+          console.log(`✅ Usuário autenticado via x-user-data: ${userData.nome || userData.email} (bar_id: ${userData.bar_id})`);
+          return userData as AuthenticatedUser;
+        }
+      } catch (e) {
+        console.log('⚠️ Falha ao parsear x-user-data header, tentando fallback...');
+      }
+    }
+
+    // PRIORIDADE 2: Header Authorization
     let userToken = request.headers
       .get('authorization')
       ?.replace('Bearer ', '');
 
-    // Se não tem no header, tentar no cookie
+    // PRIORIDADE 3: Cookie sgb_user
     if (!userToken) {
       userToken = request.cookies.get('sgb_user')?.value;
-    }
-
-    // Se não tem token, tentar parsear dados do localStorage via cookie
-    if (!userToken) {
-      // Buscar dados do usuário que o frontend envia via header customizado
-      const userDataHeader = request.headers.get('x-user-data');
-      if (userDataHeader) {
-        try {
-          const userData = JSON.parse(decodeURIComponent(userDataHeader));
-          if (userData && userData.email && userData.id) {
-            return userData as AuthenticatedUser;
-          }
-        } catch (e) {
-          console.log('Falha ao parsear x-user-data header');
-        }
-      }
     }
 
     if (!userToken) {

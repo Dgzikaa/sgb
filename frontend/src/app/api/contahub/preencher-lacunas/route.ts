@@ -20,7 +20,10 @@ export async function POST(request: NextRequest) {
     console.log('🔄 [API] Preenchendo lacunas para:', body.data_type)
 
     const dataType = body.data_type
-    const barId = body.bar_id || 3
+    if (!body.bar_id) {
+      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 });
+    }
+    const barId = body.bar_id
     const batchSize = body.batch_size || 50
 
     // Identificar datas faltantes específicas para este tipo

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
 
 interface Anomalia {
   id: number;
@@ -60,7 +61,8 @@ const TIPO_LABELS: Record<string, string> = {
 
 export default function AnomaliasContagemPage() {
   const { setPageTitle } = usePageTitle();
-  
+  const { selectedBar } = useBar();
+
   const [anomalias, setAnomalias] = useState<Anomalia[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(false);
@@ -115,7 +117,7 @@ export default function AnomaliasContagemPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bar_id: 3,
+          bar_id: selectedBar?.id,
           data_inicio: null, // últimos 90 dias
           data_fim: null
         })

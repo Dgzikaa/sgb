@@ -77,7 +77,7 @@ export default function NPSCategorizadoPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        bar_id: (selectedBar?.id || 3).toString(),
+        bar_id: selectedBar?.id?.toString() || '',
         tipo,
         data_inicio: dataInicio,
         data_fim: dataFim

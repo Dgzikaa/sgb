@@ -8,9 +8,11 @@ import { History, ArrowLeft, Calendar, User, Clock, FileEdit } from 'lucide-reac
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
 
 export default function CalendarioHistoricoPage() {
   const { setPageTitle } = usePageTitle();
+  const { selectedBar } = useBar();
   const [historico, setHistorico] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ export default function CalendarioHistoricoPage() {
 
   const carregarHistorico = async () => {
     try {
-      const response = await fetch('/api/ferramentas/calendario-operacional/historico?limit=100&bar_id=3');
+      const response = await fetch(`/api/ferramentas/calendario-operacional/historico?limit=100&bar_id=${selectedBar?.id}`);
       if (!response.ok) throw new Error('Erro ao carregar histórico');
       const result = await response.json();
       setHistorico(result.data.historico);

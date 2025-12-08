@@ -51,8 +51,14 @@ export async function GET(request: NextRequest) {
 	const startTime = Date.now()
 	const MAX_PROCESSING_TIME = 60000 // 60 segundos máximo - tempo suficiente para processar tudo
 	
-	// Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
-	const finalBarId = barIdFilter || 3
+	// bar_id é OBRIGATÓRIO - não usar fallback
+	if (!barIdFilter) {
+		return NextResponse.json(
+			{ error: 'bar_id é obrigatório. Selecione um bar.' },
+			{ status: 400 }
+		)
+	}
+	const finalBarId = barIdFilter
 	
 	while (iterations < MAX_ITERATIONS) {
 		iterations++

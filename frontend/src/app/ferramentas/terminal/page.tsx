@@ -135,7 +135,7 @@ export default function TerminalProducao() {
   // Carregar pessoas responsáveis
   const carregarPessoasResponsaveis = async () => {
     try {
-      const response = await fetch(`/api/operacional/pessoas-responsaveis?bar_id=${selectedBar?.id || 3}`);
+      const response = await fetch(`/api/operacional/pessoas-responsaveis?bar_id=${selectedBar?.id}`);
       if (response.ok) {
         const data = await response.json();
         setPessoasResponsaveis(data.data || []);
@@ -157,7 +157,7 @@ export default function TerminalProducao() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bar_id: selectedBar?.id || 3,
+          bar_id: selectedBar?.id,
           nome: novaPessoaNome.trim(),
           cargo: novaPessoaCargo.trim() || null,
         }),

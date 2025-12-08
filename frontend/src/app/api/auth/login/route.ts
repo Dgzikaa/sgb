@@ -82,15 +82,15 @@ export async function POST(request: NextRequest) {
     // Conectar ao Supabase Admin
     const supabase = await getAdminClient();
 
-    // Buscar usuário
+    // Buscar usuário - pode ter múltiplos registros se tiver acesso a múltiplos bares
     console.log('🔍 Buscando usuário na tabela usuarios_bar...');
-    const { data: usuario, error: usuarioError } = await supabase
+    const { data: usuarios, error: usuarioError } = await supabase
       .from('usuarios_bar')
       .select('*')
       .eq('email', email.toLowerCase())
-      .single();
+      .eq('ativo', true);
 
-    if (usuarioError || !usuario) {
+    if (usuarioError || !usuarios || usuarios.length === 0) {
       console.log('❌ Usuário não encontrado:', usuarioError);
       await logLoginFailure({
         email,
@@ -109,26 +109,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar se usuário está ativo
-    if (!usuario.ativo) {
-      await logLoginFailure({
-        email,
-        reason: 'User inactive',
-        ipAddress: clientIp,
-        userAgent,
-        sessionId,
-      });
-
-      return NextResponse.json(
-        {
-          error: 'Usuário inativo',
-          details: 'USER_INACTIVE',
-        },
-        { status: 401 }
-      );
-    }
-
-    console.log('✅ Usuário encontrado e ativo');
+    // Usar o primeiro registro como base (todos têm os mesmos dados de autenticação)
+    const usuario = usuarios[0];
+    
+    // Buscar todos os bares que o usuário tem acesso
+    const barIds = [...new Set(usuarios.map(u => u.bar_id))];
+    const { data: barsData } = await supabase
+      .from('bars')
+      .select('id, nome')
+      .in('id', barIds)
+      .eq('ativo', true);
+    
+    const availableBars = barsData || [];
+    console.log(`✅ Usuário encontrado com acesso a ${availableBars.length} bar(es):`, availableBars.map(b => b.nome));
 
     // Verificar senha (usando Supabase Auth)
     try {
@@ -162,16 +155,18 @@ export async function POST(request: NextRequest) {
       console.log('✅ Login bem-sucedido!');
 
       // Preparar dados do usuário para resposta
+      // Incluir lista de bares disponíveis para suporte multi-bar
       const userData = {
         id: usuario.id,
         user_id: usuario.user_id,
         nome: usuario.nome,
         email: usuario.email,
         role: usuario.role || 'funcionario',
-        bar_id: usuario.bar_id,
+        bar_id: availableBars.length > 0 ? availableBars[0].id : usuario.bar_id, // Bar padrão
         modulos_permitidos: usuario.modulos_permitidos || [],
         ativo: usuario.ativo,
         senha_redefinida: usuario.senha_redefinida,
+        availableBars: availableBars, // Lista de bares que o usuário tem acesso
       };
 
       // Retornar sucesso com dados do usuário e token

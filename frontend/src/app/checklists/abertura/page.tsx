@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckSquare, Clock, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
-import { useBar } from '@/hooks/useBar';
+import { useBar } from '@/contexts/BarContext';
 
 interface Checklist {
   id: number;
@@ -28,7 +28,7 @@ export default function ChecklistAberturaPage() {
   const carregarChecklists = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/checklists?tipo=abertura&bar_id=${selectedBar?.id || 3}`);
+      const response = await fetch(`/api/checklists?tipo=abertura&bar_id=${selectedBar?.id}`);
       if (response.ok) {
         const data = await response.json();
         setChecklists(data.data || []);

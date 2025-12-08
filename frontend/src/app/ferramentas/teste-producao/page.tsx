@@ -139,7 +139,7 @@ export default function TesteProducaoPage() {
   const carregarReceitas = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/operacional/receitas?bar_id=${selectedBar?.id || 3}`);
+      const response = await fetch(`/api/operacional/receitas?bar_id=${selectedBar?.id}`);
       const result = await response.json();
 
       if (result.success) {
@@ -155,7 +155,7 @@ export default function TesteProducaoPage() {
 
   const carregarProducoes = async () => {
     try {
-      const response = await fetch(`/api/operacional/receitas/producao?bar_id=${selectedBar?.id || 3}`);
+      const response = await fetch(`/api/operacional/receitas/producao?bar_id=${selectedBar?.id}`);
       const result = await response.json();
 
       if (result.success) {
@@ -203,7 +203,7 @@ export default function TesteProducaoPage() {
       const percentualAderencia = (rendimentoReal / rendimentoEsperado) * 100;
 
       const producao: Partial<Producao> = {
-        bar_id: selectedBar?.id || 3,
+        bar_id: selectedBar?.id,
         receita_codigo: receitaSelecionada.receita_codigo,
         receita_nome: receitaSelecionada.receita_nome,
         receita_categoria: receitaSelecionada.receita_categoria,

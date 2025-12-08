@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUser } from '@/contexts/UserContext';
+import { useBar } from '@/contexts/BarContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useToast } from '@/hooks/use-toast';
 import { apiCall } from '@/lib/api-client';
@@ -27,6 +28,7 @@ import {
 
 export default function PlanejamentoComercialExcelSimplePage() {
   const { user } = useUser();
+  const { selectedBar } = useBar();
   const { setPageTitle } = usePageTitle();
   const { toast } = useToast();
   
@@ -56,7 +58,7 @@ export default function PlanejamentoComercialExcelSimplePage() {
     try {
       const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mesAtual}&ano=${anoAtual}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
 
@@ -95,10 +97,10 @@ export default function PlanejamentoComercialExcelSimplePage() {
 
   // Carregar dados quando usuário ou filtros mudarem
   useEffect(() => {
-    if (user) {
+    if (user && selectedBar) {
       carregarDados();
     }
-  }, [user?.id, mesAtual, anoAtual]);
+  }, [user?.id, selectedBar?.id, mesAtual, anoAtual]);
 
   const formatCurrency = (value: number, isRealizado = false) => {
     if (value === 0) return '-';

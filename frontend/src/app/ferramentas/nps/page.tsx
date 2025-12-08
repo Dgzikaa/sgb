@@ -15,7 +15,7 @@ import { Smile, TrendingUp, Calendar, Users, BarChart3, Download, Upload, FileSp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { useBar } from '@/hooks/useBar';
+import { useBar } from '@/contexts/BarContext';
 
 interface NPSData {
   id: number;
@@ -121,7 +121,7 @@ function NPSCategorizadoTab({ dataInicio, dataFim, selectedBar }: {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        bar_id: (selectedBar?.id || 3).toString(),
+        bar_id: selectedBar?.id?.toString() || '',
         tipo: 'semana',
         data_inicio: dataInicio,
         data_fim: dataFim
@@ -473,10 +473,10 @@ export default function NPSPage() {
   }, [setPageTitle]);
 
   useEffect(() => {
-    if (user) {
+    if (user && selectedBar) {
       carregarDados();
     }
-  }, [user, dataInicio, dataFim, setorFiltro]);
+  }, [user, selectedBar?.id, dataInicio, dataFim, setorFiltro]);
 
   const carregarDados = async () => {
     try {
@@ -484,13 +484,13 @@ export default function NPSPage() {
 
       // Buscar NPS
       const responseNPS = await fetch(
-        `/api/nps?bar_id=${selectedBar?.id || 3}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
+        `/api/nps?bar_id=${selectedBar?.id}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
       );
       const dataNPS = await responseNPS.json();
 
       // Buscar Felicidade
       const responseFelicidade = await fetch(
-        `/api/pesquisa-felicidade?bar_id=${selectedBar?.id || 3}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
+        `/api/pesquisa-felicidade?bar_id=${selectedBar?.id}&data_inicio=${dataInicio}&data_fim=${dataFim}&setor=${setorFiltro}`
       );
       const dataFelicidade = await responseFelicidade.json();
 
@@ -529,7 +529,7 @@ export default function NPSPage() {
       setSalvando(true);
 
       const registro = {
-        bar_id: selectedBar?.id || 3,
+        bar_id: selectedBar?.id,
         data_pesquisa: formData.data_pesquisa,
         setor: formData.setor,
         funcionario_nome: formData.funcionario_nome,
@@ -562,10 +562,10 @@ export default function NPSPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         },
         body: JSON.stringify({
-          bar_id: selectedBar?.id || 3,
+          bar_id: selectedBar?.id,
           registros: [registro]
         })
       });

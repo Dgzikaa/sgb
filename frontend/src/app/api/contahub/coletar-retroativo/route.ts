@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
 
     // Configurações padrão
     const dataTypes = body.data_types || ['analitico', 'pagamentos', 'tempo', 'periodo', 'fatporhora']
-    const barId = body.bar_id || 3 // Ordinário Bar
+    if (!body.bar_id) {
+      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 });
+    }
+    const barId = body.bar_id
     const forceRecollect = body.force_recollect || false
 
     // Gerar lista de datas

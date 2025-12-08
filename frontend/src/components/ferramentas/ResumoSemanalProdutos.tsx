@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useBar } from '@/contexts/BarContext';
 import {
   CalendarIcon,
   TrendingUpIcon,
@@ -48,6 +49,7 @@ const coresDias = {
 };
 
 export default function ResumoSemanalProdutos() {
+  const { selectedBar } = useBar();
   const [dados, setDados] = useState<ResumoSemanalItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +104,7 @@ export default function ResumoSemanalProdutos() {
         body: JSON.stringify({
           data_inicio: semanaData.data_inicio,
           data_fim: semanaData.data_fim,
-          bar_id: 3
+          bar_id: selectedBar?.id
         }),
       });
 

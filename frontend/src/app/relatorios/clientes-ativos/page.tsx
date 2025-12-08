@@ -103,7 +103,7 @@ export default function ClientesAtivosPage() {
   const buscarDados = async (dataEspecifica?: string) => {
     setLoading(true);
     try {
-      const barId = selectedBar?.id || 3;
+      const barId = selectedBar?.id;
       const params = new URLSearchParams({
         periodo,
         bar_id: barId.toString()
@@ -132,7 +132,7 @@ export default function ClientesAtivosPage() {
   const buscarEvolucao = async () => {
     setLoadingEvolucao(true);
     try {
-      const barId = selectedBar?.id || 3;
+      const barId = selectedBar?.id;
       const params = new URLSearchParams({
         bar_id: barId.toString(),
         meses: mesesEvolucao.toString()

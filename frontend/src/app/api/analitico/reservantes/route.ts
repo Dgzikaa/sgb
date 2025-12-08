@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
 				.select('cli_fone')
 				.not('cli_fone', 'is', null)
 				.neq('cli_fone', '')
-				.eq('bar_id', barIdFilter || 3)
+				.eq('bar_id', barIdFilter)
 				.range(offsetVisitas, offsetVisitas + pageSizeVisitas - 1)
 			
 			if (visitasError) {

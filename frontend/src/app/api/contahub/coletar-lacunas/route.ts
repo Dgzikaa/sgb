@@ -133,7 +133,10 @@ export async function POST(request: NextRequest) {
     console.log('🔄 [API] Iniciando coleta de lacunas:', body)
 
     const dataType = body.data_type
-    const barId = body.bar_id || 3
+    if (!body.bar_id) {
+      return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 });
+    }
+    const barId = body.bar_id
     const limit = body.limit || 20
 
     // Primeiro, buscar as datas faltantes

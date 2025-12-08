@@ -138,7 +138,14 @@ interface SegmentacaoRFM {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório. Selecione um bar.' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
     const segmento = searchParams.get('segmento') || 'todos';

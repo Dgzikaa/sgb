@@ -5,14 +5,21 @@
  * do Google Sheets para o sistema Zykor.
  * 
  * Executada automaticamente via cron job às 18h todos os dias.
+ * 
+ * MULTI-BAR: Suporta múltiplos bares através do parâmetro bar_id
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SPREADSHEET_ID = '1QhuD52kQrdCv4XMfKR5NSRMttx6NzVBZO0S8ajQK1H8';
-const API_KEY = 'AIzaSyBKprFuR1gpvoTB4hV16rKlBk3oF0v1BhQ';
-const BAR_ID = 3;
+// Configuração padrão (fallback)
+const DEFAULT_API_KEY = 'AIzaSyBKprFuR1gpvoTB4hV16rKlBk3oF0v1BhQ';
+
+interface SheetsConfig {
+  spreadsheet_id: string;
+  aba_insumos: string;
+  api_key: string;
+}
 
 interface ContagemData {
   estoque_fechado: number;
@@ -44,11 +51,12 @@ function converterData(dataStr: string): string | null {
 /**
  * Busca dados do Google Sheets para uma data específica
  */
-async function buscarContagemData(data: string): Promise<InsumoSheet[]> {
+async function buscarContagemData(data: string, config: SheetsConfig): Promise<InsumoSheet[]> {
   try {
     // Buscar estrutura da planilha (500 linhas conforme planilha real)
-    const range = 'INSUMOS!A1:ZZZ500';
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
+    const abaInsumos = config.aba_insumos || 'INSUMOS';
+    const range = `${abaInsumos}!A1:ZZZ500`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.spreadsheet_id}/values/${encodeURIComponent(range)}?key=${config.api_key}`;
     
     const response = await fetch(url);
     if (!response.ok) {
@@ -135,6 +143,31 @@ async function buscarContagemData(data: string): Promise<InsumoSheet[]> {
 }
 
 /**
+ * Busca configuração do Google Sheets do banco de dados
+ */
+async function buscarConfigSheets(supabase: any, barId: number): Promise<SheetsConfig | null> {
+  const { data, error } = await supabase
+    .from('api_credentials')
+    .select('configuracoes')
+    .eq('bar_id', barId)
+    .eq('sistema', 'google_sheets')
+    .eq('ativo', true)
+    .single();
+
+  if (error || !data) {
+    console.error(`❌ Configuração Google Sheets não encontrada para bar_id ${barId}`);
+    return null;
+  }
+
+  const config = data.configuracoes as any;
+  return {
+    spreadsheet_id: config.spreadsheet_id,
+    aba_insumos: config.aba_insumos || 'INSUMOS',
+    api_key: config.api_key || DEFAULT_API_KEY,
+  };
+}
+
+/**
  * Handler principal
  */
 serve(async (req) => {
@@ -156,9 +189,10 @@ serve(async (req) => {
     const authHeader = req.headers.get('authorization');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    // Ler body para obter cronSecret (se houver)
+    // Ler body para obter cronSecret e bar_id (se houver)
     const requestBody = await req.text();
-    const { cronSecret } = requestBody ? JSON.parse(requestBody) : {};
+    const bodyData = requestBody ? JSON.parse(requestBody) : {};
+    const { cronSecret, bar_id: bodyBarId } = bodyData;
     
     if (authHeader && authHeader.includes(serviceRoleKey || '')) {
       console.log('✅ Acesso autorizado via SERVICE_ROLE_KEY');
@@ -180,20 +214,41 @@ serve(async (req) => {
     // Verificar se é um cron job ou requisição manual
     const url = new URL(req.url);
     const dataParam = url.searchParams.get('data');
+    const barIdParam = url.searchParams.get('bar_id');
+    
+    // Bar ID (parâmetro URL > body > default 3)
+    const BAR_ID = parseInt(barIdParam || bodyBarId || '3');
     
     // Data para processar (hoje por padrão)
     const hoje = new Date();
     const dataProcessar = dataParam || hoje.toISOString().split('T')[0];
     
     console.log(`📅 Processando data: ${dataProcessar}`);
+    console.log(`🏪 Bar ID: ${BAR_ID}`);
     
     // Inicializar Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
     
+    // Buscar configuração do Google Sheets para este bar
+    const sheetsConfig = await buscarConfigSheets(supabase, BAR_ID);
+    
+    if (!sheetsConfig) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Configuração Google Sheets não encontrada para bar_id ${BAR_ID}` 
+        }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log(`📊 Planilha: ${sheetsConfig.spreadsheet_id}`);
+    console.log(`📑 Aba: ${sheetsConfig.aba_insumos}`);
+    
     // Buscar contagens do Google Sheets
-    const insumosSheet = await buscarContagemData(dataProcessar);
+    const insumosSheet = await buscarContagemData(dataProcessar, sheetsConfig);
     
     console.log(`📊 Planilha: ${insumosSheet.length} insumos com contagem`);
     

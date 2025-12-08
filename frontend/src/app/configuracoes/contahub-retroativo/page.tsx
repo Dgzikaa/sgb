@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import { useBar } from '@/contexts/BarContext'
 import { 
   Calendar, 
   Database, 
@@ -40,8 +41,9 @@ interface RetroactiveResult {
 }
 
 export default function ContaHubRetroativoPage() {
-  const [startDate, setStartDate] = useState('2025-01-31')
-  const [endDate, setEndDate] = useState('2025-08-18')
+  const { selectedBar } = useBar()
+  const [startDate, setStartDate] = useState('2024-10-03')
+  const [endDate, setEndDate] = useState('2025-12-08')
   const [selectedTypes, setSelectedTypes] = useState<string[]>(['analitico', 'pagamentos', 'tempo', 'periodo', 'fatporhora'])
   const [forceRecollect, setForceRecollect] = useState(false)
   const [isCollecting, setIsCollecting] = useState(false)
@@ -102,7 +104,7 @@ export default function ContaHubRetroativoPage() {
           start_date: startDate,
           end_date: endDate,
           data_types: selectedTypes,
-          bar_id: 3,
+          bar_id: selectedBar?.id,
           force_recollect: forceRecollect
         })
       })

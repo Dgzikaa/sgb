@@ -308,7 +308,7 @@ export default function CMVSemanalPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         },
         body: JSON.stringify({
           bar_id: selectedBar.id,
@@ -369,7 +369,7 @@ export default function CMVSemanalPage() {
 
       const response = await fetch(`/api/cmv-semanal?${params}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
 
@@ -485,7 +485,7 @@ export default function CMVSemanalPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         },
         body: JSON.stringify({
           bar_id: selectedBar.id,
@@ -523,7 +523,7 @@ export default function CMVSemanalPage() {
       const response = await fetch(`/api/cmv-semanal?id=${id}`, {
         method: 'DELETE',
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
 
@@ -553,7 +553,7 @@ export default function CMVSemanalPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         },
         body: JSON.stringify({ id, status: novoStatus })
       });

@@ -36,7 +36,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Aplicar filtro de bar_id sempre (padrão bar_id = 3 se não especificado)
-    const finalBarId = barIdFilter || 3
+    // bar_id é OBRIGATÓRIO - não usar fallback
+    if (!barIdFilter) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório. Selecione um bar.' },
+        { status: 400 }
+      )
+    }
+    const finalBarId = barIdFilter
 
     // Normalizar telefone para busca e gerar variações
     let telefoneNormalizado = telefone.replace(/\D/g, '')

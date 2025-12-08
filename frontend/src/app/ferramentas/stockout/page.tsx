@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Package, TrendingDown, TrendingUp, RefreshCw, AlertTriangle, CheckCircle, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
 
 interface StockoutData {
   data_referencia?: string;
@@ -164,7 +165,8 @@ const GRUPOS_LOCAIS = {
 
 export default function StockoutPage() {
   const { setPageTitle } = usePageTitle();
-  
+  const { selectedBar } = useBar();
+
   const [selectedDate, setSelectedDate] = useState(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -266,7 +268,7 @@ export default function StockoutPage() {
         body: JSON.stringify({
           data_inicio: dataInicioDiaria,
           data_fim: dataFimDiaria,
-          bar_id: 3,
+          bar_id: selectedBar?.id,
           filtros: filtrosAtivos
         }),
       });
@@ -339,7 +341,7 @@ export default function StockoutPage() {
         body: JSON.stringify({
           data_inicio: dataInicio,
           data_fim: dataFim,
-          bar_id: 3,
+          bar_id: selectedBar?.id,
           filtros: filtrosAtivos
         }),
       });

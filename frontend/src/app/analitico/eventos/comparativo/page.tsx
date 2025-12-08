@@ -90,7 +90,7 @@ export default function EventosComparativoPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        bar_id: (selectedBar?.id || 3).toString(),
+        bar_id: selectedBar?.id?.toString() || '',
         tipo: tipoComparacao,
         data1: dataReferencia1,
         data2: dataReferencia2,

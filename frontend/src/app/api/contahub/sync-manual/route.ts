@@ -2,44 +2,59 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic'
 
+// IDs dos bares que devem ser sincronizados
+const BARES_ATIVOS = [3, 4]; // 3 = Ordinário Bar, 4 = Deboche Bar
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Executando sincronização manual do ContaHub...');
 
     const body = await request.json();
-    const { data_date } = body;
+    const { data_date, bar_id } = body;
 
     // Se não especificar data, usar ontem
     const targetDate = data_date || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
+    // Se especificar bar_id, usar apenas esse; senão sincronizar todos
+    const baresParaSincronizar = bar_id ? [bar_id] : BARES_ATIVOS;
 
     console.log(`📅 Data alvo: ${targetDate}`);
+    console.log(`🍺 Bares: ${baresParaSincronizar.join(', ')}`);
 
-    // Chamar a Edge Function correta: contahub_orchestrator
-    const response = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub_orchestrator', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
-      },
-      body: JSON.stringify({
-        data_date: targetDate,
-        bar_id: 3
-      })
-    });
+    const resultados = [];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Edge Function error: ${response.status} - ${errorText}`);
+    for (const barIdItem of baresParaSincronizar) {
+      try {
+        const response = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/contahub-sync-automatico', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
+          },
+          body: JSON.stringify({
+            data_date: targetDate,
+            bar_id: barIdItem
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          resultados.push({ bar_id: barIdItem, success: false, error: errorText });
+          continue;
+        }
+
+        const result = await response.json();
+        console.log(`✅ bar_id=${barIdItem}: ${result.summary?.total_records_collected || 0} registros`);
+        resultados.push({ bar_id: barIdItem, success: true, result });
+      } catch (err) {
+        resultados.push({ bar_id: barIdItem, success: false, error: err instanceof Error ? err.message : 'Erro' });
+      }
     }
 
-    const result = await response.json();
-
-    console.log('✅ Resultado da sincronização:', result);
-
     return NextResponse.json({
-      success: true,
+      success: resultados.some(r => r.success),
       message: `Sincronização ContaHub executada para data: ${targetDate}`,
-      result,
+      resultados,
       timestamp: new Date().toISOString()
     });
 

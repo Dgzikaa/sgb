@@ -148,7 +148,7 @@ export default function CRMInteligentePage() {
     try {
       const page = reset ? 1 : paginacao.page + 1;
       const response = await fetch(
-        `/api/crm/segmentacao?bar_id=${selectedBar?.id || 3}&page=${page}&limit=50&segmento=${filtroSegmento}`
+        `/api/crm/segmentacao?bar_id=${selectedBar?.id}&page=${page}&limit=50&segmento=${filtroSegmento}`
       );
       const result = await response.json();
 

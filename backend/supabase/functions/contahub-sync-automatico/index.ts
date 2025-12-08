@@ -13,6 +13,12 @@ function generateDynamicTimestamp(): string {
   return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}${String(now.getMilliseconds()).padStart(3, '0')}`;
 }
 
+// Converte data de YYYY-MM-DD para formato ISO com timezone (formato ContaHub)
+// Ex: 2024-10-15 -> 2024-10-15T00:00:00-0300
+function toContaHubDateFormat(isoDate: string): string {
+  return `${isoDate}T00:00:00-0300`;
+}
+
 // Função para enviar notificação Discord
 async function sendDiscordNotification(message: string, isError: boolean = false) {
   try {
@@ -117,34 +123,35 @@ async function saveRawDataOnly(supabase: any, dataType: string, rawData: any, da
   console.log(`💾 Salvando JSON bruto para ${dataType}...`);
   
   try {
+    const recordCount = Array.isArray(rawData?.list) ? rawData.list.length : 
+                       Array.isArray(rawData) ? rawData.length : 1;
+    
     // Salvar JSON completo como está - SEM PROCESSAMENTO
+    // Usar upsert sem ignoreDuplicates para atualizar se existir
     const { data, error } = await supabase
-          .from('contahub_raw_data')
-          .upsert({
+      .from('contahub_raw_data')
+      .upsert({
         bar_id: barId,
-            data_type: dataType,
+        data_type: dataType,
         data_date: dataDate,
-        raw_json: rawData, // JSON completo sem modificação
-        processed: false    // Sempre false - processamento será manual
+        raw_json: rawData,
+        processed: false
       }, {
-        onConflict: 'bar_id,data_type,data_date',
-        ignoreDuplicates: true
+        onConflict: 'bar_id,data_type,data_date'
       })
-      .select('id')
-      .single();
+      .select('id');
           
-        if (error) {
+    if (error) {
       console.error(`❌ Erro ao salvar ${dataType}:`, error);
       throw new Error(`Erro ao salvar ${dataType}: ${error.message}`);
     }
     
-    const recordCount = Array.isArray(rawData?.list) ? rawData.list.length : 
-                       Array.isArray(rawData) ? rawData.length : 1;
+    const rawDataId = data && data.length > 0 ? data[0].id : 'updated';
     
-    console.log(`✅ ${dataType} salvo: raw_data_id=${data.id}, registros=${recordCount}`);
+    console.log(`✅ ${dataType} salvo: raw_data_id=${rawDataId}, registros=${recordCount}`);
     
     return {
-      raw_data_id: data.id,
+      raw_data_id: rawDataId,
       record_count: recordCount,
       data_type: dataType
     };
@@ -187,13 +194,43 @@ Deno.serve(async (req: Request): Promise<Response> => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Configurar ContaHub
-    const contahubEmail = Deno.env.get('CONTAHUB_EMAIL');
-    const contahubPassword = Deno.env.get('CONTAHUB_PASSWORD');
+    // Buscar configuração do bar e credenciais do ContaHub
+    const { data: barConfig, error: barError } = await supabase
+      .from('bars')
+      .select('config')
+      .eq('id', bar_id)
+      .single();
+    
+    if (barError || !barConfig) {
+      throw new Error(`Bar não encontrado: ${bar_id}`);
+    }
+    
+    const emp_id = barConfig.config?.contahub_emp_id;
+    if (!emp_id) {
+      throw new Error(`ContaHub emp_id não configurado para bar ${bar_id}`);
+    }
+    
+    console.log(`📍 Bar ID: ${bar_id}, ContaHub emp_id: ${emp_id}`);
+    
+    // Buscar credenciais do ContaHub do banco
+    const { data: contahubCreds, error: credsError } = await supabase
+      .from('api_credentials')
+      .select('username, password')
+      .eq('bar_id', bar_id)
+      .eq('sistema', 'contahub')
+      .eq('ativo', true)
+      .single();
+    
+    if (credsError || !contahubCreds) {
+      throw new Error(`Credenciais ContaHub não encontradas para bar ${bar_id}`);
+    }
+    
+    const contahubEmail = contahubCreds.username;
+    const contahubPassword = contahubCreds.password;
     const contahubBaseUrl = 'https://sp.contahub.com';
     
     if (!contahubEmail || !contahubPassword) {
-      throw new Error('Variáveis do ContaHub não encontradas');
+      throw new Error('Credenciais do ContaHub inválidas');
     }
     
     // Login no ContaHub
@@ -210,6 +247,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     
     const dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo'];
     
+    // Converter data para formato ContaHub (DD.MM.YYYY)
+    const contahubDate = toContaHubDateFormat(data_date);
+    console.log(`📅 Data ContaHub: ${contahubDate}`);
+    
     for (const dataType of dataTypes) {
       try {
         console.log(`\n📊 Coletando ${dataType}...`);
@@ -217,31 +258,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
         // Gerar timestamp dinâmico para cada query
         const queryTimestamp = generateDynamicTimestamp();
         
-        // emp_id fixo para Ordinário (bar_id = 3)
-        const emp_id = "3768";
-        
         let url: string;
         
-        // Construir URL específica para cada tipo de dados
+        // Construir URL específica para cada tipo de dados (usando formato DD.MM.YYYY)
         switch (dataType) {
           case 'analitico':
-            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=77&d0=${data_date}&d1=${data_date}&produto=&grupo=&local=&turno=&mesa=&emp=${emp_id}&nfe=1`;
+            // qry=77 requer: emp, d0, d1, produto, grupo, local, turno, mesa, tipo
+            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=77&d0=${contahubDate}&d1=${contahubDate}&produto=&grupo=&local=&turno=&mesa=&tipo=&emp=${emp_id}&nfe=1`;
             break;
             
           case 'tempo':
-            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=81&d0=${data_date}&d1=${data_date}&prod=&grupo=&local=&emp=${emp_id}&nfe=1`;
+            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=81&d0=${contahubDate}&d1=${contahubDate}&prod=&grupo=&local=&emp=${emp_id}&nfe=1`;
             break;
             
           case 'pagamentos':
-            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=7&d0=${data_date}&d1=${data_date}&meio=&emp=${emp_id}&nfe=1`;
+            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=7&d0=${contahubDate}&d1=${contahubDate}&meio=&emp=${emp_id}&nfe=1`;
             break;
             
           case 'fatporhora':
-            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=101&d0=${data_date}&d1=${data_date}&emp=${emp_id}&nfe=1`;
+            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=101&d0=${contahubDate}&d1=${contahubDate}&emp=${emp_id}&nfe=1`;
             break;
             
           case 'periodo':
-            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${data_date}&d1=${data_date}&emp=${emp_id}&nfe=1`;
+            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${contahubDate}&d1=${contahubDate}&emp=${emp_id}&nfe=1`;
             break;
             
           default:

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useBar } from '@/contexts/BarContext'
 import { 
   Play, 
   RefreshCw, 
@@ -55,6 +56,7 @@ interface ProcessingResponse {
 }
 
 export default function ContaHubRawPage() {
+  const { selectedBar } = useBar()
   const [stats, setStats] = useState<RawDataStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -63,9 +65,10 @@ export default function ContaHubRawPage() {
 
   // Carregar estatísticas
   const loadStats = async () => {
+    if (!selectedBar) return
     try {
       setLoading(true)
-      const response = await fetch('/api/contahub/processar-raw?bar_id=3')
+      const response = await fetch(`/api/contahub/processar-raw?bar_id=${selectedBar.id}`)
       const data = await response.json()
       
       if (data.success) {
@@ -94,7 +97,7 @@ export default function ContaHubRawPage() {
         },
         body: JSON.stringify({
           process_all: true,
-          bar_id: 3
+          bar_id: selectedBar?.id
         })
       })
 

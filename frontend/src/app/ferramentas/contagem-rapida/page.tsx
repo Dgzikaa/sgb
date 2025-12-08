@@ -198,7 +198,7 @@ export default function ContagemRapidaPage() {
       // Salvar cada contagem
       const promises = contagens.map(async (contagem) => {
         const payload = {
-          bar_id: selectedBar?.id || 3,
+          bar_id: selectedBar?.id,
           data_contagem: dataContagem,
           insumo_id: contagem.insumo_id,
           insumo_codigo: contagem.insumo_codigo,

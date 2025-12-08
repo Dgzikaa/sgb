@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     // Preparar dados para inserção
     const dadosProducao = {
-      bar_id: body.bar_id || 3,
+      bar_id: body.bar_id,
       receita_codigo: body.receita_codigo,
       receita_nome: body.receita_nome,
       receita_categoria: body.receita_categoria,

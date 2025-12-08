@@ -323,12 +323,13 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // Criar novo stakeholder COM chave PIX
+        // TODO: Implementar suporte multi-bar para agendamento automático
         console.log('📝 Criando novo stakeholder com chave PIX...');
         const novoStakeholder = {
           name: nome_beneficiario,
           document: cpfCnpj,
           type: 'fornecedor' as const,
-          bar_id: 3,
+          bar_id: barId || 3, // Usar barId do contexto ou fallback
           pixKey: chaveFormatada,
           pixKeyType: getTipoPixNibo(tipo)
         };

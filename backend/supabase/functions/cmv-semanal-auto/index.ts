@@ -456,7 +456,7 @@ function calcularCMV(dados: any) {
 }
 
 /**
- * Handler principal
+ * Handler principal - Processa CMV para todos os bares ativos ou bar específico
  */
 serve(async (req) => {
   // Handle CORS
@@ -474,6 +474,7 @@ serve(async (req) => {
     // Permitir processar semana específica via parâmetro
     const body = await req.json().catch(() => ({}));
     const offsetSemanas = body.offsetSemanas !== undefined ? body.offsetSemanas : -1; // Padrão: -1 (semana passada)
+    const barIdParam = body.bar_id; // Bar específico (opcional)
     
     // Definir semana e ano
     const hoje = new Date();
@@ -486,61 +487,114 @@ serve(async (req) => {
     console.log(`   Período: ${inicio} até ${fim}`);
     console.log(`   Data de referência (offsetSemanas: ${offsetSemanas}): ${hoje.toISOString().split('T')[0]}`);
     
-    const barId = 3; // Ordinário (pode ser parametrizado)
+    // Buscar bares para processar
+    let baresParaProcessar: { id: number; nome: string }[] = [];
     
-    // Buscar estoque inicial (da semana anterior)
-    const estoqueInicial = await buscarCMVSemanaAnterior(supabase, barId, ano, semana);
-    console.log(`📦 Estoque inicial: R$ ${estoqueInicial.toFixed(2)}`);
+    if (barIdParam) {
+      // Bar específico
+      const { data: bar } = await supabase
+        .from('bars')
+        .select('id, nome')
+        .eq('id', barIdParam)
+        .single();
+      
+      if (bar) {
+        baresParaProcessar = [bar];
+      }
+    } else {
+      // Todos os bares ativos
+      const { data: bares } = await supabase
+        .from('bars')
+        .select('id, nome')
+        .eq('ativo', true);
+      
+      baresParaProcessar = bares || [];
+    }
     
-    // Buscar dados automáticos
-    const dadosAuto = await buscarDadosAutomaticos(supabase, barId, inicio, fim);
+    console.log(`🏪 Processando ${baresParaProcessar.length} bar(es)`);
     
-    // Montar objeto CMV
-    let cmvData: any = {
-      bar_id: barId,
-      ano,
-      semana,
-      data_inicio: inicio,
-      data_fim: fim,
-      estoque_inicial: estoqueInicial,
-      ...dadosAuto,
-      // Campos manuais (deixar zerado se não existirem)
-      consumo_rh: 0,
-      outros_ajustes: 0,
-      ajuste_bonificacoes: 0,
-      cmv_teorico_percentual: 33, // Meta padrão
-      status: 'rascunho',
-      responsavel: 'Sistema Automático'
-    };
+    const resultados: any[] = [];
     
-    // Calcular CMV
-    cmvData = calcularCMV(cmvData);
-    
-    console.log('\n📊 Resultado do CMV:');
-    console.log(`   CMV Real: R$ ${cmvData.cmv_real.toFixed(2)}`);
-    console.log(`   CMV Limpo: ${cmvData.cmv_limpo_percentual.toFixed(2)}%`);
-    console.log(`   Gap: ${cmvData.gap.toFixed(2)}%`);
-    
-    // Inserir/atualizar no banco
-    const { data, error } = await supabase
-      .from('cmv_semanal')
-      .upsert(cmvData, {
-        onConflict: 'bar_id,ano,semana'
-      })
-      .select()
-      .single();
+    for (const bar of baresParaProcessar) {
+      const barId = bar.id;
+      console.log(`\n🏪 Processando: ${bar.nome} (bar_id: ${barId})`);
+      
+      try {
+        // Buscar estoque inicial (da semana anterior)
+        const estoqueInicial = await buscarCMVSemanaAnterior(supabase, barId, ano, semana);
+        console.log(`📦 Estoque inicial: R$ ${estoqueInicial.toFixed(2)}`);
+        
+        // Buscar dados automáticos
+        const dadosAuto = await buscarDadosAutomaticos(supabase, barId, inicio, fim);
+        
+        // Montar objeto CMV
+        let cmvData: any = {
+          bar_id: barId,
+          ano,
+          semana,
+          data_inicio: inicio,
+          data_fim: fim,
+          estoque_inicial: estoqueInicial,
+          ...dadosAuto,
+          // Campos manuais (deixar zerado se não existirem)
+          consumo_rh: 0,
+          outros_ajustes: 0,
+          ajuste_bonificacoes: 0,
+          cmv_teorico_percentual: 33, // Meta padrão
+          status: 'rascunho',
+          responsavel: 'Sistema Automático'
+        };
+        
+        // Calcular CMV
+        cmvData = calcularCMV(cmvData);
+        
+        console.log(`📊 ${bar.nome}: CMV Real R$ ${cmvData.cmv_real.toFixed(2)} | CMV Limpo ${cmvData.cmv_limpo_percentual.toFixed(2)}%`);
+        
+        // Inserir/atualizar no banco
+        const { data, error } = await supabase
+          .from('cmv_semanal')
+          .upsert(cmvData, {
+            onConflict: 'bar_id,ano,semana'
+          })
+          .select()
+          .single();
 
-    if (error) {
-      throw error;
+        if (error) {
+          throw error;
+        }
+        
+        resultados.push({
+          bar_id: barId,
+          bar_nome: bar.nome,
+          success: true,
+          cmv_real: cmvData.cmv_real,
+          cmv_limpo_percentual: cmvData.cmv_limpo_percentual
+        });
+        
+      } catch (barError: any) {
+        console.error(`❌ Erro ao processar ${bar.nome}:`, barError.message);
+        resultados.push({
+          bar_id: barId,
+          bar_nome: bar.nome,
+          success: false,
+          error: barError.message
+        });
+      }
     }
 
-    console.log('\n✅ CMV Semanal processado com sucesso!');
+    const sucessos = resultados.filter(r => r.success).length;
+    const erros = resultados.filter(r => !r.success).length;
+    
+    console.log(`\n✅ CMV Semanal processado: ${sucessos} sucesso(s), ${erros} erro(s)`);
 
     return new Response(
       JSON.stringify({
-        success: true,
-        data,
-        message: 'CMV Semanal processado com sucesso'
+        success: erros === 0,
+        message: `CMV Semanal processado: ${sucessos} sucesso(s), ${erros} erro(s)`,
+        ano,
+        semana,
+        periodo: { inicio, fim },
+        resultados
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -548,7 +602,7 @@ serve(async (req) => {
       }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Erro:', error);
     return new Response(
       JSON.stringify({

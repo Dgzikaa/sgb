@@ -94,9 +94,8 @@ interface DadosMes {
   performance_media: number;
 }
 
-// 📊 CONFIGURAÇÃO DA PLANILHA GOOGLE SHEETS
-// URL da planilha: https://docs.google.com/spreadsheets/d/1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY/edit
-const GOOGLE_SHEETS_ID = '1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY';
+// 📊 CONFIGURAÇÃO PADRÃO DA PLANILHA (fallback)
+const DEFAULT_SHEETS_ID = '1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY';
 
 export default function DesempenhoPage() {
   const { setPageTitle } = usePageTitle();
@@ -110,6 +109,7 @@ export default function DesempenhoPage() {
   const [dadosSemanas, setDadosSemanas] = useState<DadosSemana[]>([]);
   const [totaisAnuais, setTotaisAnuais] = useState<TotaisMensais | null>(null);
   const [dadosMensais, setDadosMensais] = useState<DadosMes[]>([]);
+  const [sheetsId, setSheetsId] = useState<string>(DEFAULT_SHEETS_ID);
   
   // Estados para modal de edição
   const [modalAberto, setModalAberto] = useState(false);
@@ -141,7 +141,7 @@ export default function DesempenhoPage() {
           try {
             const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
               headers: {
-                'x-user-data': encodeURIComponent(JSON.stringify(user))
+                'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
               }
             });
 
@@ -211,7 +211,7 @@ export default function DesempenhoPage() {
       // Para visualização semanal, não passar parâmetro 'mes'
       const response = await fetch(`/api/estrategico/desempenho?ano=${anoAtual}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
 
@@ -321,6 +321,30 @@ export default function DesempenhoPage() {
     setPageTitle('📈 Desempenho');
   }, [setPageTitle]);
 
+  // Buscar configuração da planilha de desempenho para o bar selecionado
+  useEffect(() => {
+    const buscarConfigSheets = async () => {
+      if (!selectedBar) return;
+      
+      try {
+        const response = await fetch(`/api/configuracoes/sheets-config?bar_id=${selectedBar.id}&tipo=desempenho`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.spreadsheet_id) {
+            setSheetsId(data.spreadsheet_id);
+          } else {
+            setSheetsId(DEFAULT_SHEETS_ID);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar configuração de sheets:', error);
+        setSheetsId(DEFAULT_SHEETS_ID);
+      }
+    };
+    
+    buscarConfigSheets();
+  }, [selectedBar?.id]);
+
   useEffect(() => {
     if (selectedBar && user) {
       carregarDados();
@@ -353,7 +377,7 @@ export default function DesempenhoPage() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162`, '_blank')}
+        onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${sheetsId}/edit?gid=972882162`, '_blank')}
         className="absolute top-4 right-4 z-50 gap-2 shadow-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
       >
         <FileSpreadsheet className="h-4 w-4" />
@@ -363,7 +387,7 @@ export default function DesempenhoPage() {
       {/* Google Sheets em tela cheia */}
       <div className="w-full h-full">
         <iframe
-          src={`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}/edit?gid=972882162&widget=true&headers=false&rm=minimal`}
+          src={`https://docs.google.com/spreadsheets/d/${sheetsId}/edit?gid=972882162&widget=true&headers=false&rm=minimal`}
           className="w-full h-full border-0"
           title="Planilha de Desempenho - Tab Desemp ContaHub"
           loading="eager"

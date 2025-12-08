@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@/contexts/UserContext';
+import { useBar } from '@/contexts/BarContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useSearchParams } from 'next/navigation';
 import { apiCall } from '@/lib/api-client';
@@ -142,6 +143,7 @@ interface EventoEdicaoCompleta {
 
 export default function PlanejamentoComercialPage() {
   const { user } = useUser();
+  const { selectedBar } = useBar();
   const { setPageTitle } = usePageTitle();
   const searchParams = useSearchParams();
   
@@ -183,7 +185,7 @@ export default function PlanejamentoComercialPage() {
       
       const data = await apiCall(`/api/estrategico/planejamento-comercial?mes=${mesParam}&ano=${anoParam}&_t=${timestamp}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user)),
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id })),
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
@@ -204,7 +206,12 @@ export default function PlanejamentoComercialPage() {
 
       if (data.success && data.data) {
         // A API já retorna os dados filtrados por mês/ano, apenas ordenar por data crescente
-        const dadosOrdenados = data.data.sort((a, b) => {
+        // Filtrar dias fechados (não exibir na tabela)
+        const dadosFiltrados = data.data.filter((evento: PlanejamentoData) => 
+          evento.evento_nome?.toLowerCase() !== 'fechado'
+        );
+        
+        const dadosOrdenados = dadosFiltrados.sort((a: PlanejamentoData, b: PlanejamentoData) => {
           const dataA = new Date(a.data_evento);
           const dataB = new Date(b.data_evento);
           return dataA.getTime() - dataB.getTime();
@@ -260,10 +267,10 @@ export default function PlanejamentoComercialPage() {
   }, [setPageTitle]);
 
   useEffect(() => {
-    if (user) {
+    if (user && selectedBar) {
       buscarDados();
     }
-  }, [user, filtroMes, filtroAno]);
+  }, [user, selectedBar?.id, filtroMes, filtroAno]);
 
   // Alterar mês/ano
   const alterarPeriodo = (novoMes: number, novoAno: number) => {
@@ -286,7 +293,7 @@ export default function PlanejamentoComercialPage() {
     try {
       const response = await apiCall(`/api/estrategico/atrasos-evento?data=${evento.data_evento}`, {
         headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         }
       });
       if (response.success && response.data) {
@@ -302,7 +309,7 @@ export default function PlanejamentoComercialPage() {
       try {
         const { data: eventoCompleto } = await apiCall(`/api/eventos/${evento.evento_id}`, {
           headers: {
-            'x-user-data': encodeURIComponent(JSON.stringify(user))
+            'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
           }
         });
         if (eventoCompleto) {
@@ -389,7 +396,7 @@ export default function PlanejamentoComercialPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         },
         body: JSON.stringify({
           nome: eventoEdicao.nome,
@@ -414,7 +421,7 @@ export default function PlanejamentoComercialPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-data': encodeURIComponent(JSON.stringify(user))
+          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
         },
         body: JSON.stringify({
           real_r: eventoEdicao.real_r || 0,

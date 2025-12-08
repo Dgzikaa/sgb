@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -92,7 +92,7 @@ export default function SGBAssistant({
         },
         body: JSON.stringify({
           message: userInput,
-          barId: barInfo?.id || 3,
+          barId: barInfo?.id,
         }),
       });
 
