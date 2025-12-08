@@ -329,7 +329,7 @@ export async function POST(request: NextRequest) {
           name: nome_beneficiario,
           document: cpfCnpj,
           type: 'fornecedor' as const,
-          bar_id: barId || 3, // Usar barId do contexto ou fallback
+          bar_id: bar_id || 3, // Usar bar_id do contexto ou fallback
           pixKey: chaveFormatada,
           pixKeyType: getTipoPixNibo(tipo)
         };

@@ -104,6 +104,7 @@ export default function ClientesAtivosPage() {
     setLoading(true);
     try {
       const barId = selectedBar?.id;
+      if (!barId) return;
       const params = new URLSearchParams({
         periodo,
         bar_id: barId.toString()
@@ -133,6 +134,7 @@ export default function ClientesAtivosPage() {
     setLoadingEvolucao(true);
     try {
       const barId = selectedBar?.id;
+      if (!barId) return;
       const params = new URLSearchParams({
         bar_id: barId.toString(),
         meses: mesesEvolucao.toString()

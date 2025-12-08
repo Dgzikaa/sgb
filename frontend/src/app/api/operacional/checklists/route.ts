@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
     // bar_id pode vir do body ou do header x-user-data
     let barId = body.bar_id;
     if (!barId) {
-      const userDataHeader = request.headers.get('x-user-data');
+      const userDataHeader = req.headers.get('x-user-data');
       if (userDataHeader) {
         try {
           const parsed = JSON.parse(userDataHeader);

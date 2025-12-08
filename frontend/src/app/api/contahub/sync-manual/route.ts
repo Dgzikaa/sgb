@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     console.log(`📅 Data alvo: ${targetDate}`);
     console.log(`🍺 Bares: ${baresParaSincronizar.join(', ')}`);
 
-    const resultados = [];
+    const resultados: Array<{ bar_id: number; success: boolean; error?: string; result?: any }> = [];
 
     for (const barIdItem of baresParaSincronizar) {
       try {

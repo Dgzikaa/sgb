@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     
     console.log(`📅 Data alvo para stockout: ${targetDate}`);
     
-    const resultados = [];
+    const resultados: Array<{ bar_id: number; success: boolean; error?: string; result?: any }> = [];
     
     for (const barId of BARES_ATIVOS) {
       console.log(`\n🍺 Sincronizando stockout bar_id=${barId}...`);
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     console.log(`📅 Data alvo para stockout: ${targetDate}`);
     console.log(`🍺 Bares: ${baresParaSincronizar.join(', ')}`);
     
-    const resultados = [];
+    const resultados: Array<{ bar_id: number; success: boolean; error?: string; result?: any }> = [];
     
     for (const barIdItem of baresParaSincronizar) {
       try {
