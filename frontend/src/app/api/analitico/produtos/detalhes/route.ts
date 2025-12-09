@@ -13,7 +13,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const produto = searchParams.get('produto')
     const grupo = searchParams.get('grupo')
-    const barId = parseInt(searchParams.get('bar_id') || '3')
+    const barIdParam = searchParams.get('bar_id')
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      )
+    }
+    const barId = parseInt(barIdParam)
 
     if (!produto) {
       return NextResponse.json(

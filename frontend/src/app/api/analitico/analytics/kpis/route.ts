@@ -6,7 +6,15 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const barId = searchParams.get('bar_id') || '3';
+    const barId = searchParams.get('bar_id');
+    
+    if (!barId) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    
     const categoria = searchParams.get('categoria'); // 'operacional', 'financeiro', 'qualidade', 'eficiencia'
     const dataReferencia =
       searchParams.get('data') || new Date().toISOString().split('T')[0];

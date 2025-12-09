@@ -13,7 +13,15 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
     const limit = parseInt(searchParams.get('limit') || '100');
     const data = searchParams.get('data'); // Filtrar por data específica
     const tipo_acao = searchParams.get('tipo_acao'); // Filtrar por tipo

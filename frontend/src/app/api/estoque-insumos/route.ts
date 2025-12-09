@@ -15,7 +15,15 @@ export async function GET(request: NextRequest) {
     const dataContagem = searchParams.get('data_contagem');
     const categoria = searchParams.get('categoria');
     const status = searchParams.get('status');
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
 
     let query = supabase
       .from('estoque_insumos')

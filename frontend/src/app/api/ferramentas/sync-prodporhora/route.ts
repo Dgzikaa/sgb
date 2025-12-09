@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { data_inicial, data_final, bar_id = 3 } = await request.json();
+    const { data_inicial, data_final, bar_id } = await request.json();
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!data_inicial || !data_final) {
       return NextResponse.json(

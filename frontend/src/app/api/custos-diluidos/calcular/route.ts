@@ -28,7 +28,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const mes = parseInt(searchParams.get('mes') || (new Date().getMonth() + 1).toString());
     const ano = parseInt(searchParams.get('ano') || new Date().getFullYear().toString());
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
     const dataEvento = searchParams.get('data_evento'); // Opcional: calcular para um dia específico
 
     console.log(`🧮 Calculando diluição de custos para ${mes}/${ano} - Bar ${barId}`);

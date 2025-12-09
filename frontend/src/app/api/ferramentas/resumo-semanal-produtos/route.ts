@@ -8,7 +8,14 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { data_inicio, data_fim, periodo_semanas, bar_id = 3 } = await request.json();
+    const { data_inicio, data_fim, periodo_semanas, bar_id } = await request.json();
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     let dataInicialStr: string;
     let dataFinalStr: string;

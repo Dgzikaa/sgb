@@ -20,7 +20,15 @@ interface AreaInput {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const bar_id = parseInt(searchParams.get('bar_id') || '3');
+    const bar_id_param = searchParams.get('bar_id');
+    
+    if (!bar_id_param) {
+      return NextResponse.json(
+        { success: false, error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const bar_id = parseInt(bar_id_param);
     const apenas_ativas = searchParams.get('ativas') === 'true';
     const tipo = searchParams.get('tipo');
 

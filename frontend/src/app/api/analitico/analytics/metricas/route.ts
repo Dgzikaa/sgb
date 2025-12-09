@@ -33,7 +33,15 @@ interface MetricasResumo {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const barId = searchParams.get('bar_id') || '3';
+    const barId = searchParams.get('bar_id');
+    
+    if (!barId) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    
     const tipoMetrica = searchParams.get('tipo'); // 'performance', 'usage', 'business', 'technical'
     const categoria = searchParams.get('categoria');
     const periodo = searchParams.get('periodo') || '7'; // dias

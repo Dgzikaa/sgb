@@ -26,7 +26,14 @@ interface VendaPorHorario {
 
 export async function POST(request: NextRequest) {
   try {
-    const { data_selecionada, bar_id = 3 } = await request.json();
+    const { data_selecionada, bar_id } = await request.json();
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!data_selecionada) {
       return NextResponse.json(

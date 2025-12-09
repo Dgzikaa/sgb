@@ -257,9 +257,9 @@ async function createStakeholderInNibo(
           console.log('✅ Stakeholder encontrado por chave PIX:', existingStakeholders[0].id);
           
           // Sincronizar com banco local
-          await syncStakeholderToLocal(existingStakeholders[0]);
+          await syncStakeholderToLocal(existingStakeholders[0], barId);
           
-          return existingStakeholders[0];
+          return { ...existingStakeholders[0], bar_id: barId };
         }
       }
     }
