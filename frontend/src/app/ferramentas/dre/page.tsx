@@ -806,38 +806,40 @@ export default function DrePage() {
                       {yearlyData.macroCategorias.map((macro) => {
                         const Icon = getMacroIcon(macro.nome);
                         const colorClass = getMacroColor(macro.nome);
-                        const macroSaldo = macro.total_entradas - macro.total_saidas;
+                        // Para Receita: mostra o total positivo. Para custos: mostra negativo
+                        const valorPrincipal = macro.tipo === 'entrada' 
+                          ? macro.total_entradas 
+                          : -macro.total_saidas;
                         const isExpanded = !collapsedMacros.has(macro.nome);
+                        
+                        // Separar subcategorias em entradas e saídas
+                        const subcatEntradas = macro.categorias?.filter(c => c.entradas > 0) || [];
+                        const subcatSaidas = macro.categorias?.filter(c => c.saidas > 0) || [];
                         
                         return (
                           <div key={macro.nome} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300">
                             {/* Header do Card - Clicável */}
                             <button
                               onClick={() => toggleMacroCollapse(macro.nome)}
-                              className="w-full p-4 sm:p-6 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                              className="w-full p-4 sm:p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                             >
-                              <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                  <div className={`p-3 rounded-lg bg-gradient-to-br ${colorClass} text-white`}>
-                                    <Icon className="w-6 h-6" />
+                                  <div className={`p-2.5 rounded-lg bg-gradient-to-br ${colorClass} text-white`}>
+                                    <Icon className="w-5 h-5" />
                                   </div>
                                   <div>
                                     <h4 className="font-semibold text-gray-900 dark:text-white">{macro.nome}</h4>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
                                       {macro.categorias?.length || 0} categorias
                                     </p>
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <div className="text-right">
-                                    <div className={`text-lg font-bold ${
-                                      macroSaldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                                    }`}>
-                                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macroSaldo)}
-                                    </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                      {macro.tipo === 'entrada' ? 'Receita' : 'Custo'}
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                  <div className={`text-lg font-bold ${
+                                    valorPrincipal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                                  }`}>
+                                    {formatCurrency(valorPrincipal)}
                                   </div>
                                   {isExpanded ? (
                                     <ChevronDown className="w-5 h-5 text-gray-400" />
@@ -846,54 +848,52 @@ export default function DrePage() {
                                   )}
                                 </div>
                               </div>
-                              
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-gray-600 dark:text-gray-400">Entradas:</span>
-                                  <span className="font-medium text-green-600 dark:text-green-400">
-                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macro.total_entradas)}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-gray-600 dark:text-gray-400">Saídas:</span>
-                                  <span className="font-medium text-red-600 dark:text-red-400">
-                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macro.total_saidas)}
-                                  </span>
-                                </div>
-                              </div>
                             </button>
 
-                            {/* Dropdown com Subcategorias */}
+                            {/* Dropdown com Subcategorias - Entradas primeiro (verde), Saídas depois (vermelho) */}
                             {isExpanded && macro.categorias && macro.categorias.length > 0 && (
-                              <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 max-h-64 overflow-y-auto">
-                                <div className="p-3 space-y-1">
-                                  {macro.categorias.map((cat, idx) => {
-                                    const catValor = macro.tipo === 'entrada' 
-                                      ? cat.entradas - cat.saidas 
-                                      : -(cat.saidas - cat.entradas);
-                                    const catValorDisplay = macro.tipo === 'entrada' 
-                                      ? cat.entradas 
-                                      : cat.saidas;
-                                    
-                                    return (
+                              <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 max-h-72 overflow-y-auto">
+                                <div className="p-2 space-y-0.5">
+                                  {/* Entradas (verde) primeiro */}
+                                  {subcatEntradas.length > 0 && subcatEntradas
+                                    .sort((a, b) => b.entradas - a.entradas)
+                                    .map((cat, idx) => (
                                       <div 
-                                        key={`${cat.nome}-${idx}`}
-                                        className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        key={`entrada-${cat.nome}-${idx}`}
+                                        className="flex items-center justify-between py-1.5 px-3 rounded hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                                       >
                                         <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1 mr-2">
                                           {cleanCategoryName(cat.nome)}
                                         </span>
-                                        <span className={`text-sm font-medium whitespace-nowrap ${
-                                          macro.tipo === 'entrada' 
-                                            ? 'text-green-600 dark:text-green-400' 
-                                            : 'text-red-600 dark:text-red-400'
-                                        }`}>
-                                          {macro.tipo === 'entrada' ? '' : '-'}
-                                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(catValorDisplay)}
+                                        <span className="text-sm font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
+                                          {formatCurrency(cat.entradas)}
                                         </span>
                                       </div>
-                                    );
-                                  })}
+                                    ))
+                                  }
+                                  
+                                  {/* Separador se tiver ambos */}
+                                  {subcatEntradas.length > 0 && subcatSaidas.length > 0 && (
+                                    <div className="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                  )}
+                                  
+                                  {/* Saídas (vermelho) depois */}
+                                  {subcatSaidas.length > 0 && subcatSaidas
+                                    .sort((a, b) => b.saidas - a.saidas)
+                                    .map((cat, idx) => (
+                                      <div 
+                                        key={`saida-${cat.nome}-${idx}`}
+                                        className="flex items-center justify-between py-1.5 px-3 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                      >
+                                        <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1 mr-2">
+                                          {cleanCategoryName(cat.nome)}
+                                        </span>
+                                        <span className="text-sm font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
+                                          -{formatCurrency(cat.saidas)}
+                                        </span>
+                                      </div>
+                                    ))
+                                  }
                                 </div>
                               </div>
                             )}
