@@ -16,13 +16,6 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 
 interface Organizador {
   id: number;
@@ -42,7 +35,6 @@ export default function OrganizadorListaPage() {
   
   const [organizadores, setOrganizadores] = useState<Organizador[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const carregarOrganizadores = async () => {
     if (!selectedBar) return;
@@ -54,9 +46,12 @@ export default function OrganizadorListaPage() {
       
       if (data.organizadores) {
         setOrganizadores(data.organizadores);
+      } else {
+        setOrganizadores([]);
       }
     } catch (error) {
       console.error('Erro ao carregar organizadores:', error);
+      setOrganizadores([]);
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar os organizadores',
@@ -67,11 +62,15 @@ export default function OrganizadorListaPage() {
     }
   };
 
+  // Recarregar quando o bar mudar
   useEffect(() => {
+    setOrganizadores([]);
+    
     if (selectedBar) {
       carregarOrganizadores();
     }
-  }, [selectedBar]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBar?.id]);
 
   const handleCriarNovo = () => {
     const anoAtual = new Date().getFullYear();
@@ -90,7 +89,6 @@ export default function OrganizadorListaPage() {
 
   const handleDuplicar = async (org: Organizador) => {
     try {
-      // Buscar dados completos
       const response = await fetch(`/api/organizador?bar_id=${selectedBar?.id}&id=${org.id}`);
       const data = await response.json();
       
@@ -98,7 +96,6 @@ export default function OrganizadorListaPage() {
         const novoTrimestre = org.trimestre === 4 ? 2 : (org.trimestre || 2) + 1;
         const novoAno = org.trimestre === 4 ? org.ano + 1 : org.ano;
         
-        // Criar cópia
         const createResponse = await fetch('/api/organizador', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -128,11 +125,13 @@ export default function OrganizadorListaPage() {
     }
   };
 
-  const handleDeletar = async () => {
-    if (!deleteId) return;
+  const handleDeletar = async (id: number, nome: string) => {
+    const confirmado = window.confirm(`Tem certeza que deseja excluir "${nome}"?\n\nEsta ação não pode ser desfeita.`);
+    
+    if (!confirmado) return;
     
     try {
-      const response = await fetch(`/api/organizador?id=${deleteId}`, {
+      const response = await fetch(`/api/organizador?id=${id}`, {
         method: 'DELETE'
       });
 
@@ -149,8 +148,6 @@ export default function OrganizadorListaPage() {
         description: 'Não foi possível remover o organizador',
         variant: 'destructive'
       });
-    } finally {
-      setDeleteId(null);
     }
   };
 
@@ -191,7 +188,7 @@ export default function OrganizadorListaPage() {
                 Organizador de Visão
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Planejamento estratégico anual e trimestral
+                Planejamento estratégico anual e trimestral • {selectedBar?.nome || 'Selecione um bar'}
               </p>
             </div>
           </div>
@@ -255,7 +252,7 @@ export default function OrganizadorListaPage() {
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={(e) => { e.stopPropagation(); handleEditar(org.id); }}
+                        onClick={() => handleEditar(org.id)}
                         title="Editar"
                       >
                         <Edit className="w-4 h-4" />
@@ -263,7 +260,7 @@ export default function OrganizadorListaPage() {
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={(e) => { e.stopPropagation(); handleDuplicar(org); }}
+                        onClick={() => handleDuplicar(org)}
                         title="Duplicar"
                       >
                         <Copy className="w-4 h-4" />
@@ -271,7 +268,7 @@ export default function OrganizadorListaPage() {
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={(e) => { e.stopPropagation(); setDeleteId(org.id); }}
+                        onClick={() => handleDeletar(org.id, getNomePeriodo(org))}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         title="Excluir"
                       >
@@ -296,37 +293,6 @@ export default function OrganizadorListaPage() {
           </div>
         )}
       </div>
-
-      {/* Dialog de Confirmação de Exclusão */}
-      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-white">
-              Confirmar exclusão
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
-              Tem certeza que deseja excluir este organizador? Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteId(null)}
-              className="border-gray-300 dark:border-gray-600"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleDeletar}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Excluir
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
-

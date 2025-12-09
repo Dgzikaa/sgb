@@ -234,38 +234,63 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar compras do NIBO:', err);
     }
 
-    // 5. BUSCAR ESTOQUES (última contagem COM VALORES antes da data_fim)
-    // Tabela: contagem_estoque_insumos
-    // 🔧 CORRIGIDO: Buscar última contagem que TENHA VALORES (não apenas existe)
+    // 5. BUSCAR ESTOQUES FINAL
+    // 🔧 CORRIGIDO: A planilha usa a contagem da SEGUNDA-FEIRA de cada semana
+    // Estoque Inicial = Contagem da segunda-feira (data_inicio)
+    // Estoque Final = Contagem da segunda-feira seguinte (data_inicio da próxima semana)
     try {
-      // Buscar última contagem com estoque > 0 até data_fim
-      const { data: ultimaContagem, error: errorContagem } = await supabase
-        .rpc('get_ultima_contagem_com_valores', {
-          p_bar_id: bar_id,
-          p_data_fim: data_fim
-        });
+      // Calcular a segunda-feira seguinte ao fim do período
+      // Se data_fim é domingo (23/11), a próxima segunda é 24/11
+      const dataFimDate = new Date(data_fim + 'T12:00:00Z');
+      const diaSemana = dataFimDate.getUTCDay(); // 0 = domingo, 1 = segunda, etc.
       
-      // Fallback: buscar manualmente se RPC não existir
+      // Calcular próxima segunda-feira
+      let diasParaSegunda = 1; // Por padrão, dia seguinte
+      if (diaSemana === 0) { // Se é domingo
+        diasParaSegunda = 1; // Segunda é amanhã
+      } else if (diaSemana === 6) { // Se é sábado
+        diasParaSegunda = 2; // Segunda é depois de amanhã
+      } else {
+        diasParaSegunda = (8 - diaSemana) % 7; // Próxima segunda
+        if (diasParaSegunda === 0) diasParaSegunda = 7;
+      }
+      
+      dataFimDate.setUTCDate(dataFimDate.getUTCDate() + diasParaSegunda);
+      const dataSegundaFinal = dataFimDate.toISOString().split('T')[0];
+      
+      console.log(`📅 Estoque Final: Buscando contagem da segunda-feira ${dataSegundaFinal}`);
+      
       let dataContagemFinal = null;
       
-      if (errorContagem || !ultimaContagem) {
-        console.log('⚠️ RPC não disponível, buscando manualmente...');
+      // Primeiro, tentar buscar contagem exata da segunda-feira
+      const { data: contagemExata, error: errorExata } = await supabase
+        .from('contagem_estoque_insumos')
+        .select('data_contagem, estoque_final')
+        .eq('bar_id', bar_id)
+        .eq('data_contagem', dataSegundaFinal)
+        .gt('estoque_final', 0)
+        .limit(1);
+      
+      if (!errorExata && contagemExata && contagemExata.length > 0) {
+        dataContagemFinal = dataSegundaFinal;
+        console.log(`✅ Encontrou contagem exata da segunda-feira: ${dataContagemFinal}`);
+      } else {
+        // Fallback: buscar contagem mais próxima (até 3 dias depois)
+        console.log('⚠️ Contagem da segunda não encontrada, buscando mais próxima...');
         
-        // Buscar todas as contagens até data_fim
-        const { data: contagens, error: errorBusca } = await supabase
+        const { data: contagensProximas, error: errorProximas } = await supabase
           .from('contagem_estoque_insumos')
           .select('data_contagem, estoque_final')
           .eq('bar_id', bar_id)
-          .lte('data_contagem', data_fim)
+          .gte('data_contagem', dataSegundaFinal)
           .gt('estoque_final', 0)
-          .order('data_contagem', { ascending: false })
+          .order('data_contagem', { ascending: true })
           .limit(1);
         
-        if (!errorBusca && contagens && contagens.length > 0) {
-          dataContagemFinal = contagens[0].data_contagem;
+        if (!errorProximas && contagensProximas && contagensProximas.length > 0) {
+          dataContagemFinal = contagensProximas[0].data_contagem;
+          console.log(`✅ Usando contagem próxima: ${dataContagemFinal}`);
         }
-      } else if (ultimaContagem && ultimaContagem.length > 0) {
-        dataContagemFinal = ultimaContagem[0].data_contagem;
       }
       
       // Criar objeto compatível com código existente
@@ -377,74 +402,58 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar estoques:', err);
     }
 
-    // 6. BUSCAR ESTOQUE INICIAL (última contagem com valores ANTES do data_inicio)
+    // 6. BUSCAR ESTOQUE INICIAL (contagem da segunda-feira = data_inicio)
+    // 🔧 CORRIGIDO: Estoque inicial é a contagem do PRÓPRIO dia de início (segunda-feira)
     try {
-      // Calcular dia anterior ao início do período
-      const dataInicioDate = new Date(data_inicio);
-      dataInicioDate.setDate(dataInicioDate.getDate() - 1);
-      const dataAnterior = dataInicioDate.toISOString().split('T')[0];
+      // Usar diretamente a data_inicio (que deve ser a segunda-feira)
+      const dataContagem = data_inicio;
 
-      console.log(`📅 Buscando estoque inicial até: ${dataAnterior}`);
+      console.log(`📅 Estoque Inicial: Buscando contagem da segunda-feira ${dataContagem}`);
 
-      // Buscar última contagem com valores até o dia anterior
-      const { data: contagens, error: errorBusca } = await supabase
-        .from('contagem_estoque_insumos')
-        .select('data_contagem, estoque_final')
-        .eq('bar_id', bar_id)
-        .lte('data_contagem', dataAnterior)
-        .gt('estoque_final', 0)
-        .order('data_contagem', { ascending: false })
-        .limit(1);
+      // Buscar insumos
+      const { data: insumos } = await supabase
+        .from('insumos')
+        .select('id, tipo_local, categoria, custo_unitario')
+        .eq('bar_id', bar_id);
 
-      if (!errorBusca && contagens && contagens.length > 0) {
-        const dataContagemInicial = contagens[0].data_contagem;
-        console.log(`📅 Usando contagem de estoque inicial de: ${dataContagemInicial}`);
+      if (insumos) {
+        const insumosMap = new Map(insumos.map((i: any) => [i.id, i]));
 
-        // Buscar insumos
-        const { data: insumos } = await supabase
-          .from('insumos')
-          .select('id, tipo_local, categoria, custo_unitario')
-          .eq('bar_id', bar_id);
+        // Buscar todas as contagens da data_inicio (segunda-feira)
+        const { data: contagensIniciais } = await supabase
+          .from('contagem_estoque_insumos')
+          .select('insumo_id, estoque_final')
+          .eq('bar_id', bar_id)
+          .eq('data_contagem', dataContagem);
 
-        if (insumos) {
-          const insumosMap = new Map(insumos.map((i: any) => [i.id, i]));
+        if (contagensIniciais && contagensIniciais.length > 0) {
+          const categoriasCozinha = ['cozinha', 'ARMAZÉM (C)', 'HORTIFRUTI (C)', 'MERCADO (C)', 'Mercado (S)', 'PÃES', 'PEIXE', 'PROTEÍNA', 'tempero', 'hortifruti', 'líquido'];
+          const categoriasDrinks = ['ARMAZÉM B', 'DESTILADOS', 'DESTILADOS LOG', 'HORTIFRUTI B', 'IMPÉRIO', 'MERCADO B', 'POLPAS', 'OUTROS'];
+          const categoriasExcluir = ['HORTIFRUTI (F)', 'MERCADO (F)', 'PROTEÍNA (F)'];
 
-          // Buscar todas as contagens dessa data
-          const { data: contagensIniciais } = await supabase
-            .from('contagem_estoque_insumos')
-            .select('insumo_id, estoque_final')
-            .eq('bar_id', bar_id)
-            .eq('data_contagem', dataContagemInicial);
+          contagensIniciais.forEach((contagem: any) => {
+            const insumo = insumosMap.get(contagem.insumo_id);
+            if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
 
-          if (contagensIniciais) {
-            const categoriasCozinha = ['cozinha', 'ARMAZÉM (C)', 'HORTIFRUTI (C)', 'MERCADO (C)', 'Mercado (S)', 'PÃES', 'PEIXE', 'PROTEÍNA', 'tempero', 'hortifruti', 'líquido'];
-            const categoriasDrinks = ['ARMAZÉM B', 'DESTILADOS', 'DESTILADOS LOG', 'HORTIFRUTI B', 'IMPÉRIO', 'MERCADO B', 'POLPAS', 'OUTROS'];
-            const categoriasExcluir = ['HORTIFRUTI (F)', 'MERCADO (F)', 'PROTEÍNA (F)'];
+            const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
 
-            contagensIniciais.forEach((contagem: any) => {
-              const insumo = insumosMap.get(contagem.insumo_id);
-              if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
+            if (insumo.tipo_local === 'bar') {
+              resultado.estoque_inicial_bebidas += valor;
+            } else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
+              resultado.estoque_inicial_drinks += valor;
+            } else if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
+              resultado.estoque_inicial_cozinha += valor;
+            } else if (insumo.tipo_local === 'cozinha' && insumo.categoria === 'Não-alcóolicos') {
+              resultado.estoque_inicial_drinks += valor;
+            }
+          });
 
-              const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
-
-              if (insumo.tipo_local === 'bar') {
-                resultado.estoque_inicial_bebidas += valor;
-              } else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
-                resultado.estoque_inicial_drinks += valor;
-              } else if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
-                resultado.estoque_inicial_cozinha += valor;
-              } else if (insumo.tipo_local === 'cozinha' && insumo.categoria === 'Não-alcóolicos') {
-                resultado.estoque_inicial_drinks += valor;
-              }
-            });
-
-            console.log(`✅ Estoque Inicial Cozinha: R$ ${resultado.estoque_inicial_cozinha.toFixed(2)}`);
-            console.log(`✅ Estoque Inicial Drinks: R$ ${resultado.estoque_inicial_drinks.toFixed(2)}`);
-            console.log(`✅ Estoque Inicial Bebidas: R$ ${resultado.estoque_inicial_bebidas.toFixed(2)}`);
-          }
+          console.log(`✅ Estoque Inicial Cozinha: R$ ${resultado.estoque_inicial_cozinha.toFixed(2)}`);
+          console.log(`✅ Estoque Inicial Drinks: R$ ${resultado.estoque_inicial_drinks.toFixed(2)}`);
+          console.log(`✅ Estoque Inicial Bebidas: R$ ${resultado.estoque_inicial_bebidas.toFixed(2)}`);
+        } else {
+          console.log(`⚠️ Nenhuma contagem encontrada para ${dataContagem}`);
         }
-      } else {
-        console.log('⚠️ Nenhuma contagem de estoque inicial encontrada');
       }
     } catch (err) {
       console.error('Erro ao buscar estoque inicial:', err);
