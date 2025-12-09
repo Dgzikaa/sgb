@@ -372,7 +372,9 @@ export async function GET(request: NextRequest) {
     console.log(`👥 Total clientes período atual: ${totalClientesAtual}`);
     console.log(`🆕 Novos: ${novosClientes}, 🔄 Retornantes: ${clientesRetornantes}`);
 
-    // ⚡ CLIENTES ATIVOS DO PERÍODO: Quantos dos clientes do período têm 2+ visitas nos últimos 90 dias
+    // ⚡ CLIENTES ATIVOS - Lógica diferente por período:
+    // - DIA: Quantos dos clientes do dia são ativos (têm 2+ visitas em 90d)
+    // - SEMANA/MÊS: Base total de clientes ativos (evolução da base, janela de 90d que avança)
     const startTime2 = Date.now();
     
     // Calcular 90 dias antes do fim do período
@@ -387,42 +389,63 @@ export async function GET(request: NextRequest) {
     data90DiasAtrasAnterior.setDate(dataRefAnterior.getDate() - 90);
     const data90DiasAtrasAnteriorStr = data90DiasAtrasAnterior.toISOString().split('T')[0];
 
-    // Query para calcular clientes ativos DO PERÍODO (não base total)
-    // Clientes ativos = clientes do período que têm 2+ visitas nos últimos 90 dias
-    const { data: ativosData, error: errorAtivos } = await supabase.rpc('calcular_clientes_ativos_periodo', {
-      p_bar_id: barId,
-      p_data_inicio_periodo: inicioAtual,
-      p_data_fim_periodo: fimAtual,
-      p_data_90_dias_atras: data90DiasAtrasStr
-    });
-
-    const { data: ativosAnteriorData, error: errorAtivosAnterior } = await supabase.rpc('calcular_clientes_ativos_periodo', {
-      p_bar_id: barId,
-      p_data_inicio_periodo: inicioAnterior,
-      p_data_fim_periodo: fimAnterior,
-      p_data_90_dias_atras: data90DiasAtrasAnteriorStr
-    });
-
-    const elapsedTime2 = ((Date.now() - startTime2) / 1000).toFixed(2);
-    console.log(`⚡ Clientes ativos do período: ${elapsedTime2}s`);
-
-    // Clientes ativos do período (fallback para retornantes se função não existir)
     let clientesAtivos = 0;
     let clientesAtivosAnterior = 0;
-    
-    if (!errorAtivos && ativosData !== null) {
-      clientesAtivos = Number(ativosData);
+
+    if (periodo === 'dia') {
+      // DIA: Quantos dos clientes do dia são ativos
+      console.log(`📅 Calculando clientes ativos DO DIA...`);
+      
+      const { data: ativosData, error: errorAtivos } = await supabase.rpc('calcular_clientes_ativos_periodo', {
+        p_bar_id: barId,
+        p_data_inicio_periodo: inicioAtual,
+        p_data_fim_periodo: fimAtual,
+        p_data_90_dias_atras: data90DiasAtrasStr
+      });
+
+      const { data: ativosAnteriorData, error: errorAtivosAnterior } = await supabase.rpc('calcular_clientes_ativos_periodo', {
+        p_bar_id: barId,
+        p_data_inicio_periodo: inicioAnterior,
+        p_data_fim_periodo: fimAnterior,
+        p_data_90_dias_atras: data90DiasAtrasAnteriorStr
+      });
+
+      if (!errorAtivos && ativosData !== null) {
+        clientesAtivos = Number(ativosData);
+      } else {
+        clientesAtivos = clientesRetornantes;
+        console.log(`⚠️ Usando retornantes como fallback para clientes ativos`);
+      }
+      
+      if (!errorAtivosAnterior && ativosAnteriorData !== null) {
+        clientesAtivosAnterior = Number(ativosAnteriorData);
+      } else {
+        clientesAtivosAnterior = clientesRetornantesAnterior;
+      }
     } else {
-      // Fallback: usar retornantes como aproximação
-      clientesAtivos = clientesRetornantes;
-      console.log(`⚠️ Usando retornantes como fallback para clientes ativos`);
+      // SEMANA/MÊS: Base total de clientes ativos (evolução da base)
+      // Janela de 90 dias que termina no fim do período
+      console.log(`📊 Calculando BASE ATIVA total (evolução)...`);
+      
+      const [resultBaseAtiva, resultBaseAtivaAnterior] = await Promise.all([
+        supabase.rpc('get_count_base_ativa', {
+          p_bar_id: barId,
+          p_data_inicio: data90DiasAtrasStr,
+          p_data_fim: fimAtual
+        }),
+        supabase.rpc('get_count_base_ativa', {
+          p_bar_id: barId,
+          p_data_inicio: data90DiasAtrasAnteriorStr,
+          p_data_fim: fimAnterior
+        })
+      ]);
+
+      clientesAtivos = Number(resultBaseAtiva.data || 0);
+      clientesAtivosAnterior = Number(resultBaseAtivaAnterior.data || 0);
     }
-    
-    if (!errorAtivosAnterior && ativosAnteriorData !== null) {
-      clientesAtivosAnterior = Number(ativosAnteriorData);
-    } else {
-      clientesAtivosAnterior = clientesRetornantesAnterior;
-    }
+
+    const elapsedTime2 = ((Date.now() - startTime2) / 1000).toFixed(2);
+    console.log(`⚡ Clientes ativos calculados: ${elapsedTime2}s - Atual: ${clientesAtivos}, Anterior: ${clientesAtivosAnterior}`)
 
     // 8. CALCULAR VARIAÇÕES
     const variacaoTotal = totalClientesAnterior > 0 

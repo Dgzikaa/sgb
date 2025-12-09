@@ -391,7 +391,9 @@ export default function ClientesAtivosPage() {
                   </MetricTooltip>
 
                   {/* Clientes Ativos */}
-                  <MetricTooltip content="Dos clientes que vieram no período selecionado, quantos são considerados 'ativos' (têm 2 ou mais visitas nos últimos 90 dias). Indica quantos clientes engajados frequentaram o bar.">
+                  <MetricTooltip content={periodo === 'dia' 
+                    ? "Dos clientes que vieram NESTE DIA, quantos são 'ativos' (têm 2+ visitas nos últimos 90 dias)." 
+                    : "Base total de clientes ativos: quantos clientes têm 2+ visitas nos últimos 90 dias que terminam neste período. Acompanhe a evolução semana a semana."}>
                     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-yellow-300 dark:hover:border-yellow-600 transition-colors">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
