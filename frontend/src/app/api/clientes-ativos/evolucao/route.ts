@@ -33,53 +33,14 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(barIdParam);
     const meses = parseInt(searchParams.get('meses') || '12'); // Últimos 12 meses por padrão
 
-    // Calcular data inicial (X meses atrás)
-    const hoje = new Date();
-    const dataInicio = new Date();
-    dataInicio.setMonth(hoje.getMonth() - meses);
-    const dataInicioStr = dataInicio.toISOString().split('T')[0];
+    console.log(`📊 Buscando evolução de ${meses} meses para bar_id ${barId}`);
 
-    console.log(`📊 Buscando evolução de ${meses} meses desde ${dataInicioStr}`);
-
-    // Buscar todos os clientes do período no ContaHub
-    const { data: clientesData, error } = await supabase
-      .from('contahub_periodo')
-      .select('cli_nome, cli_email, cli_fone, dt_gerencial')
-      .eq('bar_id', barId)
-      .gte('dt_gerencial', dataInicioStr)
-      .not('cli_nome', 'is', null)
-      .not('cli_nome', 'eq', '')
-      .order('dt_gerencial', { ascending: true });
-
-    if (error) {
-      console.error('❌ Erro ao buscar clientes:', error);
-      return NextResponse.json({ error: 'Erro ao buscar dados' }, { status: 500 });
-    }
-
-    console.log(`✅ ${clientesData?.length || 0} registros de clientes encontrados`);
-
-    // Processar dados por mês
+    // Calcular evolução usando SQL direto para performance
     const evolucaoMensal: EvolucaoMensal[] = [];
-    const mesesProcessados = new Set<string>();
-    const clientesVistosPorMes: Map<string, Set<string>> = new Map();
-    const primeiraVisitaCliente: Map<string, string> = new Map();
-
-    // Identificar primeira visita de cada cliente
-    (clientesData || []).forEach((registro) => {
-      const identificador = (registro.cli_email || registro.cli_fone || registro.cli_nome).toLowerCase();
-      const dataVisita = registro.dt_gerencial;
-
-      if (!primeiraVisitaCliente.has(identificador)) {
-        primeiraVisitaCliente.set(identificador, dataVisita);
-      } else {
-        const dataAtual = primeiraVisitaCliente.get(identificador)!;
-        if (dataVisita < dataAtual) {
-          primeiraVisitaCliente.set(identificador, dataVisita);
-        }
-      }
-    });
 
     // Processar cada mês
+    const hoje = new Date();
+    
     for (let i = 0; i < meses; i++) {
       const mesData = new Date();
       mesData.setMonth(hoje.getMonth() - (meses - i - 1));
@@ -90,45 +51,58 @@ export async function GET(request: NextRequest) {
       // Calcular início e fim do mês
       const inicioMes = `${mesStr}-01`;
       const fimMes = new Date(ano, mesNum, 0).toISOString().split('T')[0];
+      
+      // Calcular mês anterior para comparação de novos vs retornantes
+      const mesAnteriorData = new Date(ano, mesNum - 2, 1);
+      const inicioMesAnterior = mesAnteriorData.toISOString().split('T')[0];
+      const fimMesAnterior = new Date(mesAnteriorData.getFullYear(), mesAnteriorData.getMonth() + 1, 0).toISOString().split('T')[0];
 
-      // Filtrar clientes do mês
-      const clientesMes = (clientesData || []).filter(
-        (r) => r.dt_gerencial >= inicioMes && r.dt_gerencial <= fimMes
-      );
-
-      // Identificar clientes únicos do mês
-      const clientesUnicosMes = new Set<string>();
-      let novosClientes = 0;
-      let clientesRetornantes = 0;
-
-      clientesMes.forEach((registro) => {
-        const identificador = (registro.cli_email || registro.cli_fone || registro.cli_nome).toLowerCase();
-        clientesUnicosMes.add(identificador);
-
-        const primeiraVisita = primeiraVisitaCliente.get(identificador);
-        if (primeiraVisita && primeiraVisita >= inicioMes && primeiraVisita <= fimMes) {
-          novosClientes++;
-        } else {
-          clientesRetornantes++;
-        }
+      // Usar a função SQL para calcular métricas
+      const { data: metricas, error: errorMetricas } = await supabase.rpc('calcular_metricas_clientes', {
+        p_bar_id: barId,
+        p_data_inicio_atual: inicioMes,
+        p_data_fim_atual: fimMes,
+        p_data_inicio_anterior: inicioMesAnterior,
+        p_data_fim_anterior: fimMesAnterior
       });
 
-      const totalClientes = clientesUnicosMes.size;
+      if (errorMetricas) {
+        console.error(`❌ Erro ao calcular métricas para ${mesStr}:`, errorMetricas);
+        // Continuar mesmo com erro
+        evolucaoMensal.push({
+          mes: mesStr,
+          mesLabel: mesData.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', ''),
+          totalClientes: 0,
+          novosClientes: 0,
+          clientesRetornantes: 0,
+          percentualNovos: 0,
+          percentualRetornantes: 0,
+          baseAtiva: 0,
+        });
+        continue;
+      }
+
+      const resultado = metricas?.[0] || { total_atual: 0, novos_atual: 0, retornantes_atual: 0 };
+      const totalClientes = Number(resultado.total_atual) || 0;
+      const novosClientes = Number(resultado.novos_atual) || 0;
+      const clientesRetornantes = Number(resultado.retornantes_atual) || 0;
+
+      // Calcular percentuais
       const percentualNovos = totalClientes > 0 ? (novosClientes / totalClientes) * 100 : 0;
       const percentualRetornantes = totalClientes > 0 ? (clientesRetornantes / totalClientes) * 100 : 0;
 
-      // Calcular base ativa (clientes que visitaram nos últimos 90 dias a partir do fim do mês)
+      // Calcular base ativa (clientes com 2+ visitas nos últimos 90 dias)
       const data90diasAtras = new Date(fimMes);
       data90diasAtras.setDate(data90diasAtras.getDate() - 90);
       const data90Str = data90diasAtras.toISOString().split('T')[0];
 
-      const clientesAtivos90d = new Set<string>();
-      (clientesData || [])
-        .filter((r) => r.dt_gerencial >= data90Str && r.dt_gerencial <= fimMes)
-        .forEach((registro) => {
-          const identificador = (registro.cli_email || registro.cli_fone || registro.cli_nome).toLowerCase();
-          clientesAtivos90d.add(identificador);
-        });
+      const { data: baseAtivaResult, error: errorBaseAtiva } = await supabase.rpc('get_count_base_ativa', {
+        p_bar_id: barId,
+        p_data_inicio: data90Str,
+        p_data_fim: fimMes
+      });
+
+      const baseAtiva = Number(baseAtivaResult) || 0;
 
       // Formatar label do mês
       const mesLabel = mesData.toLocaleDateString('pt-BR', {
@@ -142,12 +116,10 @@ export async function GET(request: NextRequest) {
         totalClientes,
         novosClientes,
         clientesRetornantes,
-        percentualNovos: Math.round(percentualNovos * 100) / 100, // 2 casas decimais
-        percentualRetornantes: Math.round(percentualRetornantes * 100) / 100, // 2 casas decimais
-        baseAtiva: clientesAtivos90d.size,
+        percentualNovos: Math.round(percentualNovos * 100) / 100,
+        percentualRetornantes: Math.round(percentualRetornantes * 100) / 100,
+        baseAtiva,
       });
-
-      mesesProcessados.add(mesStr);
     }
 
     console.log(`📈 Evolução calculada para ${evolucaoMensal.length} meses`);
@@ -157,8 +129,7 @@ export async function GET(request: NextRequest) {
       data: evolucaoMensal,
       meta: {
         meses: meses,
-        dataInicio: dataInicioStr,
-        totalRegistros: clientesData?.length || 0,
+        barId: barId,
       },
     });
   } catch (error) {
@@ -169,4 +140,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

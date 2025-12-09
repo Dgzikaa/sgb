@@ -24,7 +24,22 @@ import { toast } from 'sonner';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from 'recharts';
+
+// Componente de Tooltip para métricas
+const MetricTooltip = ({ children, content }: { children: React.ReactNode; content: string }) => (
+  <TooltipProvider delayDuration={200}>
+    <UITooltip>
+      <TooltipTrigger asChild>
+        <div className="cursor-help">{children}</div>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs text-center">
+        <p>{content}</p>
+      </TooltipContent>
+    </UITooltip>
+  </TooltipProvider>
+);
 
 interface ClientesAtivosData {
   periodo: string;
@@ -92,7 +107,10 @@ export default function ClientesAtivosPage() {
   }, [setPageTitle]);
 
   useEffect(() => {
-    buscarDados();
+    // Quando muda o período, resetar dataCustom para hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    setDataCustom(hoje);
+    buscarDados(hoje);
     buscarEvolucao();
   }, [periodo, selectedBar]);
 
@@ -289,108 +307,116 @@ export default function ClientesAtivosPage() {
                 {/* Cards de Métricas */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                   {/* Total de Clientes */}
-                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Total de Clientes
-                      </span>
-                      <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <MetricTooltip content="Número total de clientes únicos que visitaram o bar no período selecionado. Cada cliente é contado apenas uma vez, mesmo que tenha feito múltiplas visitas.">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Total de Clientes
+                        </span>
+                        <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        {data.atual.totalClientes.toLocaleString('pt-BR')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {data.variacoes.total >= 0 ? (
+                          <TrendingUp className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-600" />
+                        )}
+                        <span className={`text-sm font-medium ${data.variacoes.total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {data.variacoes.total > 0 ? '+' : ''}{data.variacoes.total}%
+                        </span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Anterior: {data.anterior.totalClientes.toLocaleString('pt-BR')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                      {data.atual.totalClientes}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {data.variacoes.total >= 0 ? (
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-red-600" />
-                      )}
-                      <span className={`text-sm font-medium ${data.variacoes.total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {data.variacoes.total > 0 ? '+' : ''}{data.variacoes.total}%
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Anterior: {data.anterior.totalClientes}
-                      </span>
-                    </div>
-                  </div>
+                  </MetricTooltip>
 
                   {/* Novos Clientes */}
-                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Novos Clientes
-                      </span>
-                      <UserPlus className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <MetricTooltip content="Clientes que visitaram o bar pela PRIMEIRA VEZ no período selecionado. São pessoas que nunca tinham vindo antes em todo o histórico registrado.">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-green-300 dark:hover:border-green-600 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Novos Clientes
+                        </span>
+                        <UserPlus className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        {data.atual.novosClientes.toLocaleString('pt-BR')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {data.variacoes.novos >= 0 ? (
+                          <TrendingUp className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-600" />
+                        )}
+                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {data.atual.percentualNovos.toFixed(2)}%
+                        </Badge>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Anterior: {data.anterior.novosClientes.toLocaleString('pt-BR')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                      {data.atual.novosClientes}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {data.variacoes.novos >= 0 ? (
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-red-600" />
-                      )}
-                      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {data.atual.percentualNovos.toFixed(2)}%
-                      </Badge>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Anterior: {data.anterior.novosClientes}
-                      </span>
-                    </div>
-                  </div>
+                  </MetricTooltip>
 
                   {/* Clientes Retornantes */}
-                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Clientes Retornantes
-                      </span>
-                      <RefreshCw className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <MetricTooltip content="Clientes que já tinham visitado o bar anteriormente e RETORNARAM no período selecionado. Indica a fidelização e satisfação dos clientes.">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Clientes Retornantes
+                        </span>
+                        <RefreshCw className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        {data.atual.clientesRetornantes.toLocaleString('pt-BR')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {data.variacoes.retornantes >= 0 ? (
+                          <TrendingUp className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-600" />
+                        )}
+                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {data.atual.percentualRetornantes.toFixed(2)}%
+                        </Badge>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Anterior: {data.anterior.clientesRetornantes.toLocaleString('pt-BR')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                      {data.atual.clientesRetornantes}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {data.variacoes.retornantes >= 0 ? (
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-red-600" />
-                      )}
-                      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {data.atual.percentualRetornantes.toFixed(2)}%
-                      </Badge>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Anterior: {data.anterior.clientesRetornantes}
-                      </span>
-                    </div>
-                  </div>
+                  </MetricTooltip>
 
-                  {/* Base Ativa (90d) */}
-                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Base Ativa (90d)
-                      </span>
-                      <Star className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                  {/* Clientes Ativos */}
+                  <MetricTooltip content="Dos clientes que vieram no período selecionado, quantos são considerados 'ativos' (têm 2 ou mais visitas nos últimos 90 dias). Indica quantos clientes engajados frequentaram o bar.">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-yellow-300 dark:hover:border-yellow-600 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Clientes Ativos
+                        </span>
+                        <Star className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        {data.atual.clientesAtivos.toLocaleString('pt-BR')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {data.variacoes.ativos >= 0 ? (
+                          <TrendingUp className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-600" />
+                        )}
+                        <span className={`text-sm font-medium ${data.variacoes.ativos >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {data.variacoes.ativos > 0 ? '+' : ''}{data.variacoes.ativos}%
+                        </span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Anterior: {data.anterior.clientesAtivos.toLocaleString('pt-BR')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                      {data.atual.clientesAtivos}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {data.variacoes.ativos >= 0 ? (
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-red-600" />
-                      )}
-                      <span className={`text-sm font-medium ${data.variacoes.ativos >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {data.variacoes.ativos > 0 ? '+' : ''}{data.variacoes.ativos}%
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Anterior: {data.anterior.clientesAtivos}
-                      </span>
-                    </div>
-                  </div>
+                  </MetricTooltip>
                 </div>
 
                 {/* Insights Estratégicos */}

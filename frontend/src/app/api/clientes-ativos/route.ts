@@ -185,6 +185,164 @@ export async function GET(request: NextRequest) {
       console.log(`📆 Comparação: ${diaSemana} vs ${diaSemana} da semana anterior`);
     }
 
+    // 🔒 DADOS FIXOS: Para SEMANAS PASSADAS, buscar dados salvos da tabela desempenho_semanal
+    if (periodo === 'semana') {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const fimSemanaDate = new Date(fimAtual + 'T00:00:00');
+      
+      // Se a semana já terminou (domingo já passou), buscar dados fixos
+      if (fimSemanaDate < hoje) {
+        console.log(`🔒 Semana passada - buscando dados FIXOS da tabela desempenho_semanal`);
+        
+        // Buscar dados fixos da semana atual e anterior
+        const { data: dadosSemana, error: errorSemana } = await supabase
+          .from('desempenho_semanal')
+          .select('numero_semana, data_inicio, data_fim, perc_clientes_novos, clientes_ativos')
+          .eq('bar_id', barId)
+          .in('data_inicio', [inicioAtual, inicioAnterior])
+          .order('data_inicio', { ascending: false });
+
+        if (!errorSemana && dadosSemana && dadosSemana.length > 0) {
+          // Encontrar dados da semana atual e anterior
+          const semanaAtualData = dadosSemana.find(s => s.data_inicio === inicioAtual);
+          const semanaAnteriorData = dadosSemana.find(s => s.data_inicio === inicioAnterior);
+
+          // Se temos dados fixos de % Novos e Clientes Ativos, usar eles
+          if (semanaAtualData?.perc_clientes_novos !== null && semanaAtualData?.clientes_ativos !== null) {
+            console.log(`✅ Dados FIXOS encontrados: % Novos = ${semanaAtualData.perc_clientes_novos}, Clientes Ativos = ${semanaAtualData.clientes_ativos}`);
+            
+            // Ainda precisamos calcular os totais de clientes (que não mudam)
+            const { data: metricas } = await supabase.rpc('calcular_metricas_clientes', {
+              p_bar_id: barId,
+              p_data_inicio_atual: inicioAtual,
+              p_data_fim_atual: fimAtual,
+              p_data_inicio_anterior: inicioAnterior,
+              p_data_fim_anterior: fimAnterior
+            });
+
+            if (metricas && metricas[0]) {
+              const resultado = metricas[0];
+              const totalClientesAtual = Number(resultado.total_atual);
+              const totalClientesAnterior = Number(resultado.total_anterior);
+              
+              // Usar % fixo para calcular novos e retornantes
+              const percNovosFixo = Number(semanaAtualData.perc_clientes_novos);
+              const novosClientesFixo = Math.round(totalClientesAtual * (percNovosFixo / 100));
+              const clientesRetornantesFixo = totalClientesAtual - novosClientesFixo;
+              
+              // Usar dados anteriores fixos se disponíveis
+              let novosClientesAnterior = Number(resultado.novos_anterior);
+              let clientesRetornantesAnterior = Number(resultado.retornantes_anterior);
+              if (semanaAnteriorData?.perc_clientes_novos !== null) {
+                const percNovosAnteriorFixo = Number(semanaAnteriorData.perc_clientes_novos);
+                novosClientesAnterior = Math.round(totalClientesAnterior * (percNovosAnteriorFixo / 100));
+                clientesRetornantesAnterior = totalClientesAnterior - novosClientesAnterior;
+              }
+              
+              // Dados fixos de clientes ativos
+              const clientesAtivosFixo = Number(semanaAtualData.clientes_ativos);
+              const clientesAtivosAnteriorFixo = semanaAnteriorData?.clientes_ativos ? Number(semanaAnteriorData.clientes_ativos) : clientesAtivosFixo;
+
+              // Calcular variações
+              const variacaoTotal = totalClientesAnterior > 0 
+                ? ((totalClientesAtual - totalClientesAnterior) / totalClientesAnterior) * 100 
+                : 0;
+              const variacaoNovos = novosClientesAnterior > 0 
+                ? ((novosClientesFixo - novosClientesAnterior) / novosClientesAnterior) * 100 
+                : 0;
+              const variacaoRetornantes = clientesRetornantesAnterior > 0 
+                ? ((clientesRetornantesFixo - clientesRetornantesAnterior) / clientesRetornantesAnterior) * 100 
+                : 0;
+              const variacaoAtivos = clientesAtivosAnteriorFixo > 0 
+                ? ((clientesAtivosFixo - clientesAtivosAnteriorFixo) / clientesAtivosAnteriorFixo) * 100 
+                : 0;
+
+              const percentualRetornantes = totalClientesAtual > 0 
+                ? (clientesRetornantesFixo / totalClientesAtual) * 100 
+                : 0;
+
+              // Gerar insights
+              const insights: any[] = [];
+              if (variacaoTotal < -10) {
+                insights.push({
+                  tipo: 'atencao',
+                  titulo: 'Queda no Fluxo',
+                  descricao: `Redução de ${Math.abs(variacaoTotal).toFixed(1)}% no número de clientes. Considere ações de marketing e promoções.`
+                });
+              } else if (variacaoTotal > 10) {
+                insights.push({
+                  tipo: 'positivo',
+                  titulo: 'Crescimento Acelerado',
+                  descricao: `O número de clientes cresceu ${variacaoTotal.toFixed(1)}% em relação ao período anterior. Continue investindo nas estratégias atuais!`
+                });
+              }
+              if (percNovosFixo > 60) {
+                insights.push({
+                  tipo: 'info',
+                  titulo: 'Alta Aquisição de Novos Clientes',
+                  descricao: `${percNovosFixo.toFixed(1)}% dos clientes são novos. Ótimo para crescimento! Foque em estratégias de fidelização.`
+                });
+              }
+              if (percentualRetornantes > 60) {
+                insights.push({
+                  tipo: 'positivo',
+                  titulo: 'Excelente Fidelização',
+                  descricao: `${percentualRetornantes.toFixed(1)}% dos clientes já conhecem o bar. A experiência está gerando retorno!`
+                });
+              }
+              if (variacaoAtivos > 15) {
+                insights.push({
+                  tipo: 'positivo',
+                  titulo: 'Clientes Ativos em Crescimento',
+                  descricao: `Os clientes ativos cresceram ${variacaoAtivos.toFixed(1)}%. Excelente engajamento!`
+                });
+              } else if (variacaoAtivos < -15) {
+                insights.push({
+                  tipo: 'atencao',
+                  titulo: 'Atenção: Clientes Ativos em Queda',
+                  descricao: `Redução de ${Math.abs(variacaoAtivos).toFixed(1)}% nos clientes ativos. Priorize reengajamento de clientes.`
+                });
+              }
+
+              return NextResponse.json({
+                success: true,
+                data: {
+                  periodo,
+                  label,
+                  periodoAtual: { inicio: inicioAtual, fim: fimAtual },
+                  periodoAnterior: { inicio: inicioAnterior, fim: fimAnterior },
+                  atual: {
+                    totalClientes: totalClientesAtual,
+                    novosClientes: novosClientesFixo,
+                    clientesRetornantes: clientesRetornantesFixo,
+                    percentualNovos: parseFloat(percNovosFixo.toFixed(1)),
+                    percentualRetornantes: parseFloat(percentualRetornantes.toFixed(1)),
+                    clientesAtivos: clientesAtivosFixo
+                  },
+                  anterior: {
+                    totalClientes: totalClientesAnterior,
+                    novosClientes: novosClientesAnterior,
+                    clientesRetornantes: clientesRetornantesAnterior,
+                    clientesAtivos: clientesAtivosAnteriorFixo
+                  },
+                  variacoes: {
+                    total: parseFloat(variacaoTotal.toFixed(1)),
+                    novos: parseFloat(variacaoNovos.toFixed(1)),
+                    retornantes: parseFloat(variacaoRetornantes.toFixed(1)),
+                    ativos: parseFloat(variacaoAtivos.toFixed(1))
+                  },
+                  insights,
+                  fonte: 'dados_fixos' // Indicador de que são dados fixos
+                }
+              });
+            }
+          }
+        }
+        console.log(`⚠️ Dados fixos não encontrados, calculando em tempo real...`);
+      }
+    }
+
     // ⚡ SUPER OTIMIZAÇÃO: Uma única query SQL que calcula tudo
     const startTime = Date.now();
     
@@ -214,48 +372,57 @@ export async function GET(request: NextRequest) {
     console.log(`👥 Total clientes período atual: ${totalClientesAtual}`);
     console.log(`🆕 Novos: ${novosClientes}, 🔄 Retornantes: ${clientesRetornantes}`);
 
-    // ⚡ SUPER OTIMIZAÇÃO: Base ativa com SQL otimizado (retorna apenas contagem)
+    // ⚡ CLIENTES ATIVOS DO PERÍODO: Quantos dos clientes do período têm 2+ visitas nos últimos 90 dias
     const startTime2 = Date.now();
     
-    // Preparar datas para base ativa
+    // Calcular 90 dias antes do fim do período
     const dataRef = new Date(fimAtual + 'T00:00:00');
-    const anoAtual = dataRef.getFullYear();
-    const mesAtual = dataRef.getMonth();
-    const fimMesAtual = new Date(anoAtual, mesAtual + 1, 0).toISOString().split('T')[0];
-    const data90DiasAtras = new Date(fimMesAtual + 'T00:00:00');
-    data90DiasAtras.setDate(data90DiasAtras.getDate() - 90);
+    const data90DiasAtras = new Date(dataRef);
+    data90DiasAtras.setDate(dataRef.getDate() - 90);
     const data90DiasAtrasStr = data90DiasAtras.toISOString().split('T')[0];
     
-    const mesAnterior = mesAtual - 1;
-    const anoMesAnterior = mesAnterior < 0 ? anoAtual - 1 : anoAtual;
-    const mesMesAnterior = mesAnterior < 0 ? 11 : mesAnterior;
-    const fimMesAnterior = new Date(anoMesAnterior, mesMesAnterior + 1, 0).toISOString().split('T')[0];
-    const data90DiasAtrasAnterior = new Date(fimMesAnterior + 'T00:00:00');
-    data90DiasAtrasAnterior.setDate(data90DiasAtrasAnterior.getDate() - 90);
+    // Para o período anterior
+    const dataRefAnterior = new Date(fimAnterior + 'T00:00:00');
+    const data90DiasAtrasAnterior = new Date(dataRefAnterior);
+    data90DiasAtrasAnterior.setDate(dataRefAnterior.getDate() - 90);
     const data90DiasAtrasAnteriorStr = data90DiasAtrasAnterior.toISOString().split('T')[0];
 
-    // Executar queries de base ativa em paralelo (retornam apenas contagem)
-    const [resultBaseAtiva, resultBaseAtivaAnterior] = await Promise.all([
-      // BASE ATIVA DO MÊS ATUAL
-      supabase.rpc('get_count_base_ativa', {
-        p_bar_id: barId,
-        p_data_inicio: data90DiasAtrasStr,
-        p_data_fim: fimMesAtual
-      }),
-      // BASE ATIVA DO MÊS ANTERIOR
-      supabase.rpc('get_count_base_ativa', {
-        p_bar_id: barId,
-        p_data_inicio: data90DiasAtrasAnteriorStr,
-        p_data_fim: fimMesAnterior
-      })
-    ]);
+    // Query para calcular clientes ativos DO PERÍODO (não base total)
+    // Clientes ativos = clientes do período que têm 2+ visitas nos últimos 90 dias
+    const { data: ativosData, error: errorAtivos } = await supabase.rpc('calcular_clientes_ativos_periodo', {
+      p_bar_id: barId,
+      p_data_inicio_periodo: inicioAtual,
+      p_data_fim_periodo: fimAtual,
+      p_data_90_dias_atras: data90DiasAtrasStr
+    });
+
+    const { data: ativosAnteriorData, error: errorAtivosAnterior } = await supabase.rpc('calcular_clientes_ativos_periodo', {
+      p_bar_id: barId,
+      p_data_inicio_periodo: inicioAnterior,
+      p_data_fim_periodo: fimAnterior,
+      p_data_90_dias_atras: data90DiasAtrasAnteriorStr
+    });
 
     const elapsedTime2 = ((Date.now() - startTime2) / 1000).toFixed(2);
-    console.log(`⚡ Base ativa com SQL otimizado: ${elapsedTime2}s`);
+    console.log(`⚡ Clientes ativos do período: ${elapsedTime2}s`);
 
-    // Base ativa (já vem como número do banco)
-    const clientesAtivos = Number(resultBaseAtiva.data || 0);
-    const clientesAtivosAnterior = Number(resultBaseAtivaAnterior.data || 0);
+    // Clientes ativos do período (fallback para retornantes se função não existir)
+    let clientesAtivos = 0;
+    let clientesAtivosAnterior = 0;
+    
+    if (!errorAtivos && ativosData !== null) {
+      clientesAtivos = Number(ativosData);
+    } else {
+      // Fallback: usar retornantes como aproximação
+      clientesAtivos = clientesRetornantes;
+      console.log(`⚠️ Usando retornantes como fallback para clientes ativos`);
+    }
+    
+    if (!errorAtivosAnterior && ativosAnteriorData !== null) {
+      clientesAtivosAnterior = Number(ativosAnteriorData);
+    } else {
+      clientesAtivosAnterior = clientesRetornantesAnterior;
+    }
 
     // 8. CALCULAR VARIAÇÕES
     const variacaoTotal = totalClientesAnterior > 0 
@@ -379,14 +546,14 @@ export async function GET(request: NextRequest) {
     if (variacaoAtivos > 15) {
       insights.push({
         tipo: 'positivo',
-        titulo: 'Base Ativa em Crescimento',
-        descricao: `A base de clientes ativos cresceu ${variacaoAtivos.toFixed(1)}%. Excelente engajamento!`
+        titulo: 'Clientes Ativos em Crescimento',
+        descricao: `Os clientes ativos cresceram ${variacaoAtivos.toFixed(1)}%. Excelente engajamento!`
       });
     } else if (variacaoAtivos < -15) {
       insights.push({
         tipo: 'atencao',
-        titulo: 'Atenção: Base Ativa em Queda',
-        descricao: `Redução de ${Math.abs(variacaoAtivos).toFixed(1)}% na base ativa. Priorize reengajamento de clientes.`
+        titulo: 'Atenção: Clientes Ativos em Queda',
+        descricao: `Redução de ${Math.abs(variacaoAtivos).toFixed(1)}% nos clientes ativos. Priorize reengajamento de clientes.`
       });
     }
 

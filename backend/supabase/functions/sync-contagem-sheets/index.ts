@@ -110,12 +110,20 @@ async function buscarContagemData(data: string, config: SheetsConfig): Promise<I
       if (!codigo || !nome) continue;
       
       // Buscar dados de contagem
-      const estoqueFechado = parseFloat(linha[colunaData]) || null;
-      const estoqueFlutuante = parseFloat(linha[colunaData + 1]) || null;
-      const pedido = parseFloat(linha[colunaData + 2]) || null;
+      // 🔧 CORRIGIDO: Tratar 0 como valor válido, não como null
+      const valorFechado = linha[colunaData]?.toString().replace(',', '.').trim();
+      const valorFlutuante = linha[colunaData + 1]?.toString().replace(',', '.').trim();
+      const valorPedido = linha[colunaData + 2]?.toString().replace(',', '.').trim();
       
-      // Só adiciona se tiver estoque fechado ou flutuante
-      if ((estoqueFechado !== null && estoqueFechado > 0) || (estoqueFlutuante !== null && estoqueFlutuante > 0)) {
+      const estoqueFechado = valorFechado ? parseFloat(valorFechado) : 0;
+      const estoqueFlutuante = valorFlutuante ? parseFloat(valorFlutuante) : 0;
+      const pedido = valorPedido ? parseFloat(valorPedido) : 0;
+      
+      // 🔧 CORRIGIDO: Calcular total = fechado + flutuante
+      const estoqueTotal = (isNaN(estoqueFechado) ? 0 : estoqueFechado) + (isNaN(estoqueFlutuante) ? 0 : estoqueFlutuante);
+      
+      // Só adiciona se tiver estoque (fechado OU flutuante > 0)
+      if (estoqueTotal > 0) {
         insumos.push({
           codigo,
           nome,
@@ -123,9 +131,9 @@ async function buscarContagemData(data: string, config: SheetsConfig): Promise<I
           preco,  // ✅ Preço da planilha (coluna A)
           contagens: {
             [data]: {
-              estoque_fechado: estoqueFechado || 0,
-              estoque_flutuante: estoqueFlutuante,
-              pedido: pedido || 0,
+              estoque_fechado: isNaN(estoqueFechado) ? 0 : estoqueFechado,
+              estoque_flutuante: isNaN(estoqueFlutuante) ? 0 : estoqueFlutuante,
+              pedido: isNaN(pedido) ? 0 : pedido,
             },
           },
         });
@@ -298,13 +306,18 @@ serve(async (req) => {
           estoqueFechado = contagemData.estoque_fechado || 0;
           estoqueFlutuante = contagemData.estoque_flutuante || 0;
           pedido = contagemData.pedido || 0;
-          // Usar preço da planilha se disponível
-          if (insumoSheet.preco && insumoSheet.preco > 0) {
-            custoUnitario = insumoSheet.preco;
-          }
+        }
+        // 🔧 SEMPRE usar preço da planilha se disponível (congelar preço no momento da contagem)
+        if (insumoSheet.preco && insumoSheet.preco > 0) {
+          custoUnitario = insumoSheet.preco;
         }
       } else {
         stats.zerados++;
+      }
+      
+      // 🔧 Log para debug de preços
+      if (insumoSheet && insumoSheet.preco && insumoSheet.preco !== custoUnitario) {
+        console.log(`💰 ${insumoSistema.codigo}: Preço planilha R$ ${insumoSheet.preco} | Sistema R$ ${insumoSistema.custo_unitario}`);
       }
       
       // Buscar estoque_final do dia anterior para estoque_inicial
@@ -331,8 +344,13 @@ serve(async (req) => {
         .eq('insumo_id', insumoSistema.id)
         .single();
       
-      // Calcular estoque total (fechado + flutuante)
+      // 🔧 Calcular estoque total (fechado + flutuante)
       const estoqueFinal = estoqueFechado + estoqueFlutuante;
+      
+      // 🔧 Log para itens com estoque flutuante significativo
+      if (estoqueFlutuante > 0 && estoqueFechado > 0) {
+        console.log(`📦 ${insumoSistema.codigo}: ${estoqueFechado} + ${estoqueFlutuante} = ${estoqueFinal}`);
+      }
       
       const payload = {
         bar_id: BAR_ID,
