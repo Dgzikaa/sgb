@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   ChefHat,
   Sparkles,
+  DollarSign,
 } from 'lucide-react';
 
 /**
@@ -66,13 +67,6 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
 // Menu items - extraído para fora do componente
 const defaultSidebarItems: SidebarItem[] = [
   {
-    icon: CheckSquare,
-    label: 'Guia de Funcionalidades',
-    href: '/guia-funcionalidades',
-    color: 'text-green-600 dark:text-green-400',
-    permission: 'home',
-  },
-  {
     icon: Target,
     label: 'Estratégico',
     href: '/estrategico',
@@ -99,6 +93,7 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: Users, label: 'NPS Funcionários', href: '/ferramentas/nps', permission: 'gestao' },
       { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal', permission: 'gestao' },
       { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout', permission: 'gestao' },
+      { icon: DollarSign, label: 'DRE', href: '/ferramentas/dre', permission: 'dashboard_financeiro_mensal' },
     ],
   },
   {
@@ -109,9 +104,18 @@ const defaultSidebarItems: SidebarItem[] = [
     permission: 'relatorios',
     subItems: [
       { icon: BarChart3, label: 'Eventos', href: '/analitico/eventos', permission: 'relatorios' },
+    ],
+  },
+  {
+    icon: Sparkles,
+    label: 'CRM',
+    href: '/crm',
+    color: 'text-purple-600 dark:text-purple-400',
+    permission: 'gestao',
+    subItems: [
       { icon: Users, label: 'Clientes', href: '/analitico/clientes', permission: 'relatorios' },
       { icon: Users, label: 'Clientes Ativos', href: '/relatorios/clientes-ativos', permission: 'relatorios' },
-      { icon: Sparkles, label: 'CRM Inteligente', href: '/crm', permission: 'gestao' },
+      { icon: Sparkles, label: 'Hub CRM', href: '/crm', permission: 'gestao' },
     ],
   },
   {

@@ -28,157 +28,294 @@ function getTrimestreAnterior(trimestre: number) {
   return quarters[trimestre as keyof typeof quarters] || quarters[2]; // Default T1
 }
 
-// Função para calcular retenção dinâmica (mês específico vs últimos 2 meses)
-async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?: string) {
+// Função para calcular taxa de retornantes trimestral
+// MESMA LÓGICA DA PÁGINA CLIENTES-ATIVOS:
+// Retornantes = clientes do período que JÁ VIERAM ANTES do início do período
+// Taxa = retornantes / total_clientes_do_período
+async function calcularRetencao(supabase: any, barIdNum: number, mesEspecifico?: string, trimestre?: number) {
   try {
-    let dataReferencia: Date;
-    
-    if (mesEspecifico) {
-      // Se foi passado um mês específico (formato YYYY-MM)
-      const [ano, mes] = mesEspecifico.split('-').map(Number);
-      dataReferencia = new Date(ano, mes - 1, 1); // mes - 1 porque Date usa 0-11
-    } else {
-      // Se não foi passado, usa o mês atual
-      dataReferencia = new Date();
-    }
-    
-    // Calcular primeiro dia do mês de referência
-    const inicioMesAtual = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth(), 1);
-    const fimMesAtual = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth() + 1, 0);
-    
-    // Calcular últimos 2 meses (mês anterior e anterior ao anterior)
-    const inicioUltimos2Meses = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth() - 2, 1);
-    const fimUltimos2Meses = new Date(dataReferencia.getFullYear(), dataReferencia.getMonth(), 0);
-    
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const year = new Date().getFullYear();
     
-    const mesAtualInicio = formatDate(inicioMesAtual);
-    const mesAtualFim = formatDate(fimMesAtual);
-    const ultimos2MesesInicio = formatDate(inicioUltimos2Meses);
-    const ultimos2MesesFim = formatDate(fimUltimos2Meses);
+    // Definir período do trimestre
+    let inicioPeriodo: string;
+    let fimPeriodo: string;
+    let inicioPeriodoAnterior: string;
+    let fimPeriodoAnterior: string;
     
-    // Logs apenas em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔄 CALCULANDO RETENÇÃO:');
-      console.log(`Parâmetro mesEspecifico recebido: ${mesEspecifico}`);
-      console.log(`Data de referência calculada: ${dataReferencia.toISOString()}`);
-      console.log(`Mês de referência${mesEspecifico ? ` (${mesEspecifico})` : ' (atual)'}: ${mesAtualInicio} até ${mesAtualFim}`);
-      console.log(`Últimos 2 meses: ${ultimos2MesesInicio} até ${ultimos2MesesFim}`);
+    if (trimestre) {
+      // Usar trimestre específico
+      const quarters: { [key: number]: { start: string; end: string } } = {
+        1: { start: `${year}-01-01`, end: `${year}-03-31` },
+        2: { start: `${year}-04-01`, end: `${year}-06-30` },
+        3: { start: `${year}-07-01`, end: `${year}-09-30` },
+        4: { start: `${year}-10-01`, end: `${year}-12-31` }
+      };
+      
+      const quarterAnterior: { [key: number]: { start: string; end: string } } = {
+        1: { start: `${year - 1}-10-01`, end: `${year - 1}-12-31` }, // T4 ano anterior
+        2: { start: `${year}-01-01`, end: `${year}-03-31` },          // T1
+        3: { start: `${year}-04-01`, end: `${year}-06-30` },          // T2
+        4: { start: `${year}-07-01`, end: `${year}-09-30` }           // T3
+      };
+      
+      const periodoAtual = quarters[trimestre] || quarters[4];
+      const periodoAnterior = quarterAnterior[trimestre] || quarterAnterior[4];
+      
+      // Ajustar fim do período atual para não ultrapassar hoje
+      const hoje = new Date();
+      const fimPeriodoDate = new Date(periodoAtual.end);
+      const fimEfetivo = hoje < fimPeriodoDate ? hoje : fimPeriodoDate;
+      
+      inicioPeriodo = periodoAtual.start;
+      fimPeriodo = formatDate(fimEfetivo);
+      inicioPeriodoAnterior = periodoAnterior.start;
+      fimPeriodoAnterior = periodoAnterior.end;
+    } else if (mesEspecifico) {
+      // Usar mês específico como referência para rolling 90 dias
+      const [ano, mes] = mesEspecifico.split('-').map(Number);
+      const dataReferencia = new Date(ano, mes, 0); // último dia do mês
+      
+      const fimPeriodoAtual = dataReferencia;
+      const inicioPeriodoAtual = new Date(dataReferencia);
+      inicioPeriodoAtual.setDate(fimPeriodoAtual.getDate() - 90);
+      
+      const fimPeriodoAnt = new Date(inicioPeriodoAtual);
+      fimPeriodoAnt.setDate(fimPeriodoAnt.getDate() - 1);
+      const inicioPeriodoAnt = new Date(fimPeriodoAnt);
+      inicioPeriodoAnt.setDate(fimPeriodoAnt.getDate() - 90);
+      
+      inicioPeriodo = formatDate(inicioPeriodoAtual);
+      fimPeriodo = formatDate(fimPeriodoAtual);
+      inicioPeriodoAnterior = formatDate(inicioPeriodoAnt);
+      fimPeriodoAnterior = formatDate(fimPeriodoAnt);
+    } else {
+      // Usar últimos 90 dias
+      const hoje = new Date();
+      const inicio90d = new Date(hoje);
+      inicio90d.setDate(hoje.getDate() - 90);
+      
+      inicioPeriodo = formatDate(inicio90d);
+      fimPeriodo = formatDate(hoje);
+      
+      const fimAnt = new Date(inicio90d);
+      fimAnt.setDate(fimAnt.getDate() - 1);
+      const inicioAnt = new Date(fimAnt);
+      inicioAnt.setDate(fimAnt.getDate() - 90);
+      
+      inicioPeriodoAnterior = formatDate(inicioAnt);
+      fimPeriodoAnterior = formatDate(fimAnt);
     }
     
-    // Buscar clientes do mês atual
-    const clientesMesAtualDataBruto = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
-      'eq_bar_id': barIdNum,
-      'gte_dt_gerencial': mesAtualInicio,
-      'lte_dt_gerencial': mesAtualFim
+    console.log('🔄 CALCULANDO TAXA DE RETORNANTES (mesma lógica clientes-ativos):');
+    console.log(`Período ATUAL: ${inicioPeriodo} até ${fimPeriodo}`);
+    console.log(`Período ANTERIOR: ${inicioPeriodoAnterior} até ${fimPeriodoAnterior}`);
+    
+    // ✅ USAR A STORED PROCEDURE calcular_metricas_clientes (mesma da clientes-ativos)
+    const { data: metricas, error: errorMetricas } = await supabase.rpc('calcular_metricas_clientes', {
+      p_bar_id: barIdNum,
+      p_data_inicio_atual: inicioPeriodo,
+      p_data_fim_atual: fimPeriodo,
+      p_data_inicio_anterior: inicioPeriodoAnterior,
+      p_data_fim_anterior: fimPeriodoAnterior
     });
     
-    // Buscar clientes dos últimos 2 meses
-    const clientesUltimos2MesesDataBruto = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
-      'eq_bar_id': barIdNum,
-      'gte_dt_gerencial': ultimos2MesesInicio,
-      'lte_dt_gerencial': ultimos2MesesFim
-    });
-    
-    // ⚡ FILTRAR DIAS FECHADOS
-    const clientesMesAtualData = await filtrarDiasAbertos(clientesMesAtualDataBruto, 'dt_gerencial', barIdNum);
-    const clientesUltimos2MesesData = await filtrarDiasAbertos(clientesUltimos2MesesDataBruto, 'dt_gerencial', barIdNum);
-    
-    // Filtrar apenas clientes com telefone
-    const clientesMesAtual = new Set(
-      clientesMesAtualData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
-    );
-    
-    const clientesUltimos2Meses = new Set(
-      clientesUltimos2MesesData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
-    );
-    
-    // Calcular intersecção (clientes que vieram no mês atual E nos últimos 2 meses)
-    const clientesRetidos = [...clientesMesAtual].filter(cliente => 
-      clientesUltimos2Meses.has(cliente)
-    );
-    
-    const totalClientesMesAtual = clientesMesAtual.size;
-    const totalClientesRetidos = clientesRetidos.length;
-    const percentualRetencao = totalClientesMesAtual > 0 
-      ? (totalClientesRetidos / totalClientesMesAtual) * 100 
-      : 0;
-    
-    // ✅ COMPARAÇÃO COM MÊS ANTERIOR
-    const mesAnteriorReferencia = new Date(dataReferencia);
-    mesAnteriorReferencia.setMonth(mesAnteriorReferencia.getMonth() - 1);
-    
-    const inicioMesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth(), 1);
-    const fimMesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth() + 1, 0);
-    const inicioUltimos2MesesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth() - 2, 1);
-    const fimUltimos2MesesAnterior = new Date(mesAnteriorReferencia.getFullYear(), mesAnteriorReferencia.getMonth(), 0);
-    
-    const mesAnteriorInicioStr = formatDate(inicioMesAnterior);
-    const mesAnteriorFimStr = formatDate(fimMesAnterior);
-    const ultimos2MesesAnteriorInicioStr = formatDate(inicioUltimos2MesesAnterior);
-    const ultimos2MesesAnteriorFimStr = formatDate(fimUltimos2MesesAnterior);
-    
-    // Buscar dados do mês anterior
-    const [clientesMesAnteriorDataBruto, clientesUltimos2MesesAnteriorDataBruto] = await Promise.all([
-      fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
-        'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': mesAnteriorInicioStr,
-        'lte_dt_gerencial': mesAnteriorFimStr
-      }),
-      fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
-        'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': ultimos2MesesAnteriorInicioStr,
-        'lte_dt_gerencial': ultimos2MesesAnteriorFimStr
-      })
-    ]);
-    
-    // ⚡ FILTRAR DIAS FECHADOS
-    const clientesMesAnteriorData = await filtrarDiasAbertos(clientesMesAnteriorDataBruto, 'dt_gerencial', barIdNum);
-    const clientesUltimos2MesesAnteriorData = await filtrarDiasAbertos(clientesUltimos2MesesAnteriorDataBruto, 'dt_gerencial', barIdNum);
-    
-    const clientesMesAnterior = new Set(
-      clientesMesAnteriorData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
-    );
-    
-    const clientesUltimos2MesesAnterior = new Set(
-      clientesUltimos2MesesAnteriorData?.filter(item => item.cli_fone).map(item => item.cli_fone) || []
-    );
-    
-    const clientesRetidosAnterior = [...clientesMesAnterior].filter(cliente => 
-      clientesUltimos2MesesAnterior.has(cliente)
-    );
-    
-    const totalClientesMesAnterior = clientesMesAnterior.size;
-    const totalClientesRetidosAnterior = clientesRetidosAnterior.length;
-    const percentualRetencaoAnterior = totalClientesMesAnterior > 0 
-      ? (totalClientesRetidosAnterior / totalClientesMesAnterior) * 100 
-      : 0;
-    
-    const variacaoRetencao = percentualRetencaoAnterior > 0 
-      ? ((percentualRetencao - percentualRetencaoAnterior) / percentualRetencaoAnterior * 100)
-      : 0;
-    
-    // Logs detalhados apenas em desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔄 RETENÇÃO CALCULADA:');
-      console.log(`Clientes únicos mês atual: ${totalClientesMesAtual}`);
-      console.log(`Clientes únicos últimos 2 meses: ${clientesUltimos2Meses.size}`);
-      console.log(`Clientes retidos (intersecção): ${totalClientesRetidos}`);
-      console.log(`Taxa de retenção: ${percentualRetencao.toFixed(1)}%`);
-      console.log(`Taxa de retenção mês anterior: ${percentualRetencaoAnterior.toFixed(1)}%`);
-      console.log(`Variação retenção: ${variacaoRetencao.toFixed(1)}%`);
+    if (errorMetricas) {
+      console.error('❌ Erro ao calcular métricas:', errorMetricas);
+      throw errorMetricas;
     }
+    
+    const resultado = metricas[0];
+    const totalClientesAtual = Number(resultado.total_atual) || 0;
+    const retornantesAtual = Number(resultado.retornantes_atual) || 0;
+    const totalClientesAnterior = Number(resultado.total_anterior) || 0;
+    const retornantesAnterior = Number(resultado.retornantes_anterior) || 0;
+    
+    // ✅ TAXA DE RETORNANTES = retornantes / total (igual clientes-ativos)
+    const percentualRetornantes = totalClientesAtual > 0 
+      ? (retornantesAtual / totalClientesAtual) * 100 
+      : 0;
+    
+    const percentualRetornantesAnterior = totalClientesAnterior > 0 
+      ? (retornantesAnterior / totalClientesAnterior) * 100 
+      : 0;
+    
+    // Calcular variação
+    const variacaoRetornantes = percentualRetornantesAnterior > 0 
+      ? ((percentualRetornantes - percentualRetornantesAnterior) / percentualRetornantesAnterior * 100)
+      : 0;
+    
+    console.log('🔄 TAXA DE RETORNANTES CALCULADA:');
+    console.log(`Total clientes período atual: ${totalClientesAtual}`);
+    console.log(`Retornantes período atual: ${retornantesAtual}`);
+    console.log(`Taxa de retornantes: ${percentualRetornantes.toFixed(1)}%`);
+    console.log(`Taxa de retornantes anterior: ${percentualRetornantesAnterior.toFixed(1)}%`);
+    console.log(`Variação: ${variacaoRetornantes.toFixed(1)}%`);
     
     return {
-      valor: parseFloat(percentualRetencao.toFixed(1)),
-      variacao: parseFloat(variacaoRetencao.toFixed(1))
+      valor: parseFloat(percentualRetornantes.toFixed(1)),
+      variacao: parseFloat(variacaoRetornantes.toFixed(1))
     };
     
   } catch (error) {
-    // Log apenas em desenvolvimento para evitar poluir console em produção
-    if (process.env.NODE_ENV === 'development') {
-      console.error('❌ Erro ao calcular retenção:', error);
+    console.error('❌ Erro ao calcular retenção:', error);
+    return { valor: 0, variacao: 0 };
+  }
+}
+
+// Função para calcular RETENÇÃO REAL (rolling 90 dias)
+// "Dos clientes do trimestre anterior, quantos voltaram neste trimestre?"
+async function calcularRetencaoReal(supabase: any, barIdNum: number, trimestre?: number) {
+  try {
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const year = new Date().getFullYear();
+    
+    // Definir período do trimestre atual e anterior
+    let inicioPeriodoAtual: string;
+    let fimPeriodoAtual: string;
+    let inicioPeriodoAnterior: string;
+    let fimPeriodoAnterior: string;
+    let inicioPeriodoComparacao: string;
+    let fimPeriodoComparacao: string;
+    
+    if (trimestre) {
+      const quarters: { [key: number]: { start: string; end: string } } = {
+        1: { start: `${year}-01-01`, end: `${year}-03-31` },
+        2: { start: `${year}-04-01`, end: `${year}-06-30` },
+        3: { start: `${year}-07-01`, end: `${year}-09-30` },
+        4: { start: `${year}-10-01`, end: `${year}-12-31` }
+      };
+      
+      const quarterAnterior: { [key: number]: { start: string; end: string } } = {
+        1: { start: `${year - 1}-10-01`, end: `${year - 1}-12-31` },
+        2: { start: `${year}-01-01`, end: `${year}-03-31` },
+        3: { start: `${year}-04-01`, end: `${year}-06-30` },
+        4: { start: `${year}-07-01`, end: `${year}-09-30` }
+      };
+      
+      const quarterComparacao: { [key: number]: { start: string; end: string } } = {
+        1: { start: `${year - 1}-07-01`, end: `${year - 1}-09-30` },
+        2: { start: `${year - 1}-10-01`, end: `${year - 1}-12-31` },
+        3: { start: `${year}-01-01`, end: `${year}-03-31` },
+        4: { start: `${year}-04-01`, end: `${year}-06-30` }
+      };
+      
+      const periodoAtual = quarters[trimestre] || quarters[4];
+      const periodoAnterior = quarterAnterior[trimestre] || quarterAnterior[4];
+      const periodoComparacao = quarterComparacao[trimestre] || quarterComparacao[4];
+      
+      // Ajustar fim do período atual para não ultrapassar hoje
+      const hoje = new Date();
+      const fimPeriodoDate = new Date(periodoAtual.end);
+      const fimEfetivo = hoje < fimPeriodoDate ? hoje : fimPeriodoDate;
+      
+      inicioPeriodoAtual = periodoAtual.start;
+      fimPeriodoAtual = formatDate(fimEfetivo);
+      inicioPeriodoAnterior = periodoAnterior.start;
+      fimPeriodoAnterior = periodoAnterior.end;
+      inicioPeriodoComparacao = periodoComparacao.start;
+      fimPeriodoComparacao = periodoComparacao.end;
+    } else {
+      // Fallback: rolling 90 dias
+      const hoje = new Date();
+      const inicio90d = new Date(hoje);
+      inicio90d.setDate(hoje.getDate() - 90);
+      
+      inicioPeriodoAtual = formatDate(inicio90d);
+      fimPeriodoAtual = formatDate(hoje);
+      
+      const fimAnt = new Date(inicio90d);
+      fimAnt.setDate(fimAnt.getDate() - 1);
+      const inicioAnt = new Date(fimAnt);
+      inicioAnt.setDate(fimAnt.getDate() - 90);
+      
+      inicioPeriodoAnterior = formatDate(inicioAnt);
+      fimPeriodoAnterior = formatDate(fimAnt);
+      
+      const fimComp = new Date(inicioAnt);
+      fimComp.setDate(fimComp.getDate() - 1);
+      const inicioComp = new Date(fimComp);
+      inicioComp.setDate(fimComp.getDate() - 90);
+      
+      inicioPeriodoComparacao = formatDate(inicioComp);
+      fimPeriodoComparacao = formatDate(fimComp);
     }
+    
+    console.log('🔄 CALCULANDO RETENÇÃO REAL (% que voltaram):');
+    console.log(`Período ATUAL: ${inicioPeriodoAtual} até ${fimPeriodoAtual}`);
+    console.log(`Período ANTERIOR: ${inicioPeriodoAnterior} até ${fimPeriodoAnterior}`);
+    
+    // Buscar clientes dos períodos
+    const [clientesPeriodoAtualBruto, clientesPeriodoAnteriorBruto, clientesPeriodoComparacaoBruto] = await Promise.all([
+      fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': inicioPeriodoAtual,
+        'lte_dt_gerencial': fimPeriodoAtual
+      }),
+      fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': inicioPeriodoAnterior,
+        'lte_dt_gerencial': fimPeriodoAnterior
+      }),
+      fetchAllData(supabase, 'contahub_periodo', 'cli_fone', {
+        'eq_bar_id': barIdNum,
+        'gte_dt_gerencial': inicioPeriodoComparacao,
+        'lte_dt_gerencial': fimPeriodoComparacao
+      })
+    ]);
+    
+    // Criar sets de clientes únicos
+    const clientesPeriodoAtual = new Set(
+      clientesPeriodoAtualBruto?.filter(item => item.cli_fone && item.cli_fone.length >= 8).map(item => item.cli_fone) || []
+    );
+    
+    const clientesPeriodoAnterior = new Set(
+      clientesPeriodoAnteriorBruto?.filter(item => item.cli_fone && item.cli_fone.length >= 8).map(item => item.cli_fone) || []
+    );
+    
+    const clientesPeriodoComparacao = new Set(
+      clientesPeriodoComparacaoBruto?.filter(item => item.cli_fone && item.cli_fone.length >= 8).map(item => item.cli_fone) || []
+    );
+    
+    // RETENÇÃO REAL = clientes do período ANTERIOR que voltaram no período ATUAL
+    const clientesQueVoltaram = [...clientesPeriodoAnterior].filter(cliente => 
+      clientesPeriodoAtual.has(cliente)
+    );
+    
+    const totalClientesAnterior = clientesPeriodoAnterior.size;
+    const totalQueVoltaram = clientesQueVoltaram.length;
+    
+    // Taxa de retenção real = quantos do período anterior voltaram
+    const percentualRetencaoReal = totalClientesAnterior > 0 
+      ? (totalQueVoltaram / totalClientesAnterior) * 100 
+      : 0;
+    
+    // Calcular variação (comparar com período ainda anterior)
+    const clientesQueVoltaramAnterior = [...clientesPeriodoComparacao].filter(cliente => 
+      clientesPeriodoAnterior.has(cliente)
+    );
+    
+    const percentualRetencaoRealAnterior = clientesPeriodoComparacao.size > 0 
+      ? (clientesQueVoltaramAnterior.length / clientesPeriodoComparacao.size) * 100 
+      : 0;
+    
+    const variacaoRetencaoReal = percentualRetencaoRealAnterior > 0 
+      ? ((percentualRetencaoReal - percentualRetencaoRealAnterior) / percentualRetencaoRealAnterior * 100)
+      : 0;
+    
+    console.log('🔄 RETENÇÃO REAL CALCULADA:');
+    console.log(`Clientes período anterior: ${totalClientesAnterior}`);
+    console.log(`Clientes que voltaram: ${totalQueVoltaram}`);
+    console.log(`Taxa de retenção real: ${percentualRetencaoReal.toFixed(1)}%`);
+    console.log(`Variação: ${variacaoRetencaoReal.toFixed(1)}%`);
+    
+    return {
+      valor: parseFloat(percentualRetencaoReal.toFixed(1)),
+      variacao: parseFloat(variacaoRetencaoReal.toFixed(1))
+    };
+    
+  } catch (error) {
+    console.error('❌ Erro ao calcular retenção real:', error);
     return { valor: 0, variacao: 0 };
   }
 }
@@ -959,24 +1096,24 @@ export async function GET(request: Request) {
           2: { // T2 (Abr-Jun)
             clientesAtivos: 3000,
             clientesTotais: 30000,
-            retencao: 10,
-            cmvLimpo: 34,
+            retencao: 40,
+            retencaoReal: 5,
             cmo: 20,
             artistica: 17
           },
           3: { // T3 (Jul-Set)
             clientesAtivos: 3000,
             clientesTotais: 30000,
-            retencao: 10,
-            cmvLimpo: 34,
+            retencao: 40,
+            retencaoReal: 5,
             cmo: 20,
             artistica: 17
           },
           4: { // T4 (Out-Dez) - NOVAS METAS
             clientesAtivos: 4000,
             clientesTotais: 15000,
-            retencao: 10,
-            cmvLimpo: 34,
+            retencao: 40,
+            retencaoReal: 5,
             cmo: 20,
             artistica: 20
           }
@@ -999,12 +1136,12 @@ export async function GET(request: Request) {
             variacao: variacaoClientesTotais
           },
           retencao: {
-            ...(await calcularRetencao(supabase, barIdNum, mesRetencao || undefined)),
+            ...(await calcularRetencao(supabase, barIdNum, mesRetencao || undefined, trimestre)),
             meta: metasTrimestre.retencao
           },
-          cmvLimpo: {
-            valor: 28.7, // TODO: Implementar input manual
-            meta: metasTrimestre.cmvLimpo
+          retencaoReal: {
+            ...(await calcularRetencaoReal(supabase, barIdNum, trimestre)),
+            meta: metasTrimestre.retencaoReal
           },
           cmo: {
             valor: percentualCMO,
@@ -1101,8 +1238,7 @@ export async function GET(request: Request) {
       // Taxa de Retenção (clientes ativos / clientes totais)
       const taxaRetencao = clientesTotaisUnicos > 0 ? (clientesAtivos / clientesTotaisUnicos) * 100 : 0;
 
-      // CMV e Artística (valores simulados para o mês)
-      const cmvLimpo = 25; // Percentual padrão
+      // Artística (valores simulados para o mês)
       const artistica = faturamentoTotal * 0.05; // 5% do faturamento
 
       const resp = NextResponse.json({
@@ -1125,12 +1261,12 @@ export async function GET(request: Request) {
           },
           retencao: {
             valor: taxaRetencao,
-            meta: 25, // Meta de 25%
+            meta: 40, // Meta de 40% (retornantes)
             variacao: 0
           },
-          cmvLimpo: {
-            valor: cmvLimpo,
-            meta: 30, // Meta de 30%
+          retencaoReal: {
+            valor: 0, // TODO: Calcular para visão anual
+            meta: 5, // Meta de 5% (que voltaram)
             variacao: 0
           },
           artistica: {

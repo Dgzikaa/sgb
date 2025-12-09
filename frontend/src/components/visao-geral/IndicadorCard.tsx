@@ -3,7 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, TrendingDown, Minus, Construction } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Construction, LucideIcon, Info } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface IndicadorCardProps {
   titulo: string;
@@ -14,7 +20,7 @@ interface IndicadorCardProps {
   formato?: 'numero' | 'moeda' | 'percentual' | 'decimal';
   tendencia?: number;
   detalhes?: Record<string, number>;
-  cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
+  cor?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink' | 'cyan' | 'indigo';
   inverterProgresso?: boolean; // Para indicadores onde "menos é melhor"
   inverterComparacao?: boolean; // Para indicadores onde variação negativa é boa (CMO, % Artística)
   periodoAnalisado?: string; // Período que está sendo analisado
@@ -23,6 +29,8 @@ interface IndicadorCardProps {
     valor: number;
     label: string; // "vs mês anterior" ou "vs trimestre anterior"
   };
+  icone?: LucideIcon; // Ícone do card
+  tooltipTexto?: string; // Texto explicativo do tooltip
 }
 
 export function IndicadorCard({
@@ -39,7 +47,9 @@ export function IndicadorCard({
   inverterComparacao = false,
   periodoAnalisado,
   emDesenvolvimento = false,
-  comparacao
+  comparacao,
+  icone: Icone,
+  tooltipTexto
 }: IndicadorCardProps) {
   const formatarValor = (val: number) => {
     switch (formato) {
@@ -100,6 +110,18 @@ export function IndicadorCard({
           bgLight: 'bg-pink-100 dark:bg-pink-900/30',
           text: 'text-pink-600 dark:text-pink-400'
         };
+      case 'cyan':
+        return {
+          bg: 'bg-cyan-500',
+          bgLight: 'bg-cyan-100 dark:bg-cyan-900/30',
+          text: 'text-cyan-600 dark:text-cyan-400'
+        };
+      case 'indigo':
+        return {
+          bg: 'bg-indigo-500',
+          bgLight: 'bg-indigo-100 dark:bg-indigo-900/30',
+          text: 'text-indigo-600 dark:text-indigo-400'
+        };
       case 'blue':
       default:
         return {
@@ -113,18 +135,40 @@ export function IndicadorCard({
   const cores = getCorClasse();
 
   return (
+    <TooltipProvider>
     <Card className={`card-dark shadow-sm hover:shadow-lg transition-shadow ${emDesenvolvimento ? 'opacity-70' : ''}`}>
       <CardHeader className="pb-2 p-3 sm:p-6">
         <div className="flex items-start sm:items-center justify-between gap-2">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-            <CardTitle className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300 break-words">
-              {titulo}
-            </CardTitle>
-            {emDesenvolvimento && (
-              <Badge variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs self-start sm:self-auto">
-                <Construction className="h-3 w-3 mr-1" />
-                Em Desenvolvimento
-              </Badge>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {/* Ícone */}
+            {Icone && (
+              <div className={`p-1.5 ${cores.bgLight} rounded-lg flex-shrink-0`}>
+                <Icone className={`w-4 h-4 ${cores.text}`} />
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
+              <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                {titulo}
+              </CardTitle>
+              {emDesenvolvimento && (
+                <Badge variant="outline" className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 text-xs self-start sm:self-auto">
+                  <Construction className="h-3 w-3 mr-1" />
+                  Em Desenvolvimento
+                </Badge>
+              )}
+            </div>
+            {/* Tooltip de ajuda */}
+            {tooltipTexto && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors flex-shrink-0">
+                    <Info className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs text-sm bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 p-3">
+                  <p>{tooltipTexto}</p>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
           {!emDesenvolvimento && tendencia !== undefined && (
@@ -239,5 +283,6 @@ export function IndicadorCard({
         )}
       </CardContent>
     </Card>
+    </TooltipProvider>
   );
 }

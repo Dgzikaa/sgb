@@ -6,33 +6,54 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Função para obter configuração da API Sympla dos secrets
-function getSymplaConfig() {
-  const token = Deno.env.get('SYMPLA_API_TOKEN');
-  if (!token) {
-    throw new Error('SYMPLA_API_TOKEN não encontrado nos secrets');
+// Cache do token para evitar múltiplas queries
+let cachedToken: string | null = null;
+
+// Função para obter token do Sympla do banco de dados
+async function getSymplaTokenFromDB(supabase: any, barId: number = 3): Promise<string> {
+  // Se já temos o token em cache, usar ele
+  if (cachedToken) {
+    return cachedToken;
   }
-  
-  return {
-    hostname: 'api.sympla.com.br',
-    token: token,
-    headers: {
-      's_token': token,
-      'Content-Type': 'application/json'
-    }
-  };
+
+  // Primeiro tenta buscar do banco
+  const { data: creds, error } = await supabase
+    .from('api_credentials')
+    .select('api_token')
+    .eq('bar_id', barId)
+    .eq('sistema', 'sympla')
+    .eq('ativo', true)
+    .single();
+
+  if (!error && creds?.api_token) {
+    cachedToken = creds.api_token;
+    console.log('✅ Token Sympla obtido do banco de dados');
+    return creds.api_token;
+  }
+
+  // Fallback para variável de ambiente
+  const envToken = Deno.env.get('SYMPLA_API_TOKEN');
+  if (envToken) {
+    cachedToken = envToken;
+    console.log('⚠️ Token Sympla obtido de variável de ambiente (fallback)');
+    return envToken;
+  }
+
+  throw new Error('Token do Sympla não encontrado no banco nem nas variáveis de ambiente');
 }
 
 // Função para fazer requisições HTTPS à API do Sympla
-async function makeSymplaRequest(path: string) {
-  const config = getSymplaConfig();
-  const url = `https://${config.hostname}${path}`;
+async function makeSymplaRequest(path: string, token: string) {
+  const url = `https://api.sympla.com.br${path}`;
   
   console.log(`🔗 Fazendo requisição para: ${url}`);
   
   const response = await fetch(url, {
     method: 'GET',
-    headers: config.headers
+    headers: {
+      's_token': token,
+      'Content-Type': 'application/json'
+    }
   });
 
   if (!response.ok) {
@@ -43,7 +64,7 @@ async function makeSymplaRequest(path: string) {
 }
 
 // Função para buscar TODOS os eventos (com paginação completa)
-async function buscarTodosEventos() {
+async function buscarTodosEventos(token: string) {
   let todosEventos: any[] = [];
   let pagina = 1;
   let temProximaPagina = true;
@@ -56,7 +77,7 @@ async function buscarTodosEventos() {
     // Não usar filtros de data na API, filtrar depois no código
     const path = `/public/v1.5.1/events?page=${pagina}`;
     
-    const response = await makeSymplaRequest(path);
+    const response = await makeSymplaRequest(path, token);
 
     if (response.data && response.data.length > 0) {
       todosEventos = todosEventos.concat(response.data);
@@ -76,7 +97,7 @@ async function buscarTodosEventos() {
 }
 
 // Função para buscar participantes de um evento (com paginação completa)
-async function buscarTodosParticipantes(eventoId: string) {
+async function buscarTodosParticipantes(eventoId: string, token: string) {
   let todosParticipantes: any[] = [];
   let pagina = 1;
   let temProximaPagina = true;
@@ -86,7 +107,7 @@ async function buscarTodosParticipantes(eventoId: string) {
   while (temProximaPagina) {
     console.log(`   📄 Página ${pagina}...`);
     const path = `/public/v1.5.1/events/${eventoId}/participants?page=${pagina}`;
-    const response = await makeSymplaRequest(path);
+    const response = await makeSymplaRequest(path, token);
 
     if (response.data && response.data.length > 0) {
       todosParticipantes = todosParticipantes.concat(response.data);
@@ -106,7 +127,7 @@ async function buscarTodosParticipantes(eventoId: string) {
 }
 
 // Função para buscar pedidos de um evento (com paginação completa)
-async function buscarTodosPedidos(eventoId: string) {
+async function buscarTodosPedidos(eventoId: string, token: string) {
   let todosPedidos: any[] = [];
   let pagina = 1;
   let temProximaPagina = true;
@@ -116,7 +137,7 @@ async function buscarTodosPedidos(eventoId: string) {
   while (temProximaPagina) {
     console.log(`   📄 Página ${pagina}...`);
     const path = `/public/v1.5.1/events/${eventoId}/orders?page=${pagina}`;
-    const response = await makeSymplaRequest(path);
+    const response = await makeSymplaRequest(path, token);
 
     if (response.data && response.data.length > 0) {
       todosPedidos = todosPedidos.concat(response.data);
@@ -352,8 +373,11 @@ Deno.serve(async (req: Request) => {
     const dataInicioStr = dataInicioPeriodo.toISOString().split('T')[0];
     const dataFimStr = dataFimPeriodo.toISOString().split('T')[0];
     
+    // Obter token do Sympla do banco
+    const symplaToken = await getSymplaTokenFromDB(supabase, 3);
+    
     console.log(`🔍 Buscando eventos...`);
-    const todosEventos = await buscarTodosEventos();
+    const todosEventos = await buscarTodosEventos(symplaToken);
     
     // Filtrar eventos por nome (Ordi) e período
     const eventosParaSincronizar = todosEventos.filter((evento: any) => {
@@ -416,7 +440,7 @@ Deno.serve(async (req: Request) => {
         });
         
         // Buscar TODOS os participantes deste evento
-        const participantesEvento = await buscarTodosParticipantes(evento.id);
+        const participantesEvento = await buscarTodosParticipantes(evento.id, symplaToken);
         console.log(`   👥 Participantes encontrados: ${participantesEvento.length}`);
         totalParticipantesTodos += participantesEvento.length;
         
@@ -435,7 +459,7 @@ Deno.serve(async (req: Request) => {
         }
         
         // Buscar TODOS os pedidos deste evento
-        const pedidosEvento = await buscarTodosPedidos(evento.id);
+        const pedidosEvento = await buscarTodosPedidos(evento.id, symplaToken);
         console.log(`   💰 Pedidos encontrados: ${pedidosEvento.length}`);
         totalPedidosTodos += pedidosEvento.length;
         

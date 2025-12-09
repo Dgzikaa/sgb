@@ -12,7 +12,13 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Users,
+  UserPlus,
+  RefreshCw,
+  Wallet,
+  Palette,
+  Activity
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -55,9 +61,10 @@ interface IndicadoresTrimestrais {
     meta: number;
     variacao?: number;
   };
-  cmvLimpo: {
+  retencaoReal: {
     valor: number;
     meta: number;
+    variacao?: number;
   };
   cmo: {
     valor: number;
@@ -130,17 +137,53 @@ export default function VisaoGeralEstrategica() {
     showLoading('Carregando dados da visão geral...');
     
     // Calcular o mês de retenção baseado no trimestre selecionado
-    // Usar o mês atual disponível para cada trimestre
+    // Usar o mês atual DINÂMICO para cada trimestre
     const getMesRetencao = (trimestre: number) => {
-      const mesAtualTrimestre = {
-        2: '2025-06', // T2 (Abr-Jun): usar Junho (último mês completo)
-        3: '2025-08', // T3 (Jul-Set): usar Agosto (mês atual) 
-        4: '2025-10'  // T4 (Out-Dez): usar Outubro (mês atual)
+      const now = new Date();
+      const mesAtual = now.getMonth() + 1; // 1-12
+      const anoAtual = now.getFullYear();
+      
+      // Se estamos no trimestre atual, usar o mês atual
+      // Se estamos vendo trimestre passado, usar o último mês do trimestre
+      const ultimoMesTrimestre = {
+        2: 6,  // T2 (Abr-Jun): Junho
+        3: 9,  // T3 (Jul-Set): Setembro
+        4: 12  // T4 (Out-Dez): Dezembro
       };
-      return mesAtualTrimestre[trimestre as keyof typeof mesAtualTrimestre] || '2025-10';
+      
+      const primeiroMesTrimestre = {
+        2: 4,  // T2 (Abr-Jun): Abril
+        3: 7,  // T3 (Jul-Set): Julho
+        4: 10  // T4 (Out-Dez): Outubro
+      };
+      
+      // Se estamos no trimestre selecionado, usar o mês atual (ou anterior se estamos no início do mês)
+      const primeiro = primeiroMesTrimestre[trimestre as keyof typeof primeiroMesTrimestre];
+      const ultimo = ultimoMesTrimestre[trimestre as keyof typeof ultimoMesTrimestre];
+      
+      let mesParaUsar: number;
+      
+      if (mesAtual >= primeiro && mesAtual <= ultimo) {
+        // Estamos no trimestre selecionado - usar mês atual
+        // Se estamos nos primeiros 10 dias do mês, usar mês anterior para ter dados completos
+        if (now.getDate() <= 10 && mesAtual > primeiro) {
+          mesParaUsar = mesAtual - 1;
+        } else {
+          mesParaUsar = mesAtual;
+        }
+      } else if (mesAtual > ultimo) {
+        // Trimestre já passou - usar último mês do trimestre
+        mesParaUsar = ultimo;
+      } else {
+        // Trimestre ainda não chegou - usar último mês do trimestre do ano anterior
+        mesParaUsar = ultimo;
+      }
+      
+      return `${anoAtual}-${mesParaUsar.toString().padStart(2, '0')}`;
     };
     
     const mesRetencao = getMesRetencao(trimestreAtual);
+    console.log(`📊 Visão Geral: Usando mês ${mesRetencao} para retenção do T${trimestreAtual}`);
     const timestamp = Date.now();
     
     const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
@@ -354,15 +397,6 @@ export default function VisaoGeralEstrategica() {
                     cor="purple"
                     sufixo=" ⭐"
                   />
-                  
-                  <IndicadorCard
-                    titulo="EBITDA 2025"
-                    valor={0}
-                    meta={100000}
-                    formato="moeda"
-                    cor="yellow"
-                    emDesenvolvimento={true}
-                  />
                 </div>
               ) : (
                 <div className="text-center py-6">
@@ -452,13 +486,15 @@ export default function VisaoGeralEstrategica() {
               {loading ? (
                 <SkeletonCards.TrimestralSkeleton />
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                   <IndicadorCard
-                    titulo="Clientes Ativos (90d)"
+                    titulo="Clientes Ativos"
                     valor={indicadoresTrimestraisMemo?.clientesAtivos?.valor || 0}
                     meta={indicadoresTrimestraisMemo?.clientesAtivos?.meta || 3000}
                     formato="numero"
                     cor="green"
+                    icone={Activity}
+                    tooltipTexto="Base Ativa (90 dias): Clientes únicos que visitaram o bar nos últimos 90 dias a partir de hoje. Indica o tamanho da sua base de clientes ativos."
                     periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
                     comparacao={{
                       valor: indicadoresTrimestraisMemo?.clientesAtivos?.variacao || 0,
@@ -472,6 +508,8 @@ export default function VisaoGeralEstrategica() {
                     meta={indicadoresTrimestraisMemo?.clientesTotais?.meta || 12000}
                     formato="numero"
                     cor="blue"
+                    icone={Users}
+                    tooltipTexto="Clientes únicos que visitaram o bar durante todo o trimestre (do início até a data atual). Inclui novos e retornantes."
                     periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
                     comparacao={{
                       valor: indicadoresTrimestraisMemo?.clientesTotais?.variacao || 0,
@@ -481,19 +519,23 @@ export default function VisaoGeralEstrategica() {
                   
                   <IndicadorRetencao
                     valor={indicadoresTrimestraisMemo?.retencao?.valor || 0}
-                    meta={indicadoresTrimestraisMemo?.retencao?.meta || 10}
+                    meta={indicadoresTrimestraisMemo?.retencao?.meta || 40}
                     variacao={indicadoresTrimestraisMemo?.retencao?.variacao || 0}
                     periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
                   />
                   
                   <IndicadorCard
-                    titulo="CMV Limpo"
-                    valor={0}
-                    meta={25}
+                    titulo="Retenção Real"
+                    valor={indicadoresTrimestraisMemo?.retencaoReal?.valor || 0}
+                    meta={indicadoresTrimestraisMemo?.retencaoReal?.meta || 5}
                     formato="percentual"
-                    cor="yellow"
-                    inverterProgresso={true}
-                    emDesenvolvimento={true}
+                    cor="cyan"
+                    icone={RefreshCw}
+                    tooltipTexto="Percentual de clientes do trimestre ANTERIOR que VOLTARAM neste trimestre. Mede quantos clientes antigos você conseguiu trazer de volta."
+                    comparacao={{
+                      valor: indicadoresTrimestraisMemo?.retencaoReal?.variacao || 0,
+                      label: "vs trimestre anterior"
+                    }}
                   />
                   
                   <IndicadorCard
@@ -502,6 +544,8 @@ export default function VisaoGeralEstrategica() {
                     meta={indicadoresTrimestraisMemo?.cmo?.meta || 20}
                     formato="percentual"
                     cor="orange"
+                    icone={Wallet}
+                    tooltipTexto="Custo de Mão de Obra: Percentual do faturamento gasto com funcionários. Quanto MENOR, melhor a eficiência operacional."
                     inverterProgresso={true}
                     inverterComparacao={true}
                     comparacao={{
@@ -516,6 +560,8 @@ export default function VisaoGeralEstrategica() {
                     meta={indicadoresTrimestraisMemo?.artistica?.meta || 17}
                     formato="percentual"
                     cor="pink"
+                    icone={Palette}
+                    tooltipTexto="Custo Artístico: Percentual do faturamento gasto com atrações (bandas, DJs, etc). Quanto MENOR, melhor o controle de custos."
                     inverterProgresso={true}
                     inverterComparacao={true}
                     comparacao={{

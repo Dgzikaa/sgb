@@ -92,13 +92,6 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
 // Estrutura base do sidebar
 const defaultSidebarItems: SidebarItem[] = [
     {
-      icon: CheckSquare,
-      label: 'Guia de Funcionalidades',
-      href: '/guia-funcionalidades',
-      color: 'text-green-600 dark:text-green-400',
-      permission: 'home',
-    },
-    {
       icon: Target,
       label: 'Estratégico',
       href: '/estrategico',
@@ -220,6 +213,13 @@ const defaultSidebarItems: SidebarItem[] = [
           href: '/ferramentas/nps',
           description: 'Pesquisa NPS e Felicidade dos funcionários',
           permission: 'gestao',
+        },
+        {
+          icon: DollarSign,
+          label: 'DRE',
+          href: '/ferramentas/dre',
+          description: 'Demonstrativo de Resultado do Exercício',
+          permission: 'dashboard_financeiro_mensal',
         },
         {
           icon: Target,
