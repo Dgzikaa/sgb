@@ -52,7 +52,14 @@ export async function POST(request: NextRequest) {
       vendas_brutas: 0,
       vendas_liquidas: 0,
 
-      // Estoques
+      // Estoques CONSOLIDADOS (para CMV)
+      estoque_inicial: 0,
+      estoque_final: 0,
+      
+      // Estoques detalhados por categoria
+      estoque_inicial_cozinha: 0,
+      estoque_inicial_bebidas: 0,
+      estoque_inicial_drinks: 0,
       estoque_final_cozinha: 0,
       estoque_final_bebidas: 0,
       estoque_final_drinks: 0,
@@ -370,11 +377,111 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar estoques:', err);
     }
 
+    // 6. BUSCAR ESTOQUE INICIAL (última contagem com valores ANTES do data_inicio)
+    try {
+      // Calcular dia anterior ao início do período
+      const dataInicioDate = new Date(data_inicio);
+      dataInicioDate.setDate(dataInicioDate.getDate() - 1);
+      const dataAnterior = dataInicioDate.toISOString().split('T')[0];
+
+      console.log(`📅 Buscando estoque inicial até: ${dataAnterior}`);
+
+      // Buscar última contagem com valores até o dia anterior
+      const { data: contagens, error: errorBusca } = await supabase
+        .from('contagem_estoque_insumos')
+        .select('data_contagem, estoque_final')
+        .eq('bar_id', bar_id)
+        .lte('data_contagem', dataAnterior)
+        .gt('estoque_final', 0)
+        .order('data_contagem', { ascending: false })
+        .limit(1);
+
+      if (!errorBusca && contagens && contagens.length > 0) {
+        const dataContagemInicial = contagens[0].data_contagem;
+        console.log(`📅 Usando contagem de estoque inicial de: ${dataContagemInicial}`);
+
+        // Buscar insumos
+        const { data: insumos } = await supabase
+          .from('insumos')
+          .select('id, tipo_local, categoria, custo_unitario')
+          .eq('bar_id', bar_id);
+
+        if (insumos) {
+          const insumosMap = new Map(insumos.map((i: any) => [i.id, i]));
+
+          // Buscar todas as contagens dessa data
+          const { data: contagensIniciais } = await supabase
+            .from('contagem_estoque_insumos')
+            .select('insumo_id, estoque_final')
+            .eq('bar_id', bar_id)
+            .eq('data_contagem', dataContagemInicial);
+
+          if (contagensIniciais) {
+            const categoriasCozinha = ['cozinha', 'ARMAZÉM (C)', 'HORTIFRUTI (C)', 'MERCADO (C)', 'Mercado (S)', 'PÃES', 'PEIXE', 'PROTEÍNA', 'tempero', 'hortifruti', 'líquido'];
+            const categoriasDrinks = ['ARMAZÉM B', 'DESTILADOS', 'DESTILADOS LOG', 'HORTIFRUTI B', 'IMPÉRIO', 'MERCADO B', 'POLPAS', 'OUTROS'];
+            const categoriasExcluir = ['HORTIFRUTI (F)', 'MERCADO (F)', 'PROTEÍNA (F)'];
+
+            contagensIniciais.forEach((contagem: any) => {
+              const insumo = insumosMap.get(contagem.insumo_id);
+              if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
+
+              const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
+
+              if (insumo.tipo_local === 'bar') {
+                resultado.estoque_inicial_bebidas += valor;
+              } else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
+                resultado.estoque_inicial_drinks += valor;
+              } else if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
+                resultado.estoque_inicial_cozinha += valor;
+              } else if (insumo.tipo_local === 'cozinha' && insumo.categoria === 'Não-alcóolicos') {
+                resultado.estoque_inicial_drinks += valor;
+              }
+            });
+
+            console.log(`✅ Estoque Inicial Cozinha: R$ ${resultado.estoque_inicial_cozinha.toFixed(2)}`);
+            console.log(`✅ Estoque Inicial Drinks: R$ ${resultado.estoque_inicial_drinks.toFixed(2)}`);
+            console.log(`✅ Estoque Inicial Bebidas: R$ ${resultado.estoque_inicial_bebidas.toFixed(2)}`);
+          }
+        }
+      } else {
+        console.log('⚠️ Nenhuma contagem de estoque inicial encontrada');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar estoque inicial:', err);
+    }
+
+    // 7. CONSOLIDAR TOTAIS
+    // Estoque
+    resultado.estoque_inicial = resultado.estoque_inicial_cozinha + resultado.estoque_inicial_bebidas + resultado.estoque_inicial_drinks;
+    resultado.estoque_final = resultado.estoque_final_cozinha + resultado.estoque_final_bebidas + resultado.estoque_final_drinks;
+
+    // Compras total
+    const compras_periodo = resultado.compras_custo_comida + resultado.compras_custo_bebidas + resultado.compras_custo_drinks;
+
+    // Consumos total (para mapear campos)
+    const consumo_socios = resultado.total_consumo_socios;
+    const consumo_beneficios = resultado.mesa_beneficios_cliente;
+    const consumo_adm = resultado.mesa_adm_casa;
+    const consumo_artista = resultado.mesa_banda_dj;
+
+    console.log(`📊 ESTOQUE INICIAL TOTAL: R$ ${resultado.estoque_inicial.toFixed(2)}`);
+    console.log(`📊 ESTOQUE FINAL TOTAL: R$ ${resultado.estoque_final.toFixed(2)}`);
+    console.log(`📊 COMPRAS TOTAL: R$ ${compras_periodo.toFixed(2)}`);
     console.log('✅ Dados automáticos buscados com sucesso');
+
+    // Retornar com campos mapeados para o frontend
+    const dadosParaFrontend = {
+      ...resultado,
+      compras_periodo,
+      consumo_socios,
+      consumo_beneficios,
+      consumo_adm,
+      consumo_artista,
+    };
 
     return NextResponse.json({
       success: true,
-      data: resultado,
+      data: dadosParaFrontend,
       message: 'Dados automáticos carregados com sucesso'
     });
 
