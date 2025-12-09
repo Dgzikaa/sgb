@@ -59,16 +59,15 @@ export async function POST(request: NextRequest) {
     };
 
     // 1. BUSCAR CONSUMO DOS SÓCIOS
-    // 🔧 CORRIGIDO: Deve somar vr_desconto + vr_produtos (alinhado com Edge Function)
-    // Filtro: Motivo contém "sócio" ou "socio"
+    // 🔧 CORRIGIDO: Inclui padrões específicos de sócios (corbal, x-corbal, sócio, socio, etc.)
     try {
       const { data: consumoSociosBruto, error: errorSocios } = await supabase
         .from('contahub_periodo')
-        .select('vr_desconto, vr_produtos, dt_gerencial')
+        .select('vr_desconto, vr_produtos, dt_gerencial, motivo')
         .eq('bar_id', bar_id)
         .gte('dt_gerencial', data_inicio)
         .lte('dt_gerencial', data_fim)
-        .or('motivo.ilike.%sócio%,motivo.ilike.%socio%');
+        .or('motivo.ilike.%sócio%,motivo.ilike.%socio%,motivo.ilike.%corbal%,motivo.ilike.%x-corbal%');
 
       if (!errorSocios && consumoSociosBruto) {
         // ⚡ FILTRAR DIAS FECHADOS
@@ -85,13 +84,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. BUSCAR CONTAS ESPECIAIS
-    // 🔧 CORRIGIDO: Deve somar vr_desconto + vr_produtos (alinhado com Edge Function)
+    // 🔧 CORRIGIDO: Regras alinhadas com a planilha Excel
     try {
       const contasEspeciais = {
-        'mesa_banda_dj': ['consumação banda', 'consumação dj', 'consumacao banda', 'consumacao dj', ' banda ', ' dj '],
-        'mesa_beneficios_cliente': ['benefício', 'beneficio'],
+        // BANDA/DJ: Inclui banda, dj, técnico de som
+        'mesa_banda_dj': ['banda', 'dj', 'técnico de som', 'tecnico de som'],
+        // BENEFÍCIOS: Inclui aniversariantes e vouchers
+        'mesa_beneficios_cliente': ['anivers', 'voucher', 'benefício', 'beneficio'],
+        // ADM: Inclui adm, marketing, casa
         'mesa_adm_casa': ['adm', 'administrativo', 'casa', 'marketing'],
+        // CHEGADEIRA
         'chegadeira': ['chegadeira', 'chegador'],
+        // RH
         'mesa_rh': ['rh', 'recursos humanos']
       };
 

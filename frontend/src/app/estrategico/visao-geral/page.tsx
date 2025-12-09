@@ -24,8 +24,10 @@ import {
   Save,
   X,
   Star,
-  DollarSign
+  DollarSign,
+  ClipboardList
 } from 'lucide-react';
+import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useGlobalLoading } from '@/components/ui/global-loading';
@@ -420,19 +422,19 @@ export default function VisaoGeralEstrategica() {
 
         {/* Indicadores Anuais */}
         <div className="card-dark p-2">
-          <div 
-            className="flex items-center justify-between mb-2 cursor-pointer"
-            onClick={() => setAnualExpanded(!anualExpanded)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setAnualExpanded(!anualExpanded);
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between mb-2">
+            <div 
+              className="flex items-center gap-3 cursor-pointer flex-1"
+              onClick={() => setAnualExpanded(!anualExpanded)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setAnualExpanded(!anualExpanded);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
@@ -441,17 +443,30 @@ export default function VisaoGeralEstrategica() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">Dashboard executivo • Performance estratégica desde abertura</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2"
-            >
-              {anualExpanded ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link href="/estrategico/organizador">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-amber-600 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:hover:bg-amber-900/20"
+                >
+                  <ClipboardList className="w-4 h-4 mr-2" />
+                  Organizador
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2"
+                onClick={() => setAnualExpanded(!anualExpanded)}
+              >
+                {anualExpanded ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </Button>
+            </div>
           </div>
           
           {anualExpanded && (
