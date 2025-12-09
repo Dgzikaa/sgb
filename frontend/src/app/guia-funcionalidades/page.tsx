@@ -102,8 +102,8 @@ const funcionalidadesImplementadas = [
       {
         titulo: 'Teste de Produção',
         descricao: 'Teste de fichas técnicas com timer e validação',
-        url: '/ferramentas/teste-producao',
-        acesso: 'Sidebar > Ferramentas > Teste de Produção',
+        url: '/configuracoes/teste-producao',
+        acesso: 'Sidebar > Configurações > Teste de Produção',
         status: 'completo'
       },
       {

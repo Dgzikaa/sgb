@@ -60,7 +60,7 @@ export default function CalendarioHistoricoPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
-        <Link href="/ferramentas/calendario-operacional">
+        <Link href="/configuracoes/calendario-operacional">
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar para Calendário

@@ -77,7 +77,6 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
       subItems: [
         { icon: Package, label: 'Produção e Insumos', href: '/ferramentas/producao-insumos' },
         { icon: Package, label: 'Contagem de Estoque', href: '/ferramentas/contagem-estoque' },
-        { icon: Calendar, label: 'Calendário Operacional', href: '/ferramentas/calendario-operacional' },
         { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento' },
         { icon: Users, label: 'NPS', href: '/ferramentas/nps' },
         { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal' },

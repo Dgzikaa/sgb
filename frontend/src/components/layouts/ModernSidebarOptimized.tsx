@@ -87,8 +87,6 @@ const defaultSidebarItems: SidebarItem[] = [
     subItems: [
       { icon: Package, label: 'Produção e Insumos', href: '/ferramentas/producao-insumos', permission: 'operacoes' },
       { icon: Package, label: 'Contagem de Estoque', href: '/ferramentas/contagem-estoque', permission: 'operacoes' },
-      { icon: ChefHat, label: 'Teste de Produção', href: '/ferramentas/teste-producao', permission: 'operacoes' },
-      { icon: Calendar, label: 'Calendário Operacional', href: '/ferramentas/calendario-operacional', permission: 'operacoes' },
       { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento', permission: 'financeiro_agendamento' },
       { icon: Users, label: 'NPS Funcionários', href: '/ferramentas/nps', permission: 'gestao' },
       { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal', permission: 'gestao' },
@@ -103,19 +101,9 @@ const defaultSidebarItems: SidebarItem[] = [
     color: 'text-indigo-600 dark:text-indigo-400',
     permission: 'relatorios',
     subItems: [
-      { icon: BarChart3, label: 'Eventos', href: '/analitico/eventos', permission: 'relatorios' },
-    ],
-  },
-  {
-    icon: Sparkles,
-    label: 'CRM',
-    href: '/crm',
-    color: 'text-purple-600 dark:text-purple-400',
-    permission: 'gestao',
-    subItems: [
       { icon: Users, label: 'Clientes', href: '/analitico/clientes', permission: 'relatorios' },
-      { icon: Users, label: 'Clientes Ativos', href: '/relatorios/clientes-ativos', permission: 'relatorios' },
-      { icon: Sparkles, label: 'Hub CRM', href: '/crm', permission: 'gestao' },
+      { icon: Sparkles, label: 'CRM', href: '/crm', permission: 'gestao' },
+      { icon: BarChart3, label: 'Eventos', href: '/analitico/eventos', permission: 'relatorios' },
     ],
   },
   {
@@ -129,6 +117,8 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: ChefHat, label: 'Fichas Técnicas', href: '/configuracoes/fichas-tecnicas', permission: 'operacoes' },
       { icon: CheckSquare, label: 'Checklists', href: '/configuracoes/checklists', permission: 'configuracoes' },
       { icon: Target, label: 'Metas', href: '/configuracoes/metas', permission: 'configuracoes' },
+      { icon: ChefHat, label: 'Teste de Produção', href: '/configuracoes/teste-producao', permission: 'operacoes' },
+      { icon: Calendar, label: 'Calendário Operacional', href: '/configuracoes/calendario-operacional', permission: 'operacoes' },
     ],
   },
 ];

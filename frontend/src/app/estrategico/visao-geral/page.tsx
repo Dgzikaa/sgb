@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   TrendingUp, 
+  TrendingDown,
   Target,
   ChevronLeft,
   ChevronRight,
@@ -62,6 +63,11 @@ interface IndicadoresTrimestrais {
     variacao?: number;
   };
   retencaoReal: {
+    valor: number;
+    meta: number;
+    variacao?: number;
+  };
+  cmvLimpo: {
     valor: number;
     meta: number;
     variacao?: number;
@@ -536,6 +542,22 @@ export default function VisaoGeralEstrategica() {
                       valor: indicadoresTrimestraisMemo?.retencaoReal?.variacao || 0,
                       label: "vs trimestre anterior"
                     }}
+                  />
+                  
+                  <IndicadorCard
+                    titulo="CMV Limpo"
+                    valor={indicadoresTrimestraisMemo?.cmvLimpo?.valor || 0}
+                    meta={indicadoresTrimestraisMemo?.cmvLimpo?.meta || 34}
+                    formato="percentual"
+                    cor="orange"
+                    icone={TrendingDown}
+                    tooltipTexto="Custo de Mercadoria Vendida (CMV) descontando perdas e ajustes. Meta: abaixo de 34% do faturamento total."
+                    comparacao={{
+                      valor: indicadoresTrimestraisMemo?.cmvLimpo?.variacao || 0,
+                      label: "vs trimestre anterior"
+                    }}
+                    inverterProgresso={true}
+                    inverterComparacao={true}
                   />
                   
                   <IndicadorCard

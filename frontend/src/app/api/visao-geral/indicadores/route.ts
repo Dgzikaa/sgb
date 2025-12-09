@@ -1098,6 +1098,7 @@ export async function GET(request: Request) {
             clientesTotais: 30000,
             retencao: 40,
             retencaoReal: 5,
+            cmvLimpo: 34,
             cmo: 20,
             artistica: 17
           },
@@ -1106,14 +1107,16 @@ export async function GET(request: Request) {
             clientesTotais: 30000,
             retencao: 40,
             retencaoReal: 5,
+            cmvLimpo: 34,
             cmo: 20,
             artistica: 17
           },
-          4: { // T4 (Out-Dez) - NOVAS METAS
+          4: { // T4 (Out-Dez) - METAS OFICIAIS
             clientesAtivos: 4000,
             clientesTotais: 15000,
             retencao: 40,
             retencaoReal: 5,
+            cmvLimpo: 34,
             cmo: 20,
             artistica: 20
           }
@@ -1142,6 +1145,11 @@ export async function GET(request: Request) {
           retencaoReal: {
             ...(await calcularRetencaoReal(supabase, barIdNum, trimestre)),
             meta: metasTrimestre.retencaoReal
+          },
+          cmvLimpo: {
+            valor: 0, // TODO: Implementar cálculo do CMV quando disponível
+            meta: metasTrimestre.cmvLimpo,
+            variacao: 0
           },
           cmo: {
             valor: percentualCMO,
