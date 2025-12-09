@@ -41,6 +41,7 @@ interface Usuario {
   nome: string;
   role: string;
   bar_id?: number;
+  bares_ids?: number[]; // Novo campo para múltiplos bares
   modulos_permitidos: string[];
   ativo: boolean;
   criado_em: string;
@@ -84,6 +85,7 @@ function UsuariosPage() {
     nome: '',
     role: '',
     bar_id: '',
+    bares_ids: [] as number[], // Novo campo para múltiplos bares
     modulos_permitidos: [] as string[],
     ativo: true,
     celular: '',
@@ -168,6 +170,16 @@ function UsuariosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar que pelo menos um bar foi selecionado
+    if (formData.bares_ids.length === 0) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione pelo menos um bar para o usuário',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     try {
       // 🔒 Se marcou como admin, garantir role="admin" e adicionar "todos" aos módulos
@@ -273,11 +285,17 @@ function UsuariosPage() {
     const isAdmin = modulosPermitidos.includes('todos') || usuario.role === 'admin';
     setIsAdminUser(isAdmin);
     
+    // Usar bares_ids se existir, senão usar bar_id legado
+    const baresIds = usuario.bares_ids && usuario.bares_ids.length > 0
+      ? usuario.bares_ids
+      : (usuario.bar_id ? [usuario.bar_id] : []);
+    
     setFormData({
       email: usuario.email,
       nome: usuario.nome,
       role: usuario.role,
       bar_id: usuario.bar_id?.toString() || '',
+      bares_ids: baresIds,
       modulos_permitidos: modulosPermitidos,
       ativo: usuario.ativo,
       celular: usuario.celular || '',
@@ -338,6 +356,7 @@ function UsuariosPage() {
       nome: '',
       role: '',
       bar_id: '',
+      bares_ids: [],
       modulos_permitidos: [],
       ativo: true,
       celular: '',
@@ -349,6 +368,16 @@ function UsuariosPage() {
       cidade: '',
       estado: '',
     });
+  };
+  
+  // Handler para toggle de bar na seleção múltipla
+  const handleBarToggle = (barId: number, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      bares_ids: checked
+        ? [...prev.bares_ids, barId]
+        : prev.bares_ids.filter(id => id !== barId)
+    }));
   };
 
   // Estado para modal de redefinição de senha
@@ -595,25 +624,43 @@ function UsuariosPage() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="bar_id" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                            <Building className="w-4 h-4" />
-                            Bar *
-                          </Label>
-                          <Select value={formData.bar_id} onValueChange={(value) => setFormData(prev => ({ ...prev, bar_id: value }))}>
-                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                              <SelectValue placeholder="Selecione o bar" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {bares.map((bar) => (
-                                <SelectItem key={bar.id} value={bar.id.toString()}>
-                                  {bar.nome}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                      {/* Bares - Seleção Múltipla */}
+                      <div className="space-y-3 mb-4">
+                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <Building className="w-4 h-4" />
+                          Bares com Acesso * <span className="text-xs text-gray-500">(selecione um ou mais)</span>
+                        </Label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                          {bares.map((bar) => (
+                            <div key={bar.id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                              <Checkbox
+                                id={`bar-${bar.id}`}
+                                checked={formData.bares_ids.includes(bar.id)}
+                                onCheckedChange={(checked) => handleBarToggle(bar.id, checked as boolean)}
+                                className="border-blue-300 dark:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                              />
+                              <Label 
+                                htmlFor={`bar-${bar.id}`}
+                                className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer font-medium"
+                              >
+                                {bar.nome}
+                              </Label>
+                            </div>
+                          ))}
                         </div>
+                        {formData.bares_ids.length === 0 && (
+                          <p className="text-xs text-red-500 dark:text-red-400">
+                            ⚠️ Selecione pelo menos um bar
+                          </p>
+                        )}
+                        {formData.bares_ids.length > 0 && (
+                          <p className="text-xs text-green-600 dark:text-green-400">
+                            ✓ {formData.bares_ids.length} bar(es) selecionado(s)
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2">
                           <Label htmlFor="role" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                             <Shield className="w-4 h-4" />
@@ -1031,6 +1078,31 @@ function UsuariosPage() {
                   { key: 'nome', header: 'Nome', sortable: true },
                   { key: 'email', header: 'Email', sortable: true },
                   { key: 'role', header: 'Função', render: (u: Usuario) => getRoleBadge(u.role) },
+                  { key: 'bares', header: 'Bares', render: (u: Usuario) => {
+                    const baresDoUsuario = u.bares_ids && u.bares_ids.length > 0 
+                      ? u.bares_ids 
+                      : (u.bar_id ? [u.bar_id] : []);
+                    const nomesDosBares = baresDoUsuario
+                      .map(barId => bares.find(b => b.id === barId)?.nome || 'N/A')
+                      .join(', ');
+                    return (
+                      <div className="flex flex-wrap gap-1">
+                        {baresDoUsuario.length === 0 ? (
+                          <Badge variant="outline" className="text-xs text-gray-400">Nenhum</Badge>
+                        ) : baresDoUsuario.length <= 2 ? (
+                          baresDoUsuario.map(barId => (
+                            <Badge key={barId} variant="outline" className="text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-700">
+                              {bares.find(b => b.id === barId)?.nome || 'N/A'}
+                            </Badge>
+                          ))
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-700" title={nomesDosBares}>
+                            {baresDoUsuario.length} bares
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  }},
                   { key: 'modulos', header: 'Módulos', render: (u: Usuario) => (
                     <Badge variant="outline" className="text-xs">{u.modulos_permitidos?.length || 0} módulos</Badge>
                   ) },

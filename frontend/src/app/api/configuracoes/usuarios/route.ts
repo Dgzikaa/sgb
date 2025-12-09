@@ -8,9 +8,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// GET - Listar todos os usuários
+// GET - Listar todos os usuários com seus bares associados
 export async function GET() {
   try {
+    // Buscar usuários
     const { data: usuarios, error } = await supabase
       .from('usuarios_bar')
       .select('*')
@@ -18,7 +19,25 @@ export async function GET() {
 
     if (error) throw error;
 
-    // Garantir que modulos_permitidos seja sempre um array
+    // Buscar relacionamentos de usuários com bares
+    const { data: usuariosBares, error: baresError } = await supabase
+      .from('usuarios_bares')
+      .select('usuario_id, bar_id');
+
+    if (baresError) {
+      console.error('Erro ao buscar relacionamentos usuários-bares:', baresError);
+    }
+
+    // Criar mapa de bares por usuário
+    const baresMap: Record<number, number[]> = {};
+    usuariosBares?.forEach(ub => {
+      if (!baresMap[ub.usuario_id]) {
+        baresMap[ub.usuario_id] = [];
+      }
+      baresMap[ub.usuario_id].push(ub.bar_id);
+    });
+
+    // Garantir que modulos_permitidos seja sempre um array e adicionar bares_ids
     const usuariosFormatados = usuarios?.map(u => {
       let modulosPermitidos: string[] = [];
       
@@ -38,7 +57,9 @@ export async function GET() {
       
       return {
         ...u,
-        modulos_permitidos: modulosPermitidos
+        modulos_permitidos: modulosPermitidos,
+        // Adicionar array de bares (da nova tabela, com fallback para bar_id legado)
+        bares_ids: baresMap[u.id] || (u.bar_id ? [u.bar_id] : [])
       };
     }) || [];
 
@@ -66,11 +87,16 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { email, nome, role, bar_id, modulos_permitidos, ativo = true, celular, telefone, cpf, data_nascimento, endereco, cep, cidade, estado } = body;
+    const { email, nome, role, bar_id, bares_ids, modulos_permitidos, ativo = true, celular, telefone, cpf, data_nascimento, endereco, cep, cidade, estado } = body;
 
-    if (!email || !nome || !role || !bar_id) {
+    // Suportar tanto bar_id (legado) quanto bares_ids (novo)
+    const baresParaAssociar: number[] = bares_ids 
+      ? (Array.isArray(bares_ids) ? bares_ids.map((id: string | number) => Number(id)) : [Number(bares_ids)])
+      : (bar_id ? [Number(bar_id)] : []);
+
+    if (!email || !nome || !role || baresParaAssociar.length === 0) {
       return NextResponse.json(
-        { error: 'Email, nome, role e bar são obrigatórios' },
+        { error: 'Email, nome, role e pelo menos um bar são obrigatórios' },
         { status: 400 }
       );
     }
@@ -104,12 +130,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Depois criar registro na tabela usuarios_bar
+    // 2. Criar registro na tabela usuarios_bar (usar primeiro bar como principal)
     const { data: usuario, error } = await supabase
       .from('usuarios_bar')
       .insert({
         user_id: authUser.user.id, // UUID do usuário criado no Auth
-        bar_id: parseInt(bar_id),
+        bar_id: baresParaAssociar[0], // Manter compatibilidade com bar_id legado
         email,
         nome,
         role,
@@ -118,12 +144,12 @@ export async function POST(request: NextRequest) {
         celular: celular || null,
         telefone: telefone || null,
         cpf: cpf || null,
-        data_nascimento: data_nascimento || null, // Converter string vazia para null
+        data_nascimento: data_nascimento || null,
         endereco: endereco || null,
         cep: cep || null,
         cidade: cidade || null,
         estado: estado || null,
-        senha_redefinida: false, // Marcar que precisa redefinir senha
+        senha_redefinida: false,
         criado_em: new Date().toISOString(),
       })
       .select()
@@ -135,10 +161,24 @@ export async function POST(request: NextRequest) {
       throw error;
     }
 
-    // 3. Enviar email de boas-vindas com credenciais
+    // 3. Criar relacionamentos na tabela usuarios_bares (múltiplos bares)
+    const relacionamentos = baresParaAssociar.map(barId => ({
+      usuario_id: usuario.id,
+      bar_id: barId
+    }));
+
+    const { error: relError } = await supabase
+      .from('usuarios_bares')
+      .insert(relacionamentos);
+
+    if (relError) {
+      console.error('⚠️ Erro ao criar relacionamentos com bares:', relError);
+      // Não falhar a operação por isso, pois o usuário já foi criado
+    }
+
+    // 4. Enviar email de boas-vindas com credenciais
     let emailSent = false;
     try {
-      // Verificar se estamos em desenvolvimento local
       const baseUrl = process.env.NODE_ENV === 'development' 
         ? 'http://localhost:3000' 
         : (process.env.NEXT_PUBLIC_APP_URL || 'https://sgbv2.vercel.app');
@@ -158,7 +198,6 @@ export async function POST(request: NextRequest) {
         })
       });
 
-      // Verificar se a resposta é JSON válida
       const contentType = emailResponse.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const emailResult = await emailResponse.json();
@@ -170,17 +209,15 @@ export async function POST(request: NextRequest) {
           emailSent = true;
         }
       } else {
-        // Resposta não é JSON (provavelmente HTML de erro)
         const textResponse = await emailResponse.text();
         console.warn('⚠️ Resposta não-JSON da API de email:', textResponse.substring(0, 200));
       }
     } catch (emailError) {
       console.warn('⚠️ Erro ao enviar email de boas-vindas:', emailError);
-      // Não falhar o cadastro por causa do email
     }
 
     return NextResponse.json({ 
-      usuario,
+      usuario: { ...usuario, bares_ids: baresParaAssociar },
       message: emailSent 
         ? 'Usuário criado com sucesso! Email com credenciais de acesso foi enviado.' 
         : 'Usuário criado com sucesso! ⚠️ Email não pôde ser enviado - verifique configurações.',
@@ -204,7 +241,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, email, nome, role, modulos_permitidos, ativo, celular, telefone, cpf, data_nascimento, endereco, cep, cidade, estado } = body;
+    const { id, email, nome, role, bar_id, bares_ids, modulos_permitidos, ativo, celular, telefone, cpf, data_nascimento, endereco, cep, cidade, estado } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -212,6 +249,11 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Suportar tanto bar_id (legado) quanto bares_ids (novo)
+    const baresParaAssociar: number[] = bares_ids 
+      ? (Array.isArray(bares_ids) ? bares_ids.map((bid: string | number) => Number(bid)) : [Number(bares_ids)])
+      : (bar_id ? [Number(bar_id)] : []);
 
     // Garantir que modulos_permitidos seja um array
     const modulosArray = Array.isArray(modulos_permitidos) ? modulos_permitidos : [];
@@ -233,7 +275,7 @@ export async function PUT(request: NextRequest) {
     // 2. Atualizar Supabase Auth (se houver user_id)
     if (currentUser.user_id) {
       try {
-        const authUpdates: any = {
+        const authUpdates: Record<string, unknown> = {
           user_metadata: {
             nome,
             role,
@@ -258,39 +300,72 @@ export async function PUT(request: NextRequest) {
         }
       } catch (authUpdateError) {
         console.warn('⚠️ Erro ao atualizar Auth:', authUpdateError);
-        // Não falhar a operação por isso
       }
     }
 
     // 3. Atualizar tabela usuarios_bar
+    const updateData: Record<string, unknown> = {
+      email,
+      nome,
+      role,
+      modulos_permitidos: modulosArray,
+      ativo,
+      celular: celular || null,
+      telefone: telefone || null,
+      cpf: cpf || null,
+      data_nascimento: data_nascimento || null,
+      endereco: endereco || null,
+      cep: cep || null,
+      cidade: cidade || null,
+      estado: estado || null,
+      atualizado_em: new Date().toISOString(),
+    };
+
+    // Atualizar bar_id principal se houver bares
+    if (baresParaAssociar.length > 0) {
+      updateData.bar_id = baresParaAssociar[0];
+    }
+
     const { data: usuario, error } = await supabase
       .from('usuarios_bar')
-      .update({
-        email,
-        nome,
-        role,
-        modulos_permitidos: modulosArray,
-        ativo,
-        celular: celular || null,
-        telefone: telefone || null,
-        cpf: cpf || null,
-        data_nascimento: data_nascimento || null, // Converter string vazia para null
-        endereco: endereco || null,
-        cep: cep || null,
-        cidade: cidade || null,
-        estado: estado || null,
-        atualizado_em: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
 
-    console.log(`✅ Usuário ${nome} atualizado com sucesso (ID: ${id})`);
+    // 4. Atualizar relacionamentos na tabela usuarios_bares
+    if (baresParaAssociar.length > 0) {
+      // Remover relacionamentos antigos
+      const { error: deleteError } = await supabase
+        .from('usuarios_bares')
+        .delete()
+        .eq('usuario_id', id);
+
+      if (deleteError) {
+        console.error('⚠️ Erro ao remover relacionamentos antigos:', deleteError);
+      }
+
+      // Inserir novos relacionamentos
+      const relacionamentos = baresParaAssociar.map(barId => ({
+        usuario_id: id,
+        bar_id: barId
+      }));
+
+      const { error: insertError } = await supabase
+        .from('usuarios_bares')
+        .insert(relacionamentos);
+
+      if (insertError) {
+        console.error('⚠️ Erro ao criar novos relacionamentos:', insertError);
+      }
+    }
+
+    console.log(`✅ Usuário ${nome} atualizado com sucesso (ID: ${id}, Bares: ${baresParaAssociar.join(', ')})`);
 
     return NextResponse.json({ 
-      usuario, 
+      usuario: { ...usuario, bares_ids: baresParaAssociar }, 
       message: 'Usuário atualizado com sucesso',
       auth_updated: !!currentUser.user_id 
     });
