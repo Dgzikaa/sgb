@@ -19,11 +19,19 @@ import {
   RefreshCw,
   Wallet,
   Palette,
-  Activity
+  Activity,
+  Edit3,
+  Save,
+  X,
+  Star,
+  DollarSign
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useGlobalLoading } from '@/components/ui/global-loading';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface IndicadoresAnuais {
   faturamento: {
@@ -92,6 +100,12 @@ export default function VisaoGeralEstrategica() {
   const [indicadoresAnuais, setIndicadoresAnuais] = useState<IndicadoresAnuais | null>(null);
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Estado para modal de CMV
+  const [modalCMVAberto, setModalCMVAberto] = useState(false);
+  const [cmvPercentual, setCmvPercentual] = useState('');
+  const [salvandoCMV, setSalvandoCMV] = useState(false);
+  
   // Detectar trimestre atual automaticamente baseado na data
   const getCurrentQuarter = () => {
     const now = new Date();
@@ -292,11 +306,70 @@ export default function VisaoGeralEstrategica() {
   // Memoizar informações do trimestre atual
   const trimestreInfo = useMemo(() => getTrimestreInfo(trimestreAtual), [getTrimestreInfo, trimestreAtual]);
 
+  // Função para salvar CMV manualmente
+  const salvarCMV = async () => {
+    if (!selectedBar?.id || !cmvPercentual) {
+      toast({
+        title: 'Erro',
+        description: 'Preencha o valor do CMV',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setSalvandoCMV(true);
+    try {
+      const ano = new Date().getFullYear();
+      const trimestresDatas: Record<number, { inicio: string; fim: string }> = {
+        2: { inicio: `${ano}-04-01`, fim: `${ano}-06-30` },
+        3: { inicio: `${ano}-07-01`, fim: `${ano}-09-30` },
+        4: { inicio: `${ano}-10-01`, fim: `${ano}-12-31` }
+      };
+      
+      const periodo = trimestresDatas[trimestreAtual] || trimestresDatas[4];
+      
+      const response = await fetch('/api/cmv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          periodo_tipo: 'trimestral',
+          periodo_inicio: periodo.inicio,
+          periodo_fim: periodo.fim,
+          cmv_percentual: parseFloat(cmvPercentual.replace(',', '.')),
+          fonte: 'manual'
+        })
+      });
+
+      if (!response.ok) throw new Error('Erro ao salvar CMV');
+
+      toast({
+        title: 'Sucesso!',
+        description: `CMV de ${cmvPercentual}% salvo para o ${trimestreInfo?.nome}`,
+      });
+
+      setModalCMVAberto(false);
+      setCmvPercentual('');
+      
+      // Recarregar indicadores
+      carregarIndicadores();
+    } catch (error) {
+      console.error('Erro ao salvar CMV:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar o CMV',
+        variant: 'destructive'
+      });
+    } finally {
+      setSalvandoCMV(false);
+    }
+  };
+
   // Memoizar componentes de skeleton para evitar re-renders
   const SkeletonCards = useMemo(() => {
     const AnualSkeleton = () => (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, i) => (
           <Card key={i} className="bg-gray-50 dark:bg-gray-900">
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-20" />
@@ -330,6 +403,7 @@ export default function VisaoGeralEstrategica() {
   }, []);
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <GlobalLoadingComponent />
       <div className="container mx-auto px-4 py-2 space-y-2">
@@ -376,13 +450,14 @@ export default function VisaoGeralEstrategica() {
               {loading ? (
                 <SkeletonCards.AnualSkeleton />
               ) : indicadoresAnuaisMemo ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <IndicadorCard
                     titulo="Faturamento 2025"
                     valor={indicadoresAnuaisMemo.faturamento.valor}
                     meta={indicadoresAnuaisMemo.faturamento.meta}
                     formato="moeda"
                     cor="green"
+                    icone={DollarSign}
                     detalhes={indicadoresAnuaisMemo.faturamento.detalhes}
                   />
                   
@@ -392,6 +467,7 @@ export default function VisaoGeralEstrategica() {
                     meta={indicadoresAnuaisMemo.pessoas.meta}
                     formato="numero"
                     cor="blue"
+                    icone={Users}
                     detalhes={indicadoresAnuaisMemo.pessoas.detalhes}
                   />
                   
@@ -401,6 +477,7 @@ export default function VisaoGeralEstrategica() {
                     meta={indicadoresAnuaisMemo.reputacao.meta}
                     formato="decimal"
                     cor="purple"
+                    icone={Star}
                     sufixo=" ⭐"
                   />
                 </div>
@@ -544,21 +621,34 @@ export default function VisaoGeralEstrategica() {
                     }}
                   />
                   
-                  <IndicadorCard
-                    titulo="CMV Limpo"
-                    valor={indicadoresTrimestraisMemo?.cmvLimpo?.valor || 0}
-                    meta={indicadoresTrimestraisMemo?.cmvLimpo?.meta || 34}
-                    formato="percentual"
-                    cor="orange"
-                    icone={TrendingDown}
-                    tooltipTexto="Custo de Mercadoria Vendida (CMV) descontando perdas e ajustes. Meta: abaixo de 34% do faturamento total."
-                    comparacao={{
-                      valor: indicadoresTrimestraisMemo?.cmvLimpo?.variacao || 0,
-                      label: "vs trimestre anterior"
-                    }}
-                    inverterProgresso={true}
-                    inverterComparacao={true}
-                  />
+                  <div className="relative group">
+                    <IndicadorCard
+                      titulo="CMV Limpo"
+                      valor={indicadoresTrimestraisMemo?.cmvLimpo?.valor || 0}
+                      meta={indicadoresTrimestraisMemo?.cmvLimpo?.meta || 34}
+                      formato="percentual"
+                      cor="orange"
+                      icone={TrendingDown}
+                      tooltipTexto="Custo de Mercadoria Vendida (CMV) descontando perdas e ajustes. Meta: abaixo de 34% do faturamento total."
+                      comparacao={{
+                        valor: indicadoresTrimestraisMemo?.cmvLimpo?.variacao || 0,
+                        label: "vs trimestre anterior"
+                      }}
+                      inverterProgresso={true}
+                      inverterComparacao={true}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700"
+                      onClick={() => {
+                        setCmvPercentual(indicadoresTrimestraisMemo?.cmvLimpo?.valor?.toString() || '');
+                        setModalCMVAberto(true);
+                      }}
+                    >
+                      <Edit3 className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                    </Button>
+                  </div>
                   
                   <IndicadorCard
                     titulo="CMO"
@@ -595,8 +685,86 @@ export default function VisaoGeralEstrategica() {
               )}
             </>
           )}
-          </div>
         </div>
       </div>
+    </div>
+
+    {/* Modal para editar CMV */}
+      <Dialog open={modalCMVAberto} onOpenChange={setModalCMVAberto}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-orange-500" />
+              Atualizar CMV Limpo
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
+              Insira o CMV (%) do {trimestreInfo?.nome} {new Date().getFullYear()}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cmv" className="text-gray-900 dark:text-white">
+                CMV Percentual (%)
+              </Label>
+              <div className="relative">
+                <Input
+                  id="cmv"
+                  type="text"
+                  placeholder="Ex: 32.5"
+                  value={cmvPercentual}
+                  onChange={(e) => setCmvPercentual(e.target.value)}
+                  className="pr-8 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                  %
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Meta: abaixo de {indicadoresTrimestraisMemo?.cmvLimpo?.meta || 34}%
+              </p>
+            </div>
+            
+            <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg">
+              <p className="text-sm text-orange-800 dark:text-orange-300">
+                <strong>Dica:</strong> O CMV é calculado na planilha &quot;Pedidos e Estoque&quot; 
+                nas abas &quot;CMV Semanal&quot; ou &quot;CMV Mensal&quot;.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setModalCMVAberto(false);
+                setCmvPercentual('');
+              }}
+              className="border-gray-300 dark:border-gray-600"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancelar
+            </Button>
+            <Button
+              onClick={salvarCMV}
+              disabled={salvandoCMV || !cmvPercentual}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {salvandoCMV ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Salvar CMV
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

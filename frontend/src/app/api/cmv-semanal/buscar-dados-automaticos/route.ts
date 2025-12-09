@@ -59,34 +59,24 @@ export async function POST(request: NextRequest) {
     };
 
     // 1. BUSCAR CONSUMO DOS SÓCIOS
-    // Sócios: x-digao, x-diogo, x-rodrigo, x-cadu, x-corbal, x-augusto, x-gonza
-    // Campos: vd_mesadesc, cli_nome, motivo (contém "sócio" ou "socio")
-    // Valor: vr_desconto
+    // 🔧 CORRIGIDO: Deve somar vr_desconto + vr_produtos (alinhado com Edge Function)
+    // Filtro: Motivo contém "sócio" ou "socio"
     try {
-      const sociosNomes = ['x-digao', 'x-diogo', 'x-rodrigo', 'x-cadu', 'x-corbal', 'x-augusto', 'x-gonza'];
-      
-      // Construir condições OR para todos os campos
-      const conditions = [
-        ...sociosNomes.map(s => `vd_mesadesc.ilike.%${s}%`),
-        ...sociosNomes.map(s => `cli_nome.ilike.%${s}%`),
-        'motivo.ilike.%sócio%',
-        'motivo.ilike.%socio%'
-      ];
-
       const { data: consumoSociosBruto, error: errorSocios } = await supabase
         .from('contahub_periodo')
-        .select('vr_desconto, dt_gerencial')
+        .select('vr_desconto, vr_produtos, dt_gerencial')
         .eq('bar_id', bar_id)
         .gte('dt_gerencial', data_inicio)
         .lte('dt_gerencial', data_fim)
-        .or(conditions.join(','));
+        .or('motivo.ilike.%sócio%,motivo.ilike.%socio%');
 
       if (!errorSocios && consumoSociosBruto) {
         // ⚡ FILTRAR DIAS FECHADOS
         const consumoSocios = await filtrarDiasAbertos(consumoSociosBruto, 'dt_gerencial', bar_id);
         
+        // 🔧 CORRIGIDO: Somar vr_desconto + vr_produtos (alguns sócios podem ter desconto parcial)
         resultado.total_consumo_socios = consumoSocios.reduce((sum, item: any) => 
-          sum + (parseFloat(item.vr_desconto) || 0), 0
+          sum + (parseFloat(item.vr_desconto) || 0) + (parseFloat(item.vr_produtos) || 0), 0
         );
         console.log(`✅ Consumo sócios: R$ ${resultado.total_consumo_socios.toFixed(2)} (${consumoSocios.length} registros)`);
       }
@@ -95,15 +85,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. BUSCAR CONTAS ESPECIAIS
-    // Campo: motivo
-    // Valor: vr_desconto
+    // 🔧 CORRIGIDO: Deve somar vr_desconto + vr_produtos (alinhado com Edge Function)
     try {
       const contasEspeciais = {
-        'mesa_banda_dj': ['dj', 'benza', 'banda', 'roadie', 'roudier'],
-        'mesa_beneficios_cliente': ['aniversario', 'aniversário', 'voucher', 'beneficio', 'benefício'],
-        'mesa_adm_casa': ['funcionario', 'funcionário', 'chefe', 'consuma', 'mkt', 'consumação financeiro', 'financeiro', 'rh', 'thais', 'isaias'],
+        'mesa_banda_dj': ['consumação banda', 'consumação dj', 'consumacao banda', 'consumacao dj', ' banda ', ' dj '],
+        'mesa_beneficios_cliente': ['benefício', 'beneficio'],
+        'mesa_adm_casa': ['adm', 'administrativo', 'casa', 'marketing'],
         'chegadeira': ['chegadeira', 'chegador'],
-        'mesa_rh': [] // Definir padrões depois
+        'mesa_rh': ['rh', 'recursos humanos']
       };
 
       for (const [campo, patterns] of Object.entries(contasEspeciais)) {
@@ -113,7 +102,7 @@ export async function POST(request: NextRequest) {
 
         const { data: dataBruto, error } = await supabase
           .from('contahub_periodo')
-          .select('vr_desconto, dt_gerencial')
+          .select('vr_desconto, vr_produtos, dt_gerencial')
           .eq('bar_id', bar_id)
           .gte('dt_gerencial', data_inicio)
           .lte('dt_gerencial', data_fim)
@@ -123,8 +112,9 @@ export async function POST(request: NextRequest) {
           // ⚡ FILTRAR DIAS FECHADOS
           const data = await filtrarDiasAbertos(dataBruto, 'dt_gerencial', bar_id);
           
+          // 🔧 CORRIGIDO: Somar vr_desconto + vr_produtos (podem ter desconto parcial)
           resultado[campo as keyof typeof resultado] = data.reduce((sum: number, item: any) => 
-            sum + (parseFloat(item.vr_desconto) || 0), 0
+            sum + (parseFloat(item.vr_desconto) || 0) + (parseFloat(item.vr_produtos) || 0), 0
           );
           console.log(`✅ ${campo}: R$ ${(resultado[campo as keyof typeof resultado] as number).toFixed(2)} (${data.length} registros)`);
         }
@@ -133,8 +123,9 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar contas especiais:', err);
     }
 
-    // 3. BUSCAR FATURAMENTO CMVível (Faturamento - Comissões)
-    // Faturamento CMVível = soma de vr_repique
+    // 3. BUSCAR FATURAMENTO CMVível (Vendas Brutas - Couvert - Comissão)
+    // 🔧 CORRIGIDO: vr_repique é COMISSÃO, não faturamento!
+    // Fórmula correta: faturamento_cmvivel = vendas_brutas - couvert - comissão
     try {
       const { data: faturamentoBruto, error: errorFaturamento } = await supabase
         .from('contahub_periodo')
@@ -147,35 +138,40 @@ export async function POST(request: NextRequest) {
         // ⚡ FILTRAR DIAS FECHADOS
         const faturamento = await filtrarDiasAbertos(faturamentoBruto, 'dt_gerencial', bar_id);
         
-        resultado.faturamento_cmvivel = faturamento.reduce((sum, item: any) => 
-          sum + (parseFloat(item.vr_repique) || 0), 0
-        );
-
+        // Calcular vendas brutas
         resultado.vendas_brutas = faturamento.reduce((sum, item: any) => 
           sum + (parseFloat(item.vr_pagamentos) || 0), 0
         );
 
-        resultado.vendas_liquidas = faturamento.reduce((sum, item: any) => 
-          sum + (parseFloat(item.vr_pagamentos) || 0) - (parseFloat(item.vr_couvert) || 0), 0
+        // Calcular total de couvert
+        const totalCouvert = faturamento.reduce((sum, item: any) => 
+          sum + (parseFloat(item.vr_couvert) || 0), 0
         );
 
-        console.log(`✅ Faturamento CMVível: R$ ${resultado.faturamento_cmvivel.toFixed(2)}`);
+        // Calcular total de comissão (vr_repique)
+        const totalComissao = faturamento.reduce((sum, item: any) => 
+          sum + (parseFloat(item.vr_repique) || 0), 0
+        );
+
+        // Vendas líquidas = Vendas Brutas - Couvert
+        resultado.vendas_liquidas = resultado.vendas_brutas - totalCouvert;
+
+        // 🔧 FATURAMENTO CMVível = Vendas Líquidas - Comissão (vr_repique)
+        resultado.faturamento_cmvivel = resultado.vendas_liquidas - totalComissao;
+
         console.log(`✅ Vendas Brutas: R$ ${resultado.vendas_brutas.toFixed(2)}`);
+        console.log(`✅ Total Couvert: R$ ${totalCouvert.toFixed(2)}`);
+        console.log(`✅ Total Comissão (vr_repique): R$ ${totalComissao.toFixed(2)}`);
         console.log(`✅ Vendas Líquidas: R$ ${resultado.vendas_liquidas.toFixed(2)}`);
+        console.log(`✅ Faturamento CMVível: R$ ${resultado.faturamento_cmvivel.toFixed(2)}`);
       }
     } catch (err) {
       console.error('Erro ao buscar faturamento:', err);
     }
 
-    // 4. BUSCAR COMPRAS DO NIBO (por categoria) - Do nosso banco nibo_agendamentos
+    // 4. BUSCAR COMPRAS DO NIBO (exatamente como na planilha - alinhado com Edge Function)
+    // 🔧 CORRIGIDO: Usar match exato de categorias, não includes()
     try {
-      const categoriasCompras = {
-        'CUSTO COMIDA': ['CUSTO COMIDA', 'COMIDA', 'ALIMENTOS', 'INSUMOS COZINHA'],
-        'CUSTO BEBIDAS': ['CUSTO BEBIDAS', 'BEBIDAS', 'CERVEJA', 'REFRIGERANTE', 'ÁGUA'],
-        'CUSTO OUTROS': ['CUSTO OUTROS', 'OUTROS CUSTOS', 'DESCARTÁVEIS', 'LIMPEZA'],
-        'CUSTO DRINKS': ['CUSTO DRINKS', 'DRINKS', 'DESTILADOS', 'INSUMOS BAR']
-      };
-
       // Buscar todas as despesas no período (usa data_competencia)
       const { data: comprasNibo, error: errorCompras } = await supabase
         .from('nibo_agendamentos')
@@ -186,23 +182,34 @@ export async function POST(request: NextRequest) {
         .lte('data_competencia', data_fim);
 
       if (!errorCompras && comprasNibo) {
-        for (const [campo, categorias] of Object.entries(categoriasCompras)) {
-          const valorCategoria = comprasNibo
-            .filter(item => 
-              item.categoria_nome && 
-              categorias.some(cat => 
-                item.categoria_nome.toUpperCase().includes(cat.toUpperCase())
-              )
-            )
-            .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+        // BEBIDAS + TABACARIA = "Custo Bebidas" + "Custo Outros"
+        resultado.compras_custo_bebidas = comprasNibo
+          .filter(item => 
+            item.categoria_nome === 'Custo Bebidas' ||
+            item.categoria_nome === 'Custo Outros'
+          )
+          .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
-          if (campo === 'CUSTO COMIDA') resultado.compras_custo_comida = valorCategoria;
-          else if (campo === 'CUSTO BEBIDAS') resultado.compras_custo_bebidas = valorCategoria;
-          else if (campo === 'CUSTO OUTROS') resultado.compras_custo_outros = valorCategoria;
-          else if (campo === 'CUSTO DRINKS') resultado.compras_custo_drinks = valorCategoria;
+        // COZINHA = APENAS "CUSTO COMIDA" (exato, não inclui "ALIMENTAÇÃO")
+        resultado.compras_custo_comida = comprasNibo
+          .filter(item => item.categoria_nome === 'CUSTO COMIDA')
+          .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
-          console.log(`✅ Compras ${campo}: R$ ${valorCategoria.toFixed(2)}`);
-        }
+        // DRINKS = "Custo Drinks"
+        resultado.compras_custo_drinks = comprasNibo
+          .filter(item => item.categoria_nome === 'Custo Drinks')
+          .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
+
+        // OUTROS = Zero (Materiais de Limpeza e Operação NÃO entram no CMV)
+        resultado.compras_custo_outros = 0;
+
+        const totalCompras = resultado.compras_custo_bebidas + resultado.compras_custo_comida + 
+                             resultado.compras_custo_drinks;
+
+        console.log(`✅ Compras Bebidas + Tabacaria: R$ ${resultado.compras_custo_bebidas.toFixed(2)}`);
+        console.log(`✅ Compras Cozinha (CUSTO COMIDA): R$ ${resultado.compras_custo_comida.toFixed(2)}`);
+        console.log(`✅ Compras Drinks: R$ ${resultado.compras_custo_drinks.toFixed(2)}`);
+        console.log(`📊 TOTAL COMPRAS CMV: R$ ${totalCompras.toFixed(2)}`);
       }
     } catch (err) {
       console.error('Erro ao buscar compras do NIBO:', err);

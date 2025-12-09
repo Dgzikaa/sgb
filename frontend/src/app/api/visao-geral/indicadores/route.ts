@@ -1146,11 +1146,52 @@ export async function GET(request: Request) {
             ...(await calcularRetencaoReal(supabase, barIdNum, trimestre)),
             meta: metasTrimestre.retencaoReal
           },
-          cmvLimpo: {
-            valor: 0, // TODO: Implementar cálculo do CMV quando disponível
-            meta: metasTrimestre.cmvLimpo,
-            variacao: 0
-          },
+          cmvLimpo: await (async () => {
+            // Buscar CMV do trimestre atual da tabela cmv_manual
+            const ano = new Date().getFullYear();
+            const trimestresDatas: Record<number, { inicio: string; fim: string }> = {
+              2: { inicio: `${ano}-04-01`, fim: `${ano}-06-30` },
+              3: { inicio: `${ano}-07-01`, fim: `${ano}-09-30` },
+              4: { inicio: `${ano}-10-01`, fim: `${ano}-12-31` }
+            };
+            
+            const periodoAtual = trimestresDatas[trimestre] || trimestresDatas[4];
+            
+            const { data: cmvData } = await supabase
+              .from('cmv_manual')
+              .select('cmv_percentual')
+              .eq('bar_id', barIdNum)
+              .eq('periodo_tipo', 'trimestral')
+              .eq('periodo_inicio', periodoAtual.inicio)
+              .single();
+            
+            // Buscar CMV do trimestre anterior para variação
+            const trimestreAnterior = trimestre === 2 ? 4 : trimestre - 1;
+            const anoAnterior = trimestre === 2 ? ano - 1 : ano;
+            const periodoAnterior = {
+              2: { inicio: `${anoAnterior}-04-01`, fim: `${anoAnterior}-06-30` },
+              3: { inicio: `${anoAnterior}-07-01`, fim: `${anoAnterior}-09-30` },
+              4: { inicio: `${anoAnterior}-10-01`, fim: `${anoAnterior}-12-31` }
+            }[trimestreAnterior] || { inicio: `${anoAnterior}-10-01`, fim: `${anoAnterior}-12-31` };
+            
+            const { data: cmvAnterior } = await supabase
+              .from('cmv_manual')
+              .select('cmv_percentual')
+              .eq('bar_id', barIdNum)
+              .eq('periodo_tipo', 'trimestral')
+              .eq('periodo_inicio', periodoAnterior.inicio)
+              .single();
+            
+            const valorAtual = cmvData?.cmv_percentual || 0;
+            const valorAnterior = cmvAnterior?.cmv_percentual || 0;
+            const variacao = valorAnterior > 0 ? ((valorAtual - valorAnterior) / valorAnterior) * 100 : 0;
+            
+            return {
+              valor: valorAtual,
+              meta: metasTrimestre.cmvLimpo,
+              variacao: variacao
+            };
+          })(),
           cmo: {
             valor: percentualCMO,
             meta: metasTrimestre.cmo,
