@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export const dynamic = 'force-dynamic'
 
-// GET: Buscar DRE anual consolidada (incluindo lançamentos manuais)
+// GET: Buscar DRE anual consolidada (incluindo lançamentos manuais e subcategorias)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -16,69 +16,22 @@ export async function GET(request: NextRequest) {
 
     console.log(`🔍 [DRE-YEARLY-CONSOLIDATED] Buscando DRE anual consolidada para ${ano}`)
 
-    // Buscar dados consolidados para todos os meses do ano
-    const mesesPromises = Array.from({ length: 12 }, (_, i) => {
-      const mes = i + 1
-      return supabase.rpc('get_dre_consolidada', { 
-        p_ano: ano, 
-        p_mes: mes 
-      })
+    // Buscar dados detalhados com subcategorias usando a nova função
+    const { data: dadosDetalhados, error: errorDetalhados } = await supabase.rpc('get_dre_detalhada', { 
+      p_ano: ano,
+      p_mes: null // null = ano inteiro
     })
 
-    const resultadosMeses = await Promise.all(mesesPromises)
-    
-    // Verificar erros
-    const erros = resultadosMeses.filter(r => r.error)
-    if (erros.length > 0) {
-      console.error('❌ [DRE-YEARLY-CONSOLIDATED] Erros ao buscar dados:', erros)
+    if (errorDetalhados) {
+      console.error('❌ [DRE-YEARLY-CONSOLIDATED] Erro ao buscar dados detalhados:', errorDetalhados)
       return NextResponse.json(
-        { error: 'Erro ao buscar dados consolidados', details: erros },
+        { error: 'Erro ao buscar dados detalhados', details: errorDetalhados.message },
         { status: 500 }
       )
     }
 
-    // Consolidar dados de todos os meses
-    const todosOsDados = resultadosMeses.flatMap(r => r.data || [])
-    
-    // Agrupar por categoria_dre e somar valores
-    const categoriasConsolidadas = new Map()
-    
-    // Separar por atividade
-    const operacionais = todosOsDados.filter(item => item.atividade === 'Operacional')
-    const investimentos = todosOsDados.filter(item => item.atividade === 'Investimento')
-    const financiamentos = todosOsDados.filter(item => item.atividade === 'Financiamento')
-
-    // Processar apenas dados operacionais para o dashboard principal
-    operacionais.forEach(item => {
-      const categoria = item.categoria_dre
-      if (!categoriasConsolidadas.has(categoria)) {
-        categoriasConsolidadas.set(categoria, {
-          nome: categoria,
-          valor_automatico: 0,
-          valor_manual: 0,
-          valor_total: 0,
-          origem: 'automatico',
-          atividade: item.atividade
-        })
-      }
-      
-      const atual = categoriasConsolidadas.get(categoria)
-      atual.valor_automatico += parseFloat(item.valor_automatico || '0')
-      atual.valor_manual += parseFloat(item.valor_manual || '0')
-      atual.valor_total += parseFloat(item.valor_total || '0')
-      
-      // Determinar origem
-      if (atual.valor_manual !== 0 && atual.valor_automatico !== 0) {
-        atual.origem = 'hibrido'
-      } else if (atual.valor_manual !== 0) {
-        atual.origem = 'manual'
-      }
-    })
-
-    const categoriasArray = Array.from(categoriasConsolidadas.values())
-
-    // Mapear para estrutura de macro-categorias
-    const MACRO_CATEGORIAS_MAP = {
+    // Mapear configuração de macro-categorias
+    const MACRO_CATEGORIAS_MAP: Record<string, { tipo: string; icon: string; color: string }> = {
       'Receita': { tipo: 'entrada', icon: 'TrendingUp', color: 'green' },
       'Custos Variáveis': { tipo: 'saida', icon: 'TrendingDown', color: 'red' },
       'Custo insumos (CMV)': { tipo: 'saida', icon: 'ShoppingCart', color: 'orange' },
@@ -89,44 +42,100 @@ export async function GET(request: NextRequest) {
       'Despesas de Ocupação (Contas)': { tipo: 'saida', icon: 'Home', color: 'gray' },
       'Não Operacionais': { tipo: 'entrada', icon: 'FileText', color: 'yellow' },
       'Investimentos': { tipo: 'saida', icon: 'Zap', color: 'cyan' },
-      'Sócios': { tipo: 'saida', icon: 'Users', color: 'violet' }
+      'Sócios': { tipo: 'saida', icon: 'Users', color: 'violet' },
+      'Outras Despesas': { tipo: 'saida', icon: 'BarChart3', color: 'gray' }
     }
 
-    const macroCategorias = categoriasArray.map(cat => {
-      const config = MACRO_CATEGORIAS_MAP[cat.nome] || { tipo: 'saida', icon: 'BarChart3', color: 'gray' }
+    // Agrupar por macro-categoria e consolidar subcategorias
+    const macroMap = new Map<string, {
+      nome: string;
+      tipo: string;
+      total_entradas: number;
+      total_saidas: number;
+      categorias: Array<{ nome: string; entradas: number; saidas: number }>;
+    }>()
+
+    // Processar cada linha dos dados detalhados
+    dadosDetalhados?.forEach((item: any) => {
+      const macroNome = item.categoria_macro || 'Outras Despesas'
+      const catNome = item.categoria_nome || 'Outros'
+      const valor = parseFloat(item.valor) || 0
       
-      return {
-        nome: cat.nome,
-        tipo: config.tipo,
-        total_entradas: config.tipo === 'entrada' ? Math.abs(cat.valor_total) : 0,
-        total_saidas: config.tipo === 'saida' ? Math.abs(cat.valor_total) : 0,
-        valor_automatico: cat.valor_automatico,
-        valor_manual: cat.valor_manual,
-        origem: cat.origem,
-        categorias: [] // Será preenchido se necessário
+      const config = MACRO_CATEGORIAS_MAP[macroNome] || { tipo: 'saida', icon: 'BarChart3', color: 'gray' }
+      
+      if (!macroMap.has(macroNome)) {
+        macroMap.set(macroNome, {
+          nome: macroNome,
+          tipo: config.tipo,
+          total_entradas: 0,
+          total_saidas: 0,
+          categorias: []
+        })
+      }
+      
+      const macro = macroMap.get(macroNome)!
+      
+      // Somar ao total da macro-categoria
+      if (valor > 0) {
+        macro.total_entradas += valor
+      } else {
+        macro.total_saidas += Math.abs(valor)
+      }
+      
+      // Adicionar ou atualizar subcategoria
+      let subcat = macro.categorias.find(c => c.nome === catNome)
+      if (!subcat) {
+        subcat = { nome: catNome, entradas: 0, saidas: 0 }
+        macro.categorias.push(subcat)
+      }
+      
+      if (valor > 0) {
+        subcat.entradas += valor
+      } else {
+        subcat.saidas += Math.abs(valor)
       }
     })
 
-    // Calcular totais
+    // Converter Map para array e ordenar subcategorias por valor
+    const macroCategorias = Array.from(macroMap.values()).map(macro => ({
+      ...macro,
+      categorias: macro.categorias.sort((a, b) => {
+        const valorA = macro.tipo === 'entrada' ? b.entradas - a.entradas : b.saidas - a.saidas
+        return valorA
+      })
+    }))
+
+    // Ordem específica das macro-categorias
+    const ordemMacros = [
+      'Receita', 'Custos Variáveis', 'Custo insumos (CMV)', 'Mão-de-Obra',
+      'Despesas Comerciais', 'Despesas Administrativas', 'Despesas Operacionais',
+      'Despesas de Ocupação (Contas)', 'Não Operacionais', 'Investimentos', 'Sócios', 'Outras Despesas'
+    ]
+    
+    macroCategorias.sort((a, b) => {
+      const indexA = ordemMacros.indexOf(a.nome)
+      const indexB = ordemMacros.indexOf(b.nome)
+      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB)
+    })
+
+    // Calcular totais (excluindo Investimentos e Sócios do EBITDA)
     const entradasTotais = macroCategorias
-      .filter(macro => macro.tipo === 'entrada')
-      .reduce((sum, macro) => sum + macro.total_entradas, 0)
+      .filter(m => m.tipo === 'entrada')
+      .reduce((sum, m) => sum + m.total_entradas, 0)
 
     const saidasTotais = macroCategorias
-      .filter(macro => macro.tipo === 'saida')
-      .reduce((sum, macro) => sum + macro.total_saidas, 0)
+      .filter(m => m.tipo === 'saida' && m.nome !== 'Investimentos' && m.nome !== 'Sócios')
+      .reduce((sum, m) => sum + m.total_saidas, 0)
 
     const saldo = entradasTotais - saidasTotais
+    const ebitda = saldo
 
-    // Calcular totais de investimento e financiamento
-    const totalInvestimentos = Math.abs(investimentos.reduce((sum, item) => sum + parseFloat(item.valor_total || '0'), 0))
-    const totalFinanciamentos = Math.abs(financiamentos.reduce((sum, item) => sum + parseFloat(item.valor_total || '0'), 0))
-
-    // Calcular EBITDA (apenas operacional)
-    const ebitda = entradasTotais - saidasTotais
+    // Totais de investimento e sócios
+    const totalInvestimentos = macroCategorias.find(m => m.nome === 'Investimentos')?.total_saidas || 0
+    const totalSocios = macroCategorias.find(m => m.nome === 'Sócios')?.total_saidas || 0
 
     // Buscar total de lançamentos manuais do ano
-    const { data: totalManuais, error: manuaisError } = await supabase
+    const { data: totalManuais } = await supabase
       .from('dre_manual')
       .select('id')
       .gte('data_competencia', `${ano}-01-01`)
@@ -135,7 +144,7 @@ export async function GET(request: NextRequest) {
     const resultado = {
       macroCategorias,
       entradasTotais,
-      saidasTotais: saidasTotais, // Apenas operacionais
+      saidasTotais,
       saldo,
       ebitda,
       year: ano,
@@ -149,23 +158,23 @@ export async function GET(request: NextRequest) {
           total: totalInvestimentos
         },
         financiamento: {
-          total: totalFinanciamentos
+          total: totalSocios
         }
       },
       estatisticas: {
-        total_categorias: categoriasArray.length,
-        categorias_com_manual: categoriasArray.filter(c => c.origem !== 'automatico').length,
+        total_categorias: macroCategorias.length,
+        total_subcategorias: macroCategorias.reduce((sum, m) => sum + m.categorias.length, 0),
         total_lancamentos_manuais: totalManuais?.length || 0
       }
     }
 
     console.log(`✅ [DRE-YEARLY-CONSOLIDATED] DRE anual consolidada retornada:`, {
       ano,
-      categorias: resultado.macroCategorias.length,
+      macroCategorias: resultado.macroCategorias.length,
+      subcategorias: resultado.estatisticas.total_subcategorias,
       entradas: resultado.entradasTotais,
       saidas: resultado.saidasTotais,
-      ebitda: resultado.ebitda,
-      lancamentos_manuais: resultado.estatisticas.total_lancamentos_manuais
+      ebitda: resultado.ebitda
     })
 
     return NextResponse.json(resultado)

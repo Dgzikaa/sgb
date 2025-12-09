@@ -143,7 +143,7 @@ export default function DrePage() {
   const [loading, setLoading] = useState(true);
   const [loadingYearly, setLoadingYearly] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [collapsedMacros, setCollapsedMacros] = useState<Set<string>>(new Set(['Receita', 'Custos Variáveis', 'Custo insumos (CMV)', 'Mão-de-Obra', 'Despesas Comerciais', 'Despesas Administrativas', 'Despesas Operacionais', 'Despesas de Ocupação (Contas)', 'Investimentos', 'Sócios']));
+  const [collapsedMacros, setCollapsedMacros] = useState<Set<string>>(new Set(['Receita', 'Custos Variáveis', 'Custo insumos (CMV)', 'Mão-de-Obra', 'Despesas Comerciais', 'Despesas Administrativas', 'Despesas Operacionais', 'Despesas de Ocupação (Contas)', 'Não Operacionais', 'Investimentos', 'Sócios', 'Outras Despesas']));
   const [month, setMonth] = useState(() => {
     const currentMonth = new Date().getMonth() + 1;
     console.log('Mês inicial:', currentMonth);
@@ -797,7 +797,7 @@ export default function DrePage() {
                     </div>
                   </div>
 
-                  {/* Macro-Categorias Avançadas */}
+                  {/* Macro-Categorias Avançadas com Dropdown */}
                   <div className="space-y-4">
                     <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
                       Macro-Categorias
@@ -807,54 +807,105 @@ export default function DrePage() {
                         const Icon = getMacroIcon(macro.nome);
                         const colorClass = getMacroColor(macro.nome);
                         const macroSaldo = macro.total_entradas - macro.total_saidas;
+                        const isExpanded = !collapsedMacros.has(macro.nome);
                         
                         return (
-                          <div key={macro.nome} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 hover:shadow-xl transition-all duration-300">
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`p-3 rounded-lg bg-gradient-to-br ${colorClass} text-white`}>
-                                  <Icon className="w-6 h-6" />
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold text-gray-900 dark:text-white">{macro.nome}</h4>
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {macro.categorias.length} categorias
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className={`text-lg font-bold ${
-                                  macroSaldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                                }`}>
-                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macroSaldo)}
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  {macro.tipo === 'entrada' ? 'Receita' : 'Custo'}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600 dark:text-gray-400">Entradas:</span>
-                                <span className="font-medium text-green-600 dark:text-green-400">
-                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macro.total_entradas)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-600 dark:text-gray-400">Saídas:</span>
-                                <span className="font-medium text-red-600 dark:text-red-400">
-                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macro.total_saidas)}
-                                </span>
-                              </div>
-                            </div>
-
+                          <div key={macro.nome} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300">
+                            {/* Header do Card - Clicável */}
                             <button
-                              onClick={() => handleExpand(macro.nome)}
-                              className="w-full mt-4 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                              onClick={() => toggleMacroCollapse(macro.nome)}
+                              className="w-full p-4 sm:p-6 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                             >
-                              Ver detalhes →
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                  <div className={`p-3 rounded-lg bg-gradient-to-br ${colorClass} text-white`}>
+                                    <Icon className="w-6 h-6" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-gray-900 dark:text-white">{macro.nome}</h4>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                      {macro.categorias?.length || 0} categorias
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <div className="text-right">
+                                    <div className={`text-lg font-bold ${
+                                      macroSaldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                                    }`}>
+                                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macroSaldo)}
+                                    </div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                                      {macro.tipo === 'entrada' ? 'Receita' : 'Custo'}
+                                    </div>
+                                  </div>
+                                  {isExpanded ? (
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                  ) : (
+                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600 dark:text-gray-400">Entradas:</span>
+                                  <span className="font-medium text-green-600 dark:text-green-400">
+                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macro.total_entradas)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600 dark:text-gray-400">Saídas:</span>
+                                  <span className="font-medium text-red-600 dark:text-red-400">
+                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(macro.total_saidas)}
+                                  </span>
+                                </div>
+                              </div>
                             </button>
+
+                            {/* Dropdown com Subcategorias */}
+                            {isExpanded && macro.categorias && macro.categorias.length > 0 && (
+                              <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 max-h-64 overflow-y-auto">
+                                <div className="p-3 space-y-1">
+                                  {macro.categorias.map((cat, idx) => {
+                                    const catValor = macro.tipo === 'entrada' 
+                                      ? cat.entradas - cat.saidas 
+                                      : -(cat.saidas - cat.entradas);
+                                    const catValorDisplay = macro.tipo === 'entrada' 
+                                      ? cat.entradas 
+                                      : cat.saidas;
+                                    
+                                    return (
+                                      <div 
+                                        key={`${cat.nome}-${idx}`}
+                                        className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                      >
+                                        <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1 mr-2">
+                                          {cleanCategoryName(cat.nome)}
+                                        </span>
+                                        <span className={`text-sm font-medium whitespace-nowrap ${
+                                          macro.tipo === 'entrada' 
+                                            ? 'text-green-600 dark:text-green-400' 
+                                            : 'text-red-600 dark:text-red-400'
+                                        }`}>
+                                          {macro.tipo === 'entrada' ? '' : '-'}
+                                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(catValorDisplay)}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Mensagem se não houver subcategorias */}
+                            {isExpanded && (!macro.categorias || macro.categorias.length === 0) && (
+                              <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-4 text-center">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  Nenhuma subcategoria disponível
+                                </p>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
