@@ -194,7 +194,14 @@ function classificarLocal(locDesc: string | null): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { data_inicio, data_fim, bar_id = 3, filtros = [] } = await request.json();
+    const { data_inicio, data_fim, bar_id, filtros = [] } = await request.json();
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!data_inicio || !data_fim) {
       return NextResponse.json(

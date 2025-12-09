@@ -167,11 +167,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }
 
       // Buscar dados do Contahub Analítico para recalcular percentuais
+      // Excluir categorias de compras/estoque
       const { data: contahubData, error: contahubError } = await supabase
         .from('contahub_analitico')
-        .select('valorfinal, loc_desc')
+        .select('valorfinal, loc_desc, grp_desc')
         .eq('trn_dtgerencial', eventoData.data_evento)
-        .eq('bar_id', user.bar_id);
+        .eq('bar_id', user.bar_id)
+        .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")');
 
       if (!contahubError && contahubData && contahubData.length > 0) {
         // Calcular totais por categoria

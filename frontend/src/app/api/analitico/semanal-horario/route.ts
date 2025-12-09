@@ -598,11 +598,13 @@ export async function GET(request: NextRequest) {
       try {
         console.log(`📊 Buscando produtos para ${datasComDados.length} datas`);
         
+        // Excluir categorias de compras/estoque
         const produtosQuery = supabase
           .from('contahub_analitico')
-          .select('trn_dtgerencial, prd_desc, qtd, valorfinal')
+          .select('trn_dtgerencial, prd_desc, qtd, valorfinal, grp_desc')
           .in('trn_dtgerencial', datasComDados)
           .eq('bar_id', barIdNum)
+          .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")')
           .order('valorfinal', { ascending: false })
           .limit(100);
 

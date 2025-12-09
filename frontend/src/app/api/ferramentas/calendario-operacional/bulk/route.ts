@@ -13,7 +13,14 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { datas, bar_id = 3, status, motivo, observacao, usuario_nome } = body;
+    const { datas, bar_id, status, motivo, observacao, usuario_nome } = body;
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!datas || !Array.isArray(datas) || datas.length === 0) {
       return NextResponse.json(

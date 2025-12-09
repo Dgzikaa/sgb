@@ -9,7 +9,14 @@ const supabase = createClient(
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const bar_id = searchParams.get('bar_id') || '3';
+    const bar_id = searchParams.get('bar_id');
+    
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     // Buscar a data mais recente com dados no contahub_analitico
     const { data: ultimaData, error } = await supabase

@@ -19,7 +19,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const mes = parseInt(searchParams.get('mes') || new Date().getMonth() + 1 + '');
     const ano = parseInt(searchParams.get('ano') || new Date().getFullYear() + '');
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
 
     // Calcular primeiro e último dia do mês
     const primeiroDia = new Date(ano, mes - 1, 1);
@@ -169,7 +177,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { data, bar_id = 3, status, motivo, observacao } = body;
+    const { data, bar_id, status, motivo, observacao } = body;
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!data || !status) {
       return NextResponse.json(
@@ -259,7 +274,15 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const data = searchParams.get('data');
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
 
     if (!data) {
       return NextResponse.json(

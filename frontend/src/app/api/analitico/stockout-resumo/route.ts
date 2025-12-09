@@ -30,7 +30,15 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const data_selecionada = searchParams.get('data');
-    const bar_id = parseInt(searchParams.get('bar_id') || '3');
+    const bar_id_param = searchParams.get('bar_id');
+    
+    if (!bar_id_param) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const bar_id = parseInt(bar_id_param);
 
     if (!data_selecionada) {
       return NextResponse.json(

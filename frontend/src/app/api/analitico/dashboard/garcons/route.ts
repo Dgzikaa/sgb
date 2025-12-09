@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -96,7 +96,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const dataInicio = searchParams.get('data_inicio');
     const dataFim = searchParams.get('data_fim');
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
 
     if (!dataInicio || !dataFim) {
       return NextResponse.json(

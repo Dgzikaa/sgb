@@ -192,7 +192,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const telefone = searchParams.get('telefone');
     const limite = parseInt(searchParams.get('limite') || '100');
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
 
     console.log(`🔍 API Padrões de Comportamento - telefone: ${telefone}, limite: ${limite}, bar_id: ${barId}`);
 

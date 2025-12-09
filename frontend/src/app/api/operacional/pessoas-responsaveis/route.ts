@@ -5,7 +5,14 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     const searchParams = request.nextUrl.searchParams;
-    const barId = searchParams.get('bar_id') || '3';
+    const barId = searchParams.get('bar_id');
+    
+    if (!barId) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     const { data: pessoas, error } = await (supabase as any)
       .from('pessoas_responsaveis')

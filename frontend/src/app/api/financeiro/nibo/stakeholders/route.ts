@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: NiboStakeholderRequest = await request.json();
-    const { name, document, email, phone, type, address } = body;
+    const { name, document, email, phone, type, address, bar_id } = body;
 
     // Validações básicas
     if (!name || !document) {
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar stakeholder no NIBO
-    const niboResponse = await createStakeholderInNibo(body);
+    const niboResponse = await createStakeholderInNibo(body, bar_id || 3);
 
     return NextResponse.json({
       success: true,
@@ -189,8 +189,9 @@ export async function GET(request: NextRequest) {
 
 // Função para criar stakeholder no NIBO
 async function createStakeholderInNibo(
-  stakeholder: NiboStakeholderRequest
-): Promise<NiboStakeholderResponse> {
+  stakeholder: NiboStakeholderRequest,
+  barId: number = 3
+): Promise<NiboStakeholderResponse & { bar_id: number }> {
   const headers = {
     accept: 'application/json',
     apitoken: NIBO_CONFIG.API_TOKEN!,
@@ -283,7 +284,7 @@ async function createStakeholderInNibo(
   // Salvar no banco local
   const { error: dbError } = await supabase.from('nibo_stakeholders').insert({
     nibo_id: data.id,
-    bar_id: 3, // Bar ID fixo
+    bar_id: barId, // Bar ID dinâmico
     nome: data.name,
     documento_numero: data.document?.number || stakeholder.document,
     documento_tipo:
@@ -314,17 +315,18 @@ async function createStakeholderInNibo(
     pixKey: stakeholder.pixKey || data.bankAccountInformation?.pixKey,
     pixKeyType:
       stakeholder.pixKeyType || data.bankAccountInformation?.pixKeyType,
+    bar_id: barId,
   };
 }
 
 // Função para sincronizar stakeholder do NIBO para banco local
-async function syncStakeholderToLocal(stakeholder: NiboStakeholderResponse): Promise<void> {
+async function syncStakeholderToLocal(stakeholder: NiboStakeholderResponse, barId: number = 3): Promise<void> {
   try {
     const { error } = await supabase
       .from('nibo_stakeholders')
       .upsert({
         nibo_id: stakeholder.id,
-        bar_id: 3, // Bar ID fixo
+        bar_id: barId, // Bar ID dinâmico
         nome: stakeholder.name,
         documento_numero: stakeholder.document,
         documento_tipo: stakeholder.document.length === 11 ? 'CPF' : 'CNPJ',

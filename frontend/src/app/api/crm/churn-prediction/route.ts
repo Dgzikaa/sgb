@@ -253,7 +253,15 @@ export async function GET(request: NextRequest) {
     const nivelRisco = searchParams.get('nivel_risco');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
 
     // Verificar cache
     const cacheKey = `churn_prediction_${barId}`;

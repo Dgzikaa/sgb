@@ -30,8 +30,16 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const { searchParams } = new URL(request.url)
     const dataType = searchParams.get('data_type')
-    const barId = parseInt(searchParams.get('bar_id') || '3')
+    const barIdParam = searchParams.get('bar_id')
     const limit = parseInt(searchParams.get('limit') || '50')
+    
+    if (!barIdParam) {
+      return NextResponse.json({
+        success: false,
+        error: 'bar_id é obrigatório'
+      }, { status: 400 })
+    }
+    const barId = parseInt(barIdParam)
 
     if (!dataType) {
       return NextResponse.json({

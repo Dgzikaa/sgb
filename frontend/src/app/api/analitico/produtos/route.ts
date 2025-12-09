@@ -57,6 +57,9 @@ export async function GET(request: NextRequest) {
 
       console.log(`📄 Página ${page + 1}: Buscando ${pageSize} registros (offset: ${page * pageSize})`)
 
+      // Categorias que são compras/estoque, não vendas
+      const categoriasExcluidas = ['Mercadorias- Compras', 'Insumos', 'Uso Interno']
+      
       let query = supabase
         .from('contahub_analitico')
         .select('prd_desc, grp_desc, trn_dtgerencial, qtd, valorfinal, custo, bar_id')
@@ -64,6 +67,7 @@ export async function GET(request: NextRequest) {
         .not('prd_desc', 'eq', '')
         .not('qtd', 'is', null)
         .not('valorfinal', 'is', null)
+        .not('grp_desc', 'in', `(${categoriasExcluidas.map(c => `"${c}"`).join(',')})`)
         .order('id')
         .range(page * pageSize, (page + 1) * pageSize - 1)
 

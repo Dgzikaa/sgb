@@ -14,7 +14,15 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const bar_id = searchParams.get('bar_id') || '3';
+    const bar_id = searchParams.get('bar_id');
+    
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    
     const data_inicio = searchParams.get('data_inicio');
     const data_fim = searchParams.get('data_fim');
     const meio_pagamento = searchParams.get('meio_pagamento');

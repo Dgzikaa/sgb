@@ -15,7 +15,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const ano = parseInt(searchParams.get('ano') || new Date().getFullYear().toString());
     const mes = searchParams.get('mes') ? parseInt(searchParams.get('mes')!) : null;
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
 
     console.log(`📊 Analytics Calendário - Ano: ${ano}, Mês: ${mes || 'todos'}, Bar: ${barId}`);
 

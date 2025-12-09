@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Buscando produtos por hora para ${data_selecionada}`);
 
     // 🎯 MUDANÇA: Usar contahub_analitico como fonte principal para contagem de produtos
+    // Excluir categorias que são compras/estoque, não vendas
     const { data: dadosAnaliticos, error: errorAnalitico } = await supabase
       .from('contahub_analitico')
       .select(`
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       `)
       .eq('trn_dtgerencial', data_selecionada)
       .eq('bar_id', bar_id)
+      .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")')
       .order('qtd', { ascending: false });
 
     if (errorAnalitico) {

@@ -25,11 +25,13 @@ export async function GET(request: NextRequest) {
     console.log(`🔍 API Detalhes Produto: Buscando vendas de "${produto}" (grupo: ${grupo || 'todos'})`)
 
     // Buscar todas as vendas do produto específico
+    // Excluir categorias de compras/estoque
     let query = supabase
       .from('contahub_analitico')
       .select('prd_desc, grp_desc, trn_dtgerencial, qtd, valorfinal, custo, bar_id')
       .eq('prd_desc', produto)
       .eq('bar_id', barId)
+      .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")')
       .order('trn_dtgerencial', { ascending: false })
 
     // Filtrar por grupo se especificado

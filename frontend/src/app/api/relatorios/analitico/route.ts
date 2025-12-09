@@ -24,10 +24,12 @@ export async function GET(request: NextRequest) {
 
     console.log(`📊 Relatório Analítico solicitado para bar ${bar_id}`);
 
+    // Excluir categorias de compras/estoque por padrão
     let query = supabase
       .from('contahub_analitico')
       .select('*')
       .eq('bar_id', parseInt(bar_id))
+      .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")')
       .limit(limit);
 
     // Aplicar filtros

@@ -352,12 +352,14 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Fallback: usar dados do contahub_analitico
+      // Excluir categorias que são compras/estoque, não vendas
       console.log('📊 Usando contahub_analitico para produtos (prodporhora vazio)');
       const { data: produtosAnalitico } = await supabase
         .from('contahub_analitico')
-        .select('prd_desc, qtd, valorfinal')
+        .select('prd_desc, qtd, valorfinal, grp_desc')
         .eq('trn_dtgerencial', data_selecionada)
-        .eq('bar_id', bar_id);
+        .eq('bar_id', bar_id)
+        .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")');
 
       produtosAnalitico?.forEach(item => {
         const produto = item.prd_desc;

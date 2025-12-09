@@ -28,7 +28,15 @@ async function buscarComentarios(barId: number, campo: string, condicao: string)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const barId = parseInt(searchParams.get('bar_id') || '3');
+    const barIdParam = searchParams.get('bar_id');
+    
+    if (!barIdParam) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
+    const barId = parseInt(barIdParam);
     const tipo = searchParams.get('tipo') || 'semana'; // dia, semana ou mes
     const dataInicio = searchParams.get('data_inicio');
     const dataFim = searchParams.get('data_fim');

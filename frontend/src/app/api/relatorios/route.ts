@@ -28,10 +28,12 @@ export async function GET(request: NextRequest) {
 
     switch (tipo) {
       case 'analitico':
+        // Excluir categorias de compras/estoque
         query = supabase
           .from('contahub_analitico')
           .select('*')
           .eq('bar_id', parseInt(bar_id))
+          .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")')
           .limit(limit);
 
         if (data_inicio) {
