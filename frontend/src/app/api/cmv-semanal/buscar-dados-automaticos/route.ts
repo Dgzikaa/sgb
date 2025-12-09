@@ -182,22 +182,30 @@ export async function POST(request: NextRequest) {
         .lte('data_competencia', data_fim);
 
       if (!errorCompras && comprasNibo) {
-        // BEBIDAS + TABACARIA = "Custo Bebidas" + "Custo Outros"
+        // 🔧 CORRIGIDO: Usar comparação case-insensitive para categorias
+        
+        // BEBIDAS + TABACARIA = "Custo Bebidas" + "Custo Outros" (case-insensitive)
         resultado.compras_custo_bebidas = comprasNibo
-          .filter(item => 
-            item.categoria_nome === 'Custo Bebidas' ||
-            item.categoria_nome === 'Custo Outros'
-          )
+          .filter(item => {
+            const cat = (item.categoria_nome || '').toLowerCase();
+            return cat === 'custo bebidas' || cat === 'custo outros';
+          })
           .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
-        // COZINHA = APENAS "CUSTO COMIDA" (exato, não inclui "ALIMENTAÇÃO")
+        // COZINHA = "CUSTO COMIDA" ou "Custo Comida" (case-insensitive)
         resultado.compras_custo_comida = comprasNibo
-          .filter(item => item.categoria_nome === 'CUSTO COMIDA')
+          .filter(item => {
+            const cat = (item.categoria_nome || '').toLowerCase();
+            return cat === 'custo comida';
+          })
           .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
-        // DRINKS = "Custo Drinks"
+        // DRINKS = "Custo Drinks" (case-insensitive)
         resultado.compras_custo_drinks = comprasNibo
-          .filter(item => item.categoria_nome === 'Custo Drinks')
+          .filter(item => {
+            const cat = (item.categoria_nome || '').toLowerCase();
+            return cat === 'custo drinks';
+          })
           .reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0);
 
         // OUTROS = Zero (Materiais de Limpeza e Operação NÃO entram no CMV)
@@ -215,22 +223,46 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao buscar compras do NIBO:', err);
     }
 
-    // 5. BUSCAR ESTOQUES (última contagem antes da data_fim)
+    // 5. BUSCAR ESTOQUES (última contagem COM VALORES antes da data_fim)
     // Tabela: contagem_estoque_insumos
+    // 🔧 CORRIGIDO: Buscar última contagem que TENHA VALORES (não apenas existe)
     try {
-      // Buscar última contagem disponível até data_fim
+      // Buscar última contagem com estoque > 0 até data_fim
       const { data: ultimaContagem, error: errorContagem } = await supabase
-        .from('contagem_estoque_insumos')
-        .select('data_contagem')
-        .eq('bar_id', bar_id)
-        .lte('data_contagem', data_fim)
-        .order('data_contagem', { ascending: false })
-        .limit(1)
-        .single();
+        .rpc('get_ultima_contagem_com_valores', {
+          p_bar_id: bar_id,
+          p_data_fim: data_fim
+        });
+      
+      // Fallback: buscar manualmente se RPC não existir
+      let dataContagemFinal = null;
+      
+      if (errorContagem || !ultimaContagem) {
+        console.log('⚠️ RPC não disponível, buscando manualmente...');
+        
+        // Buscar todas as contagens até data_fim
+        const { data: contagens, error: errorBusca } = await supabase
+          .from('contagem_estoque_insumos')
+          .select('data_contagem, estoque_final')
+          .eq('bar_id', bar_id)
+          .lte('data_contagem', data_fim)
+          .gt('estoque_final', 0)
+          .order('data_contagem', { ascending: false })
+          .limit(1);
+        
+        if (!errorBusca && contagens && contagens.length > 0) {
+          dataContagemFinal = contagens[0].data_contagem;
+        }
+      } else if (ultimaContagem && ultimaContagem.length > 0) {
+        dataContagemFinal = ultimaContagem[0].data_contagem;
+      }
+      
+      // Criar objeto compatível com código existente
+      const ultimaContagemObj = dataContagemFinal ? { data_contagem: dataContagemFinal } : null;
 
-      if (!errorContagem && ultimaContagem) {
-        const dataContagem = ultimaContagem.data_contagem;
-        console.log(`📅 Usando contagem de estoque de: ${dataContagem}`);
+      if (ultimaContagemObj) {
+        const dataContagem = ultimaContagemObj.data_contagem;
+        console.log(`📅 Usando contagem de estoque de: ${dataContagem} (última com valores até ${data_fim})`);
 
         // Buscar todos os insumos com suas categorias
         const { data: insumos, error: errorInsumos } = await supabase
@@ -250,10 +282,52 @@ export async function POST(request: NextRequest) {
             // Criar map de insumos para facilitar lookup
             const insumosMap = new Map(insumos.map(i => [i.id, i]));
 
-            // Categorias de cada tipo
-            const categoriasCozinha = ['ARMAZÉM (C)', 'HORTIFRUTI (C)', 'MERCADO (C)', 'PÃES', 'PEIXE', 'PROTEÍNA', 'Mercado (S)', 'tempero', 'hortifruti', 'líquido'];
-            const categoriasDrinks = ['ARMAZÉM B', 'DESTILADOS', 'DESTILADOS LOG', 'HORTIFRUTI B', 'IMPÉRIO', 'MERCADO B', 'POLPAS', 'Não-alcóolicos', 'OUTROS', 'polpa', 'fruta'];
-            // Excluir funcionários
+            // 🔧 CORRIGIDO: Categorias baseadas nos dados REAIS do banco (01/12/2025)
+            
+            // Categorias de COZINHA (comida) - tipo_local = 'cozinha'
+            // Incluem: PROTEÍNA, MERCADO (C), ARMAZÉM (C), PEIXE, HORTIFRUTI (C), PÃES, etc.
+            const categoriasCozinha = [
+              'cozinha',           // 280 insumos genéricos
+              'ARMAZÉM (C)', 
+              'HORTIFRUTI (C)', 
+              'MERCADO (C)', 
+              'Mercado (S)',
+              'PÃES', 
+              'PEIXE', 
+              'PROTEÍNA', 
+              'tempero', 
+              'hortifruti', 
+              'líquido'
+            ];
+            
+            // Categorias de DRINKS - tipo_local = 'cozinha' mas são para drinks
+            // DESTILADOS é a maior categoria (~R$42k)
+            const categoriasDrinks = [
+              'ARMAZÉM B', 
+              'DESTILADOS',        // Principal! R$42k
+              'DESTILADOS LOG', 
+              'HORTIFRUTI B', 
+              'IMPÉRIO', 
+              'MERCADO B', 
+              'POLPAS',
+              'OUTROS'
+            ];
+            
+            // Categorias de BEBIDAS (bar) - tipo_local = 'bar'
+            // Retornáveis, Vinhos, Long Neck, etc.
+            const categoriasBebidas = [
+              'Retornáveis',
+              'retornáveis',
+              'Vinhos',
+              'Long Neck',
+              'Não-alcóolicos',    // No bar
+              'Lata',
+              'Artesanal',
+              'polpa',
+              'fruta'
+            ];
+            
+            // Excluir funcionários (não entra no CMV)
             const categoriasExcluir = ['HORTIFRUTI (F)', 'MERCADO (F)', 'PROTEÍNA (F)'];
 
             contagens.forEach((contagem: any) => {
@@ -262,17 +336,21 @@ export async function POST(request: NextRequest) {
 
               const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
 
-              // Cozinha
-              if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
-                resultado.estoque_final_cozinha += valor;
+              // BEBIDAS - tipo_local = 'bar'
+              if (insumo.tipo_local === 'bar') {
+                resultado.estoque_final_bebidas += valor;
               }
-              // Drinks
+              // DRINKS - tipo_local = 'cozinha' mas categorias de drinks
               else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
                 resultado.estoque_final_drinks += valor;
               }
-              // Bebidas + Tabacaria (tudo do bar)
-              else if (insumo.tipo_local === 'bar') {
-                resultado.estoque_final_bebidas += valor;
+              // COZINHA (comida) - tipo_local = 'cozinha' e categorias de comida
+              else if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
+                resultado.estoque_final_cozinha += valor;
+              }
+              // Não-alcóolicos do tipo cozinha vai para drinks
+              else if (insumo.tipo_local === 'cozinha' && insumo.categoria === 'Não-alcóolicos') {
+                resultado.estoque_final_drinks += valor;
               }
             });
 

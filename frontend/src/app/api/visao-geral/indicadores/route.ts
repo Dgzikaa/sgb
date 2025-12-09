@@ -487,58 +487,40 @@ export async function GET(request: Request) {
         }
       }
       */
-      // Faturamento 2025 (ContaHub + Yuzer + Sympla) - ATÉ DATA ATUAL
-      
-      // Buscar dados do ContaHub excluindo 'Conta Assinada' (mesma lógica do desempenho)
-      const contahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido, meio', {
-        'gte_dt_gerencial': startDate,
-        'lte_dt_gerencial': endDate,
-        'eq_bar_id': barIdNum
-      });
-      
-      // Filtrar para excluir 'Conta Assinada' (consumo de sócios)
-      const contahubFiltrado = contahubData?.filter(item => item.meio !== 'Conta Assinada') || [];
-      
-      const yuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
-        'gte_data_evento': startDate,
-        'lte_data_evento': endDate,
-        'eq_bar_id': barIdNum
-      });
-      
-      // ✅ CORRIGIDO: Buscar faturamento Sympla de sympla_pedidos (dados corretos)
-      const symplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
-        'gte_data_pedido': startDate,
-        'lte_data_pedido': endDate
-      });
-
-
-      // Calcular com dados paginados
-      
-      const faturamentoContahub = contahubFiltrado?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
-      const faturamentoYuzer = yuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
-      const faturamentoSympla = symplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
-      const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
-      
-      // Log final de faturamento
-      // Log apenas em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`💰 Faturamento Anual (${startDate} a ${endDate}): R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
-      }
-      
-      // Logs detalhados removidos
-
-      // Número de Pessoas (ContaHub + Yuzer + Sympla)
-      // Pessoas com PAGINAÇÃO
-      // Pessoas com paginação
-      
-      const pessoasContahubData = await fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
-        'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate,
-        'lte_dt_gerencial': endDate
-      });
-      
-      // Yuzer e Sympla por enquanto sem paginação (volumes menores)
-      const [pessoasYuzer, pessoasSympla] = await Promise.all([
+      // 🚀 OTIMIZAÇÃO: Buscar TODOS os dados em paralelo
+      const [
+        contahubData,
+        yuzerData,
+        symplaData,
+        pessoasContahubData,
+        pessoasYuzer,
+        pessoasSympla,
+        reputacaoData
+      ] = await Promise.all([
+        // Faturamento ContaHub
+        fetchAllData(supabase, 'contahub_pagamentos', 'liquido, meio', {
+          'gte_dt_gerencial': startDate,
+          'lte_dt_gerencial': endDate,
+          'eq_bar_id': barIdNum
+        }),
+        // Faturamento Yuzer
+        fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
+          'gte_data_evento': startDate,
+          'lte_data_evento': endDate,
+          'eq_bar_id': barIdNum
+        }),
+        // Faturamento Sympla
+        fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
+          'gte_data_pedido': startDate,
+          'lte_data_pedido': endDate
+        }),
+        // Pessoas ContaHub
+        fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
+          'eq_bar_id': barIdNum,
+          'gte_dt_gerencial': startDate,
+          'lte_dt_gerencial': endDate
+        }),
+        // Pessoas Yuzer
         supabase
           .from('yuzer_produtos')
           .select('quantidade, produto_nome')
@@ -546,42 +528,43 @@ export async function GET(request: Request) {
           .or('produto_nome.ilike.%ingresso%,produto_nome.ilike.%entrada%')
           .gte('data_evento', startDate)
           .lte('data_evento', endDate),
-        
-        // ✅ CORRIGIDO: Usar checkins_realizados (coluna correta) de sympla_resumo
+        // Pessoas Sympla
         supabase
           .from('sympla_resumo')
           .select('checkins_realizados')
           .gte('data_inicio', startDate)
-          .lte('data_inicio', endDate)
+          .lte('data_inicio', endDate),
+        // Reputação Google
+        fetchAllData(supabase, 'windsor_google', 'review_average_rating_total', {
+          'gte_date': startDate,
+          'lte_date': endDate
+        })
       ]);
 
+      // Calcular Faturamento
+      const contahubFiltrado = contahubData?.filter(item => item.meio !== 'Conta Assinada') || [];
+      const faturamentoContahub = contahubFiltrado?.reduce((sum, item) => sum + (item.liquido || 0), 0) || 0;
+      const faturamentoYuzer = yuzerData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoSympla = symplaData?.reduce((sum, item) => sum + (item.valor_liquido || 0), 0) || 0;
+      const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamentoSympla;
+
+      // Calcular Pessoas
       const totalPessoasContahub = pessoasContahubData?.reduce((sum, item) => sum + (item.pessoas || 0), 0) || 0;
       const totalPessoasYuzer = pessoasYuzer.data?.reduce((sum, item) => sum + (item.quantidade || 0), 0) || 0;
-      // ✅ CORRIGIDO: Somar checkins_realizados do sympla_resumo
       const totalPessoasSympla = pessoasSympla.data?.reduce((sum, item) => sum + (item.checkins_realizados || 0), 0) || 0;
       const totalPessoas = totalPessoasContahub + totalPessoasYuzer + totalPessoasSympla;
       
-      // Log final de pessoas
-      console.log(`👥 Total Pessoas (${startDate} a ${endDate}): ${totalPessoas.toLocaleString('pt-BR')}`);
-      
-      // Logs detalhados removidos
+      // Log apenas em desenvolvimento
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`💰 Faturamento Anual: R$ ${faturamentoTotal.toLocaleString('pt-BR')}`);
+        console.log(`👥 Total Pessoas: ${totalPessoas.toLocaleString('pt-BR')}`);
+      }
 
-      // Reputação (Google Reviews)
-      // Reputação (Google Reviews - Windsor) - COM PAGINAÇÃO
-      // Reputação com paginação
-      
-      const reputacaoData = await fetchAllData(supabase, 'windsor_google', 'review_average_rating_total', {
-        'gte_date': startDate,
-        'lte_date': endDate
-      });
-
-      // Filtrar apenas registros com valor válido (não null)
+      // Calcular Reputação (já buscado em paralelo acima)
       const reputacaoValida = reputacaoData?.filter(item => item.review_average_rating_total != null && item.review_average_rating_total > 0) || [];
       const reputacao = reputacaoValida.length > 0 
         ? reputacaoValida.reduce((sum, item) => sum + item.review_average_rating_total, 0) / reputacaoValida.length
         : 0;
-        
-      // Logs detalhados removidos
 
       // EBITDA (será calculado futuramente com DRE)
       const ebitda = 0;
@@ -622,120 +605,84 @@ export async function GET(request: Request) {
     if (periodo === 'trimestral') {
       // Datas dinâmicas baseadas no trimestre selecionado
       const { start: startDate, end: endDate } = getTrimestreDates(trimestre);
-      // Trimestre selecionado
-
-      // Clientes Ativos (visitaram 2+ vezes) nos ÚLTIMOS 90 DIAS (D-90)
-      // Não zerar a cada trimestre - usar sempre os últimos 90 dias
+      const { start: startDateAnterior, end: endDateAnterior } = getTrimestreAnterior(trimestre);
+      
+      // Ajustar endDate para não ultrapassar a data atual
       const hoje = new Date();
-      const data90DiasAtras = new Date(hoje);
-      data90DiasAtras.setDate(hoje.getDate() - 90);
-      const startDate90 = data90DiasAtras.toISOString().split('T')[0];
-      const endDate90 = hoje.toISOString().split('T')[0];
-      
-      const clientesData = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
-        'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate90,
-        'lte_dt_gerencial': endDate90
-      });
-      
-      // Filtrar apenas clientes com telefone
-      const clientesComTelefone = clientesData?.filter(item => item.cli_fone) || [];
-      // Logs detalhados removidos
+      const endDateObj = new Date(endDate);
+      const endDateEfetivo = hoje < endDateObj ? hoje.toISOString().split('T')[0] : endDate;
 
-      // Agrupar por telefone e contar visitas
+      // 🚀 OTIMIZAÇÃO: Buscar dados de clientes em PARALELO
+      const [
+        clientesData,
+        clientesDataAnterior,
+        clientesTotaisContahubData,
+        clientesTotaisYuzerData,
+        clientesTotaisSymplaData
+      ] = await Promise.all([
+        // Clientes ativos do trimestre atual
+        fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
+          'eq_bar_id': barIdNum,
+          'gte_dt_gerencial': startDate,
+          'lte_dt_gerencial': endDateEfetivo
+        }),
+        // Clientes ativos do trimestre anterior
+        fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
+          'eq_bar_id': barIdNum,
+          'gte_dt_gerencial': startDateAnterior,
+          'lte_dt_gerencial': endDateAnterior
+        }),
+        // Clientes totais ContaHub
+        fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
+          'eq_bar_id': barIdNum,
+          'gte_dt_gerencial': startDate,
+          'lte_dt_gerencial': endDateEfetivo
+        }),
+        // Clientes totais Yuzer
+        fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
+          'eq_bar_id': barIdNum,
+          'gte_data_evento': startDate,
+          'lte_data_evento': endDateEfetivo
+        }),
+        // Clientes totais Sympla
+        fetchAllData(supabase, 'sympla_resumo', 'checkins_realizados', {
+          'gte_data_inicio': startDate,
+          'lte_data_inicio': endDateEfetivo
+        })
+      ]);
+      
+      // Calcular Clientes Ativos (2+ visitas) - Trimestre Atual
+      const clientesComTelefone = clientesData?.filter(item => item.cli_fone) || [];
       const clientesMap = new Map();
       clientesComTelefone.forEach(item => {
         const count = clientesMap.get(item.cli_fone) || 0;
         clientesMap.set(item.cli_fone, count + 1);
       });
-
-      // Contar clientes com 2+ visitas
       let clientesAtivos = 0;
       clientesMap.forEach(count => {
         if (count >= 2) clientesAtivos++;
       });
       
-      // ✅ COMPARAÇÃO COM D-90 DO PERÍODO ANTERIOR (90 dias atrás dos últimos 90 dias)
-      const data180DiasAtras = new Date(hoje);
-      data180DiasAtras.setDate(hoje.getDate() - 180);
-      const data90DiasAtrasAnterior = new Date(hoje);
-      data90DiasAtrasAnterior.setDate(hoje.getDate() - 90);
-      const startDateAnterior90 = data180DiasAtras.toISOString().split('T')[0];
-      const endDateAnterior90 = data90DiasAtrasAnterior.toISOString().split('T')[0];
-      
-      const clientesDataAnterior = await fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
-        'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDateAnterior90,
-        'lte_dt_gerencial': endDateAnterior90
-      });
-      
+      // Calcular Clientes Ativos - Trimestre Anterior
       const clientesComTelefoneAnterior = clientesDataAnterior?.filter(item => item.cli_fone) || [];
       const clientesMapAnterior = new Map();
       clientesComTelefoneAnterior.forEach(item => {
         const count = clientesMapAnterior.get(item.cli_fone) || 0;
         clientesMapAnterior.set(item.cli_fone, count + 1);
       });
-      
       let clientesAtivosAnterior = 0;
       clientesMapAnterior.forEach(count => {
         if (count >= 2) clientesAtivosAnterior++;
       });
       
-      // 🔍 DEBUG: Logs de comparação D-90
-      // Logs detalhados apenas em desenvolvimento
-      if (process.env.NODE_ENV === 'development') {
-        console.log('👥 CLIENTES ATIVOS - COMPARAÇÃO D-90:');
-        console.log(`Período atual (D-90): ${startDate90} a ${endDate90} = ${clientesAtivos} clientes ativos`);
-        console.log(`Período anterior (D-90): ${startDateAnterior90} a ${endDateAnterior90} = ${clientesAtivosAnterior} clientes ativos`);
-      }
       const variacaoClientesAtivos = clientesAtivosAnterior > 0 ? ((clientesAtivos - clientesAtivosAnterior) / clientesAtivosAnterior * 100) : 0;
+      
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Variação D-90: ${variacaoClientesAtivos.toFixed(1)}%`);
+        console.log(`👥 T${trimestre}: ${clientesAtivos} ativos | T${trimestre-1}: ${clientesAtivosAnterior} | Var: ${variacaoClientesAtivos.toFixed(1)}%`);
       }
       
-      // Logs detalhados removidos
-
-      // 🚨 DESABILITANDO VIEW TEMPORARIAMENTE PARA FORÇAR RECÁLCULO DO CMO
-      let viewTri: any | null = null;
-      // COMENTADO PARA FORÇAR RECÁLCULO MANUAL
-      /*
-      try {
-        const { data: triView, error: triViewErr } = await supabase
-          .from('view_visao_geral_trimestral')
-          .select('clientes_totais, cmo_total, faturamento_trimestre, cmo_percent, artistica_percent')
-          .eq('bar_id', barIdNum)
-          .eq('ano', 2025)
-          .eq('trimestre', trimestre)
-          .limit(1);
-        if (!triViewErr && triView && triView.length > 0) {
-          viewTri = triView[0];
-        }
-      } catch (_) {
-        // ignora
-      }
-      */
-      
-      console.log('🚨 VIEW DESABILITADA - FORÇANDO RECÁLCULO MANUAL DE TUDO');
-      // Número total de clientes no trimestre - COM PAGINAÇÃO
-      // Clientes totais com paginação
-      
-      const clientesTotaisContahubData = viewTri ? null : await fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
-        'eq_bar_id': barIdNum,
-        'gte_dt_gerencial': startDate,
-        'lte_dt_gerencial': endDate
-      });
-      
-      const clientesTotaisYuzerData = viewTri ? null : await fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
-        'eq_bar_id': barIdNum,
-        'gte_data_evento': startDate,
-        'lte_data_evento': endDate
-      });
-      
-      // ✅ CORRIGIDO: Usar checkins_realizados de sympla_resumo (coluna correta)
-      const clientesTotaisSymplaData = viewTri ? null : await fetchAllData(supabase, 'sympla_resumo', 'checkins_realizados', {
-        'gte_data_inicio': startDate,
-        'lte_data_inicio': endDate
-      });
+      // View desabilitada - usando cálculo manual
+      const viewTri: any | null = null;
 
       // Logs detalhados removidos
       
@@ -838,7 +785,7 @@ export async function GET(request: Request) {
           .eq('bar_id', barIdNum)
           .in('categoria_nome', categoriasCMO)
           .gte('data_competencia', startDate)
-          .lte('data_competencia', endDate);
+          .lte('data_competencia', endDateEfetivo);
         totalCMO = cmoData?.reduce((sum, item) => sum + (item.valor || 0), 0) || 0;
         
         // 🔍 DEBUG: Detalhes do CMO
@@ -870,7 +817,7 @@ export async function GET(request: Request) {
         // USAR A MESMA LÓGICA DO FATURAMENTO ANUAL (excluindo Conta Assinada)
         const fatContahubData = await fetchAllData(supabase, 'contahub_pagamentos', 'liquido, meio', {
           'gte_dt_gerencial': startDate,
-          'lte_dt_gerencial': endDate,
+          'lte_dt_gerencial': endDateEfetivo,
           'eq_bar_id': barIdNum  // Mesma ordem dos parâmetros do anual
         });
         
@@ -878,12 +825,12 @@ export async function GET(request: Request) {
         const fatContahubFiltrado = fatContahubData?.filter(item => item.meio !== 'Conta Assinada') || [];
         const fatYuzerData = await fetchAllData(supabase, 'yuzer_pagamento', 'valor_liquido', {
           'gte_data_evento': startDate,
-          'lte_data_evento': endDate,
+          'lte_data_evento': endDateEfetivo,
           'eq_bar_id': barIdNum  // Mesma ordem dos parâmetros do anual
         });
         const fatSymplaData = await fetchAllData(supabase, 'sympla_pedidos', 'valor_liquido', {
           'gte_data_pedido': startDate,
-          'lte_data_pedido': endDate
+          'lte_data_pedido': endDateEfetivo
           // Sympla não tem bar_id (mesma lógica do anual)
         });
         
@@ -894,7 +841,7 @@ export async function GET(request: Request) {
         faturamentoTrimestre = faturamentoContahubTri + faturamentoYuzerTri + faturamentoSymplaTri;
 
         // Log final faturamento trimestre
-        console.log(`💰 Faturamento T${trimestre} (${startDate} a ${endDate}): R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
+        console.log(`💰 Faturamento T${trimestre} (${startDate} a ${endDateEfetivo}): R$ ${faturamentoTrimestre.toLocaleString('pt-BR')}`);
       }
       
       // FORÇAR RECÁLCULO DO CMO % (não usar VIEW para garantir valor correto)
@@ -977,13 +924,13 @@ export async function GET(request: Request) {
           fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
             'eq_bar_id': barIdNum,
             'gte_data_competencia': startDate,
-            'lte_data_competencia': endDate,
+            'lte_data_competencia': endDateEfetivo,
             'eq_categoria_nome': 'Atrações Programação'
           }),
           fetchAllData(supabase, 'nibo_agendamentos', 'valor', {
             'eq_bar_id': barIdNum,
             'gte_data_competencia': startDate,
-            'lte_data_competencia': endDate,
+            'lte_data_competencia': endDateEfetivo,
             'eq_categoria_nome': 'Produção Eventos'
           })
         ]);

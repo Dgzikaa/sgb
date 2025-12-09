@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useBar } from '@/contexts/BarContext';
 import { IndicadorCard } from '@/components/visao-geral/IndicadorCard';
 import { IndicadorRetencao } from '@/components/visao-geral/IndicadorRetencao';
@@ -101,6 +101,10 @@ export default function VisaoGeralEstrategica() {
   const [indicadoresTrimestrais, setIndicadoresTrimestrais] = useState<IndicadoresTrimestrais | null>(null);
   const [loading, setLoading] = useState(true);
   
+  // 🚀 CACHE: Armazenar dados trimestrais já carregados para navegação rápida
+  const cacheTrimestrais = useRef<Record<number, IndicadoresTrimestrais>>({});
+  const cacheAnual = useRef<IndicadoresAnuais | null>(null);
+  
   // Estado para modal de CMV
   const [modalCMVAberto, setModalCMVAberto] = useState(false);
   const [cmvPercentual, setCmvPercentual] = useState('');
@@ -151,101 +155,93 @@ export default function VisaoGeralEstrategica() {
       return;
     }
 
-    // Buscar dados da API diretamente
+    // 🚀 CACHE: Verificar se já temos os dados em cache
+    const temCacheAnual = cacheAnual.current !== null;
+    const temCacheTrimestral = cacheTrimestrais.current[trimestreAtual] !== undefined;
+    
+    // Se já temos tudo em cache, usar cache (navegação instantânea)
+    if (temCacheAnual && temCacheTrimestral) {
+      console.log(`⚡ Cache hit! Usando dados em cache para T${trimestreAtual}`);
+      setIndicadoresAnuais(cacheAnual.current);
+      setIndicadoresTrimestrais(cacheTrimestrais.current[trimestreAtual]);
+      setLoading(false);
+      return;
+    }
+
+    // Buscar dados da API
     setLoading(true);
     setRequestInProgress(true);
-    showLoading('Carregando dados da visão geral...');
+    showLoading(temCacheAnual ? `Carregando T${trimestreAtual}...` : 'Carregando dados...');
     
-    // Calcular o mês de retenção baseado no trimestre selecionado
-    // Usar o mês atual DINÂMICO para cada trimestre
+    // Calcular o mês de retenção
     const getMesRetencao = (trimestre: number) => {
       const now = new Date();
-      const mesAtual = now.getMonth() + 1; // 1-12
+      const mesAtual = now.getMonth() + 1;
       const anoAtual = now.getFullYear();
-      
-      // Se estamos no trimestre atual, usar o mês atual
-      // Se estamos vendo trimestre passado, usar o último mês do trimestre
-      const ultimoMesTrimestre = {
-        2: 6,  // T2 (Abr-Jun): Junho
-        3: 9,  // T3 (Jul-Set): Setembro
-        4: 12  // T4 (Out-Dez): Dezembro
-      };
-      
-      const primeiroMesTrimestre = {
-        2: 4,  // T2 (Abr-Jun): Abril
-        3: 7,  // T3 (Jul-Set): Julho
-        4: 10  // T4 (Out-Dez): Outubro
-      };
-      
-      // Se estamos no trimestre selecionado, usar o mês atual (ou anterior se estamos no início do mês)
+      const ultimoMesTrimestre = { 2: 6, 3: 9, 4: 12 };
+      const primeiroMesTrimestre = { 2: 4, 3: 7, 4: 10 };
       const primeiro = primeiroMesTrimestre[trimestre as keyof typeof primeiroMesTrimestre];
       const ultimo = ultimoMesTrimestre[trimestre as keyof typeof ultimoMesTrimestre];
       
-      let mesParaUsar: number;
-      
+      let mesParaUsar = ultimo;
       if (mesAtual >= primeiro && mesAtual <= ultimo) {
-        // Estamos no trimestre selecionado - usar mês atual
-        // Se estamos nos primeiros 10 dias do mês, usar mês anterior para ter dados completos
-        if (now.getDate() <= 10 && mesAtual > primeiro) {
-          mesParaUsar = mesAtual - 1;
-        } else {
-          mesParaUsar = mesAtual;
-        }
+        mesParaUsar = (now.getDate() <= 10 && mesAtual > primeiro) ? mesAtual - 1 : mesAtual;
       } else if (mesAtual > ultimo) {
-        // Trimestre já passou - usar último mês do trimestre
-        mesParaUsar = ultimo;
-      } else {
-        // Trimestre ainda não chegou - usar último mês do trimestre do ano anterior
         mesParaUsar = ultimo;
       }
-      
       return `${anoAtual}-${mesParaUsar.toString().padStart(2, '0')}`;
     };
     
     const mesRetencao = getMesRetencao(trimestreAtual);
-    console.log(`📊 Visão Geral: Usando mês ${mesRetencao} para retenção do T${trimestreAtual}`);
     const timestamp = Date.now();
-    
-    const anualUrl = `/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
-    const trimestralUrl = `/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesRetencao}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`;
-    
     const requestHeaders = {
       'x-user-data': JSON.stringify({ bar_id: selectedBar.id, permissao: 'admin' })
     };
 
     try {
-      const [anualResponse, trimestralResponse] = await Promise.all([
-        fetch(anualUrl, { headers: requestHeaders }),
-        fetch(trimestralUrl, { headers: requestHeaders })
-      ]);
-
-      if (!anualResponse.ok) {
-        const errorText = await anualResponse.text();
-        throw new Error(`Erro ao buscar dados anuais: ${anualResponse.status} - ${errorText}`);
+      // Só buscar anual se não tiver em cache
+      const fetchPromises: Promise<Response>[] = [];
+      
+      if (!temCacheAnual) {
+        fetchPromises.push(
+          fetch(`/api/visao-geral/indicadores?periodo=anual&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`, { headers: requestHeaders })
+        );
       }
       
-      if (!trimestralResponse.ok) {
-        const errorText = await trimestralResponse.text();
-        throw new Error(`Erro ao buscar dados trimestrais: ${trimestralResponse.status} - ${errorText}`);
+      // Sempre buscar trimestral se não tiver em cache
+      fetchPromises.push(
+        fetch(`/api/visao-geral/indicadores?periodo=trimestral&trimestre=${trimestreAtual}&mes_retencao=${mesRetencao}&bar_id=${encodeURIComponent(selectedBar.id)}&_t=${timestamp}`, { headers: requestHeaders })
+      );
+
+      const responses = await Promise.all(fetchPromises);
+      
+      if (!temCacheAnual) {
+        const anualResponse = responses[0];
+        if (!anualResponse.ok) throw new Error(`Erro ao buscar dados anuais: ${anualResponse.status}`);
+        const anualData = await anualResponse.json();
+        cacheAnual.current = anualData.anual;
+        setIndicadoresAnuais(anualData.anual);
+      } else {
+        setIndicadoresAnuais(cacheAnual.current);
       }
-
-      const anualData = await anualResponse.json();
+      
+      const trimestralResponse = temCacheAnual ? responses[0] : responses[1];
+      if (!trimestralResponse.ok) throw new Error(`Erro ao buscar dados trimestrais: ${trimestralResponse.status}`);
       const trimestralData = await trimestralResponse.json();
-
-      setIndicadoresAnuais(anualData.anual);
+      
+      // Salvar no cache
+      cacheTrimestrais.current[trimestreAtual] = trimestralData.trimestral;
       setIndicadoresTrimestrais(trimestralData.trimestral);
       
+      console.log(`✅ Dados T${trimestreAtual} carregados e salvos em cache`);
+      
     } catch (error) {
-      // Log detalhado apenas em desenvolvimento
       if (process.env.NODE_ENV === 'development') {
-        console.error('❌ Erro ao carregar indicadores da visão geral:', error);
+        console.error('❌ Erro ao carregar indicadores:', error);
       }
-      
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      
       toast({
         title: 'Erro ao carregar dados',
-        description: errorMessage.includes('Failed to fetch') 
+        description: error instanceof Error && error.message.includes('Failed to fetch') 
           ? 'Verifique sua conexão com a internet'
           : 'Erro interno do servidor. Tente novamente.',
         variant: 'destructive'
@@ -258,15 +254,36 @@ export default function VisaoGeralEstrategica() {
   }, [selectedBar?.id, trimestreAtual, requestInProgress, toast, showLoading, hideLoading]);
 
   // useEffect para carregar dados quando bar ou trimestre mudar
+  // Limpar cache quando bar mudar
+  const lastBarId = useRef<string | number | null>(null);
+  
   useEffect(() => {
-    if (selectedBar && !requestInProgress) {
-      carregarIndicadores();
+    if (selectedBar) {
+      // Se o bar mudou, limpar todo o cache
+      if (lastBarId.current !== null && lastBarId.current !== selectedBar.id) {
+        console.log('🔄 Bar mudou, limpando cache...');
+        cacheAnual.current = null;
+        cacheTrimestrais.current = {};
+      }
+      lastBarId.current = selectedBar.id;
+      
+      // Resetar requestInProgress para permitir nova requisição
+      setRequestInProgress(false);
+      const timer = setTimeout(() => {
+        carregarIndicadores();
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  }, [selectedBar?.id, trimestreAtual]); // Removido carregarIndicadores das dependências
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBar?.id, trimestreAtual]);
 
-  // Função para recarregar dados
+  // Função para recarregar dados (limpa cache)
   const recarregarDados = useCallback(() => {
     try {
+      // 🚀 Limpar cache para forçar reload
+      cacheAnual.current = null;
+      cacheTrimestrais.current = {};
+      
       // Resetar estados
       setIndicadoresAnuais(null);
       setIndicadoresTrimestrais(null);
@@ -290,14 +307,6 @@ export default function VisaoGeralEstrategica() {
       });
     }
   }, [selectedBar?.id, toast, carregarIndicadores]);
-
-  // Carregar indicadores quando selectedBar estiver disponível
-  useEffect(() => {
-    if (selectedBar) {
-      carregarIndicadores();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedBar, trimestreAtual]);
 
   // Memoizar dados dos indicadores para evitar re-renders desnecessários
   const indicadoresAnuaisMemo = useMemo(() => indicadoresAnuais, [indicadoresAnuais]);

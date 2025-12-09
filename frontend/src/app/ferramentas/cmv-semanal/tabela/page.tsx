@@ -15,6 +15,7 @@ import {
 import { ChevronLeft, ChevronRight, Edit, Calendar, CalendarDays, BarChart3, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useBar } from '@/contexts/BarContext';
 
 interface CMVSemanal {
   id: string;
@@ -75,6 +76,7 @@ interface CMVSemanal {
 }
 
 export default function CMVSemanalTabelaPage() {
+  const { selectedBar } = useBar();
   const [semanas, setSemanas] = useState<CMVSemanal[]>([]);
   const [loading, setLoading] = useState(true);
   const [semanaAtualIndex, setSemanaAtualIndex] = useState(0);
@@ -107,13 +109,17 @@ export default function CMVSemanalTabelaPage() {
   }
 
   useEffect(() => {
-    carregarDados();
-  }, [anoFiltro]);
+    if (selectedBar?.id) {
+      carregarDados();
+    }
+  }, [anoFiltro, selectedBar?.id]);
 
   async function carregarDados() {
+    if (!selectedBar?.id) return;
+    
     try {
       setLoading(true);
-      const response = await fetch('/api/cmv-semanal');
+      const response = await fetch(`/api/cmv-semanal?bar_id=${selectedBar.id}`);
       if (!response.ok) throw new Error('Erro ao carregar dados');
       
       const result = await response.json();
