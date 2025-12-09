@@ -1,37 +1,37 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useBar } from '@/contexts/BarContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { 
-  ChevronLeft, 
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Save,
   Plus,
   Trash2,
   Target,
-  TrendingUp,
+  Settings,
+  BarChart3,
+  ListTodo,
   Users,
+  TrendingUp,
   DollarSign,
+  Percent,
   AlertTriangle,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  GripVertical
+  Star,
+  Building2,
+  Megaphone,
+  Eye,
+  Heart,
+  Music
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { formatCurrency } from '@/lib/utils';
 
 interface OKR {
   id?: number;
@@ -48,26 +48,21 @@ interface OrganizadorData {
   ano: number;
   trimestre: number | null;
   tipo: string;
-  // Metas
   meta_clientes_ativos: number | null;
   meta_visitas: number | null;
   meta_cmv_limpo: number | null;
   meta_cmo: number | null;
   meta_artistica: number | null;
-  // Imagem de 1 ano
   faturamento_meta: number | null;
   pessoas_meta: number | null;
   reputacao_meta: number | null;
   ebitda_meta: number | null;
-  // Foco Central
   missao: string;
   nicho: string;
   valores_centrais: string[];
-  // Marketing
   mercado_alvo: string;
   posicionamento: string;
   singularidades: string[];
-  // Problemas e Visões
   principais_problemas: string[];
   meta_10_anos: string;
   imagem_3_anos: string;
@@ -75,10 +70,10 @@ interface OrganizadorData {
 }
 
 const statusOptions = [
-  { value: 'verde', label: 'Concluído', color: 'bg-green-500', icon: CheckCircle2 },
-  { value: 'amarelo', label: 'Em Progresso', color: 'bg-yellow-500', icon: Clock },
-  { value: 'vermelho', label: 'Bloqueado', color: 'bg-red-500', icon: XCircle },
-  { value: 'cinza', label: 'Não Iniciado', color: 'bg-gray-400', icon: AlertTriangle },
+  { value: 'verde', label: '✓ Concluído', bg: 'bg-green-100 dark:bg-green-900/40', border: 'border-green-400', text: 'text-green-700 dark:text-green-300' },
+  { value: 'amarelo', label: '◐ Em Progresso', bg: 'bg-yellow-100 dark:bg-yellow-900/40', border: 'border-yellow-400', text: 'text-yellow-700 dark:text-yellow-300' },
+  { value: 'vermelho', label: '✗ Bloqueado', bg: 'bg-red-100 dark:bg-red-900/40', border: 'border-red-400', text: 'text-red-700 dark:text-red-300' },
+  { value: 'cinza', label: '○ Pendente', bg: 'bg-gray-100 dark:bg-gray-700', border: 'border-gray-300', text: 'text-gray-600 dark:text-gray-300' },
 ];
 
 const defaultOrganizador: OrganizadorData = {
@@ -95,22 +90,28 @@ const defaultOrganizador: OrganizadorData = {
   pessoas_meta: 12000,
   reputacao_meta: 4.8,
   ebitda_meta: 1000000,
-  missao: '',
-  nicho: '',
+  missao: 'Entregar o novo entretenimento',
+  nicho: 'Bares Musicais (Contexto - Responsa - Mundo vivo - Deboche - Brazólia)',
   valores_centrais: ['', '', ''],
-  mercado_alvo: '',
-  posicionamento: '',
-  singularidades: ['', '', ''],
-  principais_problemas: ['', '', ''],
+  mercado_alvo: 'Adulto com Espírito Jovem de 28 a 48, Pagosambeiro',
+  posicionamento: 'Para o Sambagodeiro, o Ordi é o Bar que não tem erro',
+  singularidades: [
+    'O melhor da Festa (Melhores artistas da cidade, bom som, boa iluminação, melhor horário, grandes projetos)',
+    'O melhor do Boteco - Atendimento Eficiente (Garçom cordial, entrega veloz), Bons drinks, poder sentar',
+    'Abraça todos os pagosambeiros (coisa que nem Brazólia nem Tia Zélia fazem)'
+  ],
+  principais_problemas: ['Queda de Domingo', 'Diligência Financeira (margem em queda)', 'Risco de Sistema'],
   meta_10_anos: '',
   imagem_3_anos: '',
-  imagem_1_ano: '',
+  imagem_1_ano: 'Ser um dos Principais Bares da Cidade',
 };
 
 const defaultOKRs: OKR[] = [
-  { epico: 'Faturamento', historia: '', responsavel: '', observacoes: '', status: 'cinza' },
-  { epico: '[NSM] Nº de Clientes Ativos', historia: '', responsavel: '', observacoes: '', status: 'cinza' },
-  { epico: 'Diligência Financeira', historia: '', responsavel: '', observacoes: '', status: 'cinza' },
+  { epico: 'Faturamento', historia: 'MVP do Almoço', responsavel: 'Cadu', observacoes: 'Teste de fit da proposta de valor do almoço. Fazer pelo menos 4 edições ao longo do tri.', status: 'amarelo' },
+  { epico: 'Faturamento', historia: 'Recuperar Domingo', responsavel: 'Augusto', observacoes: 'Lançamento do projeto novo autoral of the house. 2x no tri trazer alguém giga pra nós (30k).', status: 'amarelo' },
+  { epico: 'Faturamento', historia: 'Desenhar "mote" mensal para os dias fortes', responsavel: 'Augusto', observacoes: 'Exemplos: Breno Convida, Sexta Temática, Curicaca, Benza Convida', status: 'verde' },
+  { epico: '[NSM] Nº de Clientes Ativos', historia: 'Indicadores de cliente semanal e diário', responsavel: 'Digão', observacoes: '% novos clientes, Clientes ativos, Retenção - No Zykor', status: 'cinza' },
+  { epico: 'Diligência Financeira', historia: 'Bater orçamentos toda terça sem errar', responsavel: 'Gonza', observacoes: 'Estamos indo bem!! Melhoramos simulação de CMO Fixo, criamos controle de CMV MTD', status: 'verde' },
 ];
 
 export default function OrganizadorEditPage() {
@@ -123,6 +124,12 @@ export default function OrganizadorEditPage() {
   const isNovo = params.id === 'novo';
   const [loading, setLoading] = useState(!isNovo);
   const [saving, setSaving] = useState(false);
+  
+  // Seções colapsáveis
+  const [secaoBaseAberta, setSecaoBaseAberta] = useState(false);
+  const [secaoTrimestreAberta, setSecaoTrimestreAberta] = useState(true);
+  const [secaoOkrsAberta, setSecaoOkrsAberta] = useState(true);
+  
   const [organizador, setOrganizador] = useState<OrganizadorData>({
     ...defaultOrganizador,
     ano: parseInt(searchParams.get('ano') || String(new Date().getFullYear())),
@@ -130,45 +137,46 @@ export default function OrganizadorEditPage() {
   });
   const [okrs, setOkrs] = useState<OKR[]>(defaultOKRs);
 
-  const carregarDados = useCallback(async () => {
-    if (!selectedBar || isNovo) return;
-    
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/organizador?bar_id=${selectedBar.id}&id=${params.id}`);
-      const data = await response.json();
-      
-      if (data.organizador) {
-        setOrganizador({
-          ...defaultOrganizador,
-          ...data.organizador,
-          valores_centrais: data.organizador.valores_centrais || ['', '', ''],
-          singularidades: data.organizador.singularidades || ['', '', ''],
-          principais_problemas: data.organizador.principais_problemas || ['', '', ''],
-        });
-        setOkrs(data.okrs?.length > 0 ? data.okrs : defaultOKRs);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar o organizador',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedBar, params.id, isNovo, toast]);
+  // Flag para evitar múltiplas chamadas
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    if (selectedBar) {
-      if (isNovo) {
-        setOrganizador(prev => ({ ...prev, bar_id: selectedBar.id }));
-      } else {
-        carregarDados();
-      }
+    // Quando é novo, apenas atualiza o bar_id uma vez
+    if (selectedBar && isNovo && !dataLoaded) {
+      setOrganizador(prev => ({ ...prev, bar_id: selectedBar.id }));
+      setDataLoaded(true);
+      return;
     }
-  }, [selectedBar, isNovo, carregarDados]);
+
+    // Quando é edição, carrega os dados uma vez
+    if (selectedBar && !isNovo && !dataLoaded) {
+      const carregarDados = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch(`/api/organizador?bar_id=${selectedBar.id}&id=${params.id}`);
+          const data = await response.json();
+          
+          if (data.organizador) {
+            setOrganizador({
+              ...defaultOrganizador,
+              ...data.organizador,
+              valores_centrais: data.organizador.valores_centrais?.length ? data.organizador.valores_centrais : ['', '', ''],
+              singularidades: data.organizador.singularidades?.length ? data.organizador.singularidades : defaultOrganizador.singularidades,
+              principais_problemas: data.organizador.principais_problemas?.length ? data.organizador.principais_problemas : ['', '', ''],
+            });
+            setOkrs(data.okrs?.length > 0 ? data.okrs : defaultOKRs);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar:', error);
+          toast({ title: 'Erro', description: 'Não foi possível carregar', variant: 'destructive' });
+        } finally {
+          setLoading(false);
+          setDataLoaded(true);
+        }
+      };
+      carregarDados();
+    }
+  }, [selectedBar?.id, isNovo, dataLoaded, params.id, toast]);
 
   const handleSalvar = async () => {
     if (!selectedBar) return;
@@ -189,21 +197,13 @@ export default function OrganizadorEditPage() {
       });
 
       if (response.ok) {
-        toast({
-          title: 'Sucesso!',
-          description: isNovo ? 'Organizador criado com sucesso' : 'Alterações salvas'
-        });
+        toast({ title: 'Sucesso!', description: isNovo ? 'Organizador criado' : 'Alterações salvas' });
         router.push('/estrategico/organizador');
       } else {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao salvar');
+        throw new Error('Erro ao salvar');
       }
     } catch (error) {
-      toast({
-        title: 'Erro',
-        description: error instanceof Error ? error.message : 'Não foi possível salvar',
-        variant: 'destructive'
-      });
+      toast({ title: 'Erro', description: 'Não foi possível salvar', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -237,485 +237,510 @@ export default function OrganizadorEditPage() {
     setOkrs(prev => prev.filter((_, i) => i !== index));
   };
 
-  const getStatusColor = (status: string) => {
-    return statusOptions.find(s => s.value === status)?.color || 'bg-gray-400';
-  };
+  const getStatusStyle = (status: string) => statusOptions.find(s => s.value === status) || statusOptions[3];
 
-  const getNomePeriodo = () => {
-    if (organizador.tipo === 'anual' || !organizador.trimestre) {
-      return `Visão Anual ${organizador.ano}`;
-    }
-    return `${organizador.trimestre}º Trimestre ${organizador.ano}`;
-  };
+  const getNomePeriodo = () => `${organizador.trimestre}º TRI ${organizador.ano}`;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="container mx-auto space-y-4">
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-96 w-full" />
-        </div>
+      <div className="min-h-screen bg-[#f5f0e1] dark:bg-gray-900 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  // Função para formatar números (12000 -> 12.000)
+  const formatarNumero = (valor: number | null | undefined): string => {
+    if (!valor) return '';
+    return valor.toLocaleString('pt-BR');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/estrategico/organizador')}
-              className="text-gray-600 dark:text-gray-400"
-            >
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Voltar
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {isNovo ? 'Novo Organizador' : getNomePeriodo()}
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Planejamento estratégico - Tração
-              </p>
-            </div>
+    <div className="min-h-screen bg-[#f5f0e1] dark:bg-gray-900">
+      <div className="w-full px-4 py-3">
+        
+        {/* Header Compacto */}
+        <div className="flex items-center justify-between mb-3 bg-white dark:bg-gray-800 rounded-lg shadow px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => router.push('/estrategico/organizador')} 
+              className="h-8 px-2"
+              leftIcon={<ChevronLeft className="w-4 h-4" />}
+            />
+            <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">{selectedBar?.nome}</span>
           </div>
-          
           <Button 
             onClick={handleSalvar} 
-            disabled={saving}
-            className="bg-green-600 hover:bg-green-700"
+            disabled={saving} 
+            loading={saving}
+            className="bg-green-600 hover:bg-green-700 h-8 px-4"
+            leftIcon={<Save className="w-4 h-4" />}
           >
-            <Save className="w-4 h-4 mr-2" />
             {saving ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>
 
-        {/* Header do Organizador - Estilo Planilha */}
-        <div className="bg-gradient-to-r from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-800/20 border-2 border-amber-300 dark:border-amber-700 rounded-lg p-4 mb-6">
-          <h2 className="text-xl font-bold text-center text-gray-900 dark:text-white">
-            ORGANIZADOR VISÃO - TRAÇÃO - {getNomePeriodo().toUpperCase()}
-          </h2>
+        {/* Título Principal com Seletor de Trimestre */}
+        <div className="bg-gradient-to-r from-[#d4e8d1] via-[#e8f0e5] to-[#d4e8d1] dark:from-green-900/40 dark:to-green-900/40 border-2 border-[#8fbc8f] rounded-lg px-4 py-2.5 mb-3">
+          <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-green-700 dark:text-green-400" />
+              <h1 className="text-xl font-black text-gray-800 dark:text-white tracking-tight">
+                ORGANIZADOR VISÃO
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 bg-white dark:bg-gray-700 rounded-lg px-2 py-1 border border-[#8fbc8f]">
+              <button
+                onClick={() => updateOrganizador('trimestre', Math.max(1, (organizador.trimestre || 4) - 1))}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
+                disabled={organizador.trimestre === 1}
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              </button>
+              <select
+                value={organizador.trimestre || 4}
+                onChange={(e) => updateOrganizador('trimestre', parseInt(e.target.value))}
+                className="bg-transparent text-center font-bold text-gray-800 dark:text-white cursor-pointer focus:outline-none"
+              >
+                <option value={1}>1º TRI {organizador.ano}</option>
+                <option value={2}>2º TRI {organizador.ano}</option>
+                <option value={3}>3º TRI {organizador.ano}</option>
+                <option value={4}>4º TRI {organizador.ano}</option>
+              </select>
+              <button
+                onClick={() => updateOrganizador('trimestre', Math.min(4, (organizador.trimestre || 4) + 1))}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
+                disabled={organizador.trimestre === 4}
+              >
+                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna 1: Valores e Foco */}
-          <div className="space-y-6">
-            {/* Valores Centrais */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                  VALORES CENTRAIS
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-3">
-                {[0, 1, 2].map((i) => (
-                  <Input
-                    key={i}
-                    placeholder={`Valor ${i + 1}`}
-                    value={organizador.valores_centrais?.[i] || ''}
-                    onChange={(e) => updateArrayField('valores_centrais', i, e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-                  />
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Foco Central */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                  FOCO CENTRAL
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-4">
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Missão</Label>
-                  <Textarea
-                    placeholder="Entregar o novo entretenimento"
-                    value={organizador.missao || ''}
-                    onChange={(e) => updateOrganizador('missao', e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mt-1"
-                    rows={2}
-                  />
-                </div>
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Nicho</Label>
-                  <Textarea
-                    placeholder="Bares Musicais (Contexto - Responsa...)"
-                    value={organizador.nicho || ''}
-                    onChange={(e) => updateOrganizador('nicho', e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mt-1"
-                    rows={2}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Estratégia de Marketing */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                  ESTRATÉGIA DE MARKETING
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-4">
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Mercado Alvo</Label>
-                  <Textarea
-                    placeholder="Adulto com Espírito Jovem de 28 a 48..."
-                    value={organizador.mercado_alvo || ''}
-                    onChange={(e) => updateOrganizador('mercado_alvo', e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mt-1"
-                    rows={2}
-                  />
-                </div>
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Posicionamento</Label>
-                  <Input
-                    placeholder="Para o Sambagodeiro, o Ordi é o Bar..."
-                    value={organizador.posicionamento || ''}
-                    onChange={(e) => updateOrganizador('posicionamento', e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">3 Singularidades</Label>
-                  <div className="space-y-2 mt-1">
-                    {[0, 1, 2].map((i) => (
+        {/* ==================== SEÇÃO 1: BASE ESTRATÉGICA (Minimizada) ==================== */}
+        <div className="mb-3">
+          <button
+            onClick={() => setSecaoBaseAberta(!secaoBaseAberta)}
+            className="w-full flex items-center justify-between bg-[#f5deb3] dark:bg-amber-900/50 border-2 border-[#daa520] dark:border-amber-700 rounded-lg px-3 py-2 hover:bg-[#f0d8a8] transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Settings className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+              <span className="font-bold text-sm text-gray-800 dark:text-white">BASE ESTRATÉGICA</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400 hidden sm:inline">(Missão, Valores, Marketing)</span>
+            </div>
+            {secaoBaseAberta ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          
+          {secaoBaseAberta && (
+            <div className="mt-1.5 bg-white dark:bg-gray-800 border-2 border-[#daa520] dark:border-amber-700 rounded-lg overflow-hidden">
+              {/* Grid Estilo Planilha */}
+              <table className="w-full border-collapse text-xs">
+                <tbody>
+                  {/* VALORES CENTRAIS */}
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <td className="bg-[#f5deb3] dark:bg-amber-900/30 p-3 font-bold text-gray-800 dark:text-white w-40 align-top border-r border-gray-300 dark:border-gray-600">
+                      VALORES CENTRAIS
+                    </td>
+                    <td className="p-2">
+                      <div className="space-y-1">
+                        {[0, 1, 2].map(i => (
+                          <Input
+                            key={i}
+                            value={organizador.valores_centrais?.[i] || ''}
+                            onChange={(e) => updateArrayField('valores_centrais', i, e.target.value)}
+                            placeholder={`Valor ${i + 1}`}
+                            className="h-8 text-sm bg-gray-50 dark:bg-gray-700"
+                          />
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                  {/* FOCO CENTRAL */}
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <td rowSpan={2} className="bg-[#f5deb3] dark:bg-amber-900/30 p-3 font-bold text-gray-800 dark:text-white align-top border-r border-gray-300 dark:border-gray-600">
+                      FOCO CENTRAL
+                    </td>
+                    <td className="p-2 border-b border-gray-100 dark:border-gray-700">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-500 w-16">Missão:</span>
+                        <Input
+                          value={organizador.missao || ''}
+                          onChange={(e) => updateOrganizador('missao', e.target.value)}
+                          className="h-8 text-sm flex-1 bg-gray-50 dark:bg-gray-700"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <td className="p-2">
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs font-semibold text-gray-500 w-16 pt-1">Nicho:</span>
+                        <Textarea
+                          value={organizador.nicho || ''}
+                          onChange={(e) => updateOrganizador('nicho', e.target.value)}
+                          className="text-sm flex-1 bg-gray-50 dark:bg-gray-700 min-h-[50px]"
+                          rows={2}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  {/* ESTRATÉGIA DE MARKETING */}
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <td rowSpan={3} className="bg-[#f5deb3] dark:bg-amber-900/30 p-3 font-bold text-gray-800 dark:text-white align-top border-r border-gray-300 dark:border-gray-600">
+                      ESTRATÉGIA DE<br/>MARKETING
+                    </td>
+                    <td className="p-2 border-b border-gray-100 dark:border-gray-700">
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs font-semibold text-gray-500 w-28 pt-1">Mercado Alvo:</span>
+                        <Textarea
+                          value={organizador.mercado_alvo || ''}
+                          onChange={(e) => updateOrganizador('mercado_alvo', e.target.value)}
+                          className="text-sm flex-1 bg-gray-50 dark:bg-gray-700"
+                          rows={1}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <td className="p-2 border-b border-gray-100 dark:border-gray-700">
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs font-semibold text-gray-500 w-28 pt-1">Posicionamento:</span>
+                        <Textarea
+                          value={organizador.posicionamento || ''}
+                          onChange={(e) => updateOrganizador('posicionamento', e.target.value)}
+                          className="text-sm flex-1 bg-gray-50 dark:bg-gray-700"
+                          rows={1}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <td className="p-2">
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs font-semibold text-gray-500 w-28 pt-1">3 Singularidades:</span>
+                        <div className="flex-1 space-y-1">
+                          {[0, 1, 2].map(i => (
+                            <Textarea
+                              key={i}
+                              value={organizador.singularidades?.[i] || ''}
+                              onChange={(e) => updateArrayField('singularidades', i, e.target.value)}
+                              className="text-sm bg-gray-50 dark:bg-gray-700 min-h-[40px]"
+                              rows={1}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  {/* VISÕES */}
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <td className="bg-[#d4e8d1] dark:bg-green-900/30 p-3 font-bold text-gray-800 dark:text-white align-middle border-r border-gray-300 dark:border-gray-600">
+                      Meta de 10 anos
+                    </td>
+                    <td className="p-2">
                       <Textarea
-                        key={i}
-                        placeholder={`Singularidade ${i + 1}`}
-                        value={organizador.singularidades?.[i] || ''}
-                        onChange={(e) => updateArrayField('singularidades', i, e.target.value)}
-                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                        value={organizador.meta_10_anos || ''}
+                        onChange={(e) => updateOrganizador('meta_10_anos', e.target.value)}
+                        className="text-sm bg-gray-50 dark:bg-gray-700"
                         rows={2}
                       />
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Coluna 2: Metas e Visões */}
-          <div className="space-y-6">
-            {/* Metas do Trimestre */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Target className="w-4 h-4" />
-                  Metas do {organizador.trimestre}º Tri
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300">[NSM] Nº de Clientes Ativos</Label>
-                    <Input
-                      type="number"
-                      value={organizador.meta_clientes_ativos || ''}
-                      onChange={(e) => updateOrganizador('meta_clientes_ativos', parseInt(e.target.value) || null)}
-                      className="w-28 bg-white dark:bg-gray-700 text-right"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300">[NSM INPUT] Nº Visitas</Label>
-                    <Input
-                      type="number"
-                      value={organizador.meta_visitas || ''}
-                      onChange={(e) => updateOrganizador('meta_visitas', parseInt(e.target.value) || null)}
-                      className="w-28 bg-white dark:bg-gray-700 text-right"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300">[BP] CMV Limpo</Label>
-                    <div className="flex items-center gap-1">
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={organizador.meta_cmv_limpo || ''}
-                        onChange={(e) => updateOrganizador('meta_cmv_limpo', parseFloat(e.target.value) || null)}
-                        className="w-20 bg-white dark:bg-gray-700 text-right"
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="bg-[#d4e8d1] dark:bg-green-900/30 p-3 font-bold text-gray-800 dark:text-white align-middle border-r border-gray-300 dark:border-gray-600">
+                      Imagem de 3 anos
+                    </td>
+                    <td className="p-2">
+                      <Textarea
+                        value={organizador.imagem_3_anos || ''}
+                        onChange={(e) => updateOrganizador('imagem_3_anos', e.target.value)}
+                        className="text-sm bg-gray-50 dark:bg-gray-700"
+                        rows={2}
                       />
-                      <span className="text-gray-500">%</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300">[BP] CMO</Label>
-                    <div className="flex items-center gap-1">
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={organizador.meta_cmo || ''}
-                        onChange={(e) => updateOrganizador('meta_cmo', parseFloat(e.target.value) || null)}
-                        className="w-20 bg-white dark:bg-gray-700 text-right"
-                      />
-                      <span className="text-gray-500">%</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300">[BP] % Artístico</Label>
-                    <div className="flex items-center gap-1">
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={organizador.meta_artistica || ''}
-                        onChange={(e) => updateOrganizador('meta_artistica', parseFloat(e.target.value) || null)}
-                        className="w-20 bg-white dark:bg-gray-700 text-right"
-                      />
-                      <span className="text-gray-500">%</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Imagem de 1 Ano */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                  Imagem de 1 Ano
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <Textarea
-                  placeholder="Ser um dos Principais Bares da Cidade"
-                  value={organizador.imagem_1_ano || ''}
-                  onChange={(e) => updateOrganizador('imagem_1_ano', e.target.value)}
-                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mb-4"
-                  rows={2}
-                />
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-green-500" />
-                      Faturamento {organizador.ano}
-                    </Label>
-                    <Input
-                      type="number"
-                      value={organizador.faturamento_meta || ''}
-                      onChange={(e) => updateOrganizador('faturamento_meta', parseFloat(e.target.value) || null)}
-                      className="w-36 bg-white dark:bg-gray-700 text-right"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-blue-500" />
-                      Nº de Pessoas (mensal)
-                    </Label>
-                    <Input
-                      type="number"
-                      value={organizador.pessoas_meta || ''}
-                      onChange={(e) => updateOrganizador('pessoas_meta', parseInt(e.target.value) || null)}
-                      className="w-28 bg-white dark:bg-gray-700 text-right"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300">Reputação (Google)</Label>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      value={organizador.reputacao_meta || ''}
-                      onChange={(e) => updateOrganizador('reputacao_meta', parseFloat(e.target.value) || null)}
-                      className="w-20 bg-white dark:bg-gray-700 text-right"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-purple-500" />
-                      EBITDA {organizador.ano}
-                    </Label>
-                    <Input
-                      type="number"
-                      value={organizador.ebitda_meta || ''}
-                      onChange={(e) => updateOrganizador('ebitda_meta', parseFloat(e.target.value) || null)}
-                      className="w-36 bg-white dark:bg-gray-700 text-right"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Visões de Longo Prazo */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                  Visões de Longo Prazo
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-4">
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Meta de 10 anos</Label>
-                  <Textarea
-                    placeholder="Onde queremos estar em 10 anos?"
-                    value={organizador.meta_10_anos || ''}
-                    onChange={(e) => updateOrganizador('meta_10_anos', e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mt-1"
-                    rows={2}
-                  />
-                </div>
-                <div>
-                  <Label className="text-gray-700 dark:text-gray-300">Imagem de 3 anos</Label>
-                  <Textarea
-                    placeholder="Onde queremos estar em 3 anos?"
-                    value={organizador.imagem_3_anos || ''}
-                    onChange={(e) => updateOrganizador('imagem_3_anos', e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mt-1"
-                    rows={2}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Coluna 3: Problemas */}
-          <div className="space-y-6">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-3 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
-                <CardTitle className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
-                  Principais Problemas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-3">
-                {[0, 1, 2].map((i) => (
-                  <Input
-                    key={i}
-                    placeholder={`Problema ${i + 1}`}
-                    value={organizador.principais_problemas?.[i] || ''}
-                    onChange={(e) => updateArrayField('principais_problemas', i, e.target.value)}
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-                  />
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        {/* OKRs / Épicos */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mt-6">
-          <CardHeader className="pb-3 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold text-gray-900 dark:text-white">
-                OKRs (Épicos) / Histórias
-              </CardTitle>
-              <Button variant="outline" size="sm" onClick={addOKR}>
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar OKR
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {/* Header da Tabela */}
-            <div className="grid grid-cols-12 gap-2 mb-2 px-2 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
-              <div className="col-span-2">Épico</div>
-              <div className="col-span-3">História / BigBet</div>
-              <div className="col-span-1">Resp.</div>
-              <div className="col-span-4">Observações</div>
-              <div className="col-span-1">Status</div>
-              <div className="col-span-1"></div>
-            </div>
-            
-            {/* Linhas de OKRs */}
-            <div className="space-y-2">
-              {okrs.map((okr, index) => (
-                <div 
-                  key={index} 
-                  className={`grid grid-cols-12 gap-2 items-center p-2 rounded-lg border ${
-                    okr.status === 'verde' ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' :
-                    okr.status === 'amarelo' ? 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800' :
-                    okr.status === 'vermelho' ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800' :
-                    'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                  }`}
-                >
-                  <div className="col-span-2">
-                    <Input
-                      placeholder="Épico"
-                      value={okr.epico}
-                      onChange={(e) => updateOKR(index, 'epico', e.target.value)}
-                      className="bg-white dark:bg-gray-700 text-sm"
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <Textarea
-                      placeholder="História / BigBet"
-                      value={okr.historia}
-                      onChange={(e) => updateOKR(index, 'historia', e.target.value)}
-                      className="bg-white dark:bg-gray-700 text-sm min-h-[60px]"
-                      rows={2}
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    <Input
-                      placeholder="Nome"
-                      value={okr.responsavel}
-                      onChange={(e) => updateOKR(index, 'responsavel', e.target.value)}
-                      className="bg-white dark:bg-gray-700 text-sm"
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <Textarea
-                      placeholder="Observações e status"
-                      value={okr.observacoes}
-                      onChange={(e) => updateOKR(index, 'observacoes', e.target.value)}
-                      className="bg-white dark:bg-gray-700 text-sm min-h-[60px]"
-                      rows={2}
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    <Select
-                      value={okr.status}
-                      onValueChange={(value) => updateOKR(index, 'status', value)}
-                    >
-                      <SelectTrigger className={`${getStatusColor(okr.status)} text-white border-0`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            <div className="flex items-center gap-2">
-                              <div className={`w-3 h-3 rounded-full ${opt.color}`} />
-                              {opt.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="col-span-1 flex justify-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeOKR(index)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Botão Salvar no Final */}
-        <div className="flex justify-end mt-6">
-          <Button 
-            onClick={handleSalvar} 
-            disabled={saving}
-            className="bg-green-600 hover:bg-green-700"
-            size="lg"
+        {/* ==================== SEÇÃO 2: METAS DO TRIMESTRE ==================== */}
+        <div className="mb-3">
+          <button
+            onClick={() => setSecaoTrimestreAberta(!secaoTrimestreAberta)}
+            className="w-full flex items-center justify-between bg-[#d4e8d1] dark:bg-green-900/50 border-2 border-[#8fbc8f] dark:border-green-700 rounded-lg px-3 py-2 hover:bg-[#c8e0c5] transition-colors"
           >
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Salvando...' : 'Salvar Organizador'}
-          </Button>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-green-700 dark:text-green-400" />
+              <span className="font-bold text-sm text-gray-800 dark:text-white">{getNomePeriodo()} • METAS E INDICADORES</span>
+            </div>
+            {secaoTrimestreAberta ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          
+          {secaoTrimestreAberta && (
+            <div className="mt-1.5 grid grid-cols-1 lg:grid-cols-3 gap-2">
+              {/* Metas do Trimestre */}
+              <div className="bg-white dark:bg-gray-800 border-2 border-[#8fbc8f] dark:border-green-700 rounded-lg overflow-hidden">
+                <div className="bg-[#d4e8d1] dark:bg-green-900/50 px-3 py-2 font-bold text-center text-gray-800 dark:text-white border-b border-[#8fbc8f] flex items-center justify-center gap-2">
+                  <Target className="w-4 h-4" />
+                  Metas {organizador.trimestre}º Tri
+                </div>
+                <div className="p-3 space-y-3">
+                  {[
+                    { label: 'Clientes Ativos', field: 'meta_clientes_ativos', icon: Users, tag: 'NSM', isNumber: true },
+                    { label: 'Nº Visitas', field: 'meta_visitas', icon: TrendingUp, tag: 'INPUT', isNumber: true },
+                    { label: 'CMV Limpo', field: 'meta_cmv_limpo', icon: Percent, tag: 'BP', suffix: '%' },
+                    { label: 'CMO', field: 'meta_cmo', icon: DollarSign, tag: 'BP', suffix: '%' },
+                    { label: '% Artístico', field: 'meta_artistica', icon: Music, tag: 'BP', suffix: '%' },
+                  ].map((item) => {
+                    const IconComponent = item.icon;
+                    const value = (organizador as any)[item.field];
+                    // Formatar valor para exibição no input
+                    const displayValue = value != null 
+                      ? ((item as any).isNumber ? formatarNumero(value) : String(value))
+                      : '';
+                    return (
+                      <div key={item.field} className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <IconComponent className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">{item.label}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 font-bold flex-shrink-0">{item.tag}</span>
+                        </div>
+                        <div className="flex items-center gap-1 w-28 justify-end flex-shrink-0">
+                          <Input
+                            type="text"
+                            value={displayValue}
+                            onChange={(e) => {
+                              // Remove formatação para salvar como número
+                              const rawValue = e.target.value.replace(/\./g, '').replace(',', '.');
+                              const numValue = parseFloat(rawValue) || null;
+                              updateOrganizador(item.field as keyof OrganizadorData, numValue);
+                            }}
+                            className="w-20 h-8 text-center text-sm font-bold bg-gray-50 dark:bg-gray-700"
+                            placeholder="0"
+                          />
+                          <span className="text-xs font-bold text-gray-600 dark:text-gray-400 w-4 text-left">{item.suffix || ''}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Principais Problemas */}
+              <div className="bg-white dark:bg-gray-800 border-2 border-[#daa520] dark:border-amber-700 rounded-lg overflow-hidden">
+                <div className="bg-[#f5deb3] dark:bg-amber-900/50 px-3 py-2 font-bold text-center text-gray-800 dark:text-white border-b border-[#daa520] flex items-center justify-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Principais Problemas
+                </div>
+                <div className="p-3 space-y-2">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400 w-4">{i + 1}.</span>
+                      <Input
+                        value={organizador.principais_problemas?.[i] || ''}
+                        onChange={(e) => updateArrayField('principais_problemas', i, e.target.value)}
+                        placeholder={`Problema ${i + 1}`}
+                        className="h-8 text-sm bg-gray-50 dark:bg-gray-700 flex-1"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Imagem de 1 Ano */}
+              <div className="bg-white dark:bg-gray-800 border-2 border-[#8fbc8f] dark:border-green-700 rounded-lg overflow-hidden">
+                <div className="bg-[#d4e8d1] dark:bg-green-900/50 px-3 py-2 font-bold text-center text-gray-800 dark:text-white border-b border-[#8fbc8f] flex items-center justify-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  Imagem de 1 Ano
+                </div>
+                <div className="p-3">
+                  <Input
+                    value={organizador.imagem_1_ano || ''}
+                    onChange={(e) => updateOrganizador('imagem_1_ano', e.target.value)}
+                    placeholder="Ser um dos Principais Bares da Cidade"
+                    className="h-8 text-sm font-semibold text-center bg-gray-50 dark:bg-gray-700 mb-3"
+                  />
+                  <div className="space-y-3 text-xs">
+                    {[
+                      { label: 'Faturamento', field: 'faturamento_meta', icon: DollarSign, isCurrency: true },
+                      { label: 'Pessoas', field: 'pessoas_meta', icon: Users, suffix: '/mês', isNumber: true },
+                      { label: 'Reputação', field: 'reputacao_meta', icon: Star, prefix: '⭐', isDecimal: true },
+                      { label: 'Ebitda', field: 'ebitda_meta', icon: TrendingUp, isCurrency: true },
+                    ].map(item => {
+                      const IconComponent = item.icon;
+                      const value = (organizador as any)[item.field];
+                      // Formatar valor para exibição no input
+                      let displayValue = '';
+                      if (value != null) {
+                        if ((item as any).isCurrency) {
+                          displayValue = formatCurrency(value);
+                        } else if ((item as any).isNumber) {
+                          displayValue = formatarNumero(value);
+                        } else if ((item as any).isDecimal) {
+                          displayValue = value.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                        } else {
+                          displayValue = String(value);
+                        }
+                      }
+                      return (
+                        <div key={item.field} className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <IconComponent className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                            <span className="text-gray-700 dark:text-gray-300 whitespace-nowrap">{item.label}</span>
+                            {item.suffix && <span className="text-gray-500 text-[10px]">{item.suffix}</span>}
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {item.prefix && <span className="text-gray-500 text-[10px]">{item.prefix}</span>}
+                            <Input
+                              type="text"
+                              value={displayValue}
+                              onChange={(e) => {
+                                // Remove formatação para salvar como número
+                                const rawValue = e.target.value
+                                  .replace('R$', '')
+                                  .replace(/\s/g, '')
+                                  .replace(/\./g, '')
+                                  .replace(',', '.');
+                                const numValue = parseFloat(rawValue) || null;
+                                updateOrganizador(item.field as keyof OrganizadorData, numValue);
+                              }}
+                              className="w-32 h-8 text-right text-xs font-semibold bg-gray-50 dark:bg-gray-700"
+                              placeholder={(item as any).isCurrency ? 'R$ 0,00' : '0'}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* ==================== SEÇÃO 3: OKRs ==================== */}
+        <div className="mb-3">
+          <button
+            onClick={() => setSecaoOkrsAberta(!secaoOkrsAberta)}
+            className="w-full flex items-center justify-between bg-white dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded-lg px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <ListTodo className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+              <span className="font-bold text-sm text-gray-800 dark:text-white">OKRs • HISTÓRIAS</span>
+              <span className="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300">{okrs.length}</span>
+            </div>
+            {secaoOkrsAberta ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+          
+          {secaoOkrsAberta && (
+            <div className="mt-1.5 bg-white dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded-lg overflow-hidden">
+              {/* Header da Tabela */}
+              <div className="hidden lg:grid grid-cols-12 bg-gray-100 dark:bg-gray-700 border-b-2 border-gray-300 dark:border-gray-600 text-[11px] font-bold text-gray-700 dark:text-gray-300">
+                <div className="col-span-2 px-2 py-1.5 border-r border-gray-300 dark:border-gray-600 flex items-center gap-1">
+                  <Target className="w-3 h-3" />Épico
+                </div>
+                <div className="col-span-3 px-2 py-1.5 border-r border-gray-300 dark:border-gray-600">História</div>
+                <div className="col-span-1 px-2 py-1.5 border-r border-gray-300 dark:border-gray-600 text-center">Resp.</div>
+                <div className="col-span-4 px-2 py-1.5 border-r border-gray-300 dark:border-gray-600">Observações</div>
+                <div className="col-span-1 px-2 py-1.5 border-r border-gray-300 dark:border-gray-600 text-center">Status</div>
+                <div className="col-span-1 px-1 py-1 flex justify-center">
+                  <Button size="sm" onClick={addOKR} className="h-5 px-1.5 bg-green-600 hover:bg-green-700 text-[10px]">
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Linhas */}
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {okrs.map((okr, index) => {
+                  const statusStyle = getStatusStyle(okr.status);
+                  return (
+                    <div 
+                      key={index}
+                      className={`grid grid-cols-1 lg:grid-cols-12 ${statusStyle.bg} ${index % 2 === 0 ? '' : 'bg-opacity-50'}`}
+                    >
+                      <div className="lg:col-span-2 px-1.5 py-1 border-r border-gray-200 dark:border-gray-700">
+                        <label className="lg:hidden text-[10px] font-bold text-gray-500 mb-0.5 block">Épico</label>
+                        <Input
+                          value={okr.epico}
+                          onChange={(e) => updateOKR(index, 'epico', e.target.value)}
+                          className="h-7 text-xs font-semibold bg-white/80 dark:bg-gray-700"
+                        />
+                      </div>
+                      <div className="lg:col-span-3 px-1.5 py-1 border-r border-gray-200 dark:border-gray-700">
+                        <label className="lg:hidden text-[10px] font-bold text-gray-500 mb-0.5 block">História</label>
+                        <Textarea
+                          value={okr.historia}
+                          onChange={(e) => updateOKR(index, 'historia', e.target.value)}
+                          className="text-xs bg-white/80 dark:bg-gray-700 min-h-[40px] py-1.5"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="lg:col-span-1 px-1 py-1 border-r border-gray-200 dark:border-gray-700">
+                        <label className="lg:hidden text-[10px] font-bold text-gray-500 mb-0.5 block">Responsável</label>
+                        <Input
+                          value={okr.responsavel}
+                          onChange={(e) => updateOKR(index, 'responsavel', e.target.value)}
+                          className="h-7 text-[11px] text-center font-semibold bg-white/80 dark:bg-gray-700"
+                        />
+                      </div>
+                      <div className="lg:col-span-4 px-1.5 py-1 border-r border-gray-200 dark:border-gray-700">
+                        <label className="lg:hidden text-[10px] font-bold text-gray-500 mb-0.5 block">Observações</label>
+                        <Textarea
+                          value={okr.observacoes}
+                          onChange={(e) => updateOKR(index, 'observacoes', e.target.value)}
+                          className="text-xs bg-white/80 dark:bg-gray-700 min-h-[40px] py-1.5"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="lg:col-span-1 px-1 py-1 border-r border-gray-200 dark:border-gray-700">
+                        <label className="lg:hidden text-[10px] font-bold text-gray-500 mb-0.5 block">Status</label>
+                        <select
+                          value={okr.status}
+                          onChange={(e) => updateOKR(index, 'status', e.target.value)}
+                          className={`w-full h-7 px-1 rounded text-[10px] font-bold cursor-pointer border-2 ${statusStyle.border} ${statusStyle.bg} ${statusStyle.text}`}
+                        >
+                          {statusOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="lg:col-span-1 px-1 py-1 flex items-center justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeOKR(index)}
+                          className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Botão Add Mobile */}
+              <div className="lg:hidden p-2 border-t border-gray-200 dark:border-gray-700">
+                <Button 
+                  onClick={addOKR} 
+                  className="w-full h-8 bg-green-600 hover:bg-green-700 text-sm"
+                  leftIcon={<Plus className="w-4 h-4" />}
+                >
+                  Adicionar OKR
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
 }
-

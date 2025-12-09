@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
       
       console.log(`📅 Estoque Final: Buscando contagem da segunda-feira ${dataSegundaFinal}`);
       
-      let dataContagemFinal = null;
+      let dataContagemFinal: string | null = null;
       
       // Primeiro, tentar buscar contagem exata da segunda-feira
       const { data: contagemExata, error: errorExata } = await supabase
@@ -303,19 +303,20 @@ export async function POST(request: NextRequest) {
         // Buscar todos os insumos com suas categorias
         const { data: insumos, error: errorInsumos } = await supabase
           .from('insumos')
-          .select('id, tipo_local, categoria, custo_unitario')
+          .select('id, tipo_local, categoria')
           .eq('bar_id', bar_id);
 
         if (!errorInsumos && insumos) {
-          // Buscar contagens dessa data
+          // 🔧 CORRIGIDO: Buscar contagens COM custo_unitario (preço CONGELADO da contagem)
+          // Inclui insumo_codigo para identificar PRODUÇÃO (B) = pd*
           const { data: contagens, error: errorContagens } = await supabase
             .from('contagem_estoque_insumos')
-            .select('insumo_id, estoque_final')
+            .select('insumo_id, insumo_codigo, estoque_final, custo_unitario')
             .eq('bar_id', bar_id)
             .eq('data_contagem', dataContagem);
 
           if (!errorContagens && contagens) {
-            // Criar map de insumos para facilitar lookup
+            // Criar map de insumos para facilitar lookup (só categorias)
             const insumosMap = new Map(insumos.map(i => [i.id, i]));
 
             // 🔧 CORRIGIDO: Categorias baseadas nos dados REAIS do banco (01/12/2025)
@@ -370,11 +371,25 @@ export async function POST(request: NextRequest) {
               const insumo = insumosMap.get(contagem.insumo_id);
               if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
 
-              const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
+              // 🔧 USAR custo_unitario DA CONTAGEM (preço congelado no momento)
+              const valor = contagem.estoque_final * (contagem.custo_unitario || 0);
+              
+              // 🔧 PRODUÇÃO: códigos pd* são DRINKS (PRODUÇÃO B), pc* são COZINHA (PRODUÇÃO C)
+              const codigo = contagem.insumo_codigo || '';
+              const isProdDrinks = codigo.startsWith('pd');  // PRODUÇÃO (B) = Drinks
+              const isProdCozinha = codigo.startsWith('pc'); // PRODUÇÃO (C) = Cozinha
 
               // BEBIDAS - tipo_local = 'bar'
               if (insumo.tipo_local === 'bar') {
                 resultado.estoque_final_bebidas += valor;
+              }
+              // PRODUÇÃO (B) = Drinks (códigos pd*)
+              else if (isProdDrinks) {
+                resultado.estoque_final_drinks += valor;
+              }
+              // PRODUÇÃO (C) = Cozinha (códigos pc*)
+              else if (isProdCozinha) {
+                resultado.estoque_final_cozinha += valor;
               }
               // DRINKS - tipo_local = 'cozinha' mas categorias de drinks
               else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
@@ -413,16 +428,16 @@ export async function POST(request: NextRequest) {
       // Buscar insumos
       const { data: insumos } = await supabase
         .from('insumos')
-        .select('id, tipo_local, categoria, custo_unitario')
+        .select('id, tipo_local, categoria')
         .eq('bar_id', bar_id);
 
       if (insumos) {
         const insumosMap = new Map(insumos.map((i: any) => [i.id, i]));
 
-        // Buscar todas as contagens da data_inicio (segunda-feira)
+        // 🔧 CORRIGIDO: Buscar contagens COM custo_unitario e insumo_codigo
         const { data: contagensIniciais } = await supabase
           .from('contagem_estoque_insumos')
-          .select('insumo_id, estoque_final')
+          .select('insumo_id, insumo_codigo, estoque_final, custo_unitario')
           .eq('bar_id', bar_id)
           .eq('data_contagem', dataContagem);
 
@@ -435,10 +450,20 @@ export async function POST(request: NextRequest) {
             const insumo = insumosMap.get(contagem.insumo_id);
             if (!insumo || categoriasExcluir.includes(insumo.categoria)) return;
 
-            const valor = contagem.estoque_final * (insumo.custo_unitario || 0);
+            // 🔧 USAR custo_unitario DA CONTAGEM (preço congelado no momento)
+            const valor = contagem.estoque_final * (contagem.custo_unitario || 0);
+            
+            // 🔧 PRODUÇÃO: códigos pd* são DRINKS, pc* são COZINHA
+            const codigo = contagem.insumo_codigo || '';
+            const isProdDrinks = codigo.startsWith('pd');
+            const isProdCozinha = codigo.startsWith('pc');
 
             if (insumo.tipo_local === 'bar') {
               resultado.estoque_inicial_bebidas += valor;
+            } else if (isProdDrinks) {
+              resultado.estoque_inicial_drinks += valor;
+            } else if (isProdCozinha) {
+              resultado.estoque_inicial_cozinha += valor;
             } else if (insumo.tipo_local === 'cozinha' && categoriasDrinks.includes(insumo.categoria)) {
               resultado.estoque_inicial_drinks += valor;
             } else if (insumo.tipo_local === 'cozinha' && categoriasCozinha.includes(insumo.categoria)) {
