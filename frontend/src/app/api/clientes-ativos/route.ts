@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
           const semanaAnteriorData = dadosSemana.find(s => s.data_inicio === inicioAnterior);
 
           // Se temos dados fixos de % Novos e Clientes Ativos, usar eles
-          if (semanaAtualData?.perc_clientes_novos !== null && semanaAtualData?.clientes_ativos !== null) {
+          if (semanaAtualData && semanaAtualData.perc_clientes_novos !== null && semanaAtualData.clientes_ativos !== null) {
             console.log(`✅ Dados FIXOS encontrados: % Novos = ${semanaAtualData.perc_clientes_novos}, Clientes Ativos = ${semanaAtualData.clientes_ativos}`);
             
             // Ainda precisamos calcular os totais de clientes (que não mudam)
@@ -234,7 +234,7 @@ export async function GET(request: NextRequest) {
               // Usar dados anteriores fixos se disponíveis
               let novosClientesAnterior = Number(resultado.novos_anterior);
               let clientesRetornantesAnterior = Number(resultado.retornantes_anterior);
-              if (semanaAnteriorData?.perc_clientes_novos !== null) {
+              if (semanaAnteriorData && semanaAnteriorData.perc_clientes_novos !== null) {
                 const percNovosAnteriorFixo = Number(semanaAnteriorData.perc_clientes_novos);
                 novosClientesAnterior = Math.round(totalClientesAnterior * (percNovosAnteriorFixo / 100));
                 clientesRetornantesAnterior = totalClientesAnterior - novosClientesAnterior;
