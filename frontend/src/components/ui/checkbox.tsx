@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 interface CheckboxProps {
+  id?: string;
   checked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
@@ -10,9 +11,10 @@ interface CheckboxProps {
 }
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ checked, onCheckedChange, disabled, className }, ref) => (
+  ({ id, checked, onCheckedChange, disabled, className }, ref) => (
     <input
       ref={ref}
+      id={id}
       type="checkbox"
       checked={checked || false}
       onChange={e => onCheckedChange?.(e.target.checked)}

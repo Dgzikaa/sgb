@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number;
   max?: number;
-  color?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink';
+  color?: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'orange' | 'pink' | 'indigo' | 'cyan';
 }
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
@@ -25,6 +25,10 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
           return 'bg-orange-500';
         case 'pink':
           return 'bg-pink-500';
+        case 'indigo':
+          return 'bg-indigo-500';
+        case 'cyan':
+          return 'bg-cyan-500';
         case 'blue':
         default:
           return 'bg-blue-500';
