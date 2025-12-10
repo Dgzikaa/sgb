@@ -222,7 +222,7 @@ export default function StockoutPage() {
     setLoading(true);
     
     try {
-      console.log('🔍 Buscando stockout para data:', data, 'filtros:', filtros);
+      console.log('🔍 Buscando stockout para data:', data, 'bar_id:', selectedBar?.id, 'filtros:', filtros);
       
       const response = await fetch('/api/analitico/stockout', {
         method: 'POST',
@@ -231,6 +231,7 @@ export default function StockoutPage() {
         },
         body: JSON.stringify({
           data_selecionada: data,
+          bar_id: selectedBar?.id || 3,
           filtros: filtros
         }),
       });

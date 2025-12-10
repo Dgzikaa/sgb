@@ -9,9 +9,9 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { data_selecionada, filtros = [] } = await request.json();
+    const { data_selecionada, bar_id = 3, filtros = [] } = await request.json();
 
-    console.log('🔍 API Stockout - Data recebida:', data_selecionada, 'Filtros:', filtros);
+    console.log('🔍 API Stockout - Data recebida:', data_selecionada, 'Bar ID:', bar_id, 'Filtros:', filtros);
 
     if (!data_selecionada) {
       return NextResponse.json(
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ⚠️ VERIFICAR SE BAR ESTAVA ABERTO NESTA DATA
-    const statusDia = await verificarBarAberto(data_selecionada, 3);
+    const statusDia = await verificarBarAberto(data_selecionada, bar_id);
     
     if (!statusDia.aberto) {
       console.log(`⚠️ Bar fechado em ${data_selecionada}: ${statusDia.motivo}`);
@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('prd_ativo, prd_venda')
       .eq('data_consulta', data_selecionada)
+      .eq('bar_id', bar_id) // Filtrar por bar selecionado
       .eq('prd_ativo', 'S'); // Apenas produtos ativos
 
     // Aplicar filtros base
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('loc_desc, prd_ativo, prd_venda')
       .eq('data_consulta', data_selecionada)
+      .eq('bar_id', bar_id) // Filtrar por bar selecionado
       .eq('prd_ativo', 'S'); // Apenas produtos ativos
 
     // Aplicar filtros base
@@ -170,6 +172,7 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('prd_desc, loc_desc, prd_precovenda, prd_estoque, prd_controlaestoque, prd_validaestoquevenda')
       .eq('data_consulta', data_selecionada)
+      .eq('bar_id', bar_id) // Filtrar por bar selecionado
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'N') // E que não estão à venda = STOCKOUT
       .order('loc_desc')
@@ -194,6 +197,7 @@ export async function POST(request: NextRequest) {
       .from('contahub_stockout')
       .select('prd_desc, loc_desc, prd_precovenda, prd_estoque')
       .eq('data_consulta', data_selecionada)
+      .eq('bar_id', bar_id) // Filtrar por bar selecionado
       .eq('prd_ativo', 'S') // Apenas produtos ativos
       .eq('prd_venda', 'S') // E que estão à venda = DISPONÍVEIS
       .order('loc_desc')
