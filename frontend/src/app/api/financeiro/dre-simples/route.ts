@@ -6,36 +6,91 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET: Buscar DRE consolidada (view_dre + dre_manual)
+// GET: Buscar DRE consolidada (nibo_agendamentos + dre_manual) - FILTRADO POR BAR_ID
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const ano = parseInt(searchParams.get('ano') || '2025')
     const mes = parseInt(searchParams.get('mes') || '8')
+    const barId = searchParams.get('bar_id')
 
-    console.log(`🔍 [DRE-SIMPLES] Buscando DRE para ${mes}/${ano}`)
+    console.log(`🔍 [DRE-SIMPLES] Buscando DRE para ${mes}/${ano}${barId ? ` - Bar ID: ${barId}` : ' - TODOS OS BARES'}`)
 
-    // Usar função SQL para obter DRE consolidada
-    const { data: dreConsolidada, error: dreError } = await supabase
-      .rpc('get_dre_consolidada', { 
-        p_ano: ano, 
-        p_mes: mes 
-      })
+    // Data início e fim do mês
+    const dataInicio = `${ano}-${mes.toString().padStart(2, '0')}-01`
+    const dataFim = mes === 12 
+      ? `${ano + 1}-01-01` 
+      : `${ano}-${(mes + 1).toString().padStart(2, '0')}-01`
 
-    if (dreError) {
-      console.error('❌ [DRE-SIMPLES] Erro ao buscar DRE consolidada:', dreError)
+    // Query direta na tabela nibo_agendamentos FILTRANDO POR BAR_ID
+    let niboQuery = supabase
+      .from('nibo_agendamentos')
+      .select(`
+        valor,
+        tipo,
+        categoria_nome,
+        data_competencia
+      `)
+      .gte('data_competencia', dataInicio)
+      .lt('data_competencia', dataFim)
+      .or('deletado.is.null,deletado.eq.false')
+
+    // Filtrar por bar_id se fornecido
+    if (barId) {
+      niboQuery = niboQuery.eq('bar_id', parseInt(barId))
+    }
+
+    const { data: niboData, error: niboError } = await niboQuery
+
+    if (niboError) {
+      console.error('❌ [DRE-SIMPLES] Erro ao buscar dados do Nibo:', niboError)
       return NextResponse.json(
-        { error: 'Erro ao buscar DRE consolidada', details: dreError.message },
+        { error: 'Erro ao buscar dados do Nibo', details: niboError.message },
         { status: 500 }
       )
     }
 
+    // Buscar mapeamento de categorias
+    const { data: categoriasMapeamento } = await supabase
+      .from('nibo_categorias')
+      .select('categoria_nome, categoria_macro')
+
+    const mapCategoria = new Map(
+      categoriasMapeamento?.map(c => [c.categoria_nome, c.categoria_macro]) || []
+    )
+
+    // Agrupar dados por categoria_macro
+    const agregado = new Map<string, { valor_total: number; registros: number }>()
+    
+    niboData?.forEach(item => {
+      const categoriaMacro = mapCategoria.get(item.categoria_nome) || 'Outras Despesas'
+      const current = agregado.get(categoriaMacro) || { valor_total: 0, registros: 0 }
+      current.valor_total += parseFloat(item.valor) || 0
+      current.registros += 1
+      agregado.set(categoriaMacro, current)
+    })
+
+    // Converter para formato da DRE
+    const dreConsolidada = Array.from(agregado.entries()).map(([categoria, dados]) => ({
+      categoria_dre: categoria,
+      valor_automatico: dados.valor_total,
+      valor_manual: 0,
+      valor_total: dados.valor_total,
+      origem: 'automatico',
+      atividade: categoria === 'Investimentos' ? 'Investimento' 
+        : ['Sócios', 'Empréstimos', 'Financiamentos'].includes(categoria) ? 'Financiamento'
+        : 'Operacional'
+    }))
+
+    console.log(`📊 [DRE-SIMPLES] Dados agregados: ${dreConsolidada.length} categorias | ${niboData?.length || 0} registros`)
+
     // Buscar detalhes dos lançamentos manuais para o mês
+    // TODO: Adicionar bar_id na tabela dre_manual para filtrar corretamente
     const { data: lancamentosManuais, error: manuaisError } = await supabase
       .from('dre_manual')
       .select('*')
-      .gte('data_competencia', `${ano}-${mes.toString().padStart(2, '0')}-01`)
-      .lt('data_competencia', `${mes === 12 ? ano + 1 : ano}-${mes === 12 ? '01' : (mes + 1).toString().padStart(2, '0')}-01`)
+      .gte('data_competencia', dataInicio)
+      .lt('data_competencia', dataFim)
       .order('data_competencia', { ascending: false })
 
     if (manuaisError) {

@@ -34,6 +34,7 @@ import DreManualModal from "@/components/dre/DreManualModal";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Filler } from 'chart.js';
 import { Pie, Line } from 'react-chartjs-2';
 import { toast } from 'sonner';
+import { useBar } from '@/contexts/BarContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title, Filler);
 
@@ -138,6 +139,7 @@ const cleanCategoryName = (name: string) => {
 };
 
 export default function DrePage() {
+  const { selectedBar, isLoading: barLoading } = useBar();
   const [data, setData] = useState<DreApiResponse | null>(null);
   const [yearlyData, setYearlyData] = useState<DreApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,15 +176,24 @@ export default function DrePage() {
 
 
   const fetchData = useCallback(async () => {
+    // Aguardar bar estar carregado
+    if (barLoading || !selectedBar?.id) {
+      console.log('⏳ [DRE] Aguardando bar ser selecionado...');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
     try {
+      const barIdParam = `&bar_id=${selectedBar.id}`;
+      console.log(`🔍 [DRE] Buscando dados para Bar: ${selectedBar.nome} (ID: ${selectedBar.id})`);
+      
       // Buscar estrutura de categorias, dados consolidados e detalhes do Nibo em paralelo
       const [categoriasResponse, dreResponse, niboResponse] = await Promise.all([
         fetch('/api/financeiro/nibo-categorias'),
-        fetch(`/api/financeiro/dre-simples?ano=${year}&mes=${month}`),
-        fetch(`/api/financeiro/nibo/dre-monthly-detailed?year=${year}&month=${month}`)
+        fetch(`/api/financeiro/dre-simples?ano=${year}&mes=${month}${barIdParam}`),
+        fetch(`/api/financeiro/nibo/dre-monthly-detailed?year=${year}&month=${month}${barIdParam}`)
       ]);
       
       if (!categoriasResponse.ok || !dreResponse.ok) {
@@ -290,15 +301,21 @@ export default function DrePage() {
     } finally {
       setLoading(false);
     }
-  }, [month, year]);
+  }, [month, year, selectedBar?.id, barLoading]);
 
   const fetchYearlyData = useCallback(async () => {
+    // Aguardar bar estar carregado
+    if (barLoading || !selectedBar?.id) {
+      return;
+    }
+
     setLoadingYearly(true);
     setError(null);
     
     try {
+      const barIdParam = `&bar_id=${selectedBar.id}`;
       // Usar a nova API consolidada que inclui lançamentos manuais
-      const response = await fetch(`/api/financeiro/dre-yearly-consolidated?year=${year}`);
+      const response = await fetch(`/api/financeiro/dre-yearly-consolidated?year=${year}${barIdParam}`);
       if (!response.ok) {
         throw new Error('Erro ao buscar dados anuais consolidados');
       }
@@ -319,7 +336,7 @@ export default function DrePage() {
     } finally {
       setLoadingYearly(false);
     }
-  }, [year]);
+  }, [year, selectedBar?.id, barLoading]);
 
   const fetchLancamentosManuais = useCallback(async () => {
     setLoadingManuais(true);

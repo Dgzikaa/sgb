@@ -318,12 +318,24 @@ export function BarProvider({ children }: { children: ReactNode }) {
 
   // Função para alterar o bar selecionado
   const handleSetSelectedBar = (bar: Bar) => {
+    const previousBarId = selectedBar?.id;
     setSelectedBar(bar);
     // Salvar no localStorage apenas se estamos no cliente
     if (typeof window !== 'undefined') {
       localStorage.setItem('sgb_selected_bar_id', bar.id.toString());
       // Atualizar favicon baseado no bar selecionado
       updateFavicon(bar.nome);
+      
+      // Se o bar mudou, recarregar a página para atualizar os dados
+      if (previousBarId !== undefined && previousBarId !== bar.id) {
+        // Disparar evento customizado para notificar componentes
+        window.dispatchEvent(new CustomEvent('barChanged', { 
+          detail: { previousBarId, newBarId: bar.id, barName: bar.nome } 
+        }));
+        
+        // Recarregar a página para garantir que todos os dados sejam atualizados
+        window.location.reload();
+      }
     }
   };
 

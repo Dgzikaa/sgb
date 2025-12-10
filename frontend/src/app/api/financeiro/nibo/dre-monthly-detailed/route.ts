@@ -129,9 +129,10 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString());
   const month = parseInt(searchParams.get('month') || (new Date().getMonth() + 1).toString());
+  const barId = searchParams.get('bar_id');
 
   try {
-    console.log('🗓️ DRE Monthly Detailed - Ano:', year, 'Mês:', month);
+    console.log(`🗓️ DRE Monthly Detailed - Ano: ${year} Mês: ${month}${barId ? ` Bar ID: ${barId}` : ' TODOS OS BARES'}`);
     
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json({ 
@@ -160,13 +161,20 @@ export async function GET(request: Request) {
     const pageSize = 1000;
     
     while (hasMore) {
-      const { data: pageData, error } = await supabase
+      let query = supabase
         .from('nibo_agendamentos')
         .select('categoria_nome, valor, data_competencia')
         .eq('deletado', false)
         .gte('data_competencia', startDate)
         .lt('data_competencia', endDate)
         .range(page * pageSize, (page + 1) * pageSize - 1);
+      
+      // Filtrar por bar_id se fornecido
+      if (barId) {
+        query = query.eq('bar_id', parseInt(barId));
+      }
+
+      const { data: pageData, error } = await query;
       
       if (error) {
         console.error('❌ Erro ao buscar dados mensais:', error);
