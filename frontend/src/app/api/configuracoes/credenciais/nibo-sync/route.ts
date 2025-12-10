@@ -11,10 +11,11 @@ const supabase = createClient(
 );
 
 // Função auxiliar para sincronização
-async function executeNiboSync(barId?: string) {
+async function executeNiboSync(barId?: string, syncMode?: string, dateStart?: string, dateEnd?: string) {
   try {
     // Se não tiver barId no body, usar variável de ambiente (cron job)
     const targetBarId = barId || process.env.NIBO_BAR_ID;
+    const targetSyncMode = syncMode || 'continuous';
 
     if (!targetBarId) {
       throw new Error('Bar ID é obrigatório (via body ou variável de ambiente NIBO_BAR_ID)');
@@ -23,6 +24,7 @@ async function executeNiboSync(barId?: string) {
     // Horário atual no fuso de São Paulo
     const agoraBrasil = toZonedTime(new Date(), 'America/Sao_Paulo');
     console.log(`🕐 Horário em São Paulo: ${format(agoraBrasil, 'dd/MM/yyyy HH:mm:ss')}`);
+    console.log(`🔧 Modo de sincronização: ${targetSyncMode}${dateStart ? ` (${dateStart} a ${dateEnd})` : ''}`);
 
     // Buscar credenciais do Nibo na tabela api_credentials
     const { data: credenciais, error: credError } = await supabase
@@ -42,7 +44,7 @@ async function executeNiboSync(barId?: string) {
     // Log da sincronização
     const logData = {
       bar_id: parseInt(targetBarId),
-      tipo_sincronizacao: 'automatica_vercel',
+      tipo_sincronizacao: targetSyncMode === 'retroativo' ? 'retroativo_manual' : 'automatica_vercel',
       status: 'iniciado',
       data_inicio: new Date().toISOString(),
       criado_em: new Date().toISOString()
@@ -59,7 +61,7 @@ async function executeNiboSync(barId?: string) {
       console.error('Erro ao criar log de início:', logError);
     }
 
-    console.log(`🔄 Chamando Edge Function NIBO para bar_id: ${targetBarId}`);
+    console.log(`🔄 Chamando Edge Function NIBO para bar_id: ${targetBarId} (modo: ${targetSyncMode})`);
     
     // ✅ CHAMADA REAL para a Edge Function do NIBO
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -73,7 +75,10 @@ async function executeNiboSync(barId?: string) {
       },
       body: JSON.stringify({
         barId: targetBarId,
-        cronSecret: 'vercel_cron'
+        cronSecret: 'vercel_cron',
+        sync_mode: targetSyncMode,
+        date_start: dateStart,
+        date_end: dateEnd
       })
     });
 
@@ -155,7 +160,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { barId } = body;
+    const { barId, sync_mode, date_start, date_end } = body;
 
     if (!barId) {
       return NextResponse.json(
@@ -164,9 +169,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🔄 Sincronização manual iniciada para bar_id: ${barId}`);
+    const modoSync = sync_mode || 'continuous';
+    console.log(`🔄 Sincronização manual iniciada para bar_id: ${barId} (modo: ${modoSync})`);
     
-    const result = await executeNiboSync(barId);
+    const result = await executeNiboSync(barId, modoSync, date_start, date_end);
     
     return NextResponse.json(result, { status: 200 });
     

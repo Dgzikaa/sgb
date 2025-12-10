@@ -308,7 +308,7 @@ class NiboSyncService {
     }
   }
 
-  async syncAgendamentos(syncMode: string = 'continuous') {
+  async syncAgendamentos(syncMode: string = 'continuous', customDateStart?: string, customDateEnd?: string) {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
     try {
@@ -323,7 +323,23 @@ class NiboSyncService {
       let filterDateEnd: string
       let periodDescription: string
 
-      if (syncMode === 'daily_complete') {
+      if (customDateStart && customDateEnd) {
+        // Modo customizado: usar datas fornecidas
+        filterDateStart = customDateStart
+        filterDateEnd = customDateEnd
+        periodDescription = `período customizado: ${filterDateStart} a ${filterDateEnd}`
+        console.log(`📅 MODO CUSTOMIZADO: Sincronizando de ${filterDateStart} até ${filterDateEnd}`)
+      } else if (syncMode === 'retroativo' || syncMode === 'full') {
+        // Sincronização retroativa: desde janeiro de 2024 até hoje + 1 mês
+        filterDateStart = '2024-01-01'
+        
+        const oneMonthAhead = new Date()
+        oneMonthAhead.setMonth(oneMonthAhead.getMonth() + 1)
+        filterDateEnd = oneMonthAhead.toISOString().split('T')[0]
+        
+        periodDescription = 'RETROATIVO COMPLETO: desde 01/01/2024'
+        console.log('📅 MODO RETROATIVO: Sincronizando desde 01/01/2024')
+      } else if (syncMode === 'daily_complete') {
         // Sincronização diária completa: últimos 3 meses
         const threeMonthsAgo = new Date()
         threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
@@ -359,9 +375,10 @@ class NiboSyncService {
       const top = 200
       let hasMore = true
       let pageCount = 0
-      const maxPagesPerExecution = 5 // 🔥 PROCESSAR APENAS 5 PÁGINAS POR VEZ (1000 registros)
+      // Para modo retroativo, aumentar limite de páginas
+      const maxPagesPerExecution = (syncMode === 'retroativo' || syncMode === 'full') ? 50 : 5
       const startTime = Date.now()
-      const maxExecutionTime = 45000 // 45 segundos de limite
+      const maxExecutionTime = (syncMode === 'retroativo' || syncMode === 'full') ? 55000 : 45000
 
       console.log(`⏱️ Configuração: ${maxPagesPerExecution} páginas por execução, timeout ${maxExecutionTime}ms`)
 
@@ -536,7 +553,7 @@ class NiboSyncService {
           // Preparar batch para upsert em massa
           const processedBatch = batch.map(agendamento => ({
             nibo_id: String(agendamento.scheduleId || agendamento.id || ''),
-            bar_id: this.credentials!.bar_id,
+            bar_id: parseInt(this.credentials!.bar_id),
             tipo: String(agendamento.type || 'receita'),
             status: String(agendamento.status || 'pendente'),
             valor: parseFloat(agendamento.value || 0),
@@ -684,10 +701,14 @@ class NiboSyncService {
     }
   }
 
-  async syncAll(syncMode: string = 'continuous') {
+  async syncAll(syncMode: string = 'continuous', customDateStart?: string, customDateEnd?: string) {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
-    const modeDescription = syncMode === 'daily_complete' ? 'DIÁRIA COMPLETA (3 meses)' : 'CONTÍNUA (7 dias)'
+    let modeDescription = 'CONTÍNUA (7 dias)'
+    if (syncMode === 'daily_complete') modeDescription = 'DIÁRIA COMPLETA (3 meses)'
+    else if (syncMode === 'retroativo' || syncMode === 'full') modeDescription = 'RETROATIVA COMPLETA (desde 2024)'
+    else if (customDateStart && customDateEnd) modeDescription = `CUSTOMIZADA (${customDateStart} a ${customDateEnd})`
+    
     console.log(`🚀 Iniciando sincronização ${modeDescription} NIBO...`)
     
     // Notificar início
@@ -700,7 +721,7 @@ class NiboSyncService {
     const results = {
       stakeholders: await this.syncStakeholders(),
       categories: await this.syncCategories(),
-      agendamentos: await this.syncAgendamentos(syncMode),
+      agendamentos: await this.syncAgendamentos(syncMode, customDateStart, customDateEnd),
       timestamp: new Date().toISOString(),
       sync_mode: syncMode
     }
@@ -763,7 +784,7 @@ serve(async (req) => {
     const requestBody = await req.text()
     console.log('📥 Recebido body:', requestBody)
     
-    const { barId, cronSecret, sync_mode } = JSON.parse(requestBody || '{}')
+    const { barId, cronSecret, sync_mode, date_start, date_end } = JSON.parse(requestBody || '{}')
     
     // Verificar autenticação - aceitar SERVICE_ROLE_KEY ou cronSecret
     const authHeader = req.headers.get('authorization')
@@ -771,7 +792,7 @@ serve(async (req) => {
     
     if (authHeader && authHeader.includes(serviceRoleKey || '')) {
       console.log('✅ Acesso autorizado via SERVICE_ROLE_KEY')
-    } else if (cronSecret === 'pgcron_nibo' || cronSecret === 'manual_test') {
+    } else if (cronSecret === 'pgcron_nibo' || cronSecret === 'manual_test' || cronSecret === 'vercel_cron') {
       console.log('✅ Acesso autorizado via cronSecret')
     } else {
       return new Response(
@@ -784,7 +805,9 @@ serve(async (req) => {
     }
     
     const syncMode = sync_mode || 'continuous'
-    console.log(`🔧 Modo de sincronização: ${syncMode}`)
+    const customDateStart = date_start || undefined
+    const customDateEnd = date_end || undefined
+    console.log(`🔧 Modo de sincronização: ${syncMode}${customDateStart ? ` (${customDateStart} a ${customDateEnd})` : ''}`)
     
     if (!barId) {
       return new Response(
@@ -813,7 +836,7 @@ serve(async (req) => {
     }
 
     // Executar sincronização
-    const result = await niboSync.syncAll(syncMode)
+    const result = await niboSync.syncAll(syncMode, customDateStart, customDateEnd)
 
     return new Response(
       JSON.stringify(result),
