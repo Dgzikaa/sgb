@@ -106,12 +106,12 @@ export async function GET(request: NextRequest) {
     const receitas = operacionais.filter(item => item.categoria_dre === 'Receita')
     const custosOperacionais = operacionais.filter(item => item.categoria_dre !== 'Receita')
 
-    const totalReceitas = receitas.reduce((sum, item) => sum + parseFloat(item.valor_total || '0'), 0)
-    const totalCustosOperacionais = Math.abs(custosOperacionais.reduce((sum, item) => sum + parseFloat(item.valor_total || '0'), 0))
+    const totalReceitas = receitas.reduce((sum, item) => sum + parseFloat(String(item.valor_total || '0')), 0)
+    const totalCustosOperacionais = Math.abs(custosOperacionais.reduce((sum, item) => sum + parseFloat(String(item.valor_total || '0')), 0))
     
     // Calcular totais de investimento e financiamento
-    const totalInvestimentos = Math.abs(investimentos.reduce((sum, item) => sum + parseFloat(item.valor_total || '0'), 0))
-    const totalFinanciamentos = Math.abs(financiamentos.reduce((sum, item) => sum + parseFloat(item.valor_total || '0'), 0))
+    const totalInvestimentos = Math.abs(investimentos.reduce((sum, item) => sum + parseFloat(String(item.valor_total || '0')), 0))
+    const totalFinanciamentos = Math.abs(financiamentos.reduce((sum, item) => sum + parseFloat(String(item.valor_total || '0')), 0))
 
     const lucroOperacional = totalReceitas - totalCustosOperacionais
     
