@@ -117,6 +117,13 @@ export default function ClientesPage() {
   ]
 
   const fetchClientes = useCallback(async () => {
+    // Verificar se há bar selecionado (obrigatório para a API)
+    if (!selectedBar) {
+      console.log('⚠️ Nenhum bar selecionado, aguardando seleção...')
+      setLoading(false)
+      return
+    }
+    
     // Evitar múltiplas chamadas simultâneas usando useRef
     if (isApiCallingRef.current) {
       console.log('⚠️ API já está sendo chamada, ignorando chamada duplicada')
@@ -149,9 +156,9 @@ export default function ClientesPage() {
         try {
           const [fetchResponse] = await Promise.all([
             fetch(url, {
-              headers: selectedBar ? {
+              headers: {
                 'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
-              } : undefined
+              }
             }),
             attempts === 1 ? minLoadingTime : Promise.resolve()
           ])
@@ -209,11 +216,18 @@ export default function ClientesPage() {
       const url = `/api/analitico/reservantes${params.toString() ? `?${params.toString()}` : ''}`
       console.log('🔍 Frontend: Buscando reservantes com URL:', url)
       
+      // Verificar se há bar selecionado
+      if (!selectedBar) {
+        console.log('⚠️ Nenhum bar selecionado para reservantes')
+        setLoading(false)
+        return
+      }
+      
       const [response] = await Promise.all([
         fetch(url, {
-          headers: selectedBar ? {
+          headers: {
             'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
-          } : undefined
+          }
         }),
         minLoadingTime
       ])
@@ -405,6 +419,29 @@ export default function ClientesPage() {
         variant: "destructive"
       })
     }
+  }
+
+  // Verificar se há bar selecionado
+  if (!selectedBar) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 py-8">
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg max-w-md mx-auto mt-20">
+            <CardContent className="text-center py-16">
+              <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users className="h-10 w-10 text-amber-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                Selecione um Bar
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                Para visualizar os dados de clientes, selecione um bar no seletor do topo da página.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
