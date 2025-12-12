@@ -67,11 +67,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Gerar URL de redefinição
-    // Usar VERCEL_URL em produção, ou NEXT_PUBLIC_APP_URL, ou fallback
+    // Em produção, SEMPRE usar o domínio oficial zykor.com.br
     const baseUrl = process.env.NODE_ENV === 'development' 
       ? 'http://localhost:3000' 
-      : (process.env.NEXT_PUBLIC_APP_URL || 
-         (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://sgbv2.vercel.app'));
+      : 'https://zykor.com.br';
     
     const resetLink = `${baseUrl}/usuarios/redefinir-senha?email=${encodeURIComponent(usuario.email)}&token=${resetToken}`;
 
