@@ -67,9 +67,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Gerar URL de redefinição
+    // Usar VERCEL_URL em produção, ou NEXT_PUBLIC_APP_URL, ou fallback
     const baseUrl = process.env.NODE_ENV === 'development' 
       ? 'http://localhost:3000' 
-      : (process.env.NEXT_PUBLIC_APP_URL || 'https://zykor.com.br');
+      : (process.env.NEXT_PUBLIC_APP_URL || 
+         (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://sgbv2.vercel.app'));
     
     const resetLink = `${baseUrl}/usuarios/redefinir-senha?email=${encodeURIComponent(usuario.email)}&token=${resetToken}`;
 
@@ -78,7 +80,11 @@ export async function POST(request: NextRequest) {
     let emailError: string | null = null;
     
     try {
-      const emailResponse = await fetch(`${baseUrl}/api/emails/password-reset-link`, {
+      // Usar URL absoluta baseada no host da requisição para chamadas internas
+      const requestUrl = new URL(request.url);
+      const internalBaseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+      
+      const emailResponse = await fetch(`${internalBaseUrl}/api/emails/password-reset-link`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
