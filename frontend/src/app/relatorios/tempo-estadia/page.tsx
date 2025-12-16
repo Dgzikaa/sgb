@@ -111,8 +111,7 @@ export default function TempoEstadiaPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
         <PageHeader
           title="Tempo de Estadia"
-          subtitle="Análise de permanência dos clientes"
-          icon={<Clock className="w-8 h-8" />}
+          description="Análise de permanência dos clientes"
         />
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-6 text-center">
@@ -128,8 +127,7 @@ export default function TempoEstadiaPage() {
       <div className="container mx-auto px-4 py-6">
         <PageHeader
           title="Tempo de Estadia"
-          subtitle="Análise detalhada de permanência dos clientes"
-          icon={<Clock className="w-8 h-8" />}
+          description="Análise detalhada de permanência dos clientes"
         />
 
         {loading ? (
