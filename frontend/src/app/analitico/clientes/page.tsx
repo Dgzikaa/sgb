@@ -87,6 +87,31 @@ interface DetalhesResponse {
   }
 }
 
+interface ProdutoFavorito {
+  produto: string
+  categoria: string
+  quantidade: number
+  vezes_pediu: number
+}
+
+interface CategoriaFavorita {
+  categoria: string
+  quantidade: number
+  valor_total: number
+}
+
+interface PerfilConsumo {
+  telefone: string
+  nome: string
+  total_visitas: number
+  total_itens_consumidos: number
+  valor_total_consumo: number
+  produtos_favoritos: ProdutoFavorito[]
+  categorias_favoritas: CategoriaFavorita[]
+  tags: string[]
+  dias_preferidos: string[]
+}
+
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [reservantes, setReservantes] = useState<Reservante[]>([])
@@ -104,6 +129,8 @@ export default function ClientesPage() {
   const [loadingVisitas, setLoadingVisitas] = useState(false)
   const [modalAberto, setModalAberto] = useState(false)
   const [paginaTempos, setPaginaTempos] = useState(1) // ✅ Hook para paginação dos tempos
+  const [perfilConsumo, setPerfilConsumo] = useState<PerfilConsumo | null>(null)
+  const [loadingPerfil, setLoadingPerfil] = useState(false)
   const { toast } = useToast()
   const { selectedBar } = useBar()
   const isApiCallingRef = useRef(false)
@@ -279,12 +306,45 @@ export default function ClientesPage() {
     }
   }, [selectedBar, toast])
 
+  const fetchPerfilConsumo = useCallback(async (telefone: string) => {
+    try {
+      setLoadingPerfil(true)
+      setPerfilConsumo(null)
+      
+      const response = await fetch(`/api/analitico/clientes/perfil-consumo?telefone=${telefone}`, {
+        headers: selectedBar ? {
+          'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+        } : undefined
+      })
+      
+      if (!response.ok) {
+        console.warn('Perfil de consumo não encontrado')
+        return
+      }
+      
+      const data = await response.json()
+      if (data.perfil) {
+        setPerfilConsumo(data.perfil)
+      }
+    } catch (err) {
+      console.warn('Erro ao buscar perfil de consumo:', err)
+    } finally {
+      setLoadingPerfil(false)
+    }
+  }, [selectedBar])
+
   const abrirModalCliente = useCallback(async (cliente: Cliente) => {
     setClienteSelecionado(cliente)
     setPaginaTempos(1) // ✅ Resetar paginação ao trocar de cliente
+    setPerfilConsumo(null) // Limpar perfil anterior
     setModalAberto(true)
-    await fetchVisitasDetalhadas(cliente)
-  }, [fetchVisitasDetalhadas])
+    
+    // Buscar visitas e perfil em paralelo
+    await Promise.all([
+      fetchVisitasDetalhadas(cliente),
+      cliente.telefone ? fetchPerfilConsumo(cliente.telefone) : Promise.resolve()
+    ])
+  }, [fetchVisitasDetalhadas, fetchPerfilConsumo])
 
   // Carregamento inicial e quando filtros mudam
   useEffect(() => {
@@ -1443,6 +1503,161 @@ export default function ClientesPage() {
                   </Card>
                 </motion.div>
               </div>
+
+              {/* Perfil de Consumo - NOVO */}
+              {(loadingPerfil || perfilConsumo) && (
+                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+                  <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-600 dark:to-orange-700">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <span className="text-lg">🎯</span>
+                      Perfil de Consumo
+                    </CardTitle>
+                    <CardDescription className="text-amber-100">
+                      Produtos e categorias favoritas deste cliente
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {loadingPerfil ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mr-3"></div>
+                        <span className="text-gray-600 dark:text-gray-400">Carregando perfil de consumo...</span>
+                      </div>
+                    ) : perfilConsumo ? (
+                      <div className="space-y-6">
+                        {/* Tags do cliente */}
+                        {perfilConsumo.tags && perfilConsumo.tags.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                              <span>🏷️</span> Tags do Cliente
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {perfilConsumo.tags.map((tag, idx) => (
+                                <Badge 
+                                  key={idx} 
+                                  className={`
+                                    ${tag.includes('vip') ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-300' : ''}
+                                    ${tag.includes('frequente') ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300' : ''}
+                                    ${tag.includes('prefere_') ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300' : ''}
+                                    ${tag.includes('cervejeiro') ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-300' : ''}
+                                    ${tag.includes('frequenta_') ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-300' : ''}
+                                    ${!tag.includes('vip') && !tag.includes('frequente') && !tag.includes('prefere_') && !tag.includes('cervejeiro') && !tag.includes('frequenta_') ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' : ''}
+                                  `}
+                                >
+                                  {tag.replace(/_/g, ' ').replace(/prefere /g, '❤️ ').replace(/frequenta /g, '📅 ')}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Grid de produtos e categorias */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Produtos Favoritos */}
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                              <span>⭐</span> Top 5 Produtos Favoritos
+                            </h4>
+                            <div className="space-y-2">
+                              {perfilConsumo.produtos_favoritos.slice(0, 5).map((produto, idx) => (
+                                <div 
+                                  key={idx} 
+                                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-lg font-bold text-amber-500">#{idx + 1}</span>
+                                    <div>
+                                      <p className="font-medium text-gray-900 dark:text-white text-sm">
+                                        {produto.produto}
+                                      </p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        {produto.categoria}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800">
+                                      {produto.quantidade}x
+                                    </Badge>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                      {produto.vezes_pediu} pedido{produto.vezes_pediu !== 1 ? 's' : ''}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                              {perfilConsumo.produtos_favoritos.length === 0 && (
+                                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+                                  Nenhum produto identificado
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Categorias Favoritas */}
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                              <span>📊</span> Categorias Favoritas
+                            </h4>
+                            <div className="space-y-2">
+                              {perfilConsumo.categorias_favoritas.slice(0, 5).map((categoria, idx) => (
+                                <div 
+                                  key={idx} 
+                                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-lg font-bold text-blue-500">#{idx + 1}</span>
+                                    <p className="font-medium text-gray-900 dark:text-white text-sm">
+                                      {categoria.categoria}
+                                    </p>
+                                  </div>
+                                  <div className="text-right">
+                                    <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                                      {categoria.quantidade} itens
+                                    </Badge>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                      {formatCurrency(categoria.valor_total)}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                              {perfilConsumo.categorias_favoritas.length === 0 && (
+                                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+                                  Nenhuma categoria identificada
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Dias preferidos */}
+                        {perfilConsumo.dias_preferidos && perfilConsumo.dias_preferidos.length > 0 && (
+                          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                              <span>📅</span> Dias Preferidos
+                            </h4>
+                            <div className="flex gap-2">
+                              {perfilConsumo.dias_preferidos.map((dia, idx) => (
+                                <Badge 
+                                  key={idx}
+                                  className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-300"
+                                >
+                                  {dia}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <span className="text-4xl mb-4 block">🔍</span>
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Perfil de consumo não disponível para este cliente
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Histórico de Visitas */}
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
