@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import PageHeader from '@/components/layouts/PageHeader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -69,42 +69,48 @@ export default function TempoEstadiaPage() {
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
   const { selectedBar } = useBar()
-
-  const fetchData = useCallback(async () => {
-    if (!selectedBar?.id) return
-    
-    setLoading(true)
-    setError(null)
-    
-    try {
-      const response = await fetch('/api/relatorios/tempo-estadia', {
-        headers: {
-          'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar dados')
-      }
-      
-      const result = await response.json()
-      setData(result)
-    } catch (err) {
-      console.error('Erro:', err)
-      setError('Erro ao carregar relatório')
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar o relatório de tempo de estadia',
-        variant: 'destructive'
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedBar?.id, toast])
+  const hasFetchedRef = useRef(false)
+  const lastBarIdRef = useRef<number | null>(null)
 
   useEffect(() => {
+    // Evitar loop: só buscar se bar mudou ou ainda não buscou
+    if (!selectedBar?.id) return
+    if (hasFetchedRef.current && lastBarIdRef.current === selectedBar.id) return
+    
+    const fetchData = async () => {
+      setLoading(true)
+      setError(null)
+      
+      try {
+        const response = await fetch('/api/relatorios/tempo-estadia', {
+          headers: {
+            'x-user-data': JSON.stringify({ bar_id: selectedBar.id })
+          }
+        })
+        
+        if (!response.ok) {
+          throw new Error('Erro ao buscar dados')
+        }
+        
+        const result = await response.json()
+        setData(result)
+        hasFetchedRef.current = true
+        lastBarIdRef.current = selectedBar.id
+      } catch (err) {
+        console.error('Erro:', err)
+        setError('Erro ao carregar relatório')
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar o relatório de tempo de estadia',
+          variant: 'destructive'
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
     fetchData()
-  }, [fetchData])
+  }, [selectedBar?.id, toast])
 
   if (!selectedBar?.id) {
     return (
