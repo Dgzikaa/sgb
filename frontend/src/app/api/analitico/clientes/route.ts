@@ -207,26 +207,44 @@ export async function GET(request: NextRequest) {
 		}
 		}
 
-		// ✅ BUSCAR TEMPOS DE ESTADIA REAIS DA TABELA contahub_vendas
+		// ✅ BUSCAR TEMPOS DE ESTADIA REAIS DA TABELA contahub_vendas (COM PAGINAÇÃO)
 		console.log('⚡ Buscando tempos de estadia REAIS do banco de dados...')
 		
 		try {
-			// Buscar todos os dados de vendas com tempo de estadia
-			const { data: vendasComTempo, error: vendasError } = await supabase
-				.from('contahub_vendas')
-				.select('cli_fone, cli_nome, vd_nome, vd_hrabertura, vd_hrsaida, tempo_estadia_minutos, dt_gerencial')
-				.eq('bar_id', finalBarId)
-				.not('vd_hrabertura', 'is', null)
-				.not('vd_hrsaida', 'is', null)
+			// Criar mapa de tempos por telefone normalizado
+			const temposPorTelefone = new Map<string, { tempos: number[]; datas: string[] }>()
 			
-			if (vendasError) {
-				console.warn('⚠️ Erro ao buscar tempos de estadia:', vendasError)
-			} else if (vendasComTempo && vendasComTempo.length > 0) {
-				console.log(`📊 Encontrados ${vendasComTempo.length} registros com tempo de estadia real`)
+			// PAGINAÇÃO: Buscar em lotes de 5000 registros
+			const TEMPO_PAGE_SIZE = 5000
+			let tempoOffset = 0
+			let totalTemposProcessados = 0
+			let tempoIterations = 0
+			const MAX_TEMPO_ITERATIONS = 50 // Máximo 250.000 registros
+			
+			while (tempoIterations < MAX_TEMPO_ITERATIONS) {
+				tempoIterations++
 				
-				// Criar mapa de tempos por telefone normalizado
-				const temposPorTelefone = new Map<string, { tempos: number[]; datas: string[] }>()
+				const { data: vendasComTempo, error: vendasError } = await supabase
+					.from('contahub_vendas')
+					.select('cli_fone, tempo_estadia_minutos, dt_gerencial')
+					.eq('bar_id', finalBarId)
+					.not('vd_hrabertura', 'is', null)
+					.not('vd_hrsaida', 'is', null)
+					.gt('tempo_estadia_minutos', 0)
+					.lt('tempo_estadia_minutos', 720) // Limitar a 12 horas
+					.range(tempoOffset, tempoOffset + TEMPO_PAGE_SIZE - 1)
 				
+				if (vendasError) {
+					console.warn('⚠️ Erro ao buscar tempos de estadia (página ' + tempoIterations + '):', vendasError)
+					break
+				}
+				
+				if (!vendasComTempo || vendasComTempo.length === 0) {
+					console.log(`✅ Tempos: processamento completo após ${tempoIterations} páginas`)
+					break
+				}
+				
+				// Processar registros desta página
 				for (const venda of vendasComTempo) {
 					let foneVenda = (venda.cli_fone || '').toString().replace(/\D/g, '')
 					if (!foneVenda) continue
@@ -240,40 +258,44 @@ export async function GET(request: NextRequest) {
 					}
 					
 					const tempoMinutos = venda.tempo_estadia_minutos
-					if (tempoMinutos && tempoMinutos > 0 && tempoMinutos < 720) { // Limitar a 12 horas
+					if (tempoMinutos && tempoMinutos > 0) {
 						if (!temposPorTelefone.has(foneVenda)) {
 							temposPorTelefone.set(foneVenda, { tempos: [], datas: [] })
 						}
 						const registro = temposPorTelefone.get(foneVenda)!
 						registro.tempos.push(Math.round(tempoMinutos))
 						registro.datas.push(venda.dt_gerencial)
+						totalTemposProcessados++
 					}
 				}
 				
-				// Aplicar tempos reais aos clientes
-				let clientesComTempoReal = 0
-				for (const [fone, cliente] of map.entries()) {
-					const temposCliente = temposPorTelefone.get(fone)
-					if (temposCliente && temposCliente.tempos.length > 0) {
-						cliente.temposEstadia = temposCliente.tempos
-						cliente.tempoMedioEstadia = temposCliente.tempos.reduce((sum, t) => sum + t, 0) / temposCliente.tempos.length
-						clientesComTempoReal++
-					} else {
-						// Sem dados reais - manter arrays vazios
-						cliente.temposEstadia = []
-						cliente.tempoMedioEstadia = 0
-					}
-				}
+				// Se retornou menos que o page size, acabou
+				if (vendasComTempo.length < TEMPO_PAGE_SIZE) break
+				tempoOffset += TEMPO_PAGE_SIZE
 				
-				console.log(`✅ Tempos de estadia REAIS aplicados para ${clientesComTempoReal} clientes!`)
-			} else {
-				console.log('⚠️ Nenhum dado de tempo de estadia encontrado na tabela contahub_vendas')
-				// Sem dados - deixar arrays vazios para todos
-				for (const [, cliente] of map.entries()) {
+				// Pequeno delay para não sobrecarregar
+				await new Promise(resolve => setTimeout(resolve, 30))
+			}
+			
+			console.log(`📊 Total de ${totalTemposProcessados} registros de tempo processados para ${temposPorTelefone.size} telefones únicos`)
+			
+			// Aplicar tempos reais aos clientes
+			let clientesComTempoReal = 0
+			for (const [fone, cliente] of map.entries()) {
+				const temposCliente = temposPorTelefone.get(fone)
+				if (temposCliente && temposCliente.tempos.length > 0) {
+					cliente.temposEstadia = temposCliente.tempos
+					cliente.tempoMedioEstadia = temposCliente.tempos.reduce((sum, t) => sum + t, 0) / temposCliente.tempos.length
+					clientesComTempoReal++
+				} else {
+					// Sem dados reais - manter arrays vazios
 					cliente.temposEstadia = []
 					cliente.tempoMedioEstadia = 0
 				}
 			}
+			
+			console.log(`✅ Tempos de estadia REAIS aplicados para ${clientesComTempoReal} clientes!`)
+			
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
 			// Em caso de erro, manter arrays vazios
@@ -346,3 +368,4 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
