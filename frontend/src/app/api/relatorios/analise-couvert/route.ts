@@ -119,27 +119,54 @@ export async function GET() {
       if (!dados || dados.length === 0) {
         return {
           total_comandas: 0,
-          clientes_unicos: 0,
+          total_dias: 0,
+          comandas_por_dia: 0,
+          clientes_unicos_total: 0,
+          clientes_unicos_por_dia: 0,
           ticket_medio: 0,
           desconto_medio: 0,
           ticket_liquido: 0,
-          faturamento_bruto: 0,
-          faturamento_liquido: 0
+          faturamento_bruto_total: 0,
+          faturamento_bruto_por_dia: 0,
+          faturamento_liquido_total: 0,
+          faturamento_liquido_por_dia: 0
         }
       }
 
+      // Agrupar por data para calcular médias por dia
+      const porData = new Map<string, any[]>()
+      dados.forEach(d => {
+        if (!porData.has(d.dt_gerencial)) {
+          porData.set(d.dt_gerencial, [])
+        }
+        porData.get(d.dt_gerencial)!.push(d)
+      })
+
+      const totalDias = porData.size
       const cpfsUnicos = new Set(dados.filter(d => d.vd_cpf).map(d => d.vd_cpf))
       const totalVrCheio = dados.reduce((sum, d) => sum + (parseFloat(d.vd_vrcheio) || 0), 0)
       const totalDescontos = dados.reduce((sum, d) => sum + (parseFloat(d.vd_vrdescontos) || 0), 0)
 
+      // Calcular clientes únicos por dia (média)
+      let totalClientesPorDia = 0
+      porData.forEach((registros) => {
+        const clientesDia = new Set(registros.filter(r => r.vd_cpf).map(r => r.vd_cpf))
+        totalClientesPorDia += clientesDia.size
+      })
+
       return {
         total_comandas: dados.length,
-        clientes_unicos: cpfsUnicos.size,
+        total_dias: totalDias,
+        comandas_por_dia: Math.round((dados.length / totalDias) * 100) / 100,
+        clientes_unicos_total: cpfsUnicos.size,
+        clientes_unicos_por_dia: Math.round((totalClientesPorDia / totalDias) * 100) / 100,
         ticket_medio: Math.round((totalVrCheio / dados.length) * 100) / 100,
         desconto_medio: Math.round((totalDescontos / dados.length) * 100) / 100,
         ticket_liquido: Math.round(((totalVrCheio - totalDescontos) / dados.length) * 100) / 100,
-        faturamento_bruto: Math.round(totalVrCheio * 100) / 100,
-        faturamento_liquido: Math.round((totalVrCheio - totalDescontos) * 100) / 100
+        faturamento_bruto_total: Math.round(totalVrCheio * 100) / 100,
+        faturamento_bruto_por_dia: Math.round((totalVrCheio / totalDias) * 100) / 100,
+        faturamento_liquido_total: Math.round((totalVrCheio - totalDescontos) * 100) / 100,
+        faturamento_liquido_por_dia: Math.round(((totalVrCheio - totalDescontos) / totalDias) * 100) / 100
       }
     }
 
@@ -255,3 +282,4 @@ export async function GET() {
     }, { status: 500 })
   }
 }
+

@@ -36,12 +36,17 @@ import {
 interface TicketData {
   periodo: 'antes' | 'depois'
   total_comandas: number
-  clientes_unicos: number
+  total_dias: number
+  comandas_por_dia: number
+  clientes_unicos_total: number
+  clientes_unicos_por_dia: number
   ticket_medio: number
   desconto_medio: number
   ticket_liquido: number
-  faturamento_bruto: number
-  faturamento_liquido: number
+  faturamento_bruto_total: number
+  faturamento_bruto_por_dia: number
+  faturamento_liquido_total: number
+  faturamento_liquido_por_dia: number
 }
 
 interface RecorrenciaData {
@@ -281,7 +286,7 @@ export default function AnaliseCouvertPage() {
                 ANTES da Entrada Obrigatória
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-400">
-                Set/Out até {dataEntrada && formatDate(dataEntrada + 'T00:00:00')}
+                Set/Out até {dataEntrada && formatDate(dataEntrada + 'T00:00:00')} ({ticketAntes?.total_dias || 0} dias)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -293,21 +298,30 @@ export default function AnaliseCouvertPage() {
                   </p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Clientes Únicos</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Clientes/Dia</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {ticketAntes?.clientes_unicos?.toLocaleString() || 0}
+                    {Math.round(ticketAntes?.clientes_unicos_por_dia || 0)}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {ticketAntes?.clientes_unicos_total?.toLocaleString() || 0} total
                   </p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Comandas</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Comandas/Dia</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {ticketAntes?.total_comandas?.toLocaleString() || 0}
+                    {Math.round(ticketAntes?.comandas_por_dia || 0)}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {ticketAntes?.total_comandas?.toLocaleString() || 0} total
                   </p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Faturamento</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Faturamento/Dia</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {formatCurrency(ticketAntes?.faturamento_bruto || 0)}
+                    {formatCurrency(ticketAntes?.faturamento_bruto_por_dia || 0)}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {formatCurrency(ticketAntes?.faturamento_bruto_total || 0)} total
                   </p>
                 </div>
               </div>
@@ -322,7 +336,7 @@ export default function AnaliseCouvertPage() {
                 DEPOIS da Entrada Obrigatória
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-400">
-                A partir de {dataEntrada && formatDate(dataEntrada + 'T00:00:00')}
+                A partir de {dataEntrada && formatDate(dataEntrada + 'T00:00:00')} ({ticketDepois?.total_dias || 0} dias)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -347,34 +361,69 @@ export default function AnaliseCouvertPage() {
                   )}
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Clientes Únicos</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Clientes/Dia</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {ticketDepois?.clientes_unicos?.toLocaleString() || 0}
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Comandas</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {ticketDepois?.total_comandas?.toLocaleString() || 0}
+                    {Math.round(ticketDepois?.clientes_unicos_por_dia || 0)}
                   </p>
                   {ticketAntes && ticketDepois && (
                     <div className={`flex items-center gap-1 mt-1 text-sm ${
-                      calcularVariacao(ticketAntes.total_comandas, ticketDepois.total_comandas) >= 0 
+                      calcularVariacao(ticketAntes.clientes_unicos_por_dia, ticketDepois.clientes_unicos_por_dia) >= 0 
                         ? 'text-green-500' 
                         : 'text-red-500'
                     }`}>
-                      {calcularVariacao(ticketAntes.total_comandas, ticketDepois.total_comandas) >= 0 
+                      {calcularVariacao(ticketAntes.clientes_unicos_por_dia, ticketDepois.clientes_unicos_por_dia) >= 0 
                         ? <TrendingUp className="w-4 h-4" /> 
                         : <TrendingDown className="w-4 h-4" />
                       }
-                      {Math.abs(calcularVariacao(ticketAntes.total_comandas, ticketDepois.total_comandas)).toFixed(1)}%
+                      {Math.abs(calcularVariacao(ticketAntes.clientes_unicos_por_dia, ticketDepois.clientes_unicos_por_dia)).toFixed(1)}%
                     </div>
                   )}
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {ticketDepois?.clientes_unicos_total?.toLocaleString() || 0} total
+                  </p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Faturamento</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Comandas/Dia</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {formatCurrency(ticketDepois?.faturamento_bruto || 0)}
+                    {Math.round(ticketDepois?.comandas_por_dia || 0)}
+                  </p>
+                  {ticketAntes && ticketDepois && (
+                    <div className={`flex items-center gap-1 mt-1 text-sm ${
+                      calcularVariacao(ticketAntes.comandas_por_dia, ticketDepois.comandas_por_dia) >= 0 
+                        ? 'text-green-500' 
+                        : 'text-red-500'
+                    }`}>
+                      {calcularVariacao(ticketAntes.comandas_por_dia, ticketDepois.comandas_por_dia) >= 0 
+                        ? <TrendingUp className="w-4 h-4" /> 
+                        : <TrendingDown className="w-4 h-4" />
+                      }
+                      {Math.abs(calcularVariacao(ticketAntes.comandas_por_dia, ticketDepois.comandas_por_dia)).toFixed(1)}%
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {ticketDepois?.total_comandas?.toLocaleString() || 0} total
+                  </p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Faturamento/Dia</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {formatCurrency(ticketDepois?.faturamento_bruto_por_dia || 0)}
+                  </p>
+                  {ticketAntes && ticketDepois && (
+                    <div className={`flex items-center gap-1 mt-1 text-sm ${
+                      calcularVariacao(ticketAntes.faturamento_bruto_por_dia, ticketDepois.faturamento_bruto_por_dia) >= 0 
+                        ? 'text-green-500' 
+                        : 'text-red-500'
+                    }`}>
+                      {calcularVariacao(ticketAntes.faturamento_bruto_por_dia, ticketDepois.faturamento_bruto_por_dia) >= 0 
+                        ? <TrendingUp className="w-4 h-4" /> 
+                        : <TrendingDown className="w-4 h-4" />
+                      }
+                      {Math.abs(calcularVariacao(ticketAntes.faturamento_bruto_por_dia, ticketDepois.faturamento_bruto_por_dia)).toFixed(1)}%
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {formatCurrency(ticketDepois?.faturamento_bruto_total || 0)} total
                   </p>
                 </div>
               </div>
@@ -382,12 +431,12 @@ export default function AnaliseCouvertPage() {
           </Card>
         </div>
 
-        {/* Card de Comparativo de Variação */}
+        {/* Card de Comparativo de Variação (médias por dia) */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
           <CardHeader>
             <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-purple-500" />
-              Variação com a Entrada Obrigatória
+              Variação com a Entrada Obrigatória (médias por dia)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -411,53 +460,56 @@ export default function AnaliseCouvertPage() {
                 </p>
               </div>
 
-              {/* Volume de Comandas */}
+              {/* Comandas por Dia */}
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <Ticket className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Comandas</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Comandas/Dia</p>
                 {ticketAntes && ticketDepois && (
                   <p className={`text-2xl font-bold ${
-                    calcularVariacao(ticketAntes.total_comandas, ticketDepois.total_comandas) >= 0 
+                    calcularVariacao(ticketAntes.comandas_por_dia, ticketDepois.comandas_por_dia) >= 0 
                       ? 'text-green-500' 
                       : 'text-red-500'
                   }`}>
-                    {calcularVariacao(ticketAntes.total_comandas, ticketDepois.total_comandas) >= 0 ? '+' : ''}
-                    {calcularVariacao(ticketAntes.total_comandas, ticketDepois.total_comandas).toFixed(1)}%
+                    {calcularVariacao(ticketAntes.comandas_por_dia, ticketDepois.comandas_por_dia) >= 0 ? '+' : ''}
+                    {calcularVariacao(ticketAntes.comandas_por_dia, ticketDepois.comandas_por_dia).toFixed(1)}%
                   </p>
                 )}
                 <p className="text-xs text-gray-400 mt-1">
-                  {ticketAntes?.total_comandas?.toLocaleString()} → {ticketDepois?.total_comandas?.toLocaleString()}
+                  {Math.round(ticketAntes?.comandas_por_dia || 0)} → {Math.round(ticketDepois?.comandas_por_dia || 0)}
                 </p>
               </div>
 
-              {/* Faturamento */}
+              {/* Faturamento por Dia */}
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <TrendingUp className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Faturamento</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Faturamento/Dia</p>
                 {ticketAntes && ticketDepois && (
                   <p className={`text-2xl font-bold ${
-                    calcularVariacao(ticketAntes.faturamento_bruto, ticketDepois.faturamento_bruto) >= 0 
+                    calcularVariacao(ticketAntes.faturamento_bruto_por_dia, ticketDepois.faturamento_bruto_por_dia) >= 0 
                       ? 'text-green-500' 
                       : 'text-red-500'
                   }`}>
-                    {calcularVariacao(ticketAntes.faturamento_bruto, ticketDepois.faturamento_bruto) >= 0 ? '+' : ''}
-                    {calcularVariacao(ticketAntes.faturamento_bruto, ticketDepois.faturamento_bruto).toFixed(1)}%
+                    {calcularVariacao(ticketAntes.faturamento_bruto_por_dia, ticketDepois.faturamento_bruto_por_dia) >= 0 ? '+' : ''}
+                    {calcularVariacao(ticketAntes.faturamento_bruto_por_dia, ticketDepois.faturamento_bruto_por_dia).toFixed(1)}%
                   </p>
                 )}
+                <p className="text-xs text-gray-400 mt-1">
+                  {formatCurrency(ticketAntes?.faturamento_bruto_por_dia || 0)} → {formatCurrency(ticketDepois?.faturamento_bruto_por_dia || 0)}
+                </p>
               </div>
 
-              {/* Clientes */}
+              {/* Clientes por Dia */}
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Clientes Únicos</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Clientes/Dia</p>
                 {ticketAntes && ticketDepois && (
                   <p className={`text-2xl font-bold ${
-                    calcularVariacao(ticketAntes.clientes_unicos, ticketDepois.clientes_unicos) >= 0 
+                    calcularVariacao(ticketAntes.clientes_unicos_por_dia, ticketDepois.clientes_unicos_por_dia) >= 0 
                       ? 'text-green-500' 
                       : 'text-red-500'
                   }`}>
-                    {calcularVariacao(ticketAntes.clientes_unicos, ticketDepois.clientes_unicos) >= 0 ? '+' : ''}
-                    {calcularVariacao(ticketAntes.clientes_unicos, ticketDepois.clientes_unicos).toFixed(1)}%
+                    {calcularVariacao(ticketAntes.clientes_unicos_por_dia, ticketDepois.clientes_unicos_por_dia) >= 0 ? '+' : ''}
+                    {calcularVariacao(ticketAntes.clientes_unicos_por_dia, ticketDepois.clientes_unicos_por_dia).toFixed(1)}%
                   </p>
                 )}
               </div>
