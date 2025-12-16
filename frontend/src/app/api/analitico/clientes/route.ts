@@ -207,41 +207,49 @@ export async function GET(request: NextRequest) {
 		}
 		}
 
-		// ✅ BUSCAR TEMPOS DE ESTADIA REAIS DA TABELA contahub_vendas (COM PAGINAÇÃO)
+		// ✅ BUSCAR TEMPOS DE ESTADIA REAIS DA TABELA contahub_vendas (COM PAGINAÇÃO CORRETA)
 		console.log('⚡ Buscando tempos de estadia REAIS do banco de dados...')
 		
 		try {
 			// Criar mapa de tempos por telefone normalizado
 			const temposPorTelefone = new Map<string, { tempos: number[]; datas: string[] }>()
 			
-			// PAGINAÇÃO: Buscar em lotes de 5000 registros
-			const TEMPO_PAGE_SIZE = 5000
+			// PAGINAÇÃO CORRETA: Supabase tem limite de 1000 por query
+			const TEMPO_PAGE_SIZE = 1000
 			let tempoOffset = 0
 			let totalTemposProcessados = 0
 			let tempoIterations = 0
-			const MAX_TEMPO_ITERATIONS = 50 // Máximo 250.000 registros
+			const MAX_TEMPO_ITERATIONS = 200 // Máximo 200.000 registros (200 * 1000)
+			
+			console.log('🔄 Iniciando paginação de tempos de estadia...')
 			
 			while (tempoIterations < MAX_TEMPO_ITERATIONS) {
 				tempoIterations++
 				
+				// Query com paginação usando range (igual aos clientes)
 				const { data: vendasComTempo, error: vendasError } = await supabase
 					.from('contahub_vendas')
 					.select('cli_fone, tempo_estadia_minutos, dt_gerencial')
 					.eq('bar_id', finalBarId)
-					.not('vd_hrabertura', 'is', null)
-					.not('vd_hrsaida', 'is', null)
+					.not('cli_fone', 'is', null)
+					.neq('cli_fone', '')
 					.gt('tempo_estadia_minutos', 0)
-					.lt('tempo_estadia_minutos', 720) // Limitar a 12 horas
+					.lt('tempo_estadia_minutos', 720)
 					.range(tempoOffset, tempoOffset + TEMPO_PAGE_SIZE - 1)
 				
 				if (vendasError) {
-					console.warn('⚠️ Erro ao buscar tempos de estadia (página ' + tempoIterations + '):', vendasError)
+					console.warn(`⚠️ Erro na página ${tempoIterations}:`, vendasError)
 					break
 				}
 				
 				if (!vendasComTempo || vendasComTempo.length === 0) {
-					console.log(`✅ Tempos: processamento completo após ${tempoIterations} páginas`)
+					console.log(`✅ Tempos: COMPLETO após ${tempoIterations} páginas (${totalTemposProcessados} registros)`)
 					break
+				}
+				
+				// Log de progresso a cada 10 páginas
+				if (tempoIterations % 10 === 0) {
+					console.log(`📊 Tempos: página ${tempoIterations}, ${totalTemposProcessados} registros processados...`)
 				}
 				
 				// Processar registros desta página
@@ -249,7 +257,7 @@ export async function GET(request: NextRequest) {
 					let foneVenda = (venda.cli_fone || '').toString().replace(/\D/g, '')
 					if (!foneVenda) continue
 					
-					// Normalizar telefone da venda para match
+					// Normalizar telefone da venda para match (igual aos clientes)
 					if (foneVenda.length === 10) {
 						const ddd = foneVenda.substring(0, 2)
 						if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
@@ -269,18 +277,26 @@ export async function GET(request: NextRequest) {
 					}
 				}
 				
-				// Se retornou menos que o page size, acabou
-				if (vendasComTempo.length < TEMPO_PAGE_SIZE) break
+				// Se retornou menos que o page size, acabaram os dados
+				if (vendasComTempo.length < TEMPO_PAGE_SIZE) {
+					console.log(`✅ Tempos: COMPLETO (última página com ${vendasComTempo.length} registros)`)
+					break
+				}
+				
+				// Avançar para próxima página
 				tempoOffset += TEMPO_PAGE_SIZE
 				
-				// Pequeno delay para não sobrecarregar
-				await new Promise(resolve => setTimeout(resolve, 30))
+				// Pequeno delay para não sobrecarregar o Supabase
+				if (tempoIterations < MAX_TEMPO_ITERATIONS) {
+					await new Promise(resolve => setTimeout(resolve, 50))
+				}
 			}
 			
-			console.log(`📊 Total de ${totalTemposProcessados} registros de tempo processados para ${temposPorTelefone.size} telefones únicos`)
+			console.log(`📊 TOTAL: ${totalTemposProcessados} registros de tempo para ${temposPorTelefone.size} telefones únicos`)
 			
 			// Aplicar tempos reais aos clientes
 			let clientesComTempoReal = 0
+			let clientesSemMatch = 0
 			for (const [fone, cliente] of map.entries()) {
 				const temposCliente = temposPorTelefone.get(fone)
 				if (temposCliente && temposCliente.tempos.length > 0) {
@@ -291,10 +307,11 @@ export async function GET(request: NextRequest) {
 					// Sem dados reais - manter arrays vazios
 					cliente.temposEstadia = []
 					cliente.tempoMedioEstadia = 0
+					clientesSemMatch++
 				}
 			}
 			
-			console.log(`✅ Tempos de estadia REAIS aplicados para ${clientesComTempoReal} clientes!`)
+			console.log(`✅ Tempos aplicados: ${clientesComTempoReal} clientes COM tempo, ${clientesSemMatch} SEM match`)
 			
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
