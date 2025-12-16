@@ -137,26 +137,23 @@ export default function TempoEstadiaPage() {
         />
 
         {loading ? (
-          <div className="space-y-6">
-            {/* Cards skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => (
-                <Skeleton key={i} className="h-32 rounded-xl" />
-              ))}
+          <div className="flex items-center justify-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-blue-200 dark:border-blue-900 rounded-full"></div>
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-medium text-gray-900 dark:text-white">Carregando análise...</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Processando dados de tempo de estadia
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                <Timer className="w-4 h-4" />
+                <span>Analisando permanência dos clientes</span>
+              </div>
             </div>
-            {/* Tabs skeleton */}
-            <Skeleton className="h-10 w-96" />
-            {/* Table skeleton */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="text-center">
-                <Skeleton className="h-6 w-48 mx-auto" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </CardContent>
-            </Card>
           </div>
         ) : error ? (
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
