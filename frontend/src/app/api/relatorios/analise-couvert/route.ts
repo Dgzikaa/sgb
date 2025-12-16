@@ -174,6 +174,10 @@ export async function GET() {
       const cpfsAntes = new Set(dadosAntes.filter(d => d.vd_cpf).map(d => d.vd_cpf))
       const cpfsDepois = new Set(dadosDepois.filter(d => d.vd_cpf).map(d => d.vd_cpf))
       
+      // Contar quantos dias (quartas/sextas) tinha em cada período
+      const datasAntes = new Set(dadosAntes.map(d => d.dt_gerencial))
+      const datasDepois = new Set(dadosDepois.map(d => d.dt_gerencial))
+      
       let retornaram = 0
       let deixaramDeIr = 0
       let novosClientes = 0
@@ -192,12 +196,44 @@ export async function GET() {
         }
       })
 
+      // ANÁLISE 2: Dos que vieram DEPOIS, quantos voltaram mais de 1 vez?
+      // Agrupar visitas por CPF no período depois
+      const visitasPorCpfDepois = new Map<string, string[]>()
+      dadosDepois.filter(d => d.vd_cpf).forEach(d => {
+        if (!visitasPorCpfDepois.has(d.vd_cpf)) {
+          visitasPorCpfDepois.set(d.vd_cpf, [])
+        }
+        const datas = visitasPorCpfDepois.get(d.vd_cpf)!
+        if (!datas.includes(d.dt_gerencial)) {
+          datas.push(d.dt_gerencial)
+        }
+      })
+
+      // Contar clientes que vieram em mais de 1 dia diferente
+      let clientesRecorrentesDepois = 0
+      let clientesUmaVezDepois = 0
+      visitasPorCpfDepois.forEach((datas, cpf) => {
+        if (datas.length > 1) {
+          clientesRecorrentesDepois++
+        } else {
+          clientesUmaVezDepois++
+        }
+      })
+
       return {
         clientes_antes: cpfsAntes.size,
         clientes_depois: cpfsDepois.size,
+        dias_antes: datasAntes.size,
+        dias_depois: datasDepois.size,
         retornaram,
         deixaram_de_ir: deixaramDeIr,
-        novos_clientes: novosClientes
+        novos_clientes: novosClientes,
+        // Análise 2: Recorrência interna do período depois
+        clientes_recorrentes_depois: clientesRecorrentesDepois,
+        clientes_uma_vez_depois: clientesUmaVezDepois,
+        taxa_recorrencia_depois: cpfsDepois.size > 0 
+          ? Math.round((clientesRecorrentesDepois / cpfsDepois.size) * 1000) / 10 
+          : 0
       }
     }
 

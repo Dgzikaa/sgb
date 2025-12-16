@@ -319,15 +319,83 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
 
   console.log(`🎯 Ticket Médio: R$ ${ticketMedio.toFixed(2)}`)
 
-  // 6. ATUALIZAR REGISTRO
+  // =============================================
+  // 6. % CLIENTES NOVOS (usando stored procedure)
+  // =============================================
+  console.log(`🆕 Calculando % Clientes Novos...`)
+  
+  // Calcular período anterior para comparação (semana anterior)
+  const dataInicio = new Date(startDate + 'T00:00:00')
+  const dataFim = new Date(endDate + 'T00:00:00')
+  const inicioAnterior = new Date(dataInicio)
+  inicioAnterior.setDate(dataInicio.getDate() - 7)
+  const fimAnterior = new Date(dataFim)
+  fimAnterior.setDate(dataFim.getDate() - 7)
+  
+  const inicioAnteriorStr = inicioAnterior.toISOString().split('T')[0]
+  const fimAnteriorStr = fimAnterior.toISOString().split('T')[0]
+
+  let percClientesNovos = 0
+  let clientesAtivos = 0
+
+  // Chamar stored procedure para métricas de clientes
+  const { data: metricas, error: metricasError } = await supabase.rpc('calcular_metricas_clientes', {
+    p_bar_id: barId,
+    p_data_inicio_atual: startDate,
+    p_data_fim_atual: endDate,
+    p_data_inicio_anterior: inicioAnteriorStr,
+    p_data_fim_anterior: fimAnteriorStr
+  })
+
+  if (!metricasError && metricas && metricas[0]) {
+    const resultado = metricas[0]
+    const totalClientes = Number(resultado.total_atual) || 0
+    const novosClientes = Number(resultado.novos_atual) || 0
+    
+    // Calcular percentual de novos
+    percClientesNovos = totalClientes > 0 ? (novosClientes / totalClientes) * 100 : 0
+    
+    console.log(`🆕 Total Clientes: ${totalClientes}, Novos: ${novosClientes}`)
+    console.log(`🆕 % Clientes Novos: ${percClientesNovos.toFixed(2)}%`)
+  } else {
+    console.error(`❌ Erro ao calcular métricas de clientes:`, metricasError)
+  }
+
+  // =============================================
+  // 7. CLIENTES ATIVOS (2+ visitas em 90 dias)
+  // =============================================
+  console.log(`⭐ Calculando Clientes Ativos...`)
+  
+  // Calcular 90 dias antes do fim do período
+  const data90DiasAtras = new Date(dataFim)
+  data90DiasAtras.setDate(dataFim.getDate() - 90)
+  const data90DiasAtrasStr = data90DiasAtras.toISOString().split('T')[0]
+
+  // Chamar stored procedure para base ativa
+  const { data: baseAtivaResult, error: baseAtivaError } = await supabase.rpc('get_count_base_ativa', {
+    p_bar_id: barId,
+    p_data_inicio: data90DiasAtrasStr,
+    p_data_fim: endDate
+  })
+
+  if (!baseAtivaError && baseAtivaResult !== null) {
+    clientesAtivos = Number(baseAtivaResult) || 0
+    console.log(`⭐ Clientes Ativos (2+ visitas em 90d): ${clientesAtivos}`)
+  } else {
+    console.error(`❌ Erro ao calcular clientes ativos:`, baseAtivaError)
+  }
+
+  // 8. ATUALIZAR REGISTRO COM TODOS OS DADOS
   const dadosAtualizados = {
     faturamento_total: faturamentoTotal,
     clientes_atendidos: clientesAtendidos,
     ticket_medio: ticketMedio,
     custo_atracao_faturamento: atracaoFaturamentoPercent,
     cmo: custoTotalCMO,
+    perc_clientes_novos: parseFloat(percClientesNovos.toFixed(2)),
+    clientes_ativos: clientesAtivos,
     atualizado_em: new Date().toISOString(),
-    observacoes: `Atualizado automaticamente em ${new Date().toLocaleString('pt-BR')} - Automação semanal`
+    observacoes: `Atualizado automaticamente em ${new Date().toLocaleString('pt-BR')} - Automação semanal (com % novos e ativos)`
   }
 
   const { data: atualizada, error: updateError } = await supabase
@@ -343,6 +411,7 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
   }
 
   console.log(`✅ Semana ${numeroSemana} atualizada com sucesso!`)
+  console.log(`   📊 % Novos: ${percClientesNovos.toFixed(2)}% | Ativos: ${clientesAtivos}`)
   return atualizada
 }
 

@@ -144,6 +144,9 @@ export default function ClientesPage() {
       if (diaSemanaFiltro !== 'todos') {
         params.append('dia_semana', diaSemanaFiltro)
       }
+      if (buscaCliente.trim()) {
+        params.append('busca', buscaCliente.trim())
+      }
       
       const url = `/api/analitico/clientes${params.toString() ? `?${params.toString()}` : ''}`
       console.log('🔍 Frontend: Buscando clientes com URL:', url)
@@ -200,7 +203,7 @@ export default function ClientesPage() {
       setLoading(false)
       isApiCallingRef.current = false
     }
-  }, [selectedBar, diaSemanaFiltro])
+  }, [selectedBar, diaSemanaFiltro, buscaCliente])
 
   const fetchReservantes = useCallback(async () => {
     try {
@@ -294,20 +297,17 @@ export default function ClientesPage() {
     }
   }, [activeTab, fetchReservantes, reservantes.length])
 
-  // Filtro de busca local
+  // Debounce para busca - busca na API após 500ms de pausa na digitação
   useEffect(() => {
-    if (!buscaCliente.trim()) {
-      setClientesFiltrados(clientes)
-    } else {
-      const busca = buscaCliente.toLowerCase().trim()
-      const filtrados = clientes.filter(cliente => 
-        cliente.nome_principal?.toLowerCase().includes(busca) ||
-        cliente.telefone?.includes(busca) ||
-        cliente.identificador_principal?.includes(busca)
-      )
-      setClientesFiltrados(filtrados)
-    }
-  }, [buscaCliente, clientes])
+    const timeoutId = setTimeout(() => {
+      if (buscaCliente.trim().length >= 2 || buscaCliente.trim().length === 0) {
+        fetchClientes()
+      }
+    }, 500)
+    
+    return () => clearTimeout(timeoutId)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buscaCliente])
 
   const handleWhatsAppClick = (nome: string, telefone: string | null) => {
     try {

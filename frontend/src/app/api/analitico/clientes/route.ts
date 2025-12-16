@@ -26,9 +26,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Obter filtro de dia da semana da URL
+    // Obter filtros da URL
     const { searchParams } = new URL(request.url)
     const diaSemanaFiltro = searchParams.get('dia_semana')
+    const buscaCliente = searchParams.get('busca')?.trim() || ''
     
     // bar_id é OBRIGATÓRIO
     if (!barIdFilter) {
@@ -44,13 +45,22 @@ export async function GET(request: NextRequest) {
     // ========== USAR TABELA DE CACHE (para "todos os dias") ==========
     if (!diaSemanaFiltro || diaSemanaFiltro === 'todos') {
       console.log('⚡ Usando tabela de cache cliente_estatisticas...')
+      console.log(`🔍 Busca: "${buscaCliente}"`)
       
-      const { data: clientesCache, error: cacheError } = await supabase
+      let query = supabase
         .from('cliente_estatisticas')
         .select('*')
         .eq('bar_id', barIdFilter)
+      
+      // Se tiver busca, filtrar por nome ou telefone
+      if (buscaCliente) {
+        query = query.or(`nome.ilike.%${buscaCliente}%,telefone.ilike.%${buscaCliente}%`)
+      }
+      
+      // Ordenar e limitar
+      const { data: clientesCache, error: cacheError } = await query
         .order('total_visitas', { ascending: false })
-        .limit(100)
+        .limit(buscaCliente ? 500 : 100) // Mais resultados quando busca
 
       if (cacheError) {
         console.error('❌ Erro ao buscar cache:', cacheError)

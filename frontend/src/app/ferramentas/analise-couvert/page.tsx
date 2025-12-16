@@ -52,9 +52,15 @@ interface TicketData {
 interface RecorrenciaData {
   clientes_antes: number
   clientes_depois: number
+  dias_antes: number
+  dias_depois: number
   retornaram: number
   deixaram_de_ir: number
   novos_clientes: number
+  // Análise 2: Recorrência interna do período depois
+  clientes_recorrentes_depois: number
+  clientes_uma_vez_depois: number
+  taxa_recorrencia_depois: number
 }
 
 interface EvolucaoData {
@@ -517,15 +523,16 @@ export default function AnaliseCouvertPage() {
           </CardContent>
         </Card>
 
-        {/* Análise de Recorrência */}
+        {/* ANÁLISE 1: Clientes de Set/Out que voltaram após entrada */}
         <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
           <CardHeader>
             <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center gap-2">
               <Users className="w-5 h-5 text-blue-500" />
-              Análise de Recorrência de Clientes
+              Análise 1: Clientes de Set/Out → Retorno após entrada
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-400">
-              Clientes que frequentavam antes da entrada obrigatória e seu comportamento depois
+              Dos CPFs que vieram em {diaSelecionado === 'quarta' ? 'quartas' : 'sextas'} de Set/Out ({recorrencia?.dias_antes || 0} dias), 
+              quantos voltaram após {dataEntrada && formatDate(dataEntrada + 'T00:00:00')} ({recorrencia?.dias_depois || 0} dias)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -533,16 +540,17 @@ export default function AnaliseCouvertPage() {
               {/* Clientes Antes */}
               <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                 <Users className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                <p className="text-sm text-blue-600 dark:text-blue-400">Frequentavam Antes</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400">CPFs em Set/Out</p>
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                   {recorrencia?.clientes_antes?.toLocaleString() || 0}
                 </p>
+                <p className="text-xs text-blue-400">{recorrencia?.dias_antes || 0} dias</p>
               </div>
 
               {/* Retornaram */}
               <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                 <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                <p className="text-sm text-green-600 dark:text-green-400">Retornaram</p>
+                <p className="text-sm text-green-600 dark:text-green-400">Voltaram</p>
                 <p className="text-2xl font-bold text-green-700 dark:text-green-300">
                   {recorrencia?.retornaram?.toLocaleString() || 0}
                 </p>
@@ -551,14 +559,14 @@ export default function AnaliseCouvertPage() {
                 </p>
               </div>
 
-              {/* Deixaram de ir */}
-              <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                <UserMinus className="w-8 h-8 mx-auto mb-2 text-red-500" />
-                <p className="text-sm text-red-600 dark:text-red-400">Deixaram de Ir</p>
-                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+              {/* Ainda não voltaram */}
+              <div className="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <UserMinus className="w-8 h-8 mx-auto mb-2 text-amber-500" />
+                <p className="text-sm text-amber-600 dark:text-amber-400">Ainda não voltaram</p>
+                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
                   {recorrencia?.deixaram_de_ir?.toLocaleString() || 0}
                 </p>
-                <p className="text-xs text-red-500">
+                <p className="text-xs text-amber-500">
                   {recorrencia?.clientes_antes ? ((recorrencia.deixaram_de_ir / recorrencia.clientes_antes) * 100).toFixed(1) : 0}%
                 </p>
               </div>
@@ -566,7 +574,7 @@ export default function AnaliseCouvertPage() {
               {/* Novos clientes */}
               <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                 <UserPlus className="w-8 h-8 mx-auto mb-2 text-purple-500" />
-                <p className="text-sm text-purple-600 dark:text-purple-400">Novos Clientes</p>
+                <p className="text-sm text-purple-600 dark:text-purple-400">Novos (pós entrada)</p>
                 <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
                   {recorrencia?.novos_clientes?.toLocaleString() || 0}
                 </p>
@@ -575,11 +583,20 @@ export default function AnaliseCouvertPage() {
               {/* Clientes Depois */}
               <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
                 <Users className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
-                <p className="text-sm text-emerald-600 dark:text-emerald-400">Frequentam Agora</p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">Total pós entrada</p>
                 <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                   {recorrencia?.clientes_depois?.toLocaleString() || 0}
                 </p>
+                <p className="text-xs text-emerald-400">{recorrencia?.dias_depois || 0} dias</p>
               </div>
+            </div>
+
+            {/* Nota explicativa */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-4">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                ℹ️ <strong>Nota:</strong> "Ainda não voltaram" significa que não vieram em nenhuma {diaSelecionado === 'quarta' ? 'quarta' : 'sexta'} após a entrada obrigatória.
+                Como temos apenas {recorrencia?.dias_depois || 0} dias de dados após a mudança, alguns podem voltar nas próximas semanas.
+              </p>
             </div>
 
             {/* Comparativo de Taxa de Retorno */}
@@ -620,6 +637,56 @@ export default function AnaliseCouvertPage() {
                     ? `⚠️ Queda de ${(taxaRetornoBaseline - taxaRetornoAtual).toFixed(1)} pontos percentuais na taxa de retorno`
                     : `✅ Aumento de ${(taxaRetornoAtual - taxaRetornoBaseline).toFixed(1)} pontos percentuais na taxa de retorno`
                   }
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ANÁLISE 2: Recorrência dos clientes pós-entrada */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg text-gray-900 dark:text-white flex items-center gap-2">
+              <RefreshCcw className="w-5 h-5 text-purple-500" />
+              Análise 2: Recorrência pós-entrada (a partir de {dataEntrada && formatDate(dataEntrada + 'T00:00:00')})
+            </CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-400">
+              Dos {recorrencia?.clientes_depois || 0} CPFs que vieram após a entrada obrigatória, quantos voltaram mais de 1 vez?
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Total de clientes */}
+              <div className="text-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                <Users className="w-8 h-8 mx-auto mb-2 text-indigo-500" />
+                <p className="text-sm text-indigo-600 dark:text-indigo-400">Total de CPFs após entrada</p>
+                <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
+                  {recorrencia?.clientes_depois?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-indigo-400">em {recorrencia?.dias_depois || 0} dias</p>
+              </div>
+
+              {/* Voltaram mais de 1 vez */}
+              <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                <p className="text-sm text-green-600 dark:text-green-400">Voltaram +1 vez</p>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                  {recorrencia?.clientes_recorrentes_depois?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-green-500">
+                  {recorrencia?.taxa_recorrencia_depois?.toFixed(1) || 0}% de recorrência
+                </p>
+              </div>
+
+              {/* Foram apenas 1 vez */}
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                <p className="text-sm text-gray-600 dark:text-gray-400">Vieram apenas 1 vez</p>
+                <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                  {recorrencia?.clientes_uma_vez_depois?.toLocaleString() || 0}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {recorrencia?.clientes_depois ? ((recorrencia.clientes_uma_vez_depois / recorrencia.clientes_depois) * 100).toFixed(1) : 0}%
                 </p>
               </div>
             </div>
