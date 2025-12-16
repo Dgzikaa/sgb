@@ -726,9 +726,11 @@ export default function AnaliseCouvertPage() {
                     contentStyle={{ 
                       backgroundColor: '#1f2937', 
                       border: '1px solid #374151',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      color: '#fff'
                     }}
                     labelStyle={{ color: '#fff' }}
+                    itemStyle={{ color: '#fff' }}
                     formatter={(value: number) => [formatCurrency(value), 'Ticket Médio']}
                   />
                   <Bar dataKey="ticket_medio" radius={[4, 4, 0, 0]}>
@@ -768,9 +770,11 @@ export default function AnaliseCouvertPage() {
                     contentStyle={{ 
                       backgroundColor: '#1f2937', 
                       border: '1px solid #374151',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      color: '#fff'
                     }}
                     labelStyle={{ color: '#fff' }}
+                    itemStyle={{ color: '#fff' }}
                     formatter={(value: number) => [value.toLocaleString(), 'Clientes']}
                   />
                   <Bar dataKey="clientes" radius={[4, 4, 0, 0]}>
