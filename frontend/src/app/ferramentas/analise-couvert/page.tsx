@@ -173,9 +173,21 @@ export default function AnaliseCouvertPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-          <RefreshCcw className="w-6 h-6 animate-spin" />
-          <span className="text-lg">Carregando análise...</span>
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-200 dark:border-blue-900 rounded-full"></div>
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+          </div>
+          <div className="text-center">
+            <p className="text-lg font-medium text-gray-900 dark:text-white">Carregando análise...</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Processando dados de entrada obrigatória
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+            <Ticket className="w-4 h-4" />
+            <span>Analisando quartas e sextas desde setembro</span>
+          </div>
         </div>
       </div>
     )

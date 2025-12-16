@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { getAdminClient } from '@/lib/supabase-admin'
 
 // Datas de início da entrada obrigatória
 const DATAS_ENTRADA = {
@@ -12,208 +7,244 @@ const DATAS_ENTRADA = {
   sexta: '2025-11-14'   // Sexta-feira (primeira sexta após 13/11)
 }
 
+export const dynamic = 'force-dynamic'
+
+// Função para buscar todos os dados com paginação
+async function buscarTodosOsDados(
+  supabase: any, 
+  barId: number, 
+  dataInicio: string, 
+  dataFim?: string
+) {
+  const PAGE_SIZE = 1000
+  let offset = 0
+  let allData: any[] = []
+  let iterations = 0
+  const MAX_ITERATIONS = 200
+
+  console.log(`📥 Buscando dados: bar_id=${barId}, inicio=${dataInicio}, fim=${dataFim || 'atual'}`)
+
+  while (iterations < MAX_ITERATIONS) {
+    iterations++
+    
+    let query = supabase
+      .from('contahub_vendas')
+      .select('vd_cpf, vd_vrcheio, vd_vrdescontos, dt_gerencial')
+      .eq('bar_id', barId)
+      .gte('dt_gerencial', dataInicio)
+    
+    if (dataFim) {
+      query = query.lt('dt_gerencial', dataFim)
+    }
+    
+    query = query.range(offset, offset + PAGE_SIZE - 1)
+    
+    const { data, error } = await query
+    
+    if (error) {
+      console.error(`❌ Erro na página ${iterations}:`, error)
+      break
+    }
+    
+    if (!data || data.length === 0) {
+      console.log(`✅ Busca completa após ${iterations} páginas (${allData.length} registros)`)
+      break
+    }
+    
+    allData = allData.concat(data)
+    
+    if (data.length < PAGE_SIZE) {
+      console.log(`✅ Última página: ${data.length} registros (total: ${allData.length})`)
+      break
+    }
+    
+    offset += PAGE_SIZE
+    
+    // Log de progresso a cada 10 páginas
+    if (iterations % 10 === 0) {
+      console.log(`📊 Página ${iterations}: ${allData.length} registros...`)
+    }
+  }
+
+  return allData
+}
+
 export async function GET() {
   try {
-    // 1. Métricas de Ticket Médio - QUARTAS
-    const { data: ticketQuartas, error: errTicketQuartas } = await supabase.rpc('execute_sql', {
-      query: `
-        SELECT 
-          CASE 
-            WHEN dt_gerencial < '${DATAS_ENTRADA.quarta}' THEN 'antes'
-            ELSE 'depois'
-          END as periodo,
-          COUNT(*) as total_comandas,
-          COUNT(DISTINCT vd_cpf) FILTER (WHERE vd_cpf IS NOT NULL AND vd_cpf != '') as clientes_unicos,
-          ROUND(AVG(vd_vrcheio)::numeric, 2) as ticket_medio,
-          ROUND(AVG(vd_vrdescontos)::numeric, 2) as desconto_medio,
-          ROUND(AVG(vd_vrcheio - COALESCE(vd_vrdescontos, 0))::numeric, 2) as ticket_liquido,
-          ROUND(SUM(vd_vrcheio)::numeric, 2) as faturamento_bruto,
-          ROUND(SUM(vd_vrcheio - COALESCE(vd_vrdescontos, 0))::numeric, 2) as faturamento_liquido
-        FROM contahub_vendas
-        WHERE EXTRACT(DOW FROM dt_gerencial) = 3
-          AND dt_gerencial >= '2025-09-01'
-        GROUP BY 1
-        ORDER BY 1
-      `
+    const supabase = await getAdminClient()
+    const barId = 3 // Bar principal
+    
+    console.log('🚀 Iniciando análise de couvert...')
+    const startTime = Date.now()
+
+    // ========== BUSCAR TODOS OS DADOS COM PAGINAÇÃO ==========
+    
+    // Buscar dados desde setembro 2025
+    const todosDados = await buscarTodosOsDados(supabase, barId, '2025-09-01')
+    
+    console.log(`📊 Total de registros: ${todosDados.length}`)
+
+    // ========== FILTRAR POR DIA DA SEMANA ==========
+    
+    // Quartas (DOW = 3) - ANTES da entrada
+    const quartasAntes = todosDados.filter(r => {
+      const data = new Date(r.dt_gerencial + 'T12:00:00Z')
+      return data.getUTCDay() === 3 && r.dt_gerencial < DATAS_ENTRADA.quarta
     })
 
-    // 2. Métricas de Ticket Médio - SEXTAS
-    const { data: ticketSextas, error: errTicketSextas } = await supabase.rpc('execute_sql', {
-      query: `
-        SELECT 
-          CASE 
-            WHEN dt_gerencial < '${DATAS_ENTRADA.sexta}' THEN 'antes'
-            ELSE 'depois'
-          END as periodo,
-          COUNT(*) as total_comandas,
-          COUNT(DISTINCT vd_cpf) FILTER (WHERE vd_cpf IS NOT NULL AND vd_cpf != '') as clientes_unicos,
-          ROUND(AVG(vd_vrcheio)::numeric, 2) as ticket_medio,
-          ROUND(AVG(vd_vrdescontos)::numeric, 2) as desconto_medio,
-          ROUND(AVG(vd_vrcheio - COALESCE(vd_vrdescontos, 0))::numeric, 2) as ticket_liquido,
-          ROUND(SUM(vd_vrcheio)::numeric, 2) as faturamento_bruto,
-          ROUND(SUM(vd_vrcheio - COALESCE(vd_vrdescontos, 0))::numeric, 2) as faturamento_liquido
-        FROM contahub_vendas
-        WHERE EXTRACT(DOW FROM dt_gerencial) = 5
-          AND dt_gerencial >= '2025-09-01'
-        GROUP BY 1
-        ORDER BY 1
-      `
+    // Quartas (DOW = 3) - DEPOIS da entrada
+    const quartasDepois = todosDados.filter(r => {
+      const data = new Date(r.dt_gerencial + 'T12:00:00Z')
+      return data.getUTCDay() === 3 && r.dt_gerencial >= DATAS_ENTRADA.quarta
     })
 
-    // 3. Recorrência - QUARTAS
-    const { data: recorrenciaQuartas, error: errRecQuartas } = await supabase.rpc('execute_sql', {
-      query: `
-        WITH clientes_antes AS (
-          SELECT DISTINCT vd_cpf
-          FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 3
-            AND dt_gerencial >= '2025-09-01'
-            AND dt_gerencial < '${DATAS_ENTRADA.quarta}'
-        ),
-        clientes_depois AS (
-          SELECT DISTINCT vd_cpf
-          FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 3
-            AND dt_gerencial >= '${DATAS_ENTRADA.quarta}'
-        )
-        SELECT 
-          (SELECT COUNT(*) FROM clientes_antes) as clientes_antes,
-          (SELECT COUNT(*) FROM clientes_depois) as clientes_depois,
-          (SELECT COUNT(*) FROM clientes_antes c1 
-           WHERE EXISTS (SELECT 1 FROM clientes_depois c2 WHERE c1.vd_cpf = c2.vd_cpf)) as retornaram,
-          (SELECT COUNT(*) FROM clientes_antes c1 
-           WHERE NOT EXISTS (SELECT 1 FROM clientes_depois c2 WHERE c1.vd_cpf = c2.vd_cpf)) as deixaram_de_ir,
-          (SELECT COUNT(*) FROM clientes_depois c1 
-           WHERE NOT EXISTS (SELECT 1 FROM clientes_antes c2 WHERE c1.vd_cpf = c2.vd_cpf)) as novos_clientes
-      `
+    // Sextas (DOW = 5) - ANTES da entrada
+    const sextasAntes = todosDados.filter(r => {
+      const data = new Date(r.dt_gerencial + 'T12:00:00Z')
+      return data.getUTCDay() === 5 && r.dt_gerencial < DATAS_ENTRADA.sexta
     })
 
-    // 4. Recorrência - SEXTAS
-    const { data: recorrenciaSextas, error: errRecSextas } = await supabase.rpc('execute_sql', {
-      query: `
-        WITH clientes_antes AS (
-          SELECT DISTINCT vd_cpf
-          FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 5
-            AND dt_gerencial >= '2025-09-01'
-            AND dt_gerencial < '${DATAS_ENTRADA.sexta}'
-        ),
-        clientes_depois AS (
-          SELECT DISTINCT vd_cpf
-          FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 5
-            AND dt_gerencial >= '${DATAS_ENTRADA.sexta}'
-        )
-        SELECT 
-          (SELECT COUNT(*) FROM clientes_antes) as clientes_antes,
-          (SELECT COUNT(*) FROM clientes_depois) as clientes_depois,
-          (SELECT COUNT(*) FROM clientes_antes c1 
-           WHERE EXISTS (SELECT 1 FROM clientes_depois c2 WHERE c1.vd_cpf = c2.vd_cpf)) as retornaram,
-          (SELECT COUNT(*) FROM clientes_antes c1 
-           WHERE NOT EXISTS (SELECT 1 FROM clientes_depois c2 WHERE c1.vd_cpf = c2.vd_cpf)) as deixaram_de_ir,
-          (SELECT COUNT(*) FROM clientes_depois c1 
-           WHERE NOT EXISTS (SELECT 1 FROM clientes_antes c2 WHERE c1.vd_cpf = c2.vd_cpf)) as novos_clientes
-      `
+    // Sextas (DOW = 5) - DEPOIS da entrada
+    const sextasDepois = todosDados.filter(r => {
+      const data = new Date(r.dt_gerencial + 'T12:00:00Z')
+      return data.getUTCDay() === 5 && r.dt_gerencial >= DATAS_ENTRADA.sexta
     })
 
-    // 5. Evolução semanal - QUARTAS
-    const { data: evolucaoQuartas, error: errEvoQuartas } = await supabase.rpc('execute_sql', {
-      query: `
-        SELECT 
-          dt_gerencial as data,
-          CASE WHEN dt_gerencial < '${DATAS_ENTRADA.quarta}' THEN 'antes' ELSE 'depois' END as periodo,
-          COUNT(*) as comandas,
-          COUNT(DISTINCT vd_cpf) FILTER (WHERE vd_cpf IS NOT NULL AND vd_cpf != '') as clientes,
-          ROUND(AVG(vd_vrcheio)::numeric, 2) as ticket_medio,
-          ROUND(SUM(vd_vrcheio)::numeric, 2) as faturamento
-        FROM contahub_vendas
-        WHERE EXTRACT(DOW FROM dt_gerencial) = 3
-          AND dt_gerencial >= '2025-09-01'
-        GROUP BY 1, 2
-        ORDER BY 1
-      `
-    })
+    console.log(`📊 Quartas: ${quartasAntes.length} antes, ${quartasDepois.length} depois`)
+    console.log(`📊 Sextas: ${sextasAntes.length} antes, ${sextasDepois.length} depois`)
 
-    // 6. Evolução semanal - SEXTAS
-    const { data: evolucaoSextas, error: errEvoSextas } = await supabase.rpc('execute_sql', {
-      query: `
-        SELECT 
-          dt_gerencial as data,
-          CASE WHEN dt_gerencial < '${DATAS_ENTRADA.sexta}' THEN 'antes' ELSE 'depois' END as periodo,
-          COUNT(*) as comandas,
-          COUNT(DISTINCT vd_cpf) FILTER (WHERE vd_cpf IS NOT NULL AND vd_cpf != '') as clientes,
-          ROUND(AVG(vd_vrcheio)::numeric, 2) as ticket_medio,
-          ROUND(SUM(vd_vrcheio)::numeric, 2) as faturamento
-        FROM contahub_vendas
-        WHERE EXTRACT(DOW FROM dt_gerencial) = 5
-          AND dt_gerencial >= '2025-09-01'
-        GROUP BY 1, 2
-        ORDER BY 1
-      `
-    })
+    // ========== CALCULAR MÉTRICAS ==========
+    
+    const calcularMetricas = (dados: any[]) => {
+      if (!dados || dados.length === 0) {
+        return {
+          total_comandas: 0,
+          clientes_unicos: 0,
+          ticket_medio: 0,
+          desconto_medio: 0,
+          ticket_liquido: 0,
+          faturamento_bruto: 0,
+          faturamento_liquido: 0
+        }
+      }
 
-    // 7. Baseline de recorrência (set -> out, antes da entrada)
-    const { data: baselineQuartas } = await supabase.rpc('execute_sql', {
-      query: `
-        WITH clientes_set AS (
-          SELECT DISTINCT vd_cpf FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 3
-            AND dt_gerencial >= '2025-09-01' AND dt_gerencial < '2025-10-01'
-        ),
-        clientes_out AS (
-          SELECT DISTINCT vd_cpf FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 3
-            AND dt_gerencial >= '2025-10-01' AND dt_gerencial < '2025-11-01'
-        )
-        SELECT 
-          (SELECT COUNT(*) FROM clientes_set) as clientes_setembro,
-          (SELECT COUNT(*) FROM clientes_set c1 
-           WHERE EXISTS (SELECT 1 FROM clientes_out c2 WHERE c1.vd_cpf = c2.vd_cpf)) as retornaram_outubro
-      `
-    })
+      const cpfsUnicos = new Set(dados.filter(d => d.vd_cpf).map(d => d.vd_cpf))
+      const totalVrCheio = dados.reduce((sum, d) => sum + (parseFloat(d.vd_vrcheio) || 0), 0)
+      const totalDescontos = dados.reduce((sum, d) => sum + (parseFloat(d.vd_vrdescontos) || 0), 0)
 
-    const { data: baselineSextas } = await supabase.rpc('execute_sql', {
-      query: `
-        WITH clientes_set AS (
-          SELECT DISTINCT vd_cpf FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 5
-            AND dt_gerencial >= '2025-09-01' AND dt_gerencial < '2025-10-01'
-        ),
-        clientes_out AS (
-          SELECT DISTINCT vd_cpf FROM contahub_vendas
-          WHERE vd_cpf IS NOT NULL AND vd_cpf != ''
-            AND EXTRACT(DOW FROM dt_gerencial) = 5
-            AND dt_gerencial >= '2025-10-01' AND dt_gerencial < '2025-11-01'
-        )
-        SELECT 
-          (SELECT COUNT(*) FROM clientes_set) as clientes_setembro,
-          (SELECT COUNT(*) FROM clientes_set c1 
-           WHERE EXISTS (SELECT 1 FROM clientes_out c2 WHERE c1.vd_cpf = c2.vd_cpf)) as retornaram_outubro
-      `
-    })
+      return {
+        total_comandas: dados.length,
+        clientes_unicos: cpfsUnicos.size,
+        ticket_medio: Math.round((totalVrCheio / dados.length) * 100) / 100,
+        desconto_medio: Math.round((totalDescontos / dados.length) * 100) / 100,
+        ticket_liquido: Math.round(((totalVrCheio - totalDescontos) / dados.length) * 100) / 100,
+        faturamento_bruto: Math.round(totalVrCheio * 100) / 100,
+        faturamento_liquido: Math.round((totalVrCheio - totalDescontos) * 100) / 100
+      }
+    }
+
+    const calcularRecorrencia = (dadosAntes: any[], dadosDepois: any[]) => {
+      const cpfsAntes = new Set(dadosAntes.filter(d => d.vd_cpf).map(d => d.vd_cpf))
+      const cpfsDepois = new Set(dadosDepois.filter(d => d.vd_cpf).map(d => d.vd_cpf))
+      
+      let retornaram = 0
+      let deixaramDeIr = 0
+      let novosClientes = 0
+
+      cpfsAntes.forEach(cpf => {
+        if (cpfsDepois.has(cpf)) {
+          retornaram++
+        } else {
+          deixaramDeIr++
+        }
+      })
+
+      cpfsDepois.forEach(cpf => {
+        if (!cpfsAntes.has(cpf)) {
+          novosClientes++
+        }
+      })
+
+      return {
+        clientes_antes: cpfsAntes.size,
+        clientes_depois: cpfsDepois.size,
+        retornaram,
+        deixaram_de_ir: deixaramDeIr,
+        novos_clientes: novosClientes
+      }
+    }
+
+    const calcularEvolucao = (dados: any[], dataLimite: string) => {
+      const porData = new Map<string, any[]>()
+      
+      dados.forEach(d => {
+        const data = d.dt_gerencial
+        if (!porData.has(data)) {
+          porData.set(data, [])
+        }
+        porData.get(data)!.push(d)
+      })
+
+      return Array.from(porData.entries())
+        .map(([data, registros]) => ({
+          data,
+          periodo: data < dataLimite ? 'antes' : 'depois',
+          comandas: registros.length,
+          clientes: new Set(registros.filter(r => r.vd_cpf).map(r => r.vd_cpf)).size,
+          ticket_medio: Math.round((registros.reduce((sum, r) => sum + (parseFloat(r.vd_vrcheio) || 0), 0) / registros.length) * 100) / 100,
+          faturamento: Math.round(registros.reduce((sum, r) => sum + (parseFloat(r.vd_vrcheio) || 0), 0) * 100) / 100
+        }))
+        .sort((a, b) => a.data.localeCompare(b.data))
+    }
+
+    // Calcular baseline (set -> out)
+    const calcularBaseline = (dados: any[], mes1Inicio: string, mes1Fim: string, mes2Inicio: string, mes2Fim: string) => {
+      const dadosMes1 = dados.filter(d => d.dt_gerencial >= mes1Inicio && d.dt_gerencial < mes1Fim)
+      const dadosMes2 = dados.filter(d => d.dt_gerencial >= mes2Inicio && d.dt_gerencial < mes2Fim)
+      
+      const cpfsMes1 = new Set(dadosMes1.filter(d => d.vd_cpf).map(d => d.vd_cpf))
+      const cpfsMes2 = new Set(dadosMes2.filter(d => d.vd_cpf).map(d => d.vd_cpf))
+      
+      let retornaram = 0
+      cpfsMes1.forEach(cpf => {
+        if (cpfsMes2.has(cpf)) retornaram++
+      })
+
+      return {
+        clientes_setembro: cpfsMes1.size,
+        retornaram_outubro: retornaram
+      }
+    }
+
+    // Todos os dados filtrados por dia
+    const todasQuartas = [...quartasAntes, ...quartasDepois]
+    const todasSextas = [...sextasAntes, ...sextasDepois]
+
+    const tempoMs = Date.now() - startTime
+    console.log(`✅ Análise completa em ${tempoMs}ms`)
 
     return NextResponse.json({
       success: true,
       datasEntrada: DATAS_ENTRADA,
       quartas: {
-        ticket: ticketQuartas || [],
-        recorrencia: recorrenciaQuartas?.[0] || {},
-        evolucao: evolucaoQuartas || [],
-        baseline: baselineQuartas?.[0] || {}
+        ticket: [
+          { periodo: 'antes', ...calcularMetricas(quartasAntes) },
+          { periodo: 'depois', ...calcularMetricas(quartasDepois) }
+        ],
+        recorrencia: calcularRecorrencia(quartasAntes, quartasDepois),
+        evolucao: calcularEvolucao(todasQuartas, DATAS_ENTRADA.quarta),
+        baseline: calcularBaseline(todasQuartas, '2025-09-01', '2025-10-01', '2025-10-01', '2025-11-01')
       },
       sextas: {
-        ticket: ticketSextas || [],
-        recorrencia: recorrenciaSextas?.[0] || {},
-        evolucao: evolucaoSextas || [],
-        baseline: baselineSextas?.[0] || {}
-      }
+        ticket: [
+          { periodo: 'antes', ...calcularMetricas(sextasAntes) },
+          { periodo: 'depois', ...calcularMetricas(sextasDepois) }
+        ],
+        recorrencia: calcularRecorrencia(sextasAntes, sextasDepois),
+        evolucao: calcularEvolucao(todasSextas, DATAS_ENTRADA.sexta),
+        baseline: calcularBaseline(todasSextas, '2025-09-01', '2025-10-01', '2025-10-01', '2025-11-01')
+      },
+      tempo_processamento_ms: tempoMs
     })
 
   } catch (error) {
@@ -224,6 +255,3 @@ export async function GET() {
     }, { status: 500 })
   }
 }
-
-
-
