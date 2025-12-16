@@ -24,6 +24,7 @@ import {
   ChefHat,
   Sparkles,
   DollarSign,
+  Clock,
 } from 'lucide-react';
 
 /**
@@ -102,6 +103,7 @@ const defaultSidebarItems: SidebarItem[] = [
     permission: 'relatorios',
     subItems: [
       { icon: Users, label: 'Clientes', href: '/analitico/clientes', permission: 'relatorios' },
+      { icon: Clock, label: 'Tempo de Estadia', href: '/relatorios/tempo-estadia', permission: 'relatorios' },
       { icon: Sparkles, label: 'CRM', href: '/crm', permission: 'gestao' },
       { icon: BarChart3, label: 'Eventos', href: '/analitico/eventos', permission: 'relatorios' },
     ],

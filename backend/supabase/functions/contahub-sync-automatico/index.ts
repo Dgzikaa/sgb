@@ -245,11 +245,32 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // 1. COLETA E ARMAZENAMENTO DE JSON BRUTO
     console.log('\n📥 FASE 1: Coletando e salvando JSONs brutos...');
     
-    const dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo'];
+    const dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'vendas'];
     
     // Converter data para formato ContaHub (DD.MM.YYYY)
     const contahubDate = toContaHubDateFormat(data_date);
     console.log(`📅 Data ContaHub: ${contahubDate}`);
+    
+    // Buscar os turnos disponíveis para a data
+    let turnosDisponiveis: number[] = [];
+    try {
+      console.log(`\n🔍 Buscando turnos disponíveis para ${data_date}...`);
+      const turnosTimestamp = generateDynamicTimestamp();
+      const turnosUrl = `${contahubBaseUrl}/M/guru.facades.GerenciaFacade/getTurnos?emp=${emp_id}&t=${turnosTimestamp}`;
+      const turnosResponse = await fetchContaHubData(turnosUrl, sessionToken);
+      
+      // Filtrar turnos pela data
+      if (Array.isArray(turnosResponse)) {
+        turnosDisponiveis = turnosResponse
+          .filter((t: any) => t.trn_dtgerencial && t.trn_dtgerencial.startsWith(data_date))
+          .map((t: any) => t.trn);
+        console.log(`✅ Turnos encontrados: ${turnosDisponiveis.join(', ') || 'nenhum'}`);
+      }
+    } catch (turnoError) {
+      console.warn(`⚠️ Erro ao buscar turnos:`, turnoError);
+      // Se não conseguir buscar turnos, tenta com um turno padrão
+      turnosDisponiveis = [];
+    }
     
     for (const dataType of dataTypes) {
       try {
@@ -260,7 +281,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         
         let url: string;
         
-        // Construir URL específica para cada tipo de dados (usando formato DD.MM.YYYY)
+        // Construir URL específica para cada tipo de dados
         switch (dataType) {
           case 'analitico':
             // qry=77 requer: emp, d0, d1, produto, grupo, local, turno, mesa, tipo
@@ -282,6 +303,46 @@ Deno.serve(async (req: Request): Promise<Response> => {
           case 'periodo':
             url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${contahubDate}&d1=${contahubDate}&emp=${emp_id}&nfe=1`;
             break;
+            
+          case 'vendas':
+            // 🆕 getTurnoVendas - Dados com vd_hrabertura e vd_hrsaida
+            // Precisamos buscar para cada turno disponível
+            if (turnosDisponiveis.length === 0) {
+              console.log(`⚠️ Nenhum turno disponível para vendas em ${data_date}`);
+              continue;
+            }
+            
+            // Consolidar dados de todos os turnos
+            const allVendas: any[] = [];
+            for (const turno of turnosDisponiveis) {
+              const vendasTimestamp = generateDynamicTimestamp();
+              const vendasUrl = `${contahubBaseUrl}/M/guru.facades.GerenciaFacade/getTurnoVendas?trn=${turno}&t=${vendasTimestamp}&emp=${emp_id}`;
+              console.log(`🔗 Buscando vendas do turno ${turno}: ${vendasUrl}`);
+              
+              try {
+                const vendasData = await fetchContaHubData(vendasUrl, sessionToken);
+                // 🔧 FIX: A resposta vem como { data: [...] }, não como array direto
+                const vendasArray = Array.isArray(vendasData) ? vendasData : 
+                                   (vendasData?.data && Array.isArray(vendasData.data)) ? vendasData.data : [];
+                
+                if (vendasArray.length > 0) {
+                  // Adicionar turno a cada registro
+                  vendasArray.forEach((v: any) => v.trn = turno);
+                  allVendas.push(...vendasArray);
+                  console.log(`✅ Turno ${turno}: ${vendasArray.length} vendas`);
+                }
+              } catch (vendasTurnoError) {
+                console.warn(`⚠️ Erro ao buscar vendas do turno ${turno}:`, vendasTurnoError);
+              }
+            }
+            
+            console.log(`📊 Total de vendas coletadas: ${allVendas.length}`);
+            
+            // Salvar dados de vendas consolidados
+            const vendasResult = await saveRawDataOnly(supabase, 'vendas', { list: allVendas }, data_date, bar_id);
+            results.collected.push(vendasResult);
+            console.log(`✅ vendas: JSON bruto salvo (${vendasResult.record_count} registros)`);
+            continue; // Já processou, pular o loop normal
             
           default:
             throw new Error(`Tipo de dados não suportado: ${dataType}`);
@@ -318,7 +379,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       collected_count: results.collected.length,
       error_count: results.errors.length,
       total_records_collected: results.collected.reduce((sum, item) => sum + item.record_count, 0),
-      processing_method: 'pg_cron_background'
+      processing_method: 'pg_cron_background',
+      includes_vendas: true // inclui dados de vendas com vd_hrabertura e vd_hrsaida
     };
     
     console.log('\n📊 RESUMO FINAL:');
@@ -370,7 +432,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         body: JSON.stringify({
           data_date: data_date,
           bar_id: bar_id,
-          data_types: ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'prodporhora'] // agora inclui prodporhora
+          data_types: ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'prodporhora', 'vendas'] // inclui vendas com horários
         })
       });
       

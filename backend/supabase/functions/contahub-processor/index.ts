@@ -302,6 +302,152 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
         }
         break;
 
+      case 'vendas':
+        // 🆕 Processamento COMPLETO de dados do getTurnoVendas
+        console.log(`📊 Processando vendas com TODOS os campos...`);
+        
+        await supabase
+          .from('contahub_vendas')
+          .delete()
+          .eq('bar_id', barId)
+          .eq('dt_gerencial', dataDate);
+        
+        const vendasRecords = records.map((item: any) => {
+          // Parser de timestamp do ContaHub: "2025-12-14T16:54:17-0300"
+          const parseContaHubTimestamp = (ts: string | null): string | null => {
+            if (!ts) return null;
+            try {
+              const date = new Date(ts);
+              return isNaN(date.getTime()) ? null : date.toISOString();
+            } catch {
+              return null;
+            }
+          };
+          
+          // Parser de data simples (YYYY-MM-DD)
+          const parseDate = (d: string | null): string | null => {
+            if (!d) return null;
+            try {
+              const date = new Date(d);
+              return isNaN(date.getTime()) ? null : d.split('T')[0];
+            } catch {
+              return null;
+            }
+          };
+          
+          // Parser de valor monetário (remove $ e converte)
+          const parseMonetario = (val: any): number => {
+            if (!val) return 0;
+            if (typeof val === 'number') return val;
+            const str = String(val).replace('$', '').replace(',', '.').trim();
+            return parseFloat(str) || 0;
+          };
+          
+          return {
+            bar_id: barId,
+            dt_gerencial: dataDate,
+            trn: parseInt(item.trn) || null,
+            vd: parseInt(item.vd) || null,
+            vd_nome: item.vd_nome || '',
+            vd_mesadesc: item.vd_mesadesc || '',
+            vd_localizacao: item.vd_localizacao || '',
+            
+            // Dados do cliente COMPLETOS
+            cli_id: parseInt(item.cli) || null,
+            cli_nome: item.cli_nome || item.vd_nome || '',
+            cli_fone: item.cli_fone || '',
+            cli_email: item.cli_email || item.vd_email || '',
+            cli_dtnasc: parseDate(item.cli_dtnasc),
+            cli_dtcadastro: parseDate(item.cli_dtcadastro),
+            cli_dtultima: parseDate(item.cli_dtultima),
+            cli_sexo: item.cli_sexo || '',
+            cli_obs: item.cli_obs || '',
+            vd_cpf: item.vd_cpf || item.cli_cpf || '',
+            
+            // TODOS os horários
+            vd_hrabertura: parseContaHubTimestamp(item.vd_hrabertura),
+            vd_hrsaida: parseContaHubTimestamp(item.vd_hrsaida),
+            vd_hrultimo: parseContaHubTimestamp(item.vd_hrultimo),
+            vd_hrprimeiro: parseContaHubTimestamp(item.vd_hrprimeiro),
+            vd_hrpagamento: parseContaHubTimestamp(item.vd_hrpagamento),
+            vd_hrencerramento: parseContaHubTimestamp(item.vd_hrencerramento),
+            vd_hrfechamento: parseContaHubTimestamp(item.vd_hrfechamento),
+            
+            // Dados da venda
+            vd_comanda: item.vd_comanda || '',
+            vd_prefixo: item.vd_prefixo || '',
+            vd_status: item.vd_status || '',
+            vd_senha: item.vd_senha || '',
+            vd_sinalizacao: item.vd_sinalizacao || '',
+            vd_prepago: item.vd_prepago || '',
+            vd_interna: item.vd_interna || '',
+            vd_transferidocancelado: item.vd_transferidocancelado || '',
+            vd_perda: item.vd_perda || '',
+            vd_obs: item.vd_obs || '',
+            vd_idexterno: item.vd_idexterno || '',
+            tipovenda: item.tipovenda || '',
+            
+            // TODOS os valores financeiros
+            pessoas: parseFloat(item.vd_pessoas) || 0,
+            qtd_itens: parseFloat(item.vd_qtditens) || 0,
+            vr_pagamentos: parseFloat(item.vd_vrpagamentos) || 0,
+            vr_produtos: parseFloat(item.vd_vrprodutos) || 0,
+            vd_vrcheio: parseFloat(item.vd_vrcheio) || 0,
+            vr_couvert: parseFloat(item.vd_vrcouvert) || 0,
+            vd_vrdescontos: parseFloat(item.vd_vrdescontos) || 0,
+            vr_desconto: parseFloat(item.vd_vrdescontos) || 0,
+            vr_repique: parseFloat(item.vd_vrrepique) || 0,
+            vd_vrmanobrista: parseFloat(item.vd_vrmanobrista) || 0,
+            vd_vrentrega: parseFloat(item.vd_vrentrega) || 0,
+            vd_vrfalta: parseFloat(item.vd_vrfalta) || 0,
+            vd_qtdcouvert: parseFloat(item.vd_qtdcouvert) || 0,
+            vd_qtdmanobrista: parseFloat(item.vd_qtdmanobrista) || 0,
+            vd_dividepor: parseFloat(item.vd_dividepor) || null,
+            
+            // Dados do turno
+            trn_desc: item.trn_desc || '',
+            trn_couvert: parseMonetario(item.trn_couvert),
+            trn_hrinicio: parseContaHubTimestamp(item.trn_hrinicio),
+            trn_hrfim: parseContaHubTimestamp(item.trn_hrfim),
+            trn_status: item.trn_status || '',
+            trn_percrepiquedefault: parseFloat(item.trn_percrepiquedefault) || 0,
+            
+            // Usuários
+            usr_abriu_id: parseInt(item.usr_abriu) || null,
+            usr_fechou_id: parseInt(item.usr_fechou) || null,
+            usr_abriu: item.usr_nome_abriu || '',
+            usr_fechou: item.usr_nome_fechou || '',
+            usr_nome_abriu: item.usr_nome_abriu || '',
+            
+            // NF-e
+            nf_nnf: item.nf_nnf ? String(item.nf_nnf) : '',
+            nf_autorizada: item.nf_autorizada || '',
+            nf_tipo: item.nf_tipo || '',
+            
+            // Motivo desconto
+            motivo: item.vd_motivodesconto || '',
+            
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            idempotency_key: `${barId}_${dataDate}_${item.vd || ''}_${item.trn || ''}`
+          };
+        }).filter((v: any) => v.vd); // Filtrar registros sem ID de venda
+        
+        if (vendasRecords.length > 0) {
+          const { error } = await supabase
+            .from('contahub_vendas')
+            .upsert(vendasRecords, { onConflict: 'idempotency_key' });
+          
+          if (error) {
+            console.error(`❌ Erro ao inserir vendas:`, error.message, JSON.stringify(error));
+            return { success: true, count: 0, errors: vendasRecords.length, errorMessage: error.message, errorDetails: JSON.stringify(error) };
+          } else {
+            processedCount = vendasRecords.length;
+            console.log(`✅ vendas: ${processedCount} registros processados com TODOS os campos`);
+          }
+        }
+        break;
+
       default:
         console.log(`⚠️ Tipo de dados não suportado: ${dataType}`);
         return { success: false, count: 0, error: `Tipo não suportado: ${dataType}` };

@@ -143,7 +143,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       bar_id, 
       start_date, 
       end_date, 
-      data_types = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo'],
+      data_types = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'vendas'],
       delay_ms = 2000, // Delay entre dias para não sobrecarregar
       process_after = true // Processar dados após coleta
     } = JSON.parse(requestBody || '{}');
@@ -261,6 +261,63 @@ Deno.serve(async (req: Request): Promise<Response> => {
             case 'periodo':
               url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${data_date}&d1=${data_date}&emp=${emp_id}&nfe=1`;
               break;
+            case 'vendas':
+              // 🆕 getTurnoVendas - Dados com vd_hrabertura e vd_hrsaida
+              // Primeiro buscar turnos disponíveis
+              try {
+                const turnosUrl = `${contahubBaseUrl}/M/guru.facades.GerenciaFacade/getTurnos?emp=${emp_id}&t=${queryTimestamp}`;
+                const turnosResponse = await fetchContaHubData(turnosUrl, sessionToken);
+                
+                // Filtrar turnos pela data
+                const turnosDisponiveis = Array.isArray(turnosResponse) 
+                  ? turnosResponse
+                      .filter((t: any) => t.trn_dtgerencial && t.trn_dtgerencial.startsWith(data_date))
+                      .map((t: any) => t.trn)
+                  : [];
+                
+                if (turnosDisponiveis.length === 0) {
+                  console.log(`⚠️ Nenhum turno disponível para vendas em ${data_date}`);
+                  continue;
+                }
+                
+                // Consolidar dados de todos os turnos
+                const allVendas: any[] = [];
+                for (const turno of turnosDisponiveis) {
+                  const vendasTimestamp = generateDynamicTimestamp();
+                  const vendasUrl = `${contahubBaseUrl}/M/guru.facades.GerenciaFacade/getTurnoVendas?trn=${turno}&t=${vendasTimestamp}&emp=${emp_id}`;
+                  
+                  try {
+                    const vendasData = await fetchContaHubData(vendasUrl, sessionToken);
+                    // 🔧 FIX: A resposta vem como { data: [...] }, não como array direto
+                    const vendasArray = Array.isArray(vendasData) ? vendasData : 
+                                       (vendasData?.data && Array.isArray(vendasData.data)) ? vendasData.data : [];
+                    
+                    if (vendasArray.length > 0) {
+                      vendasArray.forEach((v: any) => v.trn = turno);
+                      allVendas.push(...vendasArray);
+                      console.log(`✅ Turno ${turno}: ${vendasArray.length} vendas`);
+                    }
+                  } catch (vendasTurnoError) {
+                    console.warn(`⚠️ Erro ao buscar vendas do turno ${turno}:`, vendasTurnoError);
+                  }
+                  await delay(300); // Pequeno delay entre turnos
+                }
+                
+                if (allVendas.length > 0) {
+                  const vendasResult = await saveRawDataOnly(supabase, 'vendas', { list: allVendas }, data_date, bar_id);
+                  dayResult.collected.push(vendasResult);
+                  console.log(`✅ vendas: ${vendasResult.record_count} registros`);
+                } else {
+                  console.log(`⚠️ Nenhuma venda encontrada em ${data_date}`);
+                }
+              } catch (vendasError) {
+                console.error(`❌ Erro ao buscar vendas:`, vendasError);
+                dayResult.errors.push({
+                  data_type: 'vendas',
+                  error: vendasError instanceof Error ? vendasError.message : String(vendasError)
+                });
+              }
+              continue; // Já processou, pular o loop normal
             default:
               continue;
           }

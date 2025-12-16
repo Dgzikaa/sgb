@@ -207,62 +207,80 @@ export async function GET(request: NextRequest) {
 		}
 		}
 
-		// ✅ SOLUÇÃO SIMPLES: Apenas adicionar tempos fixos para demonstração
-		console.log('⚡ Aplicando tempos de estadia simples...')
+		// ✅ BUSCAR TEMPOS DE ESTADIA REAIS DA TABELA contahub_vendas
+		console.log('⚡ Buscando tempos de estadia REAIS do banco de dados...')
 		
 		try {
-			// Para cada cliente no map, adicionar tempo médio simulado MAIS REALISTA
-			for (const [fone, cliente] of map.entries()) {
-				// Simular tempos mais variados e realistas
-				const temposIndividuais: number[] = []
+			// Buscar todos os dados de vendas com tempo de estadia
+			const { data: vendasComTempo, error: vendasError } = await supabase
+				.from('contahub_vendas')
+				.select('cli_fone, cli_nome, vd_nome, vd_hrabertura, vd_hrsaida, tempo_estadia_minutos, dt_gerencial')
+				.eq('bar_id', finalBarId)
+				.not('vd_hrabertura', 'is', null)
+				.not('vd_hrsaida', 'is', null)
+			
+			if (vendasError) {
+				console.warn('⚠️ Erro ao buscar tempos de estadia:', vendasError)
+			} else if (vendasComTempo && vendasComTempo.length > 0) {
+				console.log(`📊 Encontrados ${vendasComTempo.length} registros com tempo de estadia real`)
 				
-				for (let i = 0; i < cliente.visitas; i++) {
-					// Criar cenários mais realistas
-					const cenarios = [
-						{ peso: 0.2, tempo: 45 + Math.random() * 30 },   // Visita rápida: 45-75min
-						{ peso: 0.3, tempo: 90 + Math.random() * 60 },   // Visita normal: 90-150min  
-						{ peso: 0.3, tempo: 150 + Math.random() * 90 },  // Visita longa: 150-240min
-						{ peso: 0.15, tempo: 240 + Math.random() * 120 }, // Visita muito longa: 240-360min
-						{ peso: 0.05, tempo: 30 + Math.random() * 15 }   // Visita muito rápida: 30-45min
-					]
+				// Criar mapa de tempos por telefone normalizado
+				const temposPorTelefone = new Map<string, { tempos: number[]; datas: string[] }>()
+				
+				for (const venda of vendasComTempo) {
+					let foneVenda = (venda.cli_fone || '').toString().replace(/\D/g, '')
+					if (!foneVenda) continue
 					
-					// Escolher cenário baseado no peso
-					const random = Math.random()
-					let acumulado = 0
-					let tempoEscolhido = 120 // fallback
-					
-					for (const cenario of cenarios) {
-						acumulado += cenario.peso
-						if (random <= acumulado) {
-							tempoEscolhido = cenario.tempo
-							break
+					// Normalizar telefone da venda para match
+					if (foneVenda.length === 10) {
+						const ddd = foneVenda.substring(0, 2)
+						if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
+							foneVenda = ddd + '9' + foneVenda.substring(2)
 						}
 					}
 					
-					// Adicionar variação extra baseada no dia da semana simulado
-					const diaVariacao = Math.random()
-					if (diaVariacao < 0.2) {
-						// 20% chance de ser fim de semana (mais tempo)
-						tempoEscolhido *= 1.3
-					} else if (diaVariacao < 0.4) {
-						// 20% chance de ser dia de semana (menos tempo)
-						tempoEscolhido *= 0.7
+					const tempoMinutos = venda.tempo_estadia_minutos
+					if (tempoMinutos && tempoMinutos > 0 && tempoMinutos < 720) { // Limitar a 12 horas
+						if (!temposPorTelefone.has(foneVenda)) {
+							temposPorTelefone.set(foneVenda, { tempos: [], datas: [] })
+						}
+						const registro = temposPorTelefone.get(foneVenda)!
+						registro.tempos.push(Math.round(tempoMinutos))
+						registro.datas.push(venda.dt_gerencial)
 					}
-					
-					// Garantir limites realistas
-					tempoEscolhido = Math.max(25, Math.min(480, tempoEscolhido)) // 25min a 8h
-					temposIndividuais.push(Math.round(tempoEscolhido))
 				}
 				
-				cliente.temposEstadia = temposIndividuais
-				cliente.tempoMedioEstadia = temposIndividuais.length > 0 
-					? temposIndividuais.reduce((sum, t) => sum + t, 0) / temposIndividuais.length 
-					: 0
+				// Aplicar tempos reais aos clientes
+				let clientesComTempoReal = 0
+				for (const [fone, cliente] of map.entries()) {
+					const temposCliente = temposPorTelefone.get(fone)
+					if (temposCliente && temposCliente.tempos.length > 0) {
+						cliente.temposEstadia = temposCliente.tempos
+						cliente.tempoMedioEstadia = temposCliente.tempos.reduce((sum, t) => sum + t, 0) / temposCliente.tempos.length
+						clientesComTempoReal++
+					} else {
+						// Sem dados reais - manter arrays vazios
+						cliente.temposEstadia = []
+						cliente.tempoMedioEstadia = 0
+					}
+				}
+				
+				console.log(`✅ Tempos de estadia REAIS aplicados para ${clientesComTempoReal} clientes!`)
+			} else {
+				console.log('⚠️ Nenhum dado de tempo de estadia encontrado na tabela contahub_vendas')
+				// Sem dados - deixar arrays vazios para todos
+				for (const [, cliente] of map.entries()) {
+					cliente.temposEstadia = []
+					cliente.tempoMedioEstadia = 0
+				}
 			}
-			
-			console.log('✅ Tempos de estadia REALISTAS aplicados com sucesso!')
 		} catch (error) {
 			console.warn('⚠️ Erro ao processar tempos de estadia:', error)
+			// Em caso de erro, manter arrays vazios
+			for (const [, cliente] of map.entries()) {
+				cliente.temposEstadia = []
+				cliente.tempoMedioEstadia = 0
+			}
 		}
 
 		const clientes = Array.from(map.values())
