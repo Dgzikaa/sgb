@@ -265,13 +265,13 @@ export default function TempoEstadiaPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="overflow-x-auto">
-                      <Table>
+                      <Table className="w-full table-fixed">
                         <TableHeader>
                           <TableRow className="border-gray-200 dark:border-gray-700">
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Mês</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Visitas</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Tempo Médio</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Variação</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-1/4 [&>div]:justify-center">Mês</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-1/4 [&>div]:justify-center">Visitas</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-1/4 [&>div]:justify-center">Tempo Médio</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-1/4 [&>div]:justify-center">Variação</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -420,14 +420,14 @@ export default function TempoEstadiaPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="overflow-x-auto">
-                      <Table>
+                      <Table className="w-full table-fixed">
                         <TableHeader>
                           <TableRow className="border-gray-200 dark:border-gray-700">
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">#</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Cliente</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Telefone</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Visitas</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Tempo Médio</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-[8%] [&>div]:justify-center">#</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-[30%] [&>div]:justify-center">Cliente</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-[25%] [&>div]:justify-center">Telefone</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-[12%] [&>div]:justify-center">Visitas</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 !text-center w-[25%] [&>div]:justify-center">Tempo Médio</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -436,7 +436,7 @@ export default function TempoEstadiaPage() {
                               <TableCell className="text-gray-500 dark:text-gray-400 text-center">
                                 {index + 1}
                               </TableCell>
-                              <TableCell className="text-gray-900 dark:text-white font-medium text-center">
+                              <TableCell className="text-gray-900 dark:text-white font-medium text-center truncate">
                                 {cliente.nome}
                               </TableCell>
                               <TableCell className="text-gray-600 dark:text-gray-400 text-center">
