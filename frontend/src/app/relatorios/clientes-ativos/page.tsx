@@ -337,14 +337,19 @@ export default function ClientesAtivosPage() {
                   {/* Novos Clientes */}
                   <MetricTooltip content="Clientes que visitaram o bar pela PRIMEIRA VEZ no período selecionado. São pessoas que nunca tinham vindo antes em todo o histórico registrado.">
                     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-green-300 dark:hover:border-green-600 transition-colors">
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                           Novos Clientes
                         </span>
                         <UserPlus className="w-5 h-5 text-green-600 dark:text-green-400" />
                       </div>
-                      <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        {data.atual.novosClientes.toLocaleString('pt-BR')}
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                          {data.atual.novosClientes.toLocaleString('pt-BR')}
+                        </span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-sm font-semibold">
+                          {data.atual.percentualNovos.toFixed(1)}% do total
+                        </Badge>
                       </div>
                       <div className="flex items-center gap-2">
                         {data.variacoes.novos >= 0 ? (
@@ -352,9 +357,9 @@ export default function ClientesAtivosPage() {
                         ) : (
                           <TrendingDown className="w-4 h-4 text-red-600" />
                         )}
-                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {data.atual.percentualNovos.toFixed(2)}%
-                        </Badge>
+                        <span className={`text-sm font-medium ${data.variacoes.novos >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {data.variacoes.novos > 0 ? '+' : ''}{data.variacoes.novos.toFixed(1)}%
+                        </span>
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                           Anterior: {data.anterior.novosClientes.toLocaleString('pt-BR')}
                         </span>
@@ -365,14 +370,19 @@ export default function ClientesAtivosPage() {
                   {/* Clientes Retornantes */}
                   <MetricTooltip content="Clientes que já tinham visitado o bar anteriormente e RETORNARAM no período selecionado. Indica a fidelização e satisfação dos clientes.">
                     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                           Clientes Retornantes
                         </span>
                         <RefreshCw className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        {data.atual.clientesRetornantes.toLocaleString('pt-BR')}
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                          {data.atual.clientesRetornantes.toLocaleString('pt-BR')}
+                        </span>
+                        <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-sm font-semibold">
+                          {data.atual.percentualRetornantes.toFixed(1)}% do total
+                        </Badge>
                       </div>
                       <div className="flex items-center gap-2">
                         {data.variacoes.retornantes >= 0 ? (
@@ -380,9 +390,9 @@ export default function ClientesAtivosPage() {
                         ) : (
                           <TrendingDown className="w-4 h-4 text-red-600" />
                         )}
-                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                          {data.atual.percentualRetornantes.toFixed(2)}%
-                        </Badge>
+                        <span className={`text-sm font-medium ${data.variacoes.retornantes >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {data.variacoes.retornantes > 0 ? '+' : ''}{data.variacoes.retornantes.toFixed(1)}%
+                        </span>
                         <span className="text-sm text-gray-500 dark:text-gray-400">
                           Anterior: {data.anterior.clientesRetornantes.toLocaleString('pt-BR')}
                         </span>
