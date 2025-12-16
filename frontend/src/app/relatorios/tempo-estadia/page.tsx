@@ -137,10 +137,26 @@ export default function TempoEstadiaPage() {
         />
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            {[1, 2, 3, 4].map(i => (
-              <Skeleton key={i} className="h-32" />
-            ))}
+          <div className="space-y-6">
+            {/* Cards skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(i => (
+                <Skeleton key={i} className="h-32 rounded-xl" />
+              ))}
+            </div>
+            {/* Tabs skeleton */}
+            <Skeleton className="h-10 w-96" />
+            {/* Table skeleton */}
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardHeader className="text-center">
+                <Skeleton className="h-6 w-48 mx-auto" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </CardContent>
+            </Card>
           </div>
         ) : error ? (
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
@@ -219,7 +235,7 @@ export default function TempoEstadiaPage() {
 
             {/* Tabs com análises */}
             <Tabs defaultValue="mes" className="space-y-4">
-              <TabsList className="bg-gray-100 dark:bg-gray-700">
+              <TabsList className="bg-gray-100 dark:bg-gray-700 w-full justify-center">
                 <TabsTrigger value="mes" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 dark:text-gray-300 dark:data-[state=active]:text-white">
                   <Calendar className="w-4 h-4 mr-2" />
                   Por Mês
@@ -241,8 +257,8 @@ export default function TempoEstadiaPage() {
               {/* Por Mês */}
               <TabsContent value="mes">
                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-gray-900 dark:text-white flex items-center justify-center gap-2">
                       <Calendar className="w-5 h-5" />
                       Tempo Médio por Mês
                     </CardTitle>
@@ -252,10 +268,10 @@ export default function TempoEstadiaPage() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-gray-200 dark:border-gray-700">
-                            <TableHead className="text-gray-700 dark:text-gray-300">Mês</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-right">Visitas</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-right">Tempo Médio</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300">Variação</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Mês</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Visitas</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Tempo Médio</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Variação</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -266,16 +282,16 @@ export default function TempoEstadiaPage() {
                             
                             return (
                               <TableRow key={item.periodo} className="border-gray-200 dark:border-gray-700">
-                                <TableCell className="text-gray-900 dark:text-white font-medium">
+                                <TableCell className="text-gray-900 dark:text-white font-medium text-center">
                                   {formatarMes(item.periodo)}
                                 </TableCell>
-                                <TableCell className="text-gray-600 dark:text-gray-400 text-right">
+                                <TableCell className="text-gray-600 dark:text-gray-400 text-center">
                                   {item.total_vendas.toLocaleString('pt-BR')}
                                 </TableCell>
-                                <TableCell className="text-gray-900 dark:text-white text-right font-medium">
+                                <TableCell className="text-gray-900 dark:text-white text-center font-medium">
                                   {formatarTempo(item.tempo_medio_minutos)}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="text-center">
                                   {index > 0 && (
                                     <Badge className={variacaoNum > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : variacaoNum < 0 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'}>
                                       {variacaoNum > 0 ? '+' : ''}{variacao}%
@@ -295,8 +311,8 @@ export default function TempoEstadiaPage() {
               {/* Por Dia da Semana */}
               <TabsContent value="dia">
                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-gray-900 dark:text-white flex items-center justify-center gap-2">
                       <BarChart3 className="w-5 h-5" />
                       Tempo Médio por Dia da Semana
                     </CardTitle>
@@ -341,8 +357,8 @@ export default function TempoEstadiaPage() {
               {/* Distribuição por Faixas */}
               <TabsContent value="faixas">
                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-gray-900 dark:text-white flex items-center justify-center gap-2">
                       <Timer className="w-5 h-5" />
                       Distribuição por Faixa de Tempo
                     </CardTitle>
@@ -396,8 +412,8 @@ export default function TempoEstadiaPage() {
               {/* Top Clientes */}
               <TabsContent value="clientes">
                 <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-gray-900 dark:text-white flex items-center justify-center gap-2">
                       <Users className="w-5 h-5" />
                       Top 20 Clientes com Maior Tempo Médio (min. 3 visitas)
                     </CardTitle>
@@ -407,29 +423,29 @@ export default function TempoEstadiaPage() {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-gray-200 dark:border-gray-700">
-                            <TableHead className="text-gray-700 dark:text-gray-300">#</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300">Cliente</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300">Telefone</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-right">Visitas</TableHead>
-                            <TableHead className="text-gray-700 dark:text-gray-300 text-right">Tempo Médio</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">#</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Cliente</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Telefone</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Visitas</TableHead>
+                            <TableHead className="text-gray-700 dark:text-gray-300 text-center">Tempo Médio</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {data.top_clientes_maior_tempo.map((cliente, index) => (
                             <TableRow key={cliente.telefone} className="border-gray-200 dark:border-gray-700">
-                              <TableCell className="text-gray-500 dark:text-gray-400">
+                              <TableCell className="text-gray-500 dark:text-gray-400 text-center">
                                 {index + 1}
                               </TableCell>
-                              <TableCell className="text-gray-900 dark:text-white font-medium">
+                              <TableCell className="text-gray-900 dark:text-white font-medium text-center">
                                 {cliente.nome}
                               </TableCell>
-                              <TableCell className="text-gray-600 dark:text-gray-400">
+                              <TableCell className="text-gray-600 dark:text-gray-400 text-center">
                                 {cliente.telefone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')}
                               </TableCell>
-                              <TableCell className="text-gray-600 dark:text-gray-400 text-right">
+                              <TableCell className="text-gray-600 dark:text-gray-400 text-center">
                                 {cliente.visitas}
                               </TableCell>
-                              <TableCell className="text-right">
+                              <TableCell className="text-center">
                                 <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
                                   {formatarTempo(cliente.tempo_medio_minutos)}
                                 </Badge>

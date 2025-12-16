@@ -4,6 +4,47 @@ import { authenticateUser, authErrorResponse } from '@/middleware/auth'
 
 export const dynamic = 'force-dynamic'
 
+// Função para buscar todos os dados com paginação
+async function fetchAllData(supabase: any, barId: number): Promise<any[]> {
+  const pageSize = 1000
+  let offset = 0
+  const allData: any[] = []
+  let hasMore = true
+  
+  console.log(`📊 Buscando todos os dados de tempo de estadia para bar_id=${barId}...`)
+  
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from('contahub_vendas')
+      .select('dt_gerencial, tempo_estadia_minutos, cli_fone, vd_nome')
+      .eq('bar_id', barId)
+      .gt('tempo_estadia_minutos', 0)
+      .lt('tempo_estadia_minutos', 720)
+      .range(offset, offset + pageSize - 1)
+    
+    if (error) {
+      console.error('Erro ao buscar dados:', error)
+      throw error
+    }
+    
+    if (!data || data.length === 0) {
+      hasMore = false
+    } else {
+      allData.push(...data)
+      console.log(`📦 Página ${Math.floor(offset / pageSize) + 1}: ${data.length} registros (total: ${allData.length})`)
+      
+      if (data.length < pageSize) {
+        hasMore = false
+      } else {
+        offset += pageSize
+      }
+    }
+  }
+  
+  console.log(`✅ Total de registros buscados: ${allData.length}`)
+  return allData
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await authenticateUser(request)
@@ -29,51 +70,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'bar_id é obrigatório' }, { status: 400 })
     }
 
-    // 1. Tempo médio por MÊS
-    const { data: porMes, error: errMes } = await supabase.rpc('get_tempo_estadia_por_mes', { p_bar_id: barId })
+    // Buscar TODOS os dados com paginação
+    const allData = await fetchAllData(supabase, barId)
     
-    // Se a função não existir, fazer query direta
-    let dadosPorMes = porMes
-    if (errMes) {
-      console.log('Função RPC não existe, usando query direta...')
-      const { data, error } = await supabase
-        .from('contahub_vendas')
-        .select('dt_gerencial, tempo_estadia_minutos')
-        .eq('bar_id', barId)
-        .gt('tempo_estadia_minutos', 0)
-        .lt('tempo_estadia_minutos', 720)
-      
-      if (error) throw error
-      
-      // Agrupar por mês manualmente
-      const mesMap = new Map<string, { total: number; count: number }>()
-      for (const row of data || []) {
-        const mes = row.dt_gerencial.substring(0, 7) // YYYY-MM
-        const atual = mesMap.get(mes) || { total: 0, count: 0 }
-        atual.total += row.tempo_estadia_minutos
-        atual.count += 1
-        mesMap.set(mes, atual)
-      }
-      
-      dadosPorMes = Array.from(mesMap.entries()).map(([mes, dados]) => ({
-        periodo: mes,
-        total_vendas: dados.count,
-        tempo_medio_minutos: Math.round(dados.total / dados.count * 10) / 10
-      })).sort((a, b) => a.periodo.localeCompare(b.periodo))
+    if (allData.length === 0) {
+      return NextResponse.json({
+        estatisticas: {
+          total_vendas: 0,
+          tempo_medio_geral_minutos: 0,
+          tempo_medio_formatado: '0h 0min'
+        },
+        por_mes: [],
+        por_dia_semana: [],
+        por_semana: [],
+        distribuicao_faixas: [],
+        top_clientes_maior_tempo: []
+      })
     }
 
-    // 2. Tempo médio por DIA DA SEMANA
-    const { data: rawDiaSemana, error: errDia } = await supabase
-      .from('contahub_vendas')
-      .select('dt_gerencial, tempo_estadia_minutos')
-      .eq('bar_id', barId)
-      .gt('tempo_estadia_minutos', 0)
-      .lt('tempo_estadia_minutos', 720)
+    // 1. Agrupar por MÊS
+    const mesMap = new Map<string, { total: number; count: number }>()
+    for (const row of allData) {
+      const mes = row.dt_gerencial.substring(0, 7) // YYYY-MM
+      const atual = mesMap.get(mes) || { total: 0, count: 0 }
+      atual.total += row.tempo_estadia_minutos
+      atual.count += 1
+      mesMap.set(mes, atual)
+    }
     
-    if (errDia) throw errDia
-    
+    const dadosPorMes = Array.from(mesMap.entries()).map(([mes, dados]) => ({
+      periodo: mes,
+      total_vendas: dados.count,
+      tempo_medio_minutos: Math.round(dados.total / dados.count * 10) / 10
+    })).sort((a, b) => a.periodo.localeCompare(b.periodo))
+
+    // 2. Agrupar por DIA DA SEMANA
     const diasSemanaMap = new Map<number, { total: number; count: number }>()
-    for (const row of rawDiaSemana || []) {
+    for (const row of allData) {
       const data = new Date(row.dt_gerencial + 'T12:00:00Z')
       const diaSemana = data.getUTCDay()
       const atual = diasSemanaMap.get(diaSemana) || { total: 0, count: 0 }
@@ -90,9 +123,9 @@ export async function GET(request: NextRequest) {
       tempo_medio_minutos: Math.round(dados.total / dados.count * 10) / 10
     })).sort((a, b) => a.dia_semana - b.dia_semana)
 
-    // 3. Tempo médio por SEMANA do ano
+    // 3. Agrupar por SEMANA do ano
     const semanaMap = new Map<string, { total: number; count: number }>()
-    for (const row of rawDiaSemana || []) {
+    for (const row of allData) {
       const data = new Date(row.dt_gerencial + 'T12:00:00Z')
       const ano = data.getUTCFullYear()
       const inicioAno = new Date(Date.UTC(ano, 0, 1))
@@ -113,13 +146,13 @@ export async function GET(request: NextRequest) {
     })).sort((a, b) => a.periodo.localeCompare(b.periodo))
 
     // 4. Estatísticas gerais
-    const totalVendas = rawDiaSemana?.length || 0
-    const tempoTotal = rawDiaSemana?.reduce((sum, r) => sum + r.tempo_estadia_minutos, 0) || 0
+    const totalVendas = allData.length
+    const tempoTotal = allData.reduce((sum, r) => sum + r.tempo_estadia_minutos, 0)
     const tempoMedioGeral = totalVendas > 0 ? Math.round(tempoTotal / totalVendas * 10) / 10 : 0
     
-    // Calcular moda (faixa mais comum)
+    // Calcular distribuição por faixas
     const faixas = new Map<string, number>()
-    for (const row of rawDiaSemana || []) {
+    for (const row of allData) {
       const tempo = row.tempo_estadia_minutos
       let faixa = ''
       if (tempo < 60) faixa = '0-1h'
@@ -147,21 +180,7 @@ export async function GET(request: NextRequest) {
     // 5. Top clientes com maior tempo médio (mínimo 3 visitas)
     const clienteMap = new Map<string, { nome: string; tempos: number[] }>()
     
-    interface VendaCliente {
-      cli_fone: string | null
-      vd_nome: string | null
-      tempo_estadia_minutos: number
-    }
-    
-    const { data: vendasClientes } = await supabase
-      .from('contahub_vendas')
-      .select('cli_fone, vd_nome, tempo_estadia_minutos')
-      .eq('bar_id', barId)
-      .gt('tempo_estadia_minutos', 0)
-      .lt('tempo_estadia_minutos', 720)
-      .not('cli_fone', 'is', null)
-    
-    for (const row of (vendasClientes || []) as VendaCliente[]) {
+    for (const row of allData) {
       const fone = (row.cli_fone || '').replace(/\D/g, '')
       if (!fone) continue
       
@@ -184,6 +203,8 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.tempo_medio_minutos - a.tempo_medio_minutos)
       .slice(0, 20)
 
+    console.log(`📊 Relatório gerado: ${totalVendas} vendas, ${dadosPorMes.length} meses, tempo médio: ${tempoMedioGeral}min`)
+
     return NextResponse.json({
       estatisticas: {
         total_vendas: totalVendas,
@@ -202,4 +223,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }
-

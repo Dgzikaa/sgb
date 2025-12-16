@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target, Download, CalendarDays, Calendar, User, Eye, X, Activity } from 'lucide-react'
+import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target, Download, CalendarDays, Calendar, User, Eye, X, Activity, Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
 import { AnimatedCounter, AnimatedCurrency } from '@/components/ui/animated-counter'
@@ -94,6 +95,7 @@ export default function ClientesPage() {
   const [error, setError] = useState<string | null>(null)
   const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
   const [clientesFiltrados, setClientesFiltrados] = useState<Cliente[]>([])
+  const [buscaCliente, setBuscaCliente] = useState<string>('')
   const [activeTab, setActiveTab] = useState<string>('clientes')
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
   const [visitasDetalhadas, setVisitasDetalhadas] = useState<VisitaDetalhada[]>([])
@@ -292,8 +294,20 @@ export default function ClientesPage() {
     }
   }, [activeTab, fetchReservantes, reservantes.length])
 
-  // Não precisamos mais filtrar no frontend, pois o filtro é feito na API
-  // Os dados já vêm filtrados do backend
+  // Filtro de busca local
+  useEffect(() => {
+    if (!buscaCliente.trim()) {
+      setClientesFiltrados(clientes)
+    } else {
+      const busca = buscaCliente.toLowerCase().trim()
+      const filtrados = clientes.filter(cliente => 
+        cliente.nome_principal?.toLowerCase().includes(busca) ||
+        cliente.telefone?.includes(busca) ||
+        cliente.identificador_principal?.includes(busca)
+      )
+      setClientesFiltrados(filtrados)
+    }
+  }, [buscaCliente, clientes])
 
   const handleWhatsAppClick = (nome: string, telefone: string | null) => {
     try {
@@ -772,6 +786,18 @@ export default function ClientesPage() {
                   </div>
                   
                   <div className="flex flex-col sm:flex-row gap-3">
+                    {/* Busca de cliente */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 dark:text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Buscar cliente..."
+                        value={buscaCliente}
+                        onChange={(e) => setBuscaCliente(e.target.value)}
+                        className="w-full sm:w-[220px] pl-9 bg-slate-700/90 dark:bg-gray-700/90 border-gray-300 dark:border-gray-600 text-white dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-400 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm"
+                      />
+                    </div>
+                    
                     <Select value={diaSemanaFiltro} onValueChange={setDiaSemanaFiltro}>
                       <SelectTrigger className="w-full sm:w-[200px] bg-slate-700/90 dark:bg-gray-700/90 border-gray-300 dark:border-gray-600 text-white dark:text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm">
                         <CalendarDays className="h-4 w-4 mr-2 text-slate-200 dark:text-gray-400" />
