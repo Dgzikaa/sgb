@@ -96,6 +96,7 @@ export default function ClientesPage() {
   const [diaSemanaFiltro, setDiaSemanaFiltro] = useState<string>('todos')
   const [clientesFiltrados, setClientesFiltrados] = useState<Cliente[]>([])
   const [buscaCliente, setBuscaCliente] = useState<string>('')
+  const [buscaAplicada, setBuscaAplicada] = useState<string>('') // Busca que foi realmente aplicada
   const [activeTab, setActiveTab] = useState<string>('clientes')
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
   const [visitasDetalhadas, setVisitasDetalhadas] = useState<VisitaDetalhada[]>([])
@@ -144,8 +145,8 @@ export default function ClientesPage() {
       if (diaSemanaFiltro !== 'todos') {
         params.append('dia_semana', diaSemanaFiltro)
       }
-      if (buscaCliente.trim()) {
-        params.append('busca', buscaCliente.trim())
+      if (buscaAplicada) {
+        params.append('busca', buscaAplicada)
       }
       
       const url = `/api/analitico/clientes${params.toString() ? `?${params.toString()}` : ''}`
@@ -203,7 +204,7 @@ export default function ClientesPage() {
       setLoading(false)
       isApiCallingRef.current = false
     }
-  }, [selectedBar, diaSemanaFiltro, buscaCliente])
+  }, [selectedBar, diaSemanaFiltro, buscaAplicada])
 
   const fetchReservantes = useCallback(async () => {
     try {
@@ -297,17 +298,16 @@ export default function ClientesPage() {
     }
   }, [activeTab, fetchReservantes, reservantes.length])
 
-  // Debounce para busca - busca na API após 500ms de pausa na digitação
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (buscaCliente.trim().length >= 2 || buscaCliente.trim().length === 0) {
-        fetchClientes()
-      }
-    }, 500)
-    
-    return () => clearTimeout(timeoutId)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Função para executar a busca (chamada pelo botão ou Enter)
+  const executarBusca = useCallback(() => {
+    setBuscaAplicada(buscaCliente.trim())
   }, [buscaCliente])
+  
+  // Buscar quando buscaAplicada mudar
+  useEffect(() => {
+    fetchClientes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buscaAplicada])
 
   const handleWhatsAppClick = (nome: string, telefone: string | null) => {
     try {
@@ -787,15 +787,34 @@ export default function ClientesPage() {
                   
                   <div className="flex flex-col sm:flex-row gap-3">
                     {/* Busca de cliente */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 dark:text-gray-400" />
+                    <div className="flex gap-1">
                       <Input
                         type="text"
                         placeholder="Buscar cliente..."
                         value={buscaCliente}
                         onChange={(e) => setBuscaCliente(e.target.value)}
-                        className="w-full sm:w-[220px] pl-9 bg-slate-700/90 dark:bg-gray-700/90 border-gray-300 dark:border-gray-600 text-white dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-400 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm"
+                        onKeyDown={(e) => e.key === 'Enter' && executarBusca()}
+                        className="w-full sm:w-[180px] bg-slate-700/90 dark:bg-gray-700/90 border-gray-300 dark:border-gray-600 text-white dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-400 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm"
                       />
+                      <Button
+                        onClick={executarBusca}
+                        className="bg-slate-600 hover:bg-slate-500 dark:bg-gray-600 dark:hover:bg-gray-500 text-white rounded-lg"
+                        size="icon"
+                        title="Buscar"
+                      >
+                        <Search className="h-4 w-4" />
+                      </Button>
+                      {buscaAplicada && (
+                        <Button
+                          onClick={() => { setBuscaCliente(''); setBuscaAplicada(''); }}
+                          variant="ghost"
+                          className="text-slate-300 hover:text-white hover:bg-slate-600/50"
+                          size="icon"
+                          title="Limpar busca"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                     
                     <Select value={diaSemanaFiltro} onValueChange={setDiaSemanaFiltro}>

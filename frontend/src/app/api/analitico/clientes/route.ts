@@ -94,17 +94,60 @@ export async function GET(request: NextRequest) {
           total_visitas_com_tempo: c.total_visitas_com_tempo || 0
         }))
 
-        // Calcular estatísticas
-        const { data: stats } = await supabase
-          .from('cliente_estatisticas')
-          .select('total_visitas, total_gasto, total_entrada, total_consumo')
-          .eq('bar_id', barIdFilter)
-
-        const totalClientes = stats?.length || 0
-        const totalVisitas = stats?.reduce((sum, c) => sum + (c.total_visitas || 0), 0) || 0
-        const totalGasto = stats?.reduce((sum, c) => sum + (parseFloat(c.total_gasto) || 0), 0) || 0
-        const totalEntrada = stats?.reduce((sum, c) => sum + (parseFloat(c.total_entrada) || 0), 0) || 0
-        const totalConsumo = stats?.reduce((sum, c) => sum + (parseFloat(c.total_consumo) || 0), 0) || 0
+        // Calcular estatísticas usando agregação SQL (mais eficiente)
+        const { data: statsAgg, error: statsError } = await supabase
+          .rpc('get_cliente_stats_agregado', { p_bar_id: barIdFilter })
+        
+        let totalClientes = 0
+        let totalVisitas = 0
+        let totalGasto = 0
+        let totalEntrada = 0
+        let totalConsumo = 0
+        
+        if (statsError) {
+          console.log('RPC não existe, usando query direta com paginação...')
+          // Fallback: buscar contagem total
+          const { count } = await supabase
+            .from('cliente_estatisticas')
+            .select('*', { count: 'exact', head: true })
+            .eq('bar_id', barIdFilter)
+          
+          totalClientes = count || 0
+          
+          // Buscar somas com paginação
+          const pageSize = 1000
+          let offset = 0
+          let hasMore = true
+          
+          while (hasMore) {
+            const { data: statsPage } = await supabase
+              .from('cliente_estatisticas')
+              .select('total_visitas, total_gasto, total_entrada, total_consumo')
+              .eq('bar_id', barIdFilter)
+              .range(offset, offset + pageSize - 1)
+            
+            if (!statsPage || statsPage.length === 0) {
+              hasMore = false
+            } else {
+              totalVisitas += statsPage.reduce((sum, c) => sum + (c.total_visitas || 0), 0)
+              totalGasto += statsPage.reduce((sum, c) => sum + (parseFloat(c.total_gasto) || 0), 0)
+              totalEntrada += statsPage.reduce((sum, c) => sum + (parseFloat(c.total_entrada) || 0), 0)
+              totalConsumo += statsPage.reduce((sum, c) => sum + (parseFloat(c.total_consumo) || 0), 0)
+              
+              if (statsPage.length < pageSize) {
+                hasMore = false
+              } else {
+                offset += pageSize
+              }
+            }
+          }
+        } else if (statsAgg && statsAgg.length > 0) {
+          totalClientes = statsAgg[0].total_clientes || 0
+          totalVisitas = statsAgg[0].total_visitas || 0
+          totalGasto = parseFloat(statsAgg[0].total_gasto) || 0
+          totalEntrada = parseFloat(statsAgg[0].total_entrada) || 0
+          totalConsumo = parseFloat(statsAgg[0].total_consumo) || 0
+        }
 
         return NextResponse.json({
           clientes: clientesFormatados,
