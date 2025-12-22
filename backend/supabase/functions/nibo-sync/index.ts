@@ -701,6 +701,169 @@ class NiboSyncService {
     }
   }
 
+  async syncDebitEntries(syncMode: string = 'continuous', customDateStart?: string, customDateEnd?: string) {
+    if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
+
+    try {
+      console.log(`🔄 Sincronizando DebitEntries/Contas Pagas (${syncMode})...`)
+
+      // Calcular período baseado no modo
+      let filterDateStart: string
+      let filterDateEnd: string
+
+      if (customDateStart && customDateEnd) {
+        filterDateStart = customDateStart
+        filterDateEnd = customDateEnd
+        console.log(`📅 MODO CUSTOMIZADO: ${filterDateStart} a ${filterDateEnd}`)
+      } else if (syncMode === 'retroativo' || syncMode === 'full') {
+        filterDateStart = '2024-01-01'
+        const today = new Date()
+        filterDateEnd = today.toISOString().split('T')[0]
+        console.log('📅 MODO RETROATIVO: desde 01/01/2024')
+      } else if (syncMode === 'daily_complete') {
+        const threeMonthsAgo = new Date()
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
+        filterDateStart = threeMonthsAgo.toISOString().split('T')[0]
+        filterDateEnd = new Date().toISOString().split('T')[0]
+        console.log('📅 MODO DIÁRIO: últimos 3 meses')
+      } else {
+        // Contínuo: últimos 7 dias
+        const sevenDaysAgo = new Date()
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+        filterDateStart = sevenDaysAgo.toISOString().split('T')[0]
+        filterDateEnd = new Date().toISOString().split('T')[0]
+        console.log('📅 MODO CONTÍNUO: últimos 7 dias')
+      }
+
+      console.log(`📅 Buscando DebitEntries de ${filterDateStart} a ${filterDateEnd}...`)
+
+      // Buscar DebitEntries (Contas Pagas) da API NIBO
+      const allEntries: Array<{
+        entryId?: string;
+        id?: string;
+        paymentDate?: string;
+        accrualDate?: string;
+        value?: number;
+        description?: string;
+        notes?: string;
+        category?: { id?: string; name?: string };
+        stakeholder?: { id?: string; name?: string; type?: string };
+        bankAccount?: { id?: string; name?: string };
+        costCenter?: { id?: string; name?: string };
+        documentNumber?: string;
+        updateDate?: string;
+        updateUser?: string;
+      }> = []
+      let skip = 0
+      const top = 200
+      let hasMore = true
+      let pageCount = 0
+      const maxPages = syncMode === 'retroativo' || syncMode === 'full' ? 50 : 10
+
+      while (hasMore && pageCount < maxPages) {
+        pageCount++
+        const pageParams = {
+          $filter: `entryDate ge ${filterDateStart} and entryDate le ${filterDateEnd}`,
+          $orderby: 'entryDate desc',
+          $top: top,
+          $skip: skip
+        }
+
+        console.log(`📄 DebitEntries página ${pageCount}/${maxPages} (skip: ${skip})...`)
+
+        const data = await this.fetchNiboData('debitentries', pageParams)
+        const items = data?.items || []
+
+        if (!items || items.length === 0) {
+          hasMore = false
+          break
+        }
+
+        allEntries.push(...items)
+        console.log(`📄 Página ${pageCount}: ${items.length} registros`)
+
+        skip += top
+        if (items.length < top) hasMore = false
+
+        await new Promise(resolve => setTimeout(resolve, 100))
+      }
+
+      if (allEntries.length === 0) {
+        console.log('ℹ️ Nenhum DebitEntry encontrado')
+        return { success: true, count: 0, message: 'Nenhum lançamento encontrado' }
+      }
+
+      console.log(`📊 Total DebitEntries encontrados: ${allEntries.length}`)
+
+      // Inserir/Atualizar no banco - reutilizando nibo_agendamentos com tipo 'Debit'
+      let processados = 0
+      let erros = 0
+      const batchSize = 100
+
+      for (let i = 0; i < allEntries.length; i += batchSize) {
+        const batch = allEntries.slice(i, i + batchSize)
+        
+        const processedBatch = batch.map(entry => ({
+          nibo_id: String(entry.entryId || entry.id || ''),
+          bar_id: parseInt(this.credentials!.bar_id),
+          tipo: 'Debit', // Marcar como DebitEntry
+          status: 'Pago', // DebitEntries são contas já pagas
+          valor: parseFloat(String(entry.value || 0)),
+          valor_pago: parseFloat(String(entry.value || 0)),
+          data_vencimento: entry.paymentDate ? new Date(entry.paymentDate).toISOString().split('T')[0] : null,
+          data_pagamento: entry.paymentDate ? new Date(entry.paymentDate).toISOString().split('T')[0] : null,
+          data_competencia: entry.accrualDate ? new Date(entry.accrualDate).toISOString().split('T')[0] : 
+                           (entry.paymentDate ? new Date(entry.paymentDate).toISOString().split('T')[0] : null),
+          descricao: String(entry.description || ''),
+          observacoes: String(entry.notes || ''),
+          categoria_id: String(entry.category?.id || ''),
+          categoria_nome: String(entry.category?.name || ''),
+          stakeholder_id: String(entry.stakeholder?.id || ''),
+          stakeholder_nome: String(entry.stakeholder?.name || ''),
+          stakeholder_tipo: String(entry.stakeholder?.type || ''),
+          conta_bancaria_id: String(entry.bankAccount?.id || ''),
+          conta_bancaria_nome: String(entry.bankAccount?.name || ''),
+          centro_custo_id: String(entry.costCenter?.id || ''),
+          centro_custo_nome: String(entry.costCenter?.name || ''),
+          numero_documento: String(entry.documentNumber || ''),
+          data_atualizacao: entry.updateDate ? new Date(entry.updateDate).toISOString() : null,
+          usuario_atualizacao: String(entry.updateUser || ''),
+          criado_em: new Date().toISOString(),
+          atualizado_em: new Date().toISOString()
+        }))
+
+        const { error: upsertError } = await this.supabase
+          .from('nibo_agendamentos')
+          .upsert(processedBatch, {
+            onConflict: 'nibo_id',
+            ignoreDuplicates: false
+          })
+
+        if (!upsertError) {
+          processados += processedBatch.length
+          console.log(`✅ DebitEntries batch ${Math.floor(i/batchSize) + 1}: ${processedBatch.length} processados`)
+        } else {
+          erros += processedBatch.length
+          console.error(`❌ Erro no batch:`, upsertError.message)
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 50))
+      }
+
+      console.log(`✅ DebitEntries concluído: ${processados} processados, ${erros} erros`)
+      return { 
+        success: true, 
+        count: processados, 
+        errors: erros,
+        message: `${processados} DebitEntries/Contas Pagas sincronizados`
+      }
+
+    } catch (error: unknown) {
+      console.error('❌ Erro na sincronização de DebitEntries:', error)
+      return { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido' }
+    }
+  }
+
   async syncAll(syncMode: string = 'continuous', customDateStart?: string, customDateEnd?: string) {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
@@ -722,6 +885,7 @@ class NiboSyncService {
       stakeholders: await this.syncStakeholders(),
       categories: await this.syncCategories(),
       agendamentos: await this.syncAgendamentos(syncMode, customDateStart, customDateEnd),
+      debitEntries: await this.syncDebitEntries(syncMode, customDateStart, customDateEnd),
       timestamp: new Date().toISOString(),
       sync_mode: syncMode
     }
@@ -741,7 +905,8 @@ class NiboSyncService {
     const totalStakeholders = (results.stakeholders.count || 0) + (results.stakeholders.updated || 0)
     const totalCategories = (results.categories.count || 0) + (results.categories.updated || 0)
     const totalAgendamentos = (results.agendamentos.count || 0)
-    const totalErrors = (results.stakeholders.errors || 0) + (results.categories.errors || 0)
+    const totalDebitEntries = (results.debitEntries.count || 0)
+    const totalErrors = (results.stakeholders.errors || 0) + (results.categories.errors || 0) + (results.debitEntries.errors || 0)
 
     // Notificar conclusão
     const color = totalErrors > 0 ? 0xff9900 : 0x00ff00
@@ -757,6 +922,7 @@ class NiboSyncService {
       `**Stakeholders:** ${totalStakeholders} (${results.stakeholders.count} novos, ${results.stakeholders.updated} atualizados)\n` +
       `**Categorias:** ${totalCategories} (${results.categories.count} novas, ${results.categories.updated} atualizadas)\n` +
       agendamentosMsg + `\n` +
+      `**DebitEntries (Contas Pagas):** ${totalDebitEntries} processados\n` +
       `**Erros:** ${totalErrors}\n` +
       `**Bar ID:** ${this.credentials.bar_id}` +
       (results.agendamentos.batch_id ? `\n**Batch ID:** \`${results.agendamentos.batch_id}\`` : ''),
