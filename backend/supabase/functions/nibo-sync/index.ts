@@ -760,9 +760,18 @@ class NiboSyncService {
       const top = 200
       let hasMore = true
       let pageCount = 0
-      const maxPages = syncMode === 'retroativo' || syncMode === 'full' ? 50 : 10
+      // Sem limite de páginas para retroativo - buscar TODOS os registros
+      const maxPages = syncMode === 'retroativo' || syncMode === 'full' ? 500 : 20
+      const startTime = Date.now()
+      const maxExecutionTime = 50000 // 50 segundos
 
       while (hasMore && pageCount < maxPages) {
+        // Verificar timeout
+        if (Date.now() - startTime > maxExecutionTime) {
+          console.log(`⏱️ Timeout atingido após ${pageCount} páginas, continuando na próxima execução`)
+          break
+        }
+
         pageCount++
         // Usando filtro OData conforme documentação NIBO
         const pageParams = {
@@ -772,21 +781,25 @@ class NiboSyncService {
           $skip: skip
         }
 
-        console.log(`📄 Payments página ${pageCount}/${maxPages} (skip: ${skip})...`)
+        console.log(`📄 Payments página ${pageCount} (skip: ${skip})...`)
 
         const data = await this.fetchNiboData('payments', pageParams)
         const items = data?.items || []
 
         if (!items || items.length === 0) {
+          console.log(`📄 Página ${pageCount}: Fim dos dados`)
           hasMore = false
           break
         }
 
         allPayments.push(...items)
-        console.log(`📄 Página ${pageCount}: ${items.length} registros`)
+        console.log(`📄 Página ${pageCount}: ${items.length} registros (total: ${allPayments.length})`)
 
         skip += top
-        if (items.length < top) hasMore = false
+        if (items.length < top) {
+          console.log(`📄 Última página detectada (${items.length} < ${top})`)
+          hasMore = false
+        }
 
         await new Promise(resolve => setTimeout(resolve, 100))
       }
@@ -799,42 +812,51 @@ class NiboSyncService {
       console.log(`📊 Total Payments encontrados: ${allPayments.length}`)
 
       // Inserir/Atualizar no banco - reutilizando nibo_agendamentos com tipo 'Debit'
+      // IMPORTANTE: Usar prefixo 'PAY_' para evitar conflito com scheduleId dos agendamentos
       let processados = 0
       let erros = 0
+      let errosDetalhes: string[] = []
       const batchSize = 100
 
       for (let i = 0; i < allPayments.length; i += batchSize) {
         const batch = allPayments.slice(i, i + batchSize)
         
-        const processedBatch = batch.map(payment => ({
-          // Usar paymentId como identificador único, ou scheduleId se não houver
-          nibo_id: String(payment.paymentId || payment.scheduleId || payment.id || ''),
-          bar_id: parseInt(this.credentials!.bar_id),
-          tipo: 'Debit', // Marcar como pagamento realizado
-          status: 'Pago', // Payments são contas já pagas
-          valor: parseFloat(String(payment.value || 0)),
-          valor_pago: parseFloat(String(payment.value || 0)),
-          data_vencimento: payment.date ? new Date(payment.date).toISOString().split('T')[0] : null,
-          data_pagamento: payment.date ? new Date(payment.date).toISOString().split('T')[0] : null,
-          data_competencia: payment.accrualDate ? new Date(payment.accrualDate).toISOString().split('T')[0] : 
-                           (payment.date ? new Date(payment.date).toISOString().split('T')[0] : null),
-          descricao: String(payment.description || ''),
-          observacoes: String(payment.notes || ''),
-          categoria_id: String(payment.category?.id || ''),
-          categoria_nome: String(payment.category?.name || ''),
-          stakeholder_id: String(payment.stakeholder?.id || ''),
-          stakeholder_nome: String(payment.stakeholder?.name || ''),
-          stakeholder_tipo: String(payment.stakeholder?.type || ''),
-          conta_bancaria_id: String(payment.bankAccount?.id || ''),
-          conta_bancaria_nome: String(payment.bankAccount?.name || ''),
-          centro_custo_id: String(payment.costCenter?.id || ''),
-          centro_custo_nome: String(payment.costCenter?.name || ''),
-          numero_documento: String(payment.documentNumber || ''),
-          data_atualizacao: payment.updateDate ? new Date(payment.updateDate).toISOString() : null,
-          usuario_atualizacao: String(payment.updateUser || ''),
-          criado_em: new Date().toISOString(),
-          atualizado_em: new Date().toISOString()
-        }))
+        const processedBatch = batch.map(payment => {
+          // Usar prefixo PAY_ + paymentId para garantir unicidade
+          // Se não tiver paymentId, usar scheduleId (mantendo compatibilidade)
+          const uniqueId = payment.paymentId 
+            ? `PAY_${payment.paymentId}` 
+            : String(payment.scheduleId || payment.id || `unknown_${Date.now()}_${Math.random()}`)
+          
+          return {
+            nibo_id: uniqueId,
+            bar_id: parseInt(this.credentials!.bar_id),
+            tipo: 'Debit', // Marcar como pagamento realizado
+            status: 'Pago', // Payments são contas já pagas
+            valor: parseFloat(String(payment.value || 0)),
+            valor_pago: parseFloat(String(payment.value || 0)),
+            data_vencimento: payment.date ? new Date(payment.date).toISOString().split('T')[0] : null,
+            data_pagamento: payment.date ? new Date(payment.date).toISOString().split('T')[0] : null,
+            data_competencia: payment.accrualDate ? new Date(payment.accrualDate).toISOString().split('T')[0] : 
+                             (payment.date ? new Date(payment.date).toISOString().split('T')[0] : null),
+            descricao: String(payment.description || ''),
+            observacoes: String(payment.notes || ''),
+            categoria_id: String(payment.category?.id || ''),
+            categoria_nome: String(payment.category?.name || ''),
+            stakeholder_id: String(payment.stakeholder?.id || ''),
+            stakeholder_nome: String(payment.stakeholder?.name || ''),
+            stakeholder_tipo: String(payment.stakeholder?.type || ''),
+            conta_bancaria_id: String(payment.bankAccount?.id || ''),
+            conta_bancaria_nome: String(payment.bankAccount?.name || ''),
+            centro_custo_id: String(payment.costCenter?.id || ''),
+            centro_custo_nome: String(payment.costCenter?.name || ''),
+            numero_documento: String(payment.documentNumber || ''),
+            data_atualizacao: payment.updateDate ? new Date(payment.updateDate).toISOString() : null,
+            usuario_atualizacao: String(payment.updateUser || ''),
+            criado_em: new Date().toISOString(),
+            atualizado_em: new Date().toISOString()
+          }
+        })
 
         const { error: upsertError } = await this.supabase
           .from('nibo_agendamentos')
@@ -845,13 +867,19 @@ class NiboSyncService {
 
         if (!upsertError) {
           processados += processedBatch.length
-          console.log(`✅ Payments batch ${Math.floor(i/batchSize) + 1}: ${processedBatch.length} processados`)
+          console.log(`✅ Payments batch ${Math.floor(i/batchSize) + 1}: ${processedBatch.length} processados (total: ${processados})`)
         } else {
           erros += processedBatch.length
-          console.error(`❌ Erro no batch:`, upsertError.message)
+          const errorMsg = `Batch ${Math.floor(i/batchSize) + 1}: ${upsertError.message}`
+          errosDetalhes.push(errorMsg)
+          console.error(`❌ Erro no batch:`, upsertError.message, upsertError.details || '', upsertError.hint || '')
         }
 
         await new Promise(resolve => setTimeout(resolve, 50))
+      }
+      
+      if (errosDetalhes.length > 0) {
+        console.error(`📋 Resumo de erros (${errosDetalhes.length}):`, errosDetalhes.slice(0, 5).join(' | '))
       }
 
       console.log(`✅ Payments concluído: ${processados} processados, ${erros} erros`)
