@@ -167,7 +167,7 @@ export async function GET(request: NextRequest) {
 		let offsetVisitas = 0
 		const pageSizeVisitas = 1000
 		let totalVisitasProcessadas = 0
-		const MAX_ITERATIONS_VISITAS = 200 // Prevenir loop infinito (máximo 200.000 registros)
+		const MAX_ITERATIONS_VISITAS = 10000 // Prevenir loop infinito (máximo 10 milhões de registros)
 		let iterationsVisitas = 0
 		
 		// Só buscar visitas se tiver bar_id definido
