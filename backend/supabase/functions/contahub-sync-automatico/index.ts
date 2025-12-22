@@ -253,8 +253,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     
     // Buscar os turnos disponíveis para a data
     let turnosDisponiveis: number[] = [];
+    
+    // 1. Primeiro tentar a API getTurnos
     try {
-      console.log(`\n🔍 Buscando turnos disponíveis para ${data_date}...`);
+      console.log(`\n🔍 Buscando turnos via API para ${data_date}...`);
       const turnosTimestamp = generateDynamicTimestamp();
       const turnosUrl = `${contahubBaseUrl}/M/guru.facades.GerenciaFacade/getTurnos?emp=${emp_id}&t=${turnosTimestamp}`;
       const turnosResponse = await fetchContaHubData(turnosUrl, sessionToken);
@@ -264,12 +266,47 @@ Deno.serve(async (req: Request): Promise<Response> => {
         turnosDisponiveis = turnosResponse
           .filter((t: any) => t.trn_dtgerencial && t.trn_dtgerencial.startsWith(data_date))
           .map((t: any) => t.trn);
-        console.log(`✅ Turnos encontrados: ${turnosDisponiveis.join(', ') || 'nenhum'}`);
+        console.log(`✅ Turnos da API: ${turnosDisponiveis.join(', ') || 'nenhum'}`);
       }
     } catch (turnoError) {
-      console.warn(`⚠️ Erro ao buscar turnos:`, turnoError);
-      // Se não conseguir buscar turnos, tenta com um turno padrão
-      turnosDisponiveis = [];
+      console.warn(`⚠️ Erro ao buscar turnos via API:`, turnoError);
+    }
+    
+    // 2. Se não encontrou via API, buscar do banco (contahub_analitico)
+    if (turnosDisponiveis.length === 0) {
+      try {
+        console.log(`🔍 Buscando turno do banco de dados...`);
+        const { data: turnoData, error: turnoError } = await supabase
+          .from('contahub_analitico')
+          .select('trn')
+          .eq('bar_id', bar_id)
+          .gte('trn_dtgerencial', data_date)
+          .lt('trn_dtgerencial', new Date(new Date(data_date).getTime() + 86400000).toISOString().split('T')[0])
+          .limit(1)
+          .single();
+        
+        if (turnoData?.trn) {
+          turnosDisponiveis = [turnoData.trn];
+          console.log(`✅ Turno do banco: ${turnoData.trn}`);
+        }
+      } catch (dbError) {
+        console.warn(`⚠️ Turno não encontrado no banco`);
+      }
+    }
+    
+    // 3. Se ainda não encontrou, calcular baseado na data (trn=1 em 31/01/2025)
+    if (turnosDisponiveis.length === 0) {
+      const baseDate = new Date('2025-01-31');
+      const targetDate = new Date(data_date);
+      const diffDays = Math.floor((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
+      const calculatedTrn = diffDays + 1;
+      
+      if (calculatedTrn > 0 && calculatedTrn <= 500) {
+        turnosDisponiveis = [calculatedTrn];
+        console.log(`📅 Turno calculado: ${calculatedTrn} (${diffDays} dias desde 31/01/2025)`);
+      } else {
+        console.warn(`⚠️ Turno calculado inválido: ${calculatedTrn}`);
+      }
     }
     
     for (const dataType of dataTypes) {
