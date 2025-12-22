@@ -701,11 +701,11 @@ class NiboSyncService {
     }
   }
 
-  async syncDebitEntries(syncMode: string = 'continuous', customDateStart?: string, customDateEnd?: string) {
+  async syncPayments(syncMode: string = 'continuous', customDateStart?: string, customDateEnd?: string) {
     if (!this.credentials) return { success: false, error: 'Credenciais não carregadas' }
 
     try {
-      console.log(`🔄 Sincronizando DebitEntries/Contas Pagas (${syncMode})...`)
+      console.log(`🔄 Sincronizando Payments/Contas Pagas (${syncMode})...`)
 
       // Calcular período baseado no modo
       let filterDateStart: string
@@ -735,13 +735,15 @@ class NiboSyncService {
         console.log('📅 MODO CONTÍNUO: últimos 7 dias')
       }
 
-      console.log(`📅 Buscando DebitEntries de ${filterDateStart} a ${filterDateEnd}...`)
+      console.log(`📅 Buscando Payments de ${filterDateStart} a ${filterDateEnd}...`)
 
-      // Buscar DebitEntries (Contas Pagas) da API NIBO
-      const allEntries: Array<{
-        entryId?: string;
+      // Buscar Payments (Contas Pagas) da API NIBO - endpoint /payments
+      // Documentação: https://nibo.readme.io/reference/listar-pagamentos
+      const allPayments: Array<{
+        paymentId?: string;
+        scheduleId?: string;
         id?: string;
-        paymentDate?: string;
+        date?: string;
         accrualDate?: string;
         value?: number;
         description?: string;
@@ -762,16 +764,17 @@ class NiboSyncService {
 
       while (hasMore && pageCount < maxPages) {
         pageCount++
+        // Usando filtro OData conforme documentação NIBO
         const pageParams = {
-          $filter: `entryDate ge ${filterDateStart} and entryDate le ${filterDateEnd}`,
-          $orderby: 'entryDate desc',
+          $filter: `date ge ${filterDateStart} and date le ${filterDateEnd}`,
+          $orderby: 'date desc',
           $top: top,
           $skip: skip
         }
 
-        console.log(`📄 DebitEntries página ${pageCount}/${maxPages} (skip: ${skip})...`)
+        console.log(`📄 Payments página ${pageCount}/${maxPages} (skip: ${skip})...`)
 
-        const data = await this.fetchNiboData('debitentries', pageParams)
+        const data = await this.fetchNiboData('payments', pageParams)
         const items = data?.items || []
 
         if (!items || items.length === 0) {
@@ -779,7 +782,7 @@ class NiboSyncService {
           break
         }
 
-        allEntries.push(...items)
+        allPayments.push(...items)
         console.log(`📄 Página ${pageCount}: ${items.length} registros`)
 
         skip += top
@@ -788,46 +791,47 @@ class NiboSyncService {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
 
-      if (allEntries.length === 0) {
-        console.log('ℹ️ Nenhum DebitEntry encontrado')
-        return { success: true, count: 0, message: 'Nenhum lançamento encontrado' }
+      if (allPayments.length === 0) {
+        console.log('ℹ️ Nenhum Payment encontrado')
+        return { success: true, count: 0, message: 'Nenhum pagamento encontrado' }
       }
 
-      console.log(`📊 Total DebitEntries encontrados: ${allEntries.length}`)
+      console.log(`📊 Total Payments encontrados: ${allPayments.length}`)
 
       // Inserir/Atualizar no banco - reutilizando nibo_agendamentos com tipo 'Debit'
       let processados = 0
       let erros = 0
       const batchSize = 100
 
-      for (let i = 0; i < allEntries.length; i += batchSize) {
-        const batch = allEntries.slice(i, i + batchSize)
+      for (let i = 0; i < allPayments.length; i += batchSize) {
+        const batch = allPayments.slice(i, i + batchSize)
         
-        const processedBatch = batch.map(entry => ({
-          nibo_id: String(entry.entryId || entry.id || ''),
+        const processedBatch = batch.map(payment => ({
+          // Usar paymentId como identificador único, ou scheduleId se não houver
+          nibo_id: String(payment.paymentId || payment.scheduleId || payment.id || ''),
           bar_id: parseInt(this.credentials!.bar_id),
-          tipo: 'Debit', // Marcar como DebitEntry
-          status: 'Pago', // DebitEntries são contas já pagas
-          valor: parseFloat(String(entry.value || 0)),
-          valor_pago: parseFloat(String(entry.value || 0)),
-          data_vencimento: entry.paymentDate ? new Date(entry.paymentDate).toISOString().split('T')[0] : null,
-          data_pagamento: entry.paymentDate ? new Date(entry.paymentDate).toISOString().split('T')[0] : null,
-          data_competencia: entry.accrualDate ? new Date(entry.accrualDate).toISOString().split('T')[0] : 
-                           (entry.paymentDate ? new Date(entry.paymentDate).toISOString().split('T')[0] : null),
-          descricao: String(entry.description || ''),
-          observacoes: String(entry.notes || ''),
-          categoria_id: String(entry.category?.id || ''),
-          categoria_nome: String(entry.category?.name || ''),
-          stakeholder_id: String(entry.stakeholder?.id || ''),
-          stakeholder_nome: String(entry.stakeholder?.name || ''),
-          stakeholder_tipo: String(entry.stakeholder?.type || ''),
-          conta_bancaria_id: String(entry.bankAccount?.id || ''),
-          conta_bancaria_nome: String(entry.bankAccount?.name || ''),
-          centro_custo_id: String(entry.costCenter?.id || ''),
-          centro_custo_nome: String(entry.costCenter?.name || ''),
-          numero_documento: String(entry.documentNumber || ''),
-          data_atualizacao: entry.updateDate ? new Date(entry.updateDate).toISOString() : null,
-          usuario_atualizacao: String(entry.updateUser || ''),
+          tipo: 'Debit', // Marcar como pagamento realizado
+          status: 'Pago', // Payments são contas já pagas
+          valor: parseFloat(String(payment.value || 0)),
+          valor_pago: parseFloat(String(payment.value || 0)),
+          data_vencimento: payment.date ? new Date(payment.date).toISOString().split('T')[0] : null,
+          data_pagamento: payment.date ? new Date(payment.date).toISOString().split('T')[0] : null,
+          data_competencia: payment.accrualDate ? new Date(payment.accrualDate).toISOString().split('T')[0] : 
+                           (payment.date ? new Date(payment.date).toISOString().split('T')[0] : null),
+          descricao: String(payment.description || ''),
+          observacoes: String(payment.notes || ''),
+          categoria_id: String(payment.category?.id || ''),
+          categoria_nome: String(payment.category?.name || ''),
+          stakeholder_id: String(payment.stakeholder?.id || ''),
+          stakeholder_nome: String(payment.stakeholder?.name || ''),
+          stakeholder_tipo: String(payment.stakeholder?.type || ''),
+          conta_bancaria_id: String(payment.bankAccount?.id || ''),
+          conta_bancaria_nome: String(payment.bankAccount?.name || ''),
+          centro_custo_id: String(payment.costCenter?.id || ''),
+          centro_custo_nome: String(payment.costCenter?.name || ''),
+          numero_documento: String(payment.documentNumber || ''),
+          data_atualizacao: payment.updateDate ? new Date(payment.updateDate).toISOString() : null,
+          usuario_atualizacao: String(payment.updateUser || ''),
           criado_em: new Date().toISOString(),
           atualizado_em: new Date().toISOString()
         }))
@@ -841,7 +845,7 @@ class NiboSyncService {
 
         if (!upsertError) {
           processados += processedBatch.length
-          console.log(`✅ DebitEntries batch ${Math.floor(i/batchSize) + 1}: ${processedBatch.length} processados`)
+          console.log(`✅ Payments batch ${Math.floor(i/batchSize) + 1}: ${processedBatch.length} processados`)
         } else {
           erros += processedBatch.length
           console.error(`❌ Erro no batch:`, upsertError.message)
@@ -850,16 +854,16 @@ class NiboSyncService {
         await new Promise(resolve => setTimeout(resolve, 50))
       }
 
-      console.log(`✅ DebitEntries concluído: ${processados} processados, ${erros} erros`)
+      console.log(`✅ Payments concluído: ${processados} processados, ${erros} erros`)
       return { 
         success: true, 
         count: processados, 
         errors: erros,
-        message: `${processados} DebitEntries/Contas Pagas sincronizados`
+        message: `${processados} Payments/Contas Pagas sincronizados`
       }
 
     } catch (error: unknown) {
-      console.error('❌ Erro na sincronização de DebitEntries:', error)
+      console.error('❌ Erro na sincronização de Payments:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Erro desconhecido' }
     }
   }
@@ -885,7 +889,7 @@ class NiboSyncService {
       stakeholders: await this.syncStakeholders(),
       categories: await this.syncCategories(),
       agendamentos: await this.syncAgendamentos(syncMode, customDateStart, customDateEnd),
-      debitEntries: await this.syncDebitEntries(syncMode, customDateStart, customDateEnd),
+      payments: await this.syncPayments(syncMode, customDateStart, customDateEnd),
       timestamp: new Date().toISOString(),
       sync_mode: syncMode
     }
@@ -905,8 +909,8 @@ class NiboSyncService {
     const totalStakeholders = (results.stakeholders.count || 0) + (results.stakeholders.updated || 0)
     const totalCategories = (results.categories.count || 0) + (results.categories.updated || 0)
     const totalAgendamentos = (results.agendamentos.count || 0)
-    const totalDebitEntries = (results.debitEntries.count || 0)
-    const totalErrors = (results.stakeholders.errors || 0) + (results.categories.errors || 0) + (results.debitEntries.errors || 0)
+    const totalPayments = (results.payments.count || 0)
+    const totalErrors = (results.stakeholders.errors || 0) + (results.categories.errors || 0) + (results.payments.errors || 0)
 
     // Notificar conclusão
     const color = totalErrors > 0 ? 0xff9900 : 0x00ff00
@@ -922,7 +926,7 @@ class NiboSyncService {
       `**Stakeholders:** ${totalStakeholders} (${results.stakeholders.count} novos, ${results.stakeholders.updated} atualizados)\n` +
       `**Categorias:** ${totalCategories} (${results.categories.count} novas, ${results.categories.updated} atualizadas)\n` +
       agendamentosMsg + `\n` +
-      `**DebitEntries (Contas Pagas):** ${totalDebitEntries} processados\n` +
+      `**Payments (Contas Pagas):** ${totalPayments} processados\n` +
       `**Erros:** ${totalErrors}\n` +
       `**Bar ID:** ${this.credentials.bar_id}` +
       (results.agendamentos.batch_id ? `\n**Batch ID:** \`${results.agendamentos.batch_id}\`` : ''),
