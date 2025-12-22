@@ -118,6 +118,61 @@ async function fetchContaHubData(url: string, sessionToken: string) {
   return JSON.parse(responseText);
 }
 
+// Função para buscar analitico com divisão quando a query for muito grande
+async function fetchAnaliticoComDivisao(
+  baseUrl: string, 
+  dataDate: string, 
+  empId: string, 
+  sessionToken: string,
+  generateTimestamp: () => string
+): Promise<any> {
+  const contahubDate = `${dataDate}T00:00:00-0300`;
+  
+  // 1. Primeiro tentar buscar tudo de uma vez
+  try {
+    const timestamp = generateTimestamp();
+    const url = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${timestamp}?qry=77&d0=${contahubDate}&d1=${contahubDate}&produto=&grupo=&local=&turno=&mesa=&tipo=&emp=${empId}&nfe=1`;
+    console.log(`🔍 Tentando buscar analitico completo...`);
+    const data = await fetchContaHubData(url, sessionToken);
+    console.log(`✅ Analitico completo: ${data?.list?.length || 0} registros`);
+    return data;
+  } catch (error) {
+    console.warn(`⚠️ Query completa falhou, dividindo por local...`);
+  }
+  
+  // 2. Se falhou, dividir por LOCAL (filtro mais eficiente)
+  // Locais conhecidos do Ordinário Bar
+  const locais = [
+    'Bar', 'Cozinha 1', 'Cozinha 2', 'Montados', 'Baldes', 
+    'Shot e Dose', 'Chopp', 'Batidos', 'Preshh', 'Mexido', 
+    'Venda Volante', 'Pegue e Pague', '' // vazio para itens sem local
+  ];
+  const allRecords: any[] = [];
+  
+  for (const local of locais) {
+    try {
+      const timestamp = generateTimestamp();
+      const localParam = local ? encodeURIComponent(local) : '';
+      const url = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${timestamp}?qry=77&d0=${contahubDate}&d1=${contahubDate}&produto=&grupo=&local=${localParam}&turno=&mesa=&tipo=&emp=${empId}&nfe=1`;
+      console.log(`🔍 Buscando analitico local "${local || '(vazio)'}"...`);
+      
+      const data = await fetchContaHubData(url, sessionToken);
+      if (data?.list && Array.isArray(data.list)) {
+        allRecords.push(...data.list);
+        console.log(`✅ Local "${local || '(vazio)'}": ${data.list.length} registros`);
+      }
+      
+      // Pequeno delay entre requisições
+      await new Promise(resolve => setTimeout(resolve, 300));
+    } catch (localError) {
+      console.warn(`⚠️ Local "${local || '(vazio)'}" falhou`);
+    }
+  }
+  
+  console.log(`📊 Total analitico consolidado: ${allRecords.length} registros`);
+  return { list: allRecords };
+}
+
 // Função para salvar JSON bruto (SEM PROCESSAMENTO)
 async function saveRawDataOnly(supabase: any, dataType: string, rawData: any, dataDate: string, barId: number = 3) {
   console.log(`💾 Salvando JSON bruto para ${dataType}...`);
@@ -272,41 +327,30 @@ Deno.serve(async (req: Request): Promise<Response> => {
       console.warn(`⚠️ Erro ao buscar turnos via API:`, turnoError);
     }
     
-    // 2. Se não encontrou via API, buscar do banco (contahub_analitico)
+    // 2. Se não encontrou via API, buscar TODOS os turnos do banco (contahub_analitico)
     if (turnosDisponiveis.length === 0) {
       try {
-        console.log(`🔍 Buscando turno do banco de dados...`);
+        console.log(`🔍 Buscando turnos do banco de dados...`);
         const { data: turnoData, error: turnoError } = await supabase
           .from('contahub_analitico')
           .select('trn')
           .eq('bar_id', bar_id)
           .gte('trn_dtgerencial', data_date)
-          .lt('trn_dtgerencial', new Date(new Date(data_date).getTime() + 86400000).toISOString().split('T')[0])
-          .limit(1)
-          .single();
+          .lt('trn_dtgerencial', new Date(new Date(data_date).getTime() + 86400000).toISOString().split('T')[0]);
         
-        if (turnoData?.trn) {
-          turnosDisponiveis = [turnoData.trn];
-          console.log(`✅ Turno do banco: ${turnoData.trn}`);
+        if (turnoData && turnoData.length > 0) {
+          // Pegar turnos únicos
+          turnosDisponiveis = [...new Set(turnoData.map((t: any) => t.trn))];
+          console.log(`✅ Turnos do banco: ${turnosDisponiveis.join(', ')}`);
         }
       } catch (dbError) {
         console.warn(`⚠️ Turno não encontrado no banco`);
       }
     }
     
-    // 3. Se ainda não encontrou, calcular baseado na data (trn=1 em 31/01/2025)
+    // 3. Se ainda não encontrou, avisar (não calcular para evitar erros)
     if (turnosDisponiveis.length === 0) {
-      const baseDate = new Date('2025-01-31');
-      const targetDate = new Date(data_date);
-      const diffDays = Math.floor((targetDate.getTime() - baseDate.getTime()) / (1000 * 60 * 60 * 24));
-      const calculatedTrn = diffDays + 1;
-      
-      if (calculatedTrn > 0 && calculatedTrn <= 500) {
-        turnosDisponiveis = [calculatedTrn];
-        console.log(`📅 Turno calculado: ${calculatedTrn} (${diffDays} dias desde 31/01/2025)`);
-      } else {
-        console.warn(`⚠️ Turno calculado inválido: ${calculatedTrn}`);
-      }
+      console.warn(`⚠️ Nenhum turno encontrado para ${data_date} - vendas não serão sincronizadas`);
     }
     
     for (const dataType of dataTypes) {
@@ -321,9 +365,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
         // Construir URL específica para cada tipo de dados
         switch (dataType) {
           case 'analitico':
-            // qry=77 requer: emp, d0, d1, produto, grupo, local, turno, mesa, tipo
-            url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=77&d0=${contahubDate}&d1=${contahubDate}&produto=&grupo=&local=&turno=&mesa=&tipo=&emp=${emp_id}&nfe=1`;
-            break;
+            // Usar função especial que divide a query se for muito grande
+            try {
+              const analiticoData = await fetchAnaliticoComDivisao(
+                contahubBaseUrl, 
+                data_date, 
+                emp_id, 
+                sessionToken, 
+                generateDynamicTimestamp
+              );
+              const saveResult = await saveRawDataOnly(supabase, 'analitico', analiticoData, data_date, bar_id);
+              results.collected.push(saveResult);
+              console.log(`✅ analitico: JSON bruto salvo (${saveResult.record_count} registros)`);
+            } catch (analiticoError) {
+              console.error(`❌ Erro ao buscar analitico:`, analiticoError);
+              results.errors.push({ 
+                phase: 'collection', 
+                data_type: 'analitico', 
+                error: analiticoError instanceof Error ? analiticoError.message : String(analiticoError) 
+              });
+            }
+            continue; // Já processou, pular o loop normal
             
           case 'tempo':
             url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=81&d0=${contahubDate}&d1=${contahubDate}&prod=&grupo=&local=&emp=${emp_id}&nfe=1`;
