@@ -328,7 +328,8 @@ Deno.serve(async (req: Request) => {
 
     // Pegar parâmetros da requisição
     const requestBody = await req.json().catch(() => ({}));
-    const { filtro_eventos = 'ordi', data_inicio, data_fim } = requestBody;
+    // filtro_eventos vazio ou null = sem filtro de nome (pega todos)
+    const { filtro_eventos = '', data_inicio, data_fim } = requestBody;
     
     // Supabase connection
     const supabase = createClient(
@@ -350,23 +351,17 @@ Deno.serve(async (req: Request) => {
       
       console.log(`📅 Usando período customizado: ${data_inicio} a ${data_fim}`);
     } else {
-      // Calcular última semana automaticamente (segunda a domingo)
+      // Calcular últimos 14 dias automaticamente (igual ao Yuzer)
       const hoje = new Date();
-      const diaDaSemana = hoje.getDay(); // 0 = domingo, 1 = segunda, etc.
-      
-      // Se hoje é segunda (1), pegar semana passada
-      // Se é outro dia, pegar a segunda anterior
-      const diasParaSegundaPassada = diaDaSemana === 0 ? 6 : diaDaSemana - 1;
       
       dataInicioPeriodo = new Date(hoje);
-      dataInicioPeriodo.setDate(hoje.getDate() - diasParaSegundaPassada - 7); // Semana passada (segunda)
+      dataInicioPeriodo.setDate(hoje.getDate() - 14); // 14 dias atrás
       dataInicioPeriodo.setHours(0, 0, 0, 0);
       
-      dataFimPeriodo = new Date(dataInicioPeriodo);
-      dataFimPeriodo.setDate(dataInicioPeriodo.getDate() + 6); // Até domingo
+      dataFimPeriodo = new Date(hoje);
       dataFimPeriodo.setHours(23, 59, 59, 999);
       
-      console.log(`📅 Usando última semana automática: ${dataInicioPeriodo.toISOString().split('T')[0]} a ${dataFimPeriodo.toISOString().split('T')[0]}`);
+      console.log(`📅 Usando últimos 14 dias: ${dataInicioPeriodo.toISOString().split('T')[0]} a ${dataFimPeriodo.toISOString().split('T')[0]}`);
     }
 
     // Buscar todos os eventos
@@ -379,9 +374,11 @@ Deno.serve(async (req: Request) => {
     console.log(`🔍 Buscando eventos...`);
     const todosEventos = await buscarTodosEventos(symplaToken);
     
-    // Filtrar eventos por nome (Ordi) e período
+    // Filtrar eventos por nome (opcional) e período
     const eventosParaSincronizar = todosEventos.filter((evento: any) => {
-      const temNomeCorreto = evento.name && evento.name.toLowerCase().includes(filtro_eventos.toLowerCase());
+      // Se filtro_eventos estiver vazio, aceita todos os nomes
+      const temNomeCorreto = !filtro_eventos || 
+        (evento.name && evento.name.toLowerCase().includes(filtro_eventos.toLowerCase()));
       
       if (!temNomeCorreto || !evento.start_date) return false;
       
@@ -389,19 +386,19 @@ Deno.serve(async (req: Request) => {
       const dataEvento = new Date(evento.start_date);
       const noPeriodo = dataEvento >= dataInicioPeriodo && dataEvento <= dataFimPeriodo;
       
-      if (temNomeCorreto && noPeriodo) {
+      if (noPeriodo) {
         console.log(`   ✅ Evento incluído: ${evento.name} - ${dataEvento.toISOString().split('T')[0]}`);
       }
       
       return noPeriodo;
     });
 
-    console.log(`🎯 ${eventosParaSincronizar.length} eventos encontrados com filtro "${filtro_eventos}"`);
+    console.log(`🎯 ${eventosParaSincronizar.length} eventos encontrados ${filtro_eventos ? `com filtro "${filtro_eventos}"` : '(sem filtro de nome)'}`);
     
     if (eventosParaSincronizar.length === 0) {
       return Response.json({
         success: false,
-        message: `Nenhum evento encontrado com filtro "${filtro_eventos}" no período especificado`,
+        message: `Nenhum evento encontrado ${filtro_eventos ? `com filtro "${filtro_eventos}"` : ''} no período especificado`,
         data: {
           total_eventos_api: todosEventos.length,
           eventos_filtrados: 0,
