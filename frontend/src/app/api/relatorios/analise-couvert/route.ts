@@ -33,6 +33,10 @@ export async function GET() {
 
     const tempoMs = Date.now() - startTime
     console.log(`✅ Análise completa em ${tempoMs}ms`)
+    console.log('📊 Recorrência Quartas:', JSON.stringify(rpcResult?.quartas?.recorrencia, null, 2))
+    console.log('📊 Recorrência Sextas:', JSON.stringify(rpcResult?.sextas?.recorrencia, null, 2))
+    console.log('📊 Baseline Quartas:', JSON.stringify(rpcResult?.quartas?.baseline, null, 2))
+    console.log('📊 Baseline Sextas:', JSON.stringify(rpcResult?.sextas?.baseline, null, 2))
 
     // Formatar resposta
     const formatarMetricas = (stats: any, periodo: string) => {
@@ -55,18 +59,36 @@ export async function GET() {
     }
 
     const formatarRecorrencia = (rec: any) => {
-      if (!rec) return { clientes_antes: 0, clientes_depois: 0, retornaram: 0, novos_clientes: 0, deixaram_de_ir: 0 }
-      return {
-        clientes_antes: rec.clientes_antes || 0,
-        clientes_depois: rec.clientes_depois || 0,
-        retornaram: rec.retornaram || 0,
-        novos_clientes: rec.novos || 0,
-        deixaram_de_ir: (rec.clientes_antes || 0) - (rec.retornaram || 0),
+      if (!rec) return { 
+        clientes_antes: 0, 
+        clientes_depois: 0, 
+        retornaram: 0, 
+        novos_clientes: 0, 
+        deixaram_de_ir: 0,
         dias_antes: 0,
         dias_depois: 0,
         clientes_recorrentes_depois: 0,
         clientes_uma_vez_depois: 0,
         taxa_recorrencia_depois: 0
+      }
+      
+      const clientesDepois = rec.clientes_depois || 0
+      const clientesRecorrentesDepois = rec.clientes_recorrentes_depois || 0
+      const taxaRecorrencia = clientesDepois > 0 
+        ? Math.round((clientesRecorrentesDepois / clientesDepois) * 1000) / 10 
+        : 0
+      
+      return {
+        clientes_antes: rec.clientes_antes || 0,
+        clientes_depois: clientesDepois,
+        retornaram: rec.retornaram || 0,
+        novos_clientes: rec.novos || 0,
+        deixaram_de_ir: (rec.clientes_antes || 0) - (rec.retornaram || 0),
+        dias_antes: rec.dias_antes || 0,
+        dias_depois: rec.dias_depois || 0,
+        clientes_recorrentes_depois: clientesRecorrentesDepois,
+        clientes_uma_vez_depois: rec.clientes_uma_vez_depois || 0,
+        taxa_recorrencia_depois: taxaRecorrencia
       }
     }
 
@@ -80,7 +102,7 @@ export async function GET() {
         ],
         recorrencia: formatarRecorrencia(rpcResult?.quartas?.recorrencia),
         evolucao: rpcResult?.quartas?.evolucao || [],
-        baseline: { clientes_setembro: 0, retornaram_outubro: 0 }
+        baseline: rpcResult?.quartas?.baseline || { clientes_setembro: 0, retornaram_outubro: 0 }
       },
       sextas: {
         ticket: [
@@ -89,7 +111,7 @@ export async function GET() {
         ],
         recorrencia: formatarRecorrencia(rpcResult?.sextas?.recorrencia),
         evolucao: rpcResult?.sextas?.evolucao || [],
-        baseline: { clientes_setembro: 0, retornaram_outubro: 0 }
+        baseline: rpcResult?.sextas?.baseline || { clientes_setembro: 0, retornaram_outubro: 0 }
       },
       tempo_processamento_ms: tempoMs
     })
