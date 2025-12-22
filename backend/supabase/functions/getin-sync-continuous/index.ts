@@ -73,6 +73,19 @@ serve(async (req) => {
     })
     console.log('🚀 Iniciando sincronização contínua GET IN')
 
+    // Parse body para parâmetros opcionais
+    let bodyParams: { start_date?: string; end_date?: string } = {}
+    try {
+      if (req.method === 'POST') {
+        const text = await req.text()
+        if (text) {
+          bodyParams = JSON.parse(text)
+        }
+      }
+    } catch (e) {
+      console.log('📝 Sem body ou body inválido, usando padrão')
+    }
+
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -112,19 +125,33 @@ serve(async (req) => {
       username: credenciais.username 
     })
 
-    // Calculate date range: (today - 30) to (today + 30) - SINCRONIZAÇÃO COMPLETA 60 DIAS
-    const hoje = new Date()
-    const dataInicio = new Date(hoje)
-    dataInicio.setDate(hoje.getDate() - 30) // 30 dias atrás
-    
-    const dataFim = new Date(hoje)
-    dataFim.setDate(hoje.getDate() + 30) // Hoje + 30 dias
+    // Calculate date range: usar parâmetros ou padrão (today - 30) to (today + 30)
+    let startDate: string
+    let endDate: string
+    let modoSync: string
 
-    const startDate = dataInicio.toISOString().split('T')[0]
-    const endDate = dataFim.toISOString().split('T')[0]
+    if (bodyParams.start_date && bodyParams.end_date) {
+      // Modo retroativo com datas customizadas
+      startDate = bodyParams.start_date
+      endDate = bodyParams.end_date
+      modoSync = 'RETROATIVO'
+      console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (RETROATIVO)`)
+      console.log(`📋 Modo: Sincronização RETROATIVA - Datas customizadas`)
+    } else {
+      // Modo padrão: 60 dias (30 dias atrás + 30 dias à frente)
+      const hoje = new Date()
+      const dataInicio = new Date(hoje)
+      dataInicio.setDate(hoje.getDate() - 30) // 30 dias atrás
+      
+      const dataFim = new Date(hoje)
+      dataFim.setDate(hoje.getDate() + 30) // Hoje + 30 dias
 
-    console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (60 dias)`)
-    console.log(`📋 Modo: Sincronização COMPLETA - Últimos 30 dias + Próximos 30 dias`)
+      startDate = dataInicio.toISOString().split('T')[0]
+      endDate = dataFim.toISOString().split('T')[0]
+      modoSync = 'COMPLETA'
+      console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (60 dias)`)
+      console.log(`📋 Modo: Sincronização COMPLETA - Últimos 30 dias + Próximos 30 dias`)
+    }
 
     let totalReservas = 0
     let totalSalvas = 0
