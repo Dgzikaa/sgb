@@ -167,57 +167,71 @@ export async function GET(request: NextRequest) {
 		let offsetVisitas = 0
 		const pageSizeVisitas = 1000
 		let totalVisitasProcessadas = 0
+		const MAX_ITERATIONS_VISITAS = 200 // Prevenir loop infinito (máximo 200.000 registros)
+		let iterationsVisitas = 0
 		
-		while (true) {
-			const { data: visitasData, error: visitasError } = await supabase
-				.from('contahub_periodo')
-				.select('cli_fone')
-				.not('cli_fone', 'is', null)
-				.neq('cli_fone', '')
-				.eq('bar_id', barIdFilter)
-				.range(offsetVisitas, offsetVisitas + pageSizeVisitas - 1)
-			
-			if (visitasError) {
-				console.error('❌ Erro ao buscar visitas:', visitasError)
-				break
+		// Só buscar visitas se tiver bar_id definido
+		if (barIdFilter) {
+			while (iterationsVisitas < MAX_ITERATIONS_VISITAS) {
+				iterationsVisitas++
+				
+				const { data: visitasData, error: visitasError } = await supabase
+					.from('contahub_periodo')
+					.select('cli_fone')
+					.not('cli_fone', 'is', null)
+					.neq('cli_fone', '')
+					.eq('bar_id', barIdFilter)
+					.range(offsetVisitas, offsetVisitas + pageSizeVisitas - 1)
+					.order('id', { ascending: true }) // Garantir ordem consistente para paginação
+				
+				if (visitasError) {
+					console.error('❌ Erro ao buscar visitas:', visitasError)
+					break
+				}
+				
+				if (!visitasData || visitasData.length === 0) break
+				
+				totalVisitasProcessadas += visitasData.length
+				
+				visitasData.forEach(visita => {
+					let foneNormalizado = (visita.cli_fone || '').replace(/\D/g, '')
+					if (!foneNormalizado) return
+					
+					// Aplicar a mesma normalização usada nos reservantes
+					if (foneNormalizado.length === 13 && foneNormalizado.startsWith('55')) {
+						// Remover código do país (55) -> 11 dígitos
+						foneNormalizado = foneNormalizado.substring(2)
+					}
+					
+					if (foneNormalizado.length === 12 && foneNormalizado.startsWith('55')) {
+						// Remover código do país (55) e adicionar 9 -> 11 dígitos
+						const ddd = foneNormalizado.substring(2, 4)
+						const numero = foneNormalizado.substring(4)
+						if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
+							foneNormalizado = ddd + '9' + numero
+						}
+					}
+					
+					if (foneNormalizado.length === 10) {
+						// Adicionar 9 após o DDD para celulares antigos (10 -> 11 dígitos)
+						const ddd = foneNormalizado.substring(0, 2)
+						if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
+							foneNormalizado = ddd + '9' + foneNormalizado.substring(2)
+						}
+					}
+					
+					mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
+				})
+				
+				if (visitasData.length < pageSizeVisitas) break
+				offsetVisitas += pageSizeVisitas
 			}
 			
-			if (!visitasData || visitasData.length === 0) break
-			
-			totalVisitasProcessadas += visitasData.length
-			
-			visitasData.forEach(visita => {
-				let foneNormalizado = (visita.cli_fone || '').replace(/\D/g, '')
-				if (!foneNormalizado) return
-				
-				// Aplicar a mesma normalização usada nos reservantes
-				if (foneNormalizado.length === 13 && foneNormalizado.startsWith('55')) {
-					// Remover código do país (55) -> 11 dígitos
-					foneNormalizado = foneNormalizado.substring(2)
-				}
-				
-				if (foneNormalizado.length === 12 && foneNormalizado.startsWith('55')) {
-					// Remover código do país (55) e adicionar 9 -> 11 dígitos
-					const ddd = foneNormalizado.substring(2, 4)
-					const numero = foneNormalizado.substring(4)
-					if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
-						foneNormalizado = ddd + '9' + numero
-					}
-				}
-				
-				if (foneNormalizado.length === 10) {
-					// Adicionar 9 após o DDD para celulares antigos (10 -> 11 dígitos)
-					const ddd = foneNormalizado.substring(0, 2)
-					if (['11', '12', '13', '14', '15', '16', '17', '18', '19', '21', '22', '24', '27', '28', '31', '32', '33', '34', '35', '37', '38', '41', '42', '43', '44', '45', '46', '47', '48', '49', '51', '53', '54', '55', '61', '62', '63', '64', '65', '66', '67', '68', '69', '71', '73', '74', '75', '77', '79', '81', '82', '83', '84', '85', '86', '87', '88', '89', '91', '92', '93', '94', '95', '96', '97', '98', '99'].includes(ddd)) {
-						foneNormalizado = ddd + '9' + foneNormalizado.substring(2)
-					}
-				}
-				
-				mapVisitas.set(foneNormalizado, (mapVisitas.get(foneNormalizado) || 0) + 1)
-			})
-			
-			if (visitasData.length < pageSizeVisitas) break
-			offsetVisitas += pageSizeVisitas
+			if (iterationsVisitas >= MAX_ITERATIONS_VISITAS) {
+				console.warn('⚠️ API Reservantes: Limite de iterações atingido ao buscar visitas')
+			}
+		} else {
+			console.log('⚠️ API Reservantes: bar_id não definido, pulando busca de visitas')
 		}
 
 		console.log(`📊 API Reservantes: ${totalVisitasProcessadas} visitas processadas, ${mapVisitas.size} telefones únicos com visitas`)
