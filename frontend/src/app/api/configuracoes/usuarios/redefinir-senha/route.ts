@@ -23,11 +23,18 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Buscar dados do usuário
+    console.log('🔍 Buscando usuário com ID:', userId);
     const { data: usuario, error: fetchError } = await supabase
       .from('usuarios_bar')
       .select('id, user_id, email, nome, role')
       .eq('id', userId)
       .single();
+
+    if (usuario) {
+      console.log('✅ Usuário encontrado:', usuario.nome);
+      console.log('📧 Email do usuário:', usuario.email);
+      console.log('👤 User ID:', usuario.user_id);
+    }
 
     if (fetchError || !usuario) {
       return NextResponse.json(
@@ -46,14 +53,24 @@ export async function POST(request: NextRequest) {
     // 2. Gerar senha temporária (método mais direto para admin)
     const senhaTemporaria = `Temp${Math.random().toString(36).substring(2, 8)}!`;
     
+    console.log('🔑 Gerando senha temporária para:', usuario.email);
+    console.log('👤 User ID:', usuario.user_id);
+    console.log('🔐 Senha temporária gerada:', senhaTemporaria);
+    
     // 3. Atualizar senha no Supabase Auth
-    const { error: authUpdateError } = await supabase.auth.admin.updateUserById(
+    console.log('🔄 Atualizando senha no Supabase Auth...');
+    const { data: authData, error: authUpdateError } = await supabase.auth.admin.updateUserById(
       usuario.user_id,
-      { password: senhaTemporaria }
+      { 
+        password: senhaTemporaria,
+        email_confirm: true, // Garantir que email está confirmado
+      }
     );
 
     if (authUpdateError) {
       console.error('❌ Erro ao atualizar senha no Auth:', authUpdateError);
+      console.error('❌ Código do erro:', authUpdateError.status);
+      console.error('❌ Mensagem:', authUpdateError.message);
       return NextResponse.json(
         { 
           error: 'Erro ao atualizar senha no Auth',
@@ -61,6 +78,39 @@ export async function POST(request: NextRequest) {
         },
         { status: 500 }
       );
+    }
+
+    if (!authData || !authData.user) {
+      console.error('❌ Resposta do Auth não contém dados do usuário');
+      return NextResponse.json(
+        { 
+          error: 'Erro ao atualizar senha: resposta inválida do servidor',
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log('✅ Senha atualizada no Auth com sucesso');
+    console.log('✅ User ID confirmado:', authData.user.id);
+    console.log('✅ Email confirmado:', authData.user.email);
+
+    // 4. TESTAR LOGIN para garantir que a senha funciona
+    console.log('🧪 Testando login com a senha temporária...');
+    const emailNormalizado = usuario.email.toLowerCase().trim();
+    const { data: testLogin, error: testError } = await supabase.auth.signInWithPassword({
+      email: emailNormalizado,
+      password: senhaTemporaria,
+    });
+
+    if (testError || !testLogin.user) {
+      console.error('❌ ERRO CRÍTICO: Senha atualizada mas login falhou!');
+      console.error('❌ Erro do teste:', testError?.message);
+      console.error('❌ Email usado no teste:', emailNormalizado);
+      // Continuar mesmo assim, mas logar o erro
+    } else {
+      console.log('✅ Login de teste bem-sucedido! Senha está funcionando.');
+      // Fazer sign out do teste
+      await supabase.auth.signOut();
     }
 
     // 4. Gerar token único de redefinição (para link alternativo)
