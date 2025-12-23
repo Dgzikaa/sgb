@@ -37,10 +37,16 @@ export async function POST(request: NextRequest) {
 
     // Buscar usuário pelo email e validar token
     console.log('🔍 Buscando usuário e validando token...');
+    console.log('📧 Email recebido:', email);
+    console.log('🔑 Token recebido:', token ? '***' : 'vazio');
+    
+    // Normalizar email para lowercase (consistente com login)
+    const emailNormalizado = email.toLowerCase().trim();
+    
     const { data: usuarioData, error: usuarioError } = await adminClient
       .from('usuarios_bar')
-      .select('user_id, nome, reset_token, reset_token_expiry')
-      .eq('email', email)
+      .select('user_id, nome, reset_token, reset_token_expiry, email')
+      .eq('email', emailNormalizado)
       .eq('reset_token', token)
       .single();
 
@@ -70,9 +76,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Usuário encontrado e token válido:', usuarioData.nome);
+    console.log('👤 User ID:', usuarioData.user_id);
+    console.log('📧 Email do usuário:', usuarioData.email);
 
     // Atualizar senha no Supabase Auth
     console.log('🔑 Atualizando senha no Auth...');
+    console.log('🔐 Nova senha (tamanho):', novaSenha.length, 'caracteres');
+    
     const { data, error } = await adminClient.auth.admin.updateUserById(
       usuarioData.user_id,
       {
@@ -83,13 +93,16 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('❌ Erro ao atualizar senha:', error);
+      console.error('❌ Detalhes do erro:', JSON.stringify(error, null, 2));
       return NextResponse.json(
         { success: false, error: 'Erro ao atualizar senha: ' + error.message },
         { status: 500 }
       );
     }
 
-    console.log('✅ Senha atualizada com sucesso');
+    console.log('✅ Senha atualizada com sucesso no Auth');
+    console.log('✅ User ID atualizado:', data.user?.id);
+    console.log('✅ Email confirmado:', data.user?.email);
 
     // Limpar token de reset e marcar que o usuário já redefiniu a senha
     await adminClient

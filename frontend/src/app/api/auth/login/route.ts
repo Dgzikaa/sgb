@@ -126,6 +126,9 @@ export async function POST(request: NextRequest) {
     // Verificar senha (usando Supabase Auth)
     try {
       console.log('🔐 Verificando senha...');
+      console.log('📧 Email normalizado:', email.toLowerCase());
+      console.log('🔑 Senha recebida (tamanho):', senha ? senha.length + ' caracteres' : 'vazia');
+      console.log('👤 User ID do banco:', usuario.user_id);
       
       // Tentar fazer login usando Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -134,10 +137,14 @@ export async function POST(request: NextRequest) {
       });
 
       if (authError || !authData.user) {
-        console.log('❌ Senha inválida:', authError);
+        console.log('❌ Erro na autenticação:', authError);
+        console.log('❌ Código do erro:', authError?.status);
+        console.log('❌ Mensagem do erro:', authError?.message);
+        console.log('❌ Detalhes completos:', JSON.stringify(authError, null, 2));
+        
         await logLoginFailure({
           email,
-          reason: 'Invalid password',
+          reason: authError?.message || 'Invalid password',
           ipAddress: clientIp,
           userAgent,
           sessionId,
@@ -147,6 +154,14 @@ export async function POST(request: NextRequest) {
           {
             error: 'Credenciais inválidas',
             details: 'INVALID_PASSWORD',
+            // Em desenvolvimento, incluir mais detalhes
+            ...(process.env.NODE_ENV === 'development' && {
+              debug: {
+                authError: authError?.message,
+                user_id: usuario.user_id,
+                email_normalized: email.toLowerCase()
+              }
+            })
           },
           { status: 401 }
         );
