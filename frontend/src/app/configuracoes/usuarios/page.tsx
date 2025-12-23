@@ -1224,4 +1224,3 @@ function UsuariosPage() {
 }
 
 export default UsuariosPage;
-export default UsuariosPage;
