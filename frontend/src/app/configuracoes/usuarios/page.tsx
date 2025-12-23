@@ -390,6 +390,8 @@ function UsuariosPage() {
     emailSent: boolean;
     message: string;
     temporaryPassword?: string; // 🔑 Senha temporária
+    emailParaLogin?: string; // Email que deve ser usado no login (pode ser diferente)
+    avisoEmail?: string; // Aviso se email for diferente
   }>({ open: false, email: '', nome: '', resetLink: '', expiresAt: '', emailSent: false, message: '' });
 
   const handleResetPassword = async (userId: number) => {
@@ -414,7 +416,9 @@ function UsuariosPage() {
           expiresAt: result.resetData.expiresAt,
           emailSent: result.emailSent || false,
           message: result.resetData.message,
-          temporaryPassword: result.resetData.temporaryPassword // 🔑 Senha temporária
+          temporaryPassword: result.resetData.temporaryPassword, // 🔑 Senha temporária
+          emailParaLogin: result.resetData.emailParaLogin || result.resetData.email, // Email para login
+          avisoEmail: result.resetData.avisoEmail // Aviso se email for diferente
         });
         
         toast({
@@ -937,11 +941,21 @@ function UsuariosPage() {
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center gap-3">
                       <User className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-gray-900 dark:text-white">{resetModal.nome}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{resetModal.email}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Email no banco: {resetModal.email}</p>
+                        {resetModal.emailParaLogin && resetModal.emailParaLogin !== resetModal.email && (
+                          <p className="text-sm font-semibold text-yellow-600 dark:text-yellow-400 mt-1">
+                            ⚠️ Use este email para login: {resetModal.emailParaLogin}
+                          </p>
+                        )}
                       </div>
                     </div>
+                    {resetModal.avisoEmail && (
+                      <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                        <p className="text-sm text-yellow-800 dark:text-yellow-300">{resetModal.avisoEmail}</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* 🔑 Senha Temporária - DESTAQUE PRINCIPAL */}
@@ -1209,4 +1223,5 @@ function UsuariosPage() {
   );
 }
 
+export default UsuariosPage;
 export default UsuariosPage;

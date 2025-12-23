@@ -94,19 +94,49 @@ export async function POST(request: NextRequest) {
     console.log('✅ User ID confirmado:', authData.user.id);
     console.log('✅ Email confirmado:', authData.user.email);
 
-    // 4. TESTAR LOGIN para garantir que a senha funciona
+    // 4. Buscar email REAL do Auth (pode ser diferente do banco)
+    console.log('🔍 Verificando email real no Supabase Auth...');
+    const { data: authUserCheck, error: authCheckError } = await supabase.auth.admin.getUserById(usuario.user_id);
+    
+    let emailParaLogin = usuario.email.toLowerCase().trim();
+    if (authUserCheck?.user?.email) {
+      const emailNoAuth = authUserCheck.user.email.toLowerCase().trim();
+      console.log('📧 Email no banco:', emailParaLogin);
+      console.log('📧 Email no Auth:', emailNoAuth);
+      
+      if (emailNoAuth !== emailParaLogin) {
+        console.warn('⚠️ ATENÇÃO: Email no Auth é diferente! Usando email do Auth para login.');
+        emailParaLogin = emailNoAuth;
+      }
+    }
+
+    // 5. TESTAR LOGIN para garantir que a senha funciona
     console.log('🧪 Testando login com a senha temporária...');
-    const emailNormalizado = usuario.email.toLowerCase().trim();
+    console.log('📧 Email usado no teste:', emailParaLogin);
+    console.log('🔐 Senha usada no teste:', senhaTemporaria);
+    
     const { data: testLogin, error: testError } = await supabase.auth.signInWithPassword({
-      email: emailNormalizado,
+      email: emailParaLogin,
       password: senhaTemporaria,
     });
 
     if (testError || !testLogin.user) {
       console.error('❌ ERRO CRÍTICO: Senha atualizada mas login falhou!');
       console.error('❌ Erro do teste:', testError?.message);
-      console.error('❌ Email usado no teste:', emailNormalizado);
-      // Continuar mesmo assim, mas logar o erro
+      console.error('❌ Código do erro:', testError?.status);
+      console.error('❌ Email usado no teste:', emailParaLogin);
+      console.error('❌ User ID:', usuario.user_id);
+      
+      // Retornar erro para o admin saber que não funcionou
+      return NextResponse.json({
+        success: false,
+        error: 'Senha atualizada mas login de teste falhou',
+        details: testError?.message || 'Erro desconhecido',
+        emailUsadoNoTeste: emailParaLogin,
+        emailNoBanco: usuario.email,
+        senhaTemporaria: senhaTemporaria,
+        aviso: 'A senha foi atualizada no Auth, mas o login de teste falhou. Verifique se o email está correto.'
+      }, { status: 500 });
     } else {
       console.log('✅ Login de teste bem-sucedido! Senha está funcionando.');
       // Fazer sign out do teste
@@ -219,13 +249,17 @@ export async function POST(request: NextRequest) {
       // Sempre fornecer a senha temporária para o admin
       resetData: {
         email: usuario.email,
+        emailParaLogin: emailParaLogin, // Email que deve ser usado no login
         nome: usuario.nome,
         temporaryPassword: senhaTemporaria, // 🔑 SENHA TEMPORÁRIA
         resetLink: resetLink,
         expiresAt: resetTokenExpiry.toISOString(),
         message: emailSent || emailSentWithPassword
           ? '📧 Email enviado! Senha temporária abaixo para compartilhar com o usuário:' 
-          : '⚠️ Email não enviado! Use a senha temporária abaixo para compartilhar com o usuário:'
+          : '⚠️ Email não enviado! Use a senha temporária abaixo para compartilhar com o usuário:',
+        avisoEmail: emailParaLogin !== usuario.email.toLowerCase().trim() 
+          ? `⚠️ IMPORTANTE: Use o email "${emailParaLogin}" para fazer login (email no Auth é diferente do banco)`
+          : undefined
       }
     });
 
