@@ -389,10 +389,11 @@ function UsuariosPage() {
     expiresAt: string;
     emailSent: boolean;
     message: string;
+    temporaryPassword?: string; // 🔑 Senha temporária
   }>({ open: false, email: '', nome: '', resetLink: '', expiresAt: '', emailSent: false, message: '' });
 
   const handleResetPassword = async (userId: number) => {
-    if (!confirm('⚠️ Tem certeza que deseja enviar um link de redefinição de senha para este usuário?\n\nO usuário receberá um email com um link para criar uma nova senha.')) return;
+    if (!confirm('⚠️ Tem certeza que deseja resetar a senha deste usuário?\n\nUma nova senha temporária será gerada e você poderá compartilhá-la com o usuário.\n\nO sistema tentará enviar um email, mas mesmo se falhar, você terá a senha temporária para compartilhar.')) return;
 
     try {
       const response = await fetch('/api/configuracoes/usuarios/redefinir-senha', {
@@ -404,15 +405,16 @@ function UsuariosPage() {
       const result = await response.json();
 
       if (response.ok && result.resetData) {
-        // Mostrar modal com o link de redefinição
+        // Mostrar modal com o link de redefinição e senha temporária
         setResetModal({
           open: true,
           email: result.resetData.email,
           nome: result.resetData.nome,
           resetLink: result.resetData.resetLink,
           expiresAt: result.resetData.expiresAt,
-          emailSent: result.emailSent,
-          message: result.resetData.message
+          emailSent: result.emailSent || false,
+          message: result.resetData.message,
+          temporaryPassword: result.resetData.temporaryPassword // 🔑 Senha temporária
         });
         
         toast({
@@ -942,11 +944,45 @@ function UsuariosPage() {
                     </div>
                   </div>
 
-                  {/* Link de Redefinição */}
+                  {/* 🔑 Senha Temporária - DESTAQUE PRINCIPAL */}
+                  {resetModal.temporaryPassword && (
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 rounded-lg p-5 border-2 border-yellow-400 dark:border-yellow-600 shadow-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-base font-bold text-yellow-800 dark:text-yellow-300 flex items-center gap-2">
+                          🔑 Senha Temporária Gerada
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(resetModal.temporaryPassword!, 'Senha Temporária')}
+                          className="text-yellow-800 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-200 h-8 px-3 font-semibold bg-yellow-100 dark:bg-yellow-900/50"
+                        >
+                          📋 Copiar Senha
+                        </Button>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-yellow-300 dark:border-yellow-700">
+                        <p className="text-2xl font-mono font-bold text-center text-yellow-900 dark:text-yellow-200 tracking-wider select-all">
+                          {resetModal.temporaryPassword}
+                        </p>
+                      </div>
+                      <div className="mt-3 p-3 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg border border-yellow-300 dark:border-yellow-700">
+                        <p className="text-xs font-semibold text-yellow-800 dark:text-yellow-300 mb-1">
+                          ⚠️ IMPORTANTE:
+                        </p>
+                        <ul className="text-xs text-yellow-700 dark:text-yellow-400 space-y-1 list-disc list-inside">
+                          <li>Esta é uma senha temporária que o usuário DEVE alterar no primeiro login</li>
+                          <li>Compartilhe esta senha com o usuário de forma segura (WhatsApp, telefone, etc.)</li>
+                          <li>O usuário poderá fazer login imediatamente com esta senha</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Link de Redefinição (Alternativo) */}
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-700">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-blue-700 dark:text-blue-400 flex items-center gap-2">
-                        🔗 Link de Redefinição
+                        🔗 Link de Redefinição (Alternativo)
                       </span>
                       <Button
                         variant="ghost"
@@ -962,6 +998,9 @@ function UsuariosPage() {
                     </p>
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
                       ⏰ Expira em: {new Date(resetModal.expiresAt).toLocaleString('pt-BR')}
+                    </p>
+                    <p className="text-xs text-blue-500 dark:text-blue-400 mt-2 italic">
+                      💡 Use este link apenas se o usuário preferir redefinir via link em vez da senha temporária
                     </p>
                   </div>
 
@@ -988,18 +1027,35 @@ function UsuariosPage() {
 
                   {/* Instruções */}
                   <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                      <strong>📝 O que o usuário deve fazer:</strong>
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      📝 Instruções para o usuário:
                     </p>
-                    <ol className="text-sm text-gray-600 dark:text-gray-400 mt-2 list-decimal list-inside space-y-1">
-                      <li>Clicar no link recebido</li>
-                      <li>Digitar uma nova senha</li>
-                      <li>Fazer login com a nova senha</li>
-                    </ol>
+                    {resetModal.temporaryPassword ? (
+                      <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+                        <li>Fazer login com o email: <strong>{resetModal.email}</strong></li>
+                        <li>Usar a senha temporária fornecida acima</li>
+                        <li>O sistema solicitará a criação de uma nova senha no primeiro login</li>
+                        <li>Escolher uma senha forte e segura</li>
+                      </ol>
+                    ) : (
+                      <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
+                        <li>Clicar no link de redefinição acima</li>
+                        <li>Digitar uma nova senha</li>
+                        <li>Fazer login com a nova senha</li>
+                      </ol>
+                    )}
                   </div>
                 </div>
 
                 <DialogFooter className="flex gap-2">
+                  {resetModal.temporaryPassword && (
+                    <Button
+                      onClick={() => copyToClipboard(resetModal.temporaryPassword!, 'Senha Temporária')}
+                      className="bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600 text-white font-semibold"
+                    >
+                      🔑 Copiar Senha
+                    </Button>
+                  )}
                   <Button
                     onClick={() => copyToClipboard(resetModal.resetLink, 'Link')}
                     className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"

@@ -170,8 +170,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Erro ao enviar email de reset:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+    const errorDetails = error instanceof Error ? error.stack : String(error);
+    
     return NextResponse.json(
-      { error: 'Erro ao enviar email' },
+      { 
+        error: 'Erro ao enviar email',
+        details: errorMessage,
+        // Em desenvolvimento, incluir mais detalhes
+        ...(process.env.NODE_ENV === 'development' && { stack: errorDetails })
+      },
       { status: 500 }
     );
   }

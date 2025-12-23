@@ -43,27 +43,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Gerar token único de redefinição
+    // 2. Gerar senha temporária (método mais direto para admin)
+    const senhaTemporaria = `Temp${Math.random().toString(36).substring(2, 8)}!`;
+    
+    // 3. Atualizar senha no Supabase Auth
+    const { error: authUpdateError } = await supabase.auth.admin.updateUserById(
+      usuario.user_id,
+      { password: senhaTemporaria }
+    );
+
+    if (authUpdateError) {
+      console.error('❌ Erro ao atualizar senha no Auth:', authUpdateError);
+      return NextResponse.json(
+        { 
+          error: 'Erro ao atualizar senha no Auth',
+          details: authUpdateError.message 
+        },
+        { status: 500 }
+      );
+    }
+
+    // 4. Gerar token único de redefinição (para link alternativo)
     const resetToken = crypto.randomUUID();
     const resetTokenExpiry = new Date();
     resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // Expira em 1 hora
 
-    // 3. Salvar token no banco
+    // 5. Salvar token no banco e marcar que precisa redefinir senha
     const { error: updateError } = await supabase
       .from('usuarios_bar')
       .update({
         reset_token: resetToken,
         reset_token_expiry: resetTokenExpiry.toISOString(),
+        senha_redefinida: false,
+        ultima_atividade: new Date().toISOString(),
         atualizado_em: new Date().toISOString(),
       })
       .eq('id', userId);
 
     if (updateError) {
       console.error('❌ Erro ao salvar token de reset:', updateError);
-      return NextResponse.json(
-        { error: 'Erro ao gerar token de redefinição' },
-        { status: 500 }
-      );
+      // Não falhar, a senha já foi atualizada
     }
 
     // 4. Gerar URL de redefinição
@@ -110,24 +129,53 @@ export async function POST(request: NextRequest) {
       console.warn('⚠️ Erro ao enviar email:', err);
     }
 
-    // 6. Retornar resultado
-    // Se o email foi enviado com sucesso, não precisa mostrar o link
-    // Se não foi enviado, mostrar o link para o admin copiar e enviar manualmente
+    // 6. Tentar enviar email com senha temporária também
+    let emailSentWithPassword = false;
+    try {
+      const requestUrl = new URL(request.url);
+      const internalBaseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+      
+      const emailResponsePassword = await fetch(`${internalBaseUrl}/api/emails/password-reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: usuario.email,
+          nome: usuario.nome,
+          email: usuario.email,
+          senha_temporaria: senhaTemporaria,
+          role: usuario.role || 'funcionario',
+          loginUrl: baseUrl
+        })
+      });
+
+      if (emailResponsePassword.ok) {
+        emailSentWithPassword = true;
+        console.log('✅ Email com senha temporária enviado para:', usuario.email);
+      }
+    } catch (err) {
+      console.warn('⚠️ Erro ao enviar email com senha temporária:', err);
+    }
+
+    // 7. Retornar resultado com senha temporária
     return NextResponse.json({ 
       success: true,
-      message: emailSent 
-        ? `✅ Link de redefinição enviado para ${usuario.email}` 
-        : `⚠️ Não foi possível enviar o email: ${emailError}`,
-      emailSent,
-      // Sempre fornecer o link para o admin poder copiar se necessário
+      message: emailSent || emailSentWithPassword
+        ? `✅ Email enviado para ${usuario.email}` 
+        : `⚠️ Não foi possível enviar o email: ${emailError || 'Erro desconhecido'}`,
+      emailSent: emailSent || emailSentWithPassword,
+      emailError: emailError || undefined,
+      // Sempre fornecer a senha temporária para o admin
       resetData: {
         email: usuario.email,
         nome: usuario.nome,
+        temporaryPassword: senhaTemporaria, // 🔑 SENHA TEMPORÁRIA
         resetLink: resetLink,
         expiresAt: resetTokenExpiry.toISOString(),
-        message: emailSent 
-          ? '📧 Email enviado! Link abaixo caso o usuário não receba:' 
-          : '⚠️ Email não enviado! Copie o link e envie para o usuário:'
+        message: emailSent || emailSentWithPassword
+          ? '📧 Email enviado! Senha temporária abaixo para compartilhar com o usuário:' 
+          : '⚠️ Email não enviado! Use a senha temporária abaixo para compartilhar com o usuário:'
       }
     });
 
