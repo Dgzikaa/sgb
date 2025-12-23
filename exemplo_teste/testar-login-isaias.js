@@ -8,9 +8,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 async function testarLogin() {
   const email = 'isaias.carneiro03@gmail.com';
   const senhas = [
-    'Geladeira@001',
-    'geladeira@001', 
-    'Geladeira@1',
+    'Senha@Temporaria123',
   ];
 
   console.log('🧪 Testando login para:', email);

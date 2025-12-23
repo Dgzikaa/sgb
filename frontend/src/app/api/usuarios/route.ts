@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { normalizeEmail } from '@/lib/email-utils';
 
 export const dynamic = 'force-dynamic'
 
@@ -79,7 +80,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as UsuarioInput;
-    const { bar_id, email, nome, password, role, modulos_permitidos } = body;
+    const { bar_id, nome, password, role, modulos_permitidos } = body;
+    const email = normalizeEmail(body.email); // ✅ Normaliza email
 
     if (!bar_id || !email || !nome || !password) {
       return NextResponse.json(

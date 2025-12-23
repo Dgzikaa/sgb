@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { normalizeEmail } from '@/lib/email-utils';
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
   try {
     console.log('📥 Fazendo parse do body da requisição');
     const body = await request.json();
-    const email = body.email;
+    const email = normalizeEmail(body.email); // ✅ Normaliza email
     const senha = body.senha || body.password; // Aceita tanto 'senha' quanto 'password'
 
     console.log('📝 Dados recebidos:', { email, senha: senha ? '***' : 'undefined' });
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
     const { data: usuarios, error: usuarioError } = await supabase
       .from('usuarios_bar')
       .select('*')
-      .eq('email', email.toLowerCase())
+      .eq('email', email) // Email já está normalizado
       .eq('ativo', true);
 
     if (usuarioError || !usuarios || usuarios.length === 0) {
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
       
       // Tentar fazer login usando Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: email.toLowerCase(),
+        email: email, // Email já está normalizado
         password: senha,
       });
 

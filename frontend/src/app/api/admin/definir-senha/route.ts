@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeEmail } from '@/lib/email-utils';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const emailNoAuth = authUserData.user.email?.toLowerCase().trim();
+    const emailNoAuth = normalizeEmail(authUserData.user.email || '');
     console.log('📧 Email no Auth:', emailNoAuth);
     console.log('📧 Email no banco:', emailNormalizado);
     

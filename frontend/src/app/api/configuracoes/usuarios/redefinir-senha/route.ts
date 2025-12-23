@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeEmail } from '@/lib/email-utils';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -98,9 +99,9 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Verificando email real no Supabase Auth...');
     const { data: authUserCheck, error: authCheckError } = await supabase.auth.admin.getUserById(usuario.user_id);
     
-    let emailParaLogin = usuario.email.toLowerCase().trim();
+    let emailParaLogin = normalizeEmail(usuario.email);
     if (authUserCheck?.user?.email) {
-      const emailNoAuth = authUserCheck.user.email.toLowerCase().trim();
+      const emailNoAuth = normalizeEmail(authUserCheck.user.email);
       console.log('📧 Email no banco:', emailParaLogin);
       console.log('📧 Email no Auth:', emailNoAuth);
       

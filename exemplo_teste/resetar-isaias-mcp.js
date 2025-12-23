@@ -24,6 +24,9 @@ async function resetarSenha() {
 
     const result = await response.json();
 
+    console.log('📦 Resposta completa:', JSON.stringify(result, null, 2));
+    console.log('');
+
     if (!response.ok) {
       console.error('❌ Erro ao resetar senha:', result.error);
       console.error('   Detalhes:', result.details);
@@ -32,22 +35,29 @@ async function resetarSenha() {
 
     console.log('✅ Senha resetada com sucesso!');
     console.log('');
-    console.log('📋 INFORMAÇÕES DO USUÁRIO:');
-    console.log('  Nome:', result.usuario.nome);
-    console.log('  Email:', result.usuario.email);
-    console.log('  User ID:', result.usuario.user_id);
-    console.log('');
-    console.log('🧪 TESTE DE LOGIN:');
-    console.log('  Login funcionou:', result.loginTest.success ? '✅ Sim' : '❌ Não');
-    if (result.loginTest.success) {
-      console.log('  Email usado:', result.loginTest.email);
-      console.log('  User ID:', result.loginTest.userId);
-    } else {
-      console.log('  Erro:', result.loginTest.error);
+    
+    if (result.usuario) {
+      console.log('📋 INFORMAÇÕES DO USUÁRIO:');
+      console.log('  Nome:', result.usuario.nome);
+      console.log('  Email:', result.usuario.email);
+      console.log('  User ID:', result.usuario.user_id);
+      console.log('');
     }
-    console.log('');
+    
+    if (result.loginTest) {
+      console.log('🧪 TESTE DE LOGIN:');
+      console.log('  Login funcionou:', result.loginTest.success ? '✅ Sim' : '❌ Não');
+      if (result.loginTest.success) {
+        console.log('  Email usado:', result.loginTest.email);
+        console.log('  User ID:', result.loginTest.userId);
+      } else {
+        console.log('  Erro:', result.loginTest.error);
+      }
+      console.log('');
+    }
+    
     console.log('🎯 PARA FAZER LOGIN:');
-    console.log(`  Email: ${result.usuario.email}`);
+    console.log(`  Email: ${EMAIL}`);
     console.log(`  Senha: ${NOVA_SENHA}`);
     console.log('');
 
