@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic'
+
+// Criar cliente Supabase com service role key (mesmo padrão das outras APIs)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,18 +29,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obter cliente administrativo
-    let adminClient;
-    try {
-      adminClient = await getAdminClient();
-    } catch (adminError) {
-      console.error('❌ Erro ao obter cliente administrativo:', adminError);
-      return NextResponse.json(
-        { success: false, error: 'Erro de configuração do sistema' },
-        { status: 500 }
-      );
-    }
-
     // Buscar usuário pelo email e validar token
     console.log('🔍 Buscando usuário e validando token...');
     console.log('📧 Email recebido:', email);
@@ -43,7 +37,7 @@ export async function POST(request: NextRequest) {
     // Normalizar email para lowercase (consistente com login)
     const emailNormalizado = email.toLowerCase().trim();
     
-    const { data: usuarioData, error: usuarioError } = await adminClient
+    const { data: usuarioData, error: usuarioError } = await supabase
       .from('usuarios_bar')
       .select('user_id, nome, reset_token, reset_token_expiry, email')
       .eq('email', emailNormalizado)
@@ -82,8 +76,9 @@ export async function POST(request: NextRequest) {
     // Atualizar senha no Supabase Auth
     console.log('🔑 Atualizando senha no Auth...');
     console.log('🔐 Nova senha (tamanho):', novaSenha.length, 'caracteres');
+    console.log('👤 User ID:', usuarioData.user_id);
     
-    const { data, error } = await adminClient.auth.admin.updateUserById(
+    const { data: authData, error: authError } = await supabase.auth.admin.updateUserById(
       usuarioData.user_id,
       {
         password: novaSenha,
@@ -91,21 +86,31 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    if (error) {
-      console.error('❌ Erro ao atualizar senha:', error);
-      console.error('❌ Detalhes do erro:', JSON.stringify(error, null, 2));
+    if (authError) {
+      console.error('❌ Erro ao atualizar senha no Auth:', authError);
+      console.error('❌ Código do erro:', authError.status);
+      console.error('❌ Mensagem:', authError.message);
+      console.error('❌ Detalhes completos:', JSON.stringify(authError, null, 2));
       return NextResponse.json(
-        { success: false, error: 'Erro ao atualizar senha: ' + error.message },
+        { success: false, error: 'Erro ao atualizar senha: ' + authError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!authData || !authData.user) {
+      console.error('❌ Resposta do Auth não contém dados do usuário');
+      return NextResponse.json(
+        { success: false, error: 'Erro ao atualizar senha: resposta inválida do servidor' },
         { status: 500 }
       );
     }
 
     console.log('✅ Senha atualizada com sucesso no Auth');
-    console.log('✅ User ID atualizado:', data.user?.id);
-    console.log('✅ Email confirmado:', data.user?.email);
+    console.log('✅ User ID atualizado:', authData.user.id);
+    console.log('✅ Email confirmado:', authData.user.email);
 
     // Limpar token de reset e marcar que o usuário já redefiniu a senha
-    await adminClient
+    const { error: updateError } = await supabase
       .from('usuarios_bar')
       .update({
         senha_redefinida: true,
@@ -115,12 +120,19 @@ export async function POST(request: NextRequest) {
       })
       .eq('user_id', usuarioData.user_id);
 
+    if (updateError) {
+      console.error('⚠️ Erro ao atualizar flag no banco (mas senha já foi atualizada):', updateError);
+      // Não falhar, a senha já foi atualizada no Auth
+    } else {
+      console.log('✅ Flag senha_redefinida atualizada no banco');
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Senha redefinida com sucesso',
       user: {
-        id: data.user?.id,
-        email: data.user?.email,
+        id: authData.user.id,
+        email: authData.user.email,
       },
     });
   } catch (error) {
