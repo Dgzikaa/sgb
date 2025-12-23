@@ -50,8 +50,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Buscar no Supabase Auth
-    let authUser = null;
-    let authError = null;
+    let authUser: {
+      id: string;
+      email: string | undefined;
+      email_confirmed_at: string | undefined;
+      last_sign_in_at: string | undefined;
+      created_at: string;
+      updated_at: string | undefined;
+    } | null = null;
+    let authError: Error | null = null;
     
     if (usuario.user_id) {
       try {
@@ -66,14 +73,19 @@ export async function POST(request: NextRequest) {
             updated_at: authData.user.updated_at,
           };
         }
-        authError = authErr;
+        if (authErr) {
+          authError = authErr as Error;
+        }
       } catch (err) {
-        authError = err;
+        authError = err instanceof Error ? err : new Error(String(err));
       }
     }
 
     // 3. Tentar fazer login (sem retornar erro se falhar)
-    let loginTest = null;
+    let loginTest: {
+      userExists: boolean;
+      emailMatches: boolean;
+    } | null = null;
     if (usuario.user_id && authUser) {
       // Não podemos testar sem senha, mas podemos verificar se o usuário existe
       loginTest = {
@@ -101,9 +113,9 @@ export async function POST(request: NextRequest) {
       problemas: [
         !usuario.user_id && 'Usuário não tem user_id vinculado',
         !authUser && 'Usuário não encontrado no Supabase Auth',
-        authUser && authUser.email?.toLowerCase() !== emailNormalizado && 'Email no Auth diferente do banco',
-        !authUser?.email_confirmed_at && 'Email não confirmado no Auth',
-      ].filter(Boolean),
+        authUser && authUser.email && authUser.email.toLowerCase() !== emailNormalizado && 'Email no Auth diferente do banco',
+        authUser && !authUser.email_confirmed_at && 'Email não confirmado no Auth',
+      ].filter(Boolean) as string[],
     });
 
   } catch (error) {
