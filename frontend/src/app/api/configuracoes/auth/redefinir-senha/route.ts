@@ -32,26 +32,54 @@ export async function POST(request: NextRequest) {
     // Buscar usuário pelo email e validar token
     console.log('🔍 Buscando usuário e validando token...');
     console.log('📧 Email recebido:', email);
-    console.log('🔑 Token recebido:', token ? '***' : 'vazio');
+    console.log('🔑 Token recebido:', token ? token.substring(0, 8) + '...' : 'vazio');
     
     // Normalizar email para lowercase (consistente com login)
     const emailNormalizado = email.toLowerCase().trim();
     
+    // Primeiro, buscar usuário pelo email (sem token) para ver se existe
+    const { data: usuarioCheck, error: checkError } = await supabase
+      .from('usuarios_bar')
+      .select('id, email, reset_token, reset_token_expiry, user_id')
+      .eq('email', emailNormalizado)
+      .single();
+
+    if (checkError || !usuarioCheck) {
+      console.error('❌ Usuário não encontrado com email:', emailNormalizado);
+      console.error('❌ Erro:', checkError);
+      return NextResponse.json(
+        { success: false, error: 'Usuário não encontrado' },
+        { status: 404 }
+      );
+    }
+
+    console.log('✅ Usuário encontrado:', usuarioCheck.email);
+    console.log('🔑 Token no banco:', usuarioCheck.reset_token ? usuarioCheck.reset_token.substring(0, 8) + '...' : 'null');
+    console.log('🔑 Token recebido:', token ? token.substring(0, 8) + '...' : 'null');
+
+    // Verificar se o token corresponde
+    if (!usuarioCheck.reset_token || usuarioCheck.reset_token !== token) {
+      console.error('❌ Token não corresponde ou não existe');
+      console.error('❌ Token esperado:', usuarioCheck.reset_token ? 'existe' : 'não existe');
+      console.error('❌ Token recebido:', token ? 'existe' : 'não existe');
+      return NextResponse.json(
+        { success: false, error: 'Token inválido. Solicite uma nova recuperação de senha.' },
+        { status: 400 }
+      );
+    }
+
+    // Buscar dados completos do usuário
     const { data: usuarioData, error: usuarioError } = await supabase
       .from('usuarios_bar')
       .select('user_id, nome, reset_token, reset_token_expiry, email')
-      .eq('email', emailNormalizado)
-      .eq('reset_token', token)
+      .eq('id', usuarioCheck.id)
       .single();
 
     if (usuarioError || !usuarioData) {
-      console.error(
-        '❌ Usuário não encontrado ou token inválido:',
-        usuarioError
-      );
+      console.error('❌ Erro ao buscar dados completos do usuário:', usuarioError);
       return NextResponse.json(
-        { success: false, error: 'Token inválido ou expirado' },
-        { status: 404 }
+        { success: false, error: 'Erro ao buscar dados do usuário' },
+        { status: 500 }
       );
     }
 
