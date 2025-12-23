@@ -27,37 +27,19 @@ export async function POST(request: NextRequest) {
     const emailNormalizado = email.toLowerCase().trim();
     console.log('🔍 Debugando usuário:', emailOriginal);
 
-    // 1. Buscar no banco usuarios_bar (primeiro com email original, depois normalizado)
-    let usuario = null;
-    let usuarioError = null;
-    
-    // Tentar com email original primeiro
-    const { data: usuarioOriginal, error: errorOriginal } = await supabase
+    // 1. Buscar no banco usuarios_bar com ILIKE (case insensitive)
+    const { data: usuarioBusca, error: usuarioError } = await supabase
       .from('usuarios_bar')
       .select('*')
-      .eq('email', emailOriginal)
+      .ilike('email', emailNormalizado)
       .single();
 
-    if (usuarioOriginal) {
-      usuario = usuarioOriginal;
-    } else {
-      // Tentar com email normalizado (lowercase)
-      const { data: usuarioLower, error: errorLower } = await supabase
-        .from('usuarios_bar')
-        .select('*')
-        .eq('email', emailNormalizado)
-        .single();
-      
-      usuario = usuarioLower;
-      usuarioError = errorLower;
-    }
-
-    if (usuarioError || !usuario) {
-      // Tentar buscar com ILIKE (case insensitive)
+    if (usuarioError || !usuarioBusca) {
+      // Tentar buscar múltiplos registros similares
       const { data: usuario2 } = await supabase
         .from('usuarios_bar')
         .select('*')
-        .ilike('email', emailNormalizado)
+        .ilike('email', `%${emailNormalizado}%`)
         .limit(5);
 
       return NextResponse.json({
@@ -68,6 +50,8 @@ export async function POST(request: NextRequest) {
         sugestao: 'Verifique se o email está correto no banco'
       }, { status: 404 });
     }
+
+    const usuario = usuarioBusca;
 
     // 2. Buscar no Supabase Auth
     let authUser: {
