@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     // 1. Buscar dados do usuário
     const { data: usuario, error: fetchError } = await supabase
       .from('usuarios_bar')
-      .select('id, user_id, email, nome')
+      .select('id, user_id, email, nome, role')
       .eq('id', userId)
       .single();
 
