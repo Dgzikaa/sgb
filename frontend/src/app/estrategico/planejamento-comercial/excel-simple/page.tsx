@@ -63,16 +63,30 @@ export default function PlanejamentoComercialExcelSimplePage() {
       });
 
       if (data.success && data.data) {
-        // Filtrar apenas eventos válidos (não incluir terças que não abrimos)
+        // Filtrar apenas eventos válidos (incluir terças abertas com eventos ou dados)
         const eventosValidos = data.data.filter((evento: any) => {
           const dataEvento = new Date(evento.data_evento);
           const diaSemana = dataEvento.getDay(); // 0=domingo, 1=segunda, 2=terça, etc.
+          const eventoNome = evento.evento_nome?.toLowerCase() || '';
           
-          // Não incluir terças (2) que não têm eventos programados
-          if (diaSemana === 2 && (!evento.evento_nome || evento.evento_nome === '-')) {
+          // Se evento está marcado como "fechado" explicitamente, não exibir
+          if (eventoNome === 'fechado') {
             return false;
           }
           
+          // Se é terça (dia 2), só exibir se:
+          // 1. Tem nome de evento válido (não vazio, não "-")
+          // 2. OU tem algum dado real/planejado (receita > 0 ou clientes > 0)
+          if (diaSemana === 2) {
+            const temEvento = evento.evento_nome && evento.evento_nome !== '-' && evento.evento_nome !== '';
+            const temDados = (evento.real_receita || 0) > 0 || 
+                            (evento.m1_receita || 0) > 0 || 
+                            (evento.clientes_real || 0) > 0 ||
+                            (evento.clientes_plan || 0) > 0;
+            return temEvento || temDados;
+          }
+          
+          // Todos os outros dias: exibir normalmente
           return true;
         });
 

@@ -206,10 +206,32 @@ export default function PlanejamentoComercialPage() {
 
       if (data.success && data.data) {
         // A API já retorna os dados filtrados por mês/ano, apenas ordenar por data crescente
-        // Filtrar dias fechados (não exibir na tabela)
-        const dadosFiltrados = data.data.filter((evento: PlanejamentoData) => 
-          evento.evento_nome?.toLowerCase() !== 'fechado'
-        );
+        // Filtrar dias explicitamente fechados (exceto terças com eventos)
+        const dadosFiltrados = data.data.filter((evento: PlanejamentoData) => {
+          const eventoNome = evento.evento_nome?.toLowerCase() || '';
+          const dataEvento = new Date(evento.data_evento);
+          const diaSemana = dataEvento.getDay(); // 0=domingo, 1=segunda, 2=terça, etc.
+          
+          // Se evento está marcado como "fechado" explicitamente, não exibir
+          if (eventoNome === 'fechado') {
+            return false;
+          }
+          
+          // Se é terça (dia 2), só exibir se:
+          // 1. Tem nome de evento válido (não vazio, não "-")
+          // 2. OU tem algum dado real/planejado (receita > 0 ou clientes > 0)
+          if (diaSemana === 2) {
+            const temEvento = eventoNome && eventoNome !== '-' && eventoNome !== '';
+            const temDados = (evento.real_receita || 0) > 0 || 
+                            (evento.m1_receita || 0) > 0 || 
+                            (evento.clientes_real || 0) > 0 ||
+                            (evento.clientes_plan || 0) > 0;
+            return temEvento || temDados;
+          }
+          
+          // Todos os outros dias: exibir normalmente
+          return true;
+        });
         
         const dadosOrdenados = dadosFiltrados.sort((a: PlanejamentoData, b: PlanejamentoData) => {
           const dataA = new Date(a.data_evento);
