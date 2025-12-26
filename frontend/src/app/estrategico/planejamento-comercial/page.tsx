@@ -34,7 +34,9 @@ import {
   Eye,
   Filter,
   BarChart3,
-  Ticket
+  Ticket,
+  UserPlus,
+  RefreshCcw
 } from 'lucide-react';
 
 interface PlanejamentoData {
@@ -83,6 +85,10 @@ interface PlanejamentoData {
   
   // Stockout
   percent_stockout: number;
+  
+  // Segmentação de clientes
+  percent_clientes_novos: number | null;
+  clientes_ativos: number | null;
   
   // Campos manuais para domingos
   faturamento_couvert_manual?: number;
@@ -903,7 +909,7 @@ export default function PlanejamentoComercialPage() {
                       </div>
 
                       {/* Métricas Avançadas - Linha 3 */}
-                      <div className="grid grid-cols-4 gap-2 mb-3 text-center">
+                      <div className="grid grid-cols-4 gap-2 mb-2 text-center">
                         <div>
                           <div className="flex items-center justify-center gap-1 mb-1">
                             <ChefHat className="h-3 w-3 text-gray-500" />
@@ -938,6 +944,28 @@ export default function PlanejamentoComercialPage() {
                           </div>
                           <span className="text-xs font-medium text-gray-900 dark:text-white block">
                             {formatarPercentual(evento.percent_b)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Métricas de Segmentação - Linha 4 */}
+                      <div className="grid grid-cols-2 gap-2 mb-3 text-center">
+                        <div>
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <UserPlus className="h-3 w-3 text-green-500" />
+                            <span className="text-xs text-gray-500 dark:text-gray-400">%Novos</span>
+                          </div>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white block">
+                            {evento.percent_clientes_novos !== null ? `${evento.percent_clientes_novos.toFixed(1)}%` : '-'}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <RefreshCcw className="h-3 w-3 text-blue-500" />
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Ativos</span>
+                          </div>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white block">
+                            {evento.clientes_ativos !== null ? evento.clientes_ativos.toLocaleString('pt-BR') : '-'}
                           </span>
                         </div>
                       </div>

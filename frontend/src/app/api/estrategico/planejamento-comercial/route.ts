@@ -56,6 +56,10 @@ interface PlanejamentoDataFinal {
   // Stockout
   percent_stockout: number;
   
+  // Segmentação de clientes
+  percent_clientes_novos: number | null;
+  clientes_ativos: number | null;
+  
   // Flags de performance
   real_vs_m1_green: boolean;
   ci_real_vs_plan_green: boolean;
@@ -216,6 +220,29 @@ export async function GET(request: NextRequest) {
       console.log(`📝 ${eventosEditadosManualmente.length} eventos com valores editados manualmente (não serão recalculados)`);
     }
 
+    // 📊 Buscar dados de segmentação de clientes (desempenho_semanal)
+    console.log('📊 Buscando dados de segmentação de clientes...');
+    const { data: desempenhoData, error: errorDesempenho } = await supabase
+      .from('desempenho_semanal')
+      .select('data_evento, perc_clientes_novos, clientes_ativos')
+      .eq('bar_id', user.bar_id)
+      .gte('data_evento', dataInicio)
+      .lt('data_evento', dataFinalConsulta);
+    
+    // Criar mapa de desempenho por data para acesso rápido
+    const desempenhoMap = new Map<string, { perc_clientes_novos: number | null, clientes_ativos: number | null }>();
+    if (desempenhoData) {
+      desempenhoData.forEach(d => {
+        desempenhoMap.set(d.data_evento, {
+          perc_clientes_novos: d.perc_clientes_novos,
+          clientes_ativos: d.clientes_ativos
+        });
+      });
+      console.log(`✅ ${desempenhoData.length} registros de desempenho encontrados`);
+    } else if (errorDesempenho) {
+      console.error('❌ Erro ao buscar desempenho_semanal:', errorDesempenho);
+    }
+
     // Processar dados para o formato esperado pelo frontend
     const dadosProcessados: PlanejamentoDataFinal[] = eventosFiltrados.map(evento => {
       // Forçar timezone UTC para evitar problemas de fuso horário
@@ -279,6 +306,10 @@ export async function GET(request: NextRequest) {
         
         // Stockout (agora salvo na tabela eventos_base)
         percent_stockout: evento.percent_stockout || 0,
+        
+        // Segmentação de clientes (de desempenho_semanal)
+        percent_clientes_novos: desempenhoMap.get(evento.data_evento)?.perc_clientes_novos || null,
+        clientes_ativos: desempenhoMap.get(evento.data_evento)?.clientes_ativos || null,
         
         // Campos manuais para domingos
         faturamento_couvert_manual: evento.faturamento_couvert_manual || undefined,
