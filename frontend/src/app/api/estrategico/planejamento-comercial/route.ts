@@ -220,31 +220,11 @@ export async function GET(request: NextRequest) {
       console.log(`📝 ${eventosEditadosManualmente.length} eventos com valores editados manualmente (não serão recalculados)`);
     }
 
-    // 📊 Buscar dados de segmentação de clientes (desempenho_semanal)
-    console.log('📊 Buscando dados de segmentação de clientes...');
-    const { data: desempenhoData, error: errorDesempenho } = await supabase
-      .from('desempenho_semanal')
-      .select('data_evento, perc_clientes_novos, clientes_ativos')
-      .eq('bar_id', user.bar_id)
-      .gte('data_evento', dataInicio)
-      .lt('data_evento', dataFinalConsulta);
+    // 📊 Calcular métricas de segmentação para cada evento (em paralelo)
+    console.log('📊 Calculando métricas de segmentação de clientes...');
     
-    // Criar mapa de desempenho por data para acesso rápido
-    const desempenhoMap = new Map<string, { perc_clientes_novos: number | null, clientes_ativos: number | null }>();
-    if (desempenhoData) {
-      desempenhoData.forEach(d => {
-        desempenhoMap.set(d.data_evento, {
-          perc_clientes_novos: d.perc_clientes_novos,
-          clientes_ativos: d.clientes_ativos
-        });
-      });
-      console.log(`✅ ${desempenhoData.length} registros de desempenho encontrados`);
-    } else if (errorDesempenho) {
-      console.error('❌ Erro ao buscar desempenho_semanal:', errorDesempenho);
-    }
-
     // Processar dados para o formato esperado pelo frontend
-    const dadosProcessados: PlanejamentoDataFinal[] = eventosFiltrados.map(evento => {
+    const dadosProcessados: PlanejamentoDataFinal[] = await Promise.all(eventosFiltrados.map(async (evento) => {
       // Forçar timezone UTC para evitar problemas de fuso horário
       const dataEvento = new Date(evento.data_evento + 'T00:00:00Z');
       
@@ -258,6 +238,53 @@ export async function GET(request: NextRequest) {
       const tCozGreen = (evento.t_coz || 0) <= 12; // Meta <= 12min
       const tBarGreen = (evento.t_bar || 0) <= 4; // Meta <= 4min
       const fat19hGreen = (evento.fat_19h_percent || 0) >= 40; // Meta >= 40%
+
+      // Calcular métricas de segmentação de clientes para o dia
+      let percClientesNovos: number | null = null;
+      let clientesAtivos: number | null = null;
+
+      // Só calcular se o evento tiver clientes reais
+      if (evento.cl_real && evento.cl_real > 0) {
+        try {
+          // Calcular data anterior (7 dias atrás para comparação)
+          const dataEventoDate = new Date(evento.data_evento + 'T00:00:00');
+          const dataAnterior = new Date(dataEventoDate);
+          dataAnterior.setDate(dataEventoDate.getDate() - 7);
+          const dataAnteriorStr = dataAnterior.toISOString().split('T')[0];
+
+          // Calcular métricas de clientes (novos vs retornantes)
+          const { data: metricas } = await supabase.rpc('calcular_metricas_clientes', {
+            p_bar_id: user.bar_id,
+            p_data_inicio_atual: evento.data_evento,
+            p_data_fim_atual: evento.data_evento,
+            p_data_inicio_anterior: dataAnteriorStr,
+            p_data_fim_anterior: dataAnteriorStr
+          });
+
+          if (metricas && metricas[0]) {
+            const totalClientes = Number(metricas[0].total_atual) || 0;
+            const novosClientes = Number(metricas[0].novos_atual) || 0;
+            percClientesNovos = totalClientes > 0 ? parseFloat(((novosClientes / totalClientes) * 100).toFixed(1)) : 0;
+          }
+
+          // Calcular clientes ativos (2+ visitas nos últimos 90 dias)
+          const data90DiasAtras = new Date(dataEventoDate);
+          data90DiasAtras.setDate(dataEventoDate.getDate() - 90);
+          const data90DiasAtrasStr = data90DiasAtras.toISOString().split('T')[0];
+
+          const { data: baseAtivaResult } = await supabase.rpc('get_count_base_ativa', {
+            p_bar_id: user.bar_id,
+            p_data_inicio: data90DiasAtrasStr,
+            p_data_fim: evento.data_evento
+          });
+
+          if (baseAtivaResult !== null) {
+            clientesAtivos = Number(baseAtivaResult);
+          }
+        } catch (error) {
+          console.error(`❌ Erro ao calcular métricas para evento ${evento.id}:`, error);
+        }
+      }
 
       return {
         evento_id: evento.id,
@@ -307,9 +334,9 @@ export async function GET(request: NextRequest) {
         // Stockout (agora salvo na tabela eventos_base)
         percent_stockout: evento.percent_stockout || 0,
         
-        // Segmentação de clientes (de desempenho_semanal)
-        percent_clientes_novos: desempenhoMap.get(evento.data_evento)?.perc_clientes_novos || null,
-        clientes_ativos: desempenhoMap.get(evento.data_evento)?.clientes_ativos || null,
+        // Segmentação de clientes (calculado em tempo real)
+        percent_clientes_novos: percClientesNovos,
+        clientes_ativos: clientesAtivos,
         
         // Campos manuais para domingos
         faturamento_couvert_manual: evento.faturamento_couvert_manual || undefined,
@@ -326,7 +353,7 @@ export async function GET(request: NextRequest) {
         t_bar_green: tBarGreen,
         fat_19h_green: fat19hGreen
       };
-    });
+    }));
 
     console.log(`📊 Dados processados: ${dadosProcessados.length} registros`);
 
