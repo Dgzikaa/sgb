@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
 
     const { data: vendasCategoria } = await supabase.rpc('exec_sql', {
       query_text: vendasQuery,
-    }).catch(() => ({ data: null }))
+    })
 
     // CONSOLIDAÇÃO DOS DADOS
     const consolidado = {

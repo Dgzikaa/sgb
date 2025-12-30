@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 
 interface BottomNavItem {

@@ -485,7 +485,7 @@ export default function Retrospectiva2025Page() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                  label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(1)}%`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
@@ -569,12 +569,12 @@ export default function Retrospectiva2025Page() {
         </div>
 
         {/* Vendas por Categoria */}
-        <ChartCard
-          title="🍺🍹🍽️ Vendas por Categoria"
-          description="Quantidade de itens vendidos em 2025"
-          delay={1.7}
-          className="mt-12"
-        >
+        <div className="mt-12">
+          <ChartCard
+            title="🍺🍹🍽️ Vendas por Categoria"
+            description="Quantidade de itens vendidos em 2025"
+            delay={1.7}
+          >
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data?.vendasPorCategoria || []}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -653,6 +653,7 @@ export default function Retrospectiva2025Page() {
             })}
           </div>
         </ChartCard>
+        </div>
 
         {/* Mensagem Final */}
         <motion.div
