@@ -169,6 +169,15 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         category: 'navigation',
         keywords: ['analítico', 'semanal', 'comparativo', 'dia', 'semana'],
       },
+      {
+        id: 'nav-vendas-categorias',
+        title: 'Vendas por Categoria',
+        description: 'Drinks, Cervejas e Comidas vendidas por ano',
+        icon: TrendingUp,
+        href: '/relatorios/vendas-categorias',
+        category: 'navigation',
+        keywords: ['vendas', 'categoria', 'drinks', 'cervejas', 'comidas', 'ano'],
+      },
 
       // Operações
       {
