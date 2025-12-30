@@ -74,6 +74,54 @@ export async function GET(request: NextRequest) {
       .lt('data', '2026-01-01')
       .order('data', { ascending: true })
 
+    // 8. VENDAS POR CATEGORIA (CERVEJAS, DRINKS, NÃO ALCOÓLICOS, COMIDAS)
+    const vendasQuery = `
+      WITH categorias AS (
+        SELECT 
+          CASE 
+            -- CERVEJAS
+            WHEN loc_desc IN ('Chopp', 'Baldes') AND grp_desc IN ('Cervejas', 'Baldes', 'Happy Hour') THEN 'CERVEJAS'
+            WHEN loc_desc = 'Bar' AND grp_desc IN ('Cervejas', 'Baldes') THEN 'CERVEJAS'
+            
+            -- NÃO ALCOÓLICOS
+            WHEN loc_desc = 'Bar' AND grp_desc = 'Bebidas Não Alcoólicas' THEN 'NÃO ALCOÓLICOS'
+            WHEN grp_desc IN ('Drinks sem Álcool') THEN 'NÃO ALCOÓLICOS'
+            
+            -- DRINKS ALCOÓLICOS
+            WHEN loc_desc IN ('Montados', 'Batidos', 'Preshh', 'Mexido', 'Shot e Dose') THEN 'DRINKS'
+            WHEN loc_desc = 'Bar' AND grp_desc IN ('Drinks Autorais', 'Drinks Classicos', 'Drinks Clássicos',
+                                                    'Drinks Prontos', 'Dose Dupla',
+                                                    'Doses', 'Combos', 'Vinhos', 'Bebidas Prontas',
+                                                    'Happy Hour', 'Fest Moscow') THEN 'DRINKS'
+            
+            -- COMIDAS
+            WHEN loc_desc IN ('Cozinha 1', 'Cozinha 2') THEN 'COMIDAS'
+            
+            ELSE 'OUTROS'
+          END as categoria,
+          qtd,
+          valorfinal
+        FROM contahub_analitico
+        WHERE EXTRACT(YEAR FROM trn_dtgerencial) = 2025
+          AND bar_id = 3
+          AND grp_desc NOT IN ('Insumos', 'Mercadorias- Compras', 'Uso Interno')
+          AND qtd > 0
+      )
+      SELECT 
+        categoria,
+        ROUND(SUM(qtd)::numeric, 2) as quantidade_total,
+        ROUND(SUM(valorfinal)::numeric, 2) as faturamento_total,
+        COUNT(*) as num_vendas
+      FROM categorias
+      WHERE categoria IN ('DRINKS', 'CERVEJAS', 'COMIDAS', 'NÃO ALCOÓLICOS')
+      GROUP BY categoria
+      ORDER BY quantidade_total DESC
+    `
+
+    const { data: vendasCategoria } = await supabase.rpc('exec_sql', {
+      query_text: vendasQuery,
+    }).catch(() => ({ data: null }))
+
     // CONSOLIDAÇÃO DOS DADOS
     const consolidado = {
       // FINANCEIRO
@@ -170,6 +218,9 @@ export async function GET(request: NextRequest) {
         }, [])
         .sort((a: any, b: any) => b.vendaLiquida - a.vendaLiquida)
         .slice(0, 10) || [],
+
+      // VENDAS POR CATEGORIA
+      vendasPorCategoria: vendasCategoria || [],
     }
 
     return NextResponse.json({ success: true, data: consolidado })

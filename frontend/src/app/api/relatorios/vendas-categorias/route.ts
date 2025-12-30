@@ -22,12 +22,16 @@ export async function GET(request: NextRequest) {
             WHEN loc_desc IN ('Chopp', 'Baldes') AND grp_desc IN ('Cervejas', 'Baldes', 'Happy Hour') THEN 'CERVEJAS'
             WHEN loc_desc = 'Bar' AND grp_desc IN ('Cervejas', 'Baldes') THEN 'CERVEJAS'
             
-            -- DRINKS (Montados, Batidos, Preshh, Mexido, Shot e Dose e drinks do Bar)
+            -- NÃO ALCOÓLICOS (bebidas sem álcool, refrigerantes, águas, sucos, energéticos)
+            WHEN loc_desc = 'Bar' AND grp_desc = 'Bebidas Não Alcoólicas' THEN 'NÃO ALCOÓLICOS'
+            WHEN grp_desc IN ('Drinks sem Álcool') THEN 'NÃO ALCOÓLICOS'
+            
+            -- DRINKS ALCOÓLICOS (Montados, Batidos, Preshh, Mexido, Shot e Dose e drinks do Bar)
             WHEN loc_desc IN ('Montados', 'Batidos', 'Preshh', 'Mexido', 'Shot e Dose') THEN 'DRINKS'
             WHEN loc_desc = 'Bar' AND grp_desc IN ('Drinks Autorais', 'Drinks Classicos', 'Drinks Clássicos',
-                                                    'Drinks Prontos', 'Drinks sem Álcool', 'Dose Dupla',
+                                                    'Drinks Prontos', 'Dose Dupla',
                                                     'Doses', 'Combos', 'Vinhos', 'Bebidas Prontas',
-                                                    'Bebidas Não Alcoólicas', 'Happy Hour', 'Fest Moscow') THEN 'DRINKS'
+                                                    'Happy Hour', 'Fest Moscow') THEN 'DRINKS'
             
             -- COMIDAS (Cozinha 1 e Cozinha 2)
             WHEN loc_desc IN ('Cozinha 1', 'Cozinha 2') THEN 'COMIDAS'
@@ -50,7 +54,7 @@ export async function GET(request: NextRequest) {
         ROUND(SUM(valorfinal)::numeric, 2) as faturamento_total,
         COUNT(*) as num_vendas
       FROM categorias
-      WHERE categoria IN ('DRINKS', 'CERVEJAS', 'COMIDAS')
+      WHERE categoria IN ('DRINKS', 'CERVEJAS', 'COMIDAS', 'NÃO ALCOÓLICOS')
       GROUP BY categoria
       ORDER BY quantidade_total DESC
     `;
@@ -78,6 +82,7 @@ export async function GET(request: NextRequest) {
         DRINKS: { quantidade_total: 0, faturamento_total: 0, num_vendas: 0 },
         CERVEJAS: { quantidade_total: 0, faturamento_total: 0, num_vendas: 0 },
         COMIDAS: { quantidade_total: 0, faturamento_total: 0, num_vendas: 0 },
+        'NÃO ALCOÓLICOS': { quantidade_total: 0, faturamento_total: 0, num_vendas: 0 },
         OUTROS: { quantidade_total: 0, faturamento_total: 0, num_vendas: 0 }
       };
 
@@ -92,13 +97,19 @@ export async function GET(request: NextRequest) {
         } else if (loc === 'Bar' && ['Cervejas', 'Baldes'].includes(grp)) {
           categoria = 'CERVEJAS';
         }
-        // DRINKS
+        // NÃO ALCOÓLICOS
+        else if (loc === 'Bar' && grp === 'Bebidas Não Alcoólicas') {
+          categoria = 'NÃO ALCOÓLICOS';
+        } else if (grp === 'Drinks sem Álcool') {
+          categoria = 'NÃO ALCOÓLICOS';
+        }
+        // DRINKS ALCOÓLICOS
         else if (['Montados', 'Batidos', 'Preshh', 'Mexido', 'Shot e Dose'].includes(loc)) {
           categoria = 'DRINKS';
         } else if (loc === 'Bar' && ['Drinks Autorais', 'Drinks Classicos', 'Drinks Clássicos',
-                                      'Drinks Prontos', 'Drinks sem Álcool', 'Dose Dupla',
+                                      'Drinks Prontos', 'Dose Dupla',
                                       'Doses', 'Combos', 'Vinhos', 'Bebidas Prontas',
-                                      'Bebidas Não Alcoólicas', 'Happy Hour', 'Fest Moscow'].includes(grp)) {
+                                      'Happy Hour', 'Fest Moscow'].includes(grp)) {
           categoria = 'DRINKS';
         }
         // COMIDAS

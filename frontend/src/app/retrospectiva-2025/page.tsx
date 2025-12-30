@@ -17,6 +17,10 @@ import {
   Ticket,
   Star,
   Sparkles,
+  Beer,
+  Martini,
+  Droplet,
+  UtensilsCrossed,
 } from 'lucide-react'
 import {
   LineChart,
@@ -224,6 +228,58 @@ export default function Retrospectiva2025Page() {
               gradient="bg-gradient-to-br from-yellow-500 to-amber-600"
               delay={0.6}
               description="Receita total com alimentação"
+            />
+          </div>
+
+          {/* Vendas por Categoria */}
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            className="text-3xl font-black text-white mb-6 text-center"
+          >
+            🛒 Produtos Vendidos em 2025
+          </motion.h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <StatCard
+              title="Cervejas"
+              value={data?.vendas?.cervejas || 0}
+              suffix=" und"
+              icon={Beer}
+              gradient="bg-gradient-to-br from-yellow-500 to-orange-600"
+              delay={0.7}
+              description={`Faturamento: ${formatCurrency(data?.vendas?.faturamentoCervejas || 0)}`}
+            />
+
+            <StatCard
+              title="Drinks"
+              value={data?.vendas?.drinks || 0}
+              suffix=" und"
+              icon={Martini}
+              gradient="bg-gradient-to-br from-blue-500 to-purple-600"
+              delay={0.8}
+              description={`Faturamento: ${formatCurrency(data?.vendas?.faturamentoDrinks || 0)}`}
+            />
+
+            <StatCard
+              title="Não Alcoólicos"
+              value={data?.vendas?.naoAlcoolicos || 0}
+              suffix=" und"
+              icon={Droplet}
+              gradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+              delay={0.9}
+              description={`Faturamento: ${formatCurrency(data?.vendas?.faturamentoNaoAlcoolicos || 0)}`}
+            />
+
+            <StatCard
+              title="Comidas"
+              value={data?.vendas?.comidas || 0}
+              suffix=" und"
+              icon={UtensilsCrossed}
+              gradient="bg-gradient-to-br from-green-500 to-emerald-600"
+              delay={1.0}
+              description={`Faturamento: ${formatCurrency(data?.vendas?.faturamentoComidas || 0)}`}
             />
           </div>
 
@@ -512,11 +568,97 @@ export default function Retrospectiva2025Page() {
           </ChartCard>
         </div>
 
+        {/* Vendas por Categoria */}
+        <ChartCard
+          title="🍺🍹🍽️ Vendas por Categoria"
+          description="Quantidade de itens vendidos em 2025"
+          delay={1.7}
+          className="mt-12"
+        >
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={data?.vendasPorCategoria || []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis 
+                dataKey="categoria"
+                stroke="#9CA3AF"
+                style={{ fontSize: '14px', fontWeight: 'bold' }}
+              />
+              <YAxis 
+                stroke="#9CA3AF"
+                style={{ fontSize: '12px' }}
+                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1F2937',
+                  border: '1px solid #374151',
+                  borderRadius: '8px',
+                  color: '#fff',
+                }}
+                formatter={(value: any, name: string) => {
+                  if (name === 'quantidade_total') {
+                    return [new Intl.NumberFormat('pt-BR').format(value), 'Quantidade']
+                  }
+                  return [formatCurrency(value), 'Faturamento']
+                }}
+              />
+              <Legend 
+                wrapperStyle={{ paddingTop: '20px' }}
+                formatter={(value) => {
+                  if (value === 'quantidade_total') return 'Quantidade Vendida'
+                  return 'Faturamento Total'
+                }}
+              />
+              <Bar
+                dataKey="quantidade_total"
+                fill="#3B82F6"
+                radius={[8, 8, 0, 0]}
+                name="quantidade_total"
+              >
+                {data?.vendasPorCategoria?.map((entry: any, index: number) => {
+                  const colors = ['#F59E0B', '#10B981', '#EF4444']
+                  return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                })}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          
+          {/* Estatísticas detalhadas */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            {data?.vendasPorCategoria?.map((item: any, index: number) => {
+              const icons = { CERVEJAS: '🍺', DRINKS: '🍹', COMIDAS: '🍽️' }
+              const colors = { 
+                CERVEJAS: 'from-amber-500 to-yellow-600', 
+                DRINKS: 'from-green-500 to-emerald-600', 
+                COMIDAS: 'from-red-500 to-rose-600' 
+              }
+              
+              return (
+                <div 
+                  key={index}
+                  className={`p-4 rounded-lg bg-gradient-to-br ${colors[item.categoria as keyof typeof colors] || 'from-gray-500 to-gray-600'} text-white`}
+                >
+                  <div className="text-3xl mb-2">{icons[item.categoria as keyof typeof icons]}</div>
+                  <div className="font-semibold text-lg mb-1">{item.categoria}</div>
+                  <div className="text-2xl font-bold">
+                    {new Intl.NumberFormat('pt-BR').format(parseFloat(item.quantidade_total))}
+                  </div>
+                  <div className="text-sm opacity-90">unidades vendidas</div>
+                  <div className="text-lg font-semibold mt-2">
+                    {formatCurrency(parseFloat(item.faturamento_total))}
+                  </div>
+                  <div className="text-xs opacity-75">faturamento</div>
+                </div>
+              )
+            })}
+          </div>
+        </ChartCard>
+
         {/* Mensagem Final */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.7, duration: 0.8 }}
+          transition={{ delay: 1.8, duration: 0.8 }}
           className="mt-16 text-center"
         >
           <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 shadow-2xl">

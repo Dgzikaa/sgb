@@ -135,6 +135,29 @@ const defaultSidebarItems: SidebarItem[] = [
         // },
       ],
     },
+    {
+      icon: Sparkles,
+      label: 'Retrospectiva 2025',
+      href: '/retrospectiva-2025',
+      color: 'text-purple-600 dark:text-purple-400',
+      permission: 'home',
+      subItems: [
+        {
+          icon: Sparkles,
+          label: 'Visão Geral',
+          href: '/retrospectiva-2025',
+          description: 'Retrospectiva completa do ano de 2025',
+          permission: 'home',
+        },
+        {
+          icon: BarChart3,
+          label: 'Análise Detalhada',
+          href: '/retrospectiva-2025/detalhes',
+          description: 'Análises aprofundadas e métricas',
+          permission: 'home',
+        },
+      ],
+    },
     // {
     //   icon: Zap,
     //   label: 'Operacional',
