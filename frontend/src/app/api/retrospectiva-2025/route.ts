@@ -221,6 +221,18 @@ export async function GET(request: NextRequest) {
 
       // VENDAS POR CATEGORIA
       vendasPorCategoria: vendasCategoria || [],
+      
+      // VENDAS INDIVIDUAIS (para cards)
+      vendas: {
+        cervejas: vendasCategoria?.find((v: any) => v.categoria === 'CERVEJAS')?.quantidade_total || 0,
+        faturamentoCervejas: vendasCategoria?.find((v: any) => v.categoria === 'CERVEJAS')?.faturamento_total || 0,
+        drinks: vendasCategoria?.find((v: any) => v.categoria === 'DRINKS')?.quantidade_total || 0,
+        faturamentoDrinks: vendasCategoria?.find((v: any) => v.categoria === 'DRINKS')?.faturamento_total || 0,
+        naoAlcoolicos: vendasCategoria?.find((v: any) => v.categoria === 'NÃO ALCOÓLICOS')?.quantidade_total || 0,
+        faturamentoNaoAlcoolicos: vendasCategoria?.find((v: any) => v.categoria === 'NÃO ALCOÓLICOS')?.faturamento_total || 0,
+        comidas: vendasCategoria?.find((v: any) => v.categoria === 'COMIDAS')?.quantidade_total || 0,
+        faturamentoComidas: vendasCategoria?.find((v: any) => v.categoria === 'COMIDAS')?.faturamento_total || 0,
+      },
     }
 
     return NextResponse.json({ success: true, data: consolidado })
