@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { normalizeEmail } from '@/lib/email-utils';
+import { safeErrorLog } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic'
+
+// 🔇 Controle de logs verbose - defina como true para debug de login
+const VERBOSE_LOGIN_LOGS = process.env.NODE_ENV === 'development' && process.env.DEBUG_LOGIN === 'true';
 
 // ========================================
 // 🔐 API PARA AUTENTICAÇÃO
@@ -29,10 +32,13 @@ interface LoginFailureLog {
   sessionId: string;
 }
 
-// Função temporária para log de falha
+// Função para log de falhas de login (apenas erros reais, não verbose)
 async function logLoginFailure(data: LoginFailureLog) {
-  console.log('❌ Login failed:', data);
-  // TODO: Implementar log real
+  // Apenas loga em casos reais de falha (não verbose)
+  if (VERBOSE_LOGIN_LOGS) {
+    console.log('❌ Login failed:', data);
+  }
+  // TODO: Implementar log real no banco/Sentry
 }
 
 // ========================================
@@ -40,8 +46,6 @@ async function logLoginFailure(data: LoginFailureLog) {
 // ========================================
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 API de login iniciada');
-
   // Capturar informações do cliente para logging
   const forwarded = request.headers.get('x-forwarded-for');
   const clientIp = forwarded
@@ -52,12 +56,13 @@ export async function POST(request: NextRequest) {
     request.headers.get('x-session-id') || `session_${Date.now()}`;
 
   try {
-    console.log('📥 Fazendo parse do body da requisição');
     const body = await request.json();
     const email = normalizeEmail(body.email); // ✅ Normaliza email
     const senha = body.senha || body.password; // Aceita tanto 'senha' quanto 'password'
 
-    console.log('📝 Dados recebidos:', { email, senha: senha ? '***' : 'undefined' });
+    if (VERBOSE_LOGIN_LOGS) {
+      console.log('🔐 Tentativa de login:', email);
+    }
 
     // Validação básica
     if (!email || !senha) {
@@ -78,13 +83,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🔍 Tentando login para: ${email}`);
-
     // Conectar ao Supabase Admin
     const supabase = await getAdminClient();
 
     // Buscar usuário - pode ter múltiplos registros se tiver acesso a múltiplos bares
-    console.log('🔍 Buscando usuário na tabela usuarios_bar...');
     const { data: usuarios, error: usuarioError } = await supabase
       .from('usuarios_bar')
       .select('*')
@@ -92,7 +94,6 @@ export async function POST(request: NextRequest) {
       .eq('ativo', true);
 
     if (usuarioError || !usuarios || usuarios.length === 0) {
-      console.log('❌ Usuário não encontrado:', usuarioError);
       await logLoginFailure({
         email,
         reason: 'User not found',
@@ -122,15 +123,9 @@ export async function POST(request: NextRequest) {
       .eq('ativo', true);
     
     const availableBars = barsData || [];
-    console.log(`✅ Usuário encontrado com acesso a ${availableBars.length} bar(es):`, availableBars.map(b => b.nome));
 
     // Verificar senha (usando Supabase Auth)
     try {
-      console.log('🔐 Verificando senha...');
-      console.log('📧 Email normalizado:', email.toLowerCase());
-      console.log('🔑 Senha recebida (tamanho):', senha ? senha.length + ' caracteres' : 'vazia');
-      console.log('👤 User ID do banco:', usuario.user_id);
-      
       // Tentar fazer login usando Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: email, // Email já está normalizado
@@ -138,10 +133,9 @@ export async function POST(request: NextRequest) {
       });
 
       if (authError || !authData.user) {
-        console.log('❌ Erro na autenticação:', authError);
-        console.log('❌ Código do erro:', authError?.status);
-        console.log('❌ Mensagem do erro:', authError?.message);
-        console.log('❌ Detalhes completos:', JSON.stringify(authError, null, 2));
+        if (VERBOSE_LOGIN_LOGS) {
+          console.log('❌ Erro na autenticação:', authError?.message);
+        }
         
         await logLoginFailure({
           email,
@@ -168,8 +162,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log('✅ Login bem-sucedido!');
-
       // Preparar dados do usuário para resposta
       // Incluir lista de bares disponíveis para suporte multi-bar
       const userData = {
@@ -194,7 +186,7 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (authError) {
-      console.error('❌ Erro na autenticação:', authError);
+      safeErrorLog('autenticação login', authError);
       await logLoginFailure({
         email,
         reason: 'Authentication error',
@@ -213,7 +205,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('❌ Erro geral no login:', error);
+    safeErrorLog('login geral', error);
     await logLoginFailure({
       email: 'unknown',
       reason: 'Server error',

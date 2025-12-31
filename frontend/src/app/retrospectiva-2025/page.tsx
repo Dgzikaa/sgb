@@ -261,7 +261,7 @@ export default function Retrospectiva2025Page() {
                 </span>
               </div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {(data?.financeiro?.cmvLimpoMedio || 0).toFixed(1)}%
+                {((data?.financeiro?.cmvLimpoMedio || 0) * 100).toFixed(1)}%
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Média Anual
@@ -284,7 +284,7 @@ export default function Retrospectiva2025Page() {
                 </span>
               </div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {(data?.financeiro?.cmoMedio || 0).toFixed(1)}%
+                {((data?.financeiro?.cmoMedio || 0) * 100).toFixed(1)}%
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Custo Mão de Obra
@@ -307,7 +307,7 @@ export default function Retrospectiva2025Page() {
                 </span>
               </div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {(data?.financeiro?.percentualArtisticaMedio || 0).toFixed(1)}%
+                {((data?.financeiro?.percentualArtisticaMedio || 0) * 100).toFixed(1)}%
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Custo Artístico
@@ -547,7 +547,7 @@ export default function Retrospectiva2025Page() {
                 </div>
               </div>
 
-              {/* Distribuição Bebidas vs Comida */}
+              {/* Distribuição Bar / Drinks / Comida */}
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
                 <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Distribuição de Faturamento</h4>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -555,8 +555,9 @@ export default function Retrospectiva2025Page() {
                     <PieChart>
                       <Pie
                         data={[
-                          { name: 'Bebidas', value: data?.financeiro?.faturamentoBebidas || 0 },
-                          { name: 'Comida', value: data?.financeiro?.faturamentoComida || 0 },
+                          { name: 'Bar (Cervejas)', value: data?.vendas?.faturamentoCervejas || 0 },
+                          { name: 'Drinks', value: data?.vendas?.faturamentoDrinks || 0 },
+                          { name: 'Comida', value: data?.vendas?.faturamentoComidas || 0 },
                         ]}
                         cx="50%"
                         cy="50%"
@@ -566,8 +567,9 @@ export default function Retrospectiva2025Page() {
                         fill="#8884d8"
                         dataKey="value"
                       >
-                        <Cell fill="#EF4444" />
                         <Cell fill="#F59E0B" />
+                        <Cell fill="#8B5CF6" />
+                        <Cell fill="#10B981" />
                       </Pie>
                       <Tooltip
                         contentStyle={{
@@ -581,23 +583,47 @@ export default function Retrospectiva2025Page() {
                     </PieChart>
                   </ResponsiveContainer>
 
-                  <div className="flex flex-col justify-center space-y-4">
-                    <div className="flex items-center gap-4 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-lg">
-                      <Wine className="w-8 h-8 text-red-600 dark:text-red-400" />
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">Bebidas</div>
+                  <div className="flex flex-col justify-center space-y-3">
+                    <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg">
+                      <Beer className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Bar (Cervejas)</div>
                         <div className="text-xl font-bold text-gray-900 dark:text-white">
-                          {formatCurrency(data?.financeiro?.faturamentoBebidas || 0)}
+                          {formatCurrency(data?.vendas?.faturamentoCervejas || 0)}
                         </div>
                       </div>
+                      <div className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                        {data?.vendas?.faturamentoCervejas && data?.vendas?.faturamentoCervejas + data?.vendas?.faturamentoDrinks + data?.vendas?.faturamentoComidas > 0
+                          ? ((data.vendas.faturamentoCervejas / (data.vendas.faturamentoCervejas + data.vendas.faturamentoDrinks + data.vendas.faturamentoComidas)) * 100).toFixed(1)
+                          : 0}%
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                      <Utensils className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-                      <div>
+                    <div className="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800 rounded-lg">
+                      <Martini className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Drinks</div>
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">
+                          {formatCurrency(data?.vendas?.faturamentoDrinks || 0)}
+                        </div>
+                      </div>
+                      <div className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                        {data?.vendas?.faturamentoDrinks && data?.vendas?.faturamentoCervejas + data?.vendas?.faturamentoDrinks + data?.vendas?.faturamentoComidas > 0
+                          ? ((data.vendas.faturamentoDrinks / (data.vendas.faturamentoCervejas + data.vendas.faturamentoDrinks + data.vendas.faturamentoComidas)) * 100).toFixed(1)
+                          : 0}%
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 p-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                      <Utensils className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                      <div className="flex-1">
                         <div className="text-sm text-gray-600 dark:text-gray-400">Comida</div>
                         <div className="text-xl font-bold text-gray-900 dark:text-white">
-                          {formatCurrency(data?.financeiro?.faturamentoComida || 0)}
+                          {formatCurrency(data?.vendas?.faturamentoComidas || 0)}
                         </div>
+                      </div>
+                      <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                        {data?.vendas?.faturamentoComidas && data?.vendas?.faturamentoCervejas + data?.vendas?.faturamentoDrinks + data?.vendas?.faturamentoComidas > 0
+                          ? ((data.vendas.faturamentoComidas / (data.vendas.faturamentoCervejas + data.vendas.faturamentoDrinks + data.vendas.faturamentoComidas)) * 100).toFixed(1)
+                          : 0}%
                       </div>
                     </div>
                   </div>
@@ -739,248 +765,653 @@ export default function Retrospectiva2025Page() {
               </div>
             </TabsContent>
 
-            {/* TAB: PROBLEMAS E MELHORIAS */}
+            {/* TAB: DESAFIOS E METAS */}
             <TabsContent value="problemas" className="space-y-6">
-              <div>
-                <h3 className="card-title-dark mb-4">Desafios e Melhorias do Ano</h3>
-                
-                {data?.problemasEMelhorias && data.problemasEMelhorias.length > 0 ? (
-                  <div className="space-y-4">
-                    {data.problemasEMelhorias.map((periodo: any, index: number) => (
-                      <div key={index} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                            <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
-                              {periodo.trimestre === 'Anual' ? '📅' : `${periodo.trimestre}º`}
-                            </span>
-                          </div>
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {periodo.trimestre === 'Anual' ? 'Visão Anual 2025' : `${periodo.trimestre}º Trimestre ${periodo.ano}`}
-                            </h4>
-                            {periodo.imagemObjetivo && (
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Objetivo: {periodo.imagemObjetivo}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Problemas Identificados */}
-                        {periodo.problemas && periodo.problemas.length > 0 && (
-                          <div className="mb-4">
-                            <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                              Principais Problemas Identificados:
-                            </h5>
-                            <ul className="space-y-2">
-                              {periodo.problemas.map((problema: string, pIndex: number) => (
-                                <li key={pIndex} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                  <span className="text-red-500 mt-0.5">⚠️</span>
-                                  <span>{problema}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* Metas Definidas */}
-                        {periodo.metasDefinidas && (
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            {periodo.metasDefinidas.faturamento && (
-                              <div className="text-sm">
-                                <span className="text-gray-500 dark:text-gray-400">Meta Faturamento:</span>
-                                <div className="font-semibold text-gray-900 dark:text-white">
-                                  {formatCurrency(periodo.metasDefinidas.faturamento)}
-                                </div>
-                              </div>
-                            )}
-                            {periodo.metasDefinidas.clientes && (
-                              <div className="text-sm">
-                                <span className="text-gray-500 dark:text-gray-400">Meta Clientes:</span>
-                                <div className="font-semibold text-gray-900 dark:text-white">
-                                  {new Intl.NumberFormat('pt-BR').format(periodo.metasDefinidas.clientes)}
-                                </div>
-                              </div>
-                            )}
-                            {periodo.metasDefinidas.cmv && (
-                              <div className="text-sm">
-                                <span className="text-gray-500 dark:text-gray-400">Meta CMV:</span>
-                                <div className="font-semibold text-gray-900 dark:text-white">
-                                  {periodo.metasDefinidas.cmv}%
-                                </div>
-                              </div>
-                            )}
-                            {periodo.metasDefinidas.cmo && (
-                              <div className="text-sm">
-                                <span className="text-gray-500 dark:text-gray-400">Meta CMO:</span>
-                                <div className="font-semibold text-gray-900 dark:text-white">
-                                  {periodo.metasDefinidas.cmo}%
-                                </div>
-                              </div>
-                            )}
-                            {periodo.metasDefinidas.artistica && (
-                              <div className="text-sm">
-                                <span className="text-gray-500 dark:text-gray-400">Meta Artística:</span>
-                                <div className="font-semibold text-gray-900 dark:text-white">
-                                  {periodo.metasDefinidas.artistica}%
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+              {/* Visão Anual */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                    <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                ) : (
-                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center">
-                    <Target className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Nenhum problema ou meta configurada para 2025
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Visão Anual 2025</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {data?.metas?.visaoGeral?.imagem_1_ano || 'Ser um dos Principais Bares da Cidade'}
                     </p>
                   </div>
+                </div>
+
+                {/* Problemas Identificados */}
+                {data?.metas?.visaoGeral?.principais_problemas && (
+                  <div className="mb-6">
+                    <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Principais Desafios Identificados:
+                    </h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {data.metas.visaoGeral.principais_problemas.map((problema: string, pIndex: number) => (
+                        <div key={pIndex} className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <span className="text-orange-500">⚠️</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{problema}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
+
+                {/* Metas do Ano */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Meta Faturamento</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">R$ 10M</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Meta Clientes</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">4.000</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Meta CMV</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">34%</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Meta CMO</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">20%</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Meta Artística</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">20%</div>
+                  </div>
+                </div>
               </div>
 
-              {/* Comparação Real vs Meta */}
-              {data?.metas?.visaoGeral && (
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Resultado vs Meta Anual
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* CMV Limpo */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">CMV Limpo</div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {(data?.financeiro?.cmvLimpoMedio || 0).toFixed(1)}%
-                          </div>
-                          <div className="text-xs text-gray-500">Real</div>
+              {/* Análise de OKRs com Status Automático */}
+              <div>
+                <h3 className="card-title-dark mb-4">Análise de Metas vs Resultados</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Faturamento */}
+                  <div className={`rounded-xl p-5 border ${
+                    (data?.financeiro?.faturamentoTotal || 0) >= 10000000 
+                      ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' 
+                      : 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400">💰 Faturamento</div>
+                      {(data?.financeiro?.faturamentoTotal || 0) >= 10000000 ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">✓ Atingido</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full">Em progresso</span>
+                      )}
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {formatCurrency(data?.financeiro?.faturamentoTotal || 0)}
                         </div>
-                        <div className="text-right">
-                          <div className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                            {data.metas.visaoGeral.meta_cmv_limpo}%
-                          </div>
-                          <div className="text-xs text-gray-500">Meta</div>
-                        </div>
+                        <div className="text-xs text-gray-500">Real</div>
                       </div>
-                      <div className={`text-sm mt-2 ${
-                        (data?.financeiro?.cmvLimpoMedio || 0) <= data.metas.visaoGeral.meta_cmv_limpo
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {(data?.financeiro?.cmvLimpoMedio || 0) <= data.metas.visaoGeral.meta_cmv_limpo ? '✓ Meta atingida' : '⚠️ Acima da meta'}
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-gray-600 dark:text-gray-400">R$ 10M</div>
+                        <div className="text-xs text-gray-500">Meta</div>
                       </div>
                     </div>
+                    <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${(data?.financeiro?.faturamentoTotal || 0) >= 10000000 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                        style={{ width: `${Math.min(((data?.financeiro?.faturamentoTotal || 0) / 10000000) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-center mt-1 text-gray-500">
+                      {(((data?.financeiro?.faturamentoTotal || 0) / 10000000) * 100).toFixed(0)}%
+                    </div>
+                  </div>
 
-                    {/* CMO */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">CMO</div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {(data?.financeiro?.cmoMedio || 0).toFixed(1)}%
-                          </div>
-                          <div className="text-xs text-gray-500">Real</div>
+                  {/* Clientes Ativos */}
+                  <div className={`rounded-xl p-5 border ${
+                    (data?.financeiro?.clientesAtivos || 0) >= 4000 
+                      ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' 
+                      : 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400">👥 Clientes Ativos</div>
+                      {(data?.financeiro?.clientesAtivos || 0) >= 4000 ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">✓ Atingido</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full">Em progresso</span>
+                      )}
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {new Intl.NumberFormat('pt-BR').format(data?.financeiro?.clientesAtivos || 0)}
                         </div>
-                        <div className="text-right">
-                          <div className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                            {data.metas.visaoGeral.meta_cmo}%
-                          </div>
-                          <div className="text-xs text-gray-500">Meta</div>
+                        <div className="text-xs text-gray-500">Real</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-gray-600 dark:text-gray-400">4.000</div>
+                        <div className="text-xs text-gray-500">Meta</div>
+                      </div>
+                    </div>
+                    <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${(data?.financeiro?.clientesAtivos || 0) >= 4000 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                        style={{ width: `${Math.min(((data?.financeiro?.clientesAtivos || 0) / 4000) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-center mt-1 text-gray-500">
+                      {(((data?.financeiro?.clientesAtivos || 0) / 4000) * 100).toFixed(0)}%
+                    </div>
+                  </div>
+
+                  {/* CMV Limpo */}
+                  <div className={`rounded-xl p-5 border ${
+                    ((data?.financeiro?.cmvMedio || 0) * 100) <= 34 
+                      ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' 
+                      : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400">📊 CMV Limpo</div>
+                      {((data?.financeiro?.cmvMedio || 0) * 100) <= 34 ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">✓ Atingido</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">Acima</span>
+                      )}
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {((data?.financeiro?.cmvMedio || 0) * 100).toFixed(1)}%
                         </div>
+                        <div className="text-xs text-gray-500">Real</div>
                       </div>
-                      <div className={`text-sm mt-2 ${
-                        (data?.financeiro?.cmoMedio || 0) <= data.metas.visaoGeral.meta_cmo
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {(data?.financeiro?.cmoMedio || 0) <= data.metas.visaoGeral.meta_cmo ? '✓ Meta atingida' : '⚠️ Acima da meta'}
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-gray-600 dark:text-gray-400">34%</div>
+                        <div className="text-xs text-gray-500">Meta</div>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* CMO */}
+                  <div className={`rounded-xl p-5 border ${
+                    ((data?.financeiro?.cmoMedio || 0) * 100) <= 20 
+                      ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' 
+                      : 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400">👷 CMO</div>
+                      {((data?.financeiro?.cmoMedio || 0) * 100) <= 20 ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">✓ Atingido</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">Acima</span>
+                      )}
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {((data?.financeiro?.cmoMedio || 0) * 100).toFixed(1)}%
+                        </div>
+                        <div className="text-xs text-gray-500">Real</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-gray-600 dark:text-gray-400">20%</div>
+                        <div className="text-xs text-gray-500">Meta</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Instagram */}
+                  <div className={`rounded-xl p-5 border ${
+                    (data?.marketing?.seguidoresFinal || 0) >= 50000 
+                      ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' 
+                      : 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400">📱 Instagram</div>
+                      {(data?.marketing?.seguidoresFinal || 0) >= 50000 ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">✓ Atingido</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full">Em progresso</span>
+                      )}
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {new Intl.NumberFormat('pt-BR').format(data?.marketing?.seguidoresFinal || 0)}
+                        </div>
+                        <div className="text-xs text-gray-500">Seguidores</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-gray-600 dark:text-gray-400">50k</div>
+                        <div className="text-xs text-gray-500">Meta</div>
+                      </div>
+                    </div>
+                    <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${(data?.marketing?.seguidoresFinal || 0) >= 50000 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                        style={{ width: `${Math.min(((data?.marketing?.seguidoresFinal || 0) / 50000) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-center mt-1 text-gray-500">
+                      {(((data?.marketing?.seguidoresFinal || 0) / 50000) * 100).toFixed(0)}%
+                    </div>
+                  </div>
+
+                  {/* Eventos */}
+                  <div className={`rounded-xl p-5 border ${
+                    (data?.operacional?.totalEventos || 0) >= 50 
+                      ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' 
+                      : 'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
+                  }`}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400">🎉 Eventos Premium</div>
+                      {(data?.operacional?.totalEventos || 0) >= 50 ? (
+                        <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">✓ Atingido</span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full">Em progresso</span>
+                      )}
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {data?.operacional?.totalEventos || 0}
+                        </div>
+                        <div className="text-xs text-gray-500">Realizados</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-gray-600 dark:text-gray-400">50</div>
+                        <div className="text-xs text-gray-500">Meta</div>
+                      </div>
+                    </div>
+                    <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${(data?.operacional?.totalEventos || 0) >= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                        style={{ width: `${Math.min(((data?.operacional?.totalEventos || 0) / 50) * 100, 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-center mt-1 text-gray-500">
+                      {(((data?.operacional?.totalEventos || 0) / 50) * 100).toFixed(0)}%
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+
+              {/* Resumo de Metas */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border border-green-200 dark:border-green-800 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-green-600" />
+                  Resumo das Metas 2025
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                      {[
+                        (data?.financeiro?.faturamentoTotal || 0) >= 10000000,
+                        (data?.financeiro?.clientesAtivos || 0) >= 4000,
+                        ((data?.financeiro?.cmvMedio || 0) * 100) <= 34,
+                        (data?.marketing?.seguidoresFinal || 0) >= 50000,
+                        (data?.operacional?.totalEventos || 0) >= 50,
+                      ].filter(Boolean).length}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Metas Atingidas</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                      {[
+                        ((data?.financeiro?.cmoMedio || 0) * 100) > 20,
+                      ].filter(Boolean).length}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Acima da Meta</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">6</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Total de Metas</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                      {Math.round(([
+                        (data?.financeiro?.faturamentoTotal || 0) >= 10000000,
+                        (data?.financeiro?.clientesAtivos || 0) >= 4000,
+                        ((data?.financeiro?.cmvMedio || 0) * 100) <= 34,
+                        (data?.marketing?.seguidoresFinal || 0) >= 50000,
+                        (data?.operacional?.totalEventos || 0) >= 50,
+                      ].filter(Boolean).length / 6) * 100)}%
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Taxa de Sucesso</div>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
 
-            {/* TAB: CONQUISTAS */}
+            {/* TAB: INSIGHTS ESTRATÉGICOS 360° */}
             <TabsContent value="conquistas" className="space-y-6">
-              <div>
-                <h3 className="card-title-dark mb-4">Conquistas de 2025</h3>
-                
-                {/* OKRs */}
-                {data?.metas?.okrs && data.metas.okrs.length > 0 ? (
+              {/* Header */}
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  🎯 Insights Estratégicos 2025
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Análise 360° do seu ano — dados para planejar 2026
+                </p>
+              </div>
+
+              {/* RECORDES DO ANO */}
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  🏆 Recordes do Ano
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Maior Faturamento */}
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-amber-100 dark:border-amber-900">
+                    <div className="text-xs text-amber-600 dark:text-amber-400 font-medium mb-1">💰 Maior Faturamento</div>
+                    <div className="text-xl font-bold text-gray-900 dark:text-white">
+                      {formatCurrency(data?.insights?.recordes?.maiorFaturamentoDia?.valor || 0)}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {data?.insights?.recordes?.maiorFaturamentoDia?.evento}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      📅 {data?.insights?.recordes?.maiorFaturamentoDia?.data}
+                    </div>
+                  </div>
+                  
+                  {/* Maior Público */}
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-amber-100 dark:border-amber-900">
+                    <div className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">👥 Maior Público</div>
+                    <div className="text-xl font-bold text-gray-900 dark:text-white">
+                      {new Intl.NumberFormat('pt-BR').format(data?.insights?.recordes?.maiorPublico?.clientes || 0)} pessoas
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {data?.insights?.recordes?.maiorPublico?.evento}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      📅 {data?.insights?.recordes?.maiorPublico?.data}
+                    </div>
+                  </div>
+
+                  {/* Melhor Ticket */}
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-amber-100 dark:border-amber-900">
+                    <div className="text-xs text-green-600 dark:text-green-400 font-medium mb-1">🎫 Melhor Ticket Médio</div>
+                    <div className="text-xl font-bold text-gray-900 dark:text-white">
+                      {formatCurrency(data?.insights?.recordes?.melhorTicketMedio?.ticket || 0)}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {data?.insights?.recordes?.melhorTicketMedio?.evento}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      👥 {data?.insights?.recordes?.melhorTicketMedio?.clientes} clientes
+                    </div>
+                  </div>
+
+                  {/* Horário Pico */}
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-amber-100 dark:border-amber-900">
+                    <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">⏰ Horário Pico</div>
+                    <div className="text-xl font-bold text-gray-900 dark:text-white">
+                      {data?.insights?.recordes?.horarioPico?.hora || 0}h
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {formatCurrency(data?.insights?.recordes?.horarioPico?.faturamento || 0)}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Total no ano neste horário
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* TOP CLIENTES */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Clientes que Mais Gastaram */}
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    💎 Top Clientes VIP
+                  </h4>
                   <div className="space-y-3">
-                    {data.metas.okrs.map((okr: any, index: number) => (
-                      <div key={index} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                              {okr.titulo || okr.descricao}
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {okr.descricao}
-                            </p>
+                    {(data?.insights?.topClientes || []).slice(0, 5).map((cliente: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                            idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-gray-400' : idx === 2 ? 'bg-amber-700' : 'bg-gray-500'
+                          }`}>
+                            {idx + 1}
                           </div>
-                          {okr.progresso >= 100 && (
-                            <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 ml-4" />
-                          )}
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white text-sm">{cliente.nome}</div>
+                            <div className="text-xs text-gray-500">{cliente.visitas} visitas • {cliente.tempo_medio_min}min média</div>
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Progresso</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">
-                              {okr.progresso || 0}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div
-                              className={`h-2 rounded-full transition-all ${
-                                (okr.progresso || 0) >= 100
-                                  ? 'bg-green-600 dark:bg-green-400'
-                                  : (okr.progresso || 0) >= 70
-                                  ? 'bg-blue-600 dark:bg-blue-400'
-                                  : 'bg-yellow-600 dark:bg-yellow-400'
-                              }`}
-                              style={{ width: `${Math.min(okr.progresso || 0, 100)}%` }}
-                            />
-                          </div>
+                        <div className="text-right">
+                          <div className="font-bold text-green-600 dark:text-green-400">{formatCurrency(cliente.total_gasto)}</div>
+                          <div className="text-xs text-gray-500">TM: {formatCurrency(cliente.ticket_medio)}</div>
                         </div>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center">
-                    <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Nenhum OKR configurado para 2025
-                    </p>
+                </div>
+
+                {/* Clientes Mais Fiéis */}
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    ❤️ Clientes Mais Fiéis
+                  </h4>
+                  <div className="space-y-3">
+                    {(data?.insights?.clientesFieis || []).slice(0, 5).map((cliente: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                            idx === 0 ? 'bg-red-500' : idx === 1 ? 'bg-pink-500' : idx === 2 ? 'bg-rose-500' : 'bg-gray-500'
+                          }`}>
+                            {idx + 1}
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white text-sm">{cliente.nome}</div>
+                            <div className="text-xs text-gray-500">{cliente.horas_media}h média por visita</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-purple-600 dark:text-purple-400">{cliente.visitas} visitas</div>
+                          <div className="text-xs text-gray-500">{formatCurrency(cliente.total_gasto)} total</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* Visão Estratégica */}
-              {data?.metas?.visaoGeral && (
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Target className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      Visão Estratégica 2025
-                    </h4>
-                  </div>
-                  {data.metas.visaoGeral.visao && (
-                    <p className="text-gray-700 dark:text-gray-300 mb-4">
-                      {data.metas.visaoGeral.visao}
-                    </p>
-                  )}
-                  {data.metas.visaoGeral.missao && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      <strong>Missão:</strong> {data.metas.visaoGeral.missao}
+              {/* TOP ARTISTAS */}
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  🎤 Artistas com Melhor Performance
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(data?.insights?.topArtistas || []).slice(0, 6).map((artista: any, idx: number) => (
+                    <div key={idx} className="bg-white dark:bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="font-medium text-gray-900 dark:text-white text-sm truncate pr-2">
+                          {artista.artista}
+                        </div>
+                        <div className={`text-xs px-2 py-0.5 rounded-full ${
+                          idx === 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                        }`}>
+                          #{idx + 1}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-gray-500">Shows:</span>
+                          <span className="font-medium text-gray-900 dark:text-white ml-1">{artista.shows}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Público:</span>
+                          <span className="font-medium text-gray-900 dark:text-white ml-1">{artista.media_publico}</span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-gray-500">Média Fat.:</span>
+                          <span className="font-medium text-green-600 dark:text-green-400 ml-1">{formatCurrency(artista.media_faturamento)}</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              )}
+              </div>
+
+              {/* PERFORMANCE POR DIA DA SEMANA */}
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  📅 Performance por Dia da Semana
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                  {(data?.insights?.performanceDiaSemana || []).map((dia: any, idx: number) => (
+                    <div key={idx} className={`rounded-lg p-3 text-center ${
+                      idx === 0 ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500' : 'bg-white dark:bg-gray-700/50'
+                    }`}>
+                      <div className={`font-semibold text-sm ${idx === 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                        {dia.dia}
+                      </div>
+                      <div className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                        {(dia.media_faturamento / 1000).toFixed(0)}k
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {dia.media_clientes} pessoas
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {dia.total_eventos} eventos
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* TOP PRODUTOS */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Drinks */}
+                <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    🍹 Top Drinks
+                  </h4>
+                  <div className="space-y-2">
+                    {(data?.insights?.topDrinks || []).slice(0, 5).map((drink: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                            idx === 0 ? 'bg-purple-500 text-white' : 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
+                          }`}>{idx + 1}</span>
+                          <span className="text-gray-700 dark:text-gray-300 truncate">{drink.drink}</span>
+                        </div>
+                        <span className="font-medium text-purple-600 dark:text-purple-400">{drink.quantidade}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Comidas */}
+                <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    🍔 Top Comidas
+                  </h4>
+                  <div className="space-y-2">
+                    {(data?.insights?.topComidas || []).slice(0, 5).map((comida: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                            idx === 0 ? 'bg-emerald-500 text-white' : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                          }`}>{idx + 1}</span>
+                          <span className="text-gray-700 dark:text-gray-300 truncate">{comida.prato}</span>
+                        </div>
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{comida.quantidade}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Horários Pico */}
+                <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    ⏰ Horários de Pico
+                  </h4>
+                  <div className="space-y-2">
+                    {(data?.insights?.horariosPico || []).slice(0, 5).map((horario: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                            idx === 0 ? 'bg-blue-500 text-white' : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                          }`}>{idx + 1}</span>
+                          <span className="text-gray-700 dark:text-gray-300">{horario.hora}h</span>
+                        </div>
+                        <span className="font-medium text-blue-600 dark:text-blue-400">{formatCurrency(horario.faturamento)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* DATAS-CHAVE PARA 2026 */}
+              <div className="bg-gradient-to-br from-indigo-50 to-cyan-50 dark:from-indigo-900/10 dark:to-cyan-900/10 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  🗓️ Datas-Chave para 2026
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Performance em feriados e datas especiais — use para planejar 2026!
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(data?.insights?.datasChave || []).slice(0, 6).map((data_chave: any, idx: number) => (
+                    <div key={idx} className="bg-white dark:bg-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full">
+                          {data_chave.tipo_data}
+                        </span>
+                        <span className="text-xs text-gray-500">{data_chave.dia_semana}</span>
+                      </div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                        {data_chave.evento}
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-500">📅 {data_chave.data_evento}</span>
+                        <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(data_chave.faturamento)}</span>
+                      </div>
+                      {data_chave.clientes > 0 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          👥 {data_chave.clientes} pessoas
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* TOP 10 EVENTOS */}
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                  🎉 Top 10 Eventos do Ano
+                </h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <th className="pb-2 font-medium">#</th>
+                        <th className="pb-2 font-medium">Data</th>
+                        <th className="pb-2 font-medium">Evento</th>
+                        <th className="pb-2 font-medium text-right">Clientes</th>
+                        <th className="pb-2 font-medium text-right">Faturamento</th>
+                        <th className="pb-2 font-medium text-right">Ticket</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(data?.insights?.topEventos || []).map((evento: any, idx: number) => (
+                        <tr key={idx} className="border-b border-gray-100 dark:border-gray-700/50">
+                          <td className="py-2">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                              idx === 0 ? 'bg-amber-500 text-white' : idx === 1 ? 'bg-gray-400 text-white' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
+                            }`}>{idx + 1}</span>
+                          </td>
+                          <td className="py-2 text-gray-600 dark:text-gray-400">{evento.data_evento} ({evento.dia_semana})</td>
+                          <td className="py-2 font-medium text-gray-900 dark:text-white">{evento.evento}</td>
+                          <td className="py-2 text-right text-purple-600 dark:text-purple-400">{evento.clientes}</td>
+                          <td className="py-2 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(evento.faturamento)}</td>
+                          <td className="py-2 text-right text-gray-600 dark:text-gray-400">{formatCurrency(evento.ticket_medio)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
               {/* Mensagem Final */}
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700 rounded-xl p-8 text-center text-white">
@@ -988,9 +1419,23 @@ export default function Retrospectiva2025Page() {
                 <h3 className="text-3xl font-bold mb-2">
                   2025 foi apenas o começo!
                 </h3>
-                <p className="text-lg opacity-90">
-                  Agora é hora de conquistar 2026 com ainda mais força! 🚀
+                <p className="text-lg opacity-90 mb-4">
+                  Use esses insights para dominar 2026! 🚀
                 </p>
+                <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto text-sm">
+                  <div className="bg-white/20 rounded-lg p-3">
+                    <div className="font-bold text-xl">{data?.insights?.topEventos?.length || 0}</div>
+                    <div className="opacity-80">Top Eventos</div>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3">
+                    <div className="font-bold text-xl">{data?.insights?.topClientes?.length || 0}</div>
+                    <div className="opacity-80">Clientes VIP</div>
+                  </div>
+                  <div className="bg-white/20 rounded-lg p-3">
+                    <div className="font-bold text-xl">{data?.insights?.topArtistas?.length || 0}</div>
+                    <div className="opacity-80">Top Artistas</div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
 import { authenticateUser, authErrorResponse } from '@/middleware/auth';
+import { safeErrorLog, isExpectedError } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic'
 
@@ -158,8 +159,8 @@ export async function POST(request: NextRequest) {
       // 9. FINANCEIRO - Por enquanto 0, pode ser implementado depois
       badges.financeiro = 0;
     } catch (queryError: unknown) {
-      const apiError = queryError as ApiError;
-      console.error('Erro nas queries de badges:', apiError);
+      // 🔇 Usa safeErrorLog para ignorar erros esperados (ECONNRESET, etc.)
+      safeErrorLog('queries de badges', queryError);
       // Continuar com badges zerados em caso de erro
     }
 
@@ -178,8 +179,10 @@ export async function POST(request: NextRequest) {
       summary,
     });
   } catch (error: unknown) {
-    const apiError = error as ApiError;
-    console.error('Erro na API badges consolidada:', apiError);
+    // 🔇 Ignora erros esperados (conexão cancelada quando usuário navega)
+    if (!isExpectedError(error)) {
+      safeErrorLog('API badges consolidada', error);
+    }
 
     // Retornar badges zerados em caso de erro
     return NextResponse.json({

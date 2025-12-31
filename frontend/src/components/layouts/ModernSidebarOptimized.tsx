@@ -27,6 +27,7 @@ import {
   Clock,
   Ticket,
   FileSearch,
+  Activity,
 } from 'lucide-react';
 
 /**
@@ -137,6 +138,7 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: Calendar, label: 'Calendário Operacional', href: '/configuracoes/calendario-operacional', permission: 'operacoes' },
       { icon: FileSearch, label: 'Auditoria', href: '/configuracoes/auditoria', permission: 'configuracoes' },
       { icon: Target, label: 'Saúde dos Dados', href: '/configuracoes/saude-dados', permission: 'configuracoes' },
+      { icon: Activity, label: 'Monitoramento', href: '/configuracoes/monitoramento', permission: 'configuracoes' },
     ],
   },
 ];

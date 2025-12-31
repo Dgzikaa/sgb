@@ -188,18 +188,36 @@ class NiboSyncService {
 
       for (const stakeholder of stakeholders) {
         try {
+          // Validar e mapear o tipo (constraint aceita apenas 'Supplier', 'Customer', 'Partner')
+          const tipoValido = ['Supplier', 'Customer', 'Partner'].includes(stakeholder.type) 
+            ? stakeholder.type 
+            : 'Supplier' // Default para Supplier se tipo desconhecido
+          
+          // Extrair informações de PIX se disponíveis
+          const pixInfo = stakeholder.bankingInfo?.pixKeys?.[0] || null
+          
           const stakeholderData = {
-            nibo_id: stakeholder.id,
-            bar_id: this.credentials.bar_id,
-            nome: stakeholder.name,
-            email: stakeholder.email,
-            telefone: stakeholder.phone,
-            tipo: stakeholder.type,
-            ativo: stakeholder.active,
-            data_sincronizacao: new Date().toISOString()
+            nibo_id: String(stakeholder.id),
+            bar_id: parseInt(this.credentials.bar_id), // Converter para INT
+            nome: stakeholder.name || '',
+            email: stakeholder.email || null,
+            telefone: stakeholder.phone || null,
+            tipo: tipoValido,
+            ativo: stakeholder.active !== false,
+            pix_chave: pixInfo?.key || null,
+            pix_tipo: pixInfo?.type && ['CPF', 'CNPJ', 'EMAIL', 'PHONE', 'RANDOM'].includes(pixInfo.type) 
+              ? pixInfo.type 
+              : null,
+            documento_numero: stakeholder.document?.number || null,
+            documento_tipo: stakeholder.document?.type && ['CPF', 'CNPJ'].includes(stakeholder.document.type)
+              ? stakeholder.document.type
+              : null,
+            informacoes_bancarias: stakeholder.bankingInfo || null,
+            raw_data: stakeholder, // Salvar dados brutos para referência
+            atualizado_em: new Date().toISOString()
           }
 
-          const isNew = !existingIds.has(stakeholder.id)
+          const isNew = !existingIds.has(String(stakeholder.id))
           
           const { error } = await this.supabase
             .from('nibo_stakeholders')
@@ -208,7 +226,7 @@ class NiboSyncService {
             })
 
           if (error) {
-            console.error('❌ Erro ao inserir stakeholder:', error)
+            console.error('❌ Erro ao inserir stakeholder:', stakeholder.name, error.message)
             erros++
           } else {
             if (isNew) {
@@ -270,24 +288,26 @@ class NiboSyncService {
       let inseridas = 0
       let erros = 0
 
-      // Processar sequencialmente (mais simples)
+      // Processar sequencialmente - tabela usa categoria_nome e categoria_macro
       for (const category of data.items) {
         try {
+          // A tabela nibo_categorias tem estrutura: categoria_nome, categoria_macro, ativo
+          // Tentar determinar macro categoria baseado no tipo ou grupo
+          const macroCategoria = category.group || category.parentName || category.type || 'Outros'
+          
           const { error } = await this.supabase
             .from('nibo_categorias')
             .upsert({
-              nibo_id: category.id,
-              bar_id: this.credentials.bar_id,
-              nome: category.name,
-              tipo: category.type,
-              ativo: category.active,
-              data_sincronizacao: new Date().toISOString()
+              categoria_nome: category.name,
+              categoria_macro: macroCategoria,
+              ativo: category.active !== false,
+              atualizado_em: new Date().toISOString()
             }, {
-              onConflict: 'nibo_id'
+              onConflict: 'categoria_nome' // Usar nome como chave única
             })
 
           if (error) {
-            console.error('❌ Erro ao inserir categoria:', error)
+            console.error('❌ Erro ao inserir categoria:', category.name, error.message)
             erros++
           } else {
             inseridas++

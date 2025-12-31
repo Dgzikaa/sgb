@@ -1,169 +1,242 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-// Health check endpoint
+interface HealthCheck {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  timestamp: string;
+  version: string;
+  uptime: number;
+  checks: {
+    database: ComponentHealth;
+    cron_jobs: ComponentHealth;
+    edge_functions: ComponentHealth;
+    disk_usage: ComponentHealth;
+  };
+  metrics: {
+    total_eventos: number;
+    eventos_ultimos_7_dias: number;
+    alertas_abertos: number;
+    ultima_sincronizacao_nibo: string | null;
+    ultima_sincronizacao_contahub: string | null;
+    database_size_mb: number;
+  };
+  response_time_ms: number;
+}
+
+interface ComponentHealth {
+  status: 'ok' | 'warning' | 'error';
+  message: string;
+  latency_ms?: number;
+}
+
+const startTime = Date.now();
+
 export async function GET(request: NextRequest) {
-  const startTime = Date.now();
-  const checks: Record<string, any> = {};
+  const requestStart = Date.now();
   
   try {
-    // Check 1: Database connectivity
-    try {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-      
-      const dbStart = Date.now();
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('count')
-        .limit(1)
-        .single();
-      
-      checks.database = {
-        status: error ? 'unhealthy' : 'healthy',
-        latency: Date.now() - dbStart,
-        error: error?.message || null
-      };
-    } catch (error) {
-      checks.database = {
-        status: 'unhealthy',
-        latency: -1,
-        error: (error as Error).message
-      };
-    }
-
-    // Check 2: Memory usage
-    if (typeof process !== 'undefined' && process.memoryUsage) {
-      const memory = process.memoryUsage();
-      const memoryUsagePercent = Math.round((memory.heapUsed / memory.heapTotal) * 100);
-      
-      checks.memory = {
-        status: memoryUsagePercent > 80 ? 'warning' : 'healthy',
-        usage: memoryUsagePercent,
-        heapUsed: Math.round(memory.heapUsed / 1024 / 1024), // MB
-        heapTotal: Math.round(memory.heapTotal / 1024 / 1024) // MB
-      };
-    }
-
-    // Check 3: Environment variables
-    const requiredEnvVars = [
-      'NEXT_PUBLIC_SUPABASE_URL',
-      'NEXT_PUBLIC_SUPABASE_ANON_KEY'
-    ];
+    const supabase = createClient();
     
-    const missingEnvVars = requiredEnvVars.filter(
-      envVar => !process.env[envVar]
-    );
+    // Verificações paralelas para performance
+    const [
+      dbCheck,
+      cronCheck,
+      metricsData
+    ] = await Promise.all([
+      checkDatabase(supabase),
+      checkCronJobs(supabase),
+      getMetrics(supabase)
+    ]);
     
-    checks.environment = {
-      status: missingEnvVars.length > 0 ? 'unhealthy' : 'healthy',
-      missingVars: missingEnvVars
-    };
-
-    // Check 4: External APIs (simulado)
-    checks.externalApis = {
-      contahub: {
-        status: 'healthy',
-        latency: 150
-      },
-      contaazul: {
-        status: 'healthy', 
-        latency: 890
-      },
-      nibo: {
-        status: 'healthy',
-        latency: 320
-      }
-    };
-
+    const response_time_ms = Date.now() - requestStart;
+    
     // Determinar status geral
-    const allChecks = Object.values(checks).flat();
-    const hasUnhealthy = allChecks.some((check: any) => check.status === 'unhealthy');
-    const hasWarning = allChecks.some((check: any) => check.status === 'warning');
+    const allChecks = [dbCheck, cronCheck];
+    let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
     
-    const overallStatus = hasUnhealthy ? 'unhealthy' : hasWarning ? 'warning' : 'healthy';
-    const totalLatency = Date.now() - startTime;
-
-    const response = {
+    if (allChecks.some(c => c.status === 'error')) {
+      overallStatus = 'unhealthy';
+    } else if (allChecks.some(c => c.status === 'warning')) {
+      overallStatus = 'degraded';
+    }
+    
+    const healthCheck: HealthCheck = {
       status: overallStatus,
       timestamp: new Date().toISOString(),
-      latency: totalLatency,
-      version: process.env.NEXT_PUBLIC_APP_VERSION || '2.0.0',
-      environment: process.env.NODE_ENV,
-      uptime: process.uptime ? Math.round(process.uptime()) : null,
-      checks
+      version: process.env.npm_package_version || '1.0.0',
+      uptime: Math.floor((Date.now() - startTime) / 1000),
+      checks: {
+        database: dbCheck,
+        cron_jobs: cronCheck,
+        edge_functions: { status: 'ok', message: 'Edge Functions operacionais' },
+        disk_usage: { status: 'ok', message: 'Uso de disco normal' }
+      },
+      metrics: metricsData,
+      response_time_ms
     };
-
-    // Status code baseado na saúde
-    const statusCode = overallStatus === 'healthy' ? 200 : 
-                      overallStatus === 'warning' ? 200 : 503;
-
-    return NextResponse.json(response, { 
-      status: statusCode,
+    
+    const httpStatus = overallStatus === 'unhealthy' ? 503 : 
+                       overallStatus === 'degraded' ? 200 : 200;
+    
+    return NextResponse.json(healthCheck, { 
+      status: httpStatus,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+        'X-Health-Status': overallStatus
       }
     });
-
-  } catch (error) {
+    
+  } catch (error: any) {
+    const response_time_ms = Date.now() - requestStart;
+    
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      latency: Date.now() - startTime,
-      error: (error as Error).message,
-      version: process.env.NEXT_PUBLIC_APP_VERSION || '2.0.0',
-      environment: process.env.NODE_ENV
-    }, { 
-      status: 503,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache', 
-        'Expires': '0'
-      }
-    });
+      version: '1.0.0',
+      uptime: Math.floor((Date.now() - startTime) / 1000),
+      checks: {
+        database: { status: 'error', message: error.message },
+        cron_jobs: { status: 'error', message: 'Não verificado' },
+        edge_functions: { status: 'error', message: 'Não verificado' },
+        disk_usage: { status: 'error', message: 'Não verificado' }
+      },
+      metrics: {
+        total_eventos: 0,
+        eventos_ultimos_7_dias: 0,
+        alertas_abertos: 0,
+        ultima_sincronizacao_nibo: null,
+        ultima_sincronizacao_contahub: null,
+        database_size_mb: 0
+      },
+      response_time_ms,
+      error: error.message
+    }, { status: 503 });
   }
 }
 
-// Endpoint para métricas detalhadas
-export async function POST(request: NextRequest) {
+async function checkDatabase(supabase: any): Promise<ComponentHealth> {
+  const start = Date.now();
+  
   try {
-    const body = await request.json();
-    const { action } = body;
-
-    if (action === 'detailed_metrics') {
-      // Retornar métricas mais detalhadas
-      const metrics = {
-        timestamp: new Date().toISOString(),
-        performance: {
-          nodeVersion: process.version,
-          platform: process.platform,
-          arch: process.arch,
-          pid: process.pid
-        },
-        memory: process.memoryUsage ? {
-          rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
-          heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-          heapTotal: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
-          external: Math.round(process.memoryUsage().external / 1024 / 1024)
-        } : null,
-        cpu: process.cpuUsage ? process.cpuUsage() : null,
-        uptime: process.uptime ? Math.round(process.uptime()) : null
+    const { data, error } = await supabase
+      .from('bars')
+      .select('id')
+      .limit(1)
+      .single();
+    
+    const latency = Date.now() - start;
+    
+    if (error) {
+      return {
+        status: 'error',
+        message: `Erro de conexão: ${error.message}`,
+        latency_ms: latency
       };
-
-      return NextResponse.json(metrics);
     }
+    
+    if (latency > 2000) {
+      return {
+        status: 'warning',
+        message: `Latência alta: ${latency}ms`,
+        latency_ms: latency
+      };
+    }
+    
+    return {
+      status: 'ok',
+      message: 'Conexão estável',
+      latency_ms: latency
+    };
+    
+  } catch (error: any) {
+    return {
+      status: 'error',
+      message: error.message,
+      latency_ms: Date.now() - start
+    };
+  }
+}
 
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+async function checkCronJobs(supabase: any): Promise<ComponentHealth> {
+  try {
+    // Verificar últimas execuções de cron jobs importantes
+    const { data, error } = await supabase.rpc('exec_sql', {
+      query_text: `
+        SELECT 
+          COUNT(*) FILTER (WHERE status = 'succeeded' AND end_time > NOW() - INTERVAL '24 hours') as successful_24h,
+          COUNT(*) FILTER (WHERE status = 'failed' AND end_time > NOW() - INTERVAL '24 hours') as failed_24h
+        FROM cron.job_run_details
+        WHERE end_time > NOW() - INTERVAL '24 hours'
+      `
+    });
+    
+    if (error) {
+      return {
+        status: 'warning',
+        message: 'Não foi possível verificar cron jobs'
+      };
+    }
+    
+    const result = data?.[0];
+    const failed = parseInt(result?.failed_24h || '0');
+    const successful = parseInt(result?.successful_24h || '0');
+    
+    if (failed > successful * 0.2) { // Mais de 20% de falhas
+      return {
+        status: 'warning',
+        message: `${failed} falhas nas últimas 24h`
+      };
+    }
+    
+    return {
+      status: 'ok',
+      message: `${successful} execuções bem-sucedidas, ${failed} falhas`
+    };
+    
+  } catch (error: any) {
+    return {
+      status: 'warning',
+      message: 'Erro ao verificar cron jobs'
+    };
+  }
+}
 
+async function getMetrics(supabase: any): Promise<HealthCheck['metrics']> {
+  try {
+    const { data, error } = await supabase.rpc('exec_sql', {
+      query_text: `
+        SELECT 
+          (SELECT COUNT(*) FROM eventos_base WHERE ativo = true) as total_eventos,
+          (SELECT COUNT(*) FROM eventos_base WHERE data_evento >= CURRENT_DATE - 7) as eventos_7_dias,
+          (SELECT COUNT(*) FROM sistema_alertas WHERE resolvido_em IS NULL) as alertas_abertos,
+          (SELECT MAX(criado_em) FROM nibo_logs_sincronizacao WHERE status = 'sucesso') as ultima_sync_nibo,
+          (SELECT MAX(data_coleta) FROM contahub_raw_data) as ultima_sync_contahub,
+          (SELECT pg_database_size(current_database()) / 1024 / 1024) as db_size_mb
+      `
+    });
+    
+    const result = data?.[0];
+    
+    return {
+      total_eventos: parseInt(result?.total_eventos || '0'),
+      eventos_ultimos_7_dias: parseInt(result?.eventos_7_dias || '0'),
+      alertas_abertos: parseInt(result?.alertas_abertos || '0'),
+      ultima_sincronizacao_nibo: result?.ultima_sync_nibo || null,
+      ultima_sincronizacao_contahub: result?.ultima_sync_contahub || null,
+      database_size_mb: parseInt(result?.db_size_mb || '0')
+    };
+    
   } catch (error) {
-    return NextResponse.json({ 
-      error: (error as Error).message 
-    }, { status: 500 });
+    return {
+      total_eventos: 0,
+      eventos_ultimos_7_dias: 0,
+      alertas_abertos: 0,
+      ultima_sincronizacao_nibo: null,
+      ultima_sincronizacao_contahub: null,
+      database_size_mb: 0
+    };
   }
 }

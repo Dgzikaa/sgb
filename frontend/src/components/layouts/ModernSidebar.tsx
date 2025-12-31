@@ -369,6 +369,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Monitoramento de integridade dos dados',
           permission: 'configuracoes',
         },
+        {
+          icon: Activity,
+          label: 'Monitoramento',
+          href: '/configuracoes/monitoramento',
+          description: 'Status do sistema e cron jobs',
+          permission: 'configuracoes',
+        },
       ],
     },
   ];

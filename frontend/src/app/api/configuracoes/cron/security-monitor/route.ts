@@ -211,7 +211,7 @@ async function analyzeSuspiciousPatterns(
   }
 
   // Múltiplas requisições para endpoints sensíveis
-  const sensitiveEndpoints = ['/api/usuarios', '/api/admin', '/api/configuracoes/security'];
+  const sensitiveEndpoints = ['/api/usuarios', '/api/configuracoes', '/api/configuracoes/security'];
   const sensitiveRequests = events.filter(
     e =>
       e.endpoint &&

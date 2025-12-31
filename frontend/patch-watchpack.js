@@ -24,26 +24,50 @@ if (!fs.existsSync(watchpackPath)) {
 try {
   let content = fs.readFileSync(watchpackPath, 'utf8');
   
-  // Verificar se o patch já foi aplicado
-  if (content.includes('ZYKOR_WATCHPACK_PATCH')) {
-    console.log('✅ Patch já aplicado anteriormente');
+  // Verificar se o patch V2 já foi aplicado
+  if (content.includes('ZYKOR_WATCHPACK_PATCH_V2')) {
+    console.log('✅ Patch V2 já aplicado anteriormente');
     process.exit(0);
+  }
+  
+  // Remover patch V1 antigo se existir
+  if (content.includes('ZYKOR_WATCHPACK_PATCH')) {
+    console.log('🔄 Removendo patch V1 antigo...');
+    content = content.replace(/\/\/ ZYKOR_WATCHPACK_PATCH - Início[\s\S]*?\/\/ ZYKOR_WATCHPACK_PATCH - Fim\n?/, '');
   }
   
   // Adicionar código no início do arquivo para suprimir erros
   const patchCode = `
-// ZYKOR_WATCHPACK_PATCH - Início
+// ZYKOR_WATCHPACK_PATCH_V2 - Início
 (function() {
   const originalConsoleError = console.error;
+  const suppressPatterns = [
+    'System Volume Information',
+    'pagefile.sys',
+    'hiberfil.sys',
+    'swapfile.sys',
+    'DumpStack.log.tmp',
+    'DumpStack.log',
+    '$RECYCLE.BIN',
+    '$Recycle.Bin',
+    'Config.Msi',
+    'Recovery',
+    'bootmgr',
+    'BOOTNXT'
+  ];
   console.error = function(...args) {
     const message = args.join(' ');
-    if (message.includes('Watchpack Error') && message.includes('System Volume Information')) {
-      return; // Suprimir erro do Watchpack sobre System Volume Information
+    if (message.includes('Watchpack Error')) {
+      for (const pattern of suppressPatterns) {
+        if (message.includes(pattern)) {
+          return; // Suprimir erro do Watchpack sobre arquivos de sistema Windows
+        }
+      }
     }
     originalConsoleError.apply(console, args);
   };
 })();
-// ZYKOR_WATCHPACK_PATCH - Fim
+// ZYKOR_WATCHPACK_PATCH_V2 - Fim
 `;
   
   content = patchCode + content;

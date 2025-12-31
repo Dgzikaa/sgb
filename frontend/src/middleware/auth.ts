@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase-admin';
+import { safeErrorLog } from '@/lib/logger';
+
+// 🔇 Controle de logs verbose - defina como true para debug
+const VERBOSE_AUTH_LOGS = false;
 
 // Tipos para o usuário autenticado
 export interface AuthenticatedUser {
@@ -35,11 +39,13 @@ export async function authenticateUser(
       try {
         const userData = JSON.parse(decodeURIComponent(userDataHeader));
         if (userData && userData.email && userData.bar_id) {
-          console.log(`✅ Usuário autenticado via x-user-data: ${userData.nome || userData.email} (bar_id: ${userData.bar_id})`);
+          if (VERBOSE_AUTH_LOGS) {
+            console.log(`✅ Usuário autenticado: ${userData.nome || userData.email}`);
+          }
           return userData as AuthenticatedUser;
         }
-      } catch (e) {
-        console.log('⚠️ Falha ao parsear x-user-data header, tentando fallback...');
+      } catch {
+        // Silenciosamente tenta fallback
       }
     }
 
@@ -54,7 +60,7 @@ export async function authenticateUser(
     }
 
     if (!userToken) {
-      console.log('🚫 Nenhum token de autenticação encontrado');
+      // Não loga - é comum em rotas públicas
       return null;
     }
 
@@ -63,7 +69,6 @@ export async function authenticateUser(
       const userData = JSON.parse(decodeURIComponent(userToken));
 
       if (!userData || !userData.email || !userData.id) {
-        console.log('🚫 Token inválido - dados incompletos');
         return null;
       }
 
@@ -77,18 +82,18 @@ export async function authenticateUser(
         .single();
 
       if (error || !usuario) {
-        console.log('🚫 Usuário não encontrado ou inativo:', userData.email);
         return null;
       }
 
-      console.log('✅ Usuário autenticado:', usuario.nome);
+      if (VERBOSE_AUTH_LOGS) {
+        console.log('✅ Usuário autenticado:', usuario.nome);
+      }
       return usuario as AuthenticatedUser;
-    } catch (parseError) {
-      console.log('🚫 Erro ao parsear token de usuário:', parseError);
+    } catch {
       return null;
     }
   } catch (error) {
-    console.error('❌ Erro na autenticação:', error);
+    safeErrorLog('autenticação', error);
     return null;
   }
 }
@@ -196,7 +201,7 @@ export function permissionErrorResponse(
 
 // Lista de rotas que requerem autenticação
 export const PROTECTED_ROUTES = [
-  '/api/admin',
+  '/api/configuracoes',
   '/api/configuracoes/dashboard',
   '/api/windsor-auth',
   '/api/windsor-sync',
