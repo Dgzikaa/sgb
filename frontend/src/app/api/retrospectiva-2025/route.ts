@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
     const { data: analiticoData, error: analiticoError } = await supabase
       .from('contahub_analitico')
       .select('*')
-      .gte('data', '2025-01-01')
-      .lt('data', '2026-01-01')
+      .gte('trn_dtgerencial', '2025-01-01')
+      .lt('trn_dtgerencial', '2026-01-01')
 
     if (analiticoError) throw analiticoError
 
@@ -35,17 +35,26 @@ export async function GET(request: NextRequest) {
       .single()
 
     // 4. OKRs E CONQUISTAS
-    const { data: okrsData, error: okrsError } = await supabase
-      .from('organizador_okrs')
-      .select('*')
+    // Primeiro buscar o organizador_id de 2025
+    const { data: visao2025 } = await supabase
+      .from('organizador_visao')
+      .select('id')
       .eq('ano', 2025)
+      .single()
+    
+    const { data: okrsData, error: okrsError } = visao2025 
+      ? await supabase
+          .from('organizador_okrs')
+          .select('*')
+          .eq('organizador_id', visao2025.id)
+      : { data: null, error: null }
 
     // 5. NPS E FELICIDADE
     const { data: npsData, error: npsError } = await supabase
       .from('nps')
       .select('*')
-      .gte('data_resposta', '2025-01-01')
-      .lt('data_resposta', '2026-01-01')
+      .gte('data_pesquisa', '2025-01-01')
+      .lt('data_pesquisa', '2026-01-01')
 
     const { data: felicidadeData, error: felicidadeError } = await supabase
       .from('pesquisa_felicidade')
@@ -63,64 +72,77 @@ export async function GET(request: NextRequest) {
     const { data: yuzerEventos, error: yuzerError } = await supabase
       .from('yuzer_eventos')
       .select('*')
-      .gte('data', '2025-01-01')
-      .lt('data', '2026-01-01')
+      .gte('data_evento', '2025-01-01')
+      .lt('data_evento', '2026-01-01')
 
     // 7. MARKETING E REDES SOCIAIS
     const { data: instagramData, error: instagramError } = await supabase
       .from('windsor_instagram_followers_daily')
       .select('*')
-      .gte('data', '2025-01-01')
-      .lt('data', '2026-01-01')
-      .order('data', { ascending: true })
+      .gte('date', '2025-01-01')
+      .lt('date', '2026-01-01')
+      .order('date', { ascending: true })
 
-    // 8. VENDAS POR CATEGORIA (CERVEJAS, DRINKS, NÃO ALCOÓLICOS, COMIDAS)
-    const vendasQuery = `
-      WITH categorias AS (
-        SELECT 
-          CASE 
-            -- CERVEJAS
-            WHEN loc_desc IN ('Chopp', 'Baldes') AND grp_desc IN ('Cervejas', 'Baldes', 'Happy Hour') THEN 'CERVEJAS'
-            WHEN loc_desc = 'Bar' AND grp_desc IN ('Cervejas', 'Baldes') THEN 'CERVEJAS'
-            
-            -- NÃO ALCOÓLICOS
-            WHEN loc_desc = 'Bar' AND grp_desc = 'Bebidas Não Alcoólicas' THEN 'NÃO ALCOÓLICOS'
-            WHEN grp_desc IN ('Drinks sem Álcool') THEN 'NÃO ALCOÓLICOS'
-            
-            -- DRINKS ALCOÓLICOS
-            WHEN loc_desc IN ('Montados', 'Batidos', 'Preshh', 'Mexido', 'Shot e Dose') THEN 'DRINKS'
-            WHEN loc_desc = 'Bar' AND grp_desc IN ('Drinks Autorais', 'Drinks Classicos', 'Drinks Clássicos',
-                                                    'Drinks Prontos', 'Dose Dupla',
-                                                    'Doses', 'Combos', 'Vinhos', 'Bebidas Prontas',
-                                                    'Happy Hour', 'Fest Moscow') THEN 'DRINKS'
-            
-            -- COMIDAS
-            WHEN loc_desc IN ('Cozinha 1', 'Cozinha 2') THEN 'COMIDAS'
-            
-            ELSE 'OUTROS'
-          END as categoria,
-          qtd,
-          valorfinal
-        FROM contahub_analitico
-        WHERE EXTRACT(YEAR FROM trn_dtgerencial) = 2025
-          AND bar_id = 3
-          AND grp_desc NOT IN ('Insumos', 'Mercadorias- Compras', 'Uso Interno')
-          AND qtd > 0
-      )
-      SELECT 
-        categoria,
-        ROUND(SUM(qtd)::numeric, 2) as quantidade_total,
-        ROUND(SUM(valorfinal)::numeric, 2) as faturamento_total,
-        COUNT(*) as num_vendas
-      FROM categorias
-      WHERE categoria IN ('DRINKS', 'CERVEJAS', 'COMIDAS', 'NÃO ALCOÓLICOS')
-      GROUP BY categoria
-      ORDER BY quantidade_total DESC
-    `
+    // 8. VENDAS POR CATEGORIA - Usar agregação direto no Supabase
+    // Buscar dados analíticos filtrados
+    const { data: analiticoFiltrado } = await supabase
+      .from('contahub_analitico')
+      .select('loc_desc, grp_desc, qtd, valorfinal')
+      .eq('bar_id', 3)
+      .gte('trn_dtgerencial', '2025-01-01')
+      .lt('trn_dtgerencial', '2026-01-01')
+      .gt('qtd', 0)
+      .not('grp_desc', 'in', '("Insumos","Mercadorias- Compras","Uso Interno")')
 
-    const { data: vendasCategoria } = await supabase.rpc('exec_sql', {
-      query_text: vendasQuery,
-    })
+    // Categorizar no backend
+    const vendasCategoria = (analiticoFiltrado || []).reduce((acc: any[], item: any) => {
+      let categoria = 'OUTROS'
+      
+      // CERVEJAS
+      if ((item.loc_desc === 'Chopp' || item.loc_desc === 'Baldes') && 
+          ['Cervejas', 'Baldes', 'Happy Hour'].includes(item.grp_desc)) {
+        categoria = 'CERVEJAS'
+      } else if (item.loc_desc === 'Bar' && ['Cervejas', 'Baldes'].includes(item.grp_desc)) {
+        categoria = 'CERVEJAS'
+      }
+      // NÃO ALCOÓLICOS
+      else if (item.loc_desc === 'Bar' && item.grp_desc === 'Bebidas Não Alcoólicas') {
+        categoria = 'NÃO ALCOÓLICOS'
+      } else if (item.grp_desc === 'Drinks sem Álcool') {
+        categoria = 'NÃO ALCOÓLICOS'
+      }
+      // DRINKS
+      else if (['Montados', 'Batidos', 'Preshh', 'Mexido', 'Shot e Dose'].includes(item.loc_desc)) {
+        categoria = 'DRINKS'
+      } else if (item.loc_desc === 'Bar' && [
+        'Drinks Autorais', 'Drinks Classicos', 'Drinks Clássicos', 'Drinks Prontos',
+        'Dose Dupla', 'Doses', 'Combos', 'Vinhos', 'Bebidas Prontas', 'Happy Hour', 'Fest Moscow'
+      ].includes(item.grp_desc)) {
+        categoria = 'DRINKS'
+      }
+      // COMIDAS
+      else if (['Cozinha 1', 'Cozinha 2'].includes(item.loc_desc)) {
+        categoria = 'COMIDAS'
+      }
+      
+      // Agregar por categoria
+      const existing = acc.find((c: any) => c.categoria === categoria)
+      if (existing) {
+        existing.quantidade_total += parseFloat(item.qtd || 0)
+        existing.faturamento_total += parseFloat(item.valorfinal || 0)
+        existing.num_vendas += 1
+      } else {
+        acc.push({
+          categoria,
+          quantidade_total: parseFloat(item.qtd || 0),
+          faturamento_total: parseFloat(item.valorfinal || 0),
+          num_vendas: 1
+        })
+      }
+      
+      return acc
+    }, []).filter((c: any) => ['DRINKS', 'CERVEJAS', 'COMIDAS', 'NÃO ALCOÓLICOS'].includes(c.categoria))
+      .sort((a: any, b: any) => b.quantidade_total - a.quantidade_total)
 
     // CONSOLIDAÇÃO DOS DADOS
     const consolidado = {
