@@ -110,7 +110,18 @@ export default function Retrospectiva2025Page() {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(value)
+    }).format(value || 0)
+  }
+
+  // Formatar data para dd/mm/yyyy
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-'
+    try {
+      const date = new Date(dateStr)
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    } catch {
+      return dateStr
+    }
   }
 
   return (
@@ -1173,7 +1184,7 @@ export default function Retrospectiva2025Page() {
                     💎 Top Clientes VIP
                   </h4>
                   <div className="space-y-3">
-                    {(data?.insights?.topClientes || []).slice(0, 5).map((cliente: any, idx: number) => (
+                    {(data?.insights?.topClientesGasto || []).slice(0, 5).map((cliente: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
@@ -1183,12 +1194,12 @@ export default function Retrospectiva2025Page() {
                           </div>
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white text-sm">{cliente.nome}</div>
-                            <div className="text-xs text-gray-500">{cliente.visitas} visitas • {cliente.tempo_medio_min}min média</div>
+                            <div className="text-xs text-gray-500">{cliente.visitas} visitas • {cliente.horasmedia?.toFixed(1) || 0}h média</div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-green-600 dark:text-green-400">{formatCurrency(cliente.total_gasto)}</div>
-                          <div className="text-xs text-gray-500">TM: {formatCurrency(cliente.ticket_medio)}</div>
+                          <div className="font-bold text-green-600 dark:text-green-400">{formatCurrency(cliente.totalgasto)}</div>
+                          <div className="text-xs text-gray-500">TM: {formatCurrency(cliente.ticketmedio)}</div>
                         </div>
                       </div>
                     ))}
@@ -1201,7 +1212,7 @@ export default function Retrospectiva2025Page() {
                     ❤️ Clientes Mais Fiéis
                   </h4>
                   <div className="space-y-3">
-                    {(data?.insights?.clientesFieis || []).slice(0, 5).map((cliente: any, idx: number) => (
+                    {(data?.insights?.clientesMaisFieis || []).slice(0, 5).map((cliente: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-gray-700/50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
@@ -1211,12 +1222,12 @@ export default function Retrospectiva2025Page() {
                           </div>
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white text-sm">{cliente.nome}</div>
-                            <div className="text-xs text-gray-500">{cliente.horas_media}h média por visita</div>
+                            <div className="text-xs text-gray-500">{cliente.horasmedia?.toFixed(1) || 0}h média por visita</div>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-purple-600 dark:text-purple-400">{cliente.visitas} visitas</div>
-                          <div className="text-xs text-gray-500">{formatCurrency(cliente.total_gasto)} total</div>
+                          <div className="text-xs text-gray-500">{formatCurrency(cliente.totalgasto)} total</div>
                         </div>
                       </div>
                     ))}
@@ -1249,11 +1260,11 @@ export default function Retrospectiva2025Page() {
                         </div>
                         <div>
                           <span className="text-gray-500">Público:</span>
-                          <span className="font-medium text-gray-900 dark:text-white ml-1">{artista.media_publico}</span>
+                          <span className="font-medium text-gray-900 dark:text-white ml-1">{artista.mediapublico}</span>
                         </div>
                         <div className="col-span-2">
                           <span className="text-gray-500">Média Fat.:</span>
-                          <span className="font-medium text-green-600 dark:text-green-400 ml-1">{formatCurrency(artista.media_faturamento)}</span>
+                          <span className="font-medium text-green-600 dark:text-green-400 ml-1">{formatCurrency(artista.mediafaturamento)}</span>
                         </div>
                       </div>
                     </div>
@@ -1275,13 +1286,13 @@ export default function Retrospectiva2025Page() {
                         {dia.dia}
                       </div>
                       <div className="text-lg font-bold text-gray-900 dark:text-white mt-1">
-                        {(dia.media_faturamento / 1000).toFixed(0)}k
+                        {((dia.mediafaturamento || 0) / 1000).toFixed(0)}k
                       </div>
                       <div className="text-xs text-gray-500">
-                        {dia.media_clientes} pessoas
+                        {dia.mediaclientes || 0} pessoas
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
-                        {dia.total_eventos} eventos
+                        {dia.totaleventos || 0} eventos
                       </div>
                     </div>
                   ))}
@@ -1364,20 +1375,20 @@ export default function Retrospectiva2025Page() {
                     <div key={idx} className="bg-white dark:bg-gray-700/50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full">
-                          {data_chave.tipo_data}
+                          {data_chave.tipodata}
                         </span>
-                        <span className="text-xs text-gray-500">{data_chave.dia_semana}</span>
+                        <span className="text-xs text-gray-500">{data_chave.diasemana}</span>
                       </div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
                         {data_chave.evento}
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-500">📅 {data_chave.data_evento}</span>
+                        <span className="text-gray-500">📅 {formatDate(data_chave.data)}</span>
                         <span className="font-bold text-green-600 dark:text-green-400">{formatCurrency(data_chave.faturamento)}</span>
                       </div>
                       {data_chave.clientes > 0 && (
                         <div className="text-xs text-gray-500 mt-1">
-                          👥 {data_chave.clientes} pessoas
+                          👥 {data_chave.clientes} pessoas • TM: {formatCurrency(data_chave.faturamento / data_chave.clientes)}
                         </div>
                       )}
                     </div>
@@ -1410,11 +1421,11 @@ export default function Retrospectiva2025Page() {
                               idx === 0 ? 'bg-amber-500 text-white' : idx === 1 ? 'bg-gray-400 text-white' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
                             }`}>{idx + 1}</span>
                           </td>
-                          <td className="py-2 text-gray-600 dark:text-gray-400">{evento.data_evento} ({evento.dia_semana})</td>
+                          <td className="py-2 text-gray-600 dark:text-gray-400">{formatDate(evento.data)} ({evento.diasemana})</td>
                           <td className="py-2 font-medium text-gray-900 dark:text-white">{evento.evento}</td>
                           <td className="py-2 text-right text-purple-600 dark:text-purple-400">{evento.clientes}</td>
                           <td className="py-2 text-right font-bold text-green-600 dark:text-green-400">{formatCurrency(evento.faturamento)}</td>
-                          <td className="py-2 text-right text-gray-600 dark:text-gray-400">{formatCurrency(evento.ticket_medio)}</td>
+                          <td className="py-2 text-right text-gray-600 dark:text-gray-400">{formatCurrency(evento.ticketmedio)}</td>
                         </tr>
                       ))}
                     </tbody>
