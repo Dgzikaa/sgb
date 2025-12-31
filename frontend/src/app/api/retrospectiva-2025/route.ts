@@ -68,17 +68,65 @@ export async function GET(request: NextRequest) {
       return allData
     }
 
+    console.log('🔍 Iniciando busca de dados da retrospectiva 2025...')
+
     // 1. DADOS FINANCEIROS CONSOLIDADOS 2025 (com paginação)
     const desempenhoData = await fetchAllData('desempenho_semanal', {
       gte_data_inicio: '2025-01-01',
       lte_data_inicio: '2025-12-31'
     }, 'data_inicio')
 
-    // 2. CLIENTES ATIVOS 2025 (com paginação)
-    const clientesAtivosData = await fetchAllData('clientes_ativos_periodo', {
-      gte_data_inicio: '2025-01-01',
-      lte_data_inicio: '2025-12-31'
-    })
+    // 2. CLIENTES ATIVOS 2025 - Usar RPC para calcular (não existe tabela)
+    let clientesAtivosMedia = 0
+    let recorrenciaMedia = 0
+    
+    try {
+      // Calcular clientes ativos usando RPC get_count_base_ativa
+      // Usando janela de 90 dias até o final de 2025
+      const { data: baseAtiva, error: baseAtivaError } = await supabase.rpc('get_count_base_ativa', {
+        p_bar_id: 3,
+        p_data_inicio: '2025-10-02', // 90 dias antes de 31/12
+        p_data_fim: '2025-12-31'
+      })
+      
+      if (!baseAtivaError && baseAtiva) {
+        clientesAtivosMedia = Number(baseAtiva)
+      }
+
+      // Calcular recorrência média do ano
+      // Taxa de clientes que voltaram vs novos
+      const contahubData = await fetchAllData('contahub_pagamentos', {
+        eq_bar_id: 3,
+        gte_dt_gerencial: '2025-01-01',
+        lte_dt_gerencial: '2025-12-31',
+        not_null_cli_fone: true
+      })
+      
+      const clientesUnicos = new Set(contahubData.map((c: any) => c.cli_fone))
+      const totalClientesUnicos = clientesUnicos.size
+      
+      // Pegar histórico de 2024 para saber quem já era cliente
+      const historico2024 = await fetchAllData('contahub_pagamentos', {
+        eq_bar_id: 3,
+        gte_dt_gerencial: '2024-01-01',
+        lte_dt_gerencial: '2024-12-31',
+        not_null_cli_fone: true
+      })
+      
+      const clientesHistorico = new Set(historico2024.map((c: any) => c.cli_fone))
+      
+      // Contar quantos de 2025 já existiam em 2024
+      let clientesRetornantes = 0
+      clientesUnicos.forEach((fone: any) => {
+        if (clientesHistorico.has(fone)) {
+          clientesRetornantes++
+        }
+      })
+      
+      recorrenciaMedia = totalClientesUnicos > 0 ? clientesRetornantes / totalClientesUnicos : 0
+    } catch (error) {
+      console.error('⚠️ Erro ao calcular clientes ativos:', error)
+    }
 
     // 3. DADOS ANALÍTICOS CONTAHUB (com paginação)
     const analiticoData = await fetchAllData('contahub_analitico', {
@@ -193,16 +241,9 @@ export async function GET(request: NextRequest) {
     }, []).filter((c: any) => ['DRINKS', 'CERVEJAS', 'COMIDAS', 'NÃO ALCOÓLICOS'].includes(c.categoria))
       .sort((a: any, b: any) => b.quantidade_total - a.quantidade_total)
 
-    // CALCULAR INDICADORES AVANÇADOS
-    // Clientes Ativos médio do ano
-    const clientesAtivosMedia = clientesAtivosData && clientesAtivosData.length > 0
-      ? clientesAtivosData.reduce((acc: number, curr: any) => acc + (curr.total_clientes_ativos || 0), 0) / clientesAtivosData.length
-      : 0
-
-    // Recorrência média do ano (clientes que voltaram)
-    const recorrenciaMedia = clientesAtivosData && clientesAtivosData.length > 0
-      ? clientesAtivosData.reduce((acc: number, curr: any) => acc + (curr.taxa_recorrencia || 0), 0) / clientesAtivosData.length
-      : 0
+    console.log('📊 Calculando indicadores avançados...')
+    console.log(`👥 Clientes Ativos: ${clientesAtivosMedia}`)
+    console.log(`🔄 Recorrência: ${(recorrenciaMedia * 100).toFixed(1)}%`)
 
     // CMO médio do ano
     const cmoMedio = desempenhoData && desempenhoData.length > 0
