@@ -7,8 +7,8 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 // Cache simples em memória (válido por 5 minutos)
 let cache: { data: any; timestamp: number } | null = null
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
-// Reset cache on deploy - v7 (get_retrospectiva_completa com todos insights)
-const CACHE_VERSION = 7
+// Reset cache on deploy - v11 (insights extras - 17 categorias adicionais)
+const CACHE_VERSION = 11
 
 export async function GET(request: NextRequest) {
   try {
@@ -79,6 +79,56 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`✅ Insights estratégicos 360° carregados`)
+
+    // 6b. MEGA INSIGHTS 360° (25 categorias de análise)
+    const { data: megaInsightsData, error: erroMegaInsights } = await supabase
+      .rpc('get_mega_insights_360', { p_bar_id: 3 })
+
+    if (erroMegaInsights) {
+      console.error('❌ Erro ao buscar mega insights:', erroMegaInsights)
+    }
+
+    console.log(`✅ Mega insights 360° carregados (25 categorias)`)
+
+    // 6c. INSIGHTS DE OPORTUNIDADES (ações estratégicas 2026)
+    const { data: oportunidadesData, error: erroOportunidades } = await supabase
+      .rpc('get_insights_oportunidades', { p_bar_id: 3 })
+
+    if (erroOportunidades) {
+      console.error('❌ Erro ao buscar oportunidades:', erroOportunidades)
+    }
+
+    console.log(`✅ Insights de oportunidades carregados`)
+
+    // 6d. INSIGHTS ADICIONAIS (google, reservas, categorias, etc)
+    const { data: adicionaisData, error: erroAdicionais } = await supabase
+      .rpc('get_insights_adicionais', { p_bar_id: 3 })
+
+    if (erroAdicionais) {
+      console.error('❌ Erro ao buscar insights adicionais:', erroAdicionais)
+    }
+
+    console.log(`✅ Insights adicionais carregados`)
+
+    // 6e. ULTRA INSIGHTS (24 categorias de análise avançada)
+    const { data: ultraInsightsData, error: erroUltraInsights } = await supabase
+      .rpc('get_ultra_insights', { p_bar_id: 3 })
+
+    if (erroUltraInsights) {
+      console.error('❌ Erro ao buscar ultra insights:', erroUltraInsights)
+    }
+
+    console.log(`✅ Ultra insights carregados (24 categorias)`)
+
+    // 6f. INSIGHTS EXTRAS (17 categorias: vendedores, dormentes, sazonalidade, etc)
+    const { data: extrasData, error: erroExtras } = await supabase
+      .rpc('get_insights_extras', { p_bar_id: 3 })
+
+    if (erroExtras) {
+      console.error('❌ Erro ao buscar insights extras:', erroExtras)
+    }
+
+    console.log(`✅ Insights extras carregados (17 categorias)`)
 
     // 7. Metas e OKRs (busca simples, poucos registros)
     const { data: visaoData } = await supabase
@@ -209,12 +259,27 @@ export async function GET(request: NextRequest) {
         estatisticas: null,
       },
 
+      // MEGA INSIGHTS 360° (25 categorias)
+      megaInsights: megaInsightsData || null,
+
+      // OPORTUNIDADES E AÇÕES ESTRATÉGICAS 2026
+      oportunidades: oportunidadesData || null,
+
+      // INSIGHTS ADICIONAIS (google, reservas, categorias, etc)
+      insightsAdicionais: adicionaisData || null,
+
+      // ULTRA INSIGHTS (24 categorias de análise avançada)
+      ultraInsights: ultraInsightsData || null,
+
+      // INSIGHTS EXTRAS (17 categorias: vendedores, dormentes, sazonalidade, etc)
+      insightsExtras: extrasData || null,
+
       // METADADOS
       _meta: {
         ...dadosPrincipais._meta,
         tempoCarregamento: `${Date.now() - startTime}ms`,
         otimizado: true,
-        versao: 5, // v5 - Insights estratégicos 360°
+        versao: CACHE_VERSION, // v10 - Ultra Insights 24 categorias
       }
     }
 
