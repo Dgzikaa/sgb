@@ -27,27 +27,26 @@ export async function GET(request: NextRequest) {
 
     if (analiticoError) throw analiticoError
 
-    // 3. METAS E VISÃO ESTRATÉGICA
-    const { data: visaoData, error: visaoError } = await supabase
+    // 3. METAS E VISÃO ESTRATÉGICA - Buscar TODOS os organizadores de 2025
+    const { data: visaoData } = await supabase
       .from('organizador_visao')
       .select('*')
       .eq('ano', 2025)
-      .single()
-
-    // 4. OKRs E CONQUISTAS
-    // Primeiro buscar o organizador_id de 2025
-    const { data: visao2025 } = await supabase
-      .from('organizador_visao')
-      .select('id')
-      .eq('ano', 2025)
-      .single()
+      .order('trimestre', { ascending: true, nullsFirst: true })
     
-    const { data: okrsData, error: okrsError } = visao2025 
+    // Pegar a visão anual (sem trimestre) como principal
+    const visaoAnual = visaoData?.find(v => !v.trimestre) || visaoData?.[0] || null
+
+    // 4. OKRs E CONQUISTAS - Buscar OKRs de TODOS os organizadores de 2025
+    const organizadorIds = visaoData?.map(v => v.id) || []
+    
+    const { data: okrsData } = organizadorIds.length > 0
       ? await supabase
           .from('organizador_okrs')
           .select('*')
-          .eq('organizador_id', visao2025.id)
-      : { data: null, error: null }
+          .in('organizador_id', organizadorIds)
+          .order('ordem', { ascending: true })
+      : { data: null }
 
     // 5. NPS E FELICIDADE
     const { data: npsData, error: npsError } = await supabase
@@ -193,9 +192,17 @@ export async function GET(request: NextRequest) {
 
       // METAS E CONQUISTAS
       metas: {
-        visaoGeral: visaoData || null,
-        okrs: okrsData || [],
-        okrsConcluidos: okrsData?.filter(okr => okr.progresso >= 100).length || 0,
+        visaoGeral: visaoAnual,
+        visaoCompleta: visaoData || [],
+        okrs: okrsData?.map(okr => ({
+          ...okr,
+          // Mapear status para progresso %
+          progresso: okr.status === 'verde' ? 100 
+                   : okr.status === 'amarelo' ? 60 
+                   : okr.status === 'vermelho' ? 30 
+                   : 0
+        })) || [],
+        okrsConcluidos: okrsData?.filter(okr => okr.status === 'verde').length || 0,
         okrsTotal: okrsData?.length || 0,
       },
 
