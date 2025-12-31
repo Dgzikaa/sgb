@@ -353,6 +353,37 @@ Após aplicar a correção, os números de `cl_real` devem:
 
 ---
 
+## ✅ **CORREÇÃO APLICADA COM SUCESSO**
+
+### **Resultados do Teste - Semana 52 (22-28/12/2025):**
+
+| Métrica | Sem Filtros | Com vr_pagamentos > 0 | Com Filtros Completos | Diferença |
+|---------|-------------|----------------------|----------------------|-----------|
+| **Total Clientes** | 3.483 | 3.135 | **3.121** | **-362 (-10,4%)** |
+| Filtro vr_pagamentos | - | -348 clientes | - | -348 |
+| Filtro Conta Assinada | - | - | -14 clientes | -14 |
+
+### **Métricas da Função (Semana 52):**
+- **Total Atual**: 3.121 clientes
+- **Novos**: 1.850 clientes
+- **Retornantes**: 1.271 clientes
+- **Base Ativa** (2+ visitas): 76 clientes
+
+### **Relacionamento Descoberto:**
+```sql
+contahub_periodo.vd_mesadesc = contahub_pagamentos.mesa
+contahub_periodo.dt_gerencial = contahub_pagamentos.dt_gerencial
+contahub_periodo.bar_id = contahub_pagamentos.bar_id
+```
+
+### **Impacto dos Filtros:**
+1. ✅ **348 clientes** com `vr_pagamentos = 0` foram excluídos (cortesias, cancelamentos, erros)
+2. ✅ **14 clientes** com "Conta Assinada" foram excluídos (sócios/colaboradores)
+3. ✅ **Total: 362 clientes** excluídos (~10% de redução)
+4. ✅ **Números agora alinhados** com faturamento real!
+
+---
+
 **Data da correção**: 30/12/2025  
 **Motivo**: Regras de filtro sumiram das stored procedures  
-**Status**: ⚠️ **AGUARDANDO APLICAÇÃO**
+**Status**: ✅ **APLICADO VIA MCP** - 100% FUNCIONAL
