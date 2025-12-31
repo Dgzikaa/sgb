@@ -8,18 +8,21 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Helper para buscar dados com paginação
+    // Helper para buscar dados com paginação (corrigido)
     async function fetchAllData(table: string, filters: any = {}, orderBy?: string) {
       let allData: any[] = []
-      let hasMore = true
-      let page = 0
-      const pageSize = 1000
+      let from = 0
+      const limit = 1000
+      const MAX_ITERATIONS = 100
+      let iterations = 0
 
-      while (hasMore) {
+      while (iterations < MAX_ITERATIONS) {
+        iterations++
+
         let query = supabase
           .from(table)
           .select('*')
-          .range(page * pageSize, (page + 1) * pageSize - 1)
+          .range(from, from + limit - 1)
 
         // Aplicar filtros
         Object.entries(filters).forEach(([key, value]) => {
@@ -27,8 +30,13 @@ export async function GET(request: NextRequest) {
             query = query.gte(key.replace('gte_', ''), value)
           } else if (key.startsWith('lt_')) {
             query = query.lt(key.replace('lt_', ''), value)
+          } else if (key.startsWith('lte_')) {
+            query = query.lte(key.replace('lte_', ''), value)
           } else if (key.startsWith('eq_')) {
             query = query.eq(key.replace('eq_', ''), value)
+          } else if (key.startsWith('not_')) {
+            const col = key.replace('not_', '')
+            query = query.not(col, 'is', value)
           }
         })
 
@@ -38,37 +46,45 @@ export async function GET(request: NextRequest) {
 
         const { data, error } = await query
 
-        if (error) throw error
-        if (!data || data.length === 0) {
-          hasMore = false
-        } else {
-          allData = [...allData, ...data]
-          if (data.length < pageSize) {
-            hasMore = false
-          }
-          page++
+        if (error) {
+          console.error(`❌ Erro na paginação da tabela ${table}:`, error)
+          throw error
         }
+
+        if (!data || data.length === 0) {
+          break
+        }
+
+        allData = [...allData, ...data]
+
+        if (data.length < limit) {
+          break
+        }
+
+        from += limit
       }
 
+      console.log(`✅ ${table}: ${allData.length} registros buscados`)
       return allData
     }
 
     // 1. DADOS FINANCEIROS CONSOLIDADOS 2025 (com paginação)
     const desempenhoData = await fetchAllData('desempenho_semanal', {
       gte_data_inicio: '2025-01-01',
-      lt_data_inicio: '2026-01-01'
+      lte_data_inicio: '2025-12-31'
     }, 'data_inicio')
 
     // 2. CLIENTES ATIVOS 2025 (com paginação)
     const clientesAtivosData = await fetchAllData('clientes_ativos_periodo', {
       gte_data_inicio: '2025-01-01',
-      lt_data_fim: '2026-01-01'
+      lte_data_inicio: '2025-12-31'
     })
 
     // 3. DADOS ANALÍTICOS CONTAHUB (com paginação)
     const analiticoData = await fetchAllData('contahub_analitico', {
+      eq_bar_id: 3,
       gte_trn_dtgerencial: '2025-01-01',
-      lt_trn_dtgerencial: '2026-01-01'
+      lte_trn_dtgerencial: '2025-12-31'
     })
 
     // 4. METAS E VISÃO ESTRATÉGICA - Buscar TODOS os organizadores de 2025
@@ -95,40 +111,34 @@ export async function GET(request: NextRequest) {
     // 6. NPS E FELICIDADE (com paginação)
     const npsData = await fetchAllData('nps', {
       gte_data_pesquisa: '2025-01-01',
-      lt_data_pesquisa: '2026-01-01'
+      lte_data_pesquisa: '2025-12-31'
     })
 
     const felicidadeData = await fetchAllData('pesquisa_felicidade', {
       gte_data_pesquisa: '2025-01-01',
-      lt_data_pesquisa: '2026-01-01'
+      lte_data_pesquisa: '2025-12-31'
     })
 
     // 7. EVENTOS (com paginação)
     const symplaEventos = await fetchAllData('sympla_eventos', {
       gte_data_inicio: '2025-01-01',
-      lt_data_inicio: '2026-01-01'
+      lte_data_inicio: '2025-12-31'
     })
 
     const yuzerEventos = await fetchAllData('yuzer_eventos', {
       gte_data_evento: '2025-01-01',
-      lt_data_evento: '2026-01-01'
+      lte_data_evento: '2025-12-31'
     })
 
     // 8. MARKETING E REDES SOCIAIS (com paginação)
     const instagramData = await fetchAllData('windsor_instagram_followers_daily', {
       gte_date: '2025-01-01',
-      lt_date: '2026-01-01'
+      lte_date: '2025-12-31'
     }, 'date')
 
-    // 9. VENDAS POR CATEGORIA (com paginação e filtro)
-    const analiticoFiltrado = await fetchAllData('contahub_analitico', {
-      eq_bar_id: 3,
-      gte_trn_dtgerencial: '2025-01-01',
-      lt_trn_dtgerencial: '2026-01-01'
-    })
-    
+    // 9. VENDAS POR CATEGORIA (usar dados já buscados acima)
     // Filtrar por qtd > 0 e grupos válidos localmente
-    const analiticoFiltradoValido = analiticoFiltrado.filter((item: any) => 
+    const analiticoFiltradoValido = analiticoData.filter((item: any) => 
       item.qtd > 0 && 
       !['Insumos', 'Mercadorias- Compras', 'Uso Interno'].includes(item.grp_desc)
     )
