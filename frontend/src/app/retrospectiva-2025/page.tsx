@@ -188,7 +188,7 @@ export default function Retrospectiva2025Page() {
               </div>
             </div>
 
-            {/* Card: Total Clientes */}
+            {/* Card: Clientes Ativos */}
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
@@ -197,11 +197,16 @@ export default function Retrospectiva2025Page() {
                 </span>
               </div>
               <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                {new Intl.NumberFormat('pt-BR').format(data?.financeiro?.totalClientes || 0)}
+                {new Intl.NumberFormat('pt-BR').format(data?.financeiro?.clientesAtivos || 0)}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Clientes Atendidos
+                Clientes Ativos Médio
               </div>
+              {data?.financeiro?.recorrenciaMedia > 0 && (
+                <div className="text-xs text-green-600 dark:text-green-400 mt-2">
+                  {(data.financeiro.recorrenciaMedia * 100).toFixed(1)}% de recorrência
+                </div>
+              )}
             </div>
 
             {/* Card: Ticket Médio */}
@@ -238,6 +243,84 @@ export default function Retrospectiva2025Page() {
           </div>
         </motion.div>
 
+        {/* Indicadores Operacionais */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {/* Card: CMV Limpo */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border border-green-200 dark:border-green-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+                <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">
+                  CMV Limpo
+                </span>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {(data?.financeiro?.cmvLimpoMedio || 0).toFixed(1)}%
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Média Anual
+              </div>
+              {data?.metas?.visaoGeral?.meta_cmv_limpo && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Meta: {data.metas.visaoGeral.meta_cmv_limpo}%
+                </div>
+              )}
+            </div>
+
+            {/* Card: CMO */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/10 dark:to-cyan-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">
+                  CMO
+                </span>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {(data?.financeiro?.cmoMedio || 0).toFixed(1)}%
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Custo Mão de Obra
+              </div>
+              {data?.metas?.visaoGeral?.meta_cmo && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Meta: {data.metas.visaoGeral.meta_cmo}%
+                </div>
+              )}
+            </div>
+
+            {/* Card: % Artística */}
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 border border-purple-200 dark:border-purple-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                  <Star className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-2 py-1 rounded">
+                  Artística
+                </span>
+              </div>
+              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                {(data?.financeiro?.percentualArtisticaMedio || 0).toFixed(1)}%
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Custo Artístico
+              </div>
+              {data?.metas?.visaoGeral?.meta_artistica && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Meta: {data.metas.visaoGeral.meta_artistica}%
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
         {/* Tabs com Conteúdo Detalhado */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -246,10 +329,11 @@ export default function Retrospectiva2025Page() {
           className="card-dark p-6"
         >
           <Tabs defaultValue="vendas" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsList className="grid w-full grid-cols-5 mb-6">
               <TabsTrigger value="vendas">Vendas</TabsTrigger>
               <TabsTrigger value="evolucao">Evolução</TabsTrigger>
               <TabsTrigger value="cultura">Cultura</TabsTrigger>
+              <TabsTrigger value="problemas">Desafios</TabsTrigger>
               <TabsTrigger value="conquistas">Conquistas</TabsTrigger>
             </TabsList>
 
@@ -653,6 +737,171 @@ export default function Retrospectiva2025Page() {
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
+            </TabsContent>
+
+            {/* TAB: PROBLEMAS E MELHORIAS */}
+            <TabsContent value="problemas" className="space-y-6">
+              <div>
+                <h3 className="card-title-dark mb-4">Desafios e Melhorias do Ano</h3>
+                
+                {data?.problemasEMelhorias && data.problemasEMelhorias.length > 0 ? (
+                  <div className="space-y-4">
+                    {data.problemasEMelhorias.map((periodo: any, index: number) => (
+                      <div key={index} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                            <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                              {periodo.trimestre === 'Anual' ? '📅' : `${periodo.trimestre}º`}
+                            </span>
+                          </div>
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                              {periodo.trimestre === 'Anual' ? 'Visão Anual 2025' : `${periodo.trimestre}º Trimestre ${periodo.ano}`}
+                            </h4>
+                            {periodo.imagemObjetivo && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Objetivo: {periodo.imagemObjetivo}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Problemas Identificados */}
+                        {periodo.problemas && periodo.problemas.length > 0 && (
+                          <div className="mb-4">
+                            <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                              Principais Problemas Identificados:
+                            </h5>
+                            <ul className="space-y-2">
+                              {periodo.problemas.map((problema: string, pIndex: number) => (
+                                <li key={pIndex} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                  <span className="text-red-500 mt-0.5">⚠️</span>
+                                  <span>{problema}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Metas Definidas */}
+                        {periodo.metasDefinidas && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            {periodo.metasDefinidas.faturamento && (
+                              <div className="text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">Meta Faturamento:</span>
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {formatCurrency(periodo.metasDefinidas.faturamento)}
+                                </div>
+                              </div>
+                            )}
+                            {periodo.metasDefinidas.clientes && (
+                              <div className="text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">Meta Clientes:</span>
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {new Intl.NumberFormat('pt-BR').format(periodo.metasDefinidas.clientes)}
+                                </div>
+                              </div>
+                            )}
+                            {periodo.metasDefinidas.cmv && (
+                              <div className="text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">Meta CMV:</span>
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {periodo.metasDefinidas.cmv}%
+                                </div>
+                              </div>
+                            )}
+                            {periodo.metasDefinidas.cmo && (
+                              <div className="text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">Meta CMO:</span>
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {periodo.metasDefinidas.cmo}%
+                                </div>
+                              </div>
+                            )}
+                            {periodo.metasDefinidas.artistica && (
+                              <div className="text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">Meta Artística:</span>
+                                <div className="font-semibold text-gray-900 dark:text-white">
+                                  {periodo.metasDefinidas.artistica}%
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-12 text-center">
+                    <Target className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Nenhum problema ou meta configurada para 2025
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Comparação Real vs Meta */}
+              {data?.metas?.visaoGeral && (
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Resultado vs Meta Anual
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* CMV Limpo */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">CMV Limpo</div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {(data?.financeiro?.cmvLimpoMedio || 0).toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-gray-500">Real</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                            {data.metas.visaoGeral.meta_cmv_limpo}%
+                          </div>
+                          <div className="text-xs text-gray-500">Meta</div>
+                        </div>
+                      </div>
+                      <div className={`text-sm mt-2 ${
+                        (data?.financeiro?.cmvLimpoMedio || 0) <= data.metas.visaoGeral.meta_cmv_limpo
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {(data?.financeiro?.cmvLimpoMedio || 0) <= data.metas.visaoGeral.meta_cmv_limpo ? '✓ Meta atingida' : '⚠️ Acima da meta'}
+                      </div>
+                    </div>
+
+                    {/* CMO */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">CMO</div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {(data?.financeiro?.cmoMedio || 0).toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-gray-500">Real</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                            {data.metas.visaoGeral.meta_cmo}%
+                          </div>
+                          <div className="text-xs text-gray-500">Meta</div>
+                        </div>
+                      </div>
+                      <div className={`text-sm mt-2 ${
+                        (data?.financeiro?.cmoMedio || 0) <= data.metas.visaoGeral.meta_cmo
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {(data?.financeiro?.cmoMedio || 0) <= data.metas.visaoGeral.meta_cmo ? '✓ Meta atingida' : '⚠️ Acima da meta'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             {/* TAB: CONQUISTAS */}

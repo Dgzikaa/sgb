@@ -8,26 +8,70 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // 1. DADOS FINANCEIROS CONSOLIDADOS 2025
-    const { data: desempenhoData, error: desempenhoError } = await supabase
-      .from('desempenho_semanal')
-      .select('*')
-      .gte('data_inicio', '2025-01-01')
-      .lt('data_inicio', '2026-01-01')
-      .order('data_inicio', { ascending: true })
+    // Helper para buscar dados com paginação
+    async function fetchAllData(table: string, filters: any = {}, orderBy?: string) {
+      let allData: any[] = []
+      let hasMore = true
+      let page = 0
+      const pageSize = 1000
 
-    if (desempenhoError) throw desempenhoError
+      while (hasMore) {
+        let query = supabase
+          .from(table)
+          .select('*')
+          .range(page * pageSize, (page + 1) * pageSize - 1)
 
-    // 2. DADOS ANALÍTICOS CONTAHUB (BEBIDAS VS COMIDA)
-    const { data: analiticoData, error: analiticoError } = await supabase
-      .from('contahub_analitico')
-      .select('*')
-      .gte('trn_dtgerencial', '2025-01-01')
-      .lt('trn_dtgerencial', '2026-01-01')
+        // Aplicar filtros
+        Object.entries(filters).forEach(([key, value]) => {
+          if (key.startsWith('gte_')) {
+            query = query.gte(key.replace('gte_', ''), value)
+          } else if (key.startsWith('lt_')) {
+            query = query.lt(key.replace('lt_', ''), value)
+          } else if (key.startsWith('eq_')) {
+            query = query.eq(key.replace('eq_', ''), value)
+          }
+        })
 
-    if (analiticoError) throw analiticoError
+        if (orderBy) {
+          query = query.order(orderBy, { ascending: true })
+        }
 
-    // 3. METAS E VISÃO ESTRATÉGICA - Buscar TODOS os organizadores de 2025
+        const { data, error } = await query
+
+        if (error) throw error
+        if (!data || data.length === 0) {
+          hasMore = false
+        } else {
+          allData = [...allData, ...data]
+          if (data.length < pageSize) {
+            hasMore = false
+          }
+          page++
+        }
+      }
+
+      return allData
+    }
+
+    // 1. DADOS FINANCEIROS CONSOLIDADOS 2025 (com paginação)
+    const desempenhoData = await fetchAllData('desempenho_semanal', {
+      gte_data_inicio: '2025-01-01',
+      lt_data_inicio: '2026-01-01'
+    }, 'data_inicio')
+
+    // 2. CLIENTES ATIVOS 2025 (com paginação)
+    const clientesAtivosData = await fetchAllData('clientes_ativos_periodo', {
+      gte_data_inicio: '2025-01-01',
+      lt_data_fim: '2026-01-01'
+    })
+
+    // 3. DADOS ANALÍTICOS CONTAHUB (com paginação)
+    const analiticoData = await fetchAllData('contahub_analitico', {
+      gte_trn_dtgerencial: '2025-01-01',
+      lt_trn_dtgerencial: '2026-01-01'
+    })
+
+    // 4. METAS E VISÃO ESTRATÉGICA - Buscar TODOS os organizadores de 2025
     const { data: visaoData } = await supabase
       .from('organizador_visao')
       .select('*')
@@ -37,7 +81,7 @@ export async function GET(request: NextRequest) {
     // Pegar a visão anual (sem trimestre) como principal
     const visaoAnual = visaoData?.find(v => !v.trimestre) || visaoData?.[0] || null
 
-    // 4. OKRs E CONQUISTAS - Buscar OKRs de TODOS os organizadores de 2025
+    // 5. OKRs E CONQUISTAS - Buscar OKRs de TODOS os organizadores de 2025
     const organizadorIds = visaoData?.map(v => v.id) || []
     
     const { data: okrsData } = organizadorIds.length > 0
@@ -48,53 +92,49 @@ export async function GET(request: NextRequest) {
           .order('ordem', { ascending: true })
       : { data: null }
 
-    // 5. NPS E FELICIDADE
-    const { data: npsData, error: npsError } = await supabase
-      .from('nps')
-      .select('*')
-      .gte('data_pesquisa', '2025-01-01')
-      .lt('data_pesquisa', '2026-01-01')
+    // 6. NPS E FELICIDADE (com paginação)
+    const npsData = await fetchAllData('nps', {
+      gte_data_pesquisa: '2025-01-01',
+      lt_data_pesquisa: '2026-01-01'
+    })
 
-    const { data: felicidadeData, error: felicidadeError } = await supabase
-      .from('pesquisa_felicidade')
-      .select('*')
-      .gte('data_resposta', '2025-01-01')
-      .lt('data_resposta', '2026-01-01')
+    const felicidadeData = await fetchAllData('pesquisa_felicidade', {
+      gte_data_pesquisa: '2025-01-01',
+      lt_data_pesquisa: '2026-01-01'
+    })
 
-    // 6. EVENTOS (SYMPLA + YUZER)
-    const { data: symplaEventos, error: symplaError } = await supabase
-      .from('sympla_eventos')
-      .select('*')
-      .gte('data_inicio', '2025-01-01')
-      .lt('data_inicio', '2026-01-01')
+    // 7. EVENTOS (com paginação)
+    const symplaEventos = await fetchAllData('sympla_eventos', {
+      gte_data_inicio: '2025-01-01',
+      lt_data_inicio: '2026-01-01'
+    })
 
-    const { data: yuzerEventos, error: yuzerError } = await supabase
-      .from('yuzer_eventos')
-      .select('*')
-      .gte('data_evento', '2025-01-01')
-      .lt('data_evento', '2026-01-01')
+    const yuzerEventos = await fetchAllData('yuzer_eventos', {
+      gte_data_evento: '2025-01-01',
+      lt_data_evento: '2026-01-01'
+    })
 
-    // 7. MARKETING E REDES SOCIAIS
-    const { data: instagramData, error: instagramError } = await supabase
-      .from('windsor_instagram_followers_daily')
-      .select('*')
-      .gte('date', '2025-01-01')
-      .lt('date', '2026-01-01')
-      .order('date', { ascending: true })
+    // 8. MARKETING E REDES SOCIAIS (com paginação)
+    const instagramData = await fetchAllData('windsor_instagram_followers_daily', {
+      gte_date: '2025-01-01',
+      lt_date: '2026-01-01'
+    }, 'date')
 
-    // 8. VENDAS POR CATEGORIA - Usar agregação direto no Supabase
-    // Buscar dados analíticos filtrados
-    const { data: analiticoFiltrado } = await supabase
-      .from('contahub_analitico')
-      .select('loc_desc, grp_desc, qtd, valorfinal')
-      .eq('bar_id', 3)
-      .gte('trn_dtgerencial', '2025-01-01')
-      .lt('trn_dtgerencial', '2026-01-01')
-      .gt('qtd', 0)
-      .not('grp_desc', 'in', '("Insumos","Mercadorias- Compras","Uso Interno")')
+    // 9. VENDAS POR CATEGORIA (com paginação e filtro)
+    const analiticoFiltrado = await fetchAllData('contahub_analitico', {
+      eq_bar_id: 3,
+      gte_trn_dtgerencial: '2025-01-01',
+      lt_trn_dtgerencial: '2026-01-01'
+    })
+    
+    // Filtrar por qtd > 0 e grupos válidos localmente
+    const analiticoFiltradoValido = analiticoFiltrado.filter((item: any) => 
+      item.qtd > 0 && 
+      !['Insumos', 'Mercadorias- Compras', 'Uso Interno'].includes(item.grp_desc)
+    )
 
     // Categorizar no backend
-    const vendasCategoria = (analiticoFiltrado || []).reduce((acc: any[], item: any) => {
+    const vendasCategoria = (analiticoFiltradoValido || []).reduce((acc: any[], item: any) => {
       let categoria = 'OUTROS'
       
       // CERVEJAS
@@ -143,39 +183,79 @@ export async function GET(request: NextRequest) {
     }, []).filter((c: any) => ['DRINKS', 'CERVEJAS', 'COMIDAS', 'NÃO ALCOÓLICOS'].includes(c.categoria))
       .sort((a: any, b: any) => b.quantidade_total - a.quantidade_total)
 
+    // CALCULAR INDICADORES AVANÇADOS
+    // Clientes Ativos médio do ano
+    const clientesAtivosMedia = clientesAtivosData && clientesAtivosData.length > 0
+      ? clientesAtivosData.reduce((acc: number, curr: any) => acc + (curr.total_clientes_ativos || 0), 0) / clientesAtivosData.length
+      : 0
+
+    // Recorrência média do ano (clientes que voltaram)
+    const recorrenciaMedia = clientesAtivosData && clientesAtivosData.length > 0
+      ? clientesAtivosData.reduce((acc: number, curr: any) => acc + (curr.taxa_recorrencia || 0), 0) / clientesAtivosData.length
+      : 0
+
+    // CMO médio do ano
+    const cmoMedio = desempenhoData && desempenhoData.length > 0
+      ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.cmo || 0), 0) / desempenhoData.length
+      : 0
+
+    // % Artística média do ano
+    const percentualArtisticaMedio = desempenhoData && desempenhoData.length > 0
+      ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.custo_atracao_faturamento || 0), 0) / desempenhoData.length
+      : 0
+
+    // CMV Limpo médio do ano
+    const cmvLimpoMedio = desempenhoData && desempenhoData.length > 0
+      ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.cmv_limpo || 0), 0) / desempenhoData.length
+      : 0
+
     // CONSOLIDAÇÃO DOS DADOS
     const consolidado = {
       // FINANCEIRO
       financeiro: {
-        faturamentoTotal: desempenhoData?.reduce((acc, curr) => acc + (curr.faturamento_total || 0), 0) || 0,
-        faturamentoBebidas: analiticoData?.filter(p => p.categoria?.toLowerCase().includes('bebida')).reduce((acc, curr) => acc + (curr.venda_liquida || 0), 0) || 0,
-        faturamentoComida: analiticoData?.filter(p => p.categoria?.toLowerCase().includes('comida') || p.categoria?.toLowerCase().includes('food')).reduce((acc, curr) => acc + (curr.venda_liquida || 0), 0) || 0,
+        faturamentoTotal: desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.faturamento_total || 0), 0) || 0,
+        faturamentoBebidas: analiticoData?.filter((p: any) => p.categoria?.toLowerCase().includes('bebida')).reduce((acc: number, curr: any) => acc + (curr.venda_liquida || 0), 0) || 0,
+        faturamentoComida: analiticoData?.filter((p: any) => p.categoria?.toLowerCase().includes('comida') || p.categoria?.toLowerCase().includes('food')).reduce((acc: number, curr: any) => acc + (curr.venda_liquida || 0), 0) || 0,
         ticketMedio: desempenhoData && desempenhoData.length > 0 
-          ? desempenhoData.reduce((acc, curr) => acc + (curr.ticket_medio || 0), 0) / desempenhoData.length 
+          ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.ticket_medio || 0), 0) / desempenhoData.length 
           : 0,
-        totalClientes: desempenhoData?.reduce((acc, curr) => acc + (curr.total_clientes || 0), 0) || 0,
-        cmvMedio: desempenhoData && desempenhoData.length > 0
-          ? desempenhoData.reduce((acc, curr) => acc + (curr.cmv_percentual || 0), 0) / desempenhoData.length
-          : 0,
-        cmoMedio: desempenhoData && desempenhoData.length > 0
-          ? desempenhoData.reduce((acc, curr) => acc + (curr.cmo_percentual || 0), 0) / desempenhoData.length
-          : 0,
+        clientesAtivos: Math.round(clientesAtivosMedia),
+        totalClientes: desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.total_clientes || 0), 0) || 0,
+        recorrenciaMedia: recorrenciaMedia,
+        cmvLimpoMedio: cmvLimpoMedio,
+        cmoMedio: cmoMedio,
+        percentualArtisticaMedio: percentualArtisticaMedio,
       },
 
       // OPERACIONAL
       operacional: {
         totalSemanas: desempenhoData?.length || 0,
         totalEventos: (symplaEventos?.length || 0) + (yuzerEventos?.length || 0),
-        ticketsVendidos: symplaEventos?.reduce((acc, curr) => acc + (curr.total_ingressos || 0), 0) || 0,
+        ticketsVendidos: symplaEventos?.reduce((acc: number, curr: any) => acc + (curr.total_ingressos || 0), 0) || 0,
       },
+
+      // PROBLEMAS E MELHORIAS (baseado nos trimestres)
+      problemasEMelhorias: visaoData?.map((v: any) => ({
+        trimestre: v.trimestre || 'Anual',
+        ano: v.ano,
+        problemas: v.principais_problemas || [],
+        metasDefinidas: {
+          faturamento: v.faturamento_meta,
+          clientes: v.meta_clientes_ativos,
+          cmv: v.meta_cmv_limpo,
+          cmo: v.meta_cmo,
+          artistica: v.meta_artistica,
+        },
+        imagemObjetivo: v.imagem_1_ano || v.imagem_3_anos || null
+      })) || [],
 
       // PESSOAS E CULTURA
       pessoasCultura: {
         npsMedia: npsData && npsData.length > 0
-          ? npsData.reduce((acc, curr) => acc + (curr.nota || 0), 0) / npsData.length
+          ? npsData.reduce((acc: number, curr: any) => acc + (curr.nota || 0), 0) / npsData.length
           : 0,
         felicidadeMedia: felicidadeData && felicidadeData.length > 0
-          ? felicidadeData.reduce((acc, curr) => acc + (curr.nota || 0), 0) / felicidadeData.length
+          ? felicidadeData.reduce((acc: number, curr: any) => acc + (curr.nota || 0), 0) / felicidadeData.length
           : 0,
         totalRespostasNPS: npsData?.length || 0,
         totalRespostasFelicidade: felicidadeData?.length || 0,
@@ -207,7 +287,7 @@ export async function GET(request: NextRequest) {
       },
 
       // DADOS DETALHADOS POR MÊS
-      evolucaoMensal: desempenhoData?.reduce((acc: any[], curr) => {
+      evolucaoMensal: desempenhoData?.reduce((acc: any[], curr: any) => {
         const mes = new Date(curr.data_inicio).getMonth() + 1
         const existente = acc.find(item => item.mes === mes)
         
@@ -230,8 +310,8 @@ export async function GET(request: NextRequest) {
 
       // TOP PRODUTOS
       topProdutos: analiticoData
-        ?.reduce((acc: any[], curr) => {
-          const existente = acc.find(p => p.nome === curr.nome_produto)
+        ?.reduce((acc: any[], curr: any) => {
+          const existente = acc.find((p: any) => p.nome === curr.nome_produto)
           if (existente) {
             existente.vendaLiquida += curr.venda_liquida || 0
             existente.quantidade += curr.quantidade || 0

@@ -50,8 +50,8 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: process.env.NODE_ENV === 'development' 
-              ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss: ws:; font-src 'self' data: https:; worker-src 'self' blob:; frame-src 'self' https://docs.google.com; frame-ancestors 'none';"
-              : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; font-src 'self' data: https:; worker-src 'self' blob:; frame-src 'self' https://docs.google.com; frame-ancestors 'none';",
+              ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss: ws:; font-src 'self' data: https:; worker-src 'self' blob:; frame-src 'self' https://docs.google.com https://vercel.live; frame-ancestors 'none';"
+              : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://vercel.live; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; font-src 'self' data: https:; worker-src 'self' blob:; frame-src 'self' https://docs.google.com https://vercel.live; frame-ancestors 'none';",
           },
         ],
       },
