@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
 
 /**
@@ -11,8 +11,8 @@ import { authenticateUser } from '@/middleware/auth'
 export async function GET(request: NextRequest) {
   try {
     // Autenticar usuário
-    const authResult = await authenticateUser(request)
-    if (!authResult.authenticated || !authResult.user) {
+    const user = await authenticateUser(request)
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Não autorizado' },
         { status: 401 }
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const campo = searchParams.get('campo')
     const limit = parseInt(searchParams.get('limit') || '100')
 
-    const supabase = await createClient()
+    const supabase = await getAdminClient()
 
     // CONSULTA 1: Auditoria de um evento específico
     if (evento_id) {
@@ -166,8 +166,8 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Autenticar usuário (só admin pode deletar)
-    const authResult = await authenticateUser(request)
-    if (!authResult.authenticated || !authResult.user) {
+    const user = await authenticateUser(request)
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Não autorizado' },
         { status: 401 }
@@ -175,7 +175,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verificar se é admin
-    if (authResult.user.tipo_usuario !== 'admin') {
+    if (user.role !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Apenas administradores podem limpar auditoria' },
         { status: 403 }
@@ -185,7 +185,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const dias_manter = parseInt(searchParams.get('dias_manter') || '90')
 
-    const supabase = await createClient()
+    const supabase = await getAdminClient()
     
     const { data, error } = await supabase.rpc('limpar_auditoria_antiga', {
       dias_manter

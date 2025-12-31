@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await authenticateUser(request)
-    if (!authResult.authenticated || !authResult.user) {
+    const user = await authenticateUser(request)
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 })
     }
 
-    const supabase = createClient()
-    const barId = authResult.user.bar_id || 3
+    const supabase = await getAdminClient()
+    const barId = user.bar_id || 3
 
     // Buscar validações dos últimos 30 dias
     const { data: validacoes, error: validacoesError } = await supabase

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
 
 /**
@@ -10,8 +10,8 @@ import { authenticateUser } from '@/middleware/auth'
 export async function POST(request: NextRequest) {
   try {
     // Autenticar usuário
-    const authResult = await authenticateUser(request)
-    if (!authResult.authenticated || !authResult.user) {
+    const user = await authenticateUser(request)
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Não autorizado' },
         { status: 401 }
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await getAdminClient()
 
     let resultado: string = ''
     let mudancas: any[] = []

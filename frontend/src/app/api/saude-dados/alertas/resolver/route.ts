@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await authenticateUser(request)
-    if (!authResult.authenticated || !authResult.user) {
+    const user = await authenticateUser(request)
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 })
     }
 
@@ -15,14 +15,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'ID do alerta não fornecido' }, { status: 400 })
     }
 
-    const supabase = createClient()
+    const supabase = await getAdminClient()
 
     const { error } = await supabase
       .from('sistema_alertas')
       .update({ 
         resolvido: true, 
         resolvido_em: new Date().toISOString(),
-        resolvido_por: authResult.user.nome || authResult.user.email
+        resolvido_por: user.nome || user.email
       })
       .eq('id', alerta_id)
 

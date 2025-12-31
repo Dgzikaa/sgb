@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminClient } from '@/lib/supabase-admin'
 import { authenticateUser } from '@/middleware/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await authenticateUser(request)
-    if (!authResult.authenticated || !authResult.user) {
+    const user = await authenticateUser(request)
+    if (!user) {
       return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 })
     }
 
-    const supabase = createClient()
+    const supabase = await getAdminClient()
     const ontem = new Date()
     ontem.setDate(ontem.getDate() - 1)
     const ontemStr = ontem.toISOString()
 
     // Buscar status dos diferentes sistemas
-    const syncStatus = []
+    const syncStatus: Array<{sistema: string; ultima_sync: string; status: string; registros: number; erros: number}> = []
 
     // ContaHub
     const { data: contahubData } = await supabase
