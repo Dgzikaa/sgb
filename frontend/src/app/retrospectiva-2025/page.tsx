@@ -129,16 +129,28 @@ export default function Retrospectiva2025Page() {
           className="card-dark p-8 mb-6"
         >
           <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <Trophy className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                  Retrospectiva 2025
-                </h1>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="font-medium">Voltar</span>
+              </button>
+              <div className="border-l border-gray-300 dark:border-gray-600 h-8" />
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Trophy className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+                    Retrospectiva 2025
+                  </h1>
+                </div>
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  Conquistas, crescimento e evolução do ano
+                </p>
               </div>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                Conquistas, crescimento e evolução do ano
-              </p>
             </div>
             
             <div className="hidden md:flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-6 py-3 rounded-xl border border-blue-200 dark:border-blue-800">
