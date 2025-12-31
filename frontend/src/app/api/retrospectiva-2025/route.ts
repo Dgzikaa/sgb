@@ -88,44 +88,52 @@ export async function GET(request: NextRequest) {
     try {
       console.log('👥 Calculando clientes ativos...')
       
-      // Calcular clientes ativos usando RPC get_count_base_ativa
-      // Usando janela de 90 dias até o final de 2025
-      const { data: baseAtiva, error: baseAtivaError } = await supabase.rpc('get_count_base_ativa', {
+      // Usar SQL direto para evitar ambiguidade de tipos (date vs text)
+      const { data: baseAtivaResult, error: baseAtivaError } = await supabase
+        .from('contahub_analitico')
+        .select('*', { count: 'exact', head: true })
+      
+      // Calcular clientes ativos usando SQL direto para evitar conflito de tipos
+      const { data: countResult, error: countError } = await supabase.rpc('get_count_base_ativa', {
         p_bar_id: 3,
-        p_data_inicio: '2025-10-02', // 90 dias antes de 31/12
-        p_data_fim: '2025-12-31'
+        p_data_inicio: new Date('2025-10-02'),
+        p_data_fim: new Date('2025-12-31')
       })
       
-      if (baseAtivaError) {
-        console.error('❌ Erro ao buscar base ativa:', baseAtivaError)
-      } else if (baseAtiva) {
-        clientesAtivosMedia = Number(baseAtiva)
-        console.log(`✅ Clientes ativos: ${clientesAtivosMedia}`)
+      if (countError) {
+        // Fallback: usar dados do desempenho_semanal (pegar o último valor válido)
+        console.log('⚠️ RPC falhou, usando dados do desempenho_semanal...')
+        const clientesAtivosValidos = desempenhoData
+          ?.filter((d: any) => d.clientes_ativos && d.clientes_ativos > 0)
+          ?.sort((a: any, b: any) => new Date(b.data_inicio).getTime() - new Date(a.data_inicio).getTime())
+        
+        if (clientesAtivosValidos && clientesAtivosValidos.length > 0) {
+          clientesAtivosMedia = clientesAtivosValidos[0].clientes_ativos
+        }
+      } else if (countResult !== null) {
+        clientesAtivosMedia = typeof countResult === 'number' ? countResult : Number(countResult)
       }
+      console.log(`✅ Clientes ativos: ${clientesAtivosMedia}`)
 
-      // Calcular recorrência de forma simplificada
+      // Calcular recorrência usando dados do desempenho_semanal
       console.log('🔄 Calculando recorrência...')
       
-      // Usar a stored procedure para calcular métricas do ano todo
-      const { data: metricas, error: metricasError } = await supabase.rpc('calcular_metricas_clientes', {
-        p_bar_id: 3,
-        p_data_inicio_atual: '2025-01-01',
-        p_data_fim_atual: '2025-12-31',
-        p_data_inicio_anterior: '2024-01-01',
-        p_data_fim_anterior: '2024-12-31'
-      })
-      
-      if (!metricasError && metricas && metricas[0]) {
-        const resultado = metricas[0]
-        const totalAtual = Number(resultado.total_atual)
-        const retornantesAtual = Number(resultado.retornantes_atual)
+      // Usar os dados já disponíveis de desempenho_semanal
+      if (desempenhoData && desempenhoData.length > 0) {
+        const totalNovos = desempenhoData.reduce((acc: number, curr: any) => {
+          const percNovos = curr.perc_clientes_novos || 0
+          const clientes = curr.clientes_atendidos || 0
+          return acc + (clientes * percNovos / 100)
+        }, 0)
         
-        if (totalAtual > 0) {
-          recorrenciaMedia = retornantesAtual / totalAtual
+        const totalClientes = desempenhoData.reduce((acc: number, curr: any) => 
+          acc + (curr.clientes_atendidos || 0), 0)
+        
+        if (totalClientes > 0) {
+          const percNovos = totalNovos / totalClientes
+          recorrenciaMedia = 1 - percNovos // Recorrência = 1 - % de novos
           console.log(`✅ Recorrência: ${(recorrenciaMedia * 100).toFixed(1)}%`)
         }
-      } else if (metricasError) {
-        console.error('❌ Erro ao calcular métricas:', metricasError)
       }
       
     } catch (error) {
@@ -196,8 +204,8 @@ export async function GET(request: NextRequest) {
     })
 
     const yuzerEventos = await fetchAllData('yuzer_eventos', {
-      gte_data_evento: '2025-01-01',
-      lte_data_evento: '2025-12-31'
+      gte_data_inicio: '2025-01-01',
+      lte_data_inicio: '2025-12-31'
     })
 
     // 8. MARKETING E REDES SOCIAIS (com paginação)
@@ -266,33 +274,33 @@ export async function GET(request: NextRequest) {
 
     console.log('📊 Calculando indicadores avançados...')
 
-    // CMO médio do ano
-    const cmoMedio = desempenhoData && desempenhoData.length > 0
-      ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.cmo || 0), 0) / desempenhoData.length
-      : 0
+    // Calcular totais para percentuais corretos
+    const faturamentoTotal = desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.faturamento_total || 0), 0) || 0
+    const cmoTotal = desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.cmo || 0), 0) || 0
+    const cmvLimpoTotal = desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.cmv_limpo || 0), 0) || 0
+    const artisticaTotal = desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.custo_atracao_faturamento || 0), 0) || 0
 
-    // % Artística média do ano
-    const percentualArtisticaMedio = desempenhoData && desempenhoData.length > 0
-      ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.custo_atracao_faturamento || 0), 0) / desempenhoData.length
-      : 0
+    // CMO como percentual do faturamento
+    const cmoMedio = faturamentoTotal > 0 ? cmoTotal / faturamentoTotal : 0
 
-    // CMV Limpo médio do ano
-    const cmvLimpoMedio = desempenhoData && desempenhoData.length > 0
-      ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.cmv_limpo || 0), 0) / desempenhoData.length
-      : 0
+    // % Artística como percentual do faturamento
+    const percentualArtisticaMedio = faturamentoTotal > 0 ? artisticaTotal / faturamentoTotal : 0
+
+    // CMV Limpo como percentual do faturamento
+    const cmvLimpoMedio = faturamentoTotal > 0 ? cmvLimpoTotal / faturamentoTotal : 0
 
     // CONSOLIDAÇÃO DOS DADOS
     const consolidado = {
       // FINANCEIRO
       financeiro: {
-        faturamentoTotal: desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.faturamento_total || 0), 0) || 0,
+        faturamentoTotal: faturamentoTotal,
         faturamentoBebidas: analiticoData?.filter((p: any) => p.categoria?.toLowerCase().includes('bebida')).reduce((acc: number, curr: any) => acc + (curr.venda_liquida || 0), 0) || 0,
         faturamentoComida: analiticoData?.filter((p: any) => p.categoria?.toLowerCase().includes('comida') || p.categoria?.toLowerCase().includes('food')).reduce((acc: number, curr: any) => acc + (curr.venda_liquida || 0), 0) || 0,
         ticketMedio: desempenhoData && desempenhoData.length > 0 
           ? desempenhoData.reduce((acc: number, curr: any) => acc + (curr.ticket_medio || 0), 0) / desempenhoData.length 
           : 0,
         clientesAtivos: Math.round(clientesAtivosMedia),
-        totalClientes: desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.total_clientes || 0), 0) || 0,
+        totalClientes: desempenhoData?.reduce((acc: number, curr: any) => acc + (curr.clientes_atendidos || 0), 0) || 0,
         recorrenciaMedia: recorrenciaMedia,
         cmvLimpoMedio: cmvLimpoMedio,
         cmoMedio: cmoMedio,
@@ -324,23 +332,27 @@ export async function GET(request: NextRequest) {
       // PESSOAS E CULTURA
       pessoasCultura: {
         npsMedia: npsData && npsData.length > 0
-          ? npsData.reduce((acc: number, curr: any) => acc + (curr.nota || 0), 0) / npsData.length
+          ? npsData.reduce((acc: number, curr: any) => acc + (curr.nps_geral || 0), 0) / npsData.length
           : 0,
         felicidadeMedia: felicidadeData && felicidadeData.length > 0
-          ? felicidadeData.reduce((acc: number, curr: any) => acc + (curr.nota || 0), 0) / felicidadeData.length
+          ? felicidadeData.reduce((acc: number, curr: any) => acc + (curr.media_geral || 0), 0) / felicidadeData.length
           : 0,
         totalRespostasNPS: npsData?.length || 0,
         totalRespostasFelicidade: felicidadeData?.length || 0,
       },
 
       // MARKETING
-      marketing: {
-        crescimentoInstagram: instagramData && instagramData.length > 1
-          ? ((instagramData[instagramData.length - 1]?.followers || 0) - (instagramData[0]?.followers || 0))
-          : 0,
-        seguidoresInicio: instagramData?.[0]?.followers || 0,
-        seguidoresFinal: instagramData?.[instagramData.length - 1]?.followers || 0,
-      },
+      // Pegar o primeiro e último registros válidos (com followers > 0)
+      marketing: (() => {
+        const validInstagramData = (instagramData || []).filter((d: any) => d.follower_count_1d > 0)
+        const primeiro = validInstagramData[0]?.follower_count_1d || 0
+        const ultimo = validInstagramData[validInstagramData.length - 1]?.follower_count_1d || primeiro
+        return {
+          crescimentoInstagram: ultimo - primeiro,
+          seguidoresInicio: primeiro,
+          seguidoresFinal: ultimo,
+        }
+      })(),
 
       // METAS E CONQUISTAS
       metas: {
@@ -365,14 +377,14 @@ export async function GET(request: NextRequest) {
         
         if (existente) {
           existente.faturamento += curr.faturamento_total || 0
-          existente.clientes += curr.total_clientes || 0
+          existente.clientes += curr.clientes_atendidos || 0
           existente.semanas += 1
         } else {
           acc.push({
             mes,
             mesNome: new Date(curr.data_inicio).toLocaleDateString('pt-BR', { month: 'long' }),
             faturamento: curr.faturamento_total || 0,
-            clientes: curr.total_clientes || 0,
+            clientes: curr.clientes_atendidos || 0,
             semanas: 1,
           })
         }

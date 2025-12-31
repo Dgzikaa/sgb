@@ -822,11 +822,36 @@ class NiboSyncService {
         const batch = allPayments.slice(i, i + batchSize)
         
         const processedBatch = batch.map(payment => {
-          // Usar prefixo PAY_ + paymentId para garantir unicidade
-          // Se não tiver paymentId, usar scheduleId (mantendo compatibilidade)
-          const uniqueId = payment.paymentId 
-            ? `PAY_${payment.paymentId}` 
-            : String(payment.scheduleId || payment.id || `unknown_${Date.now()}_${Math.random()}`)
+          // CORREÇÃO: Gerar ID único e ESTÁVEL baseado em campos do payment
+          // A API do Nibo não retorna paymentId consistente, então usamos hash de campos estáveis
+          let uniqueId: string
+          
+          if (payment.paymentId) {
+            uniqueId = `PAY_${payment.paymentId}`
+          } else if (payment.scheduleId) {
+            uniqueId = `SCH_${payment.scheduleId}`
+          } else if (payment.id) {
+            uniqueId = `ID_${payment.id}`
+          } else {
+            // Gerar ID determinístico baseado em: data + valor + stakeholder + categoria + documento
+            // Isso garante que o mesmo payment sempre gere o mesmo ID
+            const dateStr = payment.date || payment.accrualDate || ''
+            const valueStr = String(payment.value || 0)
+            const stakeholderStr = String(payment.stakeholder?.id || payment.stakeholder?.name || '')
+            const categoryStr = String(payment.category?.id || payment.category?.name || '')
+            const docStr = String(payment.documentNumber || '')
+            const descStr = String(payment.description || '').substring(0, 50) // Limitar descrição
+            
+            // Criar hash simples mas determinístico
+            const hashInput = `${dateStr}_${valueStr}_${stakeholderStr}_${categoryStr}_${docStr}_${descStr}`
+            let hash = 0
+            for (let j = 0; j < hashInput.length; j++) {
+              const char = hashInput.charCodeAt(j)
+              hash = ((hash << 5) - hash) + char
+              hash = hash & hash // Convert to 32bit integer
+            }
+            uniqueId = `PAY_HASH_${this.credentials!.bar_id}_${Math.abs(hash)}`
+          }
           
           return {
             nibo_id: uniqueId,
@@ -869,10 +894,40 @@ class NiboSyncService {
           processados += processedBatch.length
           console.log(`✅ Payments batch ${Math.floor(i/batchSize) + 1}: ${processedBatch.length} processados (total: ${processados})`)
         } else {
-          erros += processedBatch.length
-          const errorMsg = `Batch ${Math.floor(i/batchSize) + 1}: ${upsertError.message}`
-          errosDetalhes.push(errorMsg)
-          console.error(`❌ Erro no batch:`, upsertError.message, upsertError.details || '', upsertError.hint || '')
+          // Se o batch falhou, tentar inserir individualmente para identificar registros problemáticos
+          console.warn(`⚠️ Batch ${Math.floor(i/batchSize) + 1} falhou, tentando inserção individual...`)
+          
+          let batchSuccessCount = 0
+          let batchErrorCount = 0
+          
+          for (const record of processedBatch) {
+            const { error: individualError } = await this.supabase
+              .from('nibo_agendamentos')
+              .upsert(record, {
+                onConflict: 'nibo_id',
+                ignoreDuplicates: true // Ignorar duplicatas no modo individual
+              })
+            
+            if (!individualError) {
+              batchSuccessCount++
+            } else {
+              batchErrorCount++
+              // Log apenas os primeiros erros para não sobrecarregar
+              if (batchErrorCount <= 3) {
+                console.error(`❌ Erro individual [${record.nibo_id}]:`, individualError.message)
+              }
+            }
+          }
+          
+          processados += batchSuccessCount
+          erros += batchErrorCount
+          
+          if (batchErrorCount > 0) {
+            const errorMsg = `Batch ${Math.floor(i/batchSize) + 1}: ${batchErrorCount} erros de ${processedBatch.length}`
+            errosDetalhes.push(errorMsg)
+          }
+          
+          console.log(`📊 Batch individual: ${batchSuccessCount} ok, ${batchErrorCount} erros`)
         }
 
         await new Promise(resolve => setTimeout(resolve, 50))

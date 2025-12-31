@@ -26,6 +26,7 @@ import {
   DollarSign,
   Clock,
   Ticket,
+  FileSearch,
 } from 'lucide-react';
 
 /**
@@ -134,6 +135,8 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: Target, label: 'Metas', href: '/configuracoes/metas', permission: 'configuracoes' },
       { icon: ChefHat, label: 'Teste de Produção', href: '/configuracoes/teste-producao', permission: 'operacoes' },
       { icon: Calendar, label: 'Calendário Operacional', href: '/configuracoes/calendario-operacional', permission: 'operacoes' },
+      { icon: FileSearch, label: 'Auditoria', href: '/configuracoes/auditoria', permission: 'configuracoes' },
+      { icon: Target, label: 'Saúde dos Dados', href: '/configuracoes/saude-dados', permission: 'configuracoes' },
     ],
   },
 ];

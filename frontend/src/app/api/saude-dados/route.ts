@@ -1,0 +1,132 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { authenticateUser } from '@/middleware/auth'
+
+export async function GET(request: NextRequest) {
+  try {
+    const authResult = await authenticateUser(request)
+    if (!authResult.authenticated || !authResult.user) {
+      return NextResponse.json({ success: false, error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const supabase = createClient()
+    const barId = authResult.user.bar_id || 3
+
+    // Buscar validações dos últimos 30 dias
+    const { data: validacoes, error: validacoesError } = await supabase
+      .from('validacao_dados_diaria')
+      .select('*')
+      .eq('bar_id', barId)
+      .order('data_referencia', { ascending: false })
+      .limit(30)
+
+    if (validacoesError) {
+      console.error('Erro ao buscar validações:', validacoesError)
+    }
+
+    // Buscar alertas (últimos 50)
+    const { data: alertas, error: alertasError } = await supabase
+      .from('sistema_alertas')
+      .select('*')
+      .order('criado_em', { ascending: false })
+      .limit(50)
+
+    if (alertasError) {
+      console.error('Erro ao buscar alertas:', alertasError)
+    }
+
+    // Buscar dados bloqueados
+    const { data: bloqueados, error: bloqueadosError } = await supabase
+      .from('dados_bloqueados')
+      .select('*')
+      .eq('bar_id', barId)
+      .eq('desbloqueado', false)
+      .order('data_referencia', { ascending: false })
+      .limit(100)
+
+    if (bloqueadosError) {
+      console.error('Erro ao buscar bloqueados:', bloqueadosError)
+    }
+
+    // Buscar status das sincronizações
+    const { data: niboSync } = await supabase
+      .from('nibo_agendamentos')
+      .select('atualizado_em')
+      .eq('bar_id', barId)
+      .order('atualizado_em', { ascending: false })
+      .limit(1)
+      .single()
+
+    const { data: contahubSync } = await supabase
+      .from('contahub_pagamentos')
+      .select('atualizado_em')
+      .eq('bar_id', barId)
+      .order('atualizado_em', { ascending: false })
+      .limit(1)
+      .single()
+
+    const { data: symplaSync } = await supabase
+      .from('sympla_pedidos')
+      .select('created_at')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    const { data: yuzerSync } = await supabase
+      .from('yuzer_pagamento')
+      .select('created_at')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    // Contar registros de cada sistema
+    const { count: niboCount } = await supabase
+      .from('nibo_agendamentos')
+      .select('*', { count: 'exact', head: true })
+      .eq('bar_id', barId)
+
+    const { count: contahubCount } = await supabase
+      .from('contahub_pagamentos')
+      .select('*', { count: 'exact', head: true })
+      .eq('bar_id', barId)
+
+    const statusSyncs = [
+      {
+        sistema: 'Nibo',
+        ultima_sync: niboSync?.atualizado_em || null,
+        status: niboSync ? 'ok' : 'sem dados',
+        registros: niboCount || 0
+      },
+      {
+        sistema: 'ContaHub',
+        ultima_sync: contahubSync?.atualizado_em || null,
+        status: contahubSync ? 'ok' : 'sem dados',
+        registros: contahubCount || 0
+      },
+      {
+        sistema: 'Sympla',
+        ultima_sync: symplaSync?.created_at || null,
+        status: symplaSync ? 'ok' : 'sem dados',
+        registros: 0
+      },
+      {
+        sistema: 'Yuzer',
+        ultima_sync: yuzerSync?.created_at || null,
+        status: yuzerSync ? 'ok' : 'sem dados',
+        registros: 0
+      }
+    ]
+
+    return NextResponse.json({
+      success: true,
+      validacoes: validacoes || [],
+      alertas: alertas || [],
+      bloqueados: bloqueados || [],
+      statusSyncs
+    })
+
+  } catch (error: any) {
+    console.error('Erro na API de saúde dos dados:', error)
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  }
+}

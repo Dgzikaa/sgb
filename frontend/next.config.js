@@ -104,6 +104,14 @@ const nextConfig = {
           '**/ProgramData/**',
           '**/Program Files/**',
           '**/Program Files (x86)/**',
+          // Arquivos de sistema Windows na raiz
+          '**/pagefile.sys',
+          '**/hiberfil.sys',
+          '**/swapfile.sys',
+          '**/DumpStack.log.tmp',
+          '**/DumpStack.log',
+          '**/bootmgr',
+          '**/BOOTNXT',
         ],
       };
       // Não ajustar devtool em desenvolvimento para evitar regressões e warnings do Next.js

@@ -33,6 +33,8 @@ import {
   ChefHat,
   Sparkles,
   Send,
+  FileSearch,
+  Activity,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -351,6 +353,20 @@ const defaultSidebarItems: SidebarItem[] = [
           label: 'WhatsApp',
           href: '/configuracoes/whatsapp',
           description: 'Configurar integração WhatsApp Business',
+          permission: 'configuracoes',
+        },
+        {
+          icon: FileSearch,
+          label: 'Auditoria',
+          href: '/configuracoes/auditoria',
+          description: 'Rastreamento de alterações em eventos',
+          permission: 'configuracoes',
+        },
+        {
+          icon: Shield,
+          label: 'Saúde dos Dados',
+          href: '/configuracoes/saude-dados',
+          description: 'Monitoramento de integridade dos dados',
           permission: 'configuracoes',
         },
       ],
