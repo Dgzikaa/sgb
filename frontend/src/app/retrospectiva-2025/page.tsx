@@ -2310,10 +2310,13 @@ export default function Retrospectiva2025Page() {
                     />
                     <Bar 
                       dataKey="crescimentopercent" 
-                      fill={(entry: any) => entry?.crescimentopercent >= 0 ? '#10B981' : '#EF4444'}
                       radius={[4, 4, 0, 0]} 
                       name="Crescimento %" 
-                    />
+                    >
+                      {(data?.insightsExtras?.crescimentoMoM || []).map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={entry?.crescimentopercent >= 0 ? '#10B981' : '#EF4444'} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
                 <div className="mt-4 grid grid-cols-3 gap-4">
