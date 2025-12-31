@@ -387,3 +387,23 @@ contahub_periodo.bar_id = contahub_pagamentos.bar_id
 **Data da correção**: 30/12/2025  
 **Motivo**: Regras de filtro sumiram das stored procedures  
 **Status**: ✅ **APLICADO VIA MCP** - 100% FUNCIONAL
+
+---
+
+## ✅ **RECÁLCULO COMPLETO DE EVENTOS**
+
+### **Resultado:**
+- ✅ **527 eventos recalculados** (Janeiro a Dezembro 2025)
+- ✅ **100% dos eventos** com `precisa_recalculo = false`
+- ✅ **Ambos os bares** (Ordinário e Deboche)
+- ✅ **Métricas de cl_real** agora precisas e alinhadas
+
+### **Eventos Top Dezembro 2025 (Ordinário):**
+1. 12/12 - **1.133 clientes** reais
+2. 05/12 - **1.070 clientes** reais
+3. 19/12 - **1.023 clientes** reais
+4. 27/12 - **947 clientes** reais
+5. 21/12 - **876 clientes** reais
+
+### **Data do recálculo**: 30/12/2025 23:50  
+**Método**: MCP Supabase (migrations + execute_sql)
