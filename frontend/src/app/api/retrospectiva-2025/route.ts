@@ -34,6 +34,9 @@ export async function GET(request: NextRequest) {
             query = query.lte(key.replace('lte_', ''), value)
           } else if (key.startsWith('eq_')) {
             query = query.eq(key.replace('eq_', ''), value)
+          } else if (key.startsWith('not_null_')) {
+            const col = key.replace('not_null_', '')
+            query = query.not(col, 'is', null)
           } else if (key.startsWith('not_')) {
             const col = key.replace('not_', '')
             query = query.not(col, 'is', value)
@@ -71,16 +74,20 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Iniciando busca de dados da retrospectiva 2025...')
 
     // 1. DADOS FINANCEIROS CONSOLIDADOS 2025 (com paginação)
+    console.log('📈 Buscando desempenho semanal...')
     const desempenhoData = await fetchAllData('desempenho_semanal', {
       gte_data_inicio: '2025-01-01',
       lte_data_inicio: '2025-12-31'
     }, 'data_inicio')
+    console.log(`✅ Desempenho: ${desempenhoData.length} semanas`)
 
-    // 2. CLIENTES ATIVOS 2025 - Usar RPC para calcular (não existe tabela)
+    // 2. CLIENTES ATIVOS 2025 - Usar RPC para calcular
     let clientesAtivosMedia = 0
     let recorrenciaMedia = 0
     
     try {
+      console.log('👥 Calculando clientes ativos...')
+      
       // Calcular clientes ativos usando RPC get_count_base_ativa
       // Usando janela de 90 dias até o final de 2025
       const { data: baseAtiva, error: baseAtivaError } = await supabase.rpc('get_count_base_ativa', {
@@ -89,74 +96,88 @@ export async function GET(request: NextRequest) {
         p_data_fim: '2025-12-31'
       })
       
-      if (!baseAtivaError && baseAtiva) {
+      if (baseAtivaError) {
+        console.error('❌ Erro ao buscar base ativa:', baseAtivaError)
+      } else if (baseAtiva) {
         clientesAtivosMedia = Number(baseAtiva)
+        console.log(`✅ Clientes ativos: ${clientesAtivosMedia}`)
       }
 
-      // Calcular recorrência média do ano
-      // Taxa de clientes que voltaram vs novos
-      const contahubData = await fetchAllData('contahub_pagamentos', {
-        eq_bar_id: 3,
-        gte_dt_gerencial: '2025-01-01',
-        lte_dt_gerencial: '2025-12-31',
-        not_null_cli_fone: true
+      // Calcular recorrência de forma simplificada
+      console.log('🔄 Calculando recorrência...')
+      
+      // Usar a stored procedure para calcular métricas do ano todo
+      const { data: metricas, error: metricasError } = await supabase.rpc('calcular_metricas_clientes', {
+        p_bar_id: 3,
+        p_data_inicio_atual: '2025-01-01',
+        p_data_fim_atual: '2025-12-31',
+        p_data_inicio_anterior: '2024-01-01',
+        p_data_fim_anterior: '2024-12-31'
       })
       
-      const clientesUnicos = new Set(contahubData.map((c: any) => c.cli_fone))
-      const totalClientesUnicos = clientesUnicos.size
-      
-      // Pegar histórico de 2024 para saber quem já era cliente
-      const historico2024 = await fetchAllData('contahub_pagamentos', {
-        eq_bar_id: 3,
-        gte_dt_gerencial: '2024-01-01',
-        lte_dt_gerencial: '2024-12-31',
-        not_null_cli_fone: true
-      })
-      
-      const clientesHistorico = new Set(historico2024.map((c: any) => c.cli_fone))
-      
-      // Contar quantos de 2025 já existiam em 2024
-      let clientesRetornantes = 0
-      clientesUnicos.forEach((fone: any) => {
-        if (clientesHistorico.has(fone)) {
-          clientesRetornantes++
+      if (!metricasError && metricas && metricas[0]) {
+        const resultado = metricas[0]
+        const totalAtual = Number(resultado.total_atual)
+        const retornantesAtual = Number(resultado.retornantes_atual)
+        
+        if (totalAtual > 0) {
+          recorrenciaMedia = retornantesAtual / totalAtual
+          console.log(`✅ Recorrência: ${(recorrenciaMedia * 100).toFixed(1)}%`)
         }
-      })
+      } else if (metricasError) {
+        console.error('❌ Erro ao calcular métricas:', metricasError)
+      }
       
-      recorrenciaMedia = totalClientesUnicos > 0 ? clientesRetornantes / totalClientesUnicos : 0
     } catch (error) {
       console.error('⚠️ Erro ao calcular clientes ativos:', error)
     }
 
     // 3. DADOS ANALÍTICOS CONTAHUB (com paginação)
+    console.log('💰 Buscando dados analíticos...')
     const analiticoData = await fetchAllData('contahub_analitico', {
       eq_bar_id: 3,
       gte_trn_dtgerencial: '2025-01-01',
       lte_trn_dtgerencial: '2025-12-31'
     })
+    console.log(`✅ Analítico: ${analiticoData.length} transações`)
 
     // 4. METAS E VISÃO ESTRATÉGICA - Buscar TODOS os organizadores de 2025
-    const { data: visaoData } = await supabase
+    console.log('🎯 Buscando visão estratégica...')
+    const { data: visaoData, error: visaoError } = await supabase
       .from('organizador_visao')
       .select('*')
       .eq('ano', 2025)
       .order('trimestre', { ascending: true, nullsFirst: true })
     
+    if (visaoError) {
+      console.error('❌ Erro ao buscar visão:', visaoError)
+    } else {
+      console.log(`✅ Visão: ${visaoData?.length || 0} registros`)
+    }
+    
     // Pegar a visão anual (sem trimestre) como principal
     const visaoAnual = visaoData?.find(v => !v.trimestre) || visaoData?.[0] || null
 
     // 5. OKRs E CONQUISTAS - Buscar OKRs de TODOS os organizadores de 2025
+    console.log('🎯 Buscando OKRs...')
     const organizadorIds = visaoData?.map(v => v.id) || []
     
-    const { data: okrsData } = organizadorIds.length > 0
+    const { data: okrsData, error: okrsError } = organizadorIds.length > 0
       ? await supabase
           .from('organizador_okrs')
           .select('*')
           .in('organizador_id', organizadorIds)
           .order('ordem', { ascending: true })
-      : { data: null }
+      : { data: null, error: null }
+    
+    if (okrsError) {
+      console.error('❌ Erro ao buscar OKRs:', okrsError)
+    } else {
+      console.log(`✅ OKRs: ${okrsData?.length || 0} registros`)
+    }
 
     // 6. NPS E FELICIDADE (com paginação)
+    console.log('😊 Buscando NPS e Felicidade...')
     const npsData = await fetchAllData('nps', {
       gte_data_pesquisa: '2025-01-01',
       lte_data_pesquisa: '2025-12-31'
@@ -168,6 +189,7 @@ export async function GET(request: NextRequest) {
     })
 
     // 7. EVENTOS (com paginação)
+    console.log('🎉 Buscando eventos...')
     const symplaEventos = await fetchAllData('sympla_eventos', {
       gte_data_inicio: '2025-01-01',
       lte_data_inicio: '2025-12-31'
@@ -179,6 +201,7 @@ export async function GET(request: NextRequest) {
     })
 
     // 8. MARKETING E REDES SOCIAIS (com paginação)
+    console.log('📱 Buscando dados do Instagram...')
     const instagramData = await fetchAllData('windsor_instagram_followers_daily', {
       gte_date: '2025-01-01',
       lte_date: '2025-12-31'
@@ -242,8 +265,6 @@ export async function GET(request: NextRequest) {
       .sort((a: any, b: any) => b.quantidade_total - a.quantidade_total)
 
     console.log('📊 Calculando indicadores avançados...')
-    console.log(`👥 Clientes Ativos: ${clientesAtivosMedia}`)
-    console.log(`🔄 Recorrência: ${(recorrenciaMedia * 100).toFixed(1)}%`)
 
     // CMO médio do ano
     const cmoMedio = desempenhoData && desempenhoData.length > 0
@@ -395,11 +416,18 @@ export async function GET(request: NextRequest) {
       },
     }
 
+    console.log('🎉 Dados consolidados com sucesso!')
+    console.log(`💰 Faturamento Total: R$ ${consolidado.financeiro.faturamentoTotal.toLocaleString('pt-BR')}`)
+    console.log(`👥 Total Clientes: ${consolidado.financeiro.totalClientes}`)
+    console.log(`🎯 Clientes Ativos: ${consolidado.financeiro.clientesAtivos}`)
+    console.log(`🔄 Recorrência: ${(consolidado.financeiro.recorrenciaMedia * 100).toFixed(1)}%`)
+    
     return NextResponse.json({ success: true, data: consolidado })
   } catch (error: any) {
-    console.error('Erro ao buscar dados da retrospectiva:', error)
+    console.error('❌❌❌ ERRO CRÍTICO na retrospectiva:', error)
+    console.error('Stack:', error.stack)
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: error.message || 'Erro desconhecido', stack: error.stack },
       { status: 500 }
     )
   }
