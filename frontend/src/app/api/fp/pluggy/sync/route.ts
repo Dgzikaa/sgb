@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
         // Tentar categorizar automaticamente
         let categoriaId = null
-        let categoriaOrigem = null
+        let categoriaOrigem: string | null = null
 
         // Buscar categoria template baseado na descrição
         const { data: categoria } = await supabase

@@ -53,6 +53,10 @@ export class PluggyClient {
   private async request(endpoint: string, options: RequestInit = {}) {
     const token = await this.authenticate()
 
+    if (!token) {
+      throw new Error('Erro na autenticação: token não disponível')
+    }
+
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers: {

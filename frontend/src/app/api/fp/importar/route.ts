@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import Papa from 'papaparse'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -24,15 +23,31 @@ export async function POST(request: NextRequest) {
 
     // Ler arquivo CSV
     const text = await file.text()
+    
+    // Parse CSV manualmente
+    const lines = text.split('\n').filter(line => line.trim())
+    if (lines.length < 2) {
+      return NextResponse.json(
+        { error: 'Arquivo CSV vazio ou inválido' },
+        { status: 400 }
+      )
+    }
+    
+    const headers = lines[0].split(',').map(h => h.trim())
+    const rows = lines.slice(1).map(line => {
+      const values = line.split(',')
+      const row: any = {}
+      headers.forEach((header, index) => {
+        row[header] = values[index]?.trim() || ''
+      })
+      return row
+    })
 
     return new Promise((resolve) => {
-      Papa.parse(text, {
-        header: true,
-        skipEmptyLines: true,
-        complete: async (results: any) => {
+      (async () => {
           try {
             // Mapear dados baseado no banco
-            let transacoes = results.data.map((row: any) => 
+            let transacoes = rows.map((row: any) => 
               mapearTransacao(row, banco, contaId, usuarioCpf)
             ).filter((t: any) => t !== null)
 
@@ -89,14 +104,7 @@ export async function POST(request: NextRequest) {
               { status: 500 }
             ))
           }
-        },
-        error: (error: any) => {
-          resolve(NextResponse.json(
-            { error: 'Erro ao ler arquivo CSV: ' + error.message },
-            { status: 400 }
-          ))
-        }
-      })
+      })()
     })
 
   } catch (error: any) {
