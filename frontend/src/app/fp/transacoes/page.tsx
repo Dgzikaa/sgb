@@ -213,7 +213,7 @@ export default function TransacoesPage() {
             setModalOpen(open)
             if (!open) resetForm()
           }}>
-            <DialogTrigger asChild>
+            <DialogTrigger>
               <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Transação

@@ -98,7 +98,7 @@ export class PluggyClient {
   /**
    * Fazer requisição autenticada
    */
-  private async request<T>(
+  public async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {

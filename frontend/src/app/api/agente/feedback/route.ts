@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 
 const SUPABASE_FUNCTIONS_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(
@@ -9,7 +9,7 @@ const SUPABASE_FUNCTIONS_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = createServerClient()
     
     // Verificar autenticação
     const { data: { session } } = await supabase.auth.getSession()
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
 // Buscar estatísticas de feedback
 export async function GET(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = createServerClient()
     
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) {

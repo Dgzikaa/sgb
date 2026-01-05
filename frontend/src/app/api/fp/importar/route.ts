@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
       .order('prioridade', { ascending: false })
 
     // Processar transações
-    const transacoesParaInserir = []
+    const transacoesParaInserir: any[] = []
     const transacoesDuplicadas = []
     const transacoesCategorizadas = []
 
