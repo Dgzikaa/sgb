@@ -221,15 +221,21 @@ export default function PluggyPage() {
     <>
       {/* Script do Pluggy Connect */}
       <Script
-        src="https://cdn.pluggy.ai/connect/v2/pluggy-connect.js"
-        strategy="lazyOnload"
+        src="https://cdn.pluggy.ai/connect/v3/pluggy-connect.umd.js"
+        strategy="afterInteractive"
         onLoad={() => {
           console.log('✅ Pluggy Connect carregado')
+          console.log('Window.PluggyConnect disponível:', typeof window.PluggyConnect)
           setPluggyLoaded(true)
         }}
-        onError={() => {
-          console.error('❌ Erro ao carregar Pluggy Connect')
-          toast.error('Erro ao carregar widget do Pluggy')
+        onError={(e) => {
+          console.error('❌ Erro ao carregar Pluggy Connect:', e)
+          toast.error('Erro ao carregar widget do Pluggy', {
+            description: 'Verifique sua conexão com a internet'
+          })
+        }}
+        onReady={() => {
+          console.log('🎯 Pluggy Connect pronto')
         }}
       />
 
