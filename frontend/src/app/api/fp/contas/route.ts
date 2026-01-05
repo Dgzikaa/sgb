@@ -8,35 +8,40 @@ async function getUserCPF(supabase: any, user: any) {
     userEmail: user.email
   })
 
-  // Tentar buscar por user_id primeiro
-  let { data: userData } = await supabase
+  // Buscar por user_id (pode ter múltiplos registros se tiver acesso a múltiplos bares)
+  const { data: userData, error } = await supabase
     .from('usuarios_bar')
     .select('cpf, user_id, email')
     .eq('user_id', user.id)
-    .single()
+    .limit(1)
 
-  console.log('🔍 Resultado busca por user_id:', userData)
+  console.log('🔍 Resultado busca por user_id:', { userData, error })
 
   // Se não encontrar por user_id, tentar por email
-  if (!userData) {
-    const { data: userDataByEmail } = await supabase
+  if (!userData || userData.length === 0) {
+    const { data: userDataByEmail, error: emailError } = await supabase
       .from('usuarios_bar')
       .select('cpf, user_id, email')
       .eq('email', user.email)
-      .single()
+      .limit(1)
     
-    console.log('🔍 Resultado busca por email:', userDataByEmail)
-    userData = userDataByEmail
+    console.log('🔍 Resultado busca por email:', { userDataByEmail, emailError })
+    
+    if (userDataByEmail && userDataByEmail.length > 0) {
+      const cpfLimpo = userDataByEmail[0].cpf.replace(/[^\d]/g, '')
+      console.log('✅ CPF encontrado por email:', cpfLimpo)
+      return cpfLimpo
+    }
   }
 
-  if (!userData?.cpf) {
-    throw new Error('CPF não encontrado para o usuário logado')
+  if (userData && userData.length > 0 && userData[0].cpf) {
+    // Remover formatação do CPF (apenas números)
+    const cpfLimpo = userData[0].cpf.replace(/[^\d]/g, '')
+    console.log('✅ CPF encontrado por user_id:', cpfLimpo)
+    return cpfLimpo
   }
 
-  // Remover formatação do CPF (apenas números)
-  const cpfLimpo = userData.cpf.replace(/[^\d]/g, '')
-  console.log('✅ CPF encontrado:', cpfLimpo)
-  return cpfLimpo
+  throw new Error('CPF não encontrado para o usuário logado')
 }
 
 export async function GET(request: NextRequest) {
