@@ -33,8 +33,7 @@ export default function PluggyPage() {
   const fetchItems = async () => {
     setLoading(true)
     try {
-      const response = await fetchFP('/api/fp/pluggy/items')
-      const result = await response.json()
+      const result = await fetchFP('/api/fp/pluggy/items')
       
       if (result.success) {
         setItems(result.data || [])
@@ -110,10 +109,9 @@ export default function PluggyPage() {
     setConnecting(true)
     try {
       // Criar Connect Token
-      const response = await fetchFP('/api/fp/pluggy/connect-token', {
+      const result = await fetchFP('/api/fp/pluggy/connect-token', {
         method: 'POST',
       })
-      const result = await response.json()
 
       if (!result.success) {
         toast.error('Erro ao criar token de conexão', { description: result.error })
@@ -143,7 +141,7 @@ export default function PluggyPage() {
           
           // Salvar item no banco
           try {
-            const saveResponse = await fetchFP('/api/fp/pluggy/items', {
+            const saveResult = await fetchFP('/api/fp/pluggy/items', {
               method: 'POST',
               body: JSON.stringify({
                 itemId: itemData.item.id,
@@ -151,7 +149,6 @@ export default function PluggyPage() {
                 connectorName: itemData.item.connector.name,
               }),
             })
-            const saveResult = await saveResponse.json()
 
             if (saveResult.success) {
               toast.success(`Banco ${itemData.item.connector.name} conectado!`, {
@@ -217,7 +214,7 @@ export default function PluggyPage() {
       const from = new Date()
       from.setDate(from.getDate() - 90)
       
-      const response = await fetchFP('/api/fp/pluggy/sync', {
+      const result = await fetchFP('/api/fp/pluggy/sync', {
         method: 'POST',
         body: JSON.stringify({
           itemId,
@@ -225,7 +222,6 @@ export default function PluggyPage() {
           to: new Date().toISOString().split('T')[0],
         }),
       })
-      const result = await response.json()
 
       if (result.success) {
         toast.success(`Sincronizado! ${result.data.transacoesImportadas} transações importadas`, {
@@ -246,10 +242,9 @@ export default function PluggyPage() {
     if (!confirm('Tem certeza que deseja desconectar este banco?')) return
 
     try {
-      const response = await fetchFP(`/api/fp/pluggy/items?id=${itemId}`, {
+      const result = await fetchFP(`/api/fp/pluggy/items?id=${itemId}`, {
         method: 'DELETE',
       })
-      const result = await response.json()
 
       if (result.success) {
         toast.success('Banco desconectado!')

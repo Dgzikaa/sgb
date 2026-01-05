@@ -2,6 +2,8 @@ import { supabase } from './supabase'
 
 // Helper para fazer requests autenticadas nas APIs do FP
 export async function fetchFP(url: string, options: RequestInit = {}) {
+  let token: string | null = null
+  
   // 1. Tentar pegar do sgb_session (salvo no login)
   const sgbSession = localStorage.getItem('sgb_session')
   
@@ -9,77 +11,65 @@ export async function fetchFP(url: string, options: RequestInit = {}) {
     try {
       const parsed = JSON.parse(sgbSession)
       if (parsed.access_token) {
+        token = parsed.access_token
         console.log('✅ Token encontrado em sgb_session')
-        const headers = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${parsed.access_token}`,
-          ...options.headers
-        }
-        
-        const response = await fetch(url, {
-          ...options,
-          headers
-        })
-        
-        return response
       }
     } catch (e) {
       console.error('Erro ao parsear sgb_session:', e)
     }
   }
   
-  // 2. Tentar pegar do Supabase client
-  const { data: { session }, error } = await supabase.auth.getSession()
+  // 2. Se não encontrou, tentar pegar do Supabase client
+  if (!token) {
+    const { data: { session }, error } = await supabase.auth.getSession()
+    
+    if (session?.access_token) {
+      token = session.access_token
+      console.log('✅ Token encontrado no Supabase')
+    }
+  }
   
-  console.log('🔍 DEBUG fetchFP:', {
-    hasSgbSession: !!sgbSession,
-    hasSupabaseSession: !!session,
-    hasToken: !!session?.access_token,
-    error: error?.message
+  // 3. Se não encontrou, tentar pegar do localStorage padrão do Supabase
+  if (!token) {
+    const storageKey = 'sb-uqtgsvujwcbymjmvkjhy-auth-token'
+    const stored = localStorage.getItem(storageKey)
+    
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        if (parsed.access_token) {
+          token = parsed.access_token
+          console.log('✅ Token encontrado no localStorage padrão')
+        }
+      } catch (e) {
+        console.error('Erro ao parsear token:', e)
+      }
+    }
+  }
+  
+  // Se não encontrou token em nenhum lugar, lançar erro
+  if (!token) {
+    throw new Error('Usuário não autenticado. Faça login novamente.')
+  }
+  
+  // Fazer requisição com o token
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    ...options.headers
+  }
+  
+  const response = await fetch(url, {
+    ...options,
+    headers
   })
   
-  if (session?.access_token) {
-    console.log('✅ Token encontrado no Supabase')
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
-      ...options.headers
-    }
-
-    const response = await fetch(url, {
-      ...options,
-      headers
-    })
-    
-    return response
+  // Verificar se a resposta foi bem-sucedida
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }))
+    throw new Error(errorData.error || `HTTP ${response.status}`)
   }
   
-  // 3. Tentar pegar do localStorage padrão do Supabase
-  const storageKey = 'sb-uqtgsvujwcbymjmvkjhy-auth-token'
-  const stored = localStorage.getItem(storageKey)
-  
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored)
-      if (parsed.access_token) {
-        console.log('✅ Token encontrado no localStorage padrão')
-        const headers = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${parsed.access_token}`,
-          ...options.headers
-        }
-        
-        const response = await fetch(url, {
-          ...options,
-          headers
-        })
-        
-        return response
-      }
-    } catch (e) {
-      console.error('Erro ao parsear token:', e)
-    }
-  }
-  
-  throw new Error('Usuário não autenticado. Faça login novamente.')
+  // Retornar JSON parseado
+  return response.json()
 }

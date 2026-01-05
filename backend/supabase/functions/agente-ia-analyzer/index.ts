@@ -24,6 +24,15 @@ serve(async (req) => {
     const { bar_id, scan_data, context }: AnalysisRequest = await req.json()
     const startTime = Date.now()
 
+    // 0. Carregar base de conhecimento
+    let conhecimentoBase = ''
+    try {
+      const conhecimentoPath = new URL('../_shared/conhecimento_base.md', import.meta.url)
+      conhecimentoBase = await Deno.readTextFile(conhecimentoPath)
+    } catch (e) {
+      console.log('Base de conhecimento não encontrada, continuando sem ela')
+    }
+
     // 1. Buscar memórias relevantes (RAG)
     const { data: memorias } = await supabaseClient
       .from('agente_memoria_vetorial')
@@ -50,7 +59,10 @@ serve(async (req) => {
     const prompt = `
 Você é um analista de negócios especializado em bares e restaurantes.
 
-# CONTEXTO DO BAR
+# BASE DE CONHECIMENTO (REGRAS E METAS DO NEGÓCIO)
+${conhecimentoBase || 'Nenhuma base de conhecimento carregada'}
+
+# CONTEXTO DO BAR (DADOS ATUAIS)
 ${JSON.stringify(scan_data, null, 2)}
 
 # MEMÓRIA DO AGENTE (Aprendizados anteriores)

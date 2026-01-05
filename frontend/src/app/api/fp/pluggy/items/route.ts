@@ -35,18 +35,26 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient()
     
     const authHeader = request.headers.get('authorization')
+    console.log('🔍 DEBUG items GET - authHeader:', authHeader ? 'PRESENTE' : 'AUSENTE')
+    
     if (!authHeader) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      console.log('❌ DEBUG items GET - Sem header de autorização')
+      return NextResponse.json({ error: 'Não autorizado - Sem header de autorização' }, { status: 401 })
     }
 
     const token = authHeader.replace('Bearer ', '')
+    console.log('🔍 DEBUG items GET - token extraído:', token.substring(0, 20) + '...')
+    
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    console.log('🔍 DEBUG items GET - user:', user ? user.id : 'NULL', 'error:', authError?.message)
     
     if (authError || !user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      console.log('❌ DEBUG items GET - Erro ao validar usuário:', authError?.message)
+      return NextResponse.json({ error: `Não autorizado - ${authError?.message || 'Usuário não encontrado'}` }, { status: 401 })
     }
 
     const cpf = await getUserCPF(supabase, user)
+    console.log('✅ DEBUG items GET - CPF obtido:', cpf)
 
     // Buscar items no banco
     const { data: items, error } = await supabase
