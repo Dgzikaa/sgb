@@ -1,5 +1,69 @@
 # 🤖 AGENTE INTELIGENTE ZYKOR - GUIA COMPLETO
 
+## 🚀 Como Usar
+
+### Configuração Inicial
+
+1. **Execute o setup automático** (uma vez por bar):
+
+```bash
+# Via API do Supabase
+curl -X POST https://[seu-projeto].supabase.co/functions/v1/agente-test-setup \
+  -H "Authorization: Bearer [seu-token]" \
+  -H "Content-Type: application/json" \
+  -d '{"bar_id": 1}'
+```
+
+2. **Acesse o Dashboard de Insights:**
+   - URL: `/visao-geral/agente-inteligente`
+   - Visualize insights, alertas e execute análises manuais
+
+3. **Configure o Agente:**
+   - URL: `/configuracoes/agente-inteligente`
+   - Ative/desative tipos de agente
+   - Configure frequência de análise
+   - Habilite/desabilite notificações
+
+4. **Monitore Métricas:**
+   - URL: `/visao-geral/metricas-agente`
+   - Acompanhe evolução das métricas
+   - Visualize gráficos e tendências
+
+### APIs Disponíveis
+
+#### Executar Scan Manual
+```typescript
+POST /api/agente/scan
+{
+  "bar_id": 1,
+  "tipo_scan": "completo" // ou "operacional", "financeiro", etc.
+}
+```
+
+#### Buscar Insights
+```typescript
+GET /api/agente/insights?bar_id=1&categoria=operacional&visualizado=false
+```
+
+#### Marcar Insight como Visualizado
+```typescript
+PATCH /api/agente/insights
+{
+  "insight_id": "uuid",
+  "visualizado": true
+}
+```
+
+#### Buscar Alertas
+```typescript
+GET /api/agente/alertas?bar_id=1&lido=false
+```
+
+#### Buscar Métricas
+```typescript
+GET /api/agente/metricas?bar_id=1&categoria=financeiro
+```
+
 ## 📋 Índice
 1. [Visão Geral](#visão-geral)
 2. [Arquitetura do Sistema](#arquitetura-do-sistema)

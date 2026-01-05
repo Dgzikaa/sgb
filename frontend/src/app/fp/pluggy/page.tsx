@@ -7,6 +7,14 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plug, RefreshCw, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { fetchFP } from '@/lib/api-fp'
+import Script from 'next/script'
+
+// Declarar tipos do Pluggy
+declare global {
+  interface Window {
+    PluggyConnect: any
+  }
+}
 
 interface PluggyItem {
   id: string
@@ -20,6 +28,8 @@ export default function PluggyPage() {
   const [items, setItems] = useState<PluggyItem[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState<string | null>(null)
+  const [connecting, setConnecting] = useState(false)
+  const [pluggyLoaded, setPluggyLoaded] = useState(false)
 
   const fetchItems = async () => {
     setLoading(true)
@@ -46,6 +56,79 @@ export default function PluggyPage() {
   useEffect(() => {
     fetchItems()
   }, [])
+
+  const handleConnect = async () => {
+    if (!pluggyLoaded) {
+      toast.error('Widget do Pluggy ainda está carregando...')
+      return
+    }
+
+    setConnecting(true)
+    try {
+      // Criar Connect Token
+      const response = await fetchFP('/api/fp/pluggy/connect-token', {
+        method: 'POST',
+      })
+      const result = await response.json()
+
+      if (!result.success) {
+        toast.error('Erro ao criar token de conexão', { description: result.error })
+        return
+      }
+
+      const connectToken = result.data.accessToken
+
+      // Abrir widget do Pluggy
+      const pluggyConnect = new window.PluggyConnect({
+        connectToken,
+        includeSandbox: true, // Para testes
+        onSuccess: async (itemData: any) => {
+          console.log('Conexão bem-sucedida:', itemData)
+          
+          // Salvar item no banco
+          try {
+            const saveResponse = await fetchFP('/api/fp/pluggy/items', {
+              method: 'POST',
+              body: JSON.stringify({
+                itemId: itemData.item.id,
+                connectorId: itemData.item.connector.id,
+                connectorName: itemData.item.connector.name,
+              }),
+            })
+            const saveResult = await saveResponse.json()
+
+            if (saveResult.success) {
+              toast.success(`Banco ${itemData.item.connector.name} conectado!`, {
+                description: 'Agora você pode sincronizar suas transações'
+              })
+              fetchItems()
+            } else {
+              toast.error('Erro ao salvar conexão', { description: saveResult.error })
+            }
+          } catch (error: any) {
+            toast.error('Erro ao salvar', { description: error.message })
+          }
+        },
+        onError: (error: any) => {
+          console.error('Erro na conexão:', error)
+          toast.error('Erro ao conectar banco', { 
+            description: error.message || 'Tente novamente' 
+          })
+        },
+        onClose: () => {
+          console.log('Widget fechado')
+          setConnecting(false)
+        },
+      })
+
+      pluggyConnect.init()
+    } catch (error: any) {
+      console.error('Erro ao iniciar conexão:', error)
+      toast.error('Erro ao iniciar conexão', { description: error.message })
+    } finally {
+      setConnecting(false)
+    }
+  }
 
   const handleSync = async (itemId: string) => {
     setSyncing(itemId)
@@ -135,8 +218,23 @@ export default function PluggyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4">
+    <>
+      {/* Script do Pluggy Connect */}
+      <Script
+        src="https://cdn.pluggy.ai/connect/v2/pluggy-connect.js"
+        strategy="lazyOnload"
+        onLoad={() => {
+          console.log('✅ Pluggy Connect carregado')
+          setPluggyLoaded(true)
+        }}
+        onError={() => {
+          console.error('❌ Erro ao carregar Pluggy Connect')
+          toast.error('Erro ao carregar widget do Pluggy')
+        }}
+      />
+
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
           <Link href="/fp" className="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -193,9 +291,27 @@ export default function PluggyPage() {
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Conecte sua conta bancária via Open Finance para importar transações automaticamente
             </p>
-            <Button disabled className="bg-gray-400">
-              <Plug className="w-4 h-4 mr-2" />
-              Conectar Banco (Em breve)
+            <Button 
+              onClick={handleConnect}
+              disabled={connecting || !pluggyLoaded}
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg shadow-emerald-500/30"
+            >
+              {connecting ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Conectando...
+                </>
+              ) : !pluggyLoaded ? (
+                <>
+                  <Clock className="w-4 h-4 mr-2" />
+                  Carregando widget...
+                </>
+              ) : (
+                <>
+                  <Plug className="w-4 h-4 mr-2" />
+                  Conectar Banco
+                </>
+              )}
             </Button>
           </Card>
         ) : (
