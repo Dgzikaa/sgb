@@ -2,19 +2,41 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
 
 // Helper para pegar CPF do usuário autenticado
-async function getUserCPF(supabase: any, userId: string) {
-  const { data: userData } = await supabase
+async function getUserCPF(supabase: any, user: any) {
+  console.log('🔍 DEBUG getUserCPF:', {
+    userId: user.id,
+    userEmail: user.email
+  })
+
+  // Tentar buscar por user_id primeiro
+  let { data: userData } = await supabase
     .from('usuarios_bar')
-    .select('cpf')
-    .eq('user_id', userId)
+    .select('cpf, user_id, email')
+    .eq('user_id', user.id)
     .single()
 
+  console.log('🔍 Resultado busca por user_id:', userData)
+
+  // Se não encontrar por user_id, tentar por email
+  if (!userData) {
+    const { data: userDataByEmail } = await supabase
+      .from('usuarios_bar')
+      .select('cpf, user_id, email')
+      .eq('email', user.email)
+      .single()
+    
+    console.log('🔍 Resultado busca por email:', userDataByEmail)
+    userData = userDataByEmail
+  }
+
   if (!userData?.cpf) {
-    throw new Error('CPF não encontrado')
+    throw new Error('CPF não encontrado para o usuário logado')
   }
 
   // Remover formatação do CPF (apenas números)
-  return userData.cpf.replace(/[^\d]/g, '')
+  const cpfLimpo = userData.cpf.replace(/[^\d]/g, '')
+  console.log('✅ CPF encontrado:', cpfLimpo)
+  return cpfLimpo
 }
 
 export async function GET(request: NextRequest) {
@@ -36,7 +58,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar CPF do usuário
-    const cpf = await getUserCPF(supabase, user.id)
+    const cpf = await getUserCPF(supabase, user)
 
     // Buscar contas do usuário
     const { data: contas, error } = await supabase
@@ -72,7 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar CPF do usuário
-    const cpf = await getUserCPF(supabase, user.id)
+    const cpf = await getUserCPF(supabase, user)
 
     const body = await request.json()
     const { nome, banco, tipo, saldo_inicial, cor } = body
