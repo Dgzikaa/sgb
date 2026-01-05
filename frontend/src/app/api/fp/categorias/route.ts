@@ -1,104 +1,116 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
 
+// Helper para pegar CPF do usuário autenticado
+async function getUserCPF(supabase: any, user: any) {
+  const { data: userData } = await supabase
+    .from('usuarios_bar')
+    .select('cpf')
+    .eq('user_id', user.id)
+    .limit(1)
+
+  if (!userData || userData.length === 0 || !userData[0].cpf) {
+    const { data: userDataByEmail } = await supabase
+      .from('usuarios_bar')
+      .select('cpf')
+      .eq('email', user.email)
+      .limit(1)
+    
+    if (userDataByEmail && userDataByEmail.length > 0) {
+      return userDataByEmail[0].cpf.replace(/[^\d]/g, '')
+    }
+  }
+
+  if (userData && userData.length > 0 && userData[0].cpf) {
+    return userData[0].cpf.replace(/[^\d]/g, '')
+  }
+
+  throw new Error('CPF não encontrado')
+}
+
+// GET - Listar todas as categorias (templates + customizadas do usuário)
 export async function GET(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    // Buscar CPF do usuário
-    const { data: userData } = await supabase
-      .from('usuarios')
-      .select('cpf')
-      .eq('id', session.user.id)
-      .single()
-
-    if (!userData?.cpf) {
-      return NextResponse.json({ error: 'CPF não encontrado' }, { status: 400 })
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    // Verificar se usuário já tem categorias
-    const { data: categorias, error } = await supabase
-      .from('fp_categorias')
+    const cpf = await getUserCPF(supabase, user)
+
+    // Buscar categorias template
+    const { data: templates, error: templatesError } = await supabase
+      .from('fp_categorias_template')
       .select('*')
-      .eq('usuario_cpf', userData.cpf)
-      .eq('ativa', true)
-      .order('tipo', { ascending: true })
       .order('nome', { ascending: true })
 
-    if (error) throw error
+    if (templatesError) throw templatesError
 
-    // Se não tem categorias, criar categorias padrão
-    if (!categorias || categorias.length === 0) {
-      const { data: templates } = await supabase
-        .from('fp_categorias_template')
-        .select('*')
+    // Buscar categorias customizadas do usuário
+    const { data: customizadas, error: customError } = await supabase
+      .from('fp_categorias')
+      .select('*')
+      .eq('usuario_cpf', cpf)
+      .order('nome', { ascending: true })
 
-      if (templates && templates.length > 0) {
-        const novasCategorias = templates.map(t => ({
-          usuario_cpf: userData.cpf,
-          nome: t.nome,
-          tipo: t.tipo,
-          cor: t.cor,
-          icone: t.icone,
-          ativa: true
-        }))
+    if (customError) throw customError
 
-        const { data: criadas } = await supabase
-          .from('fp_categorias')
-          .insert(novasCategorias)
-          .select()
+    // Combinar e marcar origem
+    const categoriasCompletas = [
+      ...(templates || []).map((c: any) => ({ ...c, origem: 'template', customizada: false })),
+      ...(customizadas || []).map((c: any) => ({ ...c, origem: 'customizada', customizada: true }))
+    ]
 
-        return NextResponse.json({ success: true, data: criadas || [] })
-      }
-    }
-
-    return NextResponse.json({ success: true, data: categorias })
+    return NextResponse.json({ success: true, data: categoriasCompletas })
   } catch (error: any) {
     console.error('Erro ao buscar categorias:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
+// POST - Criar categoria customizada
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const { data: userData } = await supabase
-      .from('usuarios')
-      .select('cpf')
-      .eq('id', session.user.id)
-      .single()
-
-    if (!userData?.cpf) {
-      return NextResponse.json({ error: 'CPF não encontrado' }, { status: 400 })
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
+    const cpf = await getUserCPF(supabase, user)
     const body = await request.json()
-    const { nome, tipo, cor, icone, categoria_pai } = body
+    const { nome, tipo, icone, cor } = body
 
     if (!nome || !tipo) {
-      return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
+      return NextResponse.json({ error: 'Nome e tipo são obrigatórios' }, { status: 400 })
     }
 
+    // Criar categoria customizada
     const { data: categoria, error } = await supabase
       .from('fp_categorias')
       .insert([{
-        usuario_cpf: userData.cpf,
+        usuario_cpf: cpf,
         nome,
         tipo,
-        cor: cor || '#6B7280',
-        icone: icone || 'tag',
-        categoria_pai,
+        icone: icone || '📦',
+        cor: cor || '#9CA3AF',
         ativa: true
       }])
       .select()
@@ -113,32 +125,37 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// PUT - Atualizar categoria customizada
 export async function PUT(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { id, nome, tipo, cor, icone, ativa } = body
-
-    if (!id) {
-      return NextResponse.json({ error: 'ID da categoria é obrigatório' }, { status: 400 })
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
+    const cpf = await getUserCPF(supabase, user)
+    const body = await request.json()
+    const { id, nome, tipo, icone, cor, ativa } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
+    }
+
+    // Atualizar categoria (validando que pertence ao usuário)
     const { data: categoria, error } = await supabase
       .from('fp_categorias')
-      .update({
-        nome,
-        tipo,
-        cor,
-        icone,
-        ativa
-      })
+      .update({ nome, tipo, icone, cor, ativa })
       .eq('id', id)
+      .eq('usuario_cpf', cpf)
       .select()
       .single()
 
@@ -147,6 +164,47 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, data: categoria })
   } catch (error: any) {
     console.error('Erro ao atualizar categoria:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
+// DELETE - Desativar categoria customizada
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = createServerClient()
+    
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const cpf = await getUserCPF(supabase, user)
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID é obrigatório' }, { status: 400 })
+    }
+
+    // Desativar categoria
+    const { error } = await supabase
+      .from('fp_categorias')
+      .update({ ativa: false })
+      .eq('id', id)
+      .eq('usuario_cpf', cpf)
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true, message: 'Categoria desativada' })
+  } catch (error: any) {
+    console.error('Erro ao desativar categoria:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
