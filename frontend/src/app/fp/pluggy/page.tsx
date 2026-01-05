@@ -394,7 +394,8 @@ export default function PluggyPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
