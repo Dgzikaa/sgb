@@ -46,36 +46,20 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts'
-import NewYearFireworks from '@/components/retrospectiva/NewYearFireworks'
 import StatCard from '@/components/retrospectiva/StatCard'
 import ChartCard from '@/components/retrospectiva/ChartCard'
-import { triggerConfettiFromEvent, triggerNewYearConfetti, triggerConfetti } from '@/hooks/useConfettiClick'
 
 export default function Retrospectiva2025Page() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [showFireworks, setShowFireworks] = useState(false)
 
   useEffect(() => {
-    // Verificar se deve mostrar fogos de artifício
-    const now = new Date()
-    const targetDate = new Date('2026-01-01T00:00:00')
-    const hasShownFireworks = localStorage.getItem('newyear-fireworks-2026')
-
-    if (now >= targetDate && !hasShownFireworks) {
-      setShowFireworks(true)
-    }
-
     // Buscar dados da retrospectiva
     fetch('/api/retrospectiva-2025')
       .then(res => res.json())
       .then(response => {
         if (response.success) {
           setData(response.data)
-          // Disparar confetti de boas-vindas ao carregar
-          setTimeout(() => {
-            triggerConfetti(0.5, 0.3, 'celebration')
-          }, 500)
         }
       })
       .catch(console.error)
@@ -126,16 +110,6 @@ export default function Retrospectiva2025Page() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Fogos de Artifício */}
-      <NewYearFireworks
-        show={showFireworks}
-        autoTrigger={true}
-        onComplete={() => {
-          setShowFireworks(false)
-          localStorage.setItem('newyear-fireworks-2026', 'true')
-        }}
-      />
-
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <motion.div
@@ -346,15 +320,15 @@ export default function Retrospectiva2025Page() {
         >
           <Tabs defaultValue="vendas" className="w-full">
             <TabsList className="grid w-full grid-cols-3 lg:grid-cols-9 mb-6">
-              <TabsTrigger value="vendas" onClick={(e) => triggerConfettiFromEvent(e, 'sparkle')}>📊 Vendas</TabsTrigger>
-              <TabsTrigger value="evolucao" onClick={(e) => triggerConfettiFromEvent(e, 'sparkle')}>📈 Evolução</TabsTrigger>
-              <TabsTrigger value="cultura" onClick={(e) => triggerConfettiFromEvent(e, 'sparkle')}>👥 Cultura</TabsTrigger>
-              <TabsTrigger value="problemas" onClick={(e) => triggerConfettiFromEvent(e, 'sparkle')}>🎯 Desafios</TabsTrigger>
-              <TabsTrigger value="conquistas" onClick={(e) => triggerConfettiFromEvent(e, 'stars')}>🏆 Insights</TabsTrigger>
-              <TabsTrigger value="mega" onClick={(e) => triggerConfettiFromEvent(e, 'burst')}>🔥 360°</TabsTrigger>
-              <TabsTrigger value="ultra" onClick={(e) => triggerConfettiFromEvent(e, 'celebration')}>💎 Ultra</TabsTrigger>
-              <TabsTrigger value="extras" onClick={(e) => triggerConfettiFromEvent(e, 'sparkle')}>⚡ Extras</TabsTrigger>
-              <TabsTrigger value="2026" onClick={(e) => { triggerConfettiFromEvent(e, 'burst'); triggerNewYearConfetti() }}>🚀 2026</TabsTrigger>
+              <TabsTrigger value="vendas">Vendas</TabsTrigger>
+              <TabsTrigger value="evolucao">Evolução</TabsTrigger>
+              <TabsTrigger value="cultura">Cultura</TabsTrigger>
+              <TabsTrigger value="problemas">Desafios</TabsTrigger>
+              <TabsTrigger value="conquistas">Insights</TabsTrigger>
+              <TabsTrigger value="mega">360°</TabsTrigger>
+              <TabsTrigger value="ultra">Ultra</TabsTrigger>
+              <TabsTrigger value="extras">Extras</TabsTrigger>
+              <TabsTrigger value="2026">2026</TabsTrigger>
             </TabsList>
 
             {/* TAB: VENDAS */}
