@@ -28,10 +28,16 @@ export default function PluggyPage() {
       const result = await response.json()
       
       if (result.success) {
-        setItems(result.data)
+        setItems(result.data || [])
+      } else {
+        console.error('Erro ao carregar items:', result.error)
+        toast.error('Erro ao carregar conexões', { description: result.error })
+        setItems([]) // Garantir que não fique travado
       }
-    } catch (error) {
-      toast.error('Erro ao carregar conexões')
+    } catch (error: any) {
+      console.error('Erro na requisição:', error)
+      toast.error('Erro ao carregar conexões', { description: error.message })
+      setItems([]) // Garantir que não fique travado
     } finally {
       setLoading(false)
     }

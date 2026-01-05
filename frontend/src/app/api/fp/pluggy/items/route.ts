@@ -53,32 +53,43 @@ export async function GET(request: NextRequest) {
       .from('fp_pluggy_items')
       .select('*')
       .eq('usuario_cpf', cpf)
+      .eq('ativo', true)
       .order('created_at', { ascending: false })
 
     if (error) throw error
 
-    // Para cada item, buscar status atual no Pluggy
-    const pluggyClient = getPluggyClient()
-    const itemsComStatus = await Promise.all(
-      items.map(async (item: any) => {
-        try {
-          const pluggyItem = await pluggyClient.getItem(item.pluggy_item_id)
-          return {
-            ...item,
-            status: pluggyItem.status,
-            lastUpdatedAt: pluggyItem.lastUpdatedAt,
-          }
-        } catch (error) {
-          return {
-            ...item,
-            status: 'ERROR',
-            error: 'Não foi possível buscar status',
-          }
-        }
-      })
-    )
+    // Se não há items, retornar array vazio
+    if (!items || items.length === 0) {
+      return NextResponse.json({ success: true, data: [] })
+    }
 
-    return NextResponse.json({ success: true, data: itemsComStatus })
+    // Para cada item, buscar status atual no Pluggy
+    try {
+      const pluggyClient = getPluggyClient()
+      const itemsComStatus = await Promise.all(
+        items.map(async (item: any) => {
+          try {
+            const pluggyItem = await pluggyClient.getItem(item.pluggy_item_id)
+            return {
+              ...item,
+              status: pluggyItem.status,
+              lastUpdatedAt: pluggyItem.lastUpdatedAt,
+            }
+          } catch (error) {
+            return {
+              ...item,
+              status: 'ERROR',
+              error: 'Não foi possível buscar status',
+            }
+          }
+        })
+      )
+      return NextResponse.json({ success: true, data: itemsComStatus })
+    } catch (pluggyError: any) {
+      // Se Pluggy não está configurado, retornar items do banco mesmo
+      console.warn('Pluggy não configurado, retornando items do banco:', pluggyError.message)
+      return NextResponse.json({ success: true, data: items })
+    }
   } catch (error: any) {
     console.error('Erro ao listar items:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
