@@ -143,9 +143,12 @@ export default function PluggyPage() {
         language: 'pt', // Idioma PT-BR
         onSuccess: async (itemData: any) => {
           console.log('✅ Conexão bem-sucedida:', itemData)
+          console.log('🔍 Item ID:', itemData.item?.id)
+          console.log('🔍 Connector:', itemData.item?.connector?.name)
           
           // Salvar item no banco
           try {
+            console.log('💾 Salvando item no banco...')
             const saveResult = await fetchFP('/api/fp/pluggy/items', {
               method: 'POST',
               body: JSON.stringify({
@@ -155,15 +158,20 @@ export default function PluggyPage() {
               }),
             })
 
+            console.log('📊 Resultado do salvamento:', saveResult)
+
             if (saveResult.success) {
+              console.log('✅ Item salvo com sucesso!')
               toast.success(`Banco ${itemData.item.connector.name} conectado!`, {
                 description: 'Agora você pode sincronizar suas transações'
               })
               fetchItems()
             } else {
+              console.error('❌ Erro ao salvar:', saveResult.error)
               toast.error('Erro ao salvar conexão', { description: saveResult.error })
             }
           } catch (error: any) {
+            console.error('❌ Erro ao salvar item:', error)
             toast.error('Erro ao salvar', { description: error.message })
           }
         },
@@ -176,6 +184,10 @@ export default function PluggyPage() {
         onClose: () => {
           console.log('🔒 Widget fechado')
           setConnecting(false)
+          
+          // Recarregar items após fechar (caso o onSuccess não tenha sido chamado)
+          console.log('🔄 Recarregando lista de items...')
+          fetchItems()
         },
         onEvent: (event: any) => {
           console.log('📊 Evento Pluggy:', event)

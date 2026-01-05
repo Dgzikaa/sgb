@@ -23,7 +23,7 @@ interface Mensagem {
   }
 }
 
-export default function AgenteChat Page() {
+export default function AgenteChatPage() {
   const { selectedBar } = useBarContext()
   const [mensagem, setMensagem] = useState('')
   const [conversas, setConversas] = useState<Mensagem[]>([])

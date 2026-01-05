@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { fetchFP } from '@/lib/api-fp'
 
-export default function ImportarExtrato Page() {
+export default function ImportarExtratoPage() {
   const [contas, setContas] = useState<any[]>([])
   const [contaSelecionada, setContaSelecionada] = useState('')
   const [banco, setBanco] = useState('')
