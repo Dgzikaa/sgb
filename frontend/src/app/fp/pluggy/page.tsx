@@ -344,51 +344,6 @@ export default function PluggyPage() {
           <div className="w-32" />
         </div>
 
-        {/* Informações Open Finance */}
-        <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 mb-6">
-          <CardHeader>
-            <CardTitle className="text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5" />
-              Open Finance - Conecte seus Bancos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 text-emerald-700 dark:text-emerald-300">
-              <p className="text-base">
-                <strong>🔌 Conecte suas contas bancárias de forma segura</strong> e automatize o controle financeiro!
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div className="bg-white dark:bg-emerald-900/30 p-4 rounded-lg">
-                  <h4 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-2">✨ Funcionalidades</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    <li>Importação automática de transações</li>
-                    <li>Sincronização de saldos em tempo real</li>
-                    <li>Suporte a múltiplos bancos</li>
-                    <li>Histórico de 90 dias</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-white dark:bg-emerald-900/30 p-4 rounded-lg">
-                  <h4 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-2">🏦 Bancos Suportados</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    <li>Nubank</li>
-                    <li>Bradesco</li>
-                    <li>Itaú</li>
-                    <li>Banco do Brasil</li>
-                    <li>E muitos outros...</li>
-                  </ul>
-                </div>
-              </div>
-
-              <p className="mt-4 text-sm">
-                <strong>💡 Como usar:</strong> Clique em "Conectar Banco", escolha sua instituição financeira 
-                e faça login com suas credenciais. Após conectar, clique em "Sincronizar" para importar suas transações.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Lista de Conexões */}
         {loading ? (
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 p-6">
@@ -489,8 +444,53 @@ export default function PluggyPage() {
           </div>
         )}
 
+        {/* Informações Open Finance */}
+        <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 mt-8 mb-6">
+          <CardHeader>
+            <CardTitle className="text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              Open Finance - Conecte seus Bancos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-emerald-700 dark:text-emerald-300">
+              <p className="text-base">
+                <strong>🔌 Conecte suas contas bancárias de forma segura</strong> e automatize o controle financeiro!
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="bg-white dark:bg-emerald-900/30 p-4 rounded-lg">
+                  <h4 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-2">✨ Funcionalidades</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li>Importação automática de transações</li>
+                    <li>Sincronização de saldos em tempo real</li>
+                    <li>Suporte a múltiplos bancos</li>
+                    <li>Histórico de 90 dias</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white dark:bg-emerald-900/30 p-4 rounded-lg">
+                  <h4 className="font-semibold text-emerald-900 dark:text-emerald-100 mb-2">🏦 Bancos Suportados</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li>Nubank</li>
+                    <li>Bradesco</li>
+                    <li>Itaú</li>
+                    <li>Banco do Brasil</li>
+                    <li>E muitos outros...</li>
+                  </ul>
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm">
+                <strong>💡 Como usar:</strong> Clique em "Conectar Banco", escolha sua instituição financeira 
+                e faça login com suas credenciais. Após conectar, clique em "Sincronizar" para importar suas transações.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Informações Adicionais */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mt-6">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-white">🔒 Segurança</CardTitle>
           </CardHeader>
