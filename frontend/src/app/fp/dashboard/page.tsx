@@ -1,393 +1,353 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { 
-  Wallet, 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign,
-  Calendar,
-  Plus,
-  Upload,
-  Settings,
-  ArrowUpRight,
-  ArrowDownRight,
-  Link2
-} from 'lucide-react'
 import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ArrowLeft, TrendingUp, TrendingDown, Wallet, Receipt, Calendar } from 'lucide-react'
+import { toast } from 'sonner'
+import { fetchFP } from '@/lib/api-fp'
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts'
 
-export default function DashboardFPPage() {
+interface Transacao {
+  id: string
+  descricao: string
+  valor: number
+  tipo: 'receita' | 'despesa'
+  data: string
+  categoria?: any
+  conta?: any
+}
+
+const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6', '#F43F5E']
+
+export default function DashboardPage() {
+  const [transacoes, setTransacoes] = useState<Transacao[]>([])
+  const [contas, setContas] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<any>(null)
-  const [mesAno, setMesAno] = useState(() => {
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  })
+  const [periodoSelecionado, setPeriodoSelecionado] = useState('mes')
 
   useEffect(() => {
-    fetchDashboard()
-  }, [mesAno])
-
-  const fetchDashboard = async () => {
-    try {
+    const loadData = async () => {
       setLoading(true)
-      const [ano, mes] = mesAno.split('-')
-      const response = await fetch(`/api/fp/dashboard?ano=${ano}&mes=${mesAno}`)
-      const result = await response.json()
-      
-      if (result.success) {
-        setData(result.data)
+      try {
+        const [transRes, contasRes] = await Promise.all([
+          fetchFP('/api/fp/transacoes'),
+          fetchFP('/api/fp/contas')
+        ])
+
+        const transResult = await transRes.json()
+        const contasResult = await contasRes.json()
+
+        if (transResult.success) setTransacoes(transResult.data)
+        if (contasResult.success) setContas(contasResult.data)
+      } catch (error) {
+        toast.error('Erro ao carregar dados')
+      } finally {
+        setLoading(false)
       }
-    } catch (error) {
-      console.error('Erro ao buscar dashboard:', error)
-    } finally {
-      setLoading(false)
     }
+    loadData()
+  }, [])
+
+  // Filtrar por período
+  const getDataInicio = () => {
+    const hoje = new Date()
+    if (periodoSelecionado === 'semana') {
+      hoje.setDate(hoje.getDate() - 7)
+    } else if (periodoSelecionado === 'mes') {
+      hoje.setMonth(hoje.getMonth() - 1)
+    } else if (periodoSelecionado === 'trimestre') {
+      hoje.setMonth(hoje.getMonth() - 3)
+    } else if (periodoSelecionado === 'ano') {
+      hoje.setFullYear(hoje.getFullYear() - 1)
+    }
+    return hoje
   }
+
+  const transacoesFiltradas = transacoes.filter((t) => {
+    const dataTransacao = new Date(t.data)
+    const dataInicio = getDataInicio()
+    return dataTransacao >= dataInicio
+  })
+
+  // Calcular totais
+  const totalReceitas = transacoesFiltradas
+    .filter((t) => t.tipo === 'receita')
+    .reduce((acc, t) => acc + t.valor, 0)
+
+  const totalDespesas = transacoesFiltradas
+    .filter((t) => t.tipo === 'despesa')
+    .reduce((acc, t) => acc + t.valor, 0)
+
+  const saldo = totalReceitas - totalDespesas
+
+  // Saldo total em contas
+  const saldoTotalContas = contas.reduce((acc, c) => acc + c.saldo_atual, 0)
+
+  // Despesas por categoria
+  const despesasPorCategoria: Record<string, number> = {}
+  transacoesFiltradas
+    .filter((t) => t.tipo === 'despesa')
+    .forEach((t) => {
+      const categoria = t.categoria?.nome || 'Sem categoria'
+      despesasPorCategoria[categoria] = (despesasPorCategoria[categoria] || 0) + t.valor
+    })
+
+  const dadosDespesasPorCategoria = Object.entries(despesasPorCategoria)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 8)
+
+  // Receitas por categoria
+  const receitasPorCategoria: Record<string, number> = {}
+  transacoesFiltradas
+    .filter((t) => t.tipo === 'receita')
+    .forEach((t) => {
+      const categoria = t.categoria?.nome || 'Sem categoria'
+      receitasPorCategoria[categoria] = (receitasPorCategoria[categoria] || 0) + t.valor
+    })
+
+  const dadosReceitasPorCategoria = Object.entries(receitasPorCategoria)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 8)
+
+  // Evolução temporal (últimos 30 dias)
+  const ultimosDias = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (29 - i))
+    return d.toISOString().split('T')[0]
+  })
+
+  const evolucao = ultimosDias.map((dia) => {
+    const transacoesDia = transacoes.filter((t) => t.data === dia)
+    const receitas = transacoesDia.filter((t) => t.tipo === 'receita').reduce((acc, t) => acc + t.valor, 0)
+    const despesas = transacoesDia.filter((t) => t.tipo === 'despesa').reduce((acc, t) => acc + t.valor, 0)
+    
+    return {
+      data: new Date(dia).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      receitas,
+      despesas,
+      saldo: receitas - despesas
+    }
+  })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-6">
-          <div className="card-dark p-6">
-            <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <p className="text-gray-600 dark:text-gray-400">Carregando dashboard...</p>
       </div>
     )
   }
 
-  const resumo = data?.resumo || {}
-  const contas = data?.contas || []
-  const topCategorias = data?.topCategorias || []
-  const transacoesRecentes = data?.transacoesRecentes || []
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="card-dark p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Financeiro Pessoal
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Gerencie suas finanças de forma simples e inteligente
-              </p>
-            </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between mb-8">
+          <Link href="/fp" className="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Voltar
+          </Link>
 
-            <div className="flex flex-wrap gap-2">
-              <Link href="/fp/pluggy">
-                <Button className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white">
-                  <Link2 className="w-4 h-4 mr-2" />
-                  Open Finance
-                </Button>
-              </Link>
-
-              <Link href="/fp/importar">
-                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Importar Extrato
-                </Button>
-              </Link>
-              
-              <Link href="/fp/transacoes">
-                <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Transação
-                </Button>
-              </Link>
-              
-              <Link href="/fp/categorias">
-                <Button variant="outline" className="border-gray-300 dark:border-gray-600">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Categorias
-                </Button>
-              </Link>
-            </div>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard Financeiro</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Visão geral das suas finanças
+            </p>
           </div>
 
-          {/* Filtro de Mês/Ano */}
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              <Calendar className="w-4 h-4 inline mr-1" />
-              Período
-            </label>
-            <input
-              type="month"
-              value={mesAno}
-              onChange={(e) => setMesAno(e.target.value)}
-              className="input-dark max-w-xs"
-            />
-          </div>
+          <Select value={periodoSelecionado} onValueChange={setPeriodoSelecionado}>
+            <SelectTrigger className="w-40 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-gray-800">
+              <SelectItem value="semana">Última semana</SelectItem>
+              <SelectItem value="mes">Último mês</SelectItem>
+              <SelectItem value="trimestre">Último trimestre</SelectItem>
+              <SelectItem value="ano">Último ano</SelectItem>
+              <SelectItem value="tudo">Tudo</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Cards de Resumo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Saldo Total */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader className="pb-3">
-              <CardDescription className="text-gray-600 dark:text-gray-400">
-                Saldo Total
-              </CardDescription>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-blue-100 flex items-center gap-2">
+                <Wallet className="w-4 h-4" />
+                Saldo Total em Contas
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resumo.saldoTotal || 0)}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                    {contas.length} conta{contas.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-                <Wallet className="w-10 h-10 text-blue-600 dark:text-blue-400" />
-              </div>
+              <p className="text-3xl font-bold">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldoTotalContas)}
+              </p>
             </CardContent>
           </Card>
 
-          {/* Receitas do Mês */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader className="pb-3">
-              <CardDescription className="text-gray-600 dark:text-gray-400">
-                Receitas do Mês
-              </CardDescription>
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-green-100 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Receitas ({periodoSelecionado})
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resumo.totalReceitas || 0)}
-                  </p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <ArrowUpRight className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    <p className="text-sm text-green-600 dark:text-green-400">
-                      Entradas
-                    </p>
-                  </div>
-                </div>
-                <TrendingUp className="w-10 h-10 text-green-600 dark:text-green-400" />
-              </div>
+              <p className="text-3xl font-bold">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalReceitas)}
+              </p>
             </CardContent>
           </Card>
 
-          {/* Despesas do Mês */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader className="pb-3">
-              <CardDescription className="text-gray-600 dark:text-gray-400">
-                Despesas do Mês
-              </CardDescription>
+          <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-red-100 flex items-center gap-2">
+                <TrendingDown className="w-4 h-4" />
+                Despesas ({periodoSelecionado})
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resumo.totalDespesas || 0)}
-                  </p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <ArrowDownRight className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      Saídas
-                    </p>
-                  </div>
-                </div>
-                <TrendingDown className="w-10 h-10 text-red-600 dark:text-red-400" />
-              </div>
+              <p className="text-3xl font-bold">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalDespesas)}
+              </p>
             </CardContent>
           </Card>
 
-          {/* Saldo do Mês */}
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader className="pb-3">
-              <CardDescription className="text-gray-600 dark:text-gray-400">
-                Saldo do Mês
-              </CardDescription>
+          <Card className={`bg-gradient-to-br ${saldo >= 0 ? 'from-purple-500 to-purple-600' : 'from-orange-500 to-orange-600'} text-white border-0`}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-white/80 flex items-center gap-2">
+                <Receipt className="w-4 h-4" />
+                Saldo ({periodoSelecionado})
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-3xl font-bold ${
-                    (resumo.saldo || 0) >= 0 
-                      ? 'text-green-600 dark:text-green-400' 
-                      : 'text-red-600 dark:text-red-400'
-                  }`}>
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(resumo.saldo || 0)}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                    Receitas - Despesas
-                  </p>
-                </div>
-                <DollarSign className={`w-10 h-10 ${
-                  (resumo.saldo || 0) >= 0 
-                    ? 'text-green-600 dark:text-green-400' 
-                    : 'text-red-600 dark:text-red-400'
-                }`} />
-              </div>
+              <p className="text-3xl font-bold">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldo)}
+              </p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Top 5 Categorias */}
+          {/* Despesas por Categoria */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="text-gray-900 dark:text-white">
-                Principais Despesas
+              <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                <TrendingDown className="w-5 h-5 text-red-500" />
+                Despesas por Categoria
               </CardTitle>
-              <CardDescription className="text-gray-600 dark:text-gray-400">
-                Top 5 categorias do mês
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              {topCategorias.length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-500 text-center py-8">
-                  Nenhuma despesa registrada neste mês
+              {dadosDespesasPorCategoria.length === 0 ? (
+                <p className="text-gray-600 dark:text-gray-400 text-center py-8">
+                  Nenhuma despesa registrada
                 </p>
               ) : (
-                <div className="space-y-3">
-                  {topCategorias.map((cat: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: cat.cor }}
-                        />
-                        <span className="text-gray-900 dark:text-white font-medium">
-                          {cat.nome}
-                        </span>
-                      </div>
-                      <span className="text-gray-900 dark:text-white font-semibold">
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cat.total)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={dadosDespesasPorCategoria}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {dadosDespesasPorCategoria.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: any) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)} />
+                  </PieChart>
+                </ResponsiveContainer>
               )}
             </CardContent>
           </Card>
 
-          {/* Contas */}
+          {/* Receitas por Categoria */}
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-gray-900 dark:text-white">
-                    Minhas Contas
-                  </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
-                    Saldos atualizados
-                  </CardDescription>
-                </div>
-                <Link href="/fp/contas">
-                  <Button size="sm" variant="outline">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Adicionar
-                  </Button>
-                </Link>
-              </div>
+              <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+                Receitas por Categoria
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {contas.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 dark:text-gray-500 mb-4">
-                    Nenhuma conta cadastrada
-                  </p>
-                  <Link href="/fp/contas">
-                    <Button size="sm">
-                      <Plus className="w-4 h-4 mr-1" />
-                      Adicionar Primeira Conta
-                    </Button>
-                  </Link>
-                </div>
+              {dadosReceitasPorCategoria.length === 0 ? (
+                <p className="text-gray-600 dark:text-gray-400 text-center py-8">
+                  Nenhuma receita registrada
+                </p>
               ) : (
-                <div className="space-y-3">
-                  {contas.map((conta: any) => (
-                    <div key={conta.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {conta.nome}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {conta.banco} • {conta.tipo}
-                        </p>
-                      </div>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={dadosReceitasPorCategoria}>
+                    <XAxis dataKey="name" stroke="#9CA3AF" />
+                    <YAxis stroke="#9CA3AF" />
+                    <Tooltip formatter={(value: any) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)} />
+                    <Bar dataKey="value" fill="#10B981" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Evolução Temporal */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-500" />
+              Evolução (Últimos 30 dias)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={evolucao}>
+                <XAxis dataKey="data" stroke="#9CA3AF" />
+                <YAxis stroke="#9CA3AF" />
+                <Tooltip formatter={(value: any) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)} />
+                <Legend />
+                <Line type="monotone" dataKey="receitas" stroke="#10B981" name="Receitas" strokeWidth={2} />
+                <Line type="monotone" dataKey="despesas" stroke="#EF4444" name="Despesas" strokeWidth={2} />
+                <Line type="monotone" dataKey="saldo" stroke="#3B82F6" name="Saldo" strokeWidth={2} strokeDasharray="5 5" />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Top Contas */}
+        <div className="mt-6">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-gray-900 dark:text-white">Suas Contas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {contas.map((conta) => (
+                  <div key={conta.id} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center gap-3">
+                    <div 
+                      className="w-12 h-12 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: `${conta.cor}20` }}
+                    >
+                      <Wallet className="w-6 h-6" style={{ color: conta.cor }} />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">{conta.nome}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{conta.banco}</p>
+                      <p className="text-lg font-bold" style={{ color: conta.cor }}>
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(conta.saldo_atual)}
                       </p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Transações Recentes */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-gray-900 dark:text-white">
-                  Transações Recentes
-                </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
-                  Últimas 10 movimentações
-                </CardDescription>
-              </div>
-              <Link href="/fp/transacoes">
-                <Button size="sm" variant="outline">
-                  Ver Todas
-                </Button>
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {transacoesRecentes.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-500 text-center py-8">
-                Nenhuma transação registrada
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {transacoesRecentes.map((t: any) => (
-                  <div 
-                    key={t.id} 
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: t.categoria?.cor || '#6B7280' }}
-                      >
-                        <span className="text-white text-lg">
-                          {t.tipo === 'receita' ? '+' : '-'}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {t.descricao}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {new Date(t.data).toLocaleDateString('pt-BR')} • {t.conta?.nome || 'Conta'}
-                        </p>
-                      </div>
-                    </div>
-                    <p className={`text-lg font-semibold ${
-                      t.tipo === 'receita' 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    }`}>
-                      {t.tipo === 'receita' ? '+' : '-'}
-                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.valor)}
-                    </p>
                   </div>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

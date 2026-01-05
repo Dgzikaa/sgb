@@ -35,7 +35,7 @@ const menuItems = [
     icon: BarChart3,
     href: '/fp/dashboard',
     color: 'bg-orange-500',
-    available: false
+    available: true
   },
   {
     title: 'Conexões',
