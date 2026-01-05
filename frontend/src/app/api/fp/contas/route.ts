@@ -5,8 +5,17 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    // Pegar token do header Authorization
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    // Verificar usuário pelo token
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
@@ -14,7 +23,7 @@ export async function GET(request: NextRequest) {
     const { data: userData } = await supabase
       .from('usuarios')
       .select('cpf')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single()
 
     if (!userData?.cpf) {
@@ -42,8 +51,15 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
@@ -51,7 +67,7 @@ export async function POST(request: NextRequest) {
     const { data: userData } = await supabase
       .from('usuarios')
       .select('cpf')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single()
 
     if (!userData?.cpf) {
@@ -94,8 +110,15 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
@@ -134,8 +157,15 @@ export async function DELETE(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 

@@ -73,6 +73,9 @@ export function clearAuthCookie() {
     document.cookie = `${AUTH_COOKIE_NAME}=; expires=${pastDate}; path=/; domain=.${window.location.hostname}`;
     document.cookie = `${AUTH_COOKIE_NAME}=; max-age=0; path=/`;
     document.cookie = `${AUTH_COOKIE_NAME}=; max-age=0; path=/; domain=${window.location.hostname}`;
+    
+    // Limpar também a sessão do Supabase
+    localStorage.removeItem('sgb_session');
 
     console.log('✅ Cookie de autenticação removido');
   } catch (error) {
@@ -81,10 +84,16 @@ export function clearAuthCookie() {
 }
 
 // Função para sincronizar localStorage com cookie
-export function syncAuthData(userData: UserData) {
+export function syncAuthData(userData: UserData, session?: any) {
   try {
     // Salvar no localStorage (dados completos)
     localStorage.setItem('sgb_user', JSON.stringify(userData));
+    
+    // Salvar sessão do Supabase se fornecida
+    if (session) {
+      localStorage.setItem('sgb_session', JSON.stringify(session));
+      console.log('✅ Sessão Supabase salva no localStorage');
+    }
 
     // Salvar no cookie (dados necessários para middleware)
     const cookieData: UserCookie = {

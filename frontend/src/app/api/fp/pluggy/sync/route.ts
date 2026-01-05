@@ -1,12 +1,11 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/supabase-server'
 import { createPluggyClient } from '@/lib/pluggy/client'
 import { categorizarTransacao } from '@/lib/fp/categorizacao'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createServerClient()
     
     const body = await request.json()
     const { pluggy_item_id } = body
@@ -181,7 +180,7 @@ export async function POST(request: NextRequest) {
     // Atualizar status de erro
     const { pluggy_item_id } = await request.json()
     if (pluggy_item_id) {
-      const supabase = createRouteHandlerClient({ cookies })
+      const supabase = createServerClient()
       await supabase
         .from('fp_pluggy_items')
         .update({

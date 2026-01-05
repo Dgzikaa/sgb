@@ -170,7 +170,7 @@ export default function LoginPage() {
 
         // Salvar dados do usuário no localStorage e cookie
         const { syncAuthData } = await import('@/lib/cookies');
-        syncAuthData(userData as any);
+        syncAuthData(userData as any, response.session);
 
         const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home';
         setSuccess(
@@ -220,7 +220,7 @@ export default function LoginPage() {
         if (response.success && response.user) {
           // Salvar dados do usuário no localStorage e cookie
           const { syncAuthData } = await import('@/lib/cookies');
-          syncAuthData(response.user);
+          syncAuthData(response.user, response.session);
 
           const destination = returnUrl
             ? decodeURIComponent(returnUrl)

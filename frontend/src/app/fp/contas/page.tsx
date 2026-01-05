@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Wallet, Plus, Edit2, Trash2, ArrowLeft, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { fetchFP } from '@/lib/api-fp'
 
 export default function ContasPage() {
   const [contas, setContas] = useState<any[]>([])
@@ -30,7 +31,7 @@ export default function ContasPage() {
   const fetchContas = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/fp/contas')
+      const response = await fetchFP('/api/fp/contas')
       const result = await response.json()
       
       if (result.success) {
@@ -38,6 +39,7 @@ export default function ContasPage() {
       }
     } catch (error) {
       console.error('Erro ao buscar contas:', error)
+      toast.error('Erro ao buscar contas. Faça login novamente.')
     } finally {
       setLoading(false)
     }
@@ -50,9 +52,8 @@ export default function ContasPage() {
       const url = editando ? '/api/fp/contas' : '/api/fp/contas'
       const method = editando ? 'PUT' : 'POST'
       
-      const response = await fetch(url, {
+      const response = await fetchFP(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editando ? { ...formData, id: editando.id } : formData)
       })
 
@@ -87,7 +88,7 @@ export default function ContasPage() {
     if (!confirm('Deseja realmente excluir esta conta?')) return
 
     try {
-      const response = await fetch(`/api/fp/contas?id=${id}`, {
+      const response = await fetchFP(`/api/fp/contas?id=${id}`, {
         method: 'DELETE'
       })
 
@@ -143,115 +144,131 @@ export default function ContasPage() {
               </div>
             </div>
 
+            <Button 
+              onClick={() => setModalOpen(true)}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Conta
+            </Button>
+
             <Dialog open={modalOpen} onOpenChange={(open) => {
               setModalOpen(open)
               if (!open) resetForm()
             }}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Conta
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <DialogHeader>
-                  <DialogTitle className="text-gray-900 dark:text-white">
-                    {editando ? 'Editar Conta' : 'Nova Conta'}
+              <DialogContent className="bg-white dark:bg-gray-800 border-0 shadow-2xl max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="border-b border-gray-100 dark:border-gray-700 pb-4 flex-shrink-0">
+                  <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {editando ? '✏️ Editar Conta' : '✨ Nova Conta'}
                   </DialogTitle>
-                  <DialogDescription className="text-gray-600 dark:text-gray-400">
-                    {editando ? 'Atualize os dados da conta' : 'Adicione uma nova conta bancária ou cartão'}
+                  <DialogDescription className="text-gray-500 dark:text-gray-400 mt-2">
+                    {editando ? 'Atualize os dados da sua conta' : 'Adicione uma nova conta bancária ou cartão'}
                   </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Nome da Conta *
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+                  <div className="flex-1 overflow-y-auto px-1 py-6 space-y-5">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      Nome da Conta <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={formData.nome}
                       onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                       placeholder="Ex: Conta Corrente Nubank"
                       required
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-white transition-all"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Banco *
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      Banco <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={formData.banco}
                       onChange={(e) => setFormData({ ...formData, banco: e.target.value })}
-                      placeholder="Ex: Nubank"
+                      placeholder="Ex: Nubank, Bradesco, Itaú..."
                       required
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-white transition-all"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Tipo *
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      Tipo <span className="text-red-500">*</span>
                     </label>
                     <Select value={formData.tipo} onValueChange={(value) => setFormData({ ...formData, tipo: value })}>
-                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                      <SelectTrigger className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="corrente">Conta Corrente</SelectItem>
-                        <SelectItem value="poupanca">Poupança</SelectItem>
-                        <SelectItem value="investimento">Investimento</SelectItem>
-                        <SelectItem value="cartao">Cartão de Crédito</SelectItem>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <SelectItem value="corrente">💳 Conta Corrente</SelectItem>
+                        <SelectItem value="poupanca">🏦 Poupança</SelectItem>
+                        <SelectItem value="investimento">📈 Investimento</SelectItem>
+                        <SelectItem value="cartao">💎 Cartão de Crédito</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Saldo Inicial
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      Saldo Inicial (R$)
                     </label>
                     <Input
                       type="number"
                       step="0.01"
                       value={formData.saldo_inicial}
                       onChange={(e) => setFormData({ ...formData, saldo_inicial: e.target.value })}
-                      placeholder="0.00"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      placeholder="0,00"
+                      className="h-12 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-white transition-all"
                     />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Digite o saldo atual da sua conta</p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Cor
-                    </label>
-                    <div className="flex gap-2">
-                      {cores.map((cor) => (
-                        <button
-                          key={cor}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, cor })}
-                          className={`w-8 h-8 rounded-full ${formData.cor === cor ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
-                          style={{ backgroundColor: cor }}
-                        />
-                      ))}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Cor de Identificação
+                      </label>
+                      <div className="flex flex-wrap gap-2.5">
+                        {cores.map((cor) => (
+                          <button
+                            key={cor}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, cor })}
+                            className={`w-10 h-10 rounded-xl transition-all hover:scale-110 ${
+                              formData.cor === cor 
+                                ? 'ring-4 ring-offset-2 ring-blue-500 dark:ring-blue-400 scale-110 shadow-lg' 
+                                : 'hover:shadow-md'
+                            }`}
+                            style={{ backgroundColor: cor }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-4">
-                    <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-                      {editando ? 'Atualizar' : 'Criar Conta'}
-                    </Button>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => {
-                        setModalOpen(false)
-                        resetForm()
-                      }}
-                    >
-                      Cancelar
-                    </Button>
+                  {/* Footer fixo */}
+                  <div className="flex-shrink-0 border-t border-gray-100 dark:border-gray-700 pt-4 pb-2 px-1 bg-white dark:bg-gray-800">
+                    <div className="flex gap-3">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => {
+                          setModalOpen(false)
+                          resetForm()
+                        }}
+                        className="flex-1 h-12 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40"
+                      >
+                        {editando ? '✓ Atualizar Conta' : '✨ Criar Conta'}
+                      </Button>
+                    </div>
                   </div>
                 </form>
               </DialogContent>
