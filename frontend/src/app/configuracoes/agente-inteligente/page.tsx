@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Brain, Save, Activity, DollarSign, Star, Users } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { useBarContext } from '@/contexts/BarContext'
 
 interface Configuracao {
   id: string
@@ -16,7 +16,8 @@ interface Configuracao {
 }
 
 export default function ConfiguracoesAgentePage() {
-  const { barId } = useAuth()
+  const { selectedBar } = useBarContext()
+  const barId = selectedBar?.id
   const [configuracoes, setConfiguracoes] = useState<Configuracao[]>([])
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)

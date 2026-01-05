@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Brain, TrendingUp, AlertTriangle, Clock, Eye, Archive, PlayCircle, Settings as SettingsIcon, Activity, DollarSign, Users, Star, ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { useBarContext } from '@/contexts/BarContext'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 
@@ -43,7 +43,8 @@ interface Scan {
 }
 
 export default function AgenteInteligentePage() {
-  const { user, barId } = useAuth()
+  const { selectedBar } = useBarContext()
+  const barId = selectedBar?.id
   const [insights, setInsights] = useState<Insight[]>([])
   const [alertas, setAlertas] = useState<Alerta[]>([])
   const [scans, setScans] = useState<Scan[]>([])

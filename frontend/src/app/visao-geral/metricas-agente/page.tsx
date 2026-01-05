@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Activity, DollarSign, Star, Users, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
+import { useBarContext } from '@/contexts/BarContext'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface Metrica {
@@ -20,7 +20,8 @@ interface Metrica {
 }
 
 export default function MetricasAgentePage() {
-  const { barId } = useAuth()
+  const { selectedBar } = useBarContext()
+  const barId = selectedBar?.id
   const [metricas, setMetricas] = useState<{ [categoria: string]: Metrica[] }>({})
   const [loading, setLoading] = useState(true)
 
