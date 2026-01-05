@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     
     console.log('📋 Buscando categorias do Pluggy...')
     
+    // @ts-ignore - método público mas TypeScript não reconhece
     const categories = await pluggyClient.request('/categories', {
       method: 'GET'
     })

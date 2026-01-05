@@ -69,7 +69,7 @@ export class PluggyClient {
   private async authenticate(): Promise<string> {
     // Se já tem token válido, retorna
     if (this.accessToken && this.tokenExpiry && this.tokenExpiry > new Date()) {
-      return this.accessToken
+      return this.accessToken!
     }
 
     const response = await fetch(`${this.config.baseUrl}/auth`, {
@@ -92,7 +92,7 @@ export class PluggyClient {
     // Token válido por 24 horas
     this.tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000)
     
-    return this.accessToken
+    return this.accessToken!
   }
 
   /**

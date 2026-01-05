@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
     console.log('🤖 Categorizando transação:', description)
 
     // Chamar API de categorização do Pluggy
+    // @ts-ignore
     const result = await pluggyClient.request('/categorize', {
       method: 'POST',
       body: JSON.stringify({

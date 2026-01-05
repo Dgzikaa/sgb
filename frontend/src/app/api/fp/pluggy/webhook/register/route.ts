@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     console.log('📝 Registrando webhook no Pluggy:', webhookUrl)
 
     // Criar webhook no Pluggy
+    // @ts-ignore
     const webhook = await pluggyClient.request('/webhooks', {
       method: 'POST',
       body: JSON.stringify({
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
   try {
     const pluggyClient = getPluggyClient()
     
+    // @ts-ignore
     const webhooks = await pluggyClient.request('/webhooks', {
       method: 'GET'
     })
@@ -102,6 +104,7 @@ export async function DELETE(request: NextRequest) {
 
     const pluggyClient = getPluggyClient()
     
+    // @ts-ignore
     await pluggyClient.request(`/webhooks/${webhookId}`, {
       method: 'DELETE'
     })

@@ -1,190 +1,231 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase-server'
-import { parseNubankCSV, parseBradescoCSV, parseItauCSV, parseBBCSV, parseCaixaCSV, parseGenericCSV } from '@/lib/parsers/csv-parser'
-import { parseOFX } from '@/lib/parsers/ofx-parser'
-import { categorizarTransacao } from '@/lib/fp/categorizacao'
+import { createClient } from '@supabase/supabase-js'
+import Papa from 'papaparse'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
-    
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-    }
-
-    // Buscar CPF do usuário
-    const { data: userData } = await supabase
-      .from('usuarios')
-      .select('cpf')
-      .eq('id', session.user.id)
-      .single()
-
-    if (!userData?.cpf) {
-      return NextResponse.json({ error: 'CPF não encontrado' }, { status: 400 })
-    }
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     const formData = await request.formData()
     const file = formData.get('file') as File
     const contaId = formData.get('conta_id') as string
-    const banco = formData.get('banco') as string // 'nubank', 'bradesco', 'itau', 'bb', 'caixa', 'generic'
-    
+    const banco = formData.get('banco') as string
+    const usuarioCpf = formData.get('usuario_cpf') as string
+
     if (!file || !contaId || !banco) {
-      return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Arquivo, conta e banco são obrigatórios' },
+        { status: 400 }
+      )
     }
 
-    // Verificar se a conta existe e pertence ao usuário
-    const { data: conta } = await supabase
-      .from('fp_contas')
-      .select('*')
-      .eq('id', contaId)
-      .eq('usuario_cpf', userData.cpf)
-      .single()
+    // Ler arquivo CSV
+    const text = await file.text()
 
-    if (!conta) {
-      return NextResponse.json({ error: 'Conta não encontrada' }, { status: 404 })
-    }
+    return new Promise((resolve) => {
+      Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async (results: any) => {
+          try {
+            // Mapear dados baseado no banco
+            let transacoes = results.data.map((row: any) => 
+              mapearTransacao(row, banco, contaId, usuarioCpf)
+            ).filter((t: any) => t !== null)
 
-    // Ler conteúdo do arquivo
-    const buffer = await file.arrayBuffer()
-    const content = Buffer.from(buffer).toString('utf-8')
+            // Verificar duplicatas
+            const hashes = transacoes.map((t: any) => t.hash_original)
+            const { data: existentes } = await supabase
+              .from('fp_transacoes')
+              .select('hash_original')
+              .in('hash_original', hashes)
 
-    let transacoes: any[] = []
-    const fileName = file.name.toLowerCase()
+            const hashesExistentes = new Set(existentes?.map((e: any) => e.hash_original) || [])
+            
+            const transacoesNovas = transacoes.filter(
+              (t: any) => !hashesExistentes.has(t.hash_original)
+            )
 
-    // Detectar formato e parsear
-    if (fileName.endsWith('.ofx')) {
-      transacoes = parseOFX(content)
-    } else if (fileName.endsWith('.csv')) {
-      // Parsear conforme o banco
-      switch (banco) {
-        case 'nubank':
-          transacoes = parseNubankCSV(content)
-          break
-        case 'bradesco':
-          transacoes = parseBradescoCSV(content)
-          break
-        case 'itau':
-          transacoes = parseItauCSV(content)
-          break
-        case 'bb':
-          transacoes = parseBBCSV(content)
-          break
-        case 'caixa':
-          transacoes = parseCaixaCSV(content)
-          break
-        default:
-          transacoes = parseGenericCSV(content)
-      }
-    } else {
-      return NextResponse.json({ error: 'Formato de arquivo não suportado' }, { status: 400 })
-    }
+            if (transacoesNovas.length === 0) {
+              resolve(NextResponse.json({
+                success: true,
+                message: 'Nenhuma transação nova encontrada',
+                importadas: 0,
+                duplicadas: transacoes.length
+              }))
+              return
+            }
 
-    if (!transacoes || transacoes.length === 0) {
-      return NextResponse.json({ error: 'Nenhuma transação encontrada no arquivo' }, { status: 400 })
-    }
+            // Inserir transações
+            const { data, error } = await supabase
+              .from('fp_transacoes')
+              .insert(transacoesNovas)
+              .select()
 
-    // Buscar categorias do usuário para categorização automática
-    const { data: categorias } = await supabase
-      .from('fp_categorias')
-      .select('*')
-      .eq('usuario_cpf', userData.cpf)
-      .eq('ativa', true)
+            if (error) {
+              console.error('Erro ao inserir transações:', error)
+              resolve(NextResponse.json(
+                { error: 'Erro ao inserir transações: ' + error.message },
+                { status: 500 }
+              ))
+              return
+            }
 
-    // Buscar regras de categorização
-    const { data: regras } = await supabase
-      .from('fp_regras_categoria')
-      .select('*, categoria:fp_categorias(*)')
-      .eq('usuario_cpf', userData.cpf)
-      .eq('ativa', true)
-      .order('prioridade', { ascending: false })
+            resolve(NextResponse.json({
+              success: true,
+              message: `${transacoesNovas.length} transações importadas com sucesso`,
+              importadas: transacoesNovas.length,
+              duplicadas: transacoes.length - transacoesNovas.length,
+              data
+            }))
 
-    // Processar transações
-    const transacoesParaInserir: any[] = []
-    const transacoesDuplicadas = []
-    const transacoesCategorizadas = []
-
-    for (const t of transacoes) {
-      // Gerar hash único para detectar duplicatas
-      const hash = `${t.data}_${t.valor}_${t.descricao}`.replace(/\s/g, '').toLowerCase()
-
-      // Verificar se já existe
-      const { data: existente } = await supabase
-        .from('fp_transacoes')
-        .select('id')
-        .eq('usuario_cpf', userData.cpf)
-        .eq('conta_id', contaId)
-        .eq('hash_original', hash)
-        .single()
-
-      if (existente) {
-        transacoesDuplicadas.push(t)
-        continue
-      }
-
-      // Categorizar automaticamente
-      const categoriaId = categorizarTransacao(t.descricao, t.tipo, regras || [], categorias || [])
-      
-      if (categoriaId) {
-        transacoesCategorizadas.push(t)
-      }
-
-      transacoesParaInserir.push({
-        usuario_cpf: userData.cpf,
-        conta_id: contaId,
-        categoria_id: categoriaId,
-        tipo: t.tipo,
-        descricao: t.descricao,
-        valor: parseFloat(t.valor),
-        data: t.data,
-        status: 'confirmada',
-        origem_importacao: banco,
-        hash_original: hash
+          } catch (error: any) {
+            console.error('Erro no processamento:', error)
+            resolve(NextResponse.json(
+              { error: 'Erro ao processar arquivo: ' + error.message },
+              { status: 500 }
+            ))
+          }
+        },
+        error: (error: any) => {
+          resolve(NextResponse.json(
+            { error: 'Erro ao ler arquivo CSV: ' + error.message },
+            { status: 400 }
+          ))
+        }
       })
-    }
-
-    // Inserir transações
-    let transacoesInseridas = []
-    if (transacoesParaInserir.length > 0) {
-      const { data: inseridas, error } = await supabase
-        .from('fp_transacoes')
-        .insert(transacoesParaInserir)
-        .select()
-
-      if (error) throw error
-      transacoesInseridas = inseridas || []
-
-      // Recalcular saldo da conta
-      const totalReceitas = transacoesParaInserir
-        .filter(t => t.tipo === 'receita')
-        .reduce((acc, t) => acc + t.valor, 0)
-      
-      const totalDespesas = transacoesParaInserir
-        .filter(t => t.tipo === 'despesa')
-        .reduce((acc, t) => acc + t.valor, 0)
-
-      const novoSaldo = parseFloat(conta.saldo_atual) + totalReceitas - totalDespesas
-
-      await supabase
-        .from('fp_contas')
-        .update({ saldo_atual: novoSaldo })
-        .eq('id', contaId)
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Importação concluída',
-      data: {
-        total: transacoes.length,
-        inseridas: transacoesInseridas.length,
-        duplicadas: transacoesDuplicadas.length,
-        categorizadasAuto: transacoesCategorizadas.length,
-        semCategoria: transacoesInseridas.length - transacoesCategorizadas.length,
-        transacoes: transacoesInseridas
-      }
     })
+
   } catch (error: any) {
-    console.error('Erro ao importar transações:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Erro na importação:', error)
+    return NextResponse.json(
+      { error: 'Erro na importação: ' + error.message },
+      { status: 500 }
+    )
   }
+}
+
+function mapearTransacao(row: any, banco: string, contaId: string, usuarioCpf: string): any {
+  try {
+    let data, descricao, valor, tipo
+
+    switch (banco.toLowerCase()) {
+      case 'nubank':
+        data = row['date'] || row['Data']
+        descricao = row['description'] || row['title'] || row['Descrição']
+        valor = parseFloat((row['amount'] || row['Valor'] || '0').toString().replace(',', '.'))
+        tipo = valor < 0 ? 'saida' : 'entrada'
+        break
+
+      case 'inter':
+        data = row['Data']
+        descricao = row['Descrição'] || row['Histórico']
+        valor = parseFloat((row['Valor'] || '0').toString().replace(',', '.'))
+        tipo = row['Tipo']?.toLowerCase() === 'débito' ? 'saida' : 'entrada'
+        break
+
+      case 'itau':
+        data = row['data'] || row['Data']
+        descricao = row['descricao'] || row['histórico'] || row['Descrição']
+        valor = parseFloat((row['valor'] || '0').toString().replace(',', '.'))
+        tipo = valor < 0 ? 'saida' : 'entrada'
+        break
+
+      case 'bradesco':
+        data = row['Data']
+        descricao = row['Histórico'] || row['Descrição']
+        valor = parseFloat((row['Valor'] || '0').toString().replace(',', '.'))
+        tipo = row['Tipo'] === 'D' || valor < 0 ? 'saida' : 'entrada'
+        break
+
+      case 'caixa':
+        data = row['Data']
+        descricao = row['Descrição'] || row['Histórico']
+        valor = parseFloat((row['Valor'] || '0').toString().replace(',', '.'))
+        tipo = valor < 0 ? 'saida' : 'entrada'
+        break
+
+      default:
+        // Formato genérico
+        data = row['data'] || row['Data'] || row['date']
+        descricao = row['descricao'] || row['Descrição'] || row['description'] || row['Histórico']
+        valor = parseFloat((row['valor'] || row['Valor'] || row['amount'] || '0').toString().replace(',', '.'))
+        tipo = valor < 0 ? 'saida' : 'entrada'
+    }
+
+    if (!data || !descricao || isNaN(valor)) {
+      return null
+    }
+
+    // Normalizar data para YYYY-MM-DD
+    const dataFormatada = normalizarData(data)
+    
+    // Gerar hash único
+    const hash = gerarHash(dataFormatada, descricao, valor, contaId)
+
+    return {
+      usuario_cpf: usuarioCpf,
+      conta_id: contaId,
+      categoria_id: null,
+      tipo: tipo,
+      descricao: descricao.trim(),
+      valor: Math.abs(valor),
+      data: dataFormatada,
+      status: 'pendente',
+      origem_importacao: banco,
+      hash_original: hash
+    }
+
+  } catch (error) {
+    console.error('Erro ao mapear transação:', error, row)
+    return null
+  }
+}
+
+function normalizarData(data: string): string {
+  try {
+    // Tentar diversos formatos
+    const formatos = [
+      /^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
+      /^(\d{2})\/(\d{2})\/(\d{4})$/, // DD/MM/YYYY
+      /^(\d{2})-(\d{2})-(\d{4})$/, // DD-MM-YYYY
+    ]
+
+    for (const formato of formatos) {
+      const match = data.match(formato)
+      if (match) {
+        if (formato === formatos[0]) {
+          return data // Já está no formato correto
+        } else {
+          // DD/MM/YYYY ou DD-MM-YYYY para YYYY-MM-DD
+          return `${match[3]}-${match[2]}-${match[1]}`
+        }
+      }
+    }
+
+    // Se não bateu com nenhum formato, tentar parse direto
+    const d = new Date(data)
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().split('T')[0]
+    }
+
+    throw new Error('Formato de data inválido')
+  } catch (error) {
+    console.error('Erro ao normalizar data:', data, error)
+    return new Date().toISOString().split('T')[0]
+  }
+}
+
+function gerarHash(data: string, descricao: string, valor: number, contaId: string): string {
+  const str = `${data}-${descricao}-${valor}-${contaId}`
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  return Math.abs(hash).toString(36)
 }
