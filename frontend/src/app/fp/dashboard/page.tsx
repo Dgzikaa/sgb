@@ -13,7 +13,8 @@ import {
   Upload,
   Settings,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Link2
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -79,6 +80,13 @@ export default function DashboardFPPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
+              <Link href="/fp/pluggy">
+                <Button className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white">
+                  <Link2 className="w-4 h-4 mr-2" />
+                  Open Finance
+                </Button>
+              </Link>
+
               <Link href="/fp/importar">
                 <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
                   <Upload className="w-4 h-4 mr-2" />
