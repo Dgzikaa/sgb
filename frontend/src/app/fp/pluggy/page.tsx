@@ -176,10 +176,26 @@ export default function PluggyPage() {
           }
         },
         onError: (error: any) => {
-          console.error('Erro na conexão:', error)
-          toast.error('Erro ao conectar banco', { 
-            description: error.message || 'Tente novamente' 
+          console.error('❌ Erro na conexão:', error)
+          
+          // Mensagens de erro mais amigáveis
+          let errorMessage = 'Tente novamente em alguns minutos'
+          
+          if (error.message?.includes('not sync successfully')) {
+            errorMessage = '⚠️ Sincronização falhou. Possíveis causas:\n\n' +
+              '• Muitas tentativas seguidas (aguarde 5-10 minutos)\n' +
+              '• Credenciais inválidas (verifique usuário e senha)\n' +
+              '• Banco temporariamente indisponível\n\n' +
+              '💡 Tente novamente mais tarde ou com outro banco.'
+          } else if (error.message?.includes('credentials')) {
+            errorMessage = 'Credenciais incorretas. Verifique usuário e senha.'
+          }
+          
+          toast.error('❌ Erro ao conectar banco', { 
+            description: errorMessage,
+            duration: 8000, // 8 segundos para mensagens longas
           })
+          setConnecting(false)
         },
         onClose: () => {
           console.log('🔒 Widget fechado')
