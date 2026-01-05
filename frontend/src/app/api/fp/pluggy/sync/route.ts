@@ -1,206 +1,228 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
-import { createPluggyClient } from '@/lib/pluggy/client'
-import { categorizarTransacao } from '@/lib/fp/categorizacao'
+import { getPluggyClient } from '@/lib/pluggy-client'
 
+// Helper para pegar CPF do usuário autenticado
+async function getUserCPF(supabase: any, user: any) {
+  const { data: userData } = await supabase
+    .from('usuarios_bar')
+    .select('cpf')
+    .eq('user_id', user.id)
+    .limit(1)
+
+  if (!userData || userData.length === 0 || !userData[0].cpf) {
+    const { data: userDataByEmail } = await supabase
+      .from('usuarios_bar')
+      .select('cpf')
+      .eq('email', user.email)
+      .limit(1)
+    
+    if (userDataByEmail && userDataByEmail.length > 0) {
+      return userDataByEmail[0].cpf.replace(/[^\d]/g, '')
+    }
+  }
+
+  if (userData && userData.length > 0 && userData[0].cpf) {
+    return userData[0].cpf.replace(/[^\d]/g, '')
+  }
+
+  throw new Error('CPF não encontrado')
+}
+
+// POST - Sincronizar transações de um item
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerClient()
     
-    const body = await request.json()
-    const { pluggy_item_id } = body
-
-    if (!pluggy_item_id) {
-      return NextResponse.json({ error: 'pluggy_item_id é obrigatório' }, { status: 400 })
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    // Buscar conexão Pluggy no banco
-    const { data: pluggyItem } = await supabase
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const cpf = await getUserCPF(supabase, user)
+    const body = await request.json()
+    const { itemId, from, to } = body
+
+    if (!itemId) {
+      return NextResponse.json({ error: 'Item ID é obrigatório' }, { status: 400 })
+    }
+
+    // Verificar que o item pertence ao usuário
+    const { data: item } = await supabase
       .from('fp_pluggy_items')
       .select('*')
-      .eq('pluggy_item_id', pluggy_item_id)
+      .eq('id', itemId)
+      .eq('usuario_cpf', cpf)
       .single()
 
-    if (!pluggyItem) {
-      return NextResponse.json({ error: 'Conexão não encontrada' }, { status: 404 })
+    if (!item) {
+      return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 })
     }
 
-    // Atualizar status para UPDATING
-    await supabase
-      .from('fp_pluggy_items')
-      .update({ status: 'UPDATING' })
-      .eq('pluggy_item_id', pluggy_item_id)
+    const pluggyClient = getPluggyClient()
 
-    // Sincronizar via Pluggy
-    const pluggy = createPluggyClient()
+    // Buscar contas do item
+    const accounts = await pluggyClient.getAccounts(item.pluggy_item_id)
 
-    // Atualizar item (forçar refresh)
-    await pluggy.updateItem(pluggy_item_id)
+    let transacoesImportadas = 0
+    let contasCriadas = 0
 
-    // Buscar transações dos últimos 90 dias
-    const dataInicio = new Date()
-    dataInicio.setDate(dataInicio.getDate() - 90)
-    const dataFim = new Date()
-
-    const transactions = await pluggy.getAllTransactions(pluggy_item_id, {
-      from: dataInicio.toISOString().split('T')[0],
-      to: dataFim.toISOString().split('T')[0]
-    })
-
-    // Buscar categorias e regras do usuário
-    const { data: categorias } = await supabase
-      .from('fp_categorias')
-      .select('*')
-      .eq('usuario_cpf', pluggyItem.usuario_cpf)
-      .eq('ativa', true)
-
-    const { data: regras } = await supabase
-      .from('fp_regras_categoria')
-      .select('*, categoria:fp_categorias(*)')
-      .eq('usuario_cpf', pluggyItem.usuario_cpf)
-      .eq('ativa', true)
-      .order('prioridade', { ascending: false })
-
-    // Processar transações
-    const transacoesParaInserir = []
-    let duplicadas = 0
-
-    for (const t of transactions) {
-      // Converter tipo Pluggy para nosso tipo
-      const tipo = t.amount >= 0 ? 'receita' : 'despesa'
-      const valor = Math.abs(t.amount)
-
-      // Gerar hash único
-      const hash = `pluggy_${t.id}_${t.date}_${valor}_${t.description}`.replace(/\s/g, '').toLowerCase()
-
-      // Verificar duplicata
-      const { data: existente } = await supabase
-        .from('fp_transacoes')
-        .select('id')
-        .eq('hash_original', hash)
+    // Para cada conta, criar no sistema se não existir e importar transações
+    for (const account of accounts.results || []) {
+      // Verificar se a conta já existe
+      let { data: contaExistente } = await supabase
+        .from('fp_contas')
+        .select('id, saldo_atual')
+        .eq('usuario_cpf', cpf)
+        .eq('pluggy_account_id', account.id)
         .single()
 
-      if (existente) {
-        duplicadas++
-        continue
+      // Criar conta se não existir
+      if (!contaExistente) {
+        const { data: novaConta } = await supabase
+          .from('fp_contas')
+          .insert([{
+            usuario_cpf: cpf,
+            nome: account.name || `${item.connector_name} - ${account.type}`,
+            banco: item.connector_name,
+            tipo: account.type === 'CREDIT' ? 'cartao' : 'corrente',
+            saldo_inicial: account.balance || 0,
+            saldo_atual: account.balance || 0,
+            cor: '#3B82F6',
+            ativa: true,
+            pluggy_account_id: account.id,
+          }])
+          .select()
+          .single()
+
+        contaExistente = novaConta
+        contasCriadas++
       }
 
-      // Categorizar automaticamente
-      const categoriaId = categorizarTransacao(
-        t.description,
-        tipo,
-        regras || [],
-        categorias || []
-      )
+      // Buscar transações
+      const transactions = await pluggyClient.getTransactions(account.id, from, to)
 
-      transacoesParaInserir.push({
-        usuario_cpf: pluggyItem.usuario_cpf,
-        conta_id: pluggyItem.conta_id,
-        categoria_id: categoriaId,
-        tipo,
-        descricao: t.description,
-        valor,
-        data: t.date,
-        status: 'confirmada',
-        origem_importacao: 'pluggy',
-        hash_original: hash
-      })
-    }
+      // Importar transações
+      for (const transaction of transactions.results || []) {
+        // Verificar se transação já existe
+        const { data: existente } = await supabase
+          .from('fp_transacoes')
+          .select('id')
+          .eq('pluggy_transaction_id', transaction.id)
+          .single()
 
-    // Inserir transações
-    let inseridas = 0
-    if (transacoesParaInserir.length > 0) {
-      const { data, error } = await supabase
-        .from('fp_transacoes')
-        .insert(transacoesParaInserir)
-        .select()
+        if (existente) continue // Pular se já existe
 
-      if (error) throw error
-      inseridas = data?.length || 0
+        // Determinar tipo
+        const tipo = transaction.amount > 0 ? 'receita' : 'despesa'
 
-      // Recalcular saldo da conta
-      const totalReceitas = transacoesParaInserir
-        .filter(t => t.tipo === 'receita')
-        .reduce((acc, t) => acc + t.valor, 0)
-      
-      const totalDespesas = transacoesParaInserir
-        .filter(t => t.tipo === 'despesa')
-        .reduce((acc, t) => acc + t.valor, 0)
+        // Tentar categorizar automaticamente
+        let categoriaId = null
+        let categoriaOrigem = null
 
-      // Buscar conta
-      const { data: conta } = await supabase
-        .from('fp_contas')
-        .select('saldo_atual')
-        .eq('id', pluggyItem.conta_id)
-        .single()
+        // Buscar categoria template baseado na descrição
+        const { data: categoria } = await supabase
+          .from('fp_categorias_template')
+          .select('id')
+          .eq('tipo', tipo)
+          .ilike('nome', `%${transaction.category || 'Outros'}%`)
+          .limit(1)
+          .single()
 
-      if (conta) {
-        const novoSaldo = parseFloat(conta.saldo_atual) + totalReceitas - totalDespesas
+        if (categoria) {
+          categoriaId = categoria.id
+          categoriaOrigem = 'template'
+        }
+
+        // Criar transação
+        const transacaoData: any = {
+          usuario_cpf: cpf,
+          descricao: transaction.description || 'Transação importada',
+          valor: Math.abs(transaction.amount),
+          tipo,
+          data: transaction.date.split('T')[0],
+          conta_id: contaExistente!.id,
+          pluggy_transaction_id: transaction.id,
+          categorizada: !!categoriaId,
+        }
+
+        if (categoriaId && categoriaOrigem === 'template') {
+          transacaoData.categoria_template_id = categoriaId
+        }
+
+        await supabase
+          .from('fp_transacoes')
+          .insert([transacaoData])
+
+        // Atualizar saldo da conta
+        const novoSaldo = tipo === 'receita'
+          ? contaExistente!.saldo_atual + Math.abs(transaction.amount)
+          : contaExistente!.saldo_atual - Math.abs(transaction.amount)
 
         await supabase
           .from('fp_contas')
           .update({ saldo_atual: novoSaldo })
-          .eq('id', pluggyItem.conta_id)
+          .eq('id', contaExistente!.id)
+
+        contaExistente!.saldo_atual = novoSaldo
+        transacoesImportadas++
       }
     }
 
-    // Atualizar status da conexão
-    await supabase
-      .from('fp_pluggy_items')
-      .update({
-        status: 'ACTIVE',
-        ultima_sincronizacao: new Date().toISOString(),
-        erro_mensagem: null
-      })
-      .eq('pluggy_item_id', pluggy_item_id)
-
-    // Log de sincronização
+    // Registrar sync
     await supabase
       .from('fp_pluggy_sync_log')
       .insert([{
-        pluggy_item_id,
+        usuario_cpf: cpf,
+        item_id: itemId,
+        contas_sincronizadas: accounts.results?.length || 0,
+        transacoes_importadas: transacoesImportadas,
         status: 'SUCCESS',
-        transacoes_importadas: inseridas,
-        transacoes_duplicadas: duplicadas
       }])
 
     return NextResponse.json({
       success: true,
-      message: 'Sincronização concluída',
       data: {
-        total: transactions.length,
-        inseridas,
-        duplicadas,
-        categorizadasAuto: transacoesParaInserir.filter(t => t.categoria_id).length
-      }
+        contasCriadas,
+        transacoesImportadas,
+      },
     })
   } catch (error: any) {
     console.error('Erro ao sincronizar:', error)
 
-    // Atualizar status de erro
-    const { pluggy_item_id } = await request.json()
-    if (pluggy_item_id) {
+    // Registrar erro
+    try {
       const supabase = createServerClient()
-      await supabase
-        .from('fp_pluggy_items')
-        .update({
-          status: 'LOGIN_ERROR',
-          erro_mensagem: error.message
-        })
-        .eq('pluggy_item_id', pluggy_item_id)
-
-      // Log de erro
-      await supabase
-        .from('fp_pluggy_sync_log')
-        .insert([{
-          pluggy_item_id,
-          status: 'ERROR',
-          erro_mensagem: error.message
-        }])
+      const token = request.headers.get('authorization')?.replace('Bearer ', '')
+      if (token) {
+        const { data: { user } } = await supabase.auth.getUser(token)
+        if (user) {
+          const cpf = await getUserCPF(supabase, user)
+          const body = await request.json()
+          
+          await supabase
+            .from('fp_pluggy_sync_log')
+            .insert([{
+              usuario_cpf: cpf,
+              item_id: body.itemId,
+              contas_sincronizadas: 0,
+              transacoes_importadas: 0,
+              status: 'ERROR',
+              erro: error.message,
+            }])
+        }
+      }
+    } catch (e) {
+      // Ignorar erro ao registrar log
     }
 
-    return NextResponse.json({ 
-      error: error.message || 'Erro ao sincronizar' 
-    }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

@@ -43,7 +43,7 @@ const menuItems = [
     icon: Plug,
     href: '/fp/pluggy',
     color: 'bg-pink-500',
-    available: false
+    available: true
   },
 ]
 

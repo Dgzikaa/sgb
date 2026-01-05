@@ -1,409 +1,251 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Building2, Link2, Plus, RefreshCw, Unlink, ArrowLeft, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
-import Link from 'next/link'
+import { ArrowLeft, Plug, RefreshCw, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { toast } from 'sonner'
+import { fetchFP } from '@/lib/api-fp'
+
+interface PluggyItem {
+  id: string
+  connector_name: string
+  status: string
+  created_at: string
+  lastUpdatedAt?: string
+}
 
 export default function PluggyPage() {
-  const [contas, setContas] = useState<any[]>([])
-  const [conectores, setConectores] = useState<any[]>([])
-  const [conexoes, setConexoes] = useState<any[]>([])
+  const [items, setItems] = useState<PluggyItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [connecting, setConnecting] = useState(false)
-  const [formData, setFormData] = useState({
-    conta_id: '',
-    connector_id: '',
-    credentials: {} as Record<string, string>
-  })
-  const [selectedConnector, setSelectedConnector] = useState<any>(null)
+  const [syncing, setSyncing] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchItems = async () => {
+    setLoading(true)
     try {
-      setLoading(true)
+      const response = await fetchFP('/api/fp/pluggy/items')
+      const result = await response.json()
       
-      const [contasRes, conectoresRes, conexoesRes] = await Promise.all([
-        fetch('/api/fp/contas'),
-        fetch('/api/fp/pluggy/connectors'),
-        fetch('/api/fp/pluggy/items')
-      ])
-
-      const [contasResult, conectoresResult, conexoesResult] = await Promise.all([
-        contasRes.json(),
-        conectoresRes.json(),
-        conexoesRes.json()
-      ])
-
-      if (contasResult.success) setContas(contasResult.data || [])
-      if (conectoresResult.success) setConectores(conectoresResult.data || [])
-      if (conexoesResult.success) setConexoes(conexoesResult.data || [])
+      if (result.success) {
+        setItems(result.data)
+      }
     } catch (error) {
-      console.error('Erro ao buscar dados:', error)
-      toast.error('Erro ao carregar dados')
+      toast.error('Erro ao carregar conexões')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSelectConnector = (connectorId: string) => {
-    const connector = conectores.find(c => c.id === connectorId)
-    setSelectedConnector(connector)
-    setFormData({ ...formData, connector_id: connectorId, credentials: {} })
-  }
+  useEffect(() => {
+    fetchItems()
+  }, [])
 
-  const handleConnect = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!formData.conta_id || !formData.connector_id) {
-      toast.error('Selecione uma conta e um banco')
-      return
-    }
-
-    // Validar credenciais
-    if (selectedConnector) {
-      for (const cred of selectedConnector.credentials) {
-        if (!formData.credentials[cred.name]) {
-          toast.error(`Campo ${cred.label} é obrigatório`)
-          return
-        }
-      }
-    }
-
+  const handleSync = async (itemId: string) => {
+    setSyncing(itemId)
     try {
-      setConnecting(true)
-
-      const response = await fetch('/api/fp/pluggy/connect', {
+      // Pegar data de 90 dias atrás
+      const from = new Date()
+      from.setDate(from.getDate() - 90)
+      
+      const response = await fetchFP('/api/fp/pluggy/sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          itemId,
+          from: from.toISOString().split('T')[0],
+          to: new Date().toISOString().split('T')[0],
+        }),
       })
-
       const result = await response.json()
 
       if (result.success) {
-        toast.success(result.message)
-        setModalOpen(false)
-        resetForm()
-        fetchData()
+        toast.success(`Sincronizado! ${result.data.transacoesImportadas} transações importadas`, {
+          description: result.data.contasCriadas > 0 ? `${result.data.contasCriadas} contas criadas` : undefined
+        })
+        fetchItems()
       } else {
-        toast.error(result.error || 'Erro ao conectar banco')
+        toast.error('Erro ao sincronizar', { description: result.error })
       }
-    } catch (error) {
-      console.error('Erro ao conectar:', error)
-      toast.error('Erro ao conectar banco')
+    } catch (error: any) {
+      toast.error('Erro de conexão', { description: error.message })
     } finally {
-      setConnecting(false)
+      setSyncing(null)
     }
   }
 
-  const handleSync = async (pluggyItemId: string) => {
+  const handleDisconnect = async (itemId: string) => {
+    if (!confirm('Tem certeza que deseja desconectar este banco?')) return
+
     try {
-      toast.info('Sincronizando transações...')
-
-      const response = await fetch('/api/fp/pluggy/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pluggy_item_id: pluggyItemId })
+      const response = await fetchFP(`/api/fp/pluggy/items?id=${itemId}`, {
+        method: 'DELETE',
       })
-
       const result = await response.json()
 
       if (result.success) {
-        toast.success(`${result.data.inseridas} novas transações importadas!`)
-        fetchData()
+        toast.success('Banco desconectado!')
+        fetchItems()
       } else {
-        toast.error(result.error)
+        toast.error('Erro ao desconectar', { description: result.error })
       }
     } catch (error) {
-      toast.error('Erro ao sincronizar')
-    }
-  }
-
-  const handleDisconnect = async (pluggyItemId: string) => {
-    if (!confirm('Deseja realmente desconectar este banco?')) return
-
-    try {
-      const response = await fetch('/api/fp/pluggy/disconnect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pluggy_item_id: pluggyItemId })
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        toast.success('Banco desconectado')
-        fetchData()
-      } else {
-        toast.error(result.error)
-      }
-    } catch (error) {
-      toast.error('Erro ao desconectar')
-    }
-  }
-
-  const resetForm = () => {
-    setFormData({
-      conta_id: '',
-      connector_id: '',
-      credentials: {}
-    })
-    setSelectedConnector(null)
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return 'text-green-600 dark:text-green-400'
-      case 'UPDATING':
-        return 'text-blue-600 dark:text-blue-400'
-      case 'LOGIN_ERROR':
-        return 'text-red-600 dark:text-red-400'
-      default:
-        return 'text-gray-600 dark:text-gray-400'
+      toast.error('Erro de conexão')
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'ACTIVE':
-        return <CheckCircle className="w-5 h-5" />
+      case 'UPDATED':
+      case 'LOGIN_IN_PROGRESS':
+        return <CheckCircle className="w-5 h-5 text-green-500" />
+      case 'OUTDATED':
       case 'UPDATING':
-        return <RefreshCw className="w-5 h-5 animate-spin" />
+        return <Clock className="w-5 h-5 text-yellow-500" />
       case 'LOGIN_ERROR':
-        return <XCircle className="w-5 h-5" />
+      case 'ERROR':
+        return <XCircle className="w-5 h-5 text-red-500" />
       default:
-        return <AlertCircle className="w-5 h-5" />
+        return <Clock className="w-5 h-5 text-gray-500" />
+    }
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'UPDATED':
+        return 'Atualizado'
+      case 'OUTDATED':
+        return 'Desatualizado'
+      case 'UPDATING':
+        return 'Atualizando...'
+      case 'LOGIN_IN_PROGRESS':
+        return 'Conectando...'
+      case 'LOGIN_ERROR':
+        return 'Erro de login'
+      case 'ERROR':
+        return 'Erro'
+      default:
+        return status
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="card-dark p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/fp/dashboard">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-1" />
-                  Voltar
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Open Finance (Pluggy)
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Conecte seus bancos e sincronize transações automaticamente
-                </p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between mb-8">
+          <Link href="/fp" className="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Voltar
+          </Link>
 
-            <Dialog open={modalOpen} onOpenChange={(open) => {
-              setModalOpen(open)
-              if (!open) resetForm()
-            }}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Conectar Banco
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-gray-900 dark:text-white">
-                    Conectar Banco via Open Finance
-                  </DialogTitle>
-                  <DialogDescription className="text-gray-600 dark:text-gray-400">
-                    Suas credenciais são criptografadas e seguras
-                  </DialogDescription>
-                </DialogHeader>
-
-                <form onSubmit={handleConnect} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Conta Destino *
-                    </label>
-                    <Select value={formData.conta_id} onValueChange={(value) => setFormData({ ...formData, conta_id: value })}>
-                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
-                        <SelectValue placeholder="Selecione a conta" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {contas.map((conta) => (
-                          <SelectItem key={conta.id} value={conta.id}>
-                            {conta.nome} - {conta.banco}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Banco *
-                    </label>
-                    <Select value={formData.connector_id} onValueChange={handleSelectConnector}>
-                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
-                        <SelectValue placeholder="Selecione o banco" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {conectores.map((connector) => (
-                          <SelectItem key={connector.id} value={connector.id}>
-                            {connector.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {selectedConnector && selectedConnector.credentials.map((cred: any) => (
-                    <div key={cred.name}>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {cred.label} *
-                      </label>
-                      <Input
-                        type={cred.type === 'password' ? 'password' : 'text'}
-                        value={formData.credentials[cred.name] || ''}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          credentials: { ...formData.credentials, [cred.name]: e.target.value }
-                        })}
-                        placeholder={cred.placeholder || cred.label}
-                        required
-                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-                      />
-                    </div>
-                  ))}
-
-                  <div className="flex gap-2 pt-4">
-                    <Button
-                      type="submit"
-                      disabled={connecting || !formData.conta_id || !formData.connector_id}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      {connecting ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Conectando...
-                        </>
-                      ) : (
-                        <>
-                          <Link2 className="w-4 h-4 mr-2" />
-                          Conectar
-                        </>
-                      )}
-                    </Button>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => {
-                        setModalOpen(false)
-                        resetForm()
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Conexões Bancárias</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Open Finance via Pluggy
+            </p>
           </div>
+
+          <div className="w-32" />
         </div>
 
-        {/* Bancos Conectados */}
+        {/* Aviso de Implementação */}
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 mb-6">
+          <CardHeader>
+            <CardTitle className="text-blue-900 dark:text-blue-100 flex items-center gap-2">
+              <Plug className="w-5 h-5" />
+              Open Finance Integration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-blue-700 dark:text-blue-300">
+              <p><strong>🔧 Em Desenvolvimento:</strong> A integração completa com o Pluggy Widget está sendo finalizada.</p>
+              <p><strong>📋 Próximas etapas:</strong></p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>Implementar Pluggy Connect Widget para conexão de bancos</li>
+                <li>Sincronização automática de transações</li>
+                <li>Atualização em tempo real de saldos</li>
+                <li>Suporte a múltiplos bancos simultaneamente</li>
+              </ul>
+              <p className="mt-4">
+                <strong>💡 Como funciona:</strong> Após conectar sua conta bancária via Open Finance, 
+                o sistema irá automaticamente importar suas transações e manter tudo sincronizado.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Lista de Conexões */}
         {loading ? (
-          <div className="card-dark p-6">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 p-6">
             <p className="text-gray-600 dark:text-gray-400">Carregando conexões...</p>
-          </div>
-        ) : conexoes.length === 0 ? (
-          <div className="card-dark p-12 text-center">
-            <Building2 className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+          </Card>
+        ) : items.length === 0 ? (
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 p-12 text-center">
+            <Plug className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Nenhum banco conectado
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Conecte seu banco para sincronização automática de transações
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Conecte sua conta bancária via Open Finance para importar transações automaticamente
             </p>
-            <Button onClick={() => setModalOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Conectar Primeiro Banco
+            <Button disabled className="bg-gray-400">
+              <Plug className="w-4 h-4 mr-2" />
+              Conectar Banco (Em breve)
             </Button>
-          </div>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {conexoes.map((conexao) => (
-              <Card key={conexao.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardHeader className="pb-3">
+            {items.map((item) => (
+              <Card key={item.id} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                        <Building2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg text-gray-900 dark:text-white">
-                          {conexao.banco_nome}
-                        </CardTitle>
-                        <CardDescription className="text-gray-600 dark:text-gray-400">
-                          {conexao.conta?.nome}
-                        </CardDescription>
-                      </div>
+                    <div>
+                      <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                        {item.connector_name}
+                      </CardTitle>
+                      <CardDescription className="text-gray-600 dark:text-gray-400 flex items-center gap-2 mt-2">
+                        {getStatusIcon(item.status)}
+                        {getStatusText(item.status)}
+                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <div className={`flex items-center gap-2 ${getStatusColor(conexao.status)}`}>
-                      {getStatusIcon(conexao.status)}
-                      <span className="text-sm font-medium">
-                        {conexao.status === 'ACTIVE' && 'Conectado'}
-                        {conexao.status === 'UPDATING' && 'Sincronizando...'}
-                        {conexao.status === 'LOGIN_ERROR' && 'Erro de autenticação'}
-                        {conexao.status === 'OUTDATED' && 'Desatualizado'}
-                      </span>
+                  <div className="space-y-2">
+                    <div className="text-xs text-gray-500 dark:text-gray-500">
+                      Conectado em: {new Date(item.created_at).toLocaleDateString('pt-BR')}
                     </div>
-
-                    {conexao.ultima_sincronizacao && (
-                      <p className="text-xs text-gray-500 dark:text-gray-500">
-                        Última sincronização:{' '}
-                        {new Date(conexao.ultima_sincronizacao).toLocaleString('pt-BR')}
-                      </p>
+                    {item.lastUpdatedAt && (
+                      <div className="text-xs text-gray-500 dark:text-gray-500">
+                        Última atualização: {new Date(item.lastUpdatedAt).toLocaleDateString('pt-BR')}
+                      </div>
                     )}
 
-                    {conexao.erro_mensagem && (
-                      <p className="text-xs text-red-600 dark:text-red-400">
-                        {conexao.erro_mensagem}
-                      </p>
-                    )}
-
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2 pt-4">
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => handleSync(conexao.pluggy_item_id)}
-                        className="flex-1"
-                        disabled={conexao.status === 'UPDATING'}
+                        onClick={() => handleSync(item.id)}
+                        disabled={syncing === item.id}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
                       >
-                        <RefreshCw className="w-3 h-3 mr-1" />
-                        Sincronizar
+                        {syncing === item.id ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Sincronizando...
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Sincronizar
+                          </>
+                        )}
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDisconnect(conexao.pluggy_item_id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                        onClick={() => handleDisconnect(item.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400"
                       >
-                        <Unlink className="w-3 h-3" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -413,19 +255,21 @@ export default function PluggyPage() {
           </div>
         )}
 
-        {/* Informações */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 mt-6">
+        {/* Informações Adicionais */}
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mt-6">
           <CardHeader>
-            <CardTitle className="text-blue-900 dark:text-blue-300 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5" />
-              Segurança e Privacidade
-            </CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">🔒 Segurança</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
-            <p>✅ Conexão criptografada e segura via Open Finance (Banco Central)</p>
-            <p>✅ Suas credenciais nunca são armazenadas no nosso servidor</p>
-            <p>✅ Sincronização automática de transações em tempo real</p>
-            <p>✅ Você pode desconectar a qualquer momento</p>
+          <CardContent>
+            <div className="space-y-2 text-gray-700 dark:text-gray-300">
+              <p><strong>Pluggy é certificado pelo Banco Central do Brasil</strong></p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li>Seus dados bancários são criptografados e protegidos</li>
+                <li>Nunca armazenamos sua senha bancária</li>
+                <li>Você pode desconectar a qualquer momento</li>
+                <li>Conformidade com LGPD e Open Finance</li>
+              </ul>
+            </div>
           </CardContent>
         </Card>
       </div>
