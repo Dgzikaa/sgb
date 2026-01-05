@@ -83,8 +83,7 @@ export default function TransacoesPage() {
 
   const fetchTransacoes = async () => {
     try {
-      const response = await fetchFP('/api/fp/transacoes')
-      const result = await response.json()
+      const result = await fetchFP('/api/fp/transacoes')
       
       if (result.success) {
         setTransacoes(result.data)
@@ -96,8 +95,7 @@ export default function TransacoesPage() {
 
   const fetchContas = async () => {
     try {
-      const response = await fetchFP('/api/fp/contas')
-      const result = await response.json()
+      const result = await fetchFP('/api/fp/contas')
       
       if (result.success) {
         setContas(result.data)
@@ -109,8 +107,7 @@ export default function TransacoesPage() {
 
   const fetchCategorias = async () => {
     try {
-      const response = await fetchFP('/api/fp/categorias')
-      const result = await response.json()
+      const result = await fetchFP('/api/fp/categorias')
       
       if (result.success) {
         setCategorias(result.data)
@@ -133,11 +130,10 @@ export default function TransacoesPage() {
     e.preventDefault()
     
     try {
-      const response = await fetchFP('/api/fp/transacoes', {
+      const result = await fetchFP('/api/fp/transacoes', {
         method: 'POST',
         body: JSON.stringify(formData),
       })
-      const result = await response.json()
 
       if (result.success) {
         toast.success('Transação criada com sucesso!')
@@ -157,10 +153,9 @@ export default function TransacoesPage() {
     if (!confirm('Tem certeza que deseja excluir esta transação?')) return
 
     try {
-      const response = await fetchFP(`/api/fp/transacoes?id=${id}`, {
+      const result = await fetchFP(`/api/fp/transacoes?id=${id}`, {
         method: 'DELETE',
       })
-      const result = await response.json()
 
       if (result.success) {
         toast.success('Transação excluída!')

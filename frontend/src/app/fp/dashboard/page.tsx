@@ -31,13 +31,10 @@ export default function DashboardPage() {
     const loadData = async () => {
       setLoading(true)
       try {
-        const [transRes, contasRes] = await Promise.all([
+        const [transResult, contasResult] = await Promise.all([
           fetchFP('/api/fp/transacoes'),
           fetchFP('/api/fp/contas')
         ])
-
-        const transResult = await transRes.json()
-        const contasResult = await contasRes.json()
 
         if (transResult.success) setTransacoes(transResult.data)
         if (contasResult.success) setContas(contasResult.data)

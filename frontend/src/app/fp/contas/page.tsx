@@ -31,8 +31,7 @@ export default function ContasPage() {
   const fetchContas = async () => {
     try {
       setLoading(true)
-      const response = await fetchFP('/api/fp/contas')
-      const result = await response.json()
+      const result = await fetchFP('/api/fp/contas')
       
       if (result.success) {
         setContas(result.data || [])
@@ -52,12 +51,10 @@ export default function ContasPage() {
       const url = editando ? '/api/fp/contas' : '/api/fp/contas'
       const method = editando ? 'PUT' : 'POST'
       
-      const response = await fetchFP(url, {
+      const result = await fetchFP(url, {
         method,
         body: JSON.stringify(editando ? { ...formData, id: editando.id } : formData)
       })
-
-      const result = await response.json()
 
       if (result.success) {
         toast.success(editando ? 'Conta atualizada!' : 'Conta criada!')
@@ -88,11 +85,9 @@ export default function ContasPage() {
     if (!confirm('Deseja realmente excluir esta conta?')) return
 
     try {
-      const response = await fetchFP(`/api/fp/contas?id=${id}`, {
+      const result = await fetchFP(`/api/fp/contas?id=${id}`, {
         method: 'DELETE'
       })
-
-      const result = await response.json()
 
       if (result.success) {
         toast.success('Conta excluída!')

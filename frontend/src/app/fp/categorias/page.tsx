@@ -64,8 +64,7 @@ export default function CategoriasPage() {
   const fetchCategorias = async () => {
     setLoading(true)
     try {
-      const response = await fetchFP('/api/fp/categorias')
-      const result = await response.json()
+      const result = await fetchFP('/api/fp/categorias')
       
       if (result.success) {
         setCategorias(result.data)
@@ -87,11 +86,10 @@ export default function CategoriasPage() {
     e.preventDefault()
     
     try {
-      const response = await fetchFP('/api/fp/categorias', {
+      const result = await fetchFP('/api/fp/categorias', {
         method: 'POST',
         body: JSON.stringify(formData),
       })
-      const result = await response.json()
 
       if (result.success) {
         toast.success('Categoria criada com sucesso!')

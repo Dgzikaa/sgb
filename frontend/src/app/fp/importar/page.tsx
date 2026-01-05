@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, FileText, CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { fetchFP } from '@/lib/api-fp'
 
 export default function ImportarExtrato Page() {
   const [contas, setContas] = useState<any[]>([])
@@ -22,8 +23,7 @@ export default function ImportarExtrato Page() {
 
   const fetchContas = async () => {
     try {
-      const response = await fetch('/api/fp/contas')
-      const result = await response.json()
+      const result = await fetchFP('/api/fp/contas')
       
       if (result.success) {
         setContas(result.data || [])
