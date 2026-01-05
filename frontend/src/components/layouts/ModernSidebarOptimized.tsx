@@ -28,6 +28,11 @@ import {
   Ticket,
   FileSearch,
   Activity,
+  Wallet,
+  Tag,
+  Receipt,
+  PieChart,
+  Plug,
 } from 'lucide-react';
 
 /**
@@ -66,6 +71,7 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
   relatorios: ['relatorios', 'dashboard_financeiro_mensal', 'marketing_360'],
   configuracoes: ['configuracoes'],
   ferramentas: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos', 'financeiro_agendamento'],
+  cfp: ['home'], // CFP disponível para todos
 };
 
 // Menu items - extraído para fora do componente
@@ -91,6 +97,20 @@ const defaultSidebarItems: SidebarItem[] = [
     subItems: [
       { icon: Sparkles, label: 'Visão Geral', href: '/retrospectiva-2025', permission: 'home' },
       { icon: BarChart3, label: 'Análise Detalhada', href: '/retrospectiva-2025/detalhes', permission: 'home' },
+    ],
+  },
+  {
+    icon: Wallet,
+    label: 'CFP - Finanças Pessoais',
+    href: '/fp',
+    color: 'text-emerald-600 dark:text-emerald-400',
+    permission: 'cfp',
+    subItems: [
+      { icon: PieChart, label: 'Dashboard', href: '/fp/dashboard', description: 'Visão geral financeira', permission: 'home' },
+      { icon: Wallet, label: 'Contas', href: '/fp/contas', description: 'Bancos e cartões', permission: 'home' },
+      { icon: Tag, label: 'Categorias', href: '/fp/categorias', description: 'Categorias de gastos', permission: 'home' },
+      { icon: Receipt, label: 'Transações', href: '/fp/transacoes', description: 'Receitas e despesas', permission: 'home' },
+      { icon: Plug, label: 'Conexões', href: '/fp/pluggy', description: 'Open Finance', permission: 'home' },
     ],
   },
   {
