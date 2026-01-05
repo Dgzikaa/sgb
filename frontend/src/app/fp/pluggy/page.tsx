@@ -64,24 +64,29 @@ export default function PluggyPage() {
       return
     }
 
-    // Verificar se script já existe
+    // Verificar se script já existe mas não carregou
     const existingScript = document.querySelector('script[src*="pluggy"]')
-    if (existingScript) {
-      console.log('⏳ Pluggy Connect já está sendo carregado')
+    if (existingScript && !window.PluggyConnect) {
+      console.log('🔄 Script existe mas não carregou, removendo e tentando novamente...')
+      existingScript.remove()
+      // Continua para adicionar novo script
+    } else if (existingScript && window.PluggyConnect) {
+      console.log('✅ Pluggy Connect já carregado!')
+      setPluggyLoaded(true)
       return
     }
 
-    console.log('📥 Carregando Pluggy Connect v3...')
+    console.log('📥 Carregando Pluggy Connect...')
     
     const script = document.createElement('script')
-    // URL oficial da v3 do Pluggy Connect (UMD)
-    // Ref: https://docs.pluggy.ai/docs/environments-and-configurations
-    script.src = 'https://cdn.pluggy.ai/v3/pluggy-connect.umd.js'
+    // URL oficial do Pluggy Connect
+    // Ref: https://docs.pluggy.ai/docs/pluggy-connect
+    script.src = 'https://cdn.pluggy.ai/pluggy-connect.js'
     script.async = true
     script.crossOrigin = 'anonymous'
 
     script.onload = () => {
-      console.log('✅ Pluggy Connect v3 carregado com sucesso!')
+      console.log('✅ Pluggy Connect carregado com sucesso!')
       console.log('Window.PluggyConnect:', typeof window.PluggyConnect)
       setPluggyLoaded(true)
     }
