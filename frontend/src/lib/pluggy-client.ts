@@ -16,7 +16,8 @@ export class PluggyClient {
   }
 
   /**
-   * Autenticar e obter token de acesso
+   * Autenticar e obter API Key
+   * Ref: https://docs.pluggy.ai/docs/authentication
    */
   private async authenticate() {
     if (this.token && Date.now() < this.tokenExpiry) {
@@ -35,12 +36,13 @@ export class PluggyClient {
     })
 
     if (!response.ok) {
-      throw new Error(`Erro na autenticação Pluggy: ${response.statusText}`)
+      const error = await response.json().catch(() => ({}))
+      throw new Error(`Erro na autenticação Pluggy: ${error.message || response.statusText}`)
     }
 
     const data = await response.json()
     this.token = data.apiKey
-    this.tokenExpiry = Date.now() + (24 * 60 * 60 * 1000) // 24 horas
+    this.tokenExpiry = Date.now() + (2 * 60 * 60 * 1000) // 2 horas (conforme docs)
 
     return this.token
   }

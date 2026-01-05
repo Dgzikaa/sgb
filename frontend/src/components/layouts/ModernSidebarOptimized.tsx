@@ -33,6 +33,7 @@ import {
   Receipt,
   PieChart,
   Plug,
+  Building2,
 } from 'lucide-react';
 
 /**
@@ -111,6 +112,7 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: Tag, label: 'Categorias', href: '/fp/categorias', description: 'Categorias de gastos', permission: 'home' },
       { icon: Receipt, label: 'Transações', href: '/fp/transacoes', description: 'Receitas e despesas', permission: 'home' },
       { icon: Plug, label: 'Conexões', href: '/fp/pluggy', description: 'Open Finance', permission: 'home' },
+      { icon: Building2, label: 'Bancos', href: '/fp/bancos', description: 'Bancos disponíveis', permission: 'home' },
     ],
   },
   {

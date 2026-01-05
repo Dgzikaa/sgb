@@ -47,11 +47,18 @@ export async function POST(request: NextRequest) {
 
     const cpf = await getUserCPF(supabase, user)
 
-    // Criar connect token no Pluggy
+    // Criar connect token no Pluggy (válido por 30min)
     const pluggyClient = getPluggyClient()
-    const connectToken = await pluggyClient.createConnectToken(cpf)
+    const tokenData = await pluggyClient.createConnectToken(cpf)
 
-    return NextResponse.json({ success: true, data: connectToken })
+    console.log('✅ Connect Token criado para usuário:', cpf.substring(0, 3) + '***')
+
+    return NextResponse.json({ 
+      success: true, 
+      data: { 
+        accessToken: tokenData.accessToken || tokenData // Suportar ambos os formatos
+      } 
+    })
   } catch (error: any) {
     console.error('Erro ao criar connect token:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })

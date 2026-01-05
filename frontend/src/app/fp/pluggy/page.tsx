@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plug, RefreshCw, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { fetchFP } from '@/lib/api-fp'
-import Script from 'next/script'
 
 // Declarar tipos do Pluggy
 declare global {
@@ -57,6 +56,51 @@ export default function PluggyPage() {
     fetchItems()
   }, [])
 
+  // Carregar Pluggy Connect Script
+  useEffect(() => {
+    // Verificar se já está carregado
+    if (window.PluggyConnect) {
+      console.log('✅ Pluggy Connect já está carregado')
+      setPluggyLoaded(true)
+      return
+    }
+
+    // Verificar se script já existe
+    const existingScript = document.querySelector('script[src*="pluggy"]')
+    if (existingScript) {
+      console.log('⏳ Pluggy Connect já está sendo carregado')
+      return
+    }
+
+    console.log('📥 Carregando Pluggy Connect v3...')
+    
+    const script = document.createElement('script')
+    // URL oficial da v3 do Pluggy Connect (UMD)
+    // Ref: https://docs.pluggy.ai/docs/environments-and-configurations
+    script.src = 'https://cdn.pluggy.ai/v3/pluggy-connect.umd.js'
+    script.async = true
+    script.crossOrigin = 'anonymous'
+
+    script.onload = () => {
+      console.log('✅ Pluggy Connect v3 carregado com sucesso!')
+      console.log('Window.PluggyConnect:', typeof window.PluggyConnect)
+      setPluggyLoaded(true)
+    }
+
+    script.onerror = (error) => {
+      console.error('❌ Erro ao carregar Pluggy Connect:', error)
+      toast.error('Não foi possível carregar o Pluggy Connect', {
+        description: 'Verifique sua conexão com a internet e recarregue a página'
+      })
+    }
+
+    document.head.appendChild(script)
+
+    return () => {
+      // Cleanup não remove o script pois pode ser usado novamente
+    }
+  }, [])
+
   const handleConnect = async () => {
     if (!pluggyLoaded) {
       toast.error('Widget do Pluggy ainda está carregando...')
@@ -78,12 +122,24 @@ export default function PluggyPage() {
 
       const connectToken = result.data.accessToken
 
-      // Abrir widget do Pluggy
+      if (!connectToken) {
+        toast.error('Token de conexão inválido')
+        return
+      }
+
+      console.log('✅ Connect Token obtido, iniciando widget...')
+
+      // Inicializar widget do Pluggy (conforme documentação oficial)
+      // Ref: https://docs.pluggy.ai/docs/environments-and-configurations
       const pluggyConnect = new window.PluggyConnect({
         connectToken,
-        includeSandbox: false, // Produção
+        includeSandbox: false, // PRODUÇÃO - Bancos reais
+        products: ['ACCOUNTS', 'TRANSACTIONS'], // Produtos que queremos sincronizar
+        countries: ['BR'], // Apenas bancos brasileiros
+        connectorTypes: ['PERSONAL_BANK'], // Apenas bancos pessoais (não empresariais)
+        language: 'pt', // Idioma PT-BR
         onSuccess: async (itemData: any) => {
-          console.log('Conexão bem-sucedida:', itemData)
+          console.log('✅ Conexão bem-sucedida:', itemData)
           
           // Salvar item no banco
           try {
@@ -116,8 +172,32 @@ export default function PluggyPage() {
           })
         },
         onClose: () => {
-          console.log('Widget fechado')
+          console.log('🔒 Widget fechado')
           setConnecting(false)
+        },
+        onEvent: (event: any) => {
+          console.log('📊 Evento Pluggy:', event)
+          // Rastrear eventos do usuário para analytics
+          switch (event.event) {
+            case 'SUBMITTED_CONSENT':
+              console.log('✅ Usuário aceitou termos')
+              break
+            case 'SELECTED_INSTITUTION':
+              console.log('🏦 Instituição selecionada:', event.connector?.name)
+              toast.info(`Conectando ao ${event.connector?.name}...`)
+              break
+            case 'SUBMITTED_LOGIN':
+              console.log('🔐 Credenciais enviadas')
+              toast.info('Autenticando...', { duration: 2000 })
+              break
+            case 'LOGIN_SUCCESS':
+              console.log('✅ Login bem-sucedido!')
+              toast.success('Autenticado com sucesso!')
+              break
+            case 'ITEM_RESPONSE':
+              console.log('📦 Item recebido:', event.item?.id)
+              break
+          }
         },
       })
 
@@ -218,29 +298,8 @@ export default function PluggyPage() {
   }
 
   return (
-    <>
-      {/* Script do Pluggy Connect */}
-      <Script
-        src="https://cdn.pluggy.ai/connect/v3/pluggy-connect.umd.js"
-        strategy="afterInteractive"
-        onLoad={() => {
-          console.log('✅ Pluggy Connect carregado')
-          console.log('Window.PluggyConnect disponível:', typeof window.PluggyConnect)
-          setPluggyLoaded(true)
-        }}
-        onError={(e) => {
-          console.error('❌ Erro ao carregar Pluggy Connect:', e)
-          toast.error('Erro ao carregar widget do Pluggy', {
-            description: 'Verifique sua conexão com a internet'
-          })
-        }}
-        onReady={() => {
-          console.log('🎯 Pluggy Connect pronto')
-        }}
-      />
-
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="container mx-auto px-4">
         <div className="flex items-center justify-between mb-8">
           <Link href="/fp" className="flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -419,8 +478,7 @@ export default function PluggyPage() {
             </div>
           </CardContent>
         </Card>
-        </div>
       </div>
-    </>
+    </div>
   )
 }

@@ -68,6 +68,18 @@ export async function POST(request: NextRequest) {
 
     const pluggyClient = getPluggyClient()
 
+    // Se forceUpdate = true, forçar atualização do item no Pluggy usando PATCH
+    // Ref: https://docs.pluggy.ai/reference/items-update
+    if (body.forceUpdate) {
+      console.log('🔄 Forçando atualização do item no Pluggy...')
+      try {
+        await pluggyClient.updateItem(item.pluggy_item_id)
+        console.log('✅ Item atualizado com sucesso no Pluggy')
+      } catch (updateError: any) {
+        console.warn('⚠️ Erro ao forçar update (pode ser normal):', updateError.message)
+      }
+    }
+
     // Buscar contas do item
     const accounts = await pluggyClient.getAccounts(item.pluggy_item_id)
 

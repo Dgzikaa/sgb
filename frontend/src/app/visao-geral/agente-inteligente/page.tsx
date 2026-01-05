@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Brain, TrendingUp, AlertTriangle, Clock, Eye, Archive, PlayCircle, Settings as SettingsIcon, Activity, DollarSign, Users, Star } from 'lucide-react'
+import { Brain, TrendingUp, AlertTriangle, Clock, Eye, Archive, PlayCircle, Settings as SettingsIcon, Activity, DollarSign, Users, Star, ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 interface Insight {
   id: string
@@ -162,6 +163,44 @@ export default function AgenteInteligentePage() {
     }
   }
 
+  const darFeedback = async (tipo: 'insight' | 'alerta', referenciaId: string, feedback: 'util' | 'neutro' | 'inutil') => {
+    try {
+      const response = await fetch('/api/agente/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: barId,
+          tipo,
+          referencia_id: parseInt(referenciaId),
+          feedback
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao enviar feedback')
+      }
+
+      toast.success('✅ Feedback registrado!', {
+        description: feedback === 'util' 
+          ? '🧠 Agente vai priorizar mais conteúdo assim'
+          : '🔄 Agente vai evitar alertas similares'
+      })
+
+      // Remover o item da lista após feedback
+      if (tipo === 'insight') {
+        await arquivarInsight(referenciaId)
+      } else {
+        await marcarAlertaComoLido(referenciaId)
+      }
+
+    } catch (error: any) {
+      console.error('Erro ao dar feedback:', error)
+      toast.error('Erro ao registrar feedback', {
+        description: error.message
+      })
+    }
+  }
+
   const getImpactoBadge = (impacto: string) => {
     const classes = {
       baixo: 'badge-info',
@@ -249,6 +288,14 @@ export default function AgenteInteligentePage() {
                     Executar Análise
                   </>
                 )}
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/visao-geral/agente-chat'}
+                variant="outline"
+                className="border-gray-300 dark:border-gray-600"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Chat com Agente
               </Button>
               <Button
                 onClick={() => window.location.href = '/configuracoes/agente-inteligente'}
@@ -403,6 +450,24 @@ export default function AgenteInteligentePage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => darFeedback('insight', insight.id, 'util')}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+                          title="Útil - Agente vai priorizar mais conteúdo assim"
+                        >
+                          <ThumbsUp className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => darFeedback('insight', insight.id, 'inutil')}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          title="Não útil - Agente vai evitar alertas similares"
+                        >
+                          <ThumbsDown className="w-4 h-4" />
+                        </Button>
                         {!insight.visualizado && (
                           <Button
                             size="sm"
@@ -474,15 +539,35 @@ export default function AgenteInteligentePage() {
                           </p>
                         </div>
                       </div>
-                      {!alerta.lido && (
+                      <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => marcarAlertaComoLido(alerta.id)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          variant="ghost"
+                          onClick={() => darFeedback('alerta', alerta.id, 'util')}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+                          title="Útil"
                         >
-                          Marcar como lido
+                          <ThumbsUp className="w-4 h-4" />
                         </Button>
-                      )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => darFeedback('alerta', alerta.id, 'inutil')}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          title="Não útil"
+                        >
+                          <ThumbsDown className="w-4 h-4" />
+                        </Button>
+                        {!alerta.lido && (
+                          <Button
+                            size="sm"
+                            onClick={() => marcarAlertaComoLido(alerta.id)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            Marcar como lido
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
