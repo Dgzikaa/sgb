@@ -27,7 +27,7 @@ const menuItems = [
     icon: Receipt,
     href: '/fp/transacoes',
     color: 'bg-green-500',
-    available: false
+    available: true
   },
   {
     title: 'Dashboard',
