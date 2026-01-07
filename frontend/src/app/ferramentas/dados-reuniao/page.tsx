@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useBarId } from '@/hooks/useBarId';
+import { useBar } from '@/hooks/useBar';
 import { 
   Copy, 
   Check, 
@@ -31,7 +31,7 @@ interface DadosSemana {
 }
 
 export default function DadosReuniaoPage() {
-  const { barId } = useBarId();
+  const { bar } = useBar();
   const [dados, setDados] = useState<DadosSemana[]>([]);
   const [textoParaCopiar, setTextoParaCopiar] = useState('');
   const [loading, setLoading] = useState(true);
@@ -39,9 +39,10 @@ export default function DadosReuniaoPage() {
   const [numSemanas, setNumSemanas] = useState(12);
 
   const fetchDados = async () => {
+    if (!bar?.id) return;
     setLoading(true);
     try {
-      const response = await fetch(`/api/relatorios/dados-reuniao?bar_id=${barId}&semanas=${numSemanas}`);
+      const response = await fetch(`/api/relatorios/dados-reuniao?bar_id=${bar.id}&semanas=${numSemanas}`);
       const result = await response.json();
       
       if (result.success) {
@@ -56,10 +57,10 @@ export default function DadosReuniaoPage() {
   };
 
   useEffect(() => {
-    if (barId) {
+    if (bar?.id) {
       fetchDados();
     }
-  }, [barId, numSemanas]);
+  }, [bar?.id, numSemanas]);
 
   const copiarParaClipboard = async () => {
     try {
