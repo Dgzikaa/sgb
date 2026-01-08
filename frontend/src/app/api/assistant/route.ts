@@ -153,6 +153,27 @@ const TOOLS = [
       },
       required: ["directory"]
     }
+  },
+  {
+    name: "call_specialized_agent",
+    description: "Chama um agente especializado do SGB para análises específicas. Use para: consultas SQL complexas (sql_expert), auditoria de dados (auditor), estrutura do banco (mapeador), análises de períodos (analise_periodos)",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        agente: { 
+          type: "string", 
+          enum: ["agente-sql-expert", "agente-auditor", "agente-mapeador-tabelas", "agente-analise-periodos"],
+          description: "Nome do agente especializado a chamar" 
+        },
+        mensagem: { type: "string", description: "Mensagem/pergunta para o agente" },
+        bar_id: { type: "number", description: "ID do bar (padrão: 3)" },
+        parametros: { 
+          type: "object", 
+          description: "Parâmetros adicionais específicos do agente (action, data_inicio, data_fim, etc.)" 
+        }
+      },
+      required: ["agente", "mensagem"]
+    }
   }
 ];
 
@@ -385,6 +406,91 @@ async function executeTool(toolName: string, input: any) {
           data: ['exemplo1.tsx', 'exemplo2.ts', 'exemplo3.sql'],
           message: `Arquivos listados em: ${input.directory}`
         };
+
+      case 'call_specialized_agent': {
+        // Chamar agente especializado via Edge Function
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+        
+        const agenteName = input.agente;
+        const barId = input.bar_id || 3; // Default bar_id
+        
+        console.log(`🤖 Chamando agente especializado: ${agenteName}`);
+        
+        // Montar payload baseado no agente
+        let payload: any = {
+          mensagem: input.mensagem,
+          bar_id: barId,
+          ...input.parametros
+        };
+        
+        // Ajustar payload para agentes específicos
+        if (agenteName === 'agente-mapeador-tabelas') {
+          payload = {
+            action: input.parametros?.action || 'listar_tabelas',
+            tabela: input.parametros?.tabela,
+            termo_busca: input.mensagem
+          };
+        } else if (agenteName === 'agente-auditor') {
+          payload = {
+            action: input.parametros?.action || 'validate_sync',
+            bar_id: barId,
+            data_inicio: input.parametros?.data_inicio,
+            data_fim: input.parametros?.data_fim,
+            tabela: input.parametros?.tabela
+          };
+        } else if (agenteName === 'agente-analise-periodos') {
+          payload = {
+            action: input.parametros?.action || 'comparar_semanas',
+            bar_id: barId,
+            periodo_1: input.parametros?.periodo_1,
+            periodo_2: input.parametros?.periodo_2,
+            ano: input.parametros?.ano,
+            mes: input.parametros?.mes
+          };
+        }
+        
+        try {
+          const response = await fetch(
+            `${supabaseUrl}/functions/v1/${agenteName}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabaseServiceKey}`
+              },
+              body: JSON.stringify(payload)
+            }
+          );
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`❌ Erro no agente ${agenteName}: ${response.status}`);
+            return {
+              success: false,
+              error: `Agente ${agenteName} retornou erro: ${response.status}`,
+              detalhes: errorText
+            };
+          }
+          
+          const resultado = await response.json();
+          console.log(`✅ Agente ${agenteName} respondeu com sucesso`);
+          
+          return {
+            success: true,
+            type: 'agent_response',
+            agente: agenteName,
+            data: resultado,
+            message: resultado.resposta || resultado.message || `Agente ${agenteName} executado com sucesso`
+          };
+        } catch (agentError: any) {
+          console.error(`❌ Erro ao chamar agente ${agenteName}:`, agentError);
+          return {
+            success: false,
+            error: `Erro ao chamar agente: ${agentError.message}`
+          };
+        }
+      }
 
       default:
         return {
