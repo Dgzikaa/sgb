@@ -269,6 +269,781 @@ class AlertasInteligentesService {
   }
 
   // ========================================
+  // ✅ ANÁLISE DE CHECKLISTS
+  // ========================================
+  async analisarChecklists(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const ontem = new Date(hoje)
+    ontem.setDate(ontem.getDate() - 1)
+    const ontemStr = ontem.toISOString().split('T')[0]
+
+    // Buscar checklists não concluídos de ontem
+    const { data: checklistsNaoConcluidos, error } = await this.supabase
+      .from('checklist_execucoes')
+      .select(`
+        id,
+        status,
+        template:template_id (nome),
+        usuario:usuario_id (nome)
+      `)
+      .eq('bar_id', barId)
+      .gte('data_execucao', ontemStr)
+      .lt('data_execucao', hoje.toISOString().split('T')[0])
+      .neq('status', 'concluido')
+
+    if (!error && checklistsNaoConcluidos && checklistsNaoConcluidos.length > 0) {
+      alertas.push({
+        tipo: 'aviso',
+        categoria: 'checklists',
+        titulo: '📋 Checklists não concluídos',
+        mensagem: `${checklistsNaoConcluidos.length} checklist(s) de ontem não foi(ram) concluído(s)`,
+        dados: { 
+          quantidade: checklistsNaoConcluidos.length,
+          checklists: checklistsNaoConcluidos.slice(0, 5).map((c: any) => c.template?.nome || 'Sem nome')
+        },
+        acoes_sugeridas: [
+          'Verificar com os responsáveis',
+          'Revisar horários dos checklists',
+          'Considerar ajustar templates'
+        ]
+      })
+    }
+
+    // Buscar checklists com itens críticos não conformes
+    const { data: itensNaoConformes } = await this.supabase
+      .from('checklist_execucao_itens')
+      .select(`
+        id,
+        conformidade,
+        item:item_id (nome, prioridade),
+        execucao:execucao_id (data_execucao, template:template_id (nome))
+      `)
+      .eq('bar_id', barId)
+      .gte('criado_em', ontemStr)
+      .eq('conformidade', 'nao_conforme')
+
+    const itensCriticos = (itensNaoConformes || []).filter((i: any) => 
+      i.item?.prioridade === 'alta' || i.item?.prioridade === 'critica'
+    )
+
+    if (itensCriticos.length > 0) {
+      alertas.push({
+        tipo: 'erro',
+        categoria: 'checklists',
+        titulo: '⚠️ Itens críticos não conformes',
+        mensagem: `${itensCriticos.length} item(ns) de alta prioridade marcado(s) como não conforme(s)`,
+        dados: {
+          quantidade: itensCriticos.length,
+          itens: itensCriticos.slice(0, 5).map((i: any) => i.item?.nome || 'Item')
+        },
+        acoes_sugeridas: [
+          'Tomar ação corretiva imediata',
+          'Documentar o problema',
+          'Notificar responsável'
+        ]
+      })
+    }
+
+    return alertas
+  }
+
+  // ========================================
+  // 🎯 ANÁLISE DE METAS SEMANAIS/MENSAIS
+  // ========================================
+  async analisarMetas(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const diaDoMes = hoje.getDate()
+    const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate()
+    const percentualMes = (diaDoMes / diasNoMes) * 100
+
+    // Buscar faturamento e meta do mês atual
+    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0]
+    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0]
+
+    const { data: eventos } = await this.supabase
+      .from('eventos_base')
+      .select('real_r, m1_r')
+      .eq('bar_id', barId)
+      .gte('data_evento', inicioMes)
+      .lte('data_evento', fimMes)
+      .eq('ativo', true)
+
+    if (eventos && eventos.length > 0) {
+      const faturamentoMes = eventos.reduce((acc, e) => acc + (e.real_r || 0), 0)
+      const metaMes = eventos.reduce((acc, e) => acc + (e.m1_r || 0), 0)
+
+      if (metaMes > 0) {
+        const percentualAtingido = (faturamentoMes / metaMes) * 100
+        const ritmoNecessario = metaMes / diasNoMes * diaDoMes // O que deveria ter até agora
+        const diferencaRitmo = faturamentoMes - ritmoNecessario
+
+        // Se estamos muito atrás do ritmo necessário
+        if (percentualMes > 40 && diferencaRitmo < -metaMes * 0.1) {
+          alertas.push({
+            tipo: 'aviso',
+            categoria: 'metas',
+            titulo: '🎯 Meta mensal em risco',
+            mensagem: `Faturamento de R$ ${faturamentoMes.toLocaleString('pt-BR')} (${percentualAtingido.toFixed(1)}% da meta) está R$ ${Math.abs(diferencaRitmo).toLocaleString('pt-BR')} abaixo do ritmo necessário`,
+            dados: { 
+              faturamentoMes, 
+              metaMes, 
+              percentualAtingido,
+              ritmoNecessario,
+              diferencaRitmo
+            },
+            acoes_sugeridas: [
+              'Intensificar ações de marketing',
+              'Revisar calendário de eventos',
+              'Focar em dias com maior potencial'
+            ]
+          })
+        } else if (percentualMes > 50 && percentualAtingido > percentualMes + 10) {
+          alertas.push({
+            tipo: 'sucesso',
+            categoria: 'metas',
+            titulo: '🚀 Meta mensal no caminho certo!',
+            mensagem: `Faturamento de R$ ${faturamentoMes.toLocaleString('pt-BR')} (${percentualAtingido.toFixed(1)}% da meta) está acima do ritmo esperado!`,
+            dados: { faturamentoMes, metaMes, percentualAtingido }
+          })
+        }
+      }
+    }
+
+    return alertas
+  }
+
+  // ========================================
+  // 🎂 ANÁLISE DE ANIVERSARIANTES
+  // ========================================
+  async analisarAniversariantes(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const diaAtual = hoje.getDate()
+    const mesAtual = hoje.getMonth() + 1
+    
+    // Buscar funcionários com aniversário hoje ou próximos 3 dias
+    const { data: funcionarios, error } = await this.supabase
+      .from('usuarios_bar')
+      .select('id, nome, data_nascimento, email, role')
+      .eq('bar_id', barId)
+      .eq('ativo', true)
+      .not('data_nascimento', 'is', null)
+
+    if (error || !funcionarios) {
+      return alertas
+    }
+
+    const aniversariantesHoje: { nome: string; role: string }[] = []
+    const aniversariantesProximos: { nome: string; role: string; data: string; diasFaltando: number }[] = []
+
+    for (const func of funcionarios) {
+      if (!func.data_nascimento) continue
+      
+      const dataNasc = new Date(func.data_nascimento)
+      const diaNasc = dataNasc.getDate()
+      const mesNasc = dataNasc.getMonth() + 1
+
+      // Aniversariante hoje
+      if (diaNasc === diaAtual && mesNasc === mesAtual) {
+        aniversariantesHoje.push({ nome: func.nome, role: func.role || 'Funcionário' })
+      } else {
+        // Verificar próximos 3 dias
+        const anivEsteAno = new Date(hoje.getFullYear(), mesNasc - 1, diaNasc)
+        if (anivEsteAno < hoje) {
+          anivEsteAno.setFullYear(hoje.getFullYear() + 1)
+        }
+        const diffDias = Math.ceil((anivEsteAno.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
+        
+        if (diffDias > 0 && diffDias <= 3) {
+          aniversariantesProximos.push({
+            nome: func.nome,
+            role: func.role || 'Funcionário',
+            data: anivEsteAno.toLocaleDateString('pt-BR'),
+            diasFaltando: diffDias
+          })
+        }
+      }
+    }
+
+    // Alerta para aniversariantes de hoje
+    if (aniversariantesHoje.length > 0) {
+      alertas.push({
+        tipo: 'sucesso',
+        categoria: 'aniversariantes',
+        titulo: '🎂 Aniversariante(s) Hoje!',
+        mensagem: aniversariantesHoje.length === 1 
+          ? `Hoje é aniversário de ${aniversariantesHoje[0].nome}! Não esqueça de parabenizar.`
+          : `Hoje é aniversário de ${aniversariantesHoje.length} pessoas: ${aniversariantesHoje.map(a => a.nome).join(', ')}`,
+        dados: { aniversariantes: aniversariantesHoje },
+        acoes_sugeridas: [
+          'Parabenizar o(s) aniversariante(s)',
+          'Preparar uma surpresa especial',
+          'Postar nas redes sociais (se autorizado)'
+        ]
+      })
+    }
+
+    // Alerta para aniversariantes próximos
+    if (aniversariantesProximos.length > 0) {
+      alertas.push({
+        tipo: 'info',
+        categoria: 'aniversariantes',
+        titulo: '📅 Aniversários Próximos',
+        mensagem: `${aniversariantesProximos.length} aniversário(s) nos próximos 3 dias: ${aniversariantesProximos.map(a => `${a.nome} (${a.diasFaltando === 1 ? 'amanhã' : `em ${a.diasFaltando} dias`})`).join(', ')}`,
+        dados: { proximos: aniversariantesProximos }
+      })
+    }
+
+    return alertas
+  }
+
+  // ========================================
+  // 📝 ANÁLISE DE RESERVAS
+  // ========================================
+  async analisarReservas(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const hojeStr = hoje.toISOString().split('T')[0]
+    const amanha = new Date(hoje)
+    amanha.setDate(amanha.getDate() + 1)
+    const amanhaStr = amanha.toISOString().split('T')[0]
+
+    // Buscar reservas de hoje
+    const { data: reservasHoje } = await this.supabase
+      .from('getin_reservations')
+      .select('*')
+      .eq('bar_id', barId)
+      .eq('reservation_date', hojeStr)
+      .in('status', ['confirmed', 'pending', 'CONFIRMED', 'PENDING'])
+
+    // Buscar reservas de amanhã
+    const { data: reservasAmanha } = await this.supabase
+      .from('getin_reservations')
+      .select('*')
+      .eq('bar_id', barId)
+      .eq('reservation_date', amanhaStr)
+      .in('status', ['confirmed', 'pending', 'CONFIRMED', 'PENDING'])
+
+    // Alerta de reservas de hoje
+    if (reservasHoje && reservasHoje.length > 0) {
+      const totalPessoas = reservasHoje.reduce((acc, r) => acc + (r.people || 0), 0)
+      const pendentes = reservasHoje.filter(r => 
+        r.status?.toLowerCase() === 'pending' || !r.confirmation_sent
+      )
+
+      alertas.push({
+        tipo: 'info',
+        categoria: 'reservas',
+        titulo: '📋 Reservas para Hoje',
+        mensagem: `${reservasHoje.length} reserva(s) confirmada(s) para hoje, totalizando ${totalPessoas} pessoas`,
+        dados: { 
+          quantidade: reservasHoje.length, 
+          totalPessoas,
+          pendentes: pendentes.length,
+          reservas: reservasHoje.slice(0, 5).map(r => ({
+            nome: r.customer_name,
+            horario: r.reservation_time,
+            pessoas: r.people
+          }))
+        }
+      })
+
+      // Alerta para reservas pendentes sem confirmação
+      if (pendentes.length > 0) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'reservas',
+          titulo: '⚠️ Reservas Pendentes de Confirmação',
+          mensagem: `${pendentes.length} reserva(s) para hoje ainda não foi(ram) confirmada(s)`,
+          dados: { 
+            pendentes: pendentes.map(r => ({
+              nome: r.customer_name,
+              horario: r.reservation_time,
+              telefone: r.customer_phone
+            }))
+          },
+          acoes_sugeridas: [
+            'Ligar para confirmar reservas',
+            'Enviar mensagem de confirmação',
+            'Atualizar status no sistema'
+          ]
+        })
+      }
+    }
+
+    // Alerta de reservas de amanhã
+    if (reservasAmanha && reservasAmanha.length > 0) {
+      const totalPessoas = reservasAmanha.reduce((acc, r) => acc + (r.people || 0), 0)
+      
+      alertas.push({
+        tipo: 'info',
+        categoria: 'reservas',
+        titulo: '📅 Reservas para Amanhã',
+        mensagem: `${reservasAmanha.length} reserva(s) para amanhã, totalizando ${totalPessoas} pessoas`,
+        dados: { 
+          quantidade: reservasAmanha.length, 
+          totalPessoas
+        }
+      })
+    }
+
+    // Verificar no-shows recentes (últimos 7 dias)
+    const seteDiasAtras = new Date(hoje)
+    seteDiasAtras.setDate(seteDiasAtras.getDate() - 7)
+    const seteDiasAtrasStr = seteDiasAtras.toISOString().split('T')[0]
+
+    const { data: noShows } = await this.supabase
+      .from('getin_reservations')
+      .select('*')
+      .eq('bar_id', barId)
+      .eq('no_show', true)
+      .gte('reservation_date', seteDiasAtrasStr)
+
+    if (noShows && noShows.length >= 3) {
+      alertas.push({
+        tipo: 'aviso',
+        categoria: 'reservas',
+        titulo: '⚠️ Alto índice de no-shows',
+        mensagem: `${noShows.length} no-show(s) nos últimos 7 dias. Considere políticas de confirmação mais rígidas.`,
+        dados: { noShows: noShows.length },
+        acoes_sugeridas: [
+          'Implementar taxa de no-show',
+          'Ligar para confirmar reservas com antecedência',
+          'Enviar lembretes automáticos por WhatsApp'
+        ]
+      })
+    }
+
+    return alertas
+  }
+
+  // ========================================
+  // 💰 ANÁLISE DE PAGAMENTOS
+  // ========================================
+  async analisarPagamentos(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const hojeStr = hoje.toISOString().split('T')[0]
+    
+    // Próximos 7 dias
+    const seteDias = new Date(hoje)
+    seteDias.setDate(seteDias.getDate() + 7)
+    const seteDiasStr = seteDias.toISOString().split('T')[0]
+
+    // Buscar pagamentos vencendo hoje
+    const { data: vencendoHoje } = await this.supabase
+      .from('nibo_agendamentos')
+      .select('*')
+      .eq('bar_id', barId)
+      .eq('data_vencimento', hojeStr)
+      .eq('tipo', 'pagar')
+      .neq('status', 'pago')
+      .eq('deletado', false)
+
+    // Buscar pagamentos vencidos (não pagos)
+    const { data: vencidos } = await this.supabase
+      .from('nibo_agendamentos')
+      .select('*')
+      .eq('bar_id', barId)
+      .lt('data_vencimento', hojeStr)
+      .eq('tipo', 'pagar')
+      .neq('status', 'pago')
+      .eq('deletado', false)
+
+    // Buscar pagamentos próximos 7 dias
+    const { data: proximosPagamentos } = await this.supabase
+      .from('nibo_agendamentos')
+      .select('*')
+      .eq('bar_id', barId)
+      .gt('data_vencimento', hojeStr)
+      .lte('data_vencimento', seteDiasStr)
+      .eq('tipo', 'pagar')
+      .neq('status', 'pago')
+      .eq('deletado', false)
+
+    // Alerta de contas vencidas
+    if (vencidos && vencidos.length > 0) {
+      const valorTotal = vencidos.reduce((acc, v) => acc + (v.valor || 0), 0)
+      alertas.push({
+        tipo: 'critico',
+        categoria: 'pagamentos',
+        titulo: '🚨 Contas Vencidas!',
+        mensagem: `${vencidos.length} conta(s) vencida(s) totalizando R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+        dados: { 
+          quantidade: vencidos.length, 
+          valorTotal,
+          contas: vencidos.slice(0, 5).map(v => ({
+            descricao: v.descricao || v.titulo,
+            valor: v.valor,
+            vencimento: v.data_vencimento,
+            fornecedor: v.stakeholder_nome
+          }))
+        },
+        acoes_sugeridas: [
+          'Efetuar pagamento imediatamente',
+          'Verificar possíveis multas/juros',
+          'Renegociar prazos se necessário'
+        ]
+      })
+    }
+
+    // Alerta de contas vencendo hoje
+    if (vencendoHoje && vencendoHoje.length > 0) {
+      const valorTotal = vencendoHoje.reduce((acc, v) => acc + (v.valor || 0), 0)
+      alertas.push({
+        tipo: 'aviso',
+        categoria: 'pagamentos',
+        titulo: '⚠️ Contas Vencendo Hoje',
+        mensagem: `${vencendoHoje.length} conta(s) vencem hoje, totalizando R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+        dados: { 
+          quantidade: vencendoHoje.length, 
+          valorTotal,
+          contas: vencendoHoje.map(v => ({
+            descricao: v.descricao || v.titulo,
+            valor: v.valor,
+            fornecedor: v.stakeholder_nome
+          }))
+        },
+        acoes_sugeridas: [
+          'Efetuar pagamentos antes do fechamento bancário',
+          'Verificar saldo disponível'
+        ]
+      })
+    }
+
+    // Alerta de contas próximas (resumo)
+    if (proximosPagamentos && proximosPagamentos.length > 0) {
+      const valorTotal = proximosPagamentos.reduce((acc, v) => acc + (v.valor || 0), 0)
+      alertas.push({
+        tipo: 'info',
+        categoria: 'pagamentos',
+        titulo: '💰 Pagamentos Próximos',
+        mensagem: `${proximosPagamentos.length} conta(s) a vencer nos próximos 7 dias, totalizando R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+        dados: { 
+          quantidade: proximosPagamentos.length, 
+          valorTotal 
+        }
+      })
+    }
+
+    // Buscar recebimentos esperados
+    const { data: recebimentos } = await this.supabase
+      .from('nibo_agendamentos')
+      .select('*')
+      .eq('bar_id', barId)
+      .lte('data_vencimento', seteDiasStr)
+      .gte('data_vencimento', hojeStr)
+      .eq('tipo', 'receber')
+      .neq('status', 'pago')
+      .eq('deletado', false)
+
+    if (recebimentos && recebimentos.length > 0) {
+      const valorTotal = recebimentos.reduce((acc, v) => acc + (v.valor || 0), 0)
+      alertas.push({
+        tipo: 'sucesso',
+        categoria: 'pagamentos',
+        titulo: '💵 Recebimentos Esperados',
+        mensagem: `${recebimentos.length} recebimento(s) esperado(s) nos próximos 7 dias, totalizando R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+        dados: { 
+          quantidade: recebimentos.length, 
+          valorTotal 
+        }
+      })
+    }
+
+    return alertas
+  }
+
+  // ========================================
+  // 📦 ANÁLISE DE ESTOQUE DETALHADA
+  // ========================================
+  async analisarEstoqueDetalhado(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const hojeStr = hoje.toISOString().split('T')[0]
+    
+    // Buscar última contagem de estoque
+    const { data: ultimaContagem } = await this.supabase
+      .from('contagem_estoque_produtos')
+      .select('*')
+      .eq('bar_id', barId)
+      .order('data_contagem', { ascending: false })
+      .limit(100)
+
+    if (!ultimaContagem || ultimaContagem.length === 0) {
+      return alertas
+    }
+
+    // Identificar produtos com estoque baixo (usando variação ou estoque zerado)
+    const produtosEstoqueBaixo = ultimaContagem.filter(p => 
+      p.estoque_total <= 0 || p.alerta_variacao === true
+    )
+
+    if (produtosEstoqueBaixo.length > 0) {
+      const zerados = produtosEstoqueBaixo.filter(p => p.estoque_total <= 0)
+      const comVariacao = produtosEstoqueBaixo.filter(p => p.alerta_variacao && p.estoque_total > 0)
+
+      if (zerados.length > 0) {
+        alertas.push({
+          tipo: 'critico',
+          categoria: 'estoque',
+          titulo: '🚨 Produtos com Estoque Zerado!',
+          mensagem: `${zerados.length} produto(s) estão com estoque zerado e precisam reposição urgente`,
+          dados: { 
+            quantidade: zerados.length,
+            produtos: zerados.slice(0, 10).map(p => ({
+              descricao: p.descricao,
+              categoria: p.categoria
+            }))
+          },
+          acoes_sugeridas: [
+            'Fazer pedido de reposição urgente',
+            'Verificar alternativas com fornecedores',
+            'Atualizar cardápio se necessário'
+          ]
+        })
+      }
+
+      if (comVariacao.length > 0) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'estoque',
+          titulo: '⚠️ Variações Anormais de Estoque',
+          mensagem: `${comVariacao.length} produto(s) apresentam variação anormal de estoque`,
+          dados: { 
+            quantidade: comVariacao.length,
+            produtos: comVariacao.slice(0, 5).map(p => ({
+              descricao: p.descricao,
+              variacao: p.variacao_percentual
+            }))
+          },
+          acoes_sugeridas: [
+            'Investigar possíveis perdas',
+            'Verificar processos de controle',
+            'Revisar contagem de estoque'
+          ]
+        })
+      }
+    }
+
+    // Verificar última data de contagem (se muito antiga)
+    if (ultimaContagem.length > 0) {
+      const ultimaData = new Date(ultimaContagem[0].data_contagem)
+      const diasSemContagem = Math.ceil((hoje.getTime() - ultimaData.getTime()) / (1000 * 60 * 60 * 24))
+
+      if (diasSemContagem > 7) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'estoque',
+          titulo: '📦 Contagem de Estoque Desatualizada',
+          mensagem: `Última contagem foi há ${diasSemContagem} dias. Recomenda-se contagem semanal.`,
+          dados: { diasSemContagem, ultimaContagem: ultimaData.toLocaleDateString('pt-BR') },
+          acoes_sugeridas: [
+            'Realizar nova contagem de estoque',
+            'Agendar contagens periódicas'
+          ]
+        })
+      }
+    }
+
+    return alertas
+  }
+
+  // ========================================
+  // ⭐ ANÁLISE DE AVALIAÇÕES
+  // ========================================
+  async analisarAvaliacoes(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const seteDiasAtras = new Date(hoje)
+    seteDiasAtras.setDate(seteDiasAtras.getDate() - 7)
+    const seteDiasAtrasStr = seteDiasAtras.toISOString().split('T')[0]
+
+    // Buscar avaliações do NPS interno
+    const { data: npsRecentes } = await this.supabase
+      .from('nps')
+      .select('*')
+      .eq('bar_id', barId)
+      .gte('data_pesquisa', seteDiasAtrasStr)
+      .order('data_pesquisa', { ascending: false })
+
+    if (npsRecentes && npsRecentes.length > 0) {
+      // Calcular média geral
+      const mediaGeral = npsRecentes.reduce((acc, n) => acc + (n.nps_geral || n.media_geral || 0), 0) / npsRecentes.length
+
+      if (mediaGeral < 7) {
+        alertas.push({
+          tipo: 'critico',
+          categoria: 'avaliacoes',
+          titulo: '🚨 NPS Crítico!',
+          mensagem: `Média de NPS da última semana: ${mediaGeral.toFixed(1)}/10. Ação urgente necessária!`,
+          dados: { 
+            mediaGeral,
+            totalAvaliacoes: npsRecentes.length
+          },
+          acoes_sugeridas: [
+            'Analisar comentários dos clientes',
+            'Identificar pontos de melhoria prioritários',
+            'Treinar equipe em pontos críticos'
+          ]
+        })
+      } else if (mediaGeral < 8) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'avaliacoes',
+          titulo: '⚠️ NPS em Atenção',
+          mensagem: `Média de NPS da última semana: ${mediaGeral.toFixed(1)}/10. Há espaço para melhorias.`,
+          dados: { mediaGeral, totalAvaliacoes: npsRecentes.length }
+        })
+      } else if (mediaGeral >= 9) {
+        alertas.push({
+          tipo: 'sucesso',
+          categoria: 'avaliacoes',
+          titulo: '⭐ NPS Excelente!',
+          mensagem: `Média de NPS da última semana: ${mediaGeral.toFixed(1)}/10. Continue o ótimo trabalho!`,
+          dados: { mediaGeral, totalAvaliacoes: npsRecentes.length }
+        })
+      }
+
+      // Verificar avaliações específicas baixas
+      const avaliacoesAtendimento = npsRecentes.filter(n => n.nps_atendimento && n.nps_atendimento < 7)
+      const avaliacoesComida = npsRecentes.filter(n => n.nps_comida && n.nps_comida < 7)
+      const avaliacoesLimpeza = npsRecentes.filter(n => n.nps_limpeza && n.nps_limpeza < 7)
+
+      if (avaliacoesAtendimento.length >= 3) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'avaliacoes',
+          titulo: '👥 Problemas com Atendimento',
+          mensagem: `${avaliacoesAtendimento.length} avaliações recentes apontam problemas no atendimento`,
+          dados: { quantidade: avaliacoesAtendimento.length },
+          acoes_sugeridas: ['Treinar equipe de atendimento', 'Verificar escala de funcionários']
+        })
+      }
+
+      if (avaliacoesComida.length >= 3) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'avaliacoes',
+          titulo: '🍽️ Problemas com Comida/Drinks',
+          mensagem: `${avaliacoesComida.length} avaliações recentes apontam problemas com comida/drinks`,
+          dados: { quantidade: avaliacoesComida.length },
+          acoes_sugeridas: ['Revisar qualidade dos ingredientes', 'Verificar processos da cozinha']
+        })
+      }
+
+      if (avaliacoesLimpeza.length >= 3) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'avaliacoes',
+          titulo: '🧹 Problemas com Limpeza',
+          mensagem: `${avaliacoesLimpeza.length} avaliações recentes apontam problemas com limpeza`,
+          dados: { quantidade: avaliacoesLimpeza.length },
+          acoes_sugeridas: ['Intensificar rotina de limpeza', 'Verificar checklists de limpeza']
+        })
+      }
+    }
+
+    // Buscar avaliações do Google (windsor_google)
+    const { data: googleReviews } = await this.supabase
+      .from('windsor_google')
+      .select('*')
+      .gte('date', seteDiasAtrasStr)
+      .order('date', { ascending: false })
+      .limit(20)
+
+    if (googleReviews && googleReviews.length > 0) {
+      // Contar avaliações negativas (1-2 estrelas)
+      const avaliacoesNegativas = googleReviews.filter(r => {
+        const rating = parseFloat(r.review_star_rating) || r.review_average_rating
+        return rating && rating <= 2
+      })
+
+      if (avaliacoesNegativas.length > 0) {
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'avaliacoes',
+          titulo: '⭐ Avaliações Negativas no Google',
+          mensagem: `${avaliacoesNegativas.length} avaliação(ões) negativa(s) no Google nos últimos 7 dias`,
+          dados: { 
+            quantidade: avaliacoesNegativas.length,
+            avaliacoes: avaliacoesNegativas.slice(0, 3).map(r => ({
+              autor: r.review_reviewer,
+              comentario: r.review_comment?.substring(0, 100)
+            }))
+          },
+          acoes_sugeridas: [
+            'Responder às avaliações no Google',
+            'Identificar problemas mencionados',
+            'Contatar cliente para resolver (se possível)'
+          ]
+        })
+      }
+    }
+
+    return alertas
+  }
+
+  // ========================================
+  // 📅 ANÁLISE DE EVENTOS PRÓXIMOS
+  // ========================================
+  async analisarEventosProximos(barId: number): Promise<Alerta[]> {
+    const alertas: Alerta[] = []
+    const hoje = new Date()
+    const amanha = new Date(hoje)
+    amanha.setDate(amanha.getDate() + 1)
+    const amanhaStr = amanha.toISOString().split('T')[0]
+
+    // Buscar evento de amanhã
+    const { data: eventoAmanha } = await this.supabase
+      .from('eventos_base')
+      .select('*, atracao')
+      .eq('bar_id', barId)
+      .eq('data_evento', amanhaStr)
+      .eq('ativo', true)
+      .single()
+
+    if (eventoAmanha) {
+      const meta = eventoAmanha.m1_r || 0
+      const atracao = eventoAmanha.atracao || 'Sem atração definida'
+
+      alertas.push({
+        tipo: 'info',
+        categoria: 'eventos',
+        titulo: '📅 Evento amanhã',
+        mensagem: `Amanhã (${amanhaStr}): ${atracao}. Meta: R$ ${meta.toLocaleString('pt-BR')}`,
+        dados: { 
+          data: amanhaStr, 
+          atracao, 
+          meta,
+          diaSemana: amanha.toLocaleDateString('pt-BR', { weekday: 'long' })
+        }
+      })
+    } else {
+      // Verificar se é dia que deveria ter evento
+      const diaSemana = amanha.getDay()
+      if (diaSemana >= 4 && diaSemana <= 6) { // Qui, Sex, Sab
+        alertas.push({
+          tipo: 'aviso',
+          categoria: 'eventos',
+          titulo: '⚠️ Sem evento cadastrado',
+          mensagem: `Não há evento cadastrado para amanhã (${amanha.toLocaleDateString('pt-BR', { weekday: 'long' })})`,
+          dados: { data: amanhaStr },
+          acoes_sugeridas: [
+            'Verificar calendário de eventos',
+            'Cadastrar evento se houver',
+            'Confirmar se é dia de operação'
+          ]
+        })
+      }
+    }
+
+    return alertas
+  }
+
+  // ========================================
   // 🤖 ANÁLISE COM IA (Gemini)
   // ========================================
   async analisarComIA(dados: Record<string, unknown>): Promise<string[]> {
@@ -332,18 +1107,47 @@ Retorne APENAS um JSON array de strings com os insights, sem markdown:
     console.log(`[Alertas Inteligentes] Iniciando análise para bar ${barId}`)
 
     // Executar todas as análises em paralelo
-    const [alertasFaturamento, alertasCMV, alertasClientes, alertasEstoques] = await Promise.all([
+    const [
+      alertasFaturamento, 
+      alertasCMV, 
+      alertasClientes, 
+      alertasEstoques,
+      alertasChecklists,
+      alertasMetas,
+      alertasEventos,
+      alertasAniversariantes,
+      alertasReservas,
+      alertasPagamentos,
+      alertasEstoqueDetalhado,
+      alertasAvaliacoes
+    ] = await Promise.all([
       this.analisarFaturamento(barId),
       this.analisarCMV(barId),
       this.analisarClientes(barId),
-      this.analisarEstoques(barId)
+      this.analisarEstoques(barId),
+      this.analisarChecklists(barId),
+      this.analisarMetas(barId),
+      this.analisarEventosProximos(barId),
+      this.analisarAniversariantes(barId),
+      this.analisarReservas(barId),
+      this.analisarPagamentos(barId),
+      this.analisarEstoqueDetalhado(barId),
+      this.analisarAvaliacoes(barId)
     ])
 
     const todosAlertas = [
       ...alertasFaturamento,
       ...alertasCMV,
       ...alertasClientes,
-      ...alertasEstoques
+      ...alertasEstoques,
+      ...alertasChecklists,
+      ...alertasMetas,
+      ...alertasEventos,
+      ...alertasAniversariantes,
+      ...alertasReservas,
+      ...alertasPagamentos,
+      ...alertasEstoqueDetalhado,
+      ...alertasAvaliacoes
     ]
 
     // Coletar métricas para análise IA
@@ -540,6 +1344,70 @@ serve(async (req) => {
 
       case 'estoques': {
         const alertas = await service.analisarEstoques(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'aniversariantes': {
+        const alertas = await service.analisarAniversariantes(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'reservas': {
+        const alertas = await service.analisarReservas(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'pagamentos': {
+        const alertas = await service.analisarPagamentos(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'estoque-detalhado': {
+        const alertas = await service.analisarEstoqueDetalhado(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'avaliacoes': {
+        const alertas = await service.analisarAvaliacoes(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'checklists': {
+        const alertas = await service.analisarChecklists(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'metas': {
+        const alertas = await service.analisarMetas(barId)
+        return new Response(
+          JSON.stringify({ success: true, alertas }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'eventos': {
+        const alertas = await service.analisarEventosProximos(barId)
         return new Response(
           JSON.stringify({ success: true, alertas }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }

@@ -8,6 +8,11 @@ import {
   getColorByPriority,
   formatarTempo,
 } from '@/hooks/useNotifications';
+import {
+  useInsightsNotifications,
+  getAlertBadgeClass,
+  formatarTempoRelativo,
+} from '@/hooks/useInsightsNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +33,10 @@ import {
   User,
   Trash2,
   RefreshCw,
+  Sparkles,
+  AlertTriangle,
+  TrendingDown,
+  ArrowRight,
 } from 'lucide-react';
 
 // Interfaces para tipagem
@@ -67,7 +76,7 @@ export function NotificationCenter() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [filtroTab, setFiltroTab] = useState<
-    'todas' | 'nao_lidas' | 'importantes'
+    'todas' | 'nao_lidas' | 'insights'
   >('todas');
   const [configuracoes, setConfiguracoes] = useState({
     autoRefresh: true,
@@ -90,6 +99,16 @@ export function NotificationCenter() {
     excluirNotificacao,
     recarregar,
   } = useNotifications();
+
+  // Hook para Insights Inteligentes
+  const {
+    alertas: insightsAlertas,
+    loading: insightsLoading,
+    estatisticas: insightsStats,
+    fetchAlertas: fetchInsights,
+    marcarComoLido: marcarInsightComoLido,
+    marcarTodosComoLidos: marcarTodosInsightsComoLidos,
+  } = useInsightsNotifications();
 
   const hasInitializedRef = useRef(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -151,11 +170,14 @@ export function NotificationCenter() {
     if (filtroTab === 'nao_lidas') {
       return ['pendente', 'enviada'].includes(notificacao.status || '');
     }
-    if (filtroTab === 'importantes') {
-      return ['alta', 'critica'].includes(notificacao.prioridade || '');
+    if (filtroTab === 'insights') {
+      return false; // Insights são mostrados separadamente
     }
     return true; // todas
   });
+  
+  // Insights não lidos para exibição
+  const insightsNaoLidos = insightsAlertas.filter(a => !a.lido);
 
   // =====================================================
   // HANDLERS
@@ -229,8 +251,9 @@ export function NotificationCenter() {
   // CONTADORES
   // =====================================================
 
-  const totalNaoLidas = estatisticas?.nao_lidas || 0;
+  const totalNaoLidas = (estatisticas?.nao_lidas || 0) + insightsStats.naoLidos;
   const totalImportantes = estatisticas?.alta_prioridade || 0;
+  const totalInsights = insightsAlertas.length;
 
   // =====================================================
   // RENDER
@@ -241,13 +264,24 @@ export function NotificationCenter() {
       <PopoverTrigger asChild>
         <Button variant="ghost" className="relative rounded-[4px] hover:text-gray-500 text-gray-500 h-8 p-2 py-2">
           <Bell className="h-4 w-4" />
+          {/* Badge de notificações */}
           {configuracoes.showBadge && totalNaoLidas > 0 && (
             <Badge
-              variant="destructive"
-              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              variant={insightsStats.criticos > 0 ? "destructive" : "default"}
+              className={`absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs ${
+                insightsStats.criticos > 0 
+                  ? 'bg-red-500 animate-pulse' 
+                  : insightsStats.naoLidos > 0 
+                    ? 'bg-purple-500' 
+                    : 'bg-blue-500'
+              }`}
             >
               {totalNaoLidas > 99 ? '99+' : totalNaoLidas}
             </Badge>
+          )}
+          {/* Indicador de insight quando não há badge numérico */}
+          {configuracoes.showBadge && totalNaoLidas === 0 && insightsAlertas.length > 0 && (
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full" />
           )}
         </Button>
       </PopoverTrigger>
@@ -288,8 +322,8 @@ export function NotificationCenter() {
             {/* Estatísticas Rápidas */}
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
               <span>📬 {totalNaoLidas} não lidas</span>
-              <span>🔥 {totalImportantes} importantes</span>
-              <span>📊 {notificacoes.length} total</span>
+              <span>✨ {totalInsights} insights</span>
+              <span>📊 {notificacoes.length + totalInsights} total</span>
             </div>
           </CardHeader>
 
@@ -298,7 +332,7 @@ export function NotificationCenter() {
             <Tabs
               value={filtroTab}
               onValueChange={(value: string) =>
-                setFiltroTab(value as 'todas' | 'nao_lidas' | 'importantes')
+                setFiltroTab(value as 'todas' | 'nao_lidas' | 'insights')
               }
             >
               <TabsList className="tabs-list-dark w-full rounded-none">
@@ -308,15 +342,107 @@ export function NotificationCenter() {
                 <TabsTrigger value="nao_lidas" className="tabs-trigger-dark">
                   Não Lidas ({totalNaoLidas})
                 </TabsTrigger>
-                <TabsTrigger value="importantes" className="tabs-trigger-dark">
-                  Importantes ({totalImportantes})
+                <TabsTrigger value="insights" className="tabs-trigger-dark">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Insights ({totalInsights})
                 </TabsTrigger>
               </TabsList>
 
               {/* Lista de Notificações */}
               <ScrollArea className="h-96">
                 <div className="p-4 space-y-3">
-                  {loading && notificacoes.length === 0 ? (
+                  {/* Tab de Insights */}
+                  {filtroTab === 'insights' ? (
+                    <>
+                      {insightsLoading && insightsAlertas.length === 0 ? (
+                        <div className="flex items-center justify-center py-8">
+                          <RefreshCw className="h-6 w-6 animate-spin text-gray-400" />
+                          <span className="ml-2 text-sm text-gray-500">
+                            Analisando dados...
+                          </span>
+                        </div>
+                      ) : insightsAlertas.length === 0 ? (
+                        <div className="text-center py-8">
+                          <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
+                          <p className="text-gray-500 dark:text-gray-400">
+                            Tudo certo! Nenhum alerta.
+                          </p>
+                        </div>
+                      ) : (
+                        insightsAlertas.map(alerta => (
+                          <Card
+                            key={alerta.id}
+                            className={`card-dark p-3 space-y-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
+                              !alerta.lido ? 'border-l-4 border-l-purple-500' : ''
+                            }`}
+                            onClick={() => {
+                              marcarInsightComoLido(alerta.id);
+                              if (alerta.url) {
+                                router.push(alerta.url);
+                                setIsOpen(false);
+                              }
+                            }}
+                          >
+                            {/* Header do Insight */}
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`${getAlertBadgeClass(alerta.tipo)} text-xs`}
+                                >
+                                  {alerta.tipo === 'critico' ? '🚨' : alerta.tipo === 'erro' ? '⚠️' : alerta.tipo === 'aviso' ? '⚡' : 'ℹ️'} {alerta.tipo.toUpperCase()}
+                                </Badge>
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                                >
+                                  {alerta.categoria}
+                                </Badge>
+                              </div>
+                              {!alerta.lido && (
+                                <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                              )}
+                            </div>
+
+                            {/* Conteúdo do Insight */}
+                            <div className="space-y-1">
+                              <h4 className="font-medium text-sm text-gray-900 dark:text-white">
+                                {alerta.titulo}
+                              </h4>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                                {alerta.mensagem}
+                              </p>
+                              <div className="flex items-center justify-between pt-1">
+                                <p className="text-xs text-gray-500 dark:text-gray-500">
+                                  {formatarTempoRelativo(alerta.created_at)}
+                                </p>
+                                {alerta.url && (
+                                  <span className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                                    Ver detalhes <ArrowRight className="w-3 h-3" />
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </Card>
+                        ))
+                      )}
+                      
+                      {/* Link para página completa */}
+                      {insightsAlertas.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          className="w-full text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                          onClick={() => {
+                            router.push('/alertas');
+                            setIsOpen(false);
+                          }}
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Ver todos os alertas
+                        </Button>
+                      )}
+                    </>
+                  ) : loading && notificacoes.length === 0 ? (
                     <div className="flex items-center justify-center py-8">
                       <RefreshCw className="h-6 w-6 animate-spin text-gray-400" />
                       <span className="ml-2 text-sm text-gray-500">
@@ -329,9 +455,7 @@ export function NotificationCenter() {
                       <p className="text-gray-500 dark:text-gray-400">
                         {filtroTab === 'todas'
                           ? 'Nenhuma notificação'
-                          : filtroTab === 'nao_lidas'
-                            ? 'Todas as notificações foram lidas'
-                            : 'Nenhuma notificação importante'}
+                          : 'Todas as notificações foram lidas'}
                       </p>
                     </div>
                   ) : (
