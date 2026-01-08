@@ -197,16 +197,33 @@ async function fetchDataForIntent(
     }
 
     case 'produto': {
-      const { data: produtos } = await supabase
+      // Buscar produtos e agrupar manualmente (Supabase não suporta GROUP BY direto)
+      const { data: vendas } = await supabase
         .from('contahub_analitico')
         .select('prd_desc, grp_desc, qtd, valorfinal')
         .eq('bar_id', barId)
-        .gte('trn_dtgerencial', inicioSemana.toISOString().split('T')[0])
-        .order('valorfinal', { ascending: false })
-        .limit(10);
+        .gte('trn_dtgerencial', inicioSemana.toISOString().split('T')[0]);
+
+      // Agrupar por produto
+      const produtosAgrupados: Record<string, { prd_desc: string; grp_desc: string; qtd: number; valorfinal: number }> = {};
+      
+      vendas?.forEach(v => {
+        if (!v.prd_desc) return;
+        const key = v.prd_desc;
+        if (!produtosAgrupados[key]) {
+          produtosAgrupados[key] = { prd_desc: v.prd_desc, grp_desc: v.grp_desc || '', qtd: 0, valorfinal: 0 };
+        }
+        produtosAgrupados[key].qtd += v.qtd || 0;
+        produtosAgrupados[key].valorfinal += v.valorfinal || 0;
+      });
+
+      // Ordenar por valor e pegar top 10
+      const topProdutos = Object.values(produtosAgrupados)
+        .sort((a, b) => b.valorfinal - a.valorfinal)
+        .slice(0, 10);
 
       return {
-        topProdutos: produtos
+        topProdutos
       };
     }
 

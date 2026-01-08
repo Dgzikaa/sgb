@@ -297,9 +297,14 @@ export default function AgenteChatPage() {
                         <span className="text-gray-400 text-sm">Analisando dados...</span>
                       </div>
                     ) : (
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {message.content}
-                      </div>
+                      <div 
+                        className="whitespace-pre-wrap text-sm leading-relaxed prose prose-invert prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ 
+                          __html: message.content
+                            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+                            .replace(/\n/g, '<br />')
+                        }}
+                      />
                     )}
                   </div>
 
