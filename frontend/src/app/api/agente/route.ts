@@ -1,8 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+// Tipos para as tabelas do Supabase
+interface EventoBase {
+  id?: number;
+  bar_id?: number;
+  data_evento?: string;
+  nome?: string;
+  real_r?: number;
+  m1_r?: number;
+  cl_real?: number;
+  ativo?: boolean;
+}
+
+interface ContaHubAnalitico {
+  prd_desc?: string;
+  grp_desc?: string;
+  qtd?: number;
+  valorfinal?: number;
+  trn_dtgerencial?: string;
+}
+
+interface CMVSemanal {
+  cmv_percentual?: number;
+  custo_total?: number;
+  faturamento?: number;
+}
+
+interface MetaMensal {
+  receita_meta?: number;
+}
 
 interface ChatContext {
   barName: string;
@@ -197,7 +227,7 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
 
 // Buscar dados do banco baseado na intenção
 async function fetchDataForIntent(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   intent: string,
   entities: Record<string, string>,
   barId: number
@@ -224,7 +254,7 @@ async function fetchDataForIntent(
         dataInicio = inicioMes.toISOString().split('T')[0];
       }
 
-      const { data: eventos } = await supabase
+      const { data: eventosRaw } = await supabase
         .from('eventos_base')
         .select('data_evento, real_r, m1_r, cl_real, nome')
         .eq('bar_id', barId)
@@ -233,10 +263,11 @@ async function fetchDataForIntent(
         .lte('data_evento', dataFim)
         .order('data_evento', { ascending: false });
 
+      const eventos = eventosRaw as EventoBase[] | null;
       const total = eventos?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
       const metaTotal = eventos?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
       const clientesTotal = eventos?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
-      const diasComDados = eventos?.filter(e => e.real_r > 0).length || 0;
+      const diasComDados = eventos?.filter(e => (e.real_r || 0) > 0).length || 0;
 
       return {
         faturamento: total,
@@ -259,7 +290,7 @@ async function fetchDataForIntent(
         dataFim = hoje.toISOString().split('T')[0];
       }
 
-      const { data: eventos } = await supabase
+      const { data: eventosClientesRaw } = await supabase
         .from('eventos_base')
         .select('data_evento, cl_real, real_r, nome')
         .eq('bar_id', barId)
@@ -268,8 +299,9 @@ async function fetchDataForIntent(
         .lte('data_evento', dataFim)
         .order('data_evento', { ascending: false });
 
-      const clientesTotal = eventos?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
-      const faturamento = eventos?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
+      const eventosClientes = eventosClientesRaw as EventoBase[] | null;
+      const clientesTotal = eventosClientes?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
+      const faturamento = eventosClientes?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
 
       return {
         clientes: clientesTotal,
@@ -281,13 +313,14 @@ async function fetchDataForIntent(
     }
 
     case 'cmv': {
-      const { data: cmv } = await supabase
+      const { data: cmvRaw } = await supabase
         .from('cmv_semanal')
         .select('*')
         .eq('bar_id', barId)
         .order('data_inicio', { ascending: false })
         .limit(2);
 
+      const cmv = cmvRaw as CMVSemanal[] | null;
       return {
         cmvAtual: cmv?.[0]?.cmv_percentual || 0,
         cmvAnterior: cmv?.[1]?.cmv_percentual || 0,
@@ -298,7 +331,7 @@ async function fetchDataForIntent(
     }
 
     case 'meta': {
-      const { data: eventos } = await supabase
+      const { data: eventosMetaRaw } = await supabase
         .from('eventos_base')
         .select('real_r, m1_r')
         .eq('bar_id', barId)
@@ -306,11 +339,12 @@ async function fetchDataForIntent(
         .gte('data_evento', inicioMes.toISOString().split('T')[0])
         .lte('data_evento', hoje.toISOString().split('T')[0]);
 
-      const faturamentoMes = eventos?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
-      const metaMes = eventos?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
+      const eventosMeta = eventosMetaRaw as EventoBase[] | null;
+      const faturamentoMes = eventosMeta?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
+      const metaMesEventos = eventosMeta?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
 
       // Buscar meta mensal da tabela de metas
-      const { data: metaMensal } = await supabase
+      const { data: metaMensalRaw } = await supabase
         .from('metas_mensais')
         .select('receita_meta')
         .eq('bar_id', barId)
@@ -318,33 +352,36 @@ async function fetchDataForIntent(
         .eq('mes', hoje.getMonth() + 1)
         .single();
 
+      const metaMensal = metaMensalRaw as MetaMensal | null;
       const diasPassados = hoje.getDate();
       const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
       const diasRestantes = diasNoMes - diasPassados;
+      const metaFinal = metaMensal?.receita_meta || metaMesEventos;
 
       return {
         faturamentoMes,
-        metaMes: metaMensal?.receita_meta || metaMes,
-        atingimento: (metaMensal?.receita_meta || metaMes) > 0 
-          ? (faturamentoMes / (metaMensal?.receita_meta || metaMes) * 100) 
+        metaMes: metaFinal,
+        atingimento: metaFinal > 0 
+          ? (faturamentoMes / metaFinal * 100) 
           : 0,
         diasPassados,
         diasRestantes,
         mediaDiaria: diasPassados > 0 ? faturamentoMes / diasPassados : 0,
         necessarioPorDia: diasRestantes > 0 
-          ? ((metaMensal?.receita_meta || metaMes) - faturamentoMes) / diasRestantes 
+          ? (metaFinal - faturamentoMes) / diasRestantes 
           : 0
       };
     }
 
     case 'produto': {
       // Buscar produtos e agrupar manualmente (Supabase não suporta GROUP BY direto)
-      const { data: vendas } = await supabase
+      const { data: vendasRaw } = await supabase
         .from('contahub_analitico')
         .select('prd_desc, grp_desc, qtd, valorfinal')
         .eq('bar_id', barId)
         .gte('trn_dtgerencial', inicioSemana.toISOString().split('T')[0]);
 
+      const vendas = vendasRaw as ContaHubAnalitico[] | null;
       // Agrupar por produto
       const produtosAgrupados: Record<string, { prd_desc: string; grp_desc: string; qtd: number; valorfinal: number }> = {};
       
@@ -370,7 +407,7 @@ async function fetchDataForIntent(
 
     case 'comparativo_dias': {
       // Buscar eventos da última semana para comparar dias
-      const { data: eventos } = await supabase
+      const { data: eventosCompDiasRaw } = await supabase
         .from('eventos_base')
         .select('data_evento, real_r, cl_real, nome')
         .eq('bar_id', barId)
@@ -378,18 +415,19 @@ async function fetchDataForIntent(
         .gte('data_evento', inicioSemana.toISOString().split('T')[0])
         .order('data_evento', { ascending: false });
 
+      const eventosCompDias = eventosCompDiasRaw as EventoBase[] | null;
       // Mapear dia da semana
       const diasNome = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-      const eventosPorDia = eventos?.map(e => ({
+      const eventosPorDia = eventosCompDias?.map(e => ({
         ...e,
-        diaSemana: diasNome[new Date(e.data_evento + 'T12:00:00').getDay()],
-        diaNum: new Date(e.data_evento + 'T12:00:00').getDay()
+        diaSemana: diasNome[new Date((e.data_evento || '') + 'T12:00:00').getDay()],
+        diaNum: new Date((e.data_evento || '') + 'T12:00:00').getDay()
       })) || [];
 
       // Encontrar melhor e pior dia
       const melhorDia = eventosPorDia.reduce((best, e) => 
         (e.real_r || 0) > (best?.real_r || 0) ? e : best, eventosPorDia[0]);
-      const piorDia = eventosPorDia.filter(e => e.real_r > 0).reduce((worst, e) => 
+      const piorDia = eventosPorDia.filter(e => (e.real_r || 0) > 0).reduce((worst, e) => 
         (e.real_r || Infinity) < (worst?.real_r || Infinity) ? e : worst, eventosPorDia[0]);
 
       // Se mencionou dias específicos, comparar eles
@@ -405,7 +443,7 @@ async function fetchDataForIntent(
 
     case 'comparativo_periodos': {
       // Semana atual
-      const { data: semanaAtual } = await supabase
+      const { data: semanaAtualRaw } = await supabase
         .from('eventos_base')
         .select('real_r, cl_real')
         .eq('bar_id', barId)
@@ -418,7 +456,7 @@ async function fetchDataForIntent(
       const fimSemanaPassada = new Date(inicioSemana);
       fimSemanaPassada.setDate(fimSemanaPassada.getDate() - 1);
 
-      const { data: semanaPassada } = await supabase
+      const { data: semanaPassadaRaw } = await supabase
         .from('eventos_base')
         .select('real_r, cl_real')
         .eq('bar_id', barId)
@@ -426,10 +464,12 @@ async function fetchDataForIntent(
         .gte('data_evento', inicioSemanaPassada.toISOString().split('T')[0])
         .lte('data_evento', fimSemanaPassada.toISOString().split('T')[0]);
 
-      const fatAtual = semanaAtual?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
-      const fatPassada = semanaPassada?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
-      const clientesAtual = semanaAtual?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
-      const clientesPassada = semanaPassada?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
+      const semanaAtualData = semanaAtualRaw as EventoBase[] | null;
+      const semanaPassadaData = semanaPassadaRaw as EventoBase[] | null;
+      const fatAtual = semanaAtualData?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
+      const fatPassada = semanaPassadaData?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
+      const clientesAtual = semanaAtualData?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
+      const clientesPassada = semanaPassadaData?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
 
       return {
         semanaAtual: { faturamento: fatAtual, clientes: clientesAtual },
@@ -444,7 +484,7 @@ async function fetchDataForIntent(
       const quatroSemanasAtras = new Date(hoje);
       quatroSemanasAtras.setDate(quatroSemanasAtras.getDate() - 28);
 
-      const { data: eventos } = await supabase
+      const { data: eventosTendenciaRaw } = await supabase
         .from('eventos_base')
         .select('data_evento, real_r, cl_real')
         .eq('bar_id', barId)
@@ -452,24 +492,25 @@ async function fetchDataForIntent(
         .gte('data_evento', quatroSemanasAtras.toISOString().split('T')[0])
         .order('data_evento', { ascending: true });
 
+      const eventosTendencia = eventosTendenciaRaw as EventoBase[] | null;
       // Agrupar por semana
       const semanas: { semana: number; faturamento: number; clientes: number; ticketMedio: number }[] = [];
-      let semanaAtual = 0;
+      let semanaAtualNum = 0;
       let fatSemana = 0;
       let cliSemana = 0;
 
-      eventos?.forEach((e, idx) => {
+      eventosTendencia?.forEach((e, idx) => {
         const semanaEvento = Math.floor(idx / 7);
-        if (semanaEvento !== semanaAtual && fatSemana > 0) {
+        if (semanaEvento !== semanaAtualNum && fatSemana > 0) {
           semanas.push({
-            semana: semanaAtual + 1,
+            semana: semanaAtualNum + 1,
             faturamento: fatSemana,
             clientes: cliSemana,
             ticketMedio: cliSemana > 0 ? fatSemana / cliSemana : 0
           });
           fatSemana = 0;
           cliSemana = 0;
-          semanaAtual = semanaEvento;
+          semanaAtualNum = semanaEvento;
         }
         fatSemana += e.real_r || 0;
         cliSemana += e.cl_real || 0;
@@ -478,7 +519,7 @@ async function fetchDataForIntent(
       // Adicionar última semana
       if (fatSemana > 0) {
         semanas.push({
-          semana: semanaAtual + 1,
+          semana: semanaAtualNum + 1,
           faturamento: fatSemana,
           clientes: cliSemana,
           ticketMedio: cliSemana > 0 ? fatSemana / cliSemana : 0
@@ -511,7 +552,7 @@ async function fetchDataForIntent(
 
     case 'meta_projecao': {
       // Mesma lógica de meta mas focado na projeção
-      const { data: eventos } = await supabase
+      const { data: eventosProjecaoRaw } = await supabase
         .from('eventos_base')
         .select('real_r, m1_r')
         .eq('bar_id', barId)
@@ -519,9 +560,10 @@ async function fetchDataForIntent(
         .gte('data_evento', inicioMes.toISOString().split('T')[0])
         .lte('data_evento', hoje.toISOString().split('T')[0]);
 
-      const faturamentoMes = eventos?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
+      const eventosProjecao = eventosProjecaoRaw as EventoBase[] | null;
+      const faturamentoMes = eventosProjecao?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
 
-      const { data: metaMensal } = await supabase
+      const { data: metaMensalProjecaoRaw } = await supabase
         .from('metas_mensais')
         .select('receita_meta')
         .eq('bar_id', barId)
@@ -529,7 +571,8 @@ async function fetchDataForIntent(
         .eq('mes', hoje.getMonth() + 1)
         .single();
 
-      const metaMes = metaMensal?.receita_meta || eventos?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
+      const metaMensalProjecao = metaMensalProjecaoRaw as MetaMensal | null;
+      const metaMes = metaMensalProjecao?.receita_meta || eventosProjecao?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
       const diasPassados = hoje.getDate();
       const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
       const diasRestantes = diasNoMes - diasPassados;
@@ -554,7 +597,7 @@ async function fetchDataForIntent(
 
     case 'resumo': {
       // Buscar resumo geral
-      const { data: eventosRecentes } = await supabase
+      const { data: eventosRecentesRaw } = await supabase
         .from('eventos_base')
         .select('*')
         .eq('bar_id', barId)
@@ -562,6 +605,7 @@ async function fetchDataForIntent(
         .order('data_evento', { ascending: false })
         .limit(7);
 
+      const eventosRecentes = eventosRecentesRaw as EventoBase[] | null;
       const fatSemana = eventosRecentes?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
       const clientesSemana = eventosRecentes?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
       const metaSemana = eventosRecentes?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
@@ -578,15 +622,16 @@ async function fetchDataForIntent(
 
     case 'ticket': {
       // Buscar dados para calcular ticket médio
-      const { data: eventos } = await supabase
+      const { data: eventosTicketRaw } = await supabase
         .from('eventos_base')
         .select('real_r, cl_real')
         .eq('bar_id', barId)
         .eq('ativo', true)
         .gte('data_evento', inicioSemana.toISOString().split('T')[0]);
 
+      const eventosTicket = eventosTicketRaw as EventoBase[] | null;
       return {
-        eventos: eventos || []
+        eventos: eventosTicket || []
       };
     }
 
@@ -605,7 +650,7 @@ async function fetchDataForIntent(
 
     default: {
       // Buscar resumo geral
-      const { data: eventosRecentes } = await supabase
+      const { data: eventosDefaultRaw } = await supabase
         .from('eventos_base')
         .select('*')
         .eq('bar_id', barId)
@@ -613,8 +658,9 @@ async function fetchDataForIntent(
         .order('data_evento', { ascending: false })
         .limit(7);
 
+      const eventosDefault = eventosDefaultRaw as EventoBase[] | null;
       return {
-        eventosRecentes
+        eventosRecentes: eventosDefault
       };
     }
   }
