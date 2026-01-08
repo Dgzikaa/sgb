@@ -1,271 +1,317 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-/**
- * 🔍 AGENTE AUDITOR
- * 
- * Responsável por:
- * - Validar integridade dos dados
- * - Detectar anomalias e inconsistências
- * - Verificar qualidade dos syncs
- * - Gerar relatórios de auditoria
- */
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')
+const GEMINI_MODEL = 'gemini-1.5-pro-latest'
 
-console.log("🔍 Agente Auditor - Sistema de Auditoria de Dados");
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-interface AuditRequest {
-  action: 'validate_sync' | 'check_anomalies' | 'data_quality' | 'full_audit';
-  bar_id: number;
-  data_inicio?: string;
-  data_fim?: string;
-  tabela?: string;
+interface AuditoriaRequest {
+  bar_id: number
+  tipo: 'completa' | 'rapida' | 'especifica'
+  tabela?: string
+  periodo_dias?: number
 }
 
-interface AuditResult {
-  success: boolean;
-  action: string;
-  timestamp: string;
-  bar_id: number;
-  findings: AuditFinding[];
-  summary: {
-    total_checks: number;
-    passed: number;
-    warnings: number;
-    errors: number;
-  };
+interface ProblemaEncontrado {
+  tipo: 'gap_temporal' | 'inconsistencia' | 'valor_anomalo' | 'duplicado' | 'ausente'
+  severidade: 'baixa' | 'media' | 'alta' | 'critica'
+  tabela: string
+  descricao: string
+  dados: any
+  acao_sugerida: string
 }
 
-interface AuditFinding {
-  tipo: 'info' | 'warning' | 'error' | 'critical';
-  categoria: string;
-  mensagem: string;
-  tabela?: string;
-  detalhes?: Record<string, unknown>;
-}
-
-Deno.serve(async (req: Request): Promise<Response> => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
+serve(async (req) => {
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const request: AuditRequest = await req.json();
-    const { action, bar_id, data_inicio, data_fim, tabela } = request;
-
-    console.log(`🔍 Auditoria: ${action} para bar_id=${bar_id}`);
-
-    const findings: AuditFinding[] = [];
-    let totalChecks = 0;
-    let passed = 0;
-    let warnings = 0;
-    let errors = 0;
-
-    // Definir período padrão (últimos 7 dias)
-    const hoje = new Date();
-    const inicioDefault = new Date(hoje);
-    inicioDefault.setDate(hoje.getDate() - 7);
-    
-    const inicio = data_inicio || inicioDefault.toISOString().split('T')[0];
-    const fim = data_fim || hoje.toISOString().split('T')[0];
-
-    switch (action) {
-      case 'validate_sync':
-        // Verificar se syncs estão atualizados
-        const syncsToCheck = [
-          { tabela: 'contahub_analitico', nome: 'ContaHub Analítico' },
-          { tabela: 'contahub_fatporhora', nome: 'ContaHub FatPorHora' },
-          { tabela: 'contahub_pagamentos', nome: 'ContaHub Pagamentos' },
-          { tabela: 'nibo_agendamentos', nome: 'NIBO Agendamentos' },
-          { tabela: 'getin_reservas', nome: 'GetIn Reservas' },
-          { tabela: 'yuzer_eventos', nome: 'Yuzer Eventos' },
-        ];
-
-        for (const sync of syncsToCheck) {
-          totalChecks++;
-          
-          const { data: lastRecord, error } = await supabase
-            .from(sync.tabela)
-            .select('created_at')
-            .eq('bar_id', bar_id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (error) {
-            errors++;
-            findings.push({
-              tipo: 'error',
-              categoria: 'sync_validation',
-              mensagem: `Erro ao verificar ${sync.nome}`,
-              tabela: sync.tabela,
-              detalhes: { error: error.message }
-            });
-          } else if (!lastRecord) {
-            warnings++;
-            findings.push({
-              tipo: 'warning',
-              categoria: 'sync_validation',
-              mensagem: `Nenhum dado encontrado para ${sync.nome}`,
-              tabela: sync.tabela
-            });
-          } else {
-            const lastDate = new Date(lastRecord.created_at);
-            const diffHours = (hoje.getTime() - lastDate.getTime()) / (1000 * 60 * 60);
-            
-            if (diffHours > 48) {
-              warnings++;
-              findings.push({
-                tipo: 'warning',
-                categoria: 'sync_validation',
-                mensagem: `${sync.nome} desatualizado (${Math.round(diffHours)}h atrás)`,
-                tabela: sync.tabela,
-                detalhes: { last_update: lastRecord.created_at, hours_ago: Math.round(diffHours) }
-              });
-            } else {
-              passed++;
-              findings.push({
-                tipo: 'info',
-                categoria: 'sync_validation',
-                mensagem: `${sync.nome} atualizado`,
-                tabela: sync.tabela,
-                detalhes: { last_update: lastRecord.created_at }
-              });
-            }
-          }
-        }
-        break;
-
-      case 'check_anomalies':
-        // Verificar anomalias nos dados
-        
-        // 1. Verificar faturamento zerado em dias com eventos
-        totalChecks++;
-        const { data: eventosComFatZero } = await supabase
-          .from('eventos')
-          .select('id, data_evento, nome, real_r')
-          .eq('bar_id', bar_id)
-          .gte('data_evento', inicio)
-          .lte('data_evento', fim)
-          .or('real_r.is.null,real_r.eq.0');
-
-        if (eventosComFatZero && eventosComFatZero.length > 0) {
-          warnings++;
-          findings.push({
-            tipo: 'warning',
-            categoria: 'anomaly',
-            mensagem: `${eventosComFatZero.length} eventos com faturamento zerado/nulo`,
-            detalhes: { eventos: eventosComFatZero.map(e => ({ id: e.id, nome: e.nome, data: e.data_evento })) }
-          });
-        } else {
-          passed++;
-        }
-
-        // 2. Verificar tickets muito altos ou baixos
-        totalChecks++;
-        const { data: ticketsAnormais } = await supabase
-          .from('eventos')
-          .select('id, data_evento, nome, te_r')
-          .eq('bar_id', bar_id)
-          .gte('data_evento', inicio)
-          .lte('data_evento', fim)
-          .or('te_r.gt.200,te_r.lt.10');
-
-        if (ticketsAnormais && ticketsAnormais.length > 0) {
-          warnings++;
-          findings.push({
-            tipo: 'warning',
-            categoria: 'anomaly',
-            mensagem: `${ticketsAnormais.length} eventos com ticket médio anormal`,
-            detalhes: { eventos: ticketsAnormais }
-          });
-        } else {
-          passed++;
-        }
-
-        break;
-
-      case 'data_quality':
-        // Verificar qualidade dos dados
-        
-        // 1. Verificar campos obrigatórios nulos
-        const tabelasParaVerificar = tabela ? [tabela] : ['eventos', 'contahub_analitico'];
-        
-        for (const t of tabelasParaVerificar) {
-          totalChecks++;
-          
-          const { count: nullCount } = await supabase
-            .from(t)
-            .select('*', { count: 'exact', head: true })
-            .eq('bar_id', bar_id)
-            .is('created_at', null);
-
-          if (nullCount && nullCount > 0) {
-            warnings++;
-            findings.push({
-              tipo: 'warning',
-              categoria: 'data_quality',
-              mensagem: `${nullCount} registros sem data de criação em ${t}`,
-              tabela: t
-            });
-          } else {
-            passed++;
-          }
-        }
-        break;
-
-      case 'full_audit':
-        // Executar auditoria completa
-        findings.push({
-          tipo: 'info',
-          categoria: 'full_audit',
-          mensagem: 'Auditoria completa iniciada - executando todas as verificações',
-        });
-        
-        // Combinar todas as verificações
-        // TODO: Implementar chamadas recursivas para cada tipo de verificação
-        break;
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*' } })
     }
 
-    const result: AuditResult = {
-      success: true,
-      action,
-      timestamp: new Date().toISOString(),
-      bar_id,
-      findings,
-      summary: {
-        total_checks: totalChecks,
-        passed,
-        warnings,
-        errors
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    )
+
+    const { bar_id, tipo = 'rapida', tabela, periodo_dias = 365 }: AuditoriaRequest = await req.json()
+    const startTime = Date.now()
+
+    const problemas: ProblemaEncontrado[] = []
+
+    // 1. AUDITORIA: Gaps Temporais (dias sem dados)
+    console.log('🔍 Verificando gaps temporais...')
+    
+    // Verificar contahub_analitico
+    const dataInicio = new Date()
+    dataInicio.setDate(dataInicio.getDate() - periodo_dias)
+    
+    const { data: faturamentoDiario } = await supabaseClient
+      .from('contahub_analitico')
+      .select('data, valor_bruto')
+      .eq('bar_id', bar_id)
+      .gte('data', dataInicio.toISOString().split('T')[0])
+      .order('data', { ascending: true })
+
+    if (faturamentoDiario) {
+      // Detectar gaps de mais de 1 dia
+      for (let i = 1; i < faturamentoDiario.length; i++) {
+        const dataAnterior = new Date(faturamentoDiario[i - 1].data)
+        const dataAtual = new Date(faturamentoDiario[i].data)
+        const diffDias = Math.floor((dataAtual.getTime() - dataAnterior.getTime()) / (1000 * 60 * 60 * 24))
+        
+        if (diffDias > 1) {
+          problemas.push({
+            tipo: 'gap_temporal',
+            severidade: diffDias > 7 ? 'alta' : 'media',
+            tabela: 'contahub_analitico',
+            descricao: `Gap de ${diffDias} dias entre ${faturamentoDiario[i-1].data} e ${faturamentoDiario[i].data}`,
+            dados: {
+              data_inicio: faturamentoDiario[i-1].data,
+              data_fim: faturamentoDiario[i].data,
+              dias_faltando: diffDias
+            },
+            acao_sugerida: 'Verificar se o bar estava fechado ou se houve falha na sincronização'
+          })
+        }
       }
-    };
 
-    console.log(`✅ Auditoria concluída: ${passed} OK, ${warnings} avisos, ${errors} erros`);
+      // Detectar dias com faturamento zero (suspeito)
+      const diasZero = faturamentoDiario.filter(d => d.valor_bruto === 0 || d.valor_bruto === null)
+      if (diasZero.length > 0) {
+        problemas.push({
+          tipo: 'valor_anomalo',
+          severidade: 'media',
+          tabela: 'contahub_analitico',
+          descricao: `${diasZero.length} dias com faturamento zero ou nulo`,
+          dados: {
+            datas: diasZero.map(d => d.data).slice(0, 10), // Primeiros 10
+            total_dias: diasZero.length
+          },
+          acao_sugerida: 'Verificar se eram dias de fechamento ou se há problema nos dados'
+        })
+      }
+    }
 
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
-    });
+    // 2. AUDITORIA: Desempenho Semanal
+    console.log('🔍 Verificando desempenho_semanal...')
+    
+    const { data: desempenho } = await supabaseClient
+      .from('desempenho_semanal')
+      .select('*')
+      .eq('bar_id', bar_id)
+      .order('data_inicio', { ascending: false })
+      .limit(52) // Último ano
+
+    if (desempenho) {
+      // Verificar CMV impossíveis
+      const cmvImpossiveis = desempenho.filter(d => 
+        d.cmv_percentual < 0 || d.cmv_percentual > 100
+      )
+      if (cmvImpossiveis.length > 0) {
+        problemas.push({
+          tipo: 'inconsistencia',
+          severidade: 'critica',
+          tabela: 'desempenho_semanal',
+          descricao: `${cmvImpossiveis.length} semanas com CMV impossível (< 0% ou > 100%)`,
+          dados: {
+            semanas: cmvImpossiveis.map(d => ({
+              data_inicio: d.data_inicio,
+              cmv: d.cmv_percentual
+            }))
+          },
+          acao_sugerida: 'Recalcular CMV dessas semanas ou investigar dados fonte'
+        })
+      }
+
+      // Verificar semanas sem dados
+      const semanasSemDados = desempenho.filter(d => 
+        !d.faturamento_bruto || d.faturamento_bruto === 0
+      )
+      if (semanasSemDados.length > 0) {
+        problemas.push({
+          tipo: 'ausente',
+          severidade: 'alta',
+          tabela: 'desempenho_semanal',
+          descricao: `${semanasSemDados.length} semanas sem faturamento registrado`,
+          dados: {
+            semanas: semanasSemDados.map(d => d.data_inicio).slice(0, 10)
+          },
+          acao_sugerida: 'Sincronizar dados faltantes do ContaHub'
+        })
+      }
+    }
+
+    // 3. AUDITORIA: Checklists
+    console.log('🔍 Verificando checklists...')
+    
+    const { data: checklists } = await supabaseClient
+      .from('checklist_executions')
+      .select('*')
+      .eq('bar_id', bar_id)
+      .gte('created_at', dataInicio.toISOString())
+
+    if (checklists) {
+      // Verificar taxa de conclusão
+      const total = checklists.length
+      const concluidos = checklists.filter(c => c.status === 'concluido').length
+      const taxaConclusao = total > 0 ? (concluidos / total) * 100 : 0
+
+      if (taxaConclusao < 70) {
+        problemas.push({
+          tipo: 'inconsistencia',
+          severidade: 'alta',
+          tabela: 'checklist_executions',
+          descricao: `Taxa de conclusão de checklists muito baixa: ${taxaConclusao.toFixed(1)}%`,
+          dados: {
+            total,
+            concluidos,
+            taxa: taxaConclusao.toFixed(1)
+          },
+          acao_sugerida: 'Revisar processo de checklists ou treinar equipe'
+        })
+      }
+    }
+
+    // 4. AUDITORIA: Estoque
+    console.log('🔍 Verificando estoque...')
+    
+    const { data: estoque } = await supabaseClient
+      .from('estoque_insumos')
+      .select('*')
+      .eq('bar_id', bar_id)
+
+    if (estoque) {
+      // Verificar quantidades negativas
+      const negativos = estoque.filter(e => e.quantidade < 0)
+      if (negativos.length > 0) {
+        problemas.push({
+          tipo: 'inconsistencia',
+          severidade: 'critica',
+          tabela: 'estoque_insumos',
+          descricao: `${negativos.length} produtos com estoque negativo`,
+          dados: {
+            produtos: negativos.map(e => ({
+              produto: e.produto,
+              quantidade: e.quantidade
+            }))
+          },
+          acao_sugerida: 'Corrigir estoque desses produtos imediatamente'
+        })
+      }
+    }
+
+    // 5. USAR IA PARA ANÁLISE AVANÇADA
+    console.log('🤖 Analisando com IA...')
+    
+    const prompt = `
+Você é um auditor de dados especializado em sistemas de gestão de bares.
+
+# PROBLEMAS ENCONTRADOS
+${JSON.stringify(problemas, null, 2)}
+
+# DADOS GERAIS
+- Bar ID: ${bar_id}
+- Período analisado: ${periodo_dias} dias
+- Total de problemas detectados: ${problemas.length}
+
+# SUA MISSÃO
+1. Classifique os problemas por prioridade
+2. Sugira um plano de ação para corrigir
+3. Identifique padrões ou problemas recorrentes
+4. Estime impacto de cada problema no negócio
+
+Responda em JSON:
+{
+  "resumo_executivo": "string",
+  "problemas_prioritarios": [
+    {
+      "problema": "string",
+      "impacto_estimado": "string",
+      "urgencia": "baixa|media|alta|critica",
+      "passos_correcao": ["string"]
+    }
+  ],
+  "padroes_identificados": ["string"],
+  "recomendacoes_gerais": ["string"],
+  "score_saude_dados": 0-100
+}
+`
+
+    let analiseIA = null
+    if (GEMINI_API_KEY) {
+      const geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.3,
+              topK: 20,
+              topP: 0.8,
+              maxOutputTokens: 4096,
+            }
+          })
+        }
+      )
+
+      if (geminiResponse.ok) {
+        const geminiData = await geminiResponse.json()
+        const responseText = geminiData.candidates[0].content.parts[0].text
+        
+        try {
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+          analiseIA = JSON.parse(jsonMatch ? jsonMatch[0] : responseText)
+        } catch (e) {
+          console.error('Erro ao parsear resposta IA:', e)
+        }
+      }
+    }
+
+    const tempoTotal = Date.now() - startTime
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        auditoria: {
+          bar_id,
+          periodo_dias,
+          tipo_auditoria: tipo,
+          timestamp: new Date().toISOString(),
+          tempo_execucao_ms: tempoTotal
+        },
+        problemas_encontrados: problemas,
+        total_problemas: problemas.length,
+        analise_ia: analiseIA,
+        estatisticas: {
+          criticos: problemas.filter(p => p.severidade === 'critica').length,
+          altos: problemas.filter(p => p.severidade === 'alta').length,
+          medios: problemas.filter(p => p.severidade === 'media').length,
+          baixos: problemas.filter(p => p.severidade === 'baixa').length
+        }
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
+    )
 
   } catch (error) {
-    console.error('❌ Erro no Agente Auditor:', error);
+    console.error('Erro no agente-auditor:', error)
     
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : String(error)
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
+    )
   }
-});
-
+})

@@ -1,72 +1,62 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/supabase-server'
+import { cookies } from 'next/headers'
 
-/**
- * 🗺️ API - MAPEAR TABELAS
- * Endpoint para consultar estrutura do banco de dados
- */
+const SUPABASE_FUNCTIONS_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(
+  'https://',
+  'https://'
+).replace('.supabase.co', '.supabase.co/functions/v1')
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-export async function POST(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const body = await request.json()
-    const { action, tabela, campo, termo_busca } = body
-
-    // Validar action
-    const actionsValidas = ['listar_tabelas', 'detalhar_tabela', 'buscar_campo', 'sugerir_query', 'explicar_relacionamento']
-    if (!action || !actionsValidas.includes(action)) {
+    const supabase = createServerClient()
+    
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
       return NextResponse.json(
-        { success: false, error: `action deve ser uma de: ${actionsValidas.join(', ')}` },
-        { status: 400 }
+        { error: 'Não autenticado' },
+        { status: 401 }
+      )
+    }
+
+    // Verificar se é admin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Apenas administradores podem mapear tabelas' },
+        { status: 403 }
       )
     }
 
     // Chamar Edge Function
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/agente-mapeador-tabelas`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseServiceKey}`
-        },
-        body: JSON.stringify({ action, tabela, campo, termo_busca })
-      }
-    )
+    const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/agente-mapeador-tabelas`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({})
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
-      return NextResponse.json(
-        { success: false, error: `Erro: ${response.status}`, detalhes: errorText },
-        { status: response.status }
-      )
+      throw new Error(`Edge Function error: ${errorText}`)
     }
 
-    const resultado = await response.json()
-    return NextResponse.json(resultado)
+    const data = await response.json()
 
-  } catch (error) {
-    console.error('❌ Erro:', error)
+    return NextResponse.json(data)
+
+  } catch (error: any) {
+    console.error('Erro na API /api/agente/mapear-tabelas:', error)
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Erro' },
+      { error: error.message || 'Erro ao mapear tabelas' },
       { status: 500 }
     )
   }
 }
-
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    endpoint: '/api/agente/mapear-tabelas',
-    descricao: 'Consulta estrutura e documentação do banco de dados',
-    actions: [
-      { action: 'listar_tabelas', descricao: 'Lista todas as tabelas do sistema' },
-      { action: 'detalhar_tabela', descricao: 'Detalha campos de uma tabela', params: ['tabela'] },
-      { action: 'buscar_campo', descricao: 'Busca campos por termo', params: ['termo_busca'] },
-      { action: 'sugerir_query', descricao: 'Sugere queries baseado no termo', params: ['termo_busca'] },
-      { action: 'explicar_relacionamento', descricao: 'Explica relacionamentos de uma tabela', params: ['tabela'] }
-    ]
-  })
-}
-

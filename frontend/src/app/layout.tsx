@@ -10,6 +10,7 @@ import { Toaster } from 'sonner';
 import { CommandPaletteWrapper } from '@/components/CommandPaletteWrapper';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import AuthSync from '@/components/AuthSync';
+// import RetrospectiveButton from '@/components/retrospectiva/RetrospectiveButton';
 // import AssistantWrapper from '@/components/AssistantWrapper';
 // import ZykorPWABanner from '@/components/ZykorPWABanner';
 // import { UniversalDesignSystemWrapper } from '@/components/layouts/UniversalDesignSystemWrapper';
@@ -60,6 +61,7 @@ export default function RootLayout({
                       <AuthSync />
                       <GlobalToastListener />
                       <Toaster position="top-right" richColors />
+                      {/* <RetrospectiveButton /> */}
                       {/* <AssistantWrapper /> */}
                       {/* <ZykorPWABanner /> */}
                     </ToastProvider>

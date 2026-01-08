@@ -472,8 +472,22 @@ const DialogFooter: React.FC<DialogFooterProps> = ({
   );
 };
 
+// DialogTrigger - componente para abrir o dialog
+const DialogTrigger: React.FC<React.HTMLAttributes<HTMLElement>> = ({
+  children,
+  onClick,
+  ...props
+}) => {
+  return (
+    <div onClick={onClick} {...props}>
+      {children}
+    </div>
+  );
+};
+
 export {
   Dialog,
+  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,

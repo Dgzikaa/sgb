@@ -29,6 +29,11 @@ import {
   FileSearch,
   Activity,
   Wallet,
+  Tag,
+  Receipt,
+  PieChart,
+  Plug,
+  Building2,
 } from 'lucide-react';
 
 /**
@@ -64,10 +69,10 @@ const PERMISSION_MAPPINGS: Record<string, string[]> = {
   home: ['home'],
   operacoes: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos'],
   gestao: ['gestao', 'tempo', 'planejamento'],
-  gestao_stockout: ['gestao_stockout', 'gestao'],
   relatorios: ['relatorios', 'dashboard_financeiro_mensal', 'marketing_360'],
   configuracoes: ['configuracoes'],
-  ferramentas: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos', 'financeiro_agendamento', 'gestao_stockout'],
+  ferramentas: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos', 'financeiro_agendamento'],
+  cfp: ['home'], // CFP disponível para todos
 };
 
 // Menu items - extraído para fora do componente
@@ -85,6 +90,32 @@ const defaultSidebarItems: SidebarItem[] = [
     ],
   },
   {
+    icon: Sparkles,
+    label: 'Retrospectiva 2025',
+    href: '/retrospectiva-2025',
+    color: 'text-purple-600 dark:text-purple-400',
+    permission: 'home',
+    subItems: [
+      { icon: Sparkles, label: 'Visão Geral', href: '/retrospectiva-2025', permission: 'home' },
+      { icon: BarChart3, label: 'Análise Detalhada', href: '/retrospectiva-2025/detalhes', permission: 'home' },
+    ],
+  },
+  {
+    icon: Wallet,
+    label: 'CFP - Finanças Pessoais',
+    href: '/fp',
+    color: 'text-emerald-600 dark:text-emerald-400',
+    permission: 'cfp',
+    subItems: [
+      { icon: PieChart, label: 'Dashboard', href: '/fp/dashboard', description: 'Visão geral financeira', permission: 'home' },
+      { icon: Wallet, label: 'Contas', href: '/fp/contas', description: 'Bancos e cartões', permission: 'home' },
+      { icon: Tag, label: 'Categorias', href: '/fp/categorias', description: 'Categorias de gastos', permission: 'home' },
+      { icon: Receipt, label: 'Transações', href: '/fp/transacoes', description: 'Receitas e despesas', permission: 'home' },
+      { icon: Plug, label: 'Conexões', href: '/fp/pluggy', description: 'Open Finance', permission: 'home' },
+      { icon: Building2, label: 'Bancos', href: '/fp/bancos', description: 'Bancos disponíveis', permission: 'home' },
+    ],
+  },
+  {
     icon: Wrench,
     label: 'Ferramentas',
     href: '/ferramentas',
@@ -96,10 +127,8 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento', permission: 'financeiro_agendamento' },
       { icon: Users, label: 'NPS Funcionários', href: '/ferramentas/nps', permission: 'gestao' },
       { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal', permission: 'gestao' },
-      { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout', permission: 'gestao_stockout' },
+      { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout', permission: 'gestao' },
       { icon: DollarSign, label: 'DRE', href: '/ferramentas/dre', permission: 'dashboard_financeiro_mensal' },
-      { icon: Wallet, label: 'Finanças Pessoais', href: '/fp', permission: 'home' },
-      { icon: Calendar, label: 'Dados Reunião', href: '/ferramentas/dados-reuniao', permission: 'gestao' },
     ],
   },
   {
@@ -114,7 +143,6 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: Ticket, label: 'Impacto Entrada', href: '/ferramentas/analise-couvert', permission: 'relatorios' },
       { icon: Sparkles, label: 'CRM', href: '/crm', permission: 'gestao' },
       { icon: BarChart3, label: 'Eventos', href: '/analitico/eventos', permission: 'relatorios' },
-      { icon: Sparkles, label: 'Retrospectiva 2025', href: '/retrospectiva-2025', permission: 'home' },
     ],
   },
   {

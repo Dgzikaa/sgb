@@ -170,7 +170,22 @@ export default function LoginPage() {
 
         // Salvar dados do usuário no localStorage e cookie
         const { syncAuthData } = await import('@/lib/cookies');
-        syncAuthData(userData as any);
+        syncAuthData(userData as any, response.session);
+        
+        // IMPORTANTE: Registrar a sessão no Supabase Auth Client
+        if (response.session) {
+          const { supabase } = await import('@/lib/supabase');
+          const { error: setSessionError } = await supabase.auth.setSession({
+            access_token: response.session.access_token,
+            refresh_token: response.session.refresh_token,
+          });
+          
+          if (setSessionError) {
+            console.error('❌ Erro ao registrar sessão no Supabase Auth:', setSessionError);
+          } else {
+            console.log('✅ Sessão registrada no Supabase Auth Client');
+          }
+        }
 
         const destination = returnUrl ? decodeURIComponent(returnUrl) : '/home';
         setSuccess(
@@ -220,7 +235,22 @@ export default function LoginPage() {
         if (response.success && response.user) {
           // Salvar dados do usuário no localStorage e cookie
           const { syncAuthData } = await import('@/lib/cookies');
-          syncAuthData(response.user);
+          syncAuthData(response.user, response.session);
+          
+          // IMPORTANTE: Registrar a sessão no Supabase Auth Client
+          if (response.session) {
+            const { supabase } = await import('@/lib/supabase');
+            const { error: setSessionError } = await supabase.auth.setSession({
+              access_token: response.session.access_token,
+              refresh_token: response.session.refresh_token,
+            });
+            
+            if (setSessionError) {
+              console.error('❌ Erro ao registrar sessão no Supabase Auth:', setSessionError);
+            } else {
+              console.log('✅ Sessão registrada no Supabase Auth Client (biométrico)');
+            }
+          }
 
           const destination = returnUrl
             ? decodeURIComponent(returnUrl)

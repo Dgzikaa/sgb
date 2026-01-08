@@ -1,261 +1,286 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-/**
- * 📊 AGENTE ANÁLISE DE PERÍODOS
- * 
- * Responsável por:
- * - Comparar períodos (semanas, meses, anos)
- * - Identificar tendências
- * - Calcular variações percentuais
- * - Gerar insights sobre evolução
- */
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')
+const GEMINI_MODEL = 'gemini-1.5-pro-latest'
 
-console.log("📊 Agente Análise de Períodos - Comparativos e Tendências");
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-interface AnaliseRequest {
-  action: 'comparar_semanas' | 'comparar_meses' | 'tendencia' | 'evolucao_anual' | 'resumo_periodo';
-  bar_id: number;
-  periodo_1?: { inicio: string; fim: string };
-  periodo_2?: { inicio: string; fim: string };
-  ano?: number;
-  mes?: number;
+interface PeriodoBar {
+  data: string
+  dia_semana: string
+  deveria_estar_aberto: boolean
+  tem_dados: boolean
+  faturamento: number | null
+  problema?: string
 }
 
-interface MetricasPeriodo {
-  faturamento_total: number;
-  total_eventos: number;
-  publico_total: number;
-  ticket_medio: number;
-  media_por_evento: number;
+interface FalhaPorPeriodo {
+  periodo: string
+  total_dias: number
+  dias_com_dados: number
+  dias_sem_dados: number
+  taxa_cobertura: number
+  dias_problematicos: string[]
+  impacto_estimado: string
 }
 
-async function calcularMetricasPeriodo(
-  supabase: ReturnType<typeof createClient>,
-  barId: number,
-  inicio: string,
-  fim: string
-): Promise<MetricasPeriodo> {
-  const { data, error } = await supabase
-    .from('eventos')
-    .select('real_r, pax_r, te_r')
-    .eq('bar_id', barId)
-    .gte('data_evento', inicio)
-    .lte('data_evento', fim);
-
-  if (error) throw error;
-
-  const eventos = data || [];
-  const faturamento_total = eventos.reduce((sum, e) => sum + (e.real_r || 0), 0);
-  const publico_total = eventos.reduce((sum, e) => sum + (e.pax_r || 0), 0);
-  const tickets = eventos.filter(e => e.te_r > 0).map(e => e.te_r);
-  
-  return {
-    faturamento_total,
-    total_eventos: eventos.length,
-    publico_total,
-    ticket_medio: tickets.length > 0 ? tickets.reduce((a, b) => a + b, 0) / tickets.length : 0,
-    media_por_evento: eventos.length > 0 ? faturamento_total / eventos.length : 0
-  };
-}
-
-function calcularVariacao(atual: number, anterior: number): { valor: number; percentual: number; tendencia: string } {
-  const diferenca = atual - anterior;
-  const percentual = anterior > 0 ? ((diferenca / anterior) * 100) : 0;
-  const tendencia = diferenca > 0 ? '📈 Alta' : diferenca < 0 ? '📉 Queda' : '➡️ Estável';
-  
-  return {
-    valor: diferenca,
-    percentual: Math.round(percentual * 100) / 100,
-    tendencia
-  };
-}
-
-function formatarMoeda(valor: number): string {
-  return `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-Deno.serve(async (req: Request): Promise<Response> => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
+serve(async (req) => {
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const request: AnaliseRequest = await req.json();
-    const { action, bar_id, periodo_1, periodo_2, ano, mes } = request;
-
-    console.log(`📊 Análise: ${action} para bar_id=${bar_id}`);
-
-    let resposta: Record<string, unknown> = {};
-    let textoResposta = '';
-
-    switch (action) {
-      case 'comparar_semanas':
-        // Comparar últimas 2 semanas por padrão
-        const hoje = new Date();
-        const fimSemana1 = periodo_1?.fim || hoje.toISOString().split('T')[0];
-        const inicioSemana1 = periodo_1?.inicio || new Date(hoje.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        
-        const fimSemana2 = periodo_2?.fim || inicioSemana1;
-        const inicioSemana2 = periodo_2?.inicio || new Date(new Date(inicioSemana1).getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-        const metricasSemana1 = await calcularMetricasPeriodo(supabase, bar_id, inicioSemana1, fimSemana1);
-        const metricasSemana2 = await calcularMetricasPeriodo(supabase, bar_id, inicioSemana2, fimSemana2);
-
-        const varFaturamento = calcularVariacao(metricasSemana1.faturamento_total, metricasSemana2.faturamento_total);
-        const varPublico = calcularVariacao(metricasSemana1.publico_total, metricasSemana2.publico_total);
-        const varTicket = calcularVariacao(metricasSemana1.ticket_medio, metricasSemana2.ticket_medio);
-
-        textoResposta = `📊 **Comparativo Semanal**\n\n` +
-          `**Semana Atual** (${inicioSemana1} a ${fimSemana1}):\n` +
-          `💰 Faturamento: ${formatarMoeda(metricasSemana1.faturamento_total)}\n` +
-          `👥 Público: ${metricasSemana1.publico_total} pessoas\n` +
-          `🎟️ Ticket Médio: ${formatarMoeda(metricasSemana1.ticket_medio)}\n\n` +
-          `**Semana Anterior** (${inicioSemana2} a ${fimSemana2}):\n` +
-          `💰 Faturamento: ${formatarMoeda(metricasSemana2.faturamento_total)}\n` +
-          `👥 Público: ${metricasSemana2.publico_total} pessoas\n` +
-          `🎟️ Ticket Médio: ${formatarMoeda(metricasSemana2.ticket_medio)}\n\n` +
-          `**Variações:**\n` +
-          `${varFaturamento.tendencia} Faturamento: ${varFaturamento.percentual > 0 ? '+' : ''}${varFaturamento.percentual}%\n` +
-          `${varPublico.tendencia} Público: ${varPublico.percentual > 0 ? '+' : ''}${varPublico.percentual}%\n` +
-          `${varTicket.tendencia} Ticket: ${varTicket.percentual > 0 ? '+' : ''}${varTicket.percentual}%`;
-
-        resposta = {
-          semana_atual: metricasSemana1,
-          semana_anterior: metricasSemana2,
-          variacoes: {
-            faturamento: varFaturamento,
-            publico: varPublico,
-            ticket: varTicket
-          }
-        };
-        break;
-
-      case 'comparar_meses':
-        const anoAtual = ano || new Date().getFullYear();
-        const mesAtual = mes || new Date().getMonth() + 1;
-        const mesAnterior = mesAtual === 1 ? 12 : mesAtual - 1;
-        const anoMesAnterior = mesAtual === 1 ? anoAtual - 1 : anoAtual;
-
-        const inicioMesAtual = `${anoAtual}-${String(mesAtual).padStart(2, '0')}-01`;
-        const fimMesAtual = new Date(anoAtual, mesAtual, 0).toISOString().split('T')[0];
-        const inicioMesAnt = `${anoMesAnterior}-${String(mesAnterior).padStart(2, '0')}-01`;
-        const fimMesAnt = new Date(anoMesAnterior, mesAnterior, 0).toISOString().split('T')[0];
-
-        const metricasMesAtual = await calcularMetricasPeriodo(supabase, bar_id, inicioMesAtual, fimMesAtual);
-        const metricasMesAnterior = await calcularMetricasPeriodo(supabase, bar_id, inicioMesAnt, fimMesAnt);
-
-        const varFatMes = calcularVariacao(metricasMesAtual.faturamento_total, metricasMesAnterior.faturamento_total);
-
-        textoResposta = `📅 **Comparativo Mensal**\n\n` +
-          `**${String(mesAtual).padStart(2, '0')}/${anoAtual}:**\n` +
-          `💰 ${formatarMoeda(metricasMesAtual.faturamento_total)} | 📅 ${metricasMesAtual.total_eventos} eventos | 👥 ${metricasMesAtual.publico_total} pessoas\n\n` +
-          `**${String(mesAnterior).padStart(2, '0')}/${anoMesAnterior}:**\n` +
-          `💰 ${formatarMoeda(metricasMesAnterior.faturamento_total)} | 📅 ${metricasMesAnterior.total_eventos} eventos | 👥 ${metricasMesAnterior.publico_total} pessoas\n\n` +
-          `${varFatMes.tendencia} **Variação:** ${varFatMes.percentual > 0 ? '+' : ''}${varFatMes.percentual}% no faturamento`;
-
-        resposta = {
-          mes_atual: metricasMesAtual,
-          mes_anterior: metricasMesAnterior,
-          variacao: varFatMes
-        };
-        break;
-
-      case 'evolucao_anual':
-        const anoAnalise = ano || new Date().getFullYear();
-        const evolucaoMensal: Array<{ mes: number; metricas: MetricasPeriodo }> = [];
-
-        for (let m = 1; m <= 12; m++) {
-          const inicioM = `${anoAnalise}-${String(m).padStart(2, '0')}-01`;
-          const fimM = new Date(anoAnalise, m, 0).toISOString().split('T')[0];
-          
-          const metricas = await calcularMetricasPeriodo(supabase, bar_id, inicioM, fimM);
-          evolucaoMensal.push({ mes: m, metricas });
-        }
-
-        const totalAnual = evolucaoMensal.reduce((sum, m) => sum + m.metricas.faturamento_total, 0);
-        const melhorMes = evolucaoMensal.reduce((best, m) => 
-          m.metricas.faturamento_total > best.metricas.faturamento_total ? m : best
-        );
-
-        textoResposta = `📈 **Evolução Anual ${anoAnalise}**\n\n`;
-        
-        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-        evolucaoMensal.forEach((m) => {
-          const barra = '█'.repeat(Math.min(Math.round(m.metricas.faturamento_total / 10000), 20));
-          textoResposta += `${meses[m.mes - 1]}: ${barra} ${formatarMoeda(m.metricas.faturamento_total)}\n`;
-        });
-
-        textoResposta += `\n**Resumo:**\n`;
-        textoResposta += `💰 Total: ${formatarMoeda(totalAnual)}\n`;
-        textoResposta += `🏆 Melhor mês: ${meses[melhorMes.mes - 1]} (${formatarMoeda(melhorMes.metricas.faturamento_total)})`;
-
-        resposta = {
-          ano: anoAnalise,
-          evolucao_mensal: evolucaoMensal,
-          total_anual: totalAnual,
-          melhor_mes: { mes: melhorMes.mes, valor: melhorMes.metricas.faturamento_total }
-        };
-        break;
-
-      case 'resumo_periodo':
-        if (!periodo_1) {
-          throw new Error('periodo_1 é obrigatório para resumo');
-        }
-
-        const metricasPeriodo = await calcularMetricasPeriodo(
-          supabase, 
-          bar_id, 
-          periodo_1.inicio, 
-          periodo_1.fim
-        );
-
-        textoResposta = `📋 **Resumo do Período**\n` +
-          `📅 ${periodo_1.inicio} a ${periodo_1.fim}\n\n` +
-          `💰 Faturamento: ${formatarMoeda(metricasPeriodo.faturamento_total)}\n` +
-          `📅 Eventos: ${metricasPeriodo.total_eventos}\n` +
-          `👥 Público Total: ${metricasPeriodo.publico_total} pessoas\n` +
-          `🎟️ Ticket Médio: ${formatarMoeda(metricasPeriodo.ticket_medio)}\n` +
-          `📊 Média por Evento: ${formatarMoeda(metricasPeriodo.media_por_evento)}`;
-
-        resposta = {
-          periodo: periodo_1,
-          metricas: metricasPeriodo
-        };
-        break;
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*' } })
     }
 
-    console.log(`✅ Análise concluída`);
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    )
 
-    return new Response(JSON.stringify({
-      success: true,
-      action,
-      resposta: textoResposta,
-      dados: resposta
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
-    });
+    const { bar_id, dias_analisar = 365 } = await req.json()
+    const startTime = Date.now()
+
+    console.log(`📅 Analisando ${dias_analisar} dias do bar ${bar_id}...`)
+
+    // 1. BUSCAR INFORMAÇÕES DO BAR
+    const { data: bar } = await supabaseClient
+      .from('bars')
+      .select('nome, cidade, ativo, created_at')
+      .eq('id', bar_id)
+      .single()
+
+    if (!bar) {
+      throw new Error('Bar não encontrado')
+    }
+
+    // 2. BUSCAR DADOS DE FATURAMENTO DIÁRIO
+    const dataInicio = new Date()
+    dataInicio.setDate(dataInicio.getDate() - dias_analisar)
+
+    const { data: faturamentoDiario } = await supabaseClient
+      .from('contahub_analitico')
+      .select('data, valor_bruto')
+      .eq('bar_id', bar_id)
+      .gte('data', dataInicio.toISOString().split('T')[0])
+      .order('data', { ascending: true })
+
+    // 3. MAPEAR TODOS OS DIAS DO PERÍODO
+    const periodos: PeriodoBar[] = []
+    const diasDaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+    
+    for (let i = 0; i < dias_analisar; i++) {
+      const data = new Date()
+      data.setDate(data.getDate() - (dias_analisar - i))
+      const dataStr = data.toISOString().split('T')[0]
+      const diaSemana = diasDaSemana[data.getDay()]
+
+      // Verificar se tem dados para esse dia
+      const dadoDia = faturamentoDiario?.find(f => f.data === dataStr)
+      const temDados = !!dadoDia
+      const faturamento = dadoDia?.valor_bruto || null
+
+      // Determinar se deveria estar aberto
+      // Regra: bares geralmente não abrem Segunda ou estão fechados se faturamento = 0 consistentemente
+      let deveriaEstarAberto = true
+      
+      // Se é Segunda, pode estar fechado
+      if (diaSemana === 'Segunda') {
+        deveriaEstarAberto = faturamento !== null && faturamento > 0
+      }
+
+      // Detectar problema
+      let problema = undefined
+      if (deveriaEstarAberto && !temDados) {
+        problema = 'Dia sem dados (bar deveria estar aberto)'
+      } else if (deveriaEstarAberto && faturamento === 0) {
+        problema = 'Faturamento zero (suspeito)'
+      } else if (temDados && faturamento && faturamento < 100) {
+        problema = 'Faturamento muito baixo (< R$ 100)'
+      }
+
+      periodos.push({
+        data: dataStr,
+        dia_semana: diaSemana,
+        deveria_estar_aberto: deveriaEstarAberto,
+        tem_dados: temDados,
+        faturamento,
+        problema
+      })
+    }
+
+    // 4. AGRUPAR FALHAS POR PERÍODO (mensal)
+    const falhasPorMes: Record<string, FalhaPorPeriodo> = {}
+    
+    periodos.forEach(p => {
+      const mes = p.data.substring(0, 7) // YYYY-MM
+      
+      if (!falhasPorMes[mes]) {
+        falhasPorMes[mes] = {
+          periodo: mes,
+          total_dias: 0,
+          dias_com_dados: 0,
+          dias_sem_dados: 0,
+          taxa_cobertura: 0,
+          dias_problematicos: [],
+          impacto_estimado: ''
+        }
+      }
+
+      falhasPorMes[mes].total_dias++
+      
+      if (p.tem_dados) {
+        falhasPorMes[mes].dias_com_dados++
+      } else if (p.deveria_estar_aberto) {
+        falhasPorMes[mes].dias_sem_dados++
+        falhasPorMes[mes].dias_problematicos.push(p.data)
+      }
+
+      if (p.problema) {
+        falhasPorMes[mes].dias_problematicos.push(`${p.data}: ${p.problema}`)
+      }
+    })
+
+    // Calcular taxa de cobertura e impacto
+    Object.values(falhasPorMes).forEach(f => {
+      f.taxa_cobertura = (f.dias_com_dados / f.total_dias) * 100
+      
+      if (f.taxa_cobertura < 50) {
+        f.impacto_estimado = 'CRÍTICO - Mais de 50% dos dados faltando'
+      } else if (f.taxa_cobertura < 80) {
+        f.impacto_estimado = 'ALTO - Dados incompletos comprometem análises'
+      } else if (f.taxa_cobertura < 95) {
+        f.impacto_estimado = 'MÉDIO - Alguns gaps de dados'
+      } else {
+        f.impacto_estimado = 'BAIXO - Dados praticamente completos'
+      }
+    })
+
+    // 5. ESTATÍSTICAS GERAIS
+    const totalDiasAnalisados = periodos.length
+    const diasComDados = periodos.filter(p => p.tem_dados).length
+    const diasComProblema = periodos.filter(p => p.problema).length
+    const taxaCoberturaGeral = (diasComDados / totalDiasAnalisados) * 100
+
+    // 6. DETECTAR PADRÕES COM IA
+    const analiseIA = await analisarPadroesComIA(bar, periodos, falhasPorMes)
+
+    const tempoTotal = Date.now() - startTime
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        bar: {
+          id: bar_id,
+          nome: bar.nome,
+          cidade: bar.cidade
+        },
+        resumo: {
+          periodo_analisado: `${dataInicio.toISOString().split('T')[0]} até hoje`,
+          total_dias: totalDiasAnalisados,
+          dias_com_dados: diasComDados,
+          dias_sem_dados: totalDiasAnalisados - diasComDados,
+          dias_com_problema: diasComProblema,
+          taxa_cobertura_geral: parseFloat(taxaCoberturaGeral.toFixed(2))
+        },
+        falhas_por_mes: Object.values(falhasPorMes),
+        analise_ia: analiseIA,
+        periodos_detalhados: periodos.filter(p => p.problema), // Apenas dias problemáticos
+        tempo_execucao_ms: tempoTotal
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
+    )
 
   } catch (error) {
-    console.error('❌ Erro no Agente Análise de Períodos:', error);
+    console.error('Erro na análise de períodos:', error)
     
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : String(error)
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500
-    });
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
+    )
   }
-});
+})
 
+async function analisarPadroesComIA(bar: any, periodos: PeriodoBar[], falhasPorMes: Record<string, FalhaPorPeriodo>) {
+  if (!GEMINI_API_KEY) return null
+
+  const prompt = `
+Você é um especialista em análise de dados operacionais de bares.
+
+# BAR
+Nome: ${bar.nome}
+Cidade: ${bar.cidade}
+
+# DADOS ANALISADOS
+Total de dias: ${periodos.length}
+Dias com problemas: ${periodos.filter(p => p.problema).length}
+
+# FALHAS POR MÊS
+${JSON.stringify(Object.values(falhasPorMes), null, 2)}
+
+# DIAS PROBLEMÁTICOS (Amostra)
+${JSON.stringify(periodos.filter(p => p.problema).slice(0, 20), null, 2)}
+
+# SUA MISSÃO
+1. Identificar padrões nos dias sem dados (há um dia da semana recorrente?)
+2. Detectar períodos críticos (meses inteiros com dados ruins)
+3. Avaliar impacto nas análises de negócio
+4. Sugerir ações corretivas
+
+Responda em JSON:
+{
+  "padroes_detectados": [
+    {"padrao": "string", "frequencia": "string", "impacto": "string"}
+  ],
+  "periodos_criticos": [
+    {"periodo": "string", "problema": "string", "acao_sugerida": "string"}
+  ],
+  "impacto_geral": {
+    "gravidade": "baixa|media|alta|critica",
+    "analises_comprometidas": ["string"],
+    "confiabilidade_dados": "0-100%"
+  },
+  "acoes_recomendadas": [
+    {"acao": "string", "prioridade": "baixa|media|alta", "prazo": "string"}
+  ]
+}
+`
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 4096,
+          }
+        })
+      }
+    )
+
+    if (response.ok) {
+      const data = await response.json()
+      const responseText = data.candidates[0].content.parts[0].text
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+      return JSON.parse(jsonMatch ? jsonMatch[0] : responseText)
+    }
+  } catch (error) {
+    console.error('Erro na análise com IA:', error)
+  }
+
+  return null
+}

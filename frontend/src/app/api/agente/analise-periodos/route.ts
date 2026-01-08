@@ -1,95 +1,76 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/supabase-server'
+import { cookies } from 'next/headers'
 
-/**
- * 📊 API - ANÁLISE DE PERÍODOS
- * Endpoint para análises comparativas e tendências
- */
+const SUPABASE_FUNCTIONS_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(
+  'https://',
+  'https://'
+).replace('.supabase.co', '.supabase.co/functions/v1')
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { action, bar_id, periodo_1, periodo_2, ano, mes } = body
+    const supabase = createServerClient()
+    
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Não autenticado' },
+        { status: 401 }
+      )
+    }
 
-    // Validar campos obrigatórios
+    const body = await request.json()
+    const { bar_id, dias_analisar = 365 } = body
+
     if (!bar_id) {
       return NextResponse.json(
-        { success: false, error: 'bar_id é obrigatório' },
+        { error: 'bar_id é obrigatório' },
         { status: 400 }
       )
     }
 
-    // Validar action
-    const actionsValidas = ['comparar_semanas', 'comparar_meses', 'tendencia', 'evolucao_anual', 'resumo_periodo']
-    if (!action || !actionsValidas.includes(action)) {
+    // Verificar acesso
+    const { data: acesso } = await supabase
+      .from('usuarios_bar')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('bar_id', bar_id)
+      .single()
+
+    if (!acesso) {
       return NextResponse.json(
-        { success: false, error: `action deve ser uma de: ${actionsValidas.join(', ')}` },
-        { status: 400 }
+        { error: 'Sem acesso a este bar' },
+        { status: 403 }
       )
     }
 
     // Chamar Edge Function
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/agente-analise-periodos`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseServiceKey}`
-        },
-        body: JSON.stringify({ action, bar_id, periodo_1, periodo_2, ano, mes })
-      }
-    )
+    const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/agente-analise-periodos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({
+        bar_id,
+        dias_analisar
+      })
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
-      return NextResponse.json(
-        { success: false, error: `Erro: ${response.status}`, detalhes: errorText },
-        { status: response.status }
-      )
+      throw new Error(`Edge Function error: ${errorText}`)
     }
 
-    const resultado = await response.json()
-    return NextResponse.json(resultado)
+    const data = await response.json()
 
-  } catch (error) {
-    console.error('❌ Erro:', error)
+    return NextResponse.json(data)
+
+  } catch (error: any) {
+    console.error('Erro na API /api/agente/analise-periodos:', error)
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Erro' },
+      { error: error.message || 'Erro ao analisar períodos' },
       { status: 500 }
     )
   }
 }
-
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    endpoint: '/api/agente/analise-periodos',
-    descricao: 'Análises comparativas de períodos e tendências',
-    actions: [
-      { 
-        action: 'comparar_semanas', 
-        descricao: 'Compara métricas entre duas semanas',
-        params: ['bar_id', 'periodo_1?', 'periodo_2?']
-      },
-      { 
-        action: 'comparar_meses', 
-        descricao: 'Compara métricas entre dois meses',
-        params: ['bar_id', 'ano?', 'mes?']
-      },
-      { 
-        action: 'evolucao_anual', 
-        descricao: 'Mostra evolução mês a mês do ano',
-        params: ['bar_id', 'ano?']
-      },
-      { 
-        action: 'resumo_periodo', 
-        descricao: 'Resumo de métricas de um período',
-        params: ['bar_id', 'periodo_1']
-      }
-    ]
-  })
-}
-
