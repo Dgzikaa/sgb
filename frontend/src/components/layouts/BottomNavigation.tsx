@@ -71,13 +71,15 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
       ],
     },
     {
-      icon: Sparkles,
-      label: 'Retrospectiva 2025',
-      href: '/retrospectiva-2025',
-      color: 'text-purple-600 dark:text-purple-400',
+      icon: BarChart3,
+      label: 'Analítico',
+      href: '/analitico',
+      color: 'text-indigo-600 dark:text-indigo-400',
       subItems: [
-        { icon: Sparkles, label: 'Visão Geral', href: '/retrospectiva-2025' },
-        { icon: BarChart3, label: 'Análise Detalhada', href: '/retrospectiva-2025/detalhes' },
+        { icon: Clock, label: 'Eventos', href: '/analitico/eventos' },
+        { icon: Users, label: 'Clientes', href: '/analitico/clientes' },
+        { icon: Users, label: 'Clientes Ativos', href: '/relatorios/clientes-ativos' },
+        { icon: Sparkles, label: 'Retrospectiva 2025', href: '/retrospectiva-2025' },
       ],
     },
     {
@@ -93,17 +95,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
         { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal' },
         { icon: Users, label: 'Simulação de CMO', href: '/ferramentas/simulacao-cmo' },
         { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout' },
-      ],
-    },
-    {
-      icon: BarChart3,
-      label: 'Analítico',
-      href: '/analitico',
-      color: 'text-indigo-600 dark:text-indigo-400',
-      subItems: [
-        { icon: Clock, label: 'Eventos', href: '/analitico/eventos' },
-        { icon: Users, label: 'Clientes', href: '/analitico/clientes' },
-        { icon: Users, label: 'Clientes Ativos', href: '/relatorios/clientes-ativos' },
+        { icon: TrendingUp, label: 'CFP - Finanças', href: '/fp' },
       ],
     },
   ];

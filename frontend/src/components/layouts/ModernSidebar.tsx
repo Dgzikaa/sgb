@@ -35,6 +35,7 @@ import {
   Send,
   FileSearch,
   Activity,
+  Wallet,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -137,29 +138,6 @@ const defaultSidebarItems: SidebarItem[] = [
         // },
       ],
     },
-    {
-      icon: Sparkles,
-      label: 'Retrospectiva 2025',
-      href: '/retrospectiva-2025',
-      color: 'text-purple-600 dark:text-purple-400',
-      permission: 'home',
-      subItems: [
-        {
-          icon: Sparkles,
-          label: 'Visão Geral',
-          href: '/retrospectiva-2025',
-          description: 'Retrospectiva completa do ano de 2025',
-          permission: 'home',
-        },
-        {
-          icon: BarChart3,
-          label: 'Análise Detalhada',
-          href: '/retrospectiva-2025/detalhes',
-          description: 'Análises aprofundadas e métricas',
-          permission: 'home',
-        },
-      ],
-    },
     // {
     //   icon: Zap,
     //   label: 'Operacional',
@@ -260,6 +238,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Controle de disponibilidade de produtos',
           permission: 'gestao',
         },
+        {
+          icon: Wallet,
+          label: 'CFP - Finanças',
+          href: '/fp',
+          description: 'Controle Financeiro Pessoal',
+          permission: 'home',
+        },
         // {
         //   icon: MessageSquare,
         //   label: 'Agente',
@@ -296,6 +281,13 @@ const defaultSidebarItems: SidebarItem[] = [
           href: '/analitico/eventos',
           description: 'Análise de horários de pico e produtos por evento',
           permission: 'relatorios',
+        },
+        {
+          icon: Sparkles,
+          label: 'Retrospectiva 2025',
+          href: '/retrospectiva-2025',
+          description: 'Retrospectiva completa do ano de 2025',
+          permission: 'home',
         },
       ],
     },
