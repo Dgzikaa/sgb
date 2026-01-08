@@ -307,7 +307,7 @@ async function fetchDataForIntent(
         clientes: clientesTotal,
         faturamento,
         ticketMedio: clientesTotal > 0 ? faturamento / clientesTotal : 0,
-        eventos,
+        eventos: eventosClientes,
         periodo: entities.periodo || 'ontem'
       };
     }

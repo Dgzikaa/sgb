@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
@@ -51,13 +51,21 @@ interface Message {
   isTyping?: boolean;
 }
 
+// Tipo para os prompts dinâmicos
+interface DynamicPrompt {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  prompt: string;
+  priority: number;
+}
+
 // Função para gerar sugestões dinâmicas baseadas no contexto
-const getDynamicPrompts = () => {
+const getDynamicPrompts = (): DynamicPrompt[] => {
   const hour = new Date().getHours();
   const day = new Date().getDay(); // 0 = domingo, 6 = sábado
   
   // Base prompts
-  const prompts = [];
+  const prompts: DynamicPrompt[] = [];
   
   // Baseado no horário
   if (hour < 12) {
