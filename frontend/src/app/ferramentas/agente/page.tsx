@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Send, 
   Sparkles, 
@@ -29,7 +30,11 @@ import {
   RefreshCw,
   Lightbulb,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquare,
+  History
 } from 'lucide-react';
 
 interface Message {
@@ -49,7 +54,14 @@ interface Message {
   chartData?: { label: string; value: number; color?: string }[];
   insight?: { type: 'success' | 'warning' | 'info'; text: string };
   isTyping?: boolean;
+  metricaId?: string; // Para feedback
+  feedbackGiven?: 'up' | 'down' | null;
 }
+
+// Gerar ID de sessão único
+const generateSessionId = () => {
+  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
 
 // Tipo para os prompts dinâmicos
 interface DynamicPrompt {
@@ -211,12 +223,76 @@ export default function AgenteChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [conversationContext, setConversationContext] = useState<string>(''); // Tema atual da conversa
+  const [sessionId] = useState(() => generateSessionId()); // ID único da sessão
+  const [showHistory, setShowHistory] = useState(false);
+  const [historySessions, setHistorySessions] = useState<{ session_id: string; primeira_mensagem: string; data: string }[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
   // Sugestões dinâmicas
   const dynamicPrompts = useMemo(() => getDynamicPrompts(), []);
+
+  // Carregar histórico de sessões anteriores
+  const loadHistorySessions = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/agente?barId=${selectedBar?.id || 3}`);
+      const data = await response.json();
+      if (data.success) {
+        setHistorySessions(data.sessoes || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar histórico:', error);
+    }
+  }, [selectedBar?.id]);
+
+  // Carregar uma sessão específica
+  const loadSession = async (sessionIdToLoad: string) => {
+    try {
+      const response = await fetch(`/api/agente?sessionId=${sessionIdToLoad}`);
+      const data = await response.json();
+      if (data.success && data.historico) {
+        const loadedMessages: Message[] = data.historico.map((h: { id: string; role: 'user' | 'assistant'; content: string; created_at: string; agent_used?: string; metrics?: Message['metrics']; suggestions?: string[]; deep_links?: Message['deepLinks']; chart_data?: Message['chartData'] }) => ({
+          id: h.id,
+          role: h.role,
+          content: h.content,
+          timestamp: new Date(h.created_at),
+          agent: h.agent_used,
+          metrics: h.metrics,
+          suggestions: h.suggestions,
+          deepLinks: h.deep_links,
+          chartData: h.chart_data
+        }));
+        setMessages(loadedMessages);
+        setShowWelcome(false);
+        setShowHistory(false);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar sessão:', error);
+    }
+  };
+
+  // Enviar feedback
+  const handleFeedback = async (messageId: string, rating: 'up' | 'down') => {
+    // Atualizar UI imediatamente
+    setMessages(prev => prev.map(m => 
+      m.id === messageId ? { ...m, feedbackGiven: rating } : m
+    ));
+
+    // Enviar para API (aqui usaríamos o metricaId se tivéssemos)
+    try {
+      await fetch('/api/agente', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          metricaId: messageId, // Idealmente seria o ID da métrica
+          rating: rating === 'up' ? 5 : 1
+        })
+      });
+    } catch (error) {
+      console.error('Erro ao enviar feedback:', error);
+    }
+  };
 
   useEffect(() => {
     setPageTitle('🤖 Agente Zykor');
@@ -271,6 +347,7 @@ export default function AgenteChatPage() {
           message: messageText,
           barId: selectedBar?.id || 3,
           userId: user?.id,
+          sessionId, // ID da sessão para histórico persistente
           context: {
             barName: selectedBar?.nome || 'Ordinário',
             currentTopic: conversationContext, // Tema atual da conversa
@@ -357,6 +434,93 @@ export default function AgenteChatPage() {
 
       {/* Chat Container */}
       <div className="relative flex-1 flex flex-col max-w-4xl mx-auto w-full px-4">
+        
+        {/* Header com botões */}
+        <div className="flex items-center justify-between py-3 border-b border-gray-700/50 mb-4">
+          <div className="flex items-center gap-2">
+            <Bot className="w-5 h-5 text-purple-400" />
+            <span className="text-sm text-gray-300">Sessão ativa</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                loadHistorySessions();
+                setShowHistory(!showHistory);
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600 transition-all text-sm"
+            >
+              <History className="w-4 h-4" />
+              Histórico
+            </motion.button>
+            <Link 
+              href="/ferramentas/agente/metricas"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 transition-all text-sm"
+            >
+              <BarChart2 className="w-4 h-4" />
+              Métricas
+            </Link>
+          </div>
+        </div>
+
+        {/* Painel de Histórico */}
+        <AnimatePresence>
+          {showHistory && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-4 overflow-hidden"
+            >
+              <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-medium text-white flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-purple-400" />
+                    Conversas Anteriores
+                  </h3>
+                  <button 
+                    onClick={() => setShowHistory(false)}
+                    className="text-gray-500 hover:text-white text-xs"
+                  >
+                    Fechar
+                  </button>
+                </div>
+                {historySessions.length === 0 ? (
+                  <p className="text-gray-500 text-sm">Nenhuma conversa anterior encontrada.</p>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {historySessions.map((session, idx) => (
+                      <motion.button
+                        key={session.session_id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        onClick={() => loadSession(session.session_id)}
+                        className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-700/30 hover:bg-gray-700/50 border border-gray-600/30 transition-all text-left group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-300 truncate group-hover:text-white transition-colors">
+                            {session.primeira_mensagem}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(session.data).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto py-6 space-y-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
@@ -605,10 +769,44 @@ export default function AgenteChatPage() {
                     </div>
                   )}
 
-                  {/* Timestamp */}
-                  <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
-                    <Clock className="w-3 h-3" />
-                    {message.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  {/* Timestamp + Feedback */}
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      {message.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    
+                    {/* Feedback buttons - apenas para mensagens do assistente */}
+                    {message.role === 'assistant' && !message.isTyping && (
+                      <div className="flex items-center gap-1">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleFeedback(message.id, 'up')}
+                          className={`p-1.5 rounded-lg transition-all ${
+                            message.feedbackGiven === 'up'
+                              ? 'bg-green-500/20 text-green-400'
+                              : 'hover:bg-gray-700/50 text-gray-500 hover:text-green-400'
+                          }`}
+                          title="Resposta útil"
+                        >
+                          <ThumbsUp className="w-3.5 h-3.5" />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleFeedback(message.id, 'down')}
+                          className={`p-1.5 rounded-lg transition-all ${
+                            message.feedbackGiven === 'down'
+                              ? 'bg-red-500/20 text-red-400'
+                              : 'hover:bg-gray-700/50 text-gray-500 hover:text-red-400'
+                          }`}
+                          title="Resposta não útil"
+                        >
+                          <ThumbsDown className="w-3.5 h-3.5" />
+                        </motion.button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

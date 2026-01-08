@@ -5,14 +5,13 @@ import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Users, 
   BarChart3,
   Settings,
   ArrowRight,
   Activity,
-  Target,
-  Zap,
-  TrendingUp
+  TrendingUp,
+  PieChart,
+  Wrench
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -58,17 +57,17 @@ export default function HomePage() {
       color: 'from-green-500 to-green-600'
     },
     {
-      title: 'Relatório de Clientes',
-      description: 'Base unificada e análise comportamental',
-      href: '/analitico/clientes',
-      icon: Users,
+      title: 'Analítico',
+      description: 'Retrospectiva, clientes, eventos e produtos',
+      href: '/analitico',
+      icon: PieChart,
       color: 'from-purple-500 to-purple-600'
     },
     {
-      title: 'Planejamento Comercial',
-      description: 'Metas, projeções e estratégias',
-      href: '/estrategico/planejamento-comercial',
-      icon: Target,
+      title: 'Ferramentas',
+      description: 'CFP, calendário, contagem e simulações',
+      href: '/ferramentas',
+      icon: Wrench,
       color: 'from-amber-500 to-orange-500'
     },
     {

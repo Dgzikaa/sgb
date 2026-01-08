@@ -1140,10 +1140,76 @@ function formatResponse(
   }
 }
 
+// ===== FUNÇÕES DE MÉTRICAS E HISTÓRICO =====
+async function registrarMetrica(
+  supabase: SupabaseClient,
+  dados: {
+    bar_id: number;
+    session_id?: string;
+    agent_name: string;
+    intent: string;
+    query: string;
+    response_time_ms: number;
+    success: boolean;
+    cache_hit: boolean;
+    error_message?: string;
+  }
+) {
+  try {
+    await supabase.from('agente_uso').insert({
+      bar_id: dados.bar_id,
+      session_id: dados.session_id || null,
+      agent_name: dados.agent_name,
+      intent: dados.intent,
+      query: dados.query,
+      response_time_ms: dados.response_time_ms,
+      success: dados.success,
+      cache_hit: dados.cache_hit,
+      error_message: dados.error_message || null
+    });
+  } catch (error) {
+    console.error('Erro ao registrar métrica:', error);
+  }
+}
+
+async function salvarHistorico(
+  supabase: SupabaseClient,
+  dados: {
+    bar_id: number;
+    session_id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    agent_used?: string;
+    metrics?: unknown;
+    suggestions?: string[];
+    deep_links?: unknown;
+    chart_data?: unknown;
+  }
+) {
+  try {
+    await supabase.from('agente_historico').insert({
+      bar_id: dados.bar_id,
+      session_id: dados.session_id,
+      role: dados.role,
+      content: dados.content,
+      agent_used: dados.agent_used || null,
+      metrics: dados.metrics || null,
+      suggestions: dados.suggestions || null,
+      deep_links: dados.deep_links || null,
+      chart_data: dados.chart_data || null
+    });
+  } catch (error) {
+    console.error('Erro ao salvar histórico:', error);
+  }
+}
+
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  let cacheHit = false;
+  
   try {
     const body = await request.json();
-    const { message, barId = 3, context = {} } = body;
+    const { message, barId = 3, context = {}, sessionId } = body;
     const chatContext = context as ChatContext;
 
     if (!message) {
@@ -1152,6 +1218,16 @@ export async function POST(request: NextRequest) {
 
     // Inicializar Supabase
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Salvar mensagem do usuário no histórico
+    if (sessionId) {
+      await salvarHistorico(supabase, {
+        bar_id: barId,
+        session_id: sessionId,
+        role: 'user',
+        content: message
+      });
+    }
 
     // Classificar intenção
     let { intent, entities } = classifyIntent(message);
@@ -1165,19 +1241,174 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Buscar dados relevantes
-    const data = await fetchDataForIntent(supabase, intent, entities, barId);
+    // Verificar cache
+    const cacheKey = getCacheKey(intent, entities, barId);
+    let data = getFromCache(cacheKey) as Record<string, unknown> | null;
+    
+    if (data) {
+      cacheHit = true;
+    } else {
+      // Buscar dados relevantes
+      data = await fetchDataForIntent(supabase, intent, entities, barId);
+      
+      // Cachear o resultado
+      setCache(cacheKey, data, intent);
+    }
 
     // Formatar resposta
     const response = formatResponse(intent, data, chatContext);
+    const responseTime = Date.now() - startTime;
 
-    return NextResponse.json(response);
+    // Registrar métrica de uso
+    await registrarMetrica(supabase, {
+      bar_id: barId,
+      session_id: sessionId,
+      agent_name: response.agent || 'Assistente Zykor',
+      intent,
+      query: message,
+      response_time_ms: responseTime,
+      success: response.success,
+      cache_hit: cacheHit
+    });
+
+    // Salvar resposta no histórico
+    if (sessionId) {
+      await salvarHistorico(supabase, {
+        bar_id: barId,
+        session_id: sessionId,
+        role: 'assistant',
+        content: response.response,
+        agent_used: response.agent,
+        metrics: response.metrics,
+        suggestions: response.suggestions,
+        deep_links: response.deepLinks,
+        chart_data: response.chartData
+      });
+    }
+
+    // Adicionar metadata de performance
+    return NextResponse.json({
+      ...response,
+      _meta: {
+        responseTime,
+        cacheHit,
+        intent,
+        timestamp: new Date().toISOString()
+      }
+    });
 
   } catch (error) {
+    const responseTime = Date.now() - startTime;
     console.error('Erro no agente:', error);
+    
+    // Registrar erro nas métricas
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    await registrarMetrica(supabase, {
+      bar_id: 3,
+      agent_name: 'Sistema',
+      intent: 'erro',
+      query: '',
+      response_time_ms: responseTime,
+      success: false,
+      cache_hit: false,
+      error_message: String(error)
+    });
+    
     return NextResponse.json({
       success: false,
       response: 'Desculpe, ocorreu um erro ao processar sua solicitação. Tente novamente.',
+      error: String(error)
+    }, { status: 500 });
+  }
+}
+
+// ===== ENDPOINT DE FEEDBACK =====
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { metricaId, rating, feedback } = body;
+
+    if (!metricaId || !rating) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'metricaId e rating são obrigatórios' 
+      }, { status: 400 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { error } = await supabase
+      .from('agente_uso')
+      .update({
+        feedback_rating: rating,
+        feedback_text: feedback || null
+      })
+      .eq('id', metricaId);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Feedback registrado com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao registrar feedback:', error);
+    return NextResponse.json({
+      success: false,
+      error: String(error)
+    }, { status: 500 });
+  }
+}
+
+// ===== ENDPOINT PARA CARREGAR HISTÓRICO =====
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get('sessionId');
+    const barId = searchParams.get('barId') || '3';
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    if (sessionId) {
+      // Carregar histórico de uma sessão específica
+      const { data, error } = await supabase
+        .from('agente_historico')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, historico: data });
+    } else {
+      // Listar últimas sessões do bar
+      const { data, error } = await supabase
+        .from('agente_historico')
+        .select('session_id, created_at, content')
+        .eq('bar_id', parseInt(barId))
+        .eq('role', 'user')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      // Agrupar por sessão
+      const sessoes: Record<string, { session_id: string; primeira_mensagem: string; data: string }> = {};
+      data?.forEach(msg => {
+        if (!sessoes[msg.session_id]) {
+          sessoes[msg.session_id] = {
+            session_id: msg.session_id,
+            primeira_mensagem: msg.content.substring(0, 50) + '...',
+            data: msg.created_at
+          };
+        }
+      });
+
+      return NextResponse.json({ 
+        success: true, 
+        sessoes: Object.values(sessoes).slice(0, 10)
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao carregar histórico:', error);
+    return NextResponse.json({
+      success: false,
       error: String(error)
     }, { status: 500 });
   }

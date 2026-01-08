@@ -11,7 +11,8 @@ import {
   Calendar,
   CalendarDays,
   UserCheck,
-  GitCompare
+  GitCompare,
+  Sparkles
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -25,6 +26,13 @@ interface AnalyticCard {
 
 export default function AnaliticoPage() {
   const cards: AnalyticCard[] = [
+    {
+      title: 'Retrospectiva 2025',
+      description: 'Análise completa do ano com métricas e conquistas',
+      icon: Sparkles,
+      href: '/retrospectiva-2025',
+      implemented: true
+    },
     {
       title: 'Eventos',
       description: 'Análise de horários de pico, produtos e resumos semanais',

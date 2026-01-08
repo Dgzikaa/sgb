@@ -29,7 +29,8 @@ import {
   Target,
   MapPin,
   Terminal,
-  Coffee
+  Coffee,
+  Wallet
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -54,6 +55,22 @@ export default function FerramentasPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const ferramentas: FerramentaItem[] = [
+    // CFP - Controle Financeiro Pessoal
+    {
+      title: 'CFP - Financeiro Pessoal',
+      description: 'Controle financeiro pessoal com integração Pluggy',
+      icon: Wallet,
+      href: '/fp',
+      badge: 'Destaque',
+      badgeColor: 'border-green-200 text-green-700 dark:border-green-700 dark:text-green-300',
+      iconBgColor: 'bg-green-100 dark:bg-green-900/30',
+      iconTextColor: 'text-green-600 dark:text-green-400',
+      buttonBgColor: 'bg-green-500/10 dark:bg-green-900/20',
+      buttonBorderColor: 'border-green-500 dark:border-green-700',
+      buttonTextColor: 'text-green-600 dark:text-green-400',
+      features: 'Transações • Contas • Categorias • Importar',
+      status: 'active'
+    },
     // Produção e Insumos
     {
       title: 'Produção e Insumos',
