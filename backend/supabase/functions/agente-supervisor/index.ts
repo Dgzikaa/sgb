@@ -19,51 +19,94 @@ interface AgenteDisponivel {
   quando_usar: string[]
 }
 
+// Contexto de negócio para decisões mais inteligentes
+const CONTEXTO_ZYKOR = `
+O Zykor é um sistema de gestão para bares e casas noturnas.
+Principais métricas: Faturamento (real_r), CMV, CMO, Ticket Médio, Público (PAX).
+Cada dia é um "evento". Semanas são consolidadas em desempenho_semanal.
+O principal cliente é o Ordinário Bar (bar_id = 3).
+`
+
 const AGENTES: AgenteDisponivel[] = [
   {
-    nome: 'agente-ia-analyzer',
-    especialidade: 'Análise de dados e geração de insights estratégicos',
-    endpoint: '/agente-ia-analyzer',
+    nome: 'agente-sql-expert',
+    especialidade: 'Consultas ao banco de dados e extração de dados',
+    endpoint: '/agente-sql-expert',
     quando_usar: [
-      'analisar dados',
-      'gerar insights',
-      'análise estratégica',
-      'identificar oportunidades'
-    ]
-  },
-  {
-    nome: 'agente-chat',
-    especialidade: 'Conversa natural e aprendizado de regras',
-    endpoint: '/agente-chat',
-    quando_usar: [
-      'conversar',
-      'ensinar regra',
-      'tirar dúvida',
-      'explicar'
+      'faturamento',
+      'quanto faturou',
+      'quantos clientes',
+      'ticket médio',
+      'produtos mais vendidos',
+      'top',
+      'ranking',
+      'comparar',
+      'semana passada',
+      'mês',
+      'ontem',
+      'hoje',
+      'CMV',
+      'custo',
+      'consultar',
+      'buscar dados',
+      'relatório',
+      'lista',
+      'qual foi',
+      'como foi',
+      'como está'
     ]
   },
   {
     nome: 'agente-auditor',
-    especialidade: 'Auditoria de dados, detecção de gaps e inconsistências',
+    especialidade: 'Auditoria de dados, detecção de gaps, anomalias e inconsistências',
     endpoint: '/agente-auditor',
     quando_usar: [
-      'auditar dados',
-      'verificar consistência',
-      'encontrar gaps',
-      'validar dados',
-      'checar integridade'
+      'auditar',
+      'verificar dados',
+      'consistência',
+      'gaps',
+      'faltando dados',
+      'anomalia',
+      'problema nos dados',
+      'checar',
+      'validar',
+      'integridade',
+      'qualidade dos dados',
+      'erros'
     ]
   },
   {
-    nome: 'agente-sql-expert',
-    especialidade: 'Criação e otimização de queries SQL',
-    endpoint: '/agente-sql-expert',
+    nome: 'agente-ia-analyzer',
+    especialidade: 'Análise estratégica, insights e recomendações baseadas em dados',
+    endpoint: '/agente-ia-analyzer',
     quando_usar: [
-      'criar query',
-      'consultar banco',
-      'sql',
-      'extrair dados',
-      'relatório customizado'
+      'analisar',
+      'insight',
+      'tendência',
+      'oportunidade',
+      'problema',
+      'sugestão',
+      'recomendação',
+      'o que fazer',
+      'melhorar',
+      'estratégia',
+      'previsão',
+      'projeção'
+    ]
+  },
+  {
+    nome: 'agente-alertas',
+    especialidade: 'Monitoramento de alertas críticos e notificações',
+    endpoint: '/alertas-inteligentes',
+    quando_usar: [
+      'alertas',
+      'notificação',
+      'avisos',
+      'crítico',
+      'urgente',
+      'atenção',
+      'monitorar',
+      'discord'
     ]
   }
 ]
@@ -85,33 +128,64 @@ serve(async (req) => {
     console.log('🧠 Supervisor recebeu tarefa:', tarefa)
 
     // 1. USAR IA PARA DECIDIR QUAL AGENTE CHAMAR
+    const dataAtual = new Date().toISOString().split('T')[0]
+    const diaSemana = new Date().toLocaleDateString('pt-BR', { weekday: 'long' })
+    const hora = new Date().getHours()
+
     const prompt = `
-Você é o Supervisor de Agentes IA do sistema Zykor.
-Sua função é analisar a tarefa do usuário e decidir qual(is) agente(s) chamar.
+Você é o SUPERVISOR INTELIGENTE do sistema Zykor (SGB - Sistema de Gestão de Bares).
+Sua missão é entender a intenção do usuário e direcionar para o agente correto.
+
+# CONTEXTO DO NEGÓCIO
+${CONTEXTO_ZYKOR}
+
+# DATA E HORA ATUAL
+- Data: ${dataAtual}
+- Dia da semana: ${diaSemana}
+- Hora: ${hora}h
+- Bar ID: ${bar_id}
 
 # TAREFA DO USUÁRIO
 "${tarefa}"
 
-# AGENTES DISPONÍVEIS
-${AGENTES.map((a, i) => `
-${i + 1}. ${a.nome}
-   Especialidade: ${a.especialidade}
-   Quando usar: ${a.quando_usar.join(', ')}
-`).join('\n')}
+# AGENTES DISPONÍVEIS E QUANDO USAR
 
-# SUAS OPÇÕES
-1. Chamar UM agente específico
-2. Chamar MÚLTIPLOS agentes em sequência (se precisar de mais de um)
-3. Responder diretamente (se for algo simples que não precisa de agente)
+1. **agente-sql-expert** (MAIS COMUM - 80% dos casos)
+   Use para: Consultas de dados, faturamento, clientes, produtos, métricas
+   Exemplos: "Quanto faturou ontem?", "Top 10 produtos", "CMV da semana"
+   
+2. **agente-auditor** (DIAGNÓSTICO)
+   Use para: Verificar qualidade dos dados, encontrar problemas, gaps
+   Exemplos: "Tem dados faltando?", "Verificar inconsistências"
+   
+3. **agente-ia-analyzer** (INSIGHTS)
+   Use para: Análises estratégicas, tendências, recomendações
+   Exemplos: "O que pode melhorar?", "Qual a tendência?"
+   
+4. **agente-alertas** (MONITORAMENTO)
+   Use para: Verificar alertas, problemas críticos, notificações
+   Exemplos: "Tem alertas?", "Enviar para Discord"
+
+# REGRAS DE DECISÃO
+
+1. **Perguntas sobre dados/números** → agente-sql-expert
+2. **"Como foi X?"** ou **"Qual foi X?"** → agente-sql-expert  
+3. **Problemas ou diagnósticos** → agente-auditor
+4. **"O que fazer?"** ou insights → agente-ia-analyzer
+5. **Saudações simples** → responder_direto
+6. **Dúvidas sobre o sistema** → responder_direto
 
 # RESPONDA EM JSON
 {
   "decisao": "chamar_agente" | "chamar_multiplos" | "responder_direto",
   "agentes_selecionados": ["nome-do-agente"],
-  "ordem_execucao": [1, 2, ...],
-  "razao": "Por que escolheu esse(s) agente(s)",
-  "resposta_direta": "Se decidiu responder direto, coloque aqui. Senão, null"
+  "ordem_execucao": [1],
+  "razao": "Explicação curta da escolha",
+  "resposta_direta": "Se responder direto, coloque aqui a resposta amigável. Senão, null",
+  "contexto_extra": "Informação adicional para passar ao agente, se houver"
 }
+
+IMPORTANTE: Na maioria das vezes, usar agente-sql-expert é a escolha certa.
 `
 
     const geminiResponse = await fetch(

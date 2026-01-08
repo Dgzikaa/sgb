@@ -35,6 +35,13 @@ serve(async (req) => {
     const startTime = Date.now()
 
     const problemas: ProblemaEncontrado[] = []
+    const estatisticas = {
+      tabelas_verificadas: 0,
+      registros_analisados: 0,
+      tempo_execucao_ms: 0
+    }
+
+    console.log(`🔍 Iniciando auditoria ${tipo} para bar_id ${bar_id} (${periodo_dias} dias)`)
 
     // 1. AUDITORIA: Gaps Temporais (dias sem dados)
     console.log('🔍 Verificando gaps temporais...')
@@ -198,40 +205,119 @@ serve(async (req) => {
       }
     }
 
-    // 5. USAR IA PARA ANÁLISE AVANÇADA
+    // 5. AUDITORIA: Eventos sem dados de faturamento
+    console.log('🔍 Verificando eventos sem faturamento...')
+    
+    const { data: eventosSemFat } = await supabaseClient
+      .from('eventos_base')
+      .select('data_evento, nome, real_r, m1_r')
+      .eq('bar_id', bar_id)
+      .eq('ativo', true)
+      .is('real_r', null)
+      .gte('data_evento', dataInicio.toISOString().split('T')[0])
+      .lt('data_evento', new Date().toISOString().split('T')[0])
+
+    if (eventosSemFat && eventosSemFat.length > 0) {
+      problemas.push({
+        tipo: 'ausente',
+        severidade: 'alta',
+        tabela: 'eventos_base',
+        descricao: `${eventosSemFat.length} eventos passados sem faturamento registrado`,
+        dados: {
+          eventos: eventosSemFat.slice(0, 10).map(e => ({
+            data: e.data_evento,
+            nome: e.nome,
+            meta: e.m1_r
+          }))
+        },
+        acao_sugerida: 'Executar sync do ContaHub ou inserir dados manualmente'
+      })
+    }
+
+    // 6. AUDITORIA: Ticket médio anômalo
+    console.log('🔍 Verificando tickets anômalos...')
+    
+    const { data: ticketsAnomalos } = await supabaseClient
+      .from('eventos_base')
+      .select('data_evento, nome, t_medio, cl_real, real_r')
+      .eq('bar_id', bar_id)
+      .eq('ativo', true)
+      .not('t_medio', 'is', null)
+      .or('t_medio.lt.30,t_medio.gt.300')
+      .gte('data_evento', dataInicio.toISOString().split('T')[0])
+
+    if (ticketsAnomalos && ticketsAnomalos.length > 0) {
+      problemas.push({
+        tipo: 'valor_anomalo',
+        severidade: 'media',
+        tabela: 'eventos_base',
+        descricao: `${ticketsAnomalos.length} eventos com ticket médio fora do padrão (<R$30 ou >R$300)`,
+        dados: {
+          eventos: ticketsAnomalos.slice(0, 5).map(e => ({
+            data: e.data_evento,
+            ticket: e.t_medio,
+            clientes: e.cl_real,
+            faturamento: e.real_r
+          }))
+        },
+        acao_sugerida: 'Verificar se os dados de clientes e faturamento estão corretos'
+      })
+    }
+
+    estatisticas.tabelas_verificadas = 5
+    estatisticas.registros_analisados = (faturamentoDiario?.length || 0) + 
+      (desempenho?.length || 0) + (checklists?.length || 0) + (estoque?.length || 0)
+
+    // 7. USAR IA PARA ANÁLISE AVANÇADA
     console.log('🤖 Analisando com IA...')
     
     const prompt = `
-Você é um auditor de dados especializado em sistemas de gestão de bares.
+Você é o AUDITOR DE DADOS do sistema Zykor (SGB - Sistema de Gestão de Bares).
+Seu papel é identificar problemas nos dados e sugerir ações corretivas.
 
-# PROBLEMAS ENCONTRADOS
+# CONTEXTO DO NEGÓCIO
+- Sistema de gestão para bares e casas noturnas
+- Principais fontes: ContaHub (PDV), NIBO (Financeiro), GetIn (Reservas)
+- Bar analisado: Ordinário Bar (bar_id = ${bar_id})
+- Metas: CMV < 34%, CMO < 20%, Ticket Médio > R$100
+
+# PROBLEMAS ENCONTRADOS (${problemas.length} total)
 ${JSON.stringify(problemas, null, 2)}
 
 # DADOS GERAIS
-- Bar ID: ${bar_id}
 - Período analisado: ${periodo_dias} dias
-- Total de problemas detectados: ${problemas.length}
+- Tabelas verificadas: ${estatisticas.tabelas_verificadas}
+- Registros analisados: ${estatisticas.registros_analisados}
 
 # SUA MISSÃO
-1. Classifique os problemas por prioridade
-2. Sugira um plano de ação para corrigir
-3. Identifique padrões ou problemas recorrentes
-4. Estime impacto de cada problema no negócio
+1. Classifique os problemas por impacto no negócio
+2. Identifique a causa raiz provável
+3. Sugira plano de ação prático e priorizado
+4. Calcule o "score de saúde" dos dados (0-100)
+
+# CRITÉRIOS DE SCORE
+- 90-100: Excelente, poucos ajustes
+- 70-89: Bom, alguns problemas a corrigir
+- 50-69: Regular, atenção necessária
+- 30-49: Ruim, ação urgente
+- 0-29: Crítico, dados comprometidos
 
 Responda em JSON:
 {
-  "resumo_executivo": "string",
+  "resumo_executivo": "Síntese em 2-3 linhas",
+  "score_saude_dados": 0-100,
   "problemas_prioritarios": [
     {
-      "problema": "string",
-      "impacto_estimado": "string",
+      "problema": "Descrição clara",
+      "causa_provavel": "Por que aconteceu",
+      "impacto_estimado": "R$ ou % afetado",
       "urgencia": "baixa|media|alta|critica",
-      "passos_correcao": ["string"]
+      "passos_correcao": ["Passo 1", "Passo 2"]
     }
   ],
-  "padroes_identificados": ["string"],
-  "recomendacoes_gerais": ["string"],
-  "score_saude_dados": 0-100
+  "padroes_identificados": ["Padrão 1", "Padrão 2"],
+  "recomendacoes_gerais": ["Rec 1", "Rec 2"],
+  "proxima_auditoria_sugerida": "Em X dias"
 }
 `
 

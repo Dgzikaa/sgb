@@ -4,6 +4,68 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// ===== SISTEMA DE CACHE PARA QUERIES FREQUENTES =====
+interface CacheEntry {
+  data: unknown;
+  timestamp: number;
+  ttl: number; // Time to live em ms
+}
+
+const queryCache = new Map<string, CacheEntry>();
+
+// TTLs por tipo de consulta (em minutos)
+const CACHE_TTLS: Record<string, number> = {
+  faturamento_ontem: 60,       // 1 hora (dados não mudam)
+  faturamento_semana: 30,      // 30 min
+  faturamento_mes: 15,         // 15 min (pode estar atualizando)
+  produtos_top: 60,            // 1 hora
+  clientes: 30,                // 30 min
+  cmv: 60,                     // 1 hora
+  meta: 60,                    // 1 hora
+  default: 15                  // 15 min padrão
+};
+
+function getCacheKey(intent: string, entities: Record<string, string>, barId: number): string {
+  return `${intent}:${barId}:${JSON.stringify(entities)}`;
+}
+
+function getFromCache(key: string): unknown | null {
+  const entry = queryCache.get(key);
+  if (!entry) return null;
+  
+  const now = Date.now();
+  if (now - entry.timestamp > entry.ttl) {
+    queryCache.delete(key);
+    return null;
+  }
+  
+  console.log(`📦 Cache HIT: ${key}`);
+  return entry.data;
+}
+
+function setCache(key: string, data: unknown, ttlKey: string): void {
+  const ttl = (CACHE_TTLS[ttlKey] || CACHE_TTLS.default) * 60 * 1000;
+  queryCache.set(key, {
+    data,
+    timestamp: Date.now(),
+    ttl
+  });
+  console.log(`💾 Cache SET: ${key} (TTL: ${ttl/1000/60}min)`);
+}
+
+// Limpar cache antigo periodicamente (max 100 entries)
+function cleanupCache(): void {
+  if (queryCache.size > 100) {
+    const entries = Array.from(queryCache.entries());
+    const sorted = entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    const toDelete = sorted.slice(0, 50);
+    toDelete.forEach(([key]) => queryCache.delete(key));
+    console.log(`🧹 Cache cleanup: removed ${toDelete.length} entries`);
+  }
+}
+
+// ===== TIPOS PARA AS TABELAS DO SUPABASE =====
+
 // Tipos para as tabelas do Supabase
 interface EventoBase {
   id?: number;
@@ -232,6 +294,15 @@ async function fetchDataForIntent(
   entities: Record<string, string>,
   barId: number
 ): Promise<Record<string, unknown>> {
+  // Verificar cache primeiro
+  const cacheKey = getCacheKey(intent, entities, barId);
+  const cachedData = getFromCache(cacheKey);
+  if (cachedData) {
+    return cachedData as Record<string, unknown>;
+  }
+  
+  // Limpar cache antigo
+  cleanupCache();
   const hoje = new Date();
   const ontem = new Date(hoje);
   ontem.setDate(ontem.getDate() - 1);
