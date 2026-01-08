@@ -6,15 +6,103 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 interface ChatContext {
   barName: string;
-  previousMessages: { role: string; content: string }[];
+  currentTopic?: string; // Tema atual da conversa
+  previousMessages: { role: string; content: string; agent?: string }[];
+  timeOfDay?: 'morning' | 'afternoon' | 'night';
+  dayOfWeek?: number;
 }
 
 interface AgentResponse {
   success: boolean;
   response: string;
   agent?: string;
-  metrics?: { label: string; value: string; trend?: 'up' | 'down' | 'neutral' }[];
+  metrics?: { label: string; value: string; trend?: 'up' | 'down' | 'neutral'; percentage?: number }[];
   suggestions?: string[];
+  deepLinks?: { label: string; href: string }[];
+  chartData?: { label: string; value: number; color?: string }[];
+  insight?: { type: 'success' | 'warning' | 'info'; text: string };
+}
+
+// Mapeamento de intents para deep links
+const DEEP_LINKS: Record<string, { label: string; href: string }[]> = {
+  faturamento: [
+    { label: 'Ver Planejamento Comercial', href: '/estrategico/planejamento-comercial' },
+    { label: 'Análise de Eventos', href: '/analitico/eventos' }
+  ],
+  clientes: [
+    { label: 'Ver Clientes', href: '/analitico/clientes' },
+    { label: 'CRM Inteligente', href: '/crm' }
+  ],
+  cmv: [
+    { label: 'DRE Completo', href: '/ferramentas/dre' },
+    { label: 'Orçamentação', href: '/estrategico/orcamentacao' }
+  ],
+  meta: [
+    { label: 'Planejamento Comercial', href: '/estrategico/planejamento-comercial' },
+    { label: 'Visão Mensal', href: '/estrategico/visao-mensal' }
+  ],
+  meta_projecao: [
+    { label: 'Visão Geral Estratégica', href: '/estrategico/visao-geral' },
+    { label: 'Desempenho', href: '/estrategico/desempenho' }
+  ],
+  produto: [
+    { label: 'Produtos Analítico', href: '/analitico/produtos' },
+    { label: 'Estoque', href: '/ferramentas/contagem-estoque' }
+  ],
+  comparativo_dias: [
+    { label: 'Análise Semanal', href: '/analitico/semanal' },
+    { label: 'Comparativo de Eventos', href: '/analitico/comparativo-eventos' }
+  ],
+  comparativo_periodos: [
+    { label: 'Visão Mensal', href: '/estrategico/visao-mensal' },
+    { label: 'Comparativo de Eventos', href: '/analitico/comparativo-eventos' }
+  ],
+  tendencia: [
+    { label: 'Evolução Mensal', href: '/estrategico/visao-mensal' },
+    { label: 'Dashboard Principal', href: '/home' }
+  ]
+};
+
+// Função para inferir contexto da conversa
+function inferContextFromHistory(
+  message: string,
+  previousMessages: { role: string; content: string; agent?: string }[]
+): string | null {
+  const messageLower = message.toLowerCase();
+  
+  // Perguntas vagas que precisam de contexto
+  const vaguePatterns = [
+    /^e (ontem|hoje|amanha)/i,
+    /^e (a|o) /i,
+    /^comparando/i,
+    /^mas e/i,
+    /^e se/i,
+    /^quanto/i,
+    /^como/i,
+    /^qual/i
+  ];
+  
+  const isVague = vaguePatterns.some(p => p.test(messageLower)) && messageLower.length < 30;
+  
+  if (isVague && previousMessages.length > 0) {
+    // Pegar o último agente/tema usado
+    const lastAssistant = [...previousMessages].reverse().find(m => m.role === 'assistant' && m.agent);
+    if (lastAssistant?.agent) {
+      // Mapear agente para intent
+      const agentToIntent: Record<string, string> = {
+        'Analista Financeiro': 'faturamento',
+        'Analista de Clientes': 'clientes',
+        'Analista de Custos': 'cmv',
+        'Analista de Metas': 'meta',
+        'Analista de Produtos': 'produto',
+        'Analista Comparativo': 'comparativo_periodos',
+        'Analista de Tendências': 'tendencia'
+      };
+      return agentToIntent[lastAssistant.agent] || null;
+    }
+  }
+  
+  return null;
 }
 
 // Sistema de classificação de intenção MELHORADO
@@ -558,22 +646,33 @@ function formatResponse(
       const periodoLabel = periodo === 'ontem' ? 'ontem' : 
                           periodo === 'mes_atual' ? 'este mês' : 'essa semana';
 
-      let status = '';
-      if (ating >= 100) status = '🎉 Meta batida!';
-      else if (ating >= 80) status = '📈 Próximo da meta';
-      else status = '⚠️ Precisa de atenção';
+      let insightType: 'success' | 'warning' | 'info' = 'info';
+      let insightText = '';
+      
+      if (ating >= 100) {
+        insightType = 'success';
+        insightText = 'Meta batida! Continue assim para superar ainda mais.';
+      } else if (ating >= 80) {
+        insightType = 'info';
+        insightText = 'No caminho certo! Mantenha o ritmo.';
+      } else {
+        insightType = 'warning';
+        insightText = 'Atenção: precisa acelerar para bater a meta.';
+      }
 
       return {
         success: true,
-        response: `O faturamento ${periodoLabel} foi de **${formatCurrency(fat)}**.\n\n${meta > 0 ? `Isso representa **${formatPercent(ating)}** da meta de ${formatCurrency(meta)}. ${status}\n\n` : ''}${clientes > 0 ? `Foram atendidos **${formatNumber(clientes)} clientes** com ticket médio de ${formatCurrency(ticket)}.` : ''}`,
+        response: `O faturamento ${periodoLabel} foi de **${formatCurrency(fat)}**.\n\n${meta > 0 ? `Isso representa **${formatPercent(ating)}** da meta de ${formatCurrency(meta)}.\n\n` : ''}${clientes > 0 ? `Foram atendidos **${formatNumber(clientes)} clientes** com ticket médio de ${formatCurrency(ticket)}.` : ''}`,
         agent: 'Analista Financeiro',
         metrics: [
-          { label: 'Faturamento', value: formatCurrency(fat), trend: ating >= 100 ? 'up' : 'down' },
+          { label: 'Faturamento', value: formatCurrency(fat), trend: ating >= 100 ? 'up' : 'down', percentage: ating },
           { label: 'Meta', value: formatPercent(ating), trend: ating >= 100 ? 'up' : ating >= 80 ? 'neutral' : 'down' },
           { label: 'Clientes', value: formatNumber(clientes), trend: 'neutral' },
           { label: 'Ticket', value: formatCurrency(ticket), trend: ticket >= 100 ? 'up' : 'neutral' }
         ],
-        suggestions: ['Comparar com semana passada', 'Ver produtos mais vendidos', 'Analisar por dia']
+        suggestions: ['Comparar com semana passada', 'Ver produtos mais vendidos', 'Analisar por dia'],
+        deepLinks: DEEP_LINKS.faturamento,
+        insight: { type: insightType, text: insightText }
       };
     }
 
@@ -605,21 +704,32 @@ function formatResponse(
       const metaCMV = data.metaCMV as number;
       const variacao = cmvAnterior > 0 ? cmvAtual - cmvAnterior : 0;
 
-      let status = '';
-      if (cmvAtual <= metaCMV) status = '✅ Dentro da meta!';
-      else if (cmvAtual <= metaCMV + 2) status = '⚠️ Atenção, próximo do limite';
-      else status = '🚨 Acima do limite, revisar urgente!';
+      let insightType: 'success' | 'warning' | 'info' = 'info';
+      let insightText = '';
+      
+      if (cmvAtual <= metaCMV) {
+        insightType = 'success';
+        insightText = 'CMV dentro da meta! Bom controle de custos.';
+      } else if (cmvAtual <= metaCMV + 2) {
+        insightType = 'warning';
+        insightText = 'Atenção: próximo do limite. Monitore compras e desperdício.';
+      } else {
+        insightType = 'warning';
+        insightText = 'CMV acima do limite! Revisar fornecedores e controle de estoque.';
+      }
 
       return {
         success: true,
-        response: `O CMV da última semana está em **${formatPercent(cmvAtual)}**.\n\n${status}\n\nA meta é manter abaixo de ${formatPercent(metaCMV)}.${variacao !== 0 ? ` Comparado com a semana anterior, ${variacao > 0 ? 'subiu' : 'caiu'} ${formatPercent(Math.abs(variacao))}.` : ''}`,
+        response: `O CMV da última semana está em **${formatPercent(cmvAtual)}**.\n\nA meta é manter abaixo de ${formatPercent(metaCMV)}.${variacao !== 0 ? ` Comparado com a semana anterior, ${variacao > 0 ? 'subiu' : 'caiu'} ${formatPercent(Math.abs(variacao))}.` : ''}`,
         agent: 'Analista de Custos',
         metrics: [
           { label: 'CMV Atual', value: formatPercent(cmvAtual), trend: cmvAtual <= metaCMV ? 'up' : 'down' },
           { label: 'Meta', value: formatPercent(metaCMV), trend: 'neutral' },
           { label: 'Variação', value: `${variacao >= 0 ? '+' : ''}${formatPercent(variacao)}`, trend: variacao <= 0 ? 'up' : 'down' }
         ],
-        suggestions: ['Ver produtos com maior custo', 'Analisar desperdício', 'Comparar por categoria']
+        suggestions: ['Ver produtos com maior custo', 'Analisar desperdício', 'Comparar por categoria'],
+        deepLinks: DEEP_LINKS.cmv,
+        insight: { type: insightType, text: insightText }
       };
     }
 
@@ -630,22 +740,33 @@ function formatResponse(
       const diasRestantes = data.diasRestantes as number;
       const necessario = data.necessarioPorDia as number;
 
-      let status = '';
-      if (ating >= 100) status = '🎉 Meta do mês já batida!';
-      else if (ating >= 80) status = '📈 Caminho certo, continue assim!';
-      else status = '💪 Vamos acelerar!';
+      let insightType: 'success' | 'warning' | 'info' = 'info';
+      let insightText = '';
+      
+      if (ating >= 100) {
+        insightType = 'success';
+        insightText = 'Meta do mês já batida! Excelente trabalho!';
+      } else if (ating >= 80) {
+        insightType = 'info';
+        insightText = 'Caminho certo, continue assim!';
+      } else {
+        insightType = 'warning';
+        insightText = 'Vamos acelerar! Foco nos próximos eventos.';
+      }
 
       return {
         success: true,
-        response: `O progresso da meta mensal está em **${formatPercent(ating)}**!\n\n${status}\n\nFaturamento: ${formatCurrency(fatMes)} de ${formatCurrency(metaMes)}\n\n${diasRestantes > 0 && ating < 100 ? `Faltam **${diasRestantes} dias** e será necessário **${formatCurrency(necessario)}/dia** para bater a meta.` : ''}`,
+        response: `O progresso da meta mensal está em **${formatPercent(ating)}**!\n\nFaturamento: ${formatCurrency(fatMes)} de ${formatCurrency(metaMes)}\n\n${diasRestantes > 0 && ating < 100 ? `Faltam **${diasRestantes} dias** e será necessário **${formatCurrency(necessario)}/dia** para bater a meta.` : ''}`,
         agent: 'Analista de Metas',
         metrics: [
-          { label: 'Realizado', value: formatCurrency(fatMes), trend: 'neutral' },
+          { label: 'Realizado', value: formatCurrency(fatMes), trend: 'neutral', percentage: ating },
           { label: 'Meta', value: formatCurrency(metaMes), trend: 'neutral' },
           { label: 'Atingimento', value: formatPercent(ating), trend: ating >= 80 ? 'up' : 'down' },
           { label: 'Necessário/dia', value: formatCurrency(necessario), trend: 'neutral' }
         ],
-        suggestions: ['Ver faturamento por dia', 'Analisar semana atual', 'Melhores eventos do mês']
+        suggestions: ['Ver faturamento por dia', 'Analisar semana atual', 'Melhores eventos do mês'],
+        deepLinks: DEEP_LINKS.meta,
+        insight: { type: insightType, text: insightText }
       };
     }
 
@@ -732,6 +853,20 @@ function formatResponse(
       const fatMelhor = varFat >= 0;
       const cliMelhor = varCli >= 0;
 
+      let insightType: 'success' | 'warning' | 'info' = 'info';
+      let insightText = '';
+      
+      if (fatMelhor && cliMelhor) {
+        insightType = 'success';
+        insightText = 'Ótimo! Tanto faturamento quanto clientes cresceram.';
+      } else if (!fatMelhor && !cliMelhor) {
+        insightType = 'warning';
+        insightText = 'Atenção: queda em faturamento e clientes.';
+      } else {
+        insightType = 'info';
+        insightText = fatMelhor ? 'Faturamento subiu mesmo com menos clientes - ticket aumentou!' : 'Mais clientes, mas faturamento menor - verifique o ticket.';
+      }
+
       return {
         success: true,
         response: `📊 **Comparativo Semanal**\n\n**Esta semana:**\n• Faturamento: ${formatCurrency(atual?.faturamento || 0)}\n• Clientes: ${formatNumber(atual?.clientes || 0)}\n\n**Semana passada:**\n• Faturamento: ${formatCurrency(passada?.faturamento || 0)}\n• Clientes: ${formatNumber(passada?.clientes || 0)}\n\n**Variação:**\n• Faturamento: ${fatMelhor ? '📈' : '📉'} ${varFat >= 0 ? '+' : ''}${formatPercent(varFat)}\n• Clientes: ${cliMelhor ? '📈' : '📉'} ${varCli >= 0 ? '+' : ''}${formatPercent(varCli)}`,
@@ -741,7 +876,13 @@ function formatResponse(
           { label: 'Fat. Anterior', value: formatCurrency(passada?.faturamento || 0), trend: 'neutral' },
           { label: 'Variação', value: `${varFat >= 0 ? '+' : ''}${formatPercent(varFat)}`, trend: fatMelhor ? 'up' : 'down' }
         ],
-        suggestions: ['Ver por dia', 'Analisar produtos', 'Comparar meses']
+        suggestions: ['Ver por dia', 'Analisar produtos', 'Comparar meses'],
+        deepLinks: DEEP_LINKS.comparativo_periodos,
+        chartData: [
+          { label: 'Passada', value: passada?.faturamento || 0, color: 'bg-gray-500' },
+          { label: 'Atual', value: atual?.faturamento || 0, color: fatMelhor ? 'bg-green-500' : 'bg-red-500' }
+        ],
+        insight: { type: insightType, text: insightText }
       };
     }
 
@@ -750,12 +891,36 @@ function formatResponse(
       const tendTicket = data.tendenciaTicket as string;
       const ultima = data.ultimaSemana as { faturamento: number; clientes: number; ticketMedio: number };
       const penultima = data.penultimaSemana as { faturamento: number; clientes: number; ticketMedio: number };
+      const semanas = data.semanas as { semana: number; faturamento: number }[] || [];
 
       const iconFat = tendFat === 'subindo' ? '📈' : tendFat === 'caindo' ? '📉' : '➡️';
       const iconTicket = tendTicket === 'subindo' ? '📈' : tendTicket === 'caindo' ? '📉' : '➡️';
 
       const labelFat = tendFat === 'subindo' ? 'crescendo' : tendFat === 'caindo' ? 'caindo' : 'estável';
       const labelTicket = tendTicket === 'subindo' ? 'crescendo' : tendTicket === 'caindo' ? 'caindo' : 'estável';
+
+      let insightType: 'success' | 'warning' | 'info' = 'info';
+      let insightText = '';
+      
+      if (tendFat === 'subindo' && tendTicket === 'subindo') {
+        insightType = 'success';
+        insightText = 'Excelente! Faturamento e ticket médio em alta.';
+      } else if (tendFat === 'caindo') {
+        insightType = 'warning';
+        insightText = 'Faturamento em queda. Analise eventos e promoções.';
+      } else {
+        insightType = 'info';
+        insightText = 'Tendência estável. Bom momento para experimentar novidades.';
+      }
+
+      // Gerar dados do gráfico das últimas semanas
+      const chartData = semanas.slice(-4).map((s, idx) => ({
+        label: `S${idx + 1}`,
+        value: s.faturamento,
+        color: idx === semanas.length - 1 
+          ? (tendFat === 'subindo' ? 'bg-green-500' : tendFat === 'caindo' ? 'bg-red-500' : 'bg-blue-500')
+          : 'bg-gray-500'
+      }));
 
       return {
         success: true,
@@ -765,7 +930,10 @@ function formatResponse(
           { label: 'Faturamento', value: labelFat, trend: tendFat === 'subindo' ? 'up' : tendFat === 'caindo' ? 'down' : 'neutral' },
           { label: 'Ticket', value: labelTicket, trend: tendTicket === 'subindo' ? 'up' : tendTicket === 'caindo' ? 'down' : 'neutral' }
         ],
-        suggestions: ['Ver últimas 4 semanas', 'Analisar sazonalidade', 'Comparar com ano passado']
+        suggestions: ['Ver últimas 4 semanas', 'Analisar sazonalidade', 'Comparar com ano passado'],
+        deepLinks: DEEP_LINKS.tendencia,
+        chartData: chartData.length > 0 ? chartData : undefined,
+        insight: { type: insightType, text: insightText }
       };
     }
 
@@ -859,6 +1027,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { message, barId = 3, context = {} } = body;
+    const chatContext = context as ChatContext;
 
     if (!message) {
       return NextResponse.json({ success: false, error: 'Mensagem é obrigatória' }, { status: 400 });
@@ -868,13 +1037,22 @@ export async function POST(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Classificar intenção
-    const { intent, entities } = classifyIntent(message);
+    let { intent, entities } = classifyIntent(message);
+
+    // Se a intenção for "geral", tentar inferir do contexto da conversa
+    if (intent === 'geral' && chatContext.previousMessages?.length > 0) {
+      const inferredIntent = inferContextFromHistory(message, chatContext.previousMessages);
+      if (inferredIntent) {
+        intent = inferredIntent;
+        console.log(`[Agente] Intenção inferida do contexto: ${inferredIntent}`);
+      }
+    }
 
     // Buscar dados relevantes
     const data = await fetchDataForIntent(supabase, intent, entities, barId);
 
     // Formatar resposta
-    const response = formatResponse(intent, data, context as ChatContext);
+    const response = formatResponse(intent, data, chatContext);
 
     return NextResponse.json(response);
 

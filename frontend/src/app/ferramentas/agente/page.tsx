@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useRouter } from 'next/navigation';
 import { 
   Send, 
   Sparkles, 
@@ -12,7 +13,6 @@ import {
   Users, 
   DollarSign,
   Calendar,
-  BarChart3,
   Zap,
   Bot,
   User,
@@ -20,7 +20,16 @@ import {
   ChevronRight,
   Clock,
   Target,
-  Package
+  Package,
+  ExternalLink,
+  BarChart2,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  RefreshCw,
+  Lightbulb,
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 
 interface Message {
@@ -33,32 +42,173 @@ interface Message {
     label: string;
     value: string;
     trend?: 'up' | 'down' | 'neutral';
+    percentage?: number; // Para progress bars
   }[];
   suggestions?: string[];
+  deepLinks?: { label: string; href: string }[];
+  chartData?: { label: string; value: number; color?: string }[];
+  insight?: { type: 'success' | 'warning' | 'info'; text: string };
   isTyping?: boolean;
 }
 
-const QUICK_PROMPTS = [
-  { icon: TrendingUp, label: 'Faturamento da semana', prompt: 'Qual foi o faturamento dessa semana?' },
-  { icon: Users, label: 'Clientes ontem', prompt: 'Quantos clientes vieram ontem?' },
-  { icon: DollarSign, label: 'Ticket médio', prompt: 'Qual o ticket médio atual?' },
-  { icon: Target, label: 'Status das metas', prompt: 'Como está o progresso das metas do mês?' },
-  { icon: Package, label: 'CMV atual', prompt: 'Qual o CMV da última semana?' },
-  { icon: Calendar, label: 'Melhor dia', prompt: 'Qual foi o melhor dia dessa semana?' },
-];
+// Função para gerar sugestões dinâmicas baseadas no contexto
+const getDynamicPrompts = () => {
+  const hour = new Date().getHours();
+  const day = new Date().getDay(); // 0 = domingo, 6 = sábado
+  
+  // Base prompts
+  const prompts = [];
+  
+  // Baseado no horário
+  if (hour < 12) {
+    // Manhã - foco em resumo e planejamento
+    prompts.push({ icon: RefreshCw, label: 'Resumo de ontem', prompt: 'Como foi ontem?', priority: 1 });
+    prompts.push({ icon: Target, label: 'Projeção do dia', prompt: 'Qual a projeção para hoje?', priority: 2 });
+  } else if (hour < 18) {
+    // Tarde - foco em acompanhamento
+    prompts.push({ icon: TrendingUp, label: 'Parcial do dia', prompt: 'Como está o faturamento de hoje?', priority: 1 });
+    prompts.push({ icon: Users, label: 'Movimento atual', prompt: 'Como está o movimento?', priority: 2 });
+  } else {
+    // Noite - foco em resultados
+    prompts.push({ icon: DollarSign, label: 'Fechamento do dia', prompt: 'Como fechou hoje?', priority: 1 });
+    prompts.push({ icon: BarChart2, label: 'Performance noturna', prompt: 'Como está a noite?', priority: 2 });
+  }
+  
+  // Baseado no dia da semana
+  if (day === 1) { // Segunda
+    prompts.push({ icon: Calendar, label: 'Fim de semana', prompt: 'Como foi o fim de semana?', priority: 0 });
+    prompts.push({ icon: Target, label: 'Metas da semana', prompt: 'Quanto precisamos fazer essa semana?', priority: 3 });
+  } else if (day === 5) { // Sexta
+    prompts.push({ icon: Lightbulb, label: 'Previsão FDS', prompt: 'Qual a projeção pro fim de semana?', priority: 0 });
+  } else if (day === 0) { // Domingo
+    prompts.push({ icon: CheckCircle, label: 'Semana toda', prompt: 'Como foi a semana toda?', priority: 0 });
+  }
+  
+  // Prompts padrão
+  prompts.push({ icon: Package, label: 'CMV atual', prompt: 'Qual o CMV da última semana?', priority: 4 });
+  prompts.push({ icon: TrendingUp, label: 'Ticket subindo?', prompt: 'O ticket está subindo ou caindo?', priority: 5 });
+  prompts.push({ icon: Users, label: 'Comparar dias', prompt: 'Sexta foi melhor que sábado?', priority: 6 });
+  
+  // Ordenar por prioridade e pegar os 6 primeiros
+  return prompts
+    .sort((a, b) => a.priority - b.priority)
+    .slice(0, 6);
+};
+
+// Componente de mini gráfico de barras
+const MiniBarChart = ({ data }: { data: { label: string; value: number; color?: string }[] }) => {
+  const maxValue = Math.max(...data.map(d => d.value));
+  
+  return (
+    <div className="flex items-end gap-1 h-16 p-2 bg-gray-900/50 rounded-lg">
+      {data.map((item, idx) => (
+        <div key={idx} className="flex flex-col items-center flex-1">
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: `${(item.value / maxValue) * 100}%` }}
+            transition={{ duration: 0.5, delay: idx * 0.1 }}
+            className={`w-full rounded-t-sm min-h-[4px] ${item.color || 'bg-purple-500'}`}
+            style={{ maxHeight: '40px' }}
+          />
+          <span className="text-[10px] text-gray-500 mt-1 truncate w-full text-center">
+            {item.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Componente de progress bar circular
+const CircularProgress = ({ percentage, label }: { percentage: number; label: string }) => {
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
+  
+  const getColor = () => {
+    if (percentage >= 100) return 'text-green-500';
+    if (percentage >= 80) return 'text-blue-500';
+    if (percentage >= 50) return 'text-yellow-500';
+    return 'text-red-500';
+  };
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative w-16 h-16">
+        <svg className="w-full h-full -rotate-90">
+          <circle
+            cx="32"
+            cy="32"
+            r={radius}
+            className="fill-none stroke-gray-700"
+            strokeWidth="4"
+          />
+          <motion.circle
+            cx="32"
+            cy="32"
+            r={radius}
+            className={`fill-none ${getColor()}`}
+            strokeWidth="4"
+            strokeLinecap="round"
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: 1, ease: 'easeOut' }}
+            style={{
+              strokeDasharray: circumference,
+              stroke: 'currentColor'
+            }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={`text-sm font-bold ${getColor()}`}>
+            {Math.round(percentage)}%
+          </span>
+        </div>
+      </div>
+      <span className="text-xs text-gray-400 mt-1">{label}</span>
+    </div>
+  );
+};
+
+// Componente de insight card
+const InsightCard = ({ type, text }: { type: 'success' | 'warning' | 'info'; text: string }) => {
+  const config = {
+    success: { icon: CheckCircle, bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-400' },
+    warning: { icon: AlertTriangle, bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400' },
+    info: { icon: Lightbulb, bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' }
+  };
+  
+  const { icon: Icon, bg, border, text: textColor } = config[type];
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      className={`flex items-start gap-2 p-3 rounded-lg ${bg} border ${border} mt-3`}
+    >
+      <Icon className={`w-4 h-4 ${textColor} flex-shrink-0 mt-0.5`} />
+      <span className={`text-sm ${textColor}`}>{text}</span>
+    </motion.div>
+  );
+};
 
 export default function AgenteChatPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
   const { user } = useUser();
+  const router = useRouter();
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [conversationContext, setConversationContext] = useState<string>(''); // Tema atual da conversa
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Sugestões dinâmicas
+  const dynamicPrompts = useMemo(() => getDynamicPrompts(), []);
 
   useEffect(() => {
     setPageTitle('🤖 Agente Zykor');
@@ -66,6 +216,16 @@ export default function AgenteChatPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+  
+  // Atualizar contexto da conversa baseado nas mensagens
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant' && m.agent);
+      if (lastAssistant?.agent) {
+        setConversationContext(lastAssistant.agent);
+      }
+    }
   }, [messages]);
 
   const handleSend = async (text?: string) => {
@@ -105,10 +265,14 @@ export default function AgenteChatPage() {
           userId: user?.id,
           context: {
             barName: selectedBar?.nome || 'Ordinário',
-            previousMessages: messages.slice(-5).map(m => ({
+            currentTopic: conversationContext, // Tema atual da conversa
+            previousMessages: messages.slice(-8).map(m => ({ // Aumentado para 8 mensagens
               role: m.role,
-              content: m.content
-            }))
+              content: m.content,
+              agent: m.agent
+            })),
+            timeOfDay: new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'night',
+            dayOfWeek: new Date().getDay()
           }
         })
       });
@@ -126,7 +290,10 @@ export default function AgenteChatPage() {
           timestamp: new Date(),
           agent: result.agent,
           metrics: result.metrics,
-          suggestions: result.suggestions
+          suggestions: result.suggestions,
+          deepLinks: result.deepLinks,
+          chartData: result.chartData,
+          insight: result.insight
         };
         setMessages(prev => [...prev, assistantMessage]);
       } else {
@@ -150,6 +317,11 @@ export default function AgenteChatPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // Navegar para deep link
+  const handleDeepLink = (href: string) => {
+    router.push(href);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -225,16 +397,19 @@ export default function AgenteChatPage() {
                   Posso analisar dados do {selectedBar?.nome || 'bar'} e responder suas dúvidas.
                 </motion.p>
 
-                {/* Quick Prompts */}
+                {/* Quick Prompts - Dinâmicos */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
                   className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-2xl"
                 >
-                  {QUICK_PROMPTS.map((item, idx) => (
+                  {dynamicPrompts.map((item, idx) => (
                     <motion.button
                       key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + idx * 0.1 }}
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleSend(item.prompt)}
@@ -249,6 +424,16 @@ export default function AgenteChatPage() {
                     </motion.button>
                   ))}
                 </motion.div>
+                
+                {/* Contexto Info */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                  className="text-xs text-gray-600 mt-4"
+                >
+                  💡 Sugestões baseadas no horário e dia atual
+                </motion.p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -308,28 +493,87 @@ export default function AgenteChatPage() {
                     )}
                   </div>
 
-                  {/* Metrics Cards */}
+                  {/* Metrics Cards with Progress */}
                   {message.metrics && message.metrics.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {message.metrics.map((metric, idx) => (
-                        <div
+                        <motion.div
                           key={idx}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: idx * 0.1 }}
                           className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800/80 border border-gray-700/50"
                         >
-                          <span className="text-xs text-gray-400">{metric.label}</span>
-                          <span className={`text-sm font-semibold ${
-                            metric.trend === 'up' ? 'text-green-400' :
-                            metric.trend === 'down' ? 'text-red-400' : 'text-white'
-                          }`}>
-                            {metric.value}
-                          </span>
+                          {/* Trend Icon */}
                           {metric.trend && (
-                            <TrendingUp className={`w-3 h-3 ${
-                              metric.trend === 'up' ? 'text-green-400' :
-                              metric.trend === 'down' ? 'text-red-400 rotate-180' : 'text-gray-400'
-                            }`} />
+                            metric.trend === 'up' ? (
+                              <ArrowUpRight className="w-4 h-4 text-green-400" />
+                            ) : metric.trend === 'down' ? (
+                              <ArrowDownRight className="w-4 h-4 text-red-400" />
+                            ) : (
+                              <Minus className="w-4 h-4 text-gray-400" />
+                            )
                           )}
-                        </div>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] text-gray-500 uppercase tracking-wide">{metric.label}</span>
+                            <span className={`text-sm font-bold ${
+                              metric.trend === 'up' ? 'text-green-400' :
+                              metric.trend === 'down' ? 'text-red-400' : 'text-white'
+                            }`}>
+                              {metric.value}
+                            </span>
+                          </div>
+                          {/* Mini progress bar se tiver percentage */}
+                          {metric.percentage !== undefined && (
+                            <div className="w-12 h-1.5 bg-gray-700 rounded-full overflow-hidden ml-2">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(metric.percentage, 100)}%` }}
+                                transition={{ duration: 0.5 }}
+                                className={`h-full rounded-full ${
+                                  metric.percentage >= 100 ? 'bg-green-500' :
+                                  metric.percentage >= 80 ? 'bg-blue-500' :
+                                  metric.percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                                }`}
+                              />
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Chart Data */}
+                  {message.chartData && message.chartData.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-3 w-full max-w-xs"
+                    >
+                      <MiniBarChart data={message.chartData} />
+                    </motion.div>
+                  )}
+
+                  {/* Insight Card */}
+                  {message.insight && (
+                    <InsightCard type={message.insight.type} text={message.insight.text} />
+                  )}
+
+                  {/* Deep Links */}
+                  {message.deepLinks && message.deepLinks.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {message.deepLinks.map((link, idx) => (
+                        <motion.button
+                          key={idx}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: idx * 0.1 }}
+                          onClick={() => handleDeepLink(link.href)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs hover:bg-blue-500/20 transition-colors group"
+                        >
+                          <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                          {link.label}
+                        </motion.button>
                       ))}
                     </div>
                   )}
@@ -338,14 +582,17 @@ export default function AgenteChatPage() {
                   {message.suggestions && message.suggestions.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {message.suggestions.map((suggestion, idx) => (
-                        <button
+                        <motion.button
                           key={idx}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05 }}
                           onClick={() => handleSend(suggestion)}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs hover:bg-purple-500/20 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs hover:bg-purple-500/20 hover:scale-105 transition-all"
                         >
                           <ChevronRight className="w-3 h-3" />
                           {suggestion}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   )}
