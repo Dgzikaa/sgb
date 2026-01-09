@@ -291,9 +291,6 @@ async function buscarEventosConhecidos(): Promise<any[]> {
     { nome: 'Aniversário de Brasília - Shows', data: '2026-04-21', local: 'Esplanada dos Ministérios', tipo: 'festival', impacto: 'alto' },
     
     // EVENTOS DE PAGODE/SAMBA TRADICIONAIS
-    { nome: 'Samba do Calaf', data: '2026-01-19', local: 'Ceilândia', tipo: 'samba', impacto: 'medio' },
-    { nome: 'Samba do Calaf', data: '2026-01-26', local: 'Ceilândia', tipo: 'samba', impacto: 'medio' },
-    { nome: 'Samba do Calaf', data: '2026-02-02', local: 'Ceilândia', tipo: 'samba', impacto: 'medio' },
     { nome: 'Samba InCasa - Janeiro', data: '2026-01-18', local: 'Asa Sul', tipo: 'samba', impacto: 'medio' },
     { nome: 'Samba InCasa - Fevereiro', data: '2026-02-22', local: 'Asa Sul', tipo: 'samba', impacto: 'medio' },
     
