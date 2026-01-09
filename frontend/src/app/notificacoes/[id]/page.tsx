@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { usePageTitle } from '@/contexts/PageTitleContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -14,17 +14,15 @@ import {
   TrendingDown,
   TrendingUp,
   ExternalLink,
-  Calendar,
   Clock,
   Info,
   Target,
   DollarSign,
   Users,
   ChefHat,
-  Package,
+  Calendar,
   RefreshCcw,
-  Copy,
-  Share2
+  Copy
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -32,7 +30,7 @@ import { toast } from 'sonner';
 
 interface NotificacaoDetalhes {
   id: string;
-  tipo: 'critico' | 'erro' | 'aviso' | 'info' | 'sucesso';
+  tipo: 'critico' | 'erro' | 'aviso' | 'info' | 'sucesso' | string;
   categoria: string;
   titulo: string;
   mensagem: string;
@@ -41,8 +39,7 @@ interface NotificacaoDetalhes {
   url?: string;
   created_at: string;
   lido: boolean;
-  // Dados específicos para contexto
-  referencia_tipo?: string; // 'receita' | 'reserva' | 'evento' | 'checklist' | etc
+  referencia_tipo?: string;
   referencia_id?: string;
   referencia_nome?: string;
 }
@@ -107,51 +104,51 @@ export default function NotificacaoDetalhePage() {
   const getIconByTipo = (tipo: string) => {
     switch (tipo) {
       case 'critico':
-        return <AlertTriangle className="w-6 h-6 text-red-500" />;
+        return <AlertTriangle className="w-5 h-5 text-red-500" />;
       case 'erro':
-        return <TrendingDown className="w-6 h-6 text-orange-500" />;
+        return <TrendingDown className="w-5 h-5 text-orange-500" />;
       case 'aviso':
-        return <AlertTriangle className="w-6 h-6 text-yellow-500" />;
+        return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
       case 'sucesso':
-        return <TrendingUp className="w-6 h-6 text-green-500" />;
+        return <TrendingUp className="w-5 h-5 text-green-500" />;
       default:
-        return <Bell className="w-6 h-6 text-blue-500" />;
+        return <Bell className="w-5 h-5 text-blue-500" />;
     }
   };
 
   const getIconByCategoria = (categoria: string) => {
-    switch (categoria) {
+    switch (categoria?.toLowerCase()) {
       case 'faturamento':
       case 'ticket':
-        return <DollarSign className="w-5 h-5" />;
+        return <DollarSign className="w-4 h-4" />;
       case 'cmv':
-        return <Target className="w-5 h-5" />;
+        return <Target className="w-4 h-4" />;
       case 'clientes':
-        return <Users className="w-5 h-5" />;
+        return <Users className="w-4 h-4" />;
       case 'receitas':
       case 'estoque':
-        return <ChefHat className="w-5 h-5" />;
+        return <ChefHat className="w-4 h-4" />;
       case 'reservas':
-        return <Calendar className="w-5 h-5" />;
+        return <Calendar className="w-4 h-4" />;
       case 'checklist':
-        return <CheckCircle className="w-5 h-5" />;
+        return <CheckCircle className="w-4 h-4" />;
       default:
-        return <Info className="w-5 h-5" />;
+        return <Info className="w-4 h-4" />;
     }
   };
 
   const getBadgeClass = (tipo: string) => {
     switch (tipo) {
       case 'critico':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800';
       case 'erro':
-        return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+        return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800';
       case 'aviso':
-        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+        return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
       case 'sucesso':
-        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800';
       default:
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800';
     }
   };
 
@@ -166,6 +163,25 @@ export default function NotificacaoDetalhePage() {
     });
   };
 
+  const formatarValor = (key: string, value: unknown): string => {
+    // Ignorar campos que são objetos ou arrays
+    if (value === null || value === undefined) return '-';
+    if (typeof value === 'object') return '';
+    
+    // Formatar valores numéricos
+    if (typeof value === 'number') {
+      if (key.includes('faturamento') || key.includes('meta') || key.includes('ticket') || key.includes('valor')) {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      }
+      if (key.includes('percentual') || key.includes('cmv')) {
+        return `${value.toFixed(1)}%`;
+      }
+      return value.toLocaleString('pt-BR');
+    }
+    
+    return String(value);
+  };
+
   const getUrlPorCategoria = (categoria: string): string => {
     const urlMap: Record<string, string> = {
       'faturamento': '/estrategico/visao-geral',
@@ -173,13 +189,24 @@ export default function NotificacaoDetalhePage() {
       'cmv': '/ferramentas/cmv-semanal',
       'ticket': '/analitico',
       'checklist': '/configuracoes/checklists',
+      'checklists': '/configuracoes/checklists',
       'estoque': '/configuracoes/fichas-tecnicas',
       'receitas': '/configuracoes/fichas-tecnicas',
       'reservas': '/ferramentas/calendario',
       'clientes': '/analitico/clientes',
+      'sistema': '/configuracoes',
     };
-    return urlMap[categoria] || '/alertas';
+    return urlMap[categoria?.toLowerCase()] || '/alertas';
   };
+
+  // Filtrar dados para exibição (remover objetos e arrays)
+  const dadosExibiveis = notificacao?.dados 
+    ? Object.entries(notificacao.dados).filter(([, value]) => 
+        value !== null && 
+        value !== undefined && 
+        typeof value !== 'object'
+      )
+    : [];
 
   if (loading) {
     return (
@@ -229,7 +256,7 @@ export default function NotificacaoDetalhePage() {
           <Button 
             variant="ghost" 
             onClick={() => router.push('/alertas')}
-            className="mb-4"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar para Central de Alertas
@@ -242,10 +269,10 @@ export default function NotificacaoDetalhePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className={`bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 ${
+          <Card className={`bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm ${
             !notificacao.lido ? 'border-l-4 border-l-blue-500' : ''
           }`}>
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
                   <div className={`p-3 rounded-xl ${getBadgeClass(notificacao.tipo)}`}>
@@ -254,14 +281,14 @@ export default function NotificacaoDetalhePage() {
                   <div>
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <Badge className={getBadgeClass(notificacao.tipo)}>
-                        {notificacao.tipo.toUpperCase()}
+                        {(notificacao.tipo || 'INFO').toUpperCase()}
                       </Badge>
-                      <Badge variant="outline" className="flex items-center gap-1">
+                      <Badge variant="outline" className="flex items-center gap-1 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600">
                         {getIconByCategoria(notificacao.categoria)}
-                        {notificacao.categoria}
+                        <span className="ml-1">{notificacao.categoria}</span>
                       </Badge>
                       {!notificacao.lido && (
-                        <Badge className="bg-blue-500 text-white">
+                        <Badge className="bg-blue-500 text-white border-blue-500">
                           Não lido
                         </Badge>
                       )}
@@ -272,18 +299,16 @@ export default function NotificacaoDetalhePage() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={handleCopiarLink}>
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
+                <Button variant="ghost" size="sm" onClick={handleCopiarLink} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                  <Copy className="w-4 h-4" />
+                </Button>
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="pt-6 space-y-6">
               {/* Mensagem Principal */}
-              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                <p className="text-gray-700 dark:text-gray-300 text-lg">
+              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600">
+                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
                   {notificacao.mensagem}
                 </p>
               </div>
@@ -294,32 +319,32 @@ export default function NotificacaoDetalhePage() {
                 {formatarData(notificacao.created_at)}
               </div>
 
-              {/* Dados do Contexto */}
-              {notificacao.dados && Object.keys(notificacao.dados).length > 0 && (
+              {/* Dados do Contexto - Apenas valores primitivos */}
+              {dadosExibiveis.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Package className="w-4 h-4" />
+                    <Info className="w-4 h-4 text-gray-500" />
                     Dados do Alerta
                   </h4>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {Object.entries(notificacao.dados).map(([key, value]) => (
-                      <div 
-                        key={key}
-                        className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
-                      >
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                          {key.replace(/_/g, ' ')}
-                        </p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
-                          {typeof value === 'number' && (key.includes('faturamento') || key.includes('meta') || key.includes('ticket'))
-                            ? (value as number).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-                            : typeof value === 'number' && key.includes('percentual')
-                              ? `${(value as number).toFixed(1)}%`
-                              : String(value)
-                          }
-                        </p>
-                      </div>
-                    ))}
+                    {dadosExibiveis.map(([key, value]) => {
+                      const valorFormatado = formatarValor(key, value);
+                      if (!valorFormatado) return null;
+                      
+                      return (
+                        <div 
+                          key={key}
+                          className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-600"
+                        >
+                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                            {key.replace(/_/g, ' ')}
+                          </p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
+                            {valorFormatado}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -328,14 +353,14 @@ export default function NotificacaoDetalhePage() {
               {notificacao.acoes_sugeridas && notificacao.acoes_sugeridas.length > 0 && (
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Target className="w-4 h-4" />
+                    <Target className="w-4 h-4 text-gray-500" />
                     Ações Sugeridas
                   </h4>
                   <ul className="space-y-2">
                     {notificacao.acoes_sugeridas.map((acao, i) => (
                       <li 
                         key={i}
-                        className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+                        className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800"
                       >
                         <CheckCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                         <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -347,17 +372,14 @@ export default function NotificacaoDetalhePage() {
                 </div>
               )}
 
-              {/* Referência Específica (se houver) */}
+              {/* Referência Específica */}
               {notificacao.referencia_nome && (
-                <div className="p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl">
+                <div className="p-4 border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700/30">
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-4 h-4 text-gray-500" />
                     Item Relacionado
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Este alerta está relacionado a:
-                  </p>
-                  <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">
                         {notificacao.referencia_tipo}
@@ -366,12 +388,6 @@ export default function NotificacaoDetalhePage() {
                         {notificacao.referencia_nome}
                       </p>
                     </div>
-                    {notificacao.referencia_id && (
-                      <Button size="sm" variant="outline">
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        Visualizar
-                      </Button>
-                    )}
                   </div>
                 </div>
               )}
@@ -379,16 +395,16 @@ export default function NotificacaoDetalhePage() {
               {/* Ações */}
               <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 {!notificacao.lido && (
-                  <Button onClick={handleMarcarComoLido}>
+                  <Button onClick={handleMarcarComoLido} className="bg-blue-600 hover:bg-blue-700 text-white">
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Marcar como Lido
                   </Button>
                 )}
                 
                 <Link href={notificacao.url || getUrlPorCategoria(notificacao.categoria)}>
-                  <Button variant="outline">
+                  <Button variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                     <ExternalLink className="w-4 h-4 mr-2" />
-                    Ir para {notificacao.categoria}
+                    Ir para {notificacao.categoria || 'área'}
                   </Button>
                 </Link>
               </div>
