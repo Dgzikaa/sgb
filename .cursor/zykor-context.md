@@ -13,9 +13,11 @@ Project ID Supabase: uqtgsvujwcbymjmvkjhy
 
 Bar Principal: Ordinario Bar (bar_id: 3)
 Localizacao: Sao Paulo, Brasil
-Operacao: Quarta a Domingo (fechado Seg/Ter)
+Operacao: TODOS OS DIAS (a partir de 2026!)
 
-Dias tipicos:
+Dias tipicos e atracoes:
+- Segunda: Novo! (definir atracao)
+- Terca: Novo! (definir atracao)
 - Quarta: Quarta de Bamba (Samba)
 - Quinta: Pe no Ordi (Forro)
 - Sexta: Sexta na Roca (Sertanejo)
@@ -26,13 +28,13 @@ Dias tipicos:
 
 | Dia | Meta |
 |-----|------|
-| Domingo | R$ 58.000 |
-| Segunda | R$ 5.000 |
-| Terca | R$ 0 (fechado) |
+| Segunda | R$ 20.000 (novo!) |
+| Terca | R$ 20.000 (novo!) |
 | Quarta | R$ 35.000 |
 | Quinta | R$ 25.000 |
 | Sexta | R$ 70.000 |
 | Sabado | R$ 60.000 |
+| Domingo | R$ 58.000 |
 
 KPIs: Ticket Medio R, CMV 28%, Margem 65%
 
@@ -54,7 +56,7 @@ KPIs: Ticket Medio R, CMV 28%, Margem 65%
 ## FUNCIONALIDADES
 
 Analise Diaria:
-- Busca ultima operacao REAL (ignora dias fechados)
+- Busca ultima operacao REAL (agora todos os dias sao operacionais!)
 - Compara com ultimas 4 operacoes do mesmo dia
 - ROI de atracao, margens, tendencias
 - Gemini 2.0 Flash com fallback
@@ -62,6 +64,6 @@ Analise Diaria:
 ## PONTOS DE ATENCAO
 
 1. Quota Gemini limitada - sistema tem fallback
-2. Dias fechados: ignora faturamento menor que R
+2. ATUALIZADO 2026: Bar opera todos os dias agora!
 3. Consolidar funcoes existentes antes de criar novas
 4. Dark mode obrigatorio em todas as paginas
