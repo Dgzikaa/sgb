@@ -66,6 +66,16 @@ interface FaturamentoPorDia {
   mediaFaturamento: number
 }
 
+interface EventoConcorrencia {
+  nome: string
+  local: string
+  tipo: 'samba' | 'pagode' | 'forró' | 'sertanejo' | 'festival'
+  frequencia: 'semanal' | 'mensal' | 'eventual'
+  diaSemana?: string
+  impacto: 'alto' | 'medio' | 'baixo'
+  dica: string
+}
+
 // ========================================
 // DADOS DE 2026 - DATAS IMPORTANTES
 // ========================================
@@ -83,11 +93,8 @@ const DATAS_2026: DataImportante[] = [
   { data: '2026-02-17', nome: 'Carnaval (Terça)', tipo: 'carnaval', diaSemana: 'Terça', potencial: 'maximo', dica: 'Terça de Carnaval - pico!' },
   { data: '2026-02-18', nome: 'Quarta de Cinzas', tipo: 'carnaval', diaSemana: 'Quarta', potencial: 'alto', dica: 'Ressaca de Carnaval - feijoada?' },
   
-  // Março
-  { data: '2026-03-17', nome: 'St. Patrick\'s Day', tipo: 'tematico', diaSemana: 'Terça', potencial: 'alto', dica: 'Chopp verde, promoções irlandesas!' },
-  { data: '2026-03-20', nome: 'Lollapalooza (início)', tipo: 'festival', diaSemana: 'Sexta', potencial: 'alto', dica: 'Fim de semana de festival' },
-  { data: '2026-03-21', nome: 'Lollapalooza', tipo: 'festival', diaSemana: 'Sábado', potencial: 'alto', dica: 'Tema musical especial' },
-  { data: '2026-03-22', nome: 'Lollapalooza (fim)', tipo: 'festival', diaSemana: 'Domingo', potencial: 'alto', dica: 'Encerramento do festival' },
+  // Março - mês mais fraco, sem feriados nacionais
+  // (Março não tem feriados nacionais relevantes)
   
   // Abril - Páscoa
   { data: '2026-04-03', nome: 'Sexta-feira Santa', tipo: 'nacional', diaSemana: 'Sexta', potencial: 'alto', dica: 'Feriadão da Páscoa - sexta é ouro!' },
@@ -121,12 +128,6 @@ const DATAS_2026: DataImportante[] = [
   
   // Setembro
   { data: '2026-09-07', nome: 'Independência', tipo: 'nacional', diaSemana: 'Segunda', potencial: 'maximo', dica: 'SEGUNDA - feriadão domingo+segunda!' },
-  { data: '2026-09-18', nome: 'Rock in Rio (início)', tipo: 'festival', diaSemana: 'Sexta', potencial: 'alto', dica: 'Semana do Rock começa!' },
-  { data: '2026-09-19', nome: 'Rock in Rio', tipo: 'festival', diaSemana: 'Sábado', potencial: 'alto', dica: 'Tema musical rock' },
-  { data: '2026-09-20', nome: 'Rock in Rio', tipo: 'festival', diaSemana: 'Domingo', potencial: 'alto', dica: 'Domingo de rock' },
-  { data: '2026-09-25', nome: 'Rock in Rio', tipo: 'festival', diaSemana: 'Sexta', potencial: 'alto', dica: 'Segunda semana' },
-  { data: '2026-09-26', nome: 'Rock in Rio', tipo: 'festival', diaSemana: 'Sábado', potencial: 'alto', dica: 'Penúltimo dia' },
-  { data: '2026-09-27', nome: 'Rock in Rio (fim)', tipo: 'festival', diaSemana: 'Domingo', potencial: 'alto', dica: 'Encerramento do festival' },
   
   // Outubro
   { data: '2026-10-12', nome: 'N. Sra. Aparecida', tipo: 'nacional', diaSemana: 'Segunda', potencial: 'maximo', dica: 'SEGUNDA - feriadão perfeito!' },
@@ -175,11 +176,11 @@ const TOP_DIAS_2025: DadosHistorico2025[] = [
   { data: '2025-12-03', diaSemana: 'Quarta', comandas: 717, faturamento: 76747.08, pessoas: 759, ticketMedio: 107.04, evento: 'Confraternizações' },
   { data: '2025-02-21', diaSemana: 'Sexta', comandas: 780, faturamento: 75903.54, pessoas: 789, ticketMedio: 97.31, evento: 'Pré-Carnaval' },
   { data: '2025-12-30', diaSemana: 'Terça', comandas: 618, faturamento: 69725.80, pessoas: 709, ticketMedio: 108.31, evento: 'Entre Natal e Réveillon' },
-  { data: '2025-03-21', diaSemana: 'Sexta', comandas: 741, faturamento: 69238.20, pessoas: 763, ticketMedio: 93.44, evento: 'Lollapalooza Weekend' },
+  { data: '2025-03-21', diaSemana: 'Sexta', comandas: 741, faturamento: 69238.20, pessoas: 763, ticketMedio: 93.44, evento: 'Sexta Normal' },
   { data: '2025-12-18', diaSemana: 'Quinta', comandas: 512, faturamento: 58626.06, pessoas: 531, ticketMedio: 114.50, evento: 'Confraternizações' },
   { data: '2025-02-15', diaSemana: 'Sábado', comandas: 554, faturamento: 54128.48, pessoas: 565, ticketMedio: 97.70, evento: 'Pré-Carnaval' },
   { data: '2025-12-06', diaSemana: 'Sábado', comandas: 489, faturamento: 53811.21, pessoas: 531, ticketMedio: 110.04, evento: 'Confraternizações' },
-  { data: '2025-03-22', diaSemana: 'Sábado', comandas: 573, faturamento: 52799.69, pessoas: 589, ticketMedio: 92.15, evento: 'Lollapalooza Weekend' },
+  { data: '2025-03-22', diaSemana: 'Sábado', comandas: 573, faturamento: 52799.69, pessoas: 589, ticketMedio: 92.15, evento: 'Sábado Normal' },
   { data: '2025-12-23', diaSemana: 'Terça', comandas: 505, faturamento: 51956.12, pessoas: 512, ticketMedio: 96.01, evento: 'Véspera de Natal' },
 ]
 
@@ -201,9 +202,28 @@ const COMPARACAO_DATAS: { [key: string]: { data2025: string; faturamento2025: nu
   // Páscoa 2025 (18-20 Abr) → Páscoa 2026 (3-5 Abr)
   '2026-04-03': { data2025: '2025-04-04', faturamento2025: 78667.18, evento2025: 'Sexta-feira Santa 2025' },
   // Lollapalooza 2025 → 2026
-  '2026-03-20': { data2025: '2025-03-21', faturamento2025: 69238.20, evento2025: 'Lollapalooza 2025' },
-  '2026-03-21': { data2025: '2025-03-22', faturamento2025: 52799.69, evento2025: 'Lollapalooza 2025' },
 }
+
+// ========================================
+// EVENTOS CONCORRÊNCIA BRASÍLIA
+// ========================================
+// Eventos de samba, pagode e similares que competem pelo mesmo público
+const EVENTOS_CONCORRENCIA: EventoConcorrencia[] = [
+  // Adicione eventos conforme identificados
+  // Estrutura pronta para incluir sambas, pagodes e eventos de Brasília
+  { nome: 'Samba do Calaf', local: 'Ceilândia', tipo: 'samba', frequencia: 'semanal', diaSemana: 'Domingo', impacto: 'alto', dica: 'Domingo à tarde - pode afetar nosso público' },
+  { nome: 'Samba InCasa', local: 'Asa Sul', tipo: 'samba', frequencia: 'mensal', impacto: 'medio', dica: 'Evento mensal - monitorar datas' },
+  { nome: 'Pagode do Gama', local: 'Gama', tipo: 'pagode', frequencia: 'semanal', diaSemana: 'Sábado', impacto: 'medio', dica: 'Sábados - público diferente mas pode impactar' },
+  { nome: 'Comunidade da Bênção', local: 'Taguatinga', tipo: 'samba', frequencia: 'semanal', diaSemana: 'Domingo', impacto: 'alto', dica: 'Domingo forte - concorrência direta' },
+  { nome: 'Bloco do Siri', local: 'Asa Norte', tipo: 'samba', frequencia: 'eventual', impacto: 'alto', dica: 'Eventos pontuais de grande porte' },
+  // DICA: Adicione mais eventos conforme identificados via redes sociais, Sympla, etc.
+]
+
+// Datas específicas de eventos de concorrência em 2026 (adicionar conforme descobrir)
+const DATAS_CONCORRENCIA_2026: DataImportante[] = [
+  // Exemplo de como adicionar datas específicas de concorrência:
+  // { data: '2026-03-15', nome: 'Festival de Samba BSB', tipo: 'concorrencia', diaSemana: 'Domingo', potencial: 'baixo', dica: '⚠️ Evento grande no Parque - pode reduzir nosso movimento' },
+]
 
 // Ideias de Ações Comerciais
 const IDEIAS_ACOES = [
@@ -280,9 +300,9 @@ function CalendarioMes({ mes, ano, datasImportantes }: { mes: number; ano: numbe
       case 'reveillon': return '🎆'
       case 'especial': return '💝'
       case 'futebol': return '⚽'
-      case 'festival': return '🎵'
-      case 'tematico': return '🎃'
       case 'nacional': return '🇧🇷'
+      case 'concorrencia': return '⚠️'
+      case 'brasilia': return '🏛️'
       default: return '📅'
     }
   }
@@ -436,9 +456,9 @@ export default function ComercialPage() {
       case 'reveillon': return <Star className="w-4 h-4 text-yellow-400" />
       case 'especial': return <Heart className="w-4 h-4 text-red-500" />
       case 'futebol': return <Trophy className="w-4 h-4 text-green-500" />
-      case 'festival': return <Music className="w-4 h-4 text-purple-500" />
-      case 'tematico': return <Sparkles className="w-4 h-4 text-orange-500" />
       case 'nacional': return <Flag className="w-4 h-4 text-green-600" />
+      case 'concorrencia': return <Users className="w-4 h-4 text-red-500" />
+      case 'brasilia': return <Flag className="w-4 h-4 text-yellow-500" />
       default: return <Calendar className="w-4 h-4 text-gray-500" />
     }
   }
@@ -593,6 +613,10 @@ export default function ComercialPage() {
             <TabsTrigger value="acoes" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-lg">
               <Target className="w-4 h-4 mr-2" />
               Plano de Ação
+            </TabsTrigger>
+            <TabsTrigger value="concorrencia" className="data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-lg">
+              <Users className="w-4 h-4 mr-2" />
+              Concorrência BSB
             </TabsTrigger>
             <TabsTrigger value="historico" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-lg">
               <TrendingUp className="w-4 h-4 mr-2" />
@@ -883,6 +907,175 @@ export default function ComercialPage() {
                       <li>Marketing 2-3 semanas antes das datas</li>
                       <li>Promoções especiais para reservas antecipadas</li>
                       <li>Parcerias com hotéis/pousadas para turistas</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TAB: CONCORRÊNCIA BSB */}
+          <TabsContent value="concorrencia" className="space-y-6">
+            {/* Alerta */}
+            <Card className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-200 dark:border-red-800">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                    <Users className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-red-800 dark:text-red-300">Monitoramento de Concorrência</h3>
+                    <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+                      Acompanhe sambas, pagodes e eventos de Brasília que podem impactar o movimento. 
+                      Adicione novos eventos conforme identificados via Sympla, Instagram, etc.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Grid de Eventos Fixos */}
+            <Card className="card-dark">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Music className="w-5 h-5 text-red-500" />
+                  Eventos Recorrentes de Brasília
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {EVENTOS_CONCORRENCIA.map((evento, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className={`p-4 rounded-lg border ${
+                        evento.impacto === 'alto' 
+                          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
+                          : evento.impacto === 'medio'
+                            ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                            : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">
+                            {evento.tipo === 'samba' ? '🥁' : 
+                             evento.tipo === 'pagode' ? '🎤' : 
+                             evento.tipo === 'forró' ? '🎻' : 
+                             evento.tipo === 'sertanejo' ? '🤠' : '🎵'}
+                          </span>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{evento.nome}</h4>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          evento.impacto === 'alto' 
+                            ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' 
+                            : evento.impacto === 'medio'
+                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
+                              : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                        }`}>
+                          Impacto {evento.impacto}
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-sm">
+                        <p className="text-gray-600 dark:text-gray-400">
+                          📍 {evento.local} • {evento.frequencia === 'semanal' ? `Toda ${evento.diaSemana}` : evento.frequencia}
+                        </p>
+                        <p className="text-gray-500 dark:text-gray-500 text-xs">
+                          💡 {evento.dica}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Área para adicionar novos */}
+                <div className="mt-6 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    💡 <strong>Dica:</strong> Monitore Sympla, Instagram e grupos de WhatsApp para identificar novos eventos.
+                    <br />
+                    Edite o arquivo <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">page.tsx</code> para adicionar mais eventos à lista.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Datas Específicas de Concorrência 2026 */}
+            {DATAS_CONCORRENCIA_2026.length > 0 && (
+              <Card className="card-dark">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <CalendarDays className="w-5 h-5 text-red-500" />
+                    Datas de Concorrência em 2026
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {DATAS_CONCORRENCIA_2026.map((data, idx) => (
+                      <div key={idx} className="flex items-center gap-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <div className="text-center min-w-[60px]">
+                          <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                            {new Date(data.data + 'T12:00:00').getDate()}
+                          </p>
+                          <p className="text-xs text-red-500">
+                            {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][new Date(data.data + 'T12:00:00').getMonth()]}
+                          </p>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900 dark:text-white">{data.nome}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{data.dica}</p>
+                        </div>
+                        <span className="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-full">
+                          {data.diaSemana}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Dicas de Monitoramento */}
+            <Card className="card-dark">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Lightbulb className="w-5 h-5 text-yellow-500" />
+                  Como Identificar Eventos Concorrentes
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">📱 Redes Sociais</h4>
+                    <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                      <li>• Siga perfis de casas de show e bares de BSB</li>
+                      <li>• Monitore hashtags: #sambabrasilia #pagodebsb</li>
+                      <li>• Acompanhe influenciadores locais de samba</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">🎫 Plataformas de Eventos</h4>
+                    <ul className="text-sm text-purple-700 dark:text-purple-400 space-y-1">
+                      <li>• Sympla - eventos de música em Brasília</li>
+                      <li>• Ingresse - shows e festivais</li>
+                      <li>• Eventim - grandes eventos</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">📰 Mídia Local</h4>
+                    <ul className="text-sm text-green-700 dark:text-green-400 space-y-1">
+                      <li>• Agenda Cultural do Correio Braziliense</li>
+                      <li>• Metrópoles - seção de lazer</li>
+                      <li>• Portais de eventos de BSB</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <h4 className="font-semibold text-orange-800 dark:text-orange-300 mb-2">💬 Networking</h4>
+                    <ul className="text-sm text-orange-700 dark:text-orange-400 space-y-1">
+                      <li>• Converse com clientes sobre onde vão</li>
+                      <li>• Grupos de WhatsApp do setor</li>
+                      <li>• Observe padrões de dias fracos</li>
                     </ul>
                   </div>
                 </div>
