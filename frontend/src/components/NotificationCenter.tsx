@@ -504,7 +504,58 @@ export function NotificationCenter() {
                             ))}
                             {/* Notificações não lidas do banco */}
                             {notificacoesFiltradas.map(notificacao => (
-                              <NotificacaoCard key={notificacao.id} notificacao={notificacao} onMarcarLida={handleMarcarComoLida} onExcluir={handleExcluirNotificacao} onAcao={handleAcaoNotificacao} />
+                              <Card
+                                key={notificacao.id}
+                                className="card-dark p-3 space-y-2 mb-3"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Badge
+                                      variant="outline"
+                                      className={`${getColorByType(notificacao.tipo || 'info')} text-xs`}
+                                    >
+                                      {(notificacao.tipo || 'INFO').toUpperCase()}
+                                    </Badge>
+                                    <Badge
+                                      variant="outline"
+                                      className={`${getColorByPriority(notificacao.prioridade || 'media')} text-xs`}
+                                    >
+                                      {(notificacao.prioridade || 'MEDIA').toUpperCase()}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    {['pendente', 'enviada'].includes(notificacao.status || '') && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleMarcarComoLida(notificacao.id)}
+                                        className="h-6 w-6 p-0"
+                                      >
+                                        <CheckCircle className="h-3 w-3" />
+                                      </Button>
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleExcluirNotificacao(notificacao.id)}
+                                      className="h-6 w-6 p-0"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <h4 className="font-medium text-sm text-gray-900 dark:text-white">
+                                    {notificacao.titulo || 'Notificação sem título'}
+                                  </h4>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    {notificacao.mensagem || 'Sem mensagem'}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                                    {notificacao.criada_em ? formatarTempo(notificacao.criada_em) : 'Sem data'}
+                                  </p>
+                                </div>
+                              </Card>
                             ))}
                           </>
                         )
