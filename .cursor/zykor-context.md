@@ -18,16 +18,14 @@ Stack Tecnologica:
 - IA: Google Gemini 2.0 Flash
 - Notificacoes: Discord Webhooks
 
-Objetivo: Sistema completo para gestao operacional de bares, com analises 
-inteligentes via IA, integracoes automaticas com sistemas financeiros e 
-operacionais, dashboards em tempo real.
-
 ---
 
 ## BARES NO SISTEMA
 
-Bar 1: ORDINARIO BAR (bar_id: 3) - PRINCIPAL
-Bar 2: DEBOCHE BAR (bar_id: 4)
+| ID | Nome | CNPJ | Status |
+|----|------|------|--------|
+| 3 | Ordinario Bar | 12.345.678/0001-90 | PRINCIPAL |
+| 4 | Deboche Bar | 98.765.432/0001-10 | Ativo |
 
 ---
 
@@ -47,10 +45,129 @@ Capacidade:
 - Restante: em pe
 
 Horario de Funcionamento: 18h - 02h (todos os dias)
+Operacao 2026: TODOS OS DIAS DA SEMANA
 
-Operacao 2026: TODOS OS DIAS DA SEMANA (novo!)
-- Antes: Quarta a Domingo
-- Agora: Segunda a Domingo
+Generos Musicais: Pagode (78 eventos) e Samba (76 eventos)
+
+---
+
+## RECORDES HISTORICOS
+
+| Metrica | Valor | Data |
+|---------|-------|------|
+| Maior Faturamento Dia | R$ 147.509,90 | 03/01/2026 |
+| Maior Publico Dia | 1.316 pessoas | 03/01/2026 |
+| Maior Faturamento Mes | R$ 1.850.434 | Dezembro/2025 |
+
+---
+
+## FATURAMENTO ANUAL
+
+| Ano | Faturamento | Clientes | Dias Operacao |
+|-----|-------------|----------|---------------|
+| 2025 | R$ 10.998.108,44 | 104.828 | 248 dias |
+| 2026 | R$ 311.742 (parcial) | 2.898 | 6 dias |
+
+Media diaria 2025: R$ 44.347
+Ticket medio 2025: R$ 104,91
+
+---
+
+## FATURAMENTO MENSAL (Ultimos 12 meses)
+
+| Mes | Faturamento | Media/Dia |
+|-----|-------------|-----------|
+| Jan/2026 | R$ 311.742 (parcial) | R$ 51.957 |
+| Dez/2025 | R$ 1.850.434 | R$ 71.170 |
+| Nov/2025 | R$ 1.648.620 | R$ 63.408 |
+| Out/2025 | R$ 1.339.047 | R$ 53.561 |
+| Set/2025 | R$ 1.036.280 | R$ 45.055 |
+| Ago/2025 | R$ 1.064.208 | R$ 46.269 |
+| Jul/2025 | R$ 1.011.964 | R$ 45.998 |
+| Jun/2025 | R$ 686.078 | R$ 32.670 |
+| Mai/2025 | R$ 611.689 | R$ 32.194 |
+| Abr/2025 | R$ 728.915 | R$ 36.445 |
+| Mar/2025 | R$ 495.275 | R$ 22.512 |
+| Fev/2025 | R$ 525.595 | R$ 25.028 |
+
+---
+
+## MEDIA POR DIA DA SEMANA (Historico Real)
+
+| Dia | Media Fat | Media Clientes | Recorde |
+|-----|-----------|----------------|---------|
+| Sexta | R$ 115.630 | 1.094 | R$ 129.616 |
+| Sabado | R$ 98.869 | 915 | R$ 147.509 |
+| Domingo | R$ 90.418 | 874 | R$ 112.149 |
+| Quarta | R$ 70.229 | 673 | R$ 103.489 |
+| Quinta | R$ 43.277 | 431 | R$ 58.550 |
+| Terca | R$ 36.218 | 376 | R$ 64.665 |
+| Segunda | R$ 21.516 | 208 | R$ 26.749 |
+
+---
+
+## METAS DE FATURAMENTO 2026
+
+| Dia | Meta |
+|-----|------|
+| Segunda | R$ 14.175,82 |
+| Terca | R$ 14.175,82 |
+| Quarta | R$ 35.000,00 |
+| Quinta | R$ 25.000,00 |
+| Sexta | R$ 70.000,00 |
+| Sabado | R$ 60.000,00 |
+| Domingo | R$ 58.000,00 |
+
+Meta semanal: R$ 276.351,64
+Meta mensal: ~R$ 930.000
+
+---
+
+## NPS E AVALIACOES (1.646 respostas)
+
+| Categoria | Nota |
+|-----------|------|
+| Geral | 9.3 |
+| Atendimento | 9.5 |
+| Musica | 9.5 |
+| Ambiente | 9.4 |
+| Limpeza | 9.3 |
+| Preco | 8.4 |
+| Comida | 7.7 |
+| Drinks | 7.4 |
+
+Pontos fortes: Atendimento, Musica, Ambiente
+Pontos a melhorar: Drinks, Comida
+
+---
+
+## TOP ARTISTAS POR FATURAMENTO
+
+| Artista | Shows | Fat. Total | Media/Show | Media Clientes |
+|---------|-------|------------|------------|----------------|
+| Bonsai + Benzadeus + Boka | 2 | R$ 246.810 | R$ 123.405 | 1.140 |
+| Breno Alves + Dj Jess | 3 | R$ 251.709 | R$ 83.903 | 806 |
+| Pagode da Gigi | 2 | R$ 135.664 | R$ 67.832 | 630 |
+| Benzadeus | 26 | R$ 1.693.784 | R$ 65.145 | 563 |
+| Pe no Chao + Dj Vinny | 3 | R$ 147.071 | R$ 49.023 | 490 |
+| Breno Alves | 27 | R$ 1.216.530 | R$ 45.056 | 420 |
+
+---
+
+## TOP 10 MELHORES DIAS
+
+| Data | Faturamento | Clientes | Artista |
+|------|-------------|----------|---------|
+| 03/01/2026 (Sab) | R$ 147.509 | 1.316 | - |
+| 12/12/2025 (Sex) | R$ 129.616 | 1.292 | Bonsai + Benzadeus |
+| 05/12/2025 (Sex) | R$ 127.437 | 1.204 | Bonsai + Benzadeus |
+| 19/12/2025 (Sex) | R$ 126.239 | 1.181 | Clima de Montanha |
+| 13/09/2025 (Sab) | R$ 120.899 | 1.247 | - |
+| 26/12/2025 (Sex) | R$ 119.373 | 1.076 | Benzadeus |
+| 07/11/2025 (Sex) | R$ 116.322 | 1.150 | - |
+| 14/11/2025 (Sex) | R$ 113.648 | 1.108 | - |
+| 19/11/2025 (Qua) | R$ 113.618 | 1.192 | - |
+| 29/11/2025 (Sab) | R$ 113.549 | 1.104 | - |
 
 ---
 
@@ -58,112 +175,85 @@ Operacao 2026: TODOS OS DIAS DA SEMANA (novo!)
 
 SEGUNDA: Segunda da Resenha
 TERCA: 7naRoda + Dj Leo Cabral
-QUARTA: Quarta de Bamba - Breno Alves + DJ (Afrika/Jess Ullun)
-QUINTA: Pe no Ordi - Pe no Chao + DJ (Vinny/Negritah)
-SEXTA: Pagode Vira Lata - Bonsai + DJ (Vinny/Caju) + Benzadeus/Papo em Off + Boka de Sergipe
-SABADO: Legado do Samba - STZ + Sambadona + Pagode convidado + DJ Afrika
-DOMINGO: Nossa Galera / Uma Mesa e Um Pagode - Doze + DJ (Artur Campos/Larbac)
+QUARTA: Quarta de Bamba - Breno Alves + DJ
+QUINTA: Pe no Ordi - Pe no Chao + DJ
+SEXTA: Pagode Vira Lata - Bonsai + Benzadeus + Boka de Sergipe
+SABADO: Legado do Samba - STZ + Sambadona + Pagode convidado
+DOMINGO: Uma Mesa e Um Pagode - Doze
 
 Atracoes especiais Janeiro:
 - 10/01: Inacio Rios e Mosquito (RJ)
 - 17/01: Marina Iris e Marcelle Motta (RJ)
-- 31/01: Niver Ordi (aniversario do bar!)
-
----
-
-## METAS DE FATURAMENTO 2026
-
-| Dia     | Meta          |
-|---------|---------------|
-| Segunda | R$ 14.175,82  |
-| Terca   | R$ 14.175,82  |
-| Quarta  | R$ 35.000,00  |
-| Quinta  | R$ 25.000,00  |
-| Sexta   | R$ 70.000,00  |
-| Sabado  | R$ 60.000,00  |
-| Domingo | R$ 58.000,00  |
-
-Meta semanal combinada: R$ 276.351,64
-Meta mensal estimada: ~R$ 930.000
-
----
-
-## KPIs E INDICADORES
-
-Indicadores Estrategicos (config do bar):
-- Ticket Medio ContaHub: R$ 93
-- Ticket Medio Bar: R$ 77,50
-- Ticket Medio Entrada: R$ 15,50
-- CMV Teorico: 27%
-- CMV Limpo: 31%
-- CMO (Custo Mao de Obra): 20-23%
-- Margem Ideal: 65%
-
-Indicadores de Qualidade:
-- NPS Geral: 70
-- NPS Reservas: 70
-- NPS Felicidade Equipe: 60
-- Media Avaliacoes Google: 4.8
-- Avaliacoes 5 estrelas (Google/Trip): 75-300
-
-Capacidade Operacional:
-- Clientes ativos: 3.000
-- Clientes atendidos/semana: 2.645
-- Reservas totais/semana: 800
-- Reservas presentes: 650 (81%)
-
-Metas Cockpit Vendas:
-- Qui+Sab+Dom: R$ 141.000 / R$ 91.000
-- Couvert + Atracoes: R$ 112
-- Faturamento ate 19h: 15%
-
-Metas Cockpit Produtos:
-- Stockout Bar: 1
-- Stockout Drinks: 3
-- Stockout Comidas: 3
-- Tempo Saida Bar: 3 min
-- Tempo Saida Cozinha: 10 min
+- 31/01: NIVER ORDI (aniversario do bar!)
 
 ---
 
 ## PRODUTOS MAIS VENDIDOS (TOP 15)
 
-1. Original 600ml - 16.256 vendidos - R$ 266.796
-2. Agua sem Gas 500ml - 15.949 vendidos - R$ 93.932
-3. Spaten 600ml - 13.651 vendidos - R$ 229.974
-4. Agua com Gas 500ml - 8.416 vendidos - R$ 58.647
-5. Stella Artois 330ml Pure Gold - 7.533 vendidos - R$ 90.657
-6. [HH] Spaten 600mL - 7.296 vendidos - R$ 105.606
-7. [HH] Moscow Mule - 7.081 vendidos - R$ 99.228
-8. Corona 330ml - 5.867 vendidos - R$ 67.964
-9. [HH] Caipirinha Limao - 4.549 vendidos - R$ 66.213
-10. [HH] Original 600mL - 4.235 vendidos - R$ 66.429
-11. Corona 600mL - 4.188 vendidos - R$ 80.272
-12. Corona Zero 330ml - 3.796 vendidos - R$ 47.611
-13. Caipirinha Limao - 3.542 vendidos - R$ 84.939
-14. Guarana Antarctica Lata - 2.986 vendidos - R$ 13.146
-15. Baldinho Stella Artois 4Un. 600mL - 2.897 vendidos - R$ 86.530
+1. Original 600ml - 16.256 un - R$ 266.796
+2. Agua sem Gas 500ml - 15.949 un - R$ 93.932
+3. Spaten 600ml - 13.651 un - R$ 229.974
+4. Agua com Gas 500ml - 8.416 un - R$ 58.647
+5. Stella Artois 330ml - 7.533 un - R$ 90.657
+6. [HH] Spaten 600mL - 7.296 un - R$ 105.606
+7. [HH] Moscow Mule - 7.081 un - R$ 99.228
+8. Corona 330ml - 5.867 un - R$ 67.964
+9. [HH] Caipirinha Limao - 4.549 un - R$ 66.213
+10. [HH] Original 600mL - 4.235 un - R$ 66.429
 
 ---
 
-## CATEGORIAS DE PRODUTOS
+## CATEGORIAS DE PRODUTOS (Por Volume)
 
-Por volume de vendas:
 1. Cervejas - 42 produtos - 69.003 vendidos
 2. Bebidas Nao Alcoolicas - 30 produtos - 42.149 vendidos
 3. Happy Hour - 26 produtos - 34.146 vendidos
 4. Drinks Classicos - 29 produtos - 16.174 vendidos
 5. Baldes - 14 produtos - 11.545 vendidos
-6. Pratos Compartilhar (4 pessoas) - 22 produtos - 10.133 vendidos
+6. Pratos Compartilhar - 22 produtos - 10.133 vendidos
 7. Doses - 41 produtos - 9.320 vendidos
 8. Pratos Individuais - 20 produtos - 7.021 vendidos
 9. Drinks Autorais - 23 produtos - 5.228 vendidos
 10. Bebidas Prontas - 8 produtos - 3.958 vendidos
-11. Drinks sem Alcool - 7 produtos - 2.581 vendidos
-12. Sanduiches - 9 produtos - 2.531 vendidos
-13. Venda Volante - 7 produtos - 2.306 vendidos
-14. Vinhos - 37 produtos - 521 vendidos
-15. Sobremesas - 4 produtos - 342 vendidos
+
+---
+
+## KPIS OPERACIONAIS (Configuracao do Bar)
+
+| Metrica | Valor |
+|---------|-------|
+| Ticket Medio ContaHub | R$ 93 |
+| Ticket Medio Bar | R$ 77,50 |
+| Ticket Medio Entrada | R$ 15,50 |
+| CMV Teorico | 27% |
+| CMV Limpo | 31% |
+| CMO (Custo Mao de Obra) | 20-23% |
+| Margem Ideal | 65% |
+| Stockout Medio | 9.3% |
+
+---
+
+## USUARIOS DO SISTEMA
+
+| Nome | Email | Cargo |
+|------|-------|-------|
+| Carlos Miranda (Cadu) | cadu@grupobizu.com.br | Admin |
+| Diogo Lombardi | diogo@grupobizu.com.br | Admin |
+| Pedro Gonzalez (Gonza) | pedrogonzaapsm@gmail.com | Admin |
+| Rodrigo Oliveira | rodrigo@grupomenosemais.com.br | Admin |
+| Isaias | isaias.carneiro03@gmail.com | Producao |
+
+---
+
+## CHECKLISTS ATIVOS
+
+| Nome | Tipo |
+|------|------|
+| Checklist Abertura Cozinha | Abertura |
+| Checklist Fechamento Bar | Fechamento |
+| Manutencao Equipamentos | Manutencao |
+| Seguranca Semanal | Seguranca |
+| Limpeza Banheiros | Limpeza |
 
 ---
 
@@ -182,158 +272,49 @@ Meses FRACOS:
 
 ## INTEGRACOES ATIVAS
 
-| Sistema   | Funcao                    | Status     | Edge Function             |
-|-----------|---------------------------|------------|---------------------------|
-| ContaHub  | Faturamento, PAX, Tickets | ATIVO      | contahub-sync-automatico  |
-| Nibo      | Custos, Pagamentos        | ATIVO      | nibo-sync                 |
-| Discord   | Notificacoes              | ATIVO      | discord-notification      |
-| Gemini    | Analise IA                | ATIVO      | agente-ia-analyzer        |
-| Yuzer     | Reservas                  | INTEGRANDO | yuzer-sync                |
-| Sympla    | Eventos/Ingressos         | INTEGRANDO | sympla-sync               |
-| Getin     | Lista/Entrada             | INTEGRANDO | getin-sync                |
-| ZigPay    | Pagamentos/KDS            | PLANEJADO  | -                         |
-| Pluggy    | Open Finance              | PLANEJADO  | -                         |
-| Inter     | Banco/Pagamentos          | PLANEJADO  | -                         |
+| Sistema | Funcao | Status |
+|---------|--------|--------|
+| ContaHub | Faturamento, PAX, Tickets | ATIVO |
+| Nibo | Custos, Pagamentos | ATIVO |
+| Discord | Notificacoes | ATIVO |
+| Gemini | Analise IA | ATIVO |
+| Yuzer | Reservas | INTEGRANDO |
+| Sympla | Eventos/Ingressos | INTEGRANDO |
+| Getin | Lista/Entrada | INTEGRANDO |
 
 ---
 
-## AGENDAMENTOS PG_CRON (ATIVOS)
+## AGENDAMENTOS PG_CRON PRINCIPAIS
 
-Horarios em UTC (Brasilia = UTC-3)
-
-DIARIOS:
-- 06:00 (03:00 BRT): sync-insumos-receitas
-- 08:00 (05:00 BRT): sync-nps
-- 09:00 (06:00 BRT): verificacao-confiabilidade, sync-cliente-estatisticas, sync-conhecimento
-- 10:00 (07:00 BRT): contahub-sync-diario (Ordinario)
-- 10:15 (07:15 BRT): contahub-sync-diario (Deboche)
-- 10:30 (07:30 BRT): sync-eventos
-- 11:00 (08:00 BRT): alertas-proativos-manha, recalculo-eventos, validacao-diaria
-- 13:00 (10:00 BRT): agente-analise-diaria, nibo-sync
-- 21:00 (18:00 BRT): sync-contagem, alertas-proativos-tarde
-- 23:00 (20:00 BRT): stockout-sync, auditoria-automatica
-
-SEMANAIS (Segunda):
-- 06:00 (03:00 BRT): contahub-weekly-correction
-- 09:00 (06:00 BRT): sympla-sync, desempenho-semanal
-- 10:00 (07:00 BRT): cmv-semanal-automatico
-- 11:00 (08:00 BRT): agente-analise-semanal
-- 12:00 (09:00 BRT): relatorio-metas-semanal
-
-MENSAIS:
-- Dia 2, 11:00 (08:00 BRT): agente-analise-mensal
-- Ultimos dias do mes: nibo-monthly-validation
-
-A CADA 15 MIN:
-- checklist-auto-scheduler
-- processar-alertas-discord
-
-A CADA 2 HORAS:
-- getin-continuous-sync
-- recalculo-eventos-continuo
-
----
-
-## TABELAS PRINCIPAIS DO BANCO
-
-DADOS OPERACIONAIS:
-- eventos / eventos_base - Dados de eventos
-- contahub_vendas - Vendas por comanda
-- contahub_prodporhora - Vendas por produto/hora
-- contahub_fatporhora - Faturamento por hora
-- contahub_pagamentos - Pagamentos
-- contahub_analitico - Dados analiticos
-- contahub_stockout - Rupturas de estoque
-- reservas - Reservas Yuzer
-- sympla_events / sympla_participants - Dados Sympla
-
-SISTEMA DE AGENTES IA:
-- agente_insights - Insights gerados pela IA
-- agente_base_conhecimento - Regras de negocio
-- agente_memoria - Memoria persistente
-- agente_padroes - Padroes detectados
-- agente_regras_customizadas - Regras aprendidas
-- agente_usage_metrics - Metricas de uso IA
-
-PRODUTOS E ESTOQUE:
-- produtos - Cadastro de produtos
-- contagem_estoque_produtos - Contagens
-- insumos / insumo_fornecedor - Insumos e precos
-- fichas_tecnicas / fichas_tecnicas_insumos - Receitas
-
-CONFIGURACOES:
-- bars - Configuracao dos bares
-- usuarios - Usuarios do sistema
-- metas - Metas por bar/periodo
-- credenciais - Credenciais de integracoes
-
----
-
-## FUNCIONALIDADES IMPLEMENTADAS
-
-ANALISE DIARIA (agente-analise-diaria):
-- Busca ultima operacao REAL do mesmo dia (ignora fechados)
-- Compara com ultimas 4 operacoes do mesmo dia da semana
-- Calcula estatisticas historicas (media, tendencia)
-- ROI de atracao (custo vs retorno)
-- Analise de margens e gaps
-- Analise profunda com Gemini 2.0 Flash
-- Fallback enriquecido quando IA indisponivel
-- Envio automatico para Discord
-
-SYNC AUTOMATICO:
-- ContaHub: Faturamento, PAX, Tickets, Vendas
-- Nibo: Custos, Pagamentos, Fluxo de caixa
-- Sympla: Eventos e participantes
-- Getin: Listas de entrada
-- NPS: Avaliacoes de clientes
-- Fichas Tecnicas: CMV teorico
-
-ALERTAS E NOTIFICACOES:
-- Alertas proativos (manha e tarde)
-- Relatorio matinal Discord
-- Alertas de stockout
-- Alertas de metas
-
-CHECKLISTS:
-- Auto-scheduler a cada 15 min
-- Diferentes tipos por turno
-- Acompanhamento por funcionario
-
----
-
-## SECRETS/ENV VARS
-
-| Secret                 | Descricao              | Status      |
-|------------------------|------------------------|-------------|
-| GEMINI_API_KEY         | API Key Google Gemini  | CONFIGURADO |
-| SUPABASE_SERVICE_ROLE  | Key de servico         | CONFIGURADO |
-| DISCORD_WEBHOOK_*      | Webhooks Discord       | CONFIGURADO |
-| CONTAHUB_*             | Credenciais ContaHub   | CONFIGURADO |
-| NIBO_*                 | Credenciais Nibo       | CONFIGURADO |
-| YUZER_*                | Credenciais Yuzer      | CONFIGURADO |
-| SYMPLA_*               | Credenciais Sympla     | CONFIGURADO |
+| Horario BRT | Job | Funcao |
+|-------------|-----|--------|
+| 03:00 | sync-insumos-receitas | Sync insumos |
+| 05:00 | sync-nps | Sync NPS |
+| 06:00 | desempenho-semanal (Seg) | Relatorio semanal |
+| 07:00 | contahub-sync | Sync ContaHub |
+| 07:30 | sync-eventos | Recalculo eventos |
+| 08:00 | alertas-proativos | Alertas manha |
+| 10:00 | agente-analise-diaria | Analise IA |
+| 10:00 | nibo-sync | Sync Nibo |
+| 18:00 | sync-contagem | Contagem estoque |
+| 20:00 | stockout-sync | Rupturas |
 
 ---
 
 ## PONTOS DE ATENCAO
 
 1. Quota Gemini: API tem limite. Sistema tem fallback.
-2. Operacao 7 dias: A partir de 2026, bar abre todos os dias!
-3. Consolidacao: Evitar criar novas Edge Functions - integrar existentes.
-4. Dark Mode: Todas as paginas DEVEM suportar dark mode.
-5. Copa do Mundo 2026: Ano excepcional para faturamento.
+2. Operacao 7 dias: Bar abre todos os dias em 2026!
+3. Consolidacao: Evitar criar novas Edge Functions.
+4. Dark Mode: Obrigatorio em todas as paginas.
+5. Copa do Mundo 2026: Ano excepcional!
 6. Aniversario bar: 31/01 - Niver Ordi.
+7. NPS Drinks/Comida: Pontos a melhorar (7.4 e 7.7).
 
 ---
 
-## PROXIMOS DESENVOLVIMENTOS
+## ARQUIVOS DE CONTEXTO RELACIONADOS
 
-Ver arquivo: .cursor/ideias.md
-
-Prioridades:
-1. Eventos externos (shows, jogos) - EM ANDAMENTO
-2. Analise de atracoes nas redes sociais
-3. Dashboard de performance de atracoes
-4. Integracao Yuzer completa
-5. Previsao de demanda com IA
+- .cursor/ideias.md - Ideias em andamento
+- .cursor/decisoes.md - Decisoes arquiteturais
+- .cursor/historico.md - Historico de implementacoes
