@@ -676,12 +676,14 @@ async function fetchDataForIntent(
     }
 
     case 'resumo': {
-      // Buscar resumo geral
+      // Buscar resumo geral - apenas eventos até hoje (não futuros)
+      const hojeResumo = new Date().toISOString().split('T')[0];
       const { data: eventosRecentesRaw } = await supabase
         .from('eventos_base')
         .select('*')
         .eq('bar_id', barId)
         .eq('ativo', true)
+        .lte('data_evento', hojeResumo)
         .order('data_evento', { ascending: false })
         .limit(7);
 
@@ -740,12 +742,14 @@ async function fetchDataForIntent(
     }
 
     default: {
-      // Buscar resumo geral
+      // Buscar resumo geral - apenas eventos até hoje (não futuros)
+      const hojeDefault = new Date().toISOString().split('T')[0];
       const { data: eventosDefaultRaw } = await supabase
         .from('eventos_base')
         .select('*')
         .eq('bar_id', barId)
         .eq('ativo', true)
+        .lte('data_evento', hojeDefault)
         .order('data_evento', { ascending: false })
         .limit(7);
 

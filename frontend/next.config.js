@@ -88,31 +88,42 @@ const nextConfig = {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
-        // Ignorar pastas de sistema do Windows e diretórios comuns
-        ignored: [
-          '**/node_modules/**',
-          '**/.git/**',
-          '**/.next/**',
-          '**/dist/**',
-          '**/build/**',
-          '**/System Volume Information/**',
-          '**/$RECYCLE.BIN/**',
-          '**/$Recycle.Bin/**',
-          '**/Recovery/**',
-          '**/Config.Msi/**',
-          '**/Windows/**',
-          '**/ProgramData/**',
-          '**/Program Files/**',
-          '**/Program Files (x86)/**',
-          // Arquivos de sistema Windows na raiz
-          '**/pagefile.sys',
-          '**/hiberfil.sys',
-          '**/swapfile.sys',
-          '**/DumpStack.log.tmp',
-          '**/DumpStack.log',
-          '**/bootmgr',
-          '**/BOOTNXT',
-        ],
+        // Ignorar pastas de sistema do Windows usando função para maior controle
+        ignored: (filePath) => {
+          // Ignorar pastas do sistema Windows (caminhos absolutos)
+          const systemPaths = [
+            'System Volume Information',
+            '$RECYCLE.BIN',
+            '$Recycle.Bin',
+            'Recovery',
+            'Config.Msi',
+            'Windows',
+            'ProgramData',
+            'Program Files',
+            'Program Files (x86)',
+            'pagefile.sys',
+            'hiberfil.sys',
+            'swapfile.sys',
+            'DumpStack.log',
+            'bootmgr',
+            'BOOTNXT',
+          ];
+          
+          // Verificar se o caminho contém alguma pasta do sistema
+          const normalizedPath = filePath.replace(/\\/g, '/');
+          if (systemPaths.some(sp => normalizedPath.includes(sp))) {
+            return true;
+          }
+          
+          // Ignorar node_modules, .git, .next
+          if (normalizedPath.includes('/node_modules/') || 
+              normalizedPath.includes('/.git/') || 
+              normalizedPath.includes('/.next/')) {
+            return true;
+          }
+          
+          return false;
+        },
       };
       // Não ajustar devtool em desenvolvimento para evitar regressões e warnings do Next.js
     }
