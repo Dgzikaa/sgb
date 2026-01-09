@@ -529,30 +529,38 @@ export function NotificationCenter() {
                         </div>
 
                         {/* Ações da Notificação */}
-                        {notificacao.acoes &&
-                          Array.isArray(notificacao.acoes) &&
-                          notificacao.acoes.length > 0 && (
-                            <div className="flex flex-wrap gap-2 pt-2">
-                              {notificacao.acoes.map((acao, index) => (
-                                <Button
-                                  key={index}
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleAcaoNotificacao(acao)}
-                                  className="h-7 text-xs px-3"
-                                  leftIcon={
-                                    acao.action === 'redirect' ? (
-                                      <ExternalLink className="h-3 w-3" />
-                                    ) : acao.action === 'download' ? (
-                                      <Info className="h-3 w-3" />
-                                    ) : undefined
-                                  }
-                                >
-                                  {acao.label || 'Ação'}
-                                </Button>
-                              ))}
-                            </div>
-                          )}
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {/* Botão Ver Detalhes - sempre presente */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              router.push(`/notificacoes/${notificacao.id}`);
+                              setIsOpen(false);
+                            }}
+                            className="h-7 text-xs px-3"
+                            leftIcon={<Info className="h-3 w-3" />}
+                          >
+                            Ver Detalhes
+                          </Button>
+                          
+                          {/* Ações específicas da notificação */}
+                          {notificacao.acoes &&
+                            Array.isArray(notificacao.acoes) &&
+                            notificacao.acoes.length > 0 &&
+                            notificacao.acoes.map((acao, index) => (
+                              <Button
+                                key={index}
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleAcaoNotificacao(acao)}
+                                className="h-7 text-xs px-3"
+                                leftIcon={<ExternalLink className="h-3 w-3" />}
+                              >
+                                {acao.label || 'Ir'}
+                              </Button>
+                            ))}
+                        </div>
                       </Card>
                     ))
                   )}

@@ -12,6 +12,11 @@ interface Alerta {
   mensagem: string
   dados?: Record<string, unknown>
   acoes_sugeridas?: string[]
+  // Campos para referência específica
+  referencia_tipo?: string  // 'evento' | 'receita' | 'reserva' | 'checklist' | 'produto'
+  referencia_id?: string | number
+  referencia_nome?: string
+  url?: string // URL direta para visualização
 }
 
 interface AnaliseResultado {
@@ -70,7 +75,11 @@ class AlertasInteligentesService {
           'Revisar atração/evento do dia',
           'Verificar se houve problemas operacionais',
           'Comparar com mesma data do mês anterior'
-        ]
+        ],
+        referencia_tipo: 'evento',
+        referencia_id: eventoOntem.id,
+        referencia_nome: `Evento ${ontemStr}`,
+        url: '/estrategico/visao-geral'
       })
     } else if (meta > 0 && faturamento >= meta * 1.2) {
       const percentual = ((faturamento / meta) * 100).toFixed(1)
@@ -79,7 +88,11 @@ class AlertasInteligentesService {
         categoria: 'faturamento',
         titulo: '🎉 Meta superada!',
         mensagem: `Ontem (${ontemStr}) o faturamento foi de R$ ${faturamento.toLocaleString('pt-BR')} (${percentual}% da meta!)`,
-        dados: { faturamento, meta, percentual: parseFloat(percentual), data: ontemStr }
+        dados: { faturamento, meta, percentual: parseFloat(percentual), data: ontemStr },
+        referencia_tipo: 'evento',
+        referencia_id: eventoOntem.id,
+        referencia_nome: `Evento ${ontemStr}`,
+        url: '/estrategico/visao-geral'
       })
     }
 
@@ -293,6 +306,7 @@ class AlertasInteligentesService {
       .neq('status', 'concluido')
 
     if (!error && checklistsNaoConcluidos && checklistsNaoConcluidos.length > 0) {
+      const primeiroChecklist = checklistsNaoConcluidos[0] as any
       alertas.push({
         tipo: 'aviso',
         categoria: 'checklists',
@@ -300,13 +314,18 @@ class AlertasInteligentesService {
         mensagem: `${checklistsNaoConcluidos.length} checklist(s) de ontem não foi(ram) concluído(s)`,
         dados: { 
           quantidade: checklistsNaoConcluidos.length,
-          checklists: checklistsNaoConcluidos.slice(0, 5).map((c: any) => c.template?.nome || 'Sem nome')
+          checklists: checklistsNaoConcluidos.slice(0, 5).map((c: any) => c.template?.nome || 'Sem nome'),
+          responsaveis: checklistsNaoConcluidos.slice(0, 5).map((c: any) => c.usuario?.nome || 'Não definido')
         },
         acoes_sugeridas: [
           'Verificar com os responsáveis',
           'Revisar horários dos checklists',
           'Considerar ajustar templates'
-        ]
+        ],
+        referencia_tipo: 'checklist',
+        referencia_id: primeiroChecklist?.id,
+        referencia_nome: primeiroChecklist?.template?.nome || 'Checklist pendente',
+        url: '/configuracoes/checklists'
       })
     }
 
@@ -547,16 +566,20 @@ class AlertasInteligentesService {
             horario: r.reservation_time,
             pessoas: r.people
           }))
-        }
+        },
+        referencia_tipo: 'reservas',
+        referencia_nome: `${reservasHoje.length} reservas para ${hojeStr}`,
+        url: '/ferramentas/calendario'
       })
 
       // Alerta para reservas pendentes sem confirmação
       if (pendentes.length > 0) {
+        const primeiraReserva = pendentes[0]
         alertas.push({
           tipo: 'aviso',
           categoria: 'reservas',
           titulo: '⚠️ Reservas Pendentes de Confirmação',
-          mensagem: `${pendentes.length} reserva(s) para hoje ainda não foi(ram) confirmada(s)`,
+          mensagem: `${pendentes.length} reserva(s) para hoje ainda não foi(ram) confirmada(s): ${pendentes.slice(0, 3).map(r => r.customer_name).join(', ')}`,
           dados: { 
             pendentes: pendentes.map(r => ({
               nome: r.customer_name,
@@ -568,7 +591,11 @@ class AlertasInteligentesService {
             'Ligar para confirmar reservas',
             'Enviar mensagem de confirmação',
             'Atualizar status no sistema'
-          ]
+          ],
+          referencia_tipo: 'reserva',
+          referencia_id: primeiraReserva.id,
+          referencia_nome: `${primeiraReserva.customer_name} - ${primeiraReserva.reservation_time}`,
+          url: '/ferramentas/calendario'
         })
       }
     }

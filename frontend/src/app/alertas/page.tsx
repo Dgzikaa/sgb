@@ -315,6 +315,7 @@ export default function AlertasPage() {
                                 </Button>
                               )}
                               
+                              {/* Link para página de contexto/destino */}
                               {alerta.url && (
                                 <Link href={alerta.url}>
                                   <Button
@@ -324,7 +325,7 @@ export default function AlertasPage() {
                                     onClick={() => marcarComoLido(alerta.id)}
                                   >
                                     <ExternalLink className="w-3 h-3 mr-1" />
-                                    Ver detalhes
+                                    Ir para {alerta.categoria}
                                   </Button>
                                 </Link>
                               )}
