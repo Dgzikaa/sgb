@@ -1,426 +1,415 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-// ========================================
-// CONFIGURAÇÃO DO AGENTE
-// ========================================
-
-// Palavras-chave para identificar eventos de samba/pagode
-const KEYWORDS_SAMBA_PAGODE = [
-  'samba', 'pagode', 'roda de samba', 'pagodinho', 'pagodão',
-  'samba rock', 'samba de raiz', 'samba enredo', 'boteco',
-  'feijoada', 'chorinho', 'choro', 'mpb ao vivo',
-  'samba da', 'samba do', 'pagode do', 'pagode da',
-  'bloco de', 'bloco do', 'bloco da', 'batuque',
-  'grupo revelação', 'fundo de quintal', 'zeca pagodinho',
-  'thiaguinho', 'ferrugem', 'mumuzinho', 'dilsinho',
-  'péricles', 'turma do pagode', 'sorriso maroto'
-];
-
-// Palavras que indicam que NÃO é concorrência (falso positivo)
-const KEYWORDS_IGNORAR = [
-  'aula de', 'curso de', 'workshop', 'oficina',
-  'infantil', 'kids', 'criança', 'família',
-  'gospel', 'igreja', 'religioso'
-];
-
-// Locais em Brasília/DF para filtrar
-const LOCAIS_BRASILIA = [
-  'brasília', 'brasilia', 'df', 'distrito federal',
-  'asa sul', 'asa norte', 'lago sul', 'lago norte',
-  'sudoeste', 'noroeste', 'guará', 'taguatinga',
-  'ceilândia', 'ceilandia', 'samambaia', 'águas claras',
-  'vicente pires', 'riacho fundo', 'núcleo bandeirante',
-  'gama', 'santa maria', 'recanto das emas', 'sobradinho',
-  'planaltina', 'paranoá', 'são sebastião', 'jardim botânico'
-];
-
-// ========================================
-// FUNÇÕES DE BUSCA
-// ========================================
-
-// Buscar eventos públicos do Sympla (sem autenticação)
-async function buscarEventosSympla(): Promise<any[]> {
-  console.log('🔍 Buscando eventos no Sympla...');
-  
-  const eventos: any[] = [];
-  
-  try {
-    // Sympla tem uma página de busca pública que podemos acessar
-    // Vamos buscar por categorias relevantes em Brasília
-    const categorias = ['shows', 'festas', 'bares'];
-    
-    for (const categoria of categorias) {
-      const url = `https://www.sympla.com.br/api/v1/search?city=Bras%C3%ADlia&category=${categoria}&size=50`;
-      
-      try {
-        const response = await fetch(url, {
-          headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (compatible; ZykorBot/1.0)'
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.events) {
-            eventos.push(...data.events.map((e: any) => ({
-              ...e,
-              fonte: 'sympla'
-            })));
-          }
-        }
-      } catch (err) {
-        console.log(`   ⚠️ Erro ao buscar categoria ${categoria}:`, err);
-      }
-    }
-    
-    console.log(`   ✅ ${eventos.length} eventos encontrados no Sympla`);
-  } catch (error) {
-    console.error('❌ Erro ao buscar Sympla:', error);
-  }
-  
-  return eventos;
 }
 
-// Buscar eventos do Ingresse
-async function buscarEventosIngresse(): Promise<any[]> {
-  console.log('🔍 Buscando eventos no Ingresse...');
-  
-  const eventos: any[] = [];
-  
+// ========================================
+// ARTISTAS FAMOSOS DE PAGODE/SAMBA
+// ========================================
+const ARTISTAS_FAMOSOS = [
+  'Thiaguinho', 'Ferrugem', 'Dilsinho', 'Péricles', 'Sorriso Maroto',
+  'Menos é Mais', 'Turma do Pagode', 'Belo', 'Xande de Pilares', 'Rodriguinho',
+  'Mumuzinho', 'Pixote', 'Revelação', 'Exaltasamba', 'Raça Negra',
+  'Alexandre Pires', 'Grupo Clareou', 'Imaginasamba', 'Jeito Moleque',
+  'Zeca Pagodinho', 'Jorge Aragão', 'Alcione', 'Diogo Nogueira', 'Maria Rita',
+  'Seu Jorge', 'Arlindo Cruz', 'Beth Carvalho', 'Martinho da Vila',
+  'R2 na Praia', 'Pagode do Adame', 'É o Tchan', 'Harmonia do Samba',
+  'Parangolé', 'Psirico', 'Léo Santana', 'La Fúria'
+]
+
+// Casas de show famosas em Brasília
+const CASAS_BRASILIA = [
+  'Funn', 'Arena BRB Mané Garrincha', 'Estádio Nacional', 'Centro de Convenções',
+  'Pontão do Lago Sul', 'Pier 21', 'Villa Mix', 'Quiosque', 'Iate Clube',
+  'Minas Brasília', 'Nilópolis Clube', 'SESI', 'Parque da Cidade',
+  'Parque Ana Lídia', 'Ulysses Guimarães'
+]
+
+// ========================================
+// FUNÇÃO PARA BUSCAR NO SYMPLA
+// ========================================
+async function buscarSympla(termo: string, pagina = 1): Promise<any[]> {
   try {
-    // API pública do Ingresse para buscar eventos em Brasília
-    const url = 'https://api.ingresse.com/search?state=DF&size=50&orderBy=sessions.dateTime';
+    // Sympla API pública de descoberta
+    const url = `https://www.sympla.com.br/api/v1/events/search?q=${encodeURIComponent(termo)}&state=DF&city=Brasília&page=${pagina}&limit=50`
     
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (compatible; ZykorBot/1.0)'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       }
-    });
+    })
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.data) {
-        eventos.push(...data.data.map((e: any) => ({
-          id: e.id,
-          name: e.title,
-          description: e.description,
-          venue: e.venue?.name,
-          address: e.venue?.address,
-          city: e.venue?.city,
-          date: e.sessions?.[0]?.dateTime,
-          url: e.link,
-          image: e.poster,
-          fonte: 'ingresse'
-        })));
-      }
+    if (!response.ok) {
+      console.log(`Sympla search API returned ${response.status} for "${termo}"`)
+      return []
     }
     
-    console.log(`   ✅ ${eventos.length} eventos encontrados no Ingresse`);
+    const data = await response.json()
+    return data.events || data.data || []
   } catch (error) {
-    console.error('❌ Erro ao buscar Ingresse:', error);
+    console.error(`Erro ao buscar Sympla para "${termo}":`, error)
+    return []
   }
-  
-  return eventos;
 }
 
-// Buscar eventos do Eventim
-async function buscarEventosEventim(): Promise<any[]> {
-  console.log('🔍 Buscando eventos no Eventim...');
-  
-  const eventos: any[] = [];
-  
+// ========================================
+// FUNÇÃO PARA BUSCAR NO SYMPLA VIA SCRAPING
+// ========================================
+async function buscarSympláScraping(termo: string): Promise<any[]> {
   try {
-    // API/página do Eventim para Brasília
-    const url = 'https://www.eventim.com.br/city/brasilia-55/';
+    const url = `https://www.sympla.com.br/eventos/brasilia-df?s=${encodeURIComponent(termo)}`
     
-    // Eventim não tem API pública fácil, então vamos apenas logar
-    console.log('   ⚠️ Eventim requer scraping mais avançado - pulando por agora');
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'text/html,application/xhtml+xml',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    })
+    
+    if (!response.ok) return []
+    
+    const html = await response.text()
+    
+    // Extrair dados do JSON embutido na página
+    const jsonMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)
+    const eventos: any[] = []
+    
+    if (jsonMatch) {
+      for (const match of jsonMatch) {
+        try {
+          const jsonStr = match.replace(/<script type="application\/ld\+json">/, '').replace(/<\/script>/, '')
+          const data = JSON.parse(jsonStr)
+          if (data['@type'] === 'Event' || data['@type'] === 'MusicEvent') {
+            eventos.push(data)
+          }
+        } catch (e) {
+          // Ignorar erros de parse
+        }
+      }
+    }
+    
+    // Também tentar extrair do __NEXT_DATA__
+    const nextDataMatch = html.match(/<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/)
+    if (nextDataMatch) {
+      try {
+        const nextData = JSON.parse(nextDataMatch[1])
+        const pageProps = nextData?.props?.pageProps
+        if (pageProps?.events) {
+          eventos.push(...pageProps.events)
+        }
+      } catch (e) {
+        // Ignorar
+      }
+    }
+    
+    return eventos
   } catch (error) {
-    console.error('❌ Erro ao buscar Eventim:', error);
+    console.error(`Erro no scraping Sympla para "${termo}":`, error)
+    return []
   }
-  
-  return eventos;
 }
 
 // ========================================
-// FUNÇÕES DE ANÁLISE
+// FUNÇÃO PARA BUSCAR NO INGRESSE
 // ========================================
+async function buscarIngresse(termo: string): Promise<any[]> {
+  try {
+    const url = `https://www.ingresse.com/api/search?term=${encodeURIComponent(termo)}&state=DF&size=50`
+    
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    })
+    
+    if (!response.ok) {
+      console.log(`Ingresse API returned ${response.status} for "${termo}"`)
+      return []
+    }
+    
+    const data = await response.json()
+    return data.data || data.events || []
+  } catch (error) {
+    console.error(`Erro ao buscar Ingresse para "${termo}":`, error)
+    return []
+  }
+}
 
-// Verificar se o evento é de samba/pagode
-function ehEventoSambaPagode(evento: any): { match: boolean; tipo: string; score: number } {
-  const texto = `${evento.name || ''} ${evento.description || ''} ${evento.title || ''}`.toLowerCase();
+// ========================================
+// FUNÇÃO PARA BUSCAR NO EVENTBRITE
+// ========================================
+async function buscarEventbrite(termo: string): Promise<any[]> {
+  try {
+    const url = `https://www.eventbrite.com.br/api/v3/destination/search/?q=${encodeURIComponent(termo)}&place=Brasília&dates=future`
+    
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    })
+    
+    if (!response.ok) return []
+    
+    const data = await response.json()
+    return data.events?.results || []
+  } catch (error) {
+    console.error(`Erro ao buscar Eventbrite para "${termo}":`, error)
+    return []
+  }
+}
+
+// ========================================
+// ANALISAR IMPACTO DO EVENTO
+// ========================================
+function analisarImpacto(evento: any): 'alto' | 'medio' | 'baixo' {
+  const nome = (evento.nome || evento.name || evento.title || '').toLowerCase()
+  const descricao = (evento.descricao || evento.description || '').toLowerCase()
+  const local = (evento.local_nome || evento.venue?.name || evento.location?.name || '').toLowerCase()
+  const textoCompleto = `${nome} ${descricao} ${local}`
   
-  // Verificar se tem palavras para ignorar
-  for (const keyword of KEYWORDS_IGNORAR) {
-    if (texto.includes(keyword)) {
-      return { match: false, tipo: '', score: 0 };
+  // Verificar artistas famosos
+  for (const artista of ARTISTAS_FAMOSOS) {
+    if (textoCompleto.includes(artista.toLowerCase())) {
+      return 'alto'
     }
   }
   
-  // Contar matches de keywords
-  let score = 0;
-  let tipoEncontrado = 'outro';
+  // Verificar casas grandes
+  for (const casa of CASAS_BRASILIA) {
+    if (textoCompleto.includes(casa.toLowerCase())) {
+      // Se for em casa grande, pelo menos médio
+      return 'medio'
+    }
+  }
   
-  for (const keyword of KEYWORDS_SAMBA_PAGODE) {
-    if (texto.includes(keyword)) {
-      score++;
-      
-      // Determinar tipo principal
-      if (keyword.includes('samba') && tipoEncontrado === 'outro') {
-        tipoEncontrado = 'samba';
-      } else if (keyword.includes('pagode')) {
-        tipoEncontrado = 'pagode';
-      } else if (keyword.includes('forro') || keyword.includes('forró')) {
-        tipoEncontrado = 'forro';
+  // Verificar palavras-chave de eventos grandes
+  const palavrasAlto = ['festival', 'arena', 'estádio', 'show nacional', 'mega', 'grande']
+  for (const palavra of palavrasAlto) {
+    if (textoCompleto.includes(palavra)) {
+      return 'alto'
+    }
+  }
+  
+  return 'baixo'
+}
+
+// ========================================
+// EXTRAIR DATA DO EVENTO
+// ========================================
+function extrairData(evento: any): string | null {
+  const possiveisData = [
+    evento.data_evento,
+    evento.date,
+    evento.start_date,
+    evento.startDate,
+    evento.data,
+    evento.event_date,
+    evento.datetime,
+    evento.start?.dateTime,
+    evento.start?.date
+  ]
+  
+  for (const data of possiveisData) {
+    if (data) {
+      try {
+        const parsed = new Date(data)
+        if (!isNaN(parsed.getTime())) {
+          // Verificar se é em 2026
+          const year = parsed.getFullYear()
+          if (year === 2026) {
+            return parsed.toISOString().split('T')[0]
+          }
+        }
+      } catch (e) {
+        continue
       }
     }
   }
+  
+  return null
+}
+
+// ========================================
+// NORMALIZAR EVENTO
+// ========================================
+function normalizarEvento(evento: any, fonte: string): any {
+  const nome = evento.nome || evento.name || evento.title || 'Evento sem nome'
+  const dataEvento = extrairData(evento)
+  
+  if (!dataEvento) return null
   
   return {
-    match: score > 0,
-    tipo: tipoEncontrado,
-    score
-  };
-}
-
-// Verificar se o evento é em Brasília/DF
-function ehEmBrasilia(evento: any): boolean {
-  const texto = `${evento.city || ''} ${evento.address || ''} ${evento.venue || ''} ${evento.local || ''}`.toLowerCase();
-  
-  return LOCAIS_BRASILIA.some(local => texto.includes(local));
-}
-
-// Determinar nível de impacto baseado no evento
-function determinarImpacto(evento: any, score: number): 'alto' | 'medio' | 'baixo' {
-  // Score alto + fim de semana = impacto alto
-  if (score >= 3) return 'alto';
-  if (score >= 2) return 'medio';
-  return 'baixo';
-}
-
-// Extrair data do evento
-function extrairDataEvento(evento: any): string | null {
-  try {
-    const possiveisCampos = [
-      evento.date,
-      evento.start_date,
-      evento.startDate,
-      evento.sessions?.[0]?.dateTime,
-      evento.datetime
-    ];
-    
-    for (const campo of possiveisCampos) {
-      if (campo) {
-        const data = new Date(campo);
-        if (!isNaN(data.getTime())) {
-          return data.toISOString().split('T')[0];
-        }
-      }
-    }
-  } catch {
-    // Ignorar erros de parsing
+    nome,
+    descricao: evento.descricao || evento.description || '',
+    local_nome: evento.local_nome || evento.venue?.name || evento.location?.name || evento.place || '',
+    local_endereco: evento.local_endereco || evento.venue?.address || evento.location?.address || '',
+    cidade: 'Brasília',
+    data_evento: dataEvento,
+    tipo: 'pagode',
+    impacto: analisarImpacto(evento),
+    fonte,
+    url_fonte: evento.url || evento.link || evento.eventUrl || '',
+    id_externo: evento.id?.toString() || evento.eventId?.toString() || '',
+    imagem_url: evento.image || evento.imageUrl || evento.poster || '',
+    preco_minimo: evento.preco_minimo || evento.price?.min || null,
+    preco_maximo: evento.preco_maximo || evento.price?.max || null,
+    status: 'ativo'
   }
-  
-  return null;
-}
-
-// ========================================
-// FUNÇÃO PRINCIPAL
-// ========================================
-
-async function processarEventos(supabase: any): Promise<{
-  total_buscados: number;
-  total_relevantes: number;
-  novos_adicionados: number;
-  fontes: { [key: string]: number };
-}> {
-  const resultado = {
-    total_buscados: 0,
-    total_relevantes: 0,
-    novos_adicionados: 0,
-    fontes: {} as { [key: string]: number }
-  };
-  
-  // Buscar eventos de todas as fontes
-  const [eventosSympla, eventosIngresse, eventosEventim] = await Promise.all([
-    buscarEventosSympla(),
-    buscarEventosIngresse(),
-    buscarEventosEventim()
-  ]);
-  
-  const todosEventos = [
-    ...eventosSympla,
-    ...eventosIngresse,
-    ...eventosEventim
-  ];
-  
-  resultado.total_buscados = todosEventos.length;
-  resultado.fontes = {
-    sympla: eventosSympla.length,
-    ingresse: eventosIngresse.length,
-    eventim: eventosEventim.length
-  };
-  
-  console.log(`\n📊 Total de eventos buscados: ${todosEventos.length}`);
-  
-  // Filtrar e processar eventos relevantes
-  const eventosRelevantes: any[] = [];
-  
-  for (const evento of todosEventos) {
-    // Verificar se é samba/pagode
-    const analise = ehEventoSambaPagode(evento);
-    
-    if (!analise.match) continue;
-    
-    // Verificar se é em Brasília
-    if (!ehEmBrasilia(evento)) continue;
-    
-    // Extrair data
-    const dataEvento = extrairDataEvento(evento);
-    if (!dataEvento) continue;
-    
-    // Verificar se é futuro
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const dataEventoObj = new Date(dataEvento);
-    if (dataEventoObj < hoje) continue;
-    
-    // Evento relevante encontrado!
-    eventosRelevantes.push({
-      nome: evento.name || evento.title,
-      descricao: evento.description?.substring(0, 500),
-      local_nome: evento.venue || evento.local || 'Local não especificado',
-      local_endereco: evento.address,
-      cidade: 'Brasília',
-      data_evento: dataEvento,
-      tipo: analise.tipo,
-      impacto: determinarImpacto(evento, analise.score),
-      fonte: evento.fonte,
-      url_fonte: evento.url || evento.link,
-      id_externo: String(evento.id),
-      preco_minimo: evento.price?.min || evento.lowestPrice,
-      preco_maximo: evento.price?.max || evento.highestPrice,
-      imagem_url: evento.image || evento.poster,
-      status: 'ativo',
-      verificado: false
-    });
-  }
-  
-  resultado.total_relevantes = eventosRelevantes.length;
-  console.log(`\n🎯 Eventos de samba/pagode em Brasília: ${eventosRelevantes.length}`);
-  
-  // Inserir no banco (upsert para evitar duplicatas)
-  if (eventosRelevantes.length > 0) {
-    console.log('\n💾 Salvando eventos no banco...');
-    
-    for (const evento of eventosRelevantes) {
-      try {
-        const { data, error } = await supabase
-          .from('eventos_concorrencia')
-          .upsert(evento, {
-            onConflict: 'fonte,id_externo',
-            ignoreDuplicates: false
-          })
-          .select('id');
-        
-        if (error) {
-          if (!error.message.includes('duplicate')) {
-            console.log(`   ⚠️ Erro ao inserir ${evento.nome}:`, error.message);
-          }
-        } else if (data && data.length > 0) {
-          resultado.novos_adicionados++;
-          console.log(`   ✅ Novo: ${evento.nome} (${evento.data_evento})`);
-        }
-      } catch (err) {
-        console.log(`   ⚠️ Erro ao processar ${evento.nome}:`, err);
-      }
-    }
-  }
-  
-  return resultado;
 }
 
 // ========================================
 // HANDLER PRINCIPAL
 // ========================================
-
-Deno.serve(async (req: Request) => {
-  // Handle CORS preflight requests
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('🔍 INICIANDO MONITOR DE CONCORRÊNCIA');
-    console.log(`📅 Data/Hora: ${new Date().toISOString()}`);
+    console.log('🔍 Iniciando busca de eventos de concorrência...')
     
-    // Supabase connection
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    )
     
-    // Processar eventos
-    const resultado = await processarEventos(supabase);
+    // Termos de busca específicos para pagode/samba em Brasília
+    const termosBusca = [
+      'pagode brasilia 2026',
+      'samba brasilia 2026',
+      'pagode df 2026',
+      'samba df',
+      'show pagode brasilia',
+      'show samba brasilia',
+      // Artistas específicos
+      ...ARTISTAS_FAMOSOS.slice(0, 15).map(a => `${a} brasilia`),
+      // Casas de show
+      'funn brasilia',
+      'villa mix brasilia',
+      'arena brb'
+    ]
     
-    // Limpar eventos antigos (passados há mais de 7 dias)
-    const dataLimite = new Date();
-    dataLimite.setDate(dataLimite.getDate() - 7);
+    const eventosEncontrados: any[] = []
+    const idsProcessados = new Set<string>()
     
-    const { data: eventosRemovidos, error: erroRemocao } = await supabase
-      .from('eventos_concorrencia')
-      .update({ status: 'encerrado' })
-      .lt('data_evento', dataLimite.toISOString().split('T')[0])
-      .eq('status', 'ativo')
-      .select('id');
-    
-    const totalEncerrados = eventosRemovidos?.length || 0;
-    if (totalEncerrados > 0) {
-      console.log(`\n🗑️ ${totalEncerrados} eventos antigos marcados como encerrados`);
+    // Buscar em todas as fontes
+    for (const termo of termosBusca) {
+      console.log(`📡 Buscando: "${termo}"...`)
+      
+      // Sympla API
+      const symplaApi = await buscarSympla(termo)
+      console.log(`  Sympla API: ${symplaApi.length} resultados`)
+      
+      // Sympla Scraping
+      const symplaScrap = await buscarSympláScraping(termo)
+      console.log(`  Sympla Scraping: ${symplaScrap.length} resultados`)
+      
+      // Ingresse
+      const ingresse = await buscarIngresse(termo)
+      console.log(`  Ingresse: ${ingresse.length} resultados`)
+      
+      // Eventbrite
+      const eventbrite = await buscarEventbrite(termo)
+      console.log(`  Eventbrite: ${eventbrite.length} resultados`)
+      
+      // Processar todos os resultados
+      const todosEventos = [
+        ...symplaApi.map(e => normalizarEvento(e, 'sympla')),
+        ...symplaScrap.map(e => normalizarEvento(e, 'sympla')),
+        ...ingresse.map(e => normalizarEvento(e, 'ingresse')),
+        ...eventbrite.map(e => normalizarEvento(e, 'eventbrite'))
+      ].filter(e => e !== null)
+      
+      for (const evento of todosEventos) {
+        // Evitar duplicatas
+        const chave = `${evento.nome}-${evento.data_evento}`.toLowerCase()
+        if (!idsProcessados.has(chave)) {
+          idsProcessados.add(chave)
+          eventosEncontrados.push(evento)
+        }
+      }
+      
+      // Pequeno delay para não sobrecarregar
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
     
-    // Resumo
-    console.log('\n' + '='.repeat(50));
-    console.log('📊 RESUMO DO MONITORAMENTO');
-    console.log('='.repeat(50));
-    console.log(`   🔍 Eventos buscados: ${resultado.total_buscados}`);
-    console.log(`   🎯 Eventos relevantes: ${resultado.total_relevantes}`);
-    console.log(`   ✅ Novos adicionados: ${resultado.novos_adicionados}`);
-    console.log(`   🗑️ Encerrados: ${totalEncerrados}`);
-    console.log(`   📊 Por fonte:`);
-    Object.entries(resultado.fontes).forEach(([fonte, count]) => {
-      console.log(`      - ${fonte}: ${count}`);
-    });
+    console.log(`\n✅ Total de eventos únicos encontrados: ${eventosEncontrados.length}`)
     
-    return Response.json({
-      success: true,
-      message: 'Monitoramento de concorrência concluído',
-      resultado: {
-        ...resultado,
-        eventos_encerrados: totalEncerrados
-      },
-      timestamp: new Date().toISOString()
-    }, { headers: corsHeaders });
-
+    // Filtrar apenas eventos de alto e médio impacto para 2026
+    const eventosRelevantes = eventosEncontrados.filter(e => 
+      e.impacto === 'alto' || e.impacto === 'medio'
+    )
+    
+    console.log(`🎯 Eventos relevantes (alto/médio impacto): ${eventosRelevantes.length}`)
+    
+    // Inserir no banco de dados
+    if (eventosRelevantes.length > 0) {
+      const { data: inserted, error: insertError } = await supabase
+        .from('eventos_concorrencia')
+        .upsert(
+          eventosRelevantes.map(e => ({
+            ...e,
+            encontrado_em: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })),
+          { 
+            onConflict: 'id_externo',
+            ignoreDuplicates: true 
+          }
+        )
+        .select()
+      
+      if (insertError) {
+        console.error('Erro ao inserir eventos:', insertError)
+      } else {
+        console.log(`💾 Eventos salvos no banco: ${inserted?.length || 0}`)
+      }
+    }
+    
+    // Buscar todos os eventos atuais do banco para retornar
+    const { data: eventosAtuais, error: selectError } = await supabase
+      .from('eventos_concorrencia')
+      .select('*')
+      .eq('status', 'ativo')
+      .gte('data_evento', '2026-01-01')
+      .lte('data_evento', '2026-12-31')
+      .order('data_evento', { ascending: true })
+    
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: `Busca concluída! ${eventosRelevantes.length} eventos encontrados.`,
+        eventos_novos: eventosRelevantes.length,
+        eventos_totais: eventosAtuais?.length || 0,
+        eventos: eventosAtuais || [],
+        termos_buscados: termosBusca.length,
+        fontes: ['sympla', 'ingresse', 'eventbrite'],
+        timestamp: new Date().toISOString()
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
+      }
+    )
+    
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('💥 Erro no monitor de concorrência:', error);
-
-    return Response.json({
-      success: false,
-      error: errorMessage,
-      timestamp: new Date().toISOString()
-    }, { 
-      status: 500,
-      headers: corsHeaders 
-    });
+    console.error('❌ Erro na execução:', error)
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    )
   }
-});
+})

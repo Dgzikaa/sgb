@@ -248,31 +248,69 @@ function gerarAnaliseSimples(dados: ComparacaoDados, detalhes: any): string {
 
   const lines: string[] = []
 
-  // Status da meta
+  // 1. Status da meta com contexto
+  const faltouParaMeta = ontem.meta - ontem.faturamento
   if (ontem.atingimento_meta >= 100) {
-    lines.push(`✅ **Meta batida!** Atingimento de ${formatPercent(ontem.atingimento_meta)}`)
+    const excedente = ontem.faturamento - ontem.meta
+    lines.push(`🎉 **META BATIDA!** +${formatPercent(ontem.atingimento_meta - 100)} acima (${formatCurrency(excedente)} extra)`)
+  } else if (ontem.atingimento_meta >= 90) {
+    lines.push(`⚠️ **Quase lá!** ${formatPercent(ontem.atingimento_meta)} da meta. Faltaram ${formatCurrency(faltouParaMeta)}`)
   } else if (ontem.atingimento_meta >= 80) {
-    lines.push(`⚠️ **Perto da meta!** Atingimento de ${formatPercent(ontem.atingimento_meta)}`)
+    lines.push(`📊 **Meta parcial:** ${formatPercent(ontem.atingimento_meta)}. Faltaram ${formatCurrency(faltouParaMeta)}`)
   } else {
-    lines.push(`❌ **Meta não atingida:** ${formatPercent(ontem.atingimento_meta)}`)
+    lines.push(`❌ **Dia abaixo do esperado:** ${formatPercent(ontem.atingimento_meta)} da meta. Gap de ${formatCurrency(faltouParaMeta)}`)
   }
 
-  // Comparação com semana passada
+  // 2. Comparação com semana passada
   if (dados.semana_passada && dados.semana_passada.faturamento > 0) {
-    const variacao = formatVariacao(ontem.faturamento, dados.semana_passada.faturamento)
-    lines.push(`📊 **vs Semana Passada:** ${variacao}`)
+    const variacao = ((ontem.faturamento - dados.semana_passada.faturamento) / dados.semana_passada.faturamento) * 100
+    const emoji = variacao > 5 ? '📈' : variacao < -5 ? '📉' : '➡️'
+    const sinal = variacao > 0 ? '+' : ''
+    lines.push(`${emoji} **vs ${dados.semana_passada.dia_semana} passada:** ${sinal}${variacao.toFixed(1)}% (${formatCurrency(dados.semana_passada.faturamento)} → ${formatCurrency(ontem.faturamento)})`)
   }
 
-  // Comparação com média
+  // 3. Comparação com média histórica
   if (dados.media_ultimas_4_semanas.faturamento_medio > 0) {
-    const variacao = formatVariacao(ontem.faturamento, dados.media_ultimas_4_semanas.faturamento_medio)
-    lines.push(`📈 **vs Média 4 semanas:** ${variacao}`)
+    const variacao = ((ontem.faturamento - dados.media_ultimas_4_semanas.faturamento_medio) / dados.media_ultimas_4_semanas.faturamento_medio) * 100
+    const emoji = variacao > 5 ? '📈' : variacao < -5 ? '📉' : '➡️'
+    const sinal = variacao > 0 ? '+' : ''
+    lines.push(`${emoji} **vs Média ${ontem.dia_semana}:** ${sinal}${variacao.toFixed(1)}% (média: ${formatCurrency(dados.media_ultimas_4_semanas.faturamento_medio)})`)
   }
 
-  // CMV
+  // 4. Análise de CMV com recomendação
   if (detalhes.cmv) {
-    const cmvEmoji = detalhes.cmv > 35 ? '🔴' : detalhes.cmv > 30 ? '🟡' : '🟢'
-    lines.push(`${cmvEmoji} **CMV:** ${detalhes.cmv.toFixed(1)}%`)
+    if (detalhes.cmv > 40) {
+      lines.push(`🔴 **CMV CRÍTICO:** ${detalhes.cmv.toFixed(1)}% - Revisar desperdício/precificação urgente!`)
+    } else if (detalhes.cmv > 35) {
+      lines.push(`🟠 **CMV Alto:** ${detalhes.cmv.toFixed(1)}% - Acima do ideal (meta: 30-34%)`)
+    } else if (detalhes.cmv > 30) {
+      lines.push(`🟡 **CMV Aceitável:** ${detalhes.cmv.toFixed(1)}% - Dentro da margem`)
+    } else if (detalhes.cmv > 20) {
+      lines.push(`🟢 **CMV Excelente:** ${detalhes.cmv.toFixed(1)}% - Boa gestão de custos`)
+    } else {
+      lines.push(`⚠️ **CMV muito baixo:** ${detalhes.cmv.toFixed(1)}% - Verificar se dados estão completos`)
+    }
+  }
+
+  // 5. Destaque de clientes
+  if (ontem.clientes > 0 && dados.media_ultimas_4_semanas.clientes_medio > 0) {
+    const variacaoClientes = ((ontem.clientes - dados.media_ultimas_4_semanas.clientes_medio) / dados.media_ultimas_4_semanas.clientes_medio) * 100
+    if (Math.abs(variacaoClientes) > 15) {
+      const emoji = variacaoClientes > 0 ? '👥↑' : '👥↓'
+      lines.push(`${emoji} **Público ${variacaoClientes > 0 ? 'acima' : 'abaixo'} da média:** ${ontem.clientes} pessoas (média: ${Math.round(dados.media_ultimas_4_semanas.clientes_medio)})`)
+    }
+  }
+
+  // 6. Recomendação
+  lines.push('')
+  if (ontem.atingimento_meta < 80 && detalhes.cmv > 35) {
+    lines.push(`💡 **Ação:** Foco em reduzir custos e atrair mais público. Considere promoções estratégicas.`)
+  } else if (ontem.atingimento_meta < 80) {
+    lines.push(`💡 **Ação:** Dia fraco em vendas. Revisar estratégia de atração de clientes.`)
+  } else if (detalhes.cmv > 35) {
+    lines.push(`💡 **Ação:** Faturamento OK, mas CMV alto. Revisar fichas técnicas e desperdício.`)
+  } else {
+    lines.push(`💡 **Ação:** Manter estratégia atual. Dia dentro dos parâmetros.`)
   }
 
   return lines.join('\n')

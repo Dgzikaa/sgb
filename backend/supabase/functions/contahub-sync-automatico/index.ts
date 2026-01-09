@@ -679,10 +679,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
         const processMessage = `✅ **Processamento ContaHub concluído**\n\n📊 Dados processados: ${processorResult.summary?.total_processed || 0}\n❌ Erros: ${processorResult.summary?.total_errors || 0}\n⏰ ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`;
         await sendDiscordNotification(processMessage);
         
-        // 🤖 CHAMAR ANÁLISE DIÁRIA AUTOMÁTICA (IA)
-        console.log('\n🤖 FASE 3: Iniciando análise diária com IA...');
+        // 🤖 CHAMAR AGENTE IA PARA ANÁLISE (usa agente-ia-analyzer existente)
+        console.log('\n🤖 FASE 3: Enviando dados para análise IA via agente-ia-analyzer...');
         try {
-          const analiseResponse = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/analise-diaria-automatica', {
+          // Montar scan_data com os dados processados para análise
+          const scanData = {
+            data_analise: data_date,
+            bar_id: parseInt(bar_id),
+            coleta: {
+              tipos_coletados: results.collected.length,
+              total_registros: summary.total_records_collected,
+              erros: summary.error_count
+            },
+            processamento: {
+              total_processado: processorResult.summary?.total_processed || 0,
+              erros: processorResult.summary?.total_errors || 0
+            },
+            timestamp: new Date().toISOString()
+          };
+          
+          const analiseResponse = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/agente-ia-analyzer', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -690,19 +706,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
             },
             body: JSON.stringify({
               bar_id: parseInt(bar_id),
-              data_analise: data_date,
-              enviar_discord: true
+              scan_data: scanData,
+              context: ['pos_sync_contahub', data_date]
             })
           });
           
           if (analiseResponse.ok) {
             const analiseResult = await analiseResponse.json();
-            console.log('✅ Análise diária enviada com sucesso:', analiseResult.discord_enviado ? 'Discord OK' : 'Sem Discord');
+            console.log('✅ Análise IA concluída:', analiseResult.success ? 'OK' : 'Falhou');
+            
+            // Se há resumo executivo, enviar para Discord
+            if (analiseResult.analysis?.resumo_executivo) {
+              const iaMessage = `🤖 **Análise IA - ${data_date}**\n\n${analiseResult.analysis.resumo_executivo}`;
+              await sendDiscordNotification(iaMessage);
+            }
           } else {
-            console.error('⚠️ Erro na análise diária:', analiseResponse.status);
+            console.error('⚠️ Erro na análise IA:', analiseResponse.status);
           }
         } catch (analiseError) {
-          console.error('⚠️ Erro ao chamar análise diária:', analiseError);
+          console.error('⚠️ Erro ao chamar agente-ia-analyzer:', analiseError);
           // Não bloqueia o fluxo principal
         }
       } else {
