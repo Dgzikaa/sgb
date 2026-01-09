@@ -7,8 +7,9 @@ const nextConfig = {
   compress: true,
   reactStrictMode: false, // Desabilitar para evitar chamadas duplas da API
   
-  // ✅ Definir raiz do workspace para evitar warning de múltiplos lockfiles
-  outputFileTracingRoot: path.join(__dirname, '../'),
+  // ✅ Definir raiz do workspace como o próprio projeto Zykor (não a raiz do disco)
+  // Comentado pois F:\Zykor\.. = F:\ causa scan de todo o disco
+  // outputFileTracingRoot: path.join(__dirname, '../'),
   
   // ✅ TypeScript e ESLint
   typescript: {
@@ -88,42 +89,8 @@ const nextConfig = {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
-        // Ignorar pastas de sistema do Windows usando função para maior controle
-        ignored: (filePath) => {
-          // Ignorar pastas do sistema Windows (caminhos absolutos)
-          const systemPaths = [
-            'System Volume Information',
-            '$RECYCLE.BIN',
-            '$Recycle.Bin',
-            'Recovery',
-            'Config.Msi',
-            'Windows',
-            'ProgramData',
-            'Program Files',
-            'Program Files (x86)',
-            'pagefile.sys',
-            'hiberfil.sys',
-            'swapfile.sys',
-            'DumpStack.log',
-            'bootmgr',
-            'BOOTNXT',
-          ];
-          
-          // Verificar se o caminho contém alguma pasta do sistema
-          const normalizedPath = filePath.replace(/\\/g, '/');
-          if (systemPaths.some(sp => normalizedPath.includes(sp))) {
-            return true;
-          }
-          
-          // Ignorar node_modules, .git, .next
-          if (normalizedPath.includes('/node_modules/') || 
-              normalizedPath.includes('/.git/') || 
-              normalizedPath.includes('/.next/')) {
-            return true;
-          }
-          
-          return false;
-        },
+        // Ignorar pastas de sistema do Windows usando RegExp
+        ignored: /[\\/](node_modules|\.git|\.next|System Volume Information|\$RECYCLE\.BIN|\$Recycle\.Bin|Recovery|Config\.Msi|pagefile\.sys|hiberfil\.sys|swapfile\.sys|DumpStack\.log|bootmgr|BOOTNXT)[\\/]?/,
       };
       // Não ajustar devtool em desenvolvimento para evitar regressões e warnings do Next.js
     }

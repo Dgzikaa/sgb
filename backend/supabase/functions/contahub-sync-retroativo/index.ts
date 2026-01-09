@@ -71,43 +71,47 @@ async function fetchContaHubData(url: string, sessionToken: string) {
   return JSON.parse(responseText);
 }
 
-// Função para buscar analitico com divisão quando a query for muito grande
-async function fetchAnaliticoComDivisao(
+// Locais conhecidos do Ordinário Bar (usado para dividir queries grandes)
+const LOCAIS_CONTAHUB = [
+  'Bar', 'Cozinha 1', 'Cozinha 2', 'Montados', 'Baldes', 
+  'Shot e Dose', 'Chopp', 'Batidos', 'Preshh', 'Mexido', 
+  'Venda Volante', 'Pegue e Pague', '' // vazio para itens sem local
+];
+
+// Função genérica para buscar com divisão quando a query for muito grande
+async function fetchComDivisaoPorLocal(
   baseUrl: string, 
   dataDate: string, 
   empId: string, 
   sessionToken: string,
-  generateTimestamp: () => string
+  generateTimestamp: () => string,
+  queryId: number,
+  dataType: string,
+  extraParams: string = ''
 ): Promise<any> {
   const contahubDate = `${dataDate}T00:00:00-0300`;
   
   // 1. Primeiro tentar buscar tudo de uma vez
   try {
     const timestamp = generateTimestamp();
-    const url = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${timestamp}?qry=77&d0=${contahubDate}&d1=${contahubDate}&produto=&grupo=&local=&turno=&mesa=&tipo=&emp=${empId}&nfe=1`;
-    console.log(`🔍 Tentando buscar analitico completo...`);
+    const url = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${timestamp}?qry=${queryId}&d0=${contahubDate}&d1=${contahubDate}${extraParams}&local=&emp=${empId}&nfe=1`;
+    console.log(`🔍 Tentando buscar ${dataType} completo...`);
     const data = await fetchContaHubData(url, sessionToken);
-    console.log(`✅ Analitico completo: ${data?.list?.length || 0} registros`);
+    console.log(`✅ ${dataType} completo: ${data?.list?.length || 0} registros`);
     return data;
   } catch (error) {
-    console.warn(`⚠️ Query completa falhou, dividindo por local...`);
+    console.warn(`⚠️ Query ${dataType} completa falhou, dividindo por local...`);
   }
   
-  // 2. Se falhou, dividir por LOCAL (filtro mais eficiente)
-  // Locais conhecidos do Ordinário Bar
-  const locais = [
-    'Bar', 'Cozinha 1', 'Cozinha 2', 'Montados', 'Baldes', 
-    'Shot e Dose', 'Chopp', 'Batidos', 'Preshh', 'Mexido', 
-    'Venda Volante', 'Pegue e Pague', '' // vazio para itens sem local
-  ];
+  // 2. Se falhou, dividir por LOCAL
   const allRecords: any[] = [];
   
-  for (const local of locais) {
+  for (const local of LOCAIS_CONTAHUB) {
     try {
       const timestamp = generateTimestamp();
       const localParam = local ? encodeURIComponent(local) : '';
-      const url = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${timestamp}?qry=77&d0=${contahubDate}&d1=${contahubDate}&produto=&grupo=&local=${localParam}&turno=&mesa=&tipo=&emp=${empId}&nfe=1`;
-      console.log(`🔍 Buscando analitico local "${local || '(vazio)'}"...`);
+      const url = `${baseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${timestamp}?qry=${queryId}&d0=${contahubDate}&d1=${contahubDate}${extraParams}&local=${localParam}&emp=${empId}&nfe=1`;
+      console.log(`🔍 Buscando ${dataType} local "${local || '(vazio)'}"...`);
       
       const data = await fetchContaHubData(url, sessionToken);
       if (data?.list && Array.isArray(data.list)) {
@@ -115,15 +119,35 @@ async function fetchAnaliticoComDivisao(
         console.log(`✅ Local "${local || '(vazio)'}": ${data.list.length} registros`);
       }
       
-      // Pequeno delay entre requisições
       await new Promise(resolve => setTimeout(resolve, 300));
     } catch (localError) {
-      console.warn(`⚠️ Local "${local || '(vazio)'}" falhou`);
+      console.warn(`⚠️ ${dataType} Local "${local || '(vazio)'}" falhou`);
     }
   }
   
-  console.log(`📊 Total analitico consolidado: ${allRecords.length} registros`);
+  console.log(`📊 Total ${dataType} consolidado: ${allRecords.length} registros`);
   return { list: allRecords };
+}
+
+// Funções específicas para cada tipo de relatório
+async function fetchAnaliticoComDivisao(baseUrl: string, dataDate: string, empId: string, sessionToken: string, generateTimestamp: () => string): Promise<any> {
+  return fetchComDivisaoPorLocal(baseUrl, dataDate, empId, sessionToken, generateTimestamp, 77, 'analitico', '&produto=&grupo=&turno=&mesa=&tipo=');
+}
+
+async function fetchTempoComDivisao(baseUrl: string, dataDate: string, empId: string, sessionToken: string, generateTimestamp: () => string): Promise<any> {
+  return fetchComDivisaoPorLocal(baseUrl, dataDate, empId, sessionToken, generateTimestamp, 81, 'tempo', '&prod=&grupo=');
+}
+
+async function fetchPagamentosComDivisao(baseUrl: string, dataDate: string, empId: string, sessionToken: string, generateTimestamp: () => string): Promise<any> {
+  return fetchComDivisaoPorLocal(baseUrl, dataDate, empId, sessionToken, generateTimestamp, 7, 'pagamentos', '&meio=');
+}
+
+async function fetchFatPorHoraComDivisao(baseUrl: string, dataDate: string, empId: string, sessionToken: string, generateTimestamp: () => string): Promise<any> {
+  return fetchComDivisaoPorLocal(baseUrl, dataDate, empId, sessionToken, generateTimestamp, 101, 'fatporhora', '');
+}
+
+async function fetchPeriodoComDivisao(baseUrl: string, dataDate: string, empId: string, sessionToken: string, generateTimestamp: () => string): Promise<any> {
+  return fetchComDivisaoPorLocal(baseUrl, dataDate, empId, sessionToken, generateTimestamp, 5, 'periodo', '');
 }
 
 // Função para salvar JSON bruto
@@ -323,17 +347,50 @@ Deno.serve(async (req: Request): Promise<Response> => {
               }
               continue; // Já processou, pular o loop normal
             case 'tempo':
-              url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=81&d0=${data_date}&d1=${data_date}&prod=&grupo=&local=&emp=${emp_id}&nfe=1`;
-              break;
+              // Usar função com divisão para evitar erro "Resultado muito grande"
+              try {
+                const tempoData = await fetchTempoComDivisao(contahubBaseUrl, data_date, emp_id, sessionToken, generateDynamicTimestamp);
+                const saveResultTempo = await saveRawDataOnly(supabase, 'tempo', tempoData, data_date, bar_id);
+                dayResult.collected.push(saveResultTempo);
+                console.log(`✅ tempo: ${saveResultTempo.record_count} registros`);
+              } catch (tempoError) {
+                console.error(`❌ Erro ao buscar tempo:`, tempoError);
+                dayResult.errors.push({ data_type: 'tempo', error: tempoError instanceof Error ? tempoError.message : String(tempoError) });
+              }
+              continue;
             case 'pagamentos':
-              url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=7&d0=${data_date}&d1=${data_date}&meio=&emp=${emp_id}&nfe=1`;
-              break;
+              try {
+                const pagamentosData = await fetchPagamentosComDivisao(contahubBaseUrl, data_date, emp_id, sessionToken, generateDynamicTimestamp);
+                const saveResultPag = await saveRawDataOnly(supabase, 'pagamentos', pagamentosData, data_date, bar_id);
+                dayResult.collected.push(saveResultPag);
+                console.log(`✅ pagamentos: ${saveResultPag.record_count} registros`);
+              } catch (pagError) {
+                console.error(`❌ Erro ao buscar pagamentos:`, pagError);
+                dayResult.errors.push({ data_type: 'pagamentos', error: pagError instanceof Error ? pagError.message : String(pagError) });
+              }
+              continue;
             case 'fatporhora':
-              url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=101&d0=${data_date}&d1=${data_date}&emp=${emp_id}&nfe=1`;
-              break;
+              try {
+                const fatPorHoraData = await fetchFatPorHoraComDivisao(contahubBaseUrl, data_date, emp_id, sessionToken, generateDynamicTimestamp);
+                const saveResultFat = await saveRawDataOnly(supabase, 'fatporhora', fatPorHoraData, data_date, bar_id);
+                dayResult.collected.push(saveResultFat);
+                console.log(`✅ fatporhora: ${saveResultFat.record_count} registros`);
+              } catch (fatError) {
+                console.error(`❌ Erro ao buscar fatporhora:`, fatError);
+                dayResult.errors.push({ data_type: 'fatporhora', error: fatError instanceof Error ? fatError.message : String(fatError) });
+              }
+              continue;
             case 'periodo':
-              url = `${contahubBaseUrl}/rest/contahub.cmds.QueryCmd/execQuery/${queryTimestamp}?qry=5&d0=${data_date}&d1=${data_date}&emp=${emp_id}&nfe=1`;
-              break;
+              try {
+                const periodoData = await fetchPeriodoComDivisao(contahubBaseUrl, data_date, emp_id, sessionToken, generateDynamicTimestamp);
+                const saveResultPeriodo = await saveRawDataOnly(supabase, 'periodo', periodoData, data_date, bar_id);
+                dayResult.collected.push(saveResultPeriodo);
+                console.log(`✅ periodo: ${saveResultPeriodo.record_count} registros`);
+              } catch (periodoError) {
+                console.error(`❌ Erro ao buscar periodo:`, periodoError);
+                dayResult.errors.push({ data_type: 'periodo', error: periodoError instanceof Error ? periodoError.message : String(periodoError) });
+              }
+              continue;
             case 'vendas':
               // 🆕 getTurnoVendas - Dados com vd_hrabertura e vd_hrsaida
               // Buscar turnos de 3 formas: API, banco ou cálculo
