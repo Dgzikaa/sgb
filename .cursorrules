@@ -1,5 +1,31 @@
 # REGRAS DE ORGANIZAÇÃO ATUALIZADAS - SGB_V2
 
+---
+
+## 🧠 CONTEXTO DO AGENTE ZYKOR
+
+**IMPORTANTE**: Em cada novo chat, leia os arquivos de contexto:
+
+```
+.cursor/zykor-context.md  ← Visão geral, integrações, KPIs
+.cursor/ideias.md         ← Ideias em andamento
+.cursor/decisoes.md       ← Decisões arquiteturais
+.cursor/historico.md      ← O que foi implementado
+```
+
+**Ao iniciar um chat:**
+1. Leia `.cursor/zykor-context.md` para entender o projeto
+2. Verifique `.cursor/ideias.md` para saber prioridades
+3. Consulte `.cursor/decisoes.md` antes de tomar decisões arquiteturais
+4. Atualize `.cursor/historico.md` após implementações significativas
+
+**Ao finalizar uma sessão:**
+1. Atualize `historico.md` com o que foi feito
+2. Mova ideias implementadas para "✅ IDEIAS IMPLEMENTADAS"
+3. Adicione novas decisões em `decisoes.md`
+
+---
+
 ## ⚠️ REGRAS CRÍTICAS ABSOLUTAS (NUNCA IGNORAR)
 
 ### 🔒 1. GIT PUSH - SEMPRE PERGUNTAR AO USUÁRIO
