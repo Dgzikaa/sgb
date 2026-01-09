@@ -311,10 +311,10 @@ export default function NotificacaoDetalhePage() {
                           {key.replace(/_/g, ' ')}
                         </p>
                         <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
-                          {typeof value === 'number' && key.includes('faturamento') || key.includes('meta') || key.includes('ticket')
-                            ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                          {typeof value === 'number' && (key.includes('faturamento') || key.includes('meta') || key.includes('ticket'))
+                            ? (value as number).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                             : typeof value === 'number' && key.includes('percentual')
-                              ? `${value.toFixed(1)}%`
+                              ? `${(value as number).toFixed(1)}%`
                               : String(value)
                           }
                         </p>

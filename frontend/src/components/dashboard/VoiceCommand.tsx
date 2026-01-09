@@ -53,7 +53,7 @@ export default function VoiceCommand({ onCommand, onResult, isProcessing = false
       };
 
       recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error('Speech recognition error:', (event as Event & { error?: string }).error);
         setIsListening(false);
         stopVolumeMonitoring();
       };
