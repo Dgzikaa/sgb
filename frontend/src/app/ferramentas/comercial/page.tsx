@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import {
   Calendar,
@@ -29,6 +29,12 @@ import {
   Megaphone,
   TrendingDown,
   Info,
+  RefreshCcw,
+  Plus,
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle,
+  Loader2,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -74,6 +80,29 @@ interface EventoConcorrencia {
   diaSemana?: string
   impacto: 'alto' | 'medio' | 'baixo'
   dica: string
+}
+
+// Interface para eventos do banco de dados
+interface EventoConcorrenciaBD {
+  id: string
+  nome: string
+  descricao?: string
+  local_nome: string
+  local_endereco?: string
+  cidade: string
+  data_evento: string
+  horario_inicio?: string
+  tipo: string
+  impacto: 'alto' | 'medio' | 'baixo'
+  fonte: string
+  url_fonte?: string
+  preco_minimo?: number
+  preco_maximo?: number
+  imagem_url?: string
+  status: string
+  verificado: boolean
+  notas?: string
+  created_at: string
 }
 
 // ========================================
@@ -401,6 +430,57 @@ function CalendarioMes({ mes, ano, datasImportantes }: { mes: number; ano: numbe
 export default function ComercialPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [mesSelecionado, setMesSelecionado] = useState<number | null>(null)
+  
+  // Estados para eventos de concorrência do banco
+  const [eventosConcorrenciaBD, setEventosConcorrenciaBD] = useState<EventoConcorrenciaBD[]>([])
+  const [loadingEventos, setLoadingEventos] = useState(false)
+  const [executandoAgente, setExecutandoAgente] = useState(false)
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<string | null>(null)
+  const [estatisticasAgente, setEstatisticasAgente] = useState<any>(null)
+
+  // Função para buscar eventos do banco
+  const buscarEventosConcorrencia = useCallback(async () => {
+    setLoadingEventos(true)
+    try {
+      const response = await fetch('/api/concorrencia?status=ativo')
+      const data = await response.json()
+      
+      if (data.success) {
+        setEventosConcorrenciaBD(data.eventos)
+        setUltimaAtualizacao(new Date().toLocaleString('pt-BR'))
+      }
+    } catch (error) {
+      console.error('Erro ao buscar eventos:', error)
+    } finally {
+      setLoadingEventos(false)
+    }
+  }, [])
+
+  // Função para executar o agente de monitoramento
+  const executarAgente = async () => {
+    setExecutandoAgente(true)
+    try {
+      const response = await fetch('/api/concorrencia/monitorar', {
+        method: 'POST'
+      })
+      const data = await response.json()
+      
+      if (data.success) {
+        setEstatisticasAgente(data.resultado)
+        // Recarregar eventos após monitoramento
+        await buscarEventosConcorrencia()
+      }
+    } catch (error) {
+      console.error('Erro ao executar agente:', error)
+    } finally {
+      setExecutandoAgente(false)
+    }
+  }
+
+  // Buscar eventos ao carregar a página
+  useEffect(() => {
+    buscarEventosConcorrencia()
+  }, [buscarEventosConcorrencia])
 
   // Estatísticas calculadas
   const stats = useMemo(() => {
@@ -916,21 +996,206 @@ export default function ComercialPage() {
 
           {/* TAB: CONCORRÊNCIA BSB */}
           <TabsContent value="concorrencia" className="space-y-6">
-            {/* Alerta */}
+            {/* Header com Agente */}
             <Card className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-200 dark:border-red-800">
               <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                    <Users className="w-6 h-6 text-red-600 dark:text-red-400" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <Users className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-red-800 dark:text-red-300">🤖 Agente de Monitoramento de Concorrência</h3>
+                      <p className="text-sm text-red-700 dark:text-red-400 mt-1">
+                        Busca automática de sambas e pagodes em Brasília via Sympla, Ingresse e outros sites.
+                        {ultimaAtualizacao && (
+                          <span className="block text-xs mt-1 text-red-600 dark:text-red-500">
+                            Última atualização: {ultimaAtualizacao}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-red-800 dark:text-red-300">Monitoramento de Concorrência</h3>
-                    <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                      Acompanhe sambas, pagodes e eventos de Brasília que podem impactar o movimento. 
-                      Adicione novos eventos conforme identificados via Sympla, Instagram, etc.
-                    </p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={buscarEventosConcorrencia}
+                      disabled={loadingEventos}
+                      variant="outline"
+                      className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30"
+                    >
+                      {loadingEventos ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <RefreshCcw className="w-4 h-4 mr-2" />
+                      )}
+                      Atualizar
+                    </Button>
+                    <Button
+                      onClick={executarAgente}
+                      disabled={executandoAgente}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      {executandoAgente ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Buscando...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4 mr-2" />
+                          Executar Agente
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Estatísticas do Agente */}
+            {estatisticasAgente && (
+              <Card className="card-dark">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <span className="font-semibold text-gray-900 dark:text-white">Resultado da última busca</span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{estatisticasAgente.resultado?.total_buscados || 0}</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-500">Eventos analisados</p>
+                    </div>
+                    <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{estatisticasAgente.resultado?.total_relevantes || 0}</p>
+                      <p className="text-xs text-yellow-700 dark:text-yellow-500">Samba/Pagode encontrados</p>
+                    </div>
+                    <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">{estatisticasAgente.resultado?.novos_adicionados || 0}</p>
+                      <p className="text-xs text-green-700 dark:text-green-500">Novos adicionados</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">{estatisticasAgente.resultado?.eventos_encerrados || 0}</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-500">Eventos encerrados</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Eventos Identificados pelo Agente */}
+            <Card className="card-dark">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                    Próximos Eventos de Concorrência
+                    {loadingEventos && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />}
+                  </div>
+                  <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                    {eventosConcorrenciaBD.length} eventos ativos
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {eventosConcorrenciaBD.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Music className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Nenhum evento de concorrência identificado ainda.
+                    </p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                      Clique em "Executar Agente" para buscar eventos em Sympla, Ingresse e outros sites.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {eventosConcorrenciaBD.map((evento) => {
+                      const dataEvento = new Date(evento.data_evento + 'T12:00:00')
+                      const diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][dataEvento.getDay()]
+                      
+                      return (
+                        <motion.div
+                          key={evento.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className={`p-4 rounded-lg border flex items-start gap-4 ${
+                            evento.impacto === 'alto'
+                              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                              : evento.impacto === 'medio'
+                                ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                          }`}
+                        >
+                          {/* Data */}
+                          <div className="text-center min-w-[60px]">
+                            <p className={`text-lg font-bold ${
+                              evento.impacto === 'alto' ? 'text-red-600 dark:text-red-400' :
+                              evento.impacto === 'medio' ? 'text-yellow-600 dark:text-yellow-400' :
+                              'text-gray-600 dark:text-gray-400'
+                            }`}>
+                              {dataEvento.getDate()}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][dataEvento.getMonth()]}
+                            </p>
+                            <p className="text-xs text-gray-400">{diaSemana}</p>
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                  <span>
+                                    {evento.tipo === 'samba' ? '🥁' :
+                                     evento.tipo === 'pagode' ? '🎤' :
+                                     evento.tipo === 'forro' ? '🎻' : '🎵'}
+                                  </span>
+                                  {evento.nome}
+                                  {evento.verificado && (
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                  )}
+                                </h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                  📍 {evento.local_nome}
+                                  {evento.local_endereco && ` • ${evento.local_endereco}`}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  evento.impacto === 'alto'
+                                    ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                                    : evento.impacto === 'medio'
+                                      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                      : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                                }`}>
+                                  {evento.impacto}
+                                </span>
+                                {evento.url_fonte && (
+                                  <a
+                                    href={evento.url_fonte}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-400 hover:text-blue-500"
+                                  >
+                                    <ExternalLink className="w-4 h-4" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                              <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{evento.tipo}</span>
+                              <span>via {evento.fonte}</span>
+                              {evento.preco_minimo && (
+                                <span>R$ {evento.preco_minimo.toFixed(0)}{evento.preco_maximo && ` - ${evento.preco_maximo.toFixed(0)}`}</span>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
