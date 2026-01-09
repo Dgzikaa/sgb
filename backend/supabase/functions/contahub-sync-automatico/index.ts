@@ -678,6 +678,33 @@ Deno.serve(async (req: Request): Promise<Response> => {
         // Notificar sucesso completo
         const processMessage = `✅ **Processamento ContaHub concluído**\n\n📊 Dados processados: ${processorResult.summary?.total_processed || 0}\n❌ Erros: ${processorResult.summary?.total_errors || 0}\n⏰ ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`;
         await sendDiscordNotification(processMessage);
+        
+        // 🤖 CHAMAR ANÁLISE DIÁRIA AUTOMÁTICA (IA)
+        console.log('\n🤖 FASE 3: Iniciando análise diária com IA...');
+        try {
+          const analiseResponse = await fetch('https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1/analise-diaria-automatica', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+            },
+            body: JSON.stringify({
+              bar_id: parseInt(bar_id),
+              data_analise: data_date,
+              enviar_discord: true
+            })
+          });
+          
+          if (analiseResponse.ok) {
+            const analiseResult = await analiseResponse.json();
+            console.log('✅ Análise diária enviada com sucesso:', analiseResult.discord_enviado ? 'Discord OK' : 'Sem Discord');
+          } else {
+            console.error('⚠️ Erro na análise diária:', analiseResponse.status);
+          }
+        } catch (analiseError) {
+          console.error('⚠️ Erro ao chamar análise diária:', analiseError);
+          // Não bloqueia o fluxo principal
+        }
       } else {
         console.error('❌ Erro no processor:', processorResult);
         results.errors.push({

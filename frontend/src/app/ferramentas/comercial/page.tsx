@@ -35,6 +35,8 @@ import {
   AlertTriangle,
   CheckCircle,
   Loader2,
+  Trash2,
+  X,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -70,16 +72,6 @@ interface FaturamentoPorDia {
   totalDias: number
   faturamentoTotal: number
   mediaFaturamento: number
-}
-
-interface EventoConcorrencia {
-  nome: string
-  local: string
-  tipo: 'samba' | 'pagode' | 'forró' | 'sertanejo' | 'festival'
-  frequencia: 'semanal' | 'mensal' | 'eventual'
-  diaSemana?: string
-  impacto: 'alto' | 'medio' | 'baixo'
-  dica: string
 }
 
 // Interface para eventos do banco de dados
@@ -236,17 +228,7 @@ const COMPARACAO_DATAS: { [key: string]: { data2025: string; faturamento2025: nu
 // ========================================
 // EVENTOS CONCORRÊNCIA BRASÍLIA
 // ========================================
-// Eventos de samba, pagode e similares que competem pelo mesmo público
-const EVENTOS_CONCORRENCIA: EventoConcorrencia[] = [
-  // Adicione eventos conforme identificados
-  // Estrutura pronta para incluir sambas, pagodes e eventos de Brasília
-  { nome: 'Samba do Calaf', local: 'Ceilândia', tipo: 'samba', frequencia: 'semanal', diaSemana: 'Domingo', impacto: 'alto', dica: 'Domingo à tarde - pode afetar nosso público' },
-  { nome: 'Samba InCasa', local: 'Asa Sul', tipo: 'samba', frequencia: 'mensal', impacto: 'medio', dica: 'Evento mensal - monitorar datas' },
-  { nome: 'Pagode do Gama', local: 'Gama', tipo: 'pagode', frequencia: 'semanal', diaSemana: 'Sábado', impacto: 'medio', dica: 'Sábados - público diferente mas pode impactar' },
-  { nome: 'Comunidade da Bênção', local: 'Taguatinga', tipo: 'samba', frequencia: 'semanal', diaSemana: 'Domingo', impacto: 'alto', dica: 'Domingo forte - concorrência direta' },
-  { nome: 'Bloco do Siri', local: 'Asa Norte', tipo: 'samba', frequencia: 'eventual', impacto: 'alto', dica: 'Eventos pontuais de grande porte' },
-  // DICA: Adicione mais eventos conforme identificados via redes sociais, Sympla, etc.
-]
+// Lista vazia - eventos são gerenciados via banco de dados
 
 // Datas específicas de eventos de concorrência em 2026 (adicionar conforme descobrir)
 const DATAS_CONCORRENCIA_2026: DataImportante[] = [
@@ -434,9 +416,22 @@ export default function ComercialPage() {
   // Estados para eventos de concorrência do banco
   const [eventosConcorrenciaBD, setEventosConcorrenciaBD] = useState<EventoConcorrenciaBD[]>([])
   const [loadingEventos, setLoadingEventos] = useState(false)
-  const [executandoAgente, setExecutandoAgente] = useState(false)
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<string | null>(null)
-  const [estatisticasAgente, setEstatisticasAgente] = useState<any>(null)
+  
+  // Estados para formulário manual
+  const [mostrarFormulario, setMostrarFormulario] = useState(false)
+  const [salvandoEvento, setSalvandoEvento] = useState(false)
+  const [novoEvento, setNovoEvento] = useState({
+    nome: '',
+    local_nome: '',
+    local_endereco: '',
+    data_evento: '',
+    horario_inicio: '',
+    tipo: 'samba',
+    impacto: 'medio',
+    url_fonte: '',
+    notas: ''
+  })
 
   // Função para buscar eventos do banco
   const buscarEventosConcorrencia = useCallback(async () => {
@@ -456,24 +451,63 @@ export default function ComercialPage() {
     }
   }, [])
 
-  // Função para executar o agente de monitoramento
-  const executarAgente = async () => {
-    setExecutandoAgente(true)
+  // Função para adicionar evento manualmente
+  const adicionarEventoManual = async () => {
+    if (!novoEvento.nome || !novoEvento.local_nome || !novoEvento.data_evento) {
+      alert('Preencha pelo menos: Nome, Local e Data do evento')
+      return
+    }
+    
+    setSalvandoEvento(true)
     try {
-      const response = await fetch('/api/concorrencia/monitorar', {
-        method: 'POST'
+      const response = await fetch('/api/concorrencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(novoEvento)
       })
       const data = await response.json()
       
       if (data.success) {
-        setEstatisticasAgente(data.resultado)
-        // Recarregar eventos após monitoramento
+        // Limpar formulário e recarregar eventos
+        setNovoEvento({
+          nome: '',
+          local_nome: '',
+          local_endereco: '',
+          data_evento: '',
+          horario_inicio: '',
+          tipo: 'samba',
+          impacto: 'medio',
+          url_fonte: '',
+          notas: ''
+        })
+        setMostrarFormulario(false)
+        await buscarEventosConcorrencia()
+      } else {
+        alert('Erro ao adicionar evento: ' + data.error)
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar evento:', error)
+      alert('Erro ao adicionar evento')
+    } finally {
+      setSalvandoEvento(false)
+    }
+  }
+  
+  // Função para remover evento
+  const removerEvento = async (id: string) => {
+    if (!confirm('Tem certeza que deseja remover este evento?')) return
+    
+    try {
+      const response = await fetch(`/api/concorrencia?id=${id}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+      
+      if (data.success) {
         await buscarEventosConcorrencia()
       }
     } catch (error) {
-      console.error('Erro ao executar agente:', error)
-    } finally {
-      setExecutandoAgente(false)
+      console.error('Erro ao remover evento:', error)
     }
   }
 
@@ -996,7 +1030,7 @@ export default function ComercialPage() {
 
           {/* TAB: CONCORRÊNCIA BSB */}
           <TabsContent value="concorrencia" className="space-y-6">
-            {/* Header com Agente */}
+            {/* Header */}
             <Card className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-200 dark:border-red-800">
               <CardContent className="p-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1005,14 +1039,11 @@ export default function ComercialPage() {
                       <Users className="w-6 h-6 text-red-600 dark:text-red-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-red-800 dark:text-red-300">🤖 Agente de Monitoramento de Concorrência</h3>
+                      <h3 className="font-semibold text-red-800 dark:text-red-300">Monitoramento de Concorrência</h3>
                       <p className="text-sm text-red-700 dark:text-red-400 mt-1">
-                        Busca automática de sambas e pagodes em Brasília via Sympla, Ingresse e outros sites.
-                        {ultimaAtualizacao && (
-                          <span className="block text-xs mt-1 text-red-600 dark:text-red-500">
-                            Última atualização: {ultimaAtualizacao}
-                          </span>
-                        )}
+                        🤖 O agente busca automaticamente eventos de samba/pagode em Brasília todo dia às 6h.
+                        <br />
+                        <span className="text-xs">Você também pode adicionar eventos manualmente.</span>
                       </p>
                     </div>
                   </div>
@@ -1031,52 +1062,133 @@ export default function ComercialPage() {
                       Atualizar
                     </Button>
                     <Button
-                      onClick={executarAgente}
-                      disabled={executandoAgente}
+                      onClick={() => setMostrarFormulario(!mostrarFormulario)}
                       className="bg-red-600 hover:bg-red-700 text-white"
                     >
-                      {executandoAgente ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Buscando...
-                        </>
-                      ) : (
-                        <>
-                          <Search className="w-4 h-4 mr-2" />
-                          Executar Agente
-                        </>
-                      )}
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar Evento
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Estatísticas do Agente */}
-            {estatisticasAgente && (
-              <Card className="card-dark">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="font-semibold text-gray-900 dark:text-white">Resultado da última busca</span>
+            {/* Formulário para Adicionar Evento Manual */}
+            {mostrarFormulario && (
+              <Card className="card-dark border-2 border-red-200 dark:border-red-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                    <Plus className="w-5 h-5 text-red-500" />
+                    Adicionar Evento de Concorrência
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Evento *</label>
+                      <Input
+                        placeholder="Ex: Samba do Fulano"
+                        value={novoEvento.nome}
+                        onChange={(e) => setNovoEvento({...novoEvento, nome: e.target.value})}
+                        className="bg-white dark:bg-gray-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Local *</label>
+                      <Input
+                        placeholder="Ex: Bar do Zé - Asa Sul"
+                        value={novoEvento.local_nome}
+                        onChange={(e) => setNovoEvento({...novoEvento, local_nome: e.target.value})}
+                        className="bg-white dark:bg-gray-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Data *</label>
+                      <Input
+                        type="date"
+                        value={novoEvento.data_evento}
+                        onChange={(e) => setNovoEvento({...novoEvento, data_evento: e.target.value})}
+                        className="bg-white dark:bg-gray-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Horário</label>
+                      <Input
+                        type="time"
+                        value={novoEvento.horario_inicio}
+                        onChange={(e) => setNovoEvento({...novoEvento, horario_inicio: e.target.value})}
+                        className="bg-white dark:bg-gray-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tipo</label>
+                      <select
+                        value={novoEvento.tipo}
+                        onChange={(e) => setNovoEvento({...novoEvento, tipo: e.target.value})}
+                        className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      >
+                        <option value="samba">🥁 Samba</option>
+                        <option value="pagode">🎤 Pagode</option>
+                        <option value="forro">🎻 Forró</option>
+                        <option value="sertanejo">🤠 Sertanejo</option>
+                        <option value="outro">🎵 Outro</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Impacto Esperado</label>
+                      <select
+                        value={novoEvento.impacto}
+                        onChange={(e) => setNovoEvento({...novoEvento, impacto: e.target.value})}
+                        className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      >
+                        <option value="alto">🔴 Alto - Vai afetar muito</option>
+                        <option value="medio">🟡 Médio - Pode afetar</option>
+                        <option value="baixo">🟢 Baixo - Pouco impacto</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Link do Evento (opcional)</label>
+                      <Input
+                        placeholder="https://sympla.com.br/evento..."
+                        value={novoEvento.url_fonte}
+                        onChange={(e) => setNovoEvento({...novoEvento, url_fonte: e.target.value})}
+                        className="bg-white dark:bg-gray-700"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Observações</label>
+                      <Input
+                        placeholder="Ex: Grupo famoso, entrada gratuita, etc."
+                        value={novoEvento.notas}
+                        onChange={(e) => setNovoEvento({...novoEvento, notas: e.target.value})}
+                        className="bg-white dark:bg-gray-700"
+                      />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{estatisticasAgente.resultado?.total_buscados || 0}</p>
-                      <p className="text-xs text-blue-700 dark:text-blue-500">Eventos analisados</p>
-                    </div>
-                    <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{estatisticasAgente.resultado?.total_relevantes || 0}</p>
-                      <p className="text-xs text-yellow-700 dark:text-yellow-500">Samba/Pagode encontrados</p>
-                    </div>
-                    <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">{estatisticasAgente.resultado?.novos_adicionados || 0}</p>
-                      <p className="text-xs text-green-700 dark:text-green-500">Novos adicionados</p>
-                    </div>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                      <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">{estatisticasAgente.resultado?.eventos_encerrados || 0}</p>
-                      <p className="text-xs text-gray-700 dark:text-gray-500">Eventos encerrados</p>
-                    </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setMostrarFormulario(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={adicionarEventoManual}
+                      disabled={salvandoEvento}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      {salvandoEvento ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Salvar Evento
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1181,6 +1293,13 @@ export default function ComercialPage() {
                                     <ExternalLink className="w-4 h-4" />
                                   </a>
                                 )}
+                                <button
+                                  onClick={() => removerEvento(evento.id)}
+                                  className="text-gray-400 hover:text-red-500 transition-colors"
+                                  title="Remover evento"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </div>
                             </div>
                             <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
@@ -1199,72 +1318,6 @@ export default function ComercialPage() {
               </CardContent>
             </Card>
 
-            {/* Grid de Eventos Fixos */}
-            <Card className="card-dark">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                  <Music className="w-5 h-5 text-red-500" />
-                  Eventos Recorrentes de Brasília
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {EVENTOS_CONCORRENCIA.map((evento, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className={`p-4 rounded-lg border ${
-                        evento.impacto === 'alto' 
-                          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
-                          : evento.impacto === 'medio'
-                            ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-                            : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">
-                            {evento.tipo === 'samba' ? '🥁' : 
-                             evento.tipo === 'pagode' ? '🎤' : 
-                             evento.tipo === 'forró' ? '🎻' : 
-                             evento.tipo === 'sertanejo' ? '🤠' : '🎵'}
-                          </span>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">{evento.nome}</h4>
-                        </div>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          evento.impacto === 'alto' 
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' 
-                            : evento.impacto === 'medio'
-                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'
-                              : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                        }`}>
-                          Impacto {evento.impacto}
-                        </span>
-                      </div>
-                      <div className="space-y-1 text-sm">
-                        <p className="text-gray-600 dark:text-gray-400">
-                          📍 {evento.local} • {evento.frequencia === 'semanal' ? `Toda ${evento.diaSemana}` : evento.frequencia}
-                        </p>
-                        <p className="text-gray-500 dark:text-gray-500 text-xs">
-                          💡 {evento.dica}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Área para adicionar novos */}
-                <div className="mt-6 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    💡 <strong>Dica:</strong> Monitore Sympla, Instagram e grupos de WhatsApp para identificar novos eventos.
-                    <br />
-                    Edite o arquivo <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">page.tsx</code> para adicionar mais eventos à lista.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Datas Específicas de Concorrência 2026 */}
             {DATAS_CONCORRENCIA_2026.length > 0 && (
@@ -1301,51 +1354,6 @@ export default function ComercialPage() {
               </Card>
             )}
 
-            {/* Dicas de Monitoramento */}
-            <Card className="card-dark">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-                  <Lightbulb className="w-5 h-5 text-yellow-500" />
-                  Como Identificar Eventos Concorrentes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">📱 Redes Sociais</h4>
-                    <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
-                      <li>• Siga perfis de casas de show e bares de BSB</li>
-                      <li>• Monitore hashtags: #sambabrasilia #pagodebsb</li>
-                      <li>• Acompanhe influenciadores locais de samba</li>
-                    </ul>
-                  </div>
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">🎫 Plataformas de Eventos</h4>
-                    <ul className="text-sm text-purple-700 dark:text-purple-400 space-y-1">
-                      <li>• Sympla - eventos de música em Brasília</li>
-                      <li>• Ingresse - shows e festivais</li>
-                      <li>• Eventim - grandes eventos</li>
-                    </ul>
-                  </div>
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">📰 Mídia Local</h4>
-                    <ul className="text-sm text-green-700 dark:text-green-400 space-y-1">
-                      <li>• Agenda Cultural do Correio Braziliense</li>
-                      <li>• Metrópoles - seção de lazer</li>
-                      <li>• Portais de eventos de BSB</li>
-                    </ul>
-                  </div>
-                  <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                    <h4 className="font-semibold text-orange-800 dark:text-orange-300 mb-2">💬 Networking</h4>
-                    <ul className="text-sm text-orange-700 dark:text-orange-400 space-y-1">
-                      <li>• Converse com clientes sobre onde vão</li>
-                      <li>• Grupos de WhatsApp do setor</li>
-                      <li>• Observe padrões de dias fracos</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* TAB: HISTÓRICO 2025 */}
