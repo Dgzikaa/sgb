@@ -83,10 +83,12 @@ class ZykorNotifications {
     // Usar Service Worker se disponível (para notificações persistentes)
     if (this.swRegistration) {
       try {
-        await this.swRegistration.showNotification(config.title, {
+        // ServiceWorkerRegistration.showNotification suporta actions
+        const swOptions = {
           ...options,
           actions: config.actions
-        });
+        } as NotificationOptions & { actions?: NotificationAction[] };
+        await this.swRegistration.showNotification(config.title, swOptions);
         return null;
       } catch (error) {
         console.warn('Fallback para notificação simples');
@@ -149,7 +151,7 @@ class ZykorNotifications {
       title: `💡 ${insight.titulo}`,
       body: insight.descricao,
       tag: 'insight-agente',
-      data: { tipo: 'insight', ...insight }
+      data: { categoria: 'insight', ...insight }
     });
   }
 
