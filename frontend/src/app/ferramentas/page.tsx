@@ -30,7 +30,8 @@ import {
   MapPin,
   Terminal,
   Coffee,
-  Wallet
+  Wallet,
+  Megaphone
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -55,6 +56,22 @@ export default function FerramentasPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const ferramentas: FerramentaItem[] = [
+    // Central Comercial 2026
+    {
+      title: 'Central Comercial 2026',
+      description: 'Planejamento estratégico: feriados, Copa do Mundo, eventos e oportunidades',
+      icon: Megaphone,
+      href: '/ferramentas/comercial',
+      badge: 'Novo',
+      badgeColor: 'border-emerald-200 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300',
+      iconBgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+      iconTextColor: 'text-emerald-600 dark:text-emerald-400',
+      buttonBgColor: 'bg-emerald-500/10 dark:bg-emerald-900/20',
+      buttonBorderColor: 'border-emerald-500 dark:border-emerald-700',
+      buttonTextColor: 'text-emerald-600 dark:text-emerald-400',
+      features: 'Feriados 2026 • Copa do Mundo • Oportunidades • Ações',
+      status: 'active'
+    },
     // CFP - Controle Financeiro Pessoal
     {
       title: 'CFP - Financeiro Pessoal',

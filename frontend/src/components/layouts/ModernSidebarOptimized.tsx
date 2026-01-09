@@ -34,6 +34,7 @@ import {
   PieChart,
   Plug,
   Building2,
+  Megaphone,
 } from 'lucide-react';
 
 /**
@@ -111,6 +112,7 @@ const defaultSidebarItems: SidebarItem[] = [
     color: 'text-green-600 dark:text-green-400',
     permission: 'ferramentas',
     subItems: [
+      { icon: Megaphone, label: 'Central Comercial', href: '/ferramentas/comercial', permission: 'gestao' },
       { icon: Package, label: 'Produção e Insumos', href: '/ferramentas/producao-insumos', permission: 'operacoes' },
       { icon: Package, label: 'Contagem de Estoque', href: '/ferramentas/contagem-estoque', permission: 'operacoes' },
       { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento', permission: 'financeiro_agendamento' },

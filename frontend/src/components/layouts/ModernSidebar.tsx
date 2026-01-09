@@ -36,6 +36,7 @@ import {
   FileSearch,
   Activity,
   Wallet,
+  Megaphone,
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -168,6 +169,13 @@ const defaultSidebarItems: SidebarItem[] = [
         //   description: 'Calendário visual de eventos e reservas',
         //   permission: 'operacoes',
         // },
+        {
+          icon: Megaphone,
+          label: 'Central Comercial',
+          href: '/ferramentas/comercial',
+          description: 'Planejamento 2026: feriados, Copa, eventos',
+          permission: 'gestao',
+        },
         {
           icon: Package,
           label: 'Produção e Insumos',

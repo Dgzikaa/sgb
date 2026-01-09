@@ -25,6 +25,7 @@ import {
   ChevronDown,
   ChevronRight,
   Sparkles,
+  Megaphone,
 } from 'lucide-react';
 
 interface BottomNavItem {
@@ -88,6 +89,7 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
       href: '/ferramentas',
       color: 'text-green-600 dark:text-green-400',
       subItems: [
+        { icon: Megaphone, label: 'Central Comercial', href: '/ferramentas/comercial' },
         { icon: Package, label: 'Produção e Insumos', href: '/ferramentas/producao-insumos' },
         { icon: Package, label: 'Contagem de Estoque', href: '/ferramentas/contagem-estoque' },
         { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento' },
