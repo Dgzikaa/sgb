@@ -36,6 +36,24 @@ export async function GET(
     // Extrair dados do campo jsonb
     const dados = notificacao.dados || {};
 
+    // Filtrar dados para remover objetos/arrays (manter apenas valores primitivos)
+    const dadosFiltrados: Record<string, unknown> = {};
+    const dadosOriginais = dados.dados_extras || dados;
+    
+    if (dadosOriginais && typeof dadosOriginais === 'object') {
+      for (const [key, value] of Object.entries(dadosOriginais)) {
+        // Ignorar campos de sistema e objetos/arrays
+        if (
+          value !== null && 
+          value !== undefined && 
+          typeof value !== 'object' &&
+          !['acoes', 'acoes_sugeridas', 'referencia_tipo', 'referencia_id', 'referencia_nome', 'modulo', 'categoria', 'tipo'].includes(key)
+        ) {
+          dadosFiltrados[key] = value;
+        }
+      }
+    }
+
     // Formatar resposta
     const response = {
       id: notificacao.id,
@@ -43,7 +61,7 @@ export async function GET(
       categoria: dados.categoria || dados.modulo || 'sistema',
       titulo: notificacao.titulo,
       mensagem: notificacao.mensagem,
-      dados: dados.dados_extras || dados,
+      dados: dadosFiltrados,
       acoes_sugeridas: dados.acoes_sugeridas || [],
       url: dados.acoes?.[0]?.url || null,
       created_at: notificacao.criada_em,

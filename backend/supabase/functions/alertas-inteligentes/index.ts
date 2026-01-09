@@ -110,7 +110,11 @@ class AlertasInteligentesService {
             'Revisar sugestive selling da equipe',
             'Verificar promoções que podem estar canibalizando',
             'Analisar mix de produtos vendidos'
-          ]
+          ],
+          referencia_tipo: 'evento',
+          referencia_id: eventoOntem.id,
+          referencia_nome: `Evento ${ontemStr}`,
+          url: '/analitico'
         })
       }
     }
@@ -152,7 +156,11 @@ class AlertasInteligentesService {
             'Revisar precificação dos produtos',
             'Verificar desperdício na cozinha/bar',
             'Analisar produtos com maior custo'
-          ]
+          ],
+          referencia_tipo: 'cmv',
+          referencia_id: cmvData.id,
+          referencia_nome: `CMV Semana ${cmvData.data_inicio}`,
+          url: '/ferramentas/cmv-semanal'
         })
       } else if (cmvPercentual > 32) {
         alertas.push({
@@ -160,7 +168,11 @@ class AlertasInteligentesService {
           categoria: 'cmv',
           titulo: '⚠️ CMV em zona de atenção',
           mensagem: `CMV semanal em ${cmvPercentual.toFixed(1)}% - próximo do limite`,
-          dados: { cmvPercentual, meta: 34 }
+          dados: { cmvPercentual, meta: 34 },
+          referencia_tipo: 'cmv',
+          referencia_id: cmvData.id,
+          referencia_nome: `CMV Semana ${cmvData.data_inicio}`,
+          url: '/ferramentas/cmv-semanal'
         })
       }
     }
@@ -213,7 +225,8 @@ class AlertasInteligentesService {
             'Verificar calendário de eventos',
             'Revisar estratégia de marketing',
             'Checar se houve problemas operacionais'
-          ]
+          ],
+          url: '/analitico/clientes'
         })
       } else if (variacao > 20) {
         alertas.push({
@@ -221,7 +234,8 @@ class AlertasInteligentesService {
           categoria: 'clientes',
           titulo: '📈 Crescimento de clientes!',
           mensagem: `+${variacao.toFixed(1)}% de clientes esta semana!`,
-          dados: { clientesAtual, clientesAnterior, variacao }
+          dados: { clientesAtual, clientesAnterior, variacao },
+          url: '/analitico/clientes'
         })
       }
     }
@@ -255,7 +269,8 @@ class AlertasInteligentesService {
           'Verificar possíveis perdas ou furtos',
           'Revisar processos de contagem',
           'Checar consumo vs vendas'
-        ]
+        ],
+        url: '/ferramentas/contagem-estoque'
       })
     }
 
@@ -274,7 +289,8 @@ class AlertasInteligentesService {
         categoria: 'estoque',
         titulo: '🚨 Anomalias de contagem detectadas',
         mensagem: `${anomalias.length} contagem(ns) anômala(s) requer(em) atenção`,
-        dados: { anomalias: anomalias.map(a => ({ descricao: a.descricao, score: a.score_anomalia })) }
+        dados: { anomalias: anomalias.map(a => ({ descricao: a.descricao, score: a.score_anomalia })) },
+        url: '/ferramentas/contagem-estoque'
       })
     }
 
@@ -347,6 +363,7 @@ class AlertasInteligentesService {
     )
 
     if (itensCriticos.length > 0) {
+      const primeiroItem = itensCriticos[0] as any
       alertas.push({
         tipo: 'erro',
         categoria: 'checklists',
@@ -360,7 +377,11 @@ class AlertasInteligentesService {
           'Tomar ação corretiva imediata',
           'Documentar o problema',
           'Notificar responsável'
-        ]
+        ],
+        referencia_tipo: 'checklist',
+        referencia_id: primeiroItem?.execucao?.id,
+        referencia_nome: primeiroItem?.execucao?.template?.nome || 'Checklist',
+        url: '/configuracoes/checklists'
       })
     }
 
@@ -416,7 +437,8 @@ class AlertasInteligentesService {
               'Intensificar ações de marketing',
               'Revisar calendário de eventos',
               'Focar em dias com maior potencial'
-            ]
+            ],
+            url: '/estrategico/visao-geral'
           })
         } else if (percentualMes > 50 && percentualAtingido > percentualMes + 10) {
           alertas.push({
@@ -424,7 +446,8 @@ class AlertasInteligentesService {
             categoria: 'metas',
             titulo: '🚀 Meta mensal no caminho certo!',
             mensagem: `Faturamento de R$ ${faturamentoMes.toLocaleString('pt-BR')} (${percentualAtingido.toFixed(1)}% da meta) está acima do ritmo esperado!`,
-            dados: { faturamentoMes, metaMes, percentualAtingido }
+            dados: { faturamentoMes, metaMes, percentualAtingido },
+            url: '/estrategico/visao-geral'
           })
         }
       }
@@ -500,7 +523,8 @@ class AlertasInteligentesService {
           'Parabenizar o(s) aniversariante(s)',
           'Preparar uma surpresa especial',
           'Postar nas redes sociais (se autorizado)'
-        ]
+        ],
+        url: '/configuracoes/usuarios'
       })
     }
 
@@ -511,7 +535,8 @@ class AlertasInteligentesService {
         categoria: 'aniversariantes',
         titulo: '📅 Aniversários Próximos',
         mensagem: `${aniversariantesProximos.length} aniversário(s) nos próximos 3 dias: ${aniversariantesProximos.map(a => `${a.nome} (${a.diasFaltando === 1 ? 'amanhã' : `em ${a.diasFaltando} dias`})`).join(', ')}`,
-        dados: { proximos: aniversariantesProximos }
+        dados: { proximos: aniversariantesProximos },
+        url: '/configuracoes/usuarios'
       })
     }
 
@@ -612,7 +637,8 @@ class AlertasInteligentesService {
         dados: { 
           quantidade: reservasAmanha.length, 
           totalPessoas
-        }
+        },
+        url: '/ferramentas/calendario'
       })
     }
 
@@ -639,7 +665,8 @@ class AlertasInteligentesService {
           'Implementar taxa de no-show',
           'Ligar para confirmar reservas com antecedência',
           'Enviar lembretes automáticos por WhatsApp'
-        ]
+        ],
+        url: '/ferramentas/calendario'
       })
     }
 
@@ -693,6 +720,7 @@ class AlertasInteligentesService {
     // Alerta de contas vencidas
     if (vencidos && vencidos.length > 0) {
       const valorTotal = vencidos.reduce((acc, v) => acc + (v.valor || 0), 0)
+      const primeiraConta = vencidos[0]
       alertas.push({
         tipo: 'critico',
         categoria: 'pagamentos',
@@ -712,13 +740,18 @@ class AlertasInteligentesService {
           'Efetuar pagamento imediatamente',
           'Verificar possíveis multas/juros',
           'Renegociar prazos se necessário'
-        ]
+        ],
+        referencia_tipo: 'pagamento',
+        referencia_id: primeiraConta.id,
+        referencia_nome: primeiraConta.descricao || primeiraConta.titulo || 'Conta vencida',
+        url: '/fp'
       })
     }
 
     // Alerta de contas vencendo hoje
     if (vencendoHoje && vencendoHoje.length > 0) {
       const valorTotal = vencendoHoje.reduce((acc, v) => acc + (v.valor || 0), 0)
+      const primeiraConta = vencendoHoje[0]
       alertas.push({
         tipo: 'aviso',
         categoria: 'pagamentos',
@@ -736,7 +769,11 @@ class AlertasInteligentesService {
         acoes_sugeridas: [
           'Efetuar pagamentos antes do fechamento bancário',
           'Verificar saldo disponível'
-        ]
+        ],
+        referencia_tipo: 'pagamento',
+        referencia_id: primeiraConta.id,
+        referencia_nome: primeiraConta.descricao || primeiraConta.titulo || 'Conta vencendo',
+        url: '/fp'
       })
     }
 
@@ -751,7 +788,8 @@ class AlertasInteligentesService {
         dados: { 
           quantidade: proximosPagamentos.length, 
           valorTotal 
-        }
+        },
+        url: '/fp'
       })
     }
 
@@ -776,7 +814,8 @@ class AlertasInteligentesService {
         dados: { 
           quantidade: recebimentos.length, 
           valorTotal 
-        }
+        },
+        url: '/fp'
       })
     }
 
@@ -813,6 +852,7 @@ class AlertasInteligentesService {
       const comVariacao = produtosEstoqueBaixo.filter(p => p.alerta_variacao && p.estoque_total > 0)
 
       if (zerados.length > 0) {
+        const primeiroProduto = zerados[0]
         alertas.push({
           tipo: 'critico',
           categoria: 'estoque',
@@ -829,11 +869,16 @@ class AlertasInteligentesService {
             'Fazer pedido de reposição urgente',
             'Verificar alternativas com fornecedores',
             'Atualizar cardápio se necessário'
-          ]
+          ],
+          referencia_tipo: 'produto',
+          referencia_id: primeiroProduto.id,
+          referencia_nome: primeiroProduto.descricao,
+          url: '/ferramentas/contagem-estoque'
         })
       }
 
       if (comVariacao.length > 0) {
+        const primeiroProduto = comVariacao[0]
         alertas.push({
           tipo: 'aviso',
           categoria: 'estoque',
@@ -850,7 +895,11 @@ class AlertasInteligentesService {
             'Investigar possíveis perdas',
             'Verificar processos de controle',
             'Revisar contagem de estoque'
-          ]
+          ],
+          referencia_tipo: 'produto',
+          referencia_id: primeiroProduto.id,
+          referencia_nome: primeiroProduto.descricao,
+          url: '/ferramentas/contagem-estoque'
         })
       }
     }
@@ -870,7 +919,8 @@ class AlertasInteligentesService {
           acoes_sugeridas: [
             'Realizar nova contagem de estoque',
             'Agendar contagens periódicas'
-          ]
+          ],
+          url: '/ferramentas/contagem-estoque'
         })
       }
     }
@@ -914,7 +964,8 @@ class AlertasInteligentesService {
             'Analisar comentários dos clientes',
             'Identificar pontos de melhoria prioritários',
             'Treinar equipe em pontos críticos'
-          ]
+          ],
+          url: '/ferramentas/nps'
         })
       } else if (mediaGeral < 8) {
         alertas.push({
@@ -922,7 +973,8 @@ class AlertasInteligentesService {
           categoria: 'avaliacoes',
           titulo: '⚠️ NPS em Atenção',
           mensagem: `Média de NPS da última semana: ${mediaGeral.toFixed(1)}/10. Há espaço para melhorias.`,
-          dados: { mediaGeral, totalAvaliacoes: npsRecentes.length }
+          dados: { mediaGeral, totalAvaliacoes: npsRecentes.length },
+          url: '/ferramentas/nps'
         })
       } else if (mediaGeral >= 9) {
         alertas.push({
@@ -930,7 +982,8 @@ class AlertasInteligentesService {
           categoria: 'avaliacoes',
           titulo: '⭐ NPS Excelente!',
           mensagem: `Média de NPS da última semana: ${mediaGeral.toFixed(1)}/10. Continue o ótimo trabalho!`,
-          dados: { mediaGeral, totalAvaliacoes: npsRecentes.length }
+          dados: { mediaGeral, totalAvaliacoes: npsRecentes.length },
+          url: '/ferramentas/nps'
         })
       }
 
@@ -946,7 +999,8 @@ class AlertasInteligentesService {
           titulo: '👥 Problemas com Atendimento',
           mensagem: `${avaliacoesAtendimento.length} avaliações recentes apontam problemas no atendimento`,
           dados: { quantidade: avaliacoesAtendimento.length },
-          acoes_sugeridas: ['Treinar equipe de atendimento', 'Verificar escala de funcionários']
+          acoes_sugeridas: ['Treinar equipe de atendimento', 'Verificar escala de funcionários'],
+          url: '/ferramentas/nps'
         })
       }
 
@@ -957,7 +1011,8 @@ class AlertasInteligentesService {
           titulo: '🍽️ Problemas com Comida/Drinks',
           mensagem: `${avaliacoesComida.length} avaliações recentes apontam problemas com comida/drinks`,
           dados: { quantidade: avaliacoesComida.length },
-          acoes_sugeridas: ['Revisar qualidade dos ingredientes', 'Verificar processos da cozinha']
+          acoes_sugeridas: ['Revisar qualidade dos ingredientes', 'Verificar processos da cozinha'],
+          url: '/ferramentas/nps'
         })
       }
 
@@ -968,7 +1023,8 @@ class AlertasInteligentesService {
           titulo: '🧹 Problemas com Limpeza',
           mensagem: `${avaliacoesLimpeza.length} avaliações recentes apontam problemas com limpeza`,
           dados: { quantidade: avaliacoesLimpeza.length },
-          acoes_sugeridas: ['Intensificar rotina de limpeza', 'Verificar checklists de limpeza']
+          acoes_sugeridas: ['Intensificar rotina de limpeza', 'Verificar checklists de limpeza'],
+          url: '/ferramentas/nps'
         })
       }
     }
@@ -1005,7 +1061,8 @@ class AlertasInteligentesService {
             'Responder às avaliações no Google',
             'Identificar problemas mencionados',
             'Contatar cliente para resolver (se possível)'
-          ]
+          ],
+          url: '/ferramentas/nps'
         })
       }
     }
@@ -1046,7 +1103,11 @@ class AlertasInteligentesService {
           atracao, 
           meta,
           diaSemana: amanha.toLocaleDateString('pt-BR', { weekday: 'long' })
-        }
+        },
+        referencia_tipo: 'evento',
+        referencia_id: eventoAmanha.id,
+        referencia_nome: `${atracao} - ${amanhaStr}`,
+        url: '/analitico/eventos'
       })
     } else {
       // Verificar se é dia que deveria ter evento
@@ -1062,7 +1123,8 @@ class AlertasInteligentesService {
             'Verificar calendário de eventos',
             'Cadastrar evento se houver',
             'Confirmar se é dia de operação'
-          ]
+          ],
+          url: '/analitico/eventos'
         })
       }
     }
