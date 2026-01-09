@@ -1,29 +1,48 @@
-# 💡 IDEIAS EM ANDAMENTO - ZYKOR
+# IDEIAS EM ANDAMENTO - ZYKOR
 
-> **IMPORTANTE**: Adicione suas ideias aqui. O agente lerá automaticamente.
+> Adicione suas ideias aqui. O agente lera automaticamente.
+> Ultima atualizacao: 2026-01-09
 
 ---
 
-## 🔥 PRIORIDADE ALTA
+## PRIORIDADE ALTA
 
 ### 1. Eventos Externos que Impactam o Bar
-**Status:** 🔄 Em desenvolvimento (outro chat)
-**Descrição:** Detectar e correlacionar eventos externos (shows na cidade, jogos de futebol, feriados, clima extremo) com o desempenho do bar
-**Impacto:** Contextualizar análises e prever demanda
-**Próximos passos:**
-- [ ] Definir fontes de dados (APIs de eventos, clima, etc.)
+**Status:** EM DESENVOLVIMENTO (outro chat)
+**Descricao:** Detectar e correlacionar eventos externos com desempenho:
+- Shows na cidade (Mane Garrincha, bares concorrentes)
+- Jogos de futebol (Flamengo, Vasco, Corinthians em Brasilia)
+- Feriados e pontos facultativos
+- Copa do Mundo 2026 (PRIORIDADE!)
+- Eventos governamentais (posse, manifestacoes)
+**Impacto:** Contextualizar analises, prever demanda, ajustar estoque
+**Proximos passos:**
+- [ ] Definir fontes de dados (APIs de eventos)
 - [ ] Criar tabela de eventos externos
-- [ ] Integrar na análise diária
+- [ ] Integrar na analise diaria
+- [ ] Alertas de eventos proximos
 
-### 2. Análise de Atrações nas Redes Sociais
-**Status:** 💭 Ideia
-**Descrição:** Verificar se atrações fizeram posts marcando @ordinariobar no Instagram
-**Impacto:** Medir engajamento, alcance e ROI real das atrações
-**Próximos passos:**
+### 2. Analise de Atracoes nas Redes Sociais
+**Status:** IDEIA
+**Descricao:** Verificar engajamento das atracoes com @ordinariobar:
+- Posts marcando o bar
+- Stories compartilhados
+- Alcance e impressoes
+- Engajamento (likes, comentarios)
+**Impacto:** Medir ROI real das atracoes, decidir quem contratar
+**Atracoes frequentes a monitorar:**
+- Breno Alves (Quarta de Bamba)
+- Pe no Chao (Pe no Ordi)
+- Bonsai (Pagode Vira Lata)
+- STZ, Sambadona (Legado do Samba)
+- 7naRoda (Terca)
+- DJs: Afrika, Vinny, Caju, Jess Ullun, Negritah, Leo Cabral
+**Proximos passos:**
 - [ ] Pesquisar API do Instagram/Meta Business
-- [ ] Criar integração ou scraper
+- [ ] Criar integracao ou scraper
 - [ ] Correlacionar posts com faturamento do dia
-- [ ] Dashboard de performance de atrações
+- [ ] Dashboard de performance de atracoes
+- [ ] Ranking de atracoes por ROI
 
 ### 3. Integração Yuzer Completa (Reservas)
 **Status:** 🔄 Em integração
@@ -47,19 +66,25 @@
 
 ## 🟡 PRIORIDADE MÉDIA
 
-### 5. Dashboard de Performance de Atrações
-**Status:** 💭 Ideia
-**Descrição:** Ranking completo de atrações por:
-- ROI (custo da atração vs faturamento gerado)
-- Público atraído (PAX)
-- Ticket médio quando toca
+### 5. Dashboard de Performance de Atracoes
+**Status:** IDEIA
+**Descricao:** Ranking completo de atracoes por:
+- ROI (custo da atracao vs faturamento gerado)
+- Publico atraido (PAX)
+- Ticket medio quando toca
 - Engajamento social
-**Impacto:** Decidir quais atrações contratar/repetir
-**Dados necessários:**
-- Custo por atração (já temos em eventos_base)
-- Faturamento do dia
-- PAX
+- Frequencia de shows
+- Tendencia (melhorando/piorando)
+**Impacto:** Decidir quais atracoes contratar/repetir
+**Dados necessarios:**
+- Custo por atracao (ja temos em eventos_base.custo_atracao)
+- Faturamento do dia (eventos_base.faturamento_liquido)
+- PAX (eventos_base.cl_real)
 - Posts nas redes (a implementar)
+**Metricas sugeridas:**
+- ROI = (Faturamento - Custo Atracao) / Custo Atracao
+- Ticket/PAX quando toca vs media geral
+- Lotacao % quando toca
 
 ### 6. Previsão de Demanda com IA
 **Status:** 💭 Ideia
@@ -102,46 +127,74 @@
 
 ---
 
-## 🟢 PRIORIDADE BAIXA (FUTURO)
-
-### 10. App Mobile para Gestores
-**Status:** 💭 Ideia futura
-**Descrição:** Versão mobile do SGB com dashboards principais e alertas push
-**Impacto:** Acompanhamento em tempo real
-
-### 11. Multi-bar
-**Status:** 💭 Ideia futura
-**Descrição:** Suporte a múltiplos bares na mesma conta com comparativos
-**Impacto:** Expansão do negócio
-
-### 12. Integração com Fornecedores
-**Status:** 💭 Ideia futura
-**Descrição:** Pedidos automáticos baseado em estoque e previsão
-**Impacto:** Automatização de compras
-
-### 13. Open Finance (Pluggy)
-**Status:** 💭 Ideia futura
-**Descrição:** Conectar contas bancárias para fluxo de caixa automático
-**Impacto:** Visão financeira completa
+### 10. Copa do Mundo 2026 - Preparacao
+**Status:** IDEIA
+**Descricao:** Preparar sistema para Copa do Mundo:
+- Calendario de jogos do Brasil
+- Previsao de demanda por jogo
+- Ajuste automatico de metas
+- Estoque especial
+- Escalas diferenciadas
+**Impacto:** Maximizar faturamento em evento historico
+**Datas importantes:** Junho-Julho 2026
 
 ---
 
-## ✅ IDEIAS IMPLEMENTADAS
+## PRIORIDADE BAIXA (FUTURO)
+
+### 11. App Mobile para Gestores
+**Status:** IDEIA FUTURA
+**Descricao:** Versao mobile do SGB com dashboards principais e alertas push
+**Impacto:** Acompanhamento em tempo real
+
+### 12. Multi-bar Comparativo
+**Status:** PARCIALMENTE IMPLEMENTADO
+**Descricao:** Ja temos Ordinario (id 3) e Deboche (id 4)
+- Comparar performance entre bares
+- Identificar melhores praticas
+- Benchmark interno
+**Impacto:** Aprendizado entre unidades
+
+### 13. Integracao com Fornecedores
+**Status:** IDEIA FUTURA
+**Descricao:** Pedidos automaticos baseado em estoque e previsao
+**Impacto:** Automatizacao de compras
+
+### 14. Open Finance (Pluggy)
+**Status:** IDEIA FUTURA
+**Descricao:** Conectar contas bancarias para fluxo de caixa automatico
+**Impacto:** Visao financeira completa
+
+### 15. Integracao Banco Inter
+**Status:** IDEIA FUTURA
+**Descricao:** Pagamentos, cobranças, conciliacao automatica
+**Impacto:** Reduzir trabalho financeiro manual
+
+---
+
+## IDEIAS IMPLEMENTADAS
 
 | Ideia | Data | Detalhes |
 |-------|------|----------|
-| Análise diária automática | 2026-01-09 | Roda 10:00, envia Discord |
-| Análise semanal automática | 2026-01-09 | Roda segunda 08:00 |
-| Análise mensal automática | 2026-01-09 | Roda dia 2, 08:00 |
-| Comparação inteligente (ignora dias fechados) | 2026-01-09 | Busca último dia aberto |
-| Estatísticas históricas do mesmo dia | 2026-01-09 | Últimas 4 operações |
-| Sistema de agente com memória | 2026-01-08 | Tabelas agente_* |
-| Sync ContaHub automático | 2025 | Diário 09:00 |
-| Sync Nibo automático | 2025 | Diário 08:00 |
-| Sync Sympla | 2025 | Diário 06:00 |
-| Notificações Discord | 2025 | Múltiplos webhooks |
-| Desativar alertas duplicados | 2026-01-09 | Job alertas-inteligentes |
+| Analise diaria automatica | 2026-01-09 | Roda 10:00 BRT, envia Discord |
+| Analise semanal automatica | 2026-01-09 | Roda segunda 08:00 BRT |
+| Analise mensal automatica | 2026-01-09 | Roda dia 2, 08:00 BRT |
+| Comparacao inteligente | 2026-01-09 | Ignora dias fechados, busca ultimo aberto |
+| Estatisticas historicas | 2026-01-09 | Ultimas 4 operacoes do mesmo dia |
+| Sistema de agente com memoria | 2026-01-08 | Tabelas agente_* |
+| Sync ContaHub automatico | 2025 | Diario 07:00 BRT |
+| Sync Nibo automatico | 2025 | Diario 10:00 BRT |
+| Sync Sympla | 2025 | Semanal |
+| Sync Yuzer | 2025 | Semanal |
+| Sync NPS | 2025 | Diario 05:00 BRT |
+| Sync Fichas Tecnicas | 2025 | Diario |
+| CMV Semanal automatico | 2025 | Segunda 07:00 BRT |
+| Desempenho Semanal automatico | 2025 | Segunda 06:00 BRT |
+| Notificacoes Discord | 2025 | Multiplos webhooks |
+| Alertas proativos | 2025 | Manha e tarde |
+| Checklist auto-scheduler | 2025 | A cada 15 min |
 | Context files para agente | 2026-01-09 | .cursor/*.md |
+| Operacao 7 dias/semana | 2026-01-09 | Segunda e Terca adicionados |
 
 ---
 
