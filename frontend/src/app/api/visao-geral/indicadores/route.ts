@@ -5,27 +5,30 @@ import { filtrarDiasAbertos } from '@/lib/helpers/calendario-helper';
 export const dynamic = 'force-dynamic'
 
 // Função para calcular datas do trimestre
-function getTrimestreDates(trimestre: number) {
-  const year = 2025;
+function getTrimestreDates(trimestre: number, year?: number) {
+  const anoAtual = year || new Date().getFullYear();
   const quarters = {
-    2: { start: `${year}-04-01`, end: `${year}-06-30` }, // Abr-Jun
-    3: { start: `${year}-07-01`, end: `${year}-09-30` }, // Jul-Set  
-    4: { start: `${year}-10-01`, end: `${year}-12-31` }  // Out-Dez
+    1: { start: `${anoAtual}-01-01`, end: `${anoAtual}-03-31` }, // Jan-Mar
+    2: { start: `${anoAtual}-04-01`, end: `${anoAtual}-06-30` }, // Abr-Jun
+    3: { start: `${anoAtual}-07-01`, end: `${anoAtual}-09-30` }, // Jul-Set  
+    4: { start: `${anoAtual}-10-01`, end: `${anoAtual}-12-31` }  // Out-Dez
   };
   
-  return quarters[trimestre as keyof typeof quarters] || quarters[3];
+  return quarters[trimestre as keyof typeof quarters] || quarters[1];
 }
 
 // Função para calcular trimestre anterior
-function getTrimestreAnterior(trimestre: number) {
-  const year = 2025;
+function getTrimestreAnterior(trimestre: number, year?: number) {
+  const anoAtual = year || new Date().getFullYear();
+  const anoAnterior = anoAtual - 1;
   const quarters = {
-    2: { start: `${year}-01-01`, end: `${year}-03-31` }, // T1 (Jan-Mar) - anterior ao T2
-    3: { start: `${year}-04-01`, end: `${year}-06-30` }, // T2 (Abr-Jun) - anterior ao T3
-    4: { start: `${year}-07-01`, end: `${year}-09-30` }  // T3 (Jul-Set) - anterior ao T4
+    1: { start: `${anoAnterior}-10-01`, end: `${anoAnterior}-12-31` }, // T4 ano anterior - anterior ao T1
+    2: { start: `${anoAtual}-01-01`, end: `${anoAtual}-03-31` }, // T1 (Jan-Mar) - anterior ao T2
+    3: { start: `${anoAtual}-04-01`, end: `${anoAtual}-06-30` }, // T2 (Abr-Jun) - anterior ao T3
+    4: { start: `${anoAtual}-07-01`, end: `${anoAtual}-09-30` }  // T3 (Jul-Set) - anterior ao T4
   };
   
-  return quarters[trimestre as keyof typeof quarters] || quarters[2]; // Default T1
+  return quarters[trimestre as keyof typeof quarters] || quarters[1]; // Default T4 anterior
 }
 
 // Função para calcular taxa de retornantes trimestral
@@ -422,7 +425,8 @@ export async function GET(request: Request) {
     // Buscar dados anuais
     if (periodo === 'anual') {
       // Performance Anual - Desde abertura até data atual
-      const startDate = '2025-02-01'; // Bar abriu em Fevereiro
+      const anoAtual = new Date().getFullYear();
+      const startDate = `${anoAtual}-01-01`; // Início do ano atual
       const hoje = new Date();
       const endDate = hoje.toISOString().split('T')[0]; // Data atual
       // 🚨 DESABILITAR VIEW ANUAL TEMPORARIAMENTE PARA FORÇAR RECÁLCULO
@@ -573,7 +577,7 @@ export async function GET(request: Request) {
         anual: {
           faturamento: {
             valor: faturamentoTotal,
-            meta: 10000000,
+            meta: 18000000, // Meta 2026: R$ 18M
             detalhes: {
               contahub: faturamentoContahub,
               yuzer: faturamentoYuzer,
@@ -582,7 +586,7 @@ export async function GET(request: Request) {
           },
           pessoas: {
             valor: totalPessoas,
-            meta: 144000, // 12.000 mensal * 12
+            meta: 78000, // 6.500 média/mês * 12
             detalhes: {
               contahub: totalPessoasContahub,
               yuzer: totalPessoasYuzer,
@@ -591,11 +595,11 @@ export async function GET(request: Request) {
           },
           reputacao: {
             valor: reputacao,
-            meta: 4.8
+            meta: 4.9 // Meta 2026
           },
           ebitda: {
             valor: ebitda,
-            meta: 1000000
+            meta: 1800000 // Meta 2026: R$ 1.8M
           }
         }
       });
@@ -611,48 +615,75 @@ export async function GET(request: Request) {
       const hoje = new Date();
       const endDateObj = new Date(endDate);
       const endDateEfetivo = hoje < endDateObj ? hoje.toISOString().split('T')[0] : endDate;
+      
+      // 🔥 CLIENTES ATIVOS: Usar regra dos 90 dias (rolling window)
+      const formatDate = (date: Date) => date.toISOString().split('T')[0];
+      
+      // Período atual: últimos 90 dias
+      const inicio90dias = new Date(hoje);
+      inicio90dias.setDate(hoje.getDate() - 90);
+      const periodo90diasAtual = {
+        inicio: formatDate(inicio90dias),
+        fim: formatDate(hoje)
+      };
+      
+      // Período anterior: 90 dias antes do período atual (para comparação)
+      const fim90diasAnterior = new Date(inicio90dias);
+      fim90diasAnterior.setDate(fim90diasAnterior.getDate() - 1);
+      const inicio90diasAnterior = new Date(fim90diasAnterior);
+      inicio90diasAnterior.setDate(fim90diasAnterior.getDate() - 90);
+      const periodo90diasAnterior = {
+        inicio: formatDate(inicio90diasAnterior),
+        fim: formatDate(fim90diasAnterior)
+      };
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔥 CLIENTES ATIVOS - Regra 90 dias:');
+        console.log(`   Período atual: ${periodo90diasAtual.inicio} a ${periodo90diasAtual.fim}`);
+        console.log(`   Período anterior: ${periodo90diasAnterior.inicio} a ${periodo90diasAnterior.fim}`);
+      }
 
       // 🚀 OTIMIZAÇÃO: Buscar dados de clientes em PARALELO
       const [
-        clientesData,
-        clientesDataAnterior,
+        clientesAtivos90diasData,
+        clientesAtivos90diasAnteriorData,
         clientesTotaisContahubData,
         clientesTotaisYuzerData,
         clientesTotaisSymplaData
       ] = await Promise.all([
-        // Clientes ativos do trimestre atual
+        // Clientes ativos - ÚLTIMOS 90 DIAS (rolling window)
         fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
           'eq_bar_id': barIdNum,
-          'gte_dt_gerencial': startDate,
-          'lte_dt_gerencial': endDateEfetivo
+          'gte_dt_gerencial': periodo90diasAtual.inicio,
+          'lte_dt_gerencial': periodo90diasAtual.fim
         }),
-        // Clientes ativos do trimestre anterior
+        // Clientes ativos - 90 DIAS ANTERIORES (para comparação)
         fetchAllData(supabase, 'contahub_periodo', 'cli_fone, dt_gerencial', {
           'eq_bar_id': barIdNum,
-          'gte_dt_gerencial': startDateAnterior,
-          'lte_dt_gerencial': endDateAnterior
+          'gte_dt_gerencial': periodo90diasAnterior.inicio,
+          'lte_dt_gerencial': periodo90diasAnterior.fim
         }),
-        // Clientes totais ContaHub
+        // Clientes totais ContaHub - TRIMESTRE
         fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
           'eq_bar_id': barIdNum,
           'gte_dt_gerencial': startDate,
           'lte_dt_gerencial': endDateEfetivo
         }),
-        // Clientes totais Yuzer
+        // Clientes totais Yuzer - TRIMESTRE
         fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
           'eq_bar_id': barIdNum,
           'gte_data_evento': startDate,
           'lte_data_evento': endDateEfetivo
         }),
-        // Clientes totais Sympla
+        // Clientes totais Sympla - TRIMESTRE
         fetchAllData(supabase, 'sympla_resumo', 'checkins_realizados', {
           'gte_data_inicio': startDate,
           'lte_data_inicio': endDateEfetivo
         })
       ]);
       
-      // Calcular Clientes Ativos (2+ visitas) - Trimestre Atual
-      const clientesComTelefone = clientesData?.filter(item => item.cli_fone) || [];
+      // Calcular Clientes Ativos (2+ visitas nos últimos 90 dias)
+      const clientesComTelefone = clientesAtivos90diasData?.filter(item => item.cli_fone) || [];
       const clientesMap = new Map();
       clientesComTelefone.forEach(item => {
         const count = clientesMap.get(item.cli_fone) || 0;
@@ -663,8 +694,8 @@ export async function GET(request: Request) {
         if (count >= 2) clientesAtivos++;
       });
       
-      // Calcular Clientes Ativos - Trimestre Anterior
-      const clientesComTelefoneAnterior = clientesDataAnterior?.filter(item => item.cli_fone) || [];
+      // Calcular Clientes Ativos - Período Anterior (90 dias anteriores)
+      const clientesComTelefoneAnterior = clientesAtivos90diasAnteriorData?.filter(item => item.cli_fone) || [];
       const clientesMapAnterior = new Map();
       clientesComTelefoneAnterior.forEach(item => {
         const count = clientesMapAnterior.get(item.cli_fone) || 0;
@@ -678,7 +709,7 @@ export async function GET(request: Request) {
       const variacaoClientesAtivos = clientesAtivosAnterior > 0 ? ((clientesAtivos - clientesAtivosAnterior) / clientesAtivosAnterior * 100) : 0;
       
       if (process.env.NODE_ENV === 'development') {
-        console.log(`👥 T${trimestre}: ${clientesAtivos} ativos | T${trimestre-1}: ${clientesAtivosAnterior} | Var: ${variacaoClientesAtivos.toFixed(1)}%`);
+        console.log(`👥 Clientes Ativos (90d): ${clientesAtivos} | Anterior: ${clientesAtivosAnterior} | Var: ${variacaoClientesAtivos.toFixed(1)}%`);
       }
       
       // View desabilitada - usando cálculo manual
@@ -1037,38 +1068,47 @@ export async function GET(request: Request) {
       console.log(`T${trimestre} atual: ${startDate} a ${endDate}`);
       console.log(`T${trimestre - 1} anterior: ${trimestreAnteriorStart} a ${trimestreAnteriorEnd}`);
 
-      // Metas dinâmicas por trimestre
+      // Metas dinâmicas por trimestre - 2026
       const getMetasTrimestre = (trimestre: number) => {
         const metas = {
-          2: { // T2 (Abr-Jun)
-            clientesAtivos: 3000,
+          1: { // T1 2026 (Jan-Mar) - "Ver de Qualé - Segura a Peteca"
+            clientesAtivos: 5100, // Meta 31/03
             clientesTotais: 30000,
+            retencao: 40,
+            retencaoReal: 5,
+            cmvLimpo: 34, // CMV Limpo Médio do Tri
+            cmo: 20,
+            artistica: 20 // Atrações/Fat
+          },
+          2: { // T2 (Abr-Jun)
+            clientesAtivos: 5500,
+            clientesTotais: 35000,
             retencao: 40,
             retencaoReal: 5,
             cmvLimpo: 34,
             cmo: 20,
-            artistica: 17
+            artistica: 19
           },
           3: { // T3 (Jul-Set)
-            clientesAtivos: 3000,
-            clientesTotais: 30000,
+            clientesAtivos: 6000,
+            clientesTotais: 38000,
             retencao: 40,
             retencaoReal: 5,
             cmvLimpo: 34,
             cmo: 20,
-            artistica: 17
+            artistica: 19
           },
-          4: { // T4 (Out-Dez) - METAS OFICIAIS
-            clientesAtivos: 4000,
-            clientesTotais: 15000,
+          4: { // T4 (Out-Dez)
+            clientesAtivos: 6500, // Meta ano: 6.500 média
+            clientesTotais: 40000,
             retencao: 40,
             retencaoReal: 5,
             cmvLimpo: 34,
             cmo: 20,
-            artistica: 20
+            artistica: 19
           }
         };
-        return metas[trimestre as keyof typeof metas] || metas[3];
+        return metas[trimestre as keyof typeof metas] || metas[1];
       };
 
       const metasTrimestre = getMetasTrimestre(trimestre);

@@ -75,10 +75,11 @@ export default function OrganizadorListaPage() {
   const handleCriarNovo = () => {
     const anoAtual = new Date().getFullYear();
     const mesAtual = new Date().getMonth() + 1;
-    let trimestreAtual = 4;
-    if (mesAtual >= 4 && mesAtual <= 6) trimestreAtual = 2;
+    let trimestreAtual = 1;
+    if (mesAtual >= 1 && mesAtual <= 3) trimestreAtual = 1;
+    else if (mesAtual >= 4 && mesAtual <= 6) trimestreAtual = 2;
     else if (mesAtual >= 7 && mesAtual <= 9) trimestreAtual = 3;
-    else if (mesAtual >= 10) trimestreAtual = 4;
+    else trimestreAtual = 4;
     
     router.push(`/estrategico/organizador/novo?ano=${anoAtual}&trimestre=${trimestreAtual}`);
   };
@@ -93,7 +94,7 @@ export default function OrganizadorListaPage() {
       const data = await response.json();
       
       if (data.organizador) {
-        const novoTrimestre = org.trimestre === 4 ? 2 : (org.trimestre || 2) + 1;
+        const novoTrimestre = org.trimestre === 4 ? 1 : (org.trimestre || 1) + 1;
         const novoAno = org.trimestre === 4 ? org.ano + 1 : org.ano;
         
         const createResponse = await fetch('/api/organizador', {
@@ -161,6 +162,7 @@ export default function OrganizadorListaPage() {
   const getCorTrimestre = (trimestre: number | null) => {
     if (!trimestre) return 'bg-blue-500';
     const cores: Record<number, string> = {
+      1: 'bg-cyan-500',
       2: 'bg-green-500',
       3: 'bg-yellow-500',
       4: 'bg-orange-500'

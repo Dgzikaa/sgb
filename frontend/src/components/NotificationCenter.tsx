@@ -37,6 +37,7 @@ import {
   AlertTriangle,
   TrendingDown,
   ArrowRight,
+  ExternalLink,
 } from 'lucide-react';
 
 // Interfaces para tipagem
@@ -531,21 +532,22 @@ export function NotificationCenter() {
                         {notificacao.acoes &&
                           Array.isArray(notificacao.acoes) &&
                           notificacao.acoes.length > 0 && (
-                            <div className="flex flex-wrap gap-1 pt-2">
+                            <div className="flex flex-wrap gap-2 pt-2">
                               {notificacao.acoes.map((acao, index) => (
                                 <Button
                                   key={index}
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleAcaoNotificacao(acao)}
-                                  className="h-6 text-xs"
+                                  className="h-7 text-xs px-3"
+                                  leftIcon={
+                                    acao.action === 'redirect' ? (
+                                      <ExternalLink className="h-3 w-3" />
+                                    ) : acao.action === 'download' ? (
+                                      <Info className="h-3 w-3" />
+                                    ) : undefined
+                                  }
                                 >
-                                  {acao.action === 'redirect' && (
-                                    <User className="h-3 w-3 mr-1" />
-                                  )}
-                                  {acao.action === 'download' && (
-                                    <Info className="h-3 w-3 mr-1" />
-                                  )}
                                   {acao.label || 'Ação'}
                                 </Button>
                               ))}

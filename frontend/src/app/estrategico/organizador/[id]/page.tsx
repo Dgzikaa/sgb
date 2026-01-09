@@ -79,18 +79,18 @@ const statusOptions = [
 const defaultOrganizador: OrganizadorData = {
   bar_id: 0,
   ano: new Date().getFullYear(),
-  trimestre: 4,
+  trimestre: 1, // 1º Tri 2026
   tipo: 'trimestral',
-  meta_clientes_ativos: 4000,
+  meta_clientes_ativos: 5100, // Meta 31/03
   meta_visitas: 15000,
-  meta_cmv_limpo: 34,
+  meta_cmv_limpo: 34, // CMV Limpo Médio do Tri
   meta_cmo: 20,
-  meta_artistica: 20,
-  faturamento_meta: 10000000,
-  pessoas_meta: 12000,
-  reputacao_meta: 4.8,
-  ebitda_meta: 1000000,
-  missao: 'Entregar o novo entretenimento',
+  meta_artistica: 20, // Atrações/Fat
+  faturamento_meta: 18000000, // Meta ano 2026
+  pessoas_meta: 6500, // Média-ano Clientes Ativos
+  reputacao_meta: 4.9, // Meta 2026
+  ebitda_meta: 1800000, // Meta 2026
+  missao: 'Ver de Qualé - Segura a Peteca',
   nicho: 'Bares Musicais (Contexto - Responsa - Mundo vivo - Deboche - Brazólia)',
   valores_centrais: ['', '', ''],
   mercado_alvo: 'Adulto com Espírito Jovem de 28 a 48, Pagosambeiro',
@@ -100,18 +100,21 @@ const defaultOrganizador: OrganizadorData = {
     'O melhor do Boteco - Atendimento Eficiente (Garçom cordial, entrega veloz), Bons drinks, poder sentar',
     'Abraça todos os pagosambeiros (coisa que nem Brazólia nem Tia Zélia fazem)'
   ],
-  principais_problemas: ['Queda de Domingo', 'Diligência Financeira (margem em queda)', 'Risco de Sistema'],
+  principais_problemas: ['Custo % de artistas alto', 'Risco de dar alguma merda reputacional'],
   meta_10_anos: '',
   imagem_3_anos: '',
-  imagem_1_ano: 'Ser um dos Principais Bares da Cidade',
+  imagem_1_ano: 'Se Consolidar como O Bar de Samba de Brasília',
 };
 
 const defaultOKRs: OKR[] = [
-  { epico: 'Faturamento', historia: 'MVP do Almoço', responsavel: 'Cadu', observacoes: 'Teste de fit da proposta de valor do almoço. Fazer pelo menos 4 edições ao longo do tri.', status: 'amarelo' },
-  { epico: 'Faturamento', historia: 'Recuperar Domingo', responsavel: 'Augusto', observacoes: 'Lançamento do projeto novo autoral of the house. 2x no tri trazer alguém giga pra nós (30k).', status: 'amarelo' },
-  { epico: 'Faturamento', historia: 'Desenhar "mote" mensal para os dias fortes', responsavel: 'Augusto', observacoes: 'Exemplos: Breno Convida, Sexta Temática, Curicaca, Benza Convida', status: 'verde' },
-  { epico: '[NSM] Nº de Clientes Ativos', historia: 'Indicadores de cliente semanal e diário', responsavel: 'Digão', observacoes: '% novos clientes, Clientes ativos, Retenção - No Zykor', status: 'cinza' },
-  { epico: 'Diligência Financeira', historia: 'Bater orçamentos toda terça sem errar', responsavel: 'Gonza', observacoes: 'Estamos indo bem!! Melhoramos simulação de CMO Fixo, criamos controle de CMV MTD', status: 'verde' },
+  // 1º TRI 2026 - "Ver de Qualé - Segura a Peteca"
+  { epico: 'Faturamento', historia: 'DATAS CHAVE - CARNAVAL', responsavel: 'Augusto', observacoes: 'Planejamento da proposta do evento, atrações, preço, modelo. Meta Carnaval +25% = R$ 500.000,00', status: 'cinza' },
+  { epico: 'Faturamento', historia: 'DATAS CHAVE - COPA DO MUNDO', responsavel: 'Augusto', observacoes: 'Planejamento da proposta do evento, atrações, preço, modelo', status: 'cinza' },
+  { epico: 'Faturamento', historia: 'Estudo da experiência da fila de espera', responsavel: 'Cadu', observacoes: 'Melhorar a experiência da fila de espera. Fila de espera como "expansão" da capacidade', status: 'cinza' },
+  { epico: 'Clientes Ativos', historia: 'Ações de fidelização/reativação para aumentar retornantes', responsavel: 'Diogo', observacoes: 'CRM com disparos? Programa de Fidelização?', status: 'cinza' },
+  { epico: 'Clientes Novos', historia: 'Ação de Mídia para Awareness', responsavel: 'Diogo', observacoes: 'Plano de mídia digital+OOH', status: 'cinza' },
+  { epico: 'Margem', historia: 'ROI das Atrações', responsavel: 'Augusto', observacoes: '(2º semestre?) Fazer Contrato com atrações fixas. "Não mexer em time que está ganhando" mas aproveitar novos entrantes para "começar certo" com melhores negociações', status: 'cinza' },
+  { epico: 'Reputação (Marca)', historia: 'Artistas Nacionais com modelo de atendimento padrão', responsavel: 'Augusto', observacoes: 'Aproveitar oportunidade de artistas que já estejam em Brasília? Aniver de Bsb? Na Praia? Fazer 2 no ano. 1 no 1º Semestre em Abril', status: 'cinza' },
 ];
 
 export default function OrganizadorEditPage() {

@@ -113,6 +113,15 @@ interface AgentResponse {
   deepLinks?: { label: string; href: string }[];
   chartData?: { label: string; value: number; color?: string }[];
   insight?: { type: 'success' | 'warning' | 'info'; text: string };
+  data?: {
+    faturamento?: number;
+    publico?: number;
+    atingimento?: number;
+    cmv?: number;
+    ticketMedio?: number;
+    variacaoFaturamento?: number;
+    variacaoPublico?: number;
+  };
 }
 
 // Mapeamento de intents para deep links
@@ -254,7 +263,7 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
     ['operacional', /horario|pico|movimento|funcionamento|lotado/],
     
     // Resumo geral
-    ['resumo', /como foi|como esta|como ta|tudo bem|resumo|novidades|o que mudou|visao geral/],
+    ['resumo', /como foi|como esta|como ta|tudo bem|resumo|novidades|o que mudou|visao geral|insights|desempenho/],
   ];
 
   let intent = 'geral';
@@ -681,13 +690,24 @@ async function fetchDataForIntent(
       const clientesSemana = eventosRecentes?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
       const metaSemana = eventosRecentes?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
 
+      // Buscar CMV também para o resumo
+      const { data: cmvResumoRaw } = await supabase
+        .from('cmv_semanal')
+        .select('cmv_percentual')
+        .eq('bar_id', barId)
+        .order('data_inicio', { ascending: false })
+        .limit(1);
+
+      const cmvResumo = (cmvResumoRaw as CMVSemanal[] | null)?.[0]?.cmv_percentual || 0;
+
       return {
         eventosRecentes,
         fatSemana,
         clientesSemana,
         metaSemana,
         atingimento: metaSemana > 0 ? (fatSemana / metaSemana * 100) : 0,
-        ticketMedio: clientesSemana > 0 ? fatSemana / clientesSemana : 0
+        ticketMedio: clientesSemana > 0 ? fatSemana / clientesSemana : 0,
+        cmv: cmvResumo
       };
     }
 
@@ -1085,6 +1105,9 @@ function formatResponse(
       const clientesSemana = data.clientesSemana as number;
       const ating = data.atingimento as number;
       const ticket = data.ticketMedio as number;
+      
+      // Buscar CMV do data se disponível
+      const cmv = (data.cmv as number) || 0;
 
       return {
         success: true,
@@ -1096,7 +1119,15 @@ function formatResponse(
           { label: 'Ticket', value: formatCurrency(ticket), trend: 'neutral' },
           { label: 'Meta', value: formatPercent(ating), trend: ating >= 80 ? 'up' : 'down' }
         ],
-        suggestions: ['Ver por dia', 'Comparar com semana passada', 'Produtos mais vendidos']
+        suggestions: ['Ver por dia', 'Comparar com semana passada', 'Produtos mais vendidos'],
+        // Dados brutos para o dashboard
+        data: {
+          faturamento: fatSemana,
+          publico: clientesSemana,
+          atingimento: ating,
+          cmv: cmv,
+          ticketMedio: ticket
+        }
       };
     }
 

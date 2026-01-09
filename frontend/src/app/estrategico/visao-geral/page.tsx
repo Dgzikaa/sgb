@@ -185,10 +185,10 @@ export default function VisaoGeralEstrategica() {
       const now = new Date();
       const mesAtual = now.getMonth() + 1;
       const anoAtual = now.getFullYear();
-      const ultimoMesTrimestre = { 2: 6, 3: 9, 4: 12 };
-      const primeiroMesTrimestre = { 2: 4, 3: 7, 4: 10 };
-      const primeiro = primeiroMesTrimestre[trimestre as keyof typeof primeiroMesTrimestre];
-      const ultimo = ultimoMesTrimestre[trimestre as keyof typeof ultimoMesTrimestre];
+      const ultimoMesTrimestre: Record<number, number> = { 1: 3, 2: 6, 3: 9, 4: 12 };
+      const primeiroMesTrimestre: Record<number, number> = { 1: 1, 2: 4, 3: 7, 4: 10 };
+      const primeiro = primeiroMesTrimestre[trimestre] || 1;
+      const ultimo = ultimoMesTrimestre[trimestre] || 3;
       
       let mesParaUsar = ultimo;
       if (mesAtual >= primeiro && mesAtual <= ultimo) {
@@ -606,11 +606,11 @@ export default function VisaoGeralEstrategica() {
                     formato="numero"
                     cor="green"
                     icone={Activity}
-                    tooltipTexto="Base Ativa (90 dias): Clientes únicos que visitaram o bar nos últimos 90 dias a partir de hoje. Indica o tamanho da sua base de clientes ativos."
-                    periodoAnalisado={`${trimestreInfo?.periodo} ${anoAtual}`}
+                    tooltipTexto="Base Ativa (90 dias): Clientes únicos com 2+ visitas nos últimos 90 dias a partir de hoje. Indica o tamanho da sua base de clientes ativos."
+                    periodoAnalisado="Últimos 90 dias"
                     comparacao={{
                       valor: indicadoresTrimestraisMemo?.clientesAtivos?.variacao || 0,
-                      label: "vs trimestre anterior"
+                      label: "vs 90 dias anteriores"
                     }}
                   />
                   
