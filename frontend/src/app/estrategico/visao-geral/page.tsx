@@ -117,11 +117,14 @@ export default function VisaoGeralEstrategica() {
     const now = new Date();
     const month = now.getMonth() + 1; // getMonth() retorna 0-11, então +1 para 1-12
     
+    if (month >= 1 && month <= 3) return 1; // Jan-Mar
     if (month >= 4 && month <= 6) return 2; // Abr-Jun
     if (month >= 7 && month <= 9) return 3; // Jul-Set
-    if (month >= 10 && month <= 12) return 4; // Out-Dez
-    return 2; // Jan-Mar seria T1, mas como só temos T2-T4, usar T2 como fallback
+    return 4; // Out-Dez
   };
+  
+  // Obter ano atual
+  const getCurrentYear = () => new Date().getFullYear();
 
   const [trimestreAtual, setTrimestreAtual] = useState(getCurrentQuarter());
   const [anualExpanded, setAnualExpanded] = useState(true);
@@ -132,18 +135,20 @@ export default function VisaoGeralEstrategica() {
   // Removido useEffect do PageTitle para evitar re-renders desnecessários
 
   // Informações dos trimestres - memoizado para evitar recriação
+  const anoAtual = getCurrentYear();
   const getTrimestreInfo = useMemo(() => {
     const info = {
-      2: { nome: '2º Trimestre 2025 (Abr-Jun)', periodo: 'abril-junho' },
-      3: { nome: '3º Trimestre 2025 (Jul-Set)', periodo: 'julho-setembro' },
-      4: { nome: '4º Trimestre 2025 (Out-Dez)', periodo: 'outubro-dezembro' }
+      1: { nome: `1º Trimestre ${anoAtual} (Jan-Mar)`, periodo: 'janeiro-março' },
+      2: { nome: `2º Trimestre ${anoAtual} (Abr-Jun)`, periodo: 'abril-junho' },
+      3: { nome: `3º Trimestre ${anoAtual} (Jul-Set)`, periodo: 'julho-setembro' },
+      4: { nome: `4º Trimestre ${anoAtual} (Out-Dez)`, periodo: 'outubro-dezembro' }
     };
     return (trimestre: number) => info[trimestre as keyof typeof info];
-  }, []);
+  }, [anoAtual]);
 
   // Navegação entre trimestres
   const navegarTrimestre = (direcao: 'anterior' | 'proximo') => {
-    if (direcao === 'anterior' && trimestreAtual > 2) {
+    if (direcao === 'anterior' && trimestreAtual > 1) {
       setTrimestreAtual(trimestreAtual - 1);
     } else if (direcao === 'proximo' && trimestreAtual < 4) {
       setTrimestreAtual(trimestreAtual + 1);
@@ -476,7 +481,7 @@ export default function VisaoGeralEstrategica() {
               ) : indicadoresAnuaisMemo ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <IndicadorCard
-                    titulo="Faturamento 2025"
+                    titulo={`Faturamento ${anoAtual}`}
                     valor={indicadoresAnuaisMemo.faturamento.valor}
                     meta={indicadoresAnuaisMemo.faturamento.meta}
                     formato="moeda"
@@ -548,7 +553,7 @@ export default function VisaoGeralEstrategica() {
                     e.stopPropagation();
                     navegarTrimestre('anterior');
                   }}
-                  disabled={trimestreAtual <= 2}
+                  disabled={trimestreAtual <= 1}
                   className="p-2"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -602,7 +607,7 @@ export default function VisaoGeralEstrategica() {
                     cor="green"
                     icone={Activity}
                     tooltipTexto="Base Ativa (90 dias): Clientes únicos que visitaram o bar nos últimos 90 dias a partir de hoje. Indica o tamanho da sua base de clientes ativos."
-                    periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
+                    periodoAnalisado={`${trimestreInfo?.periodo} ${anoAtual}`}
                     comparacao={{
                       valor: indicadoresTrimestraisMemo?.clientesAtivos?.variacao || 0,
                       label: "vs trimestre anterior"
@@ -617,7 +622,7 @@ export default function VisaoGeralEstrategica() {
                     cor="blue"
                     icone={Users}
                     tooltipTexto="Clientes únicos que visitaram o bar durante todo o trimestre (do início até a data atual). Inclui novos e retornantes."
-                    periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
+                    periodoAnalisado={`${trimestreInfo?.periodo} ${anoAtual}`}
                     comparacao={{
                       valor: indicadoresTrimestraisMemo?.clientesTotais?.variacao || 0,
                       label: "vs trimestre anterior"
@@ -628,7 +633,7 @@ export default function VisaoGeralEstrategica() {
                     valor={indicadoresTrimestraisMemo?.retencao?.valor || 0}
                     meta={indicadoresTrimestraisMemo?.retencao?.meta || 40}
                     variacao={indicadoresTrimestraisMemo?.retencao?.variacao || 0}
-                    periodoAnalisado={`${trimestreInfo?.periodo} 2025`}
+                    periodoAnalisado={`${trimestreInfo?.periodo} ${anoAtual}`}
                   />
                   
                   <IndicadorCard

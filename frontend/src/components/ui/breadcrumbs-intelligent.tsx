@@ -81,7 +81,7 @@ export const useIntelligentBreadcrumbs = () => {
     '/configuracoes/privacidade': { label: 'Privacidade', icon: <Shield className="w-4 h-4" />, category: 'Segurança' },
     '/relatorios': { label: 'Relatórios', icon: <File className="w-4 h-4" />, category: 'Análise' },
     '/operacoes': { label: 'Operações', icon: <Zap className="w-4 h-4" />, category: 'Operacional' },
-    '/operacoes/receitas': { label: 'Receitas', icon: <DollarSign className="w-4 h-4" />, category: 'Financeiro' },
+    '/configuracoes/fichas-tecnicas': { label: 'Fichas Técnicas', icon: <DollarSign className="w-4 h-4" />, category: 'Operacional' },
     '/operacoes/produtos': { label: 'Produtos', icon: <Package className="w-4 h-4" />, category: 'Operacional' },
     '/operacoes/planejamento': { label: 'Planejamento', icon: <Target className="w-4 h-4" />, category: 'Estratégico' },
     '/operacoes/tempo': { label: 'Tempo', icon: <Clock className="w-4 h-4" />, category: 'Operacional' },
@@ -100,7 +100,7 @@ export const useIntelligentBreadcrumbs = () => {
     '/usuarios/redefinir-senha': { label: 'Redefinir Senha', icon: <Shield className="w-4 h-4" />, category: 'Segurança' },
     '/login': { label: 'Login', icon: <Shield className="w-4 h-4" />, category: 'Autenticação' },
     '/home': { label: 'Home', icon: <Home className="w-4 h-4" />, category: 'Navegação' },
-    '/minha-conta': { label: 'Minha Conta', icon: <User className="w-4 h-4" />, category: 'Usuário' },
+    '/usuarios/minha-conta': { label: 'Minha Conta', icon: <User className="w-4 h-4" />, category: 'Usuário' },
     '/auth': { label: 'Autenticação', icon: <Shield className="w-4 h-4" />, category: 'Segurança' }
   }), []);
 

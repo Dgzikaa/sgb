@@ -85,36 +85,36 @@ export function useInsightsNotifications(): UseInsightsNotificationsResult {
       'metas': '/estrategico/visao-geral',
       'cmv': '/operacional/dre',
       'ticket': '/analitico',
-      'pagamentos': '/financeiro',
+      'pagamentos': '/fp',
       
       // Operacional
-      'checklist': '/operacoes/checklists',
-      'checklists': '/operacoes/checklists',
-      'estoque': '/operacoes/receitas',
+      'checklist': '/configuracoes/checklists',
+      'checklists': '/configuracoes/checklists',
+      'estoque': '/configuracoes/fichas-tecnicas',
       
       // Pessoas
       'desempenho': '/estrategico/desempenho',
       'aniversariantes': '/configuracoes/usuarios',
       
       // Reservas
-      'reservas': '/operacoes/reservas',
+      'reservas': '/ferramentas/calendario',
       
       // Avaliações
-      'avaliacoes': '/analitico/nps',
+      'avaliacoes': '/ferramentas/nps',
       
       // Clientes
       'cliente': '/analitico/clientes',
       'clientes': '/analitico/clientes',
       
       // Eventos
-      'evento': '/analitico',
-      'eventos': '/analitico',
+      'evento': '/analitico/eventos',
+      'eventos': '/analitico/eventos',
       
       // Outros
       'marketing': '/analitico',
       'financeiro': '/operacional/dre',
-      'produto': '/analitico',
-      'produtos': '/analitico',
+      'produto': '/analitico/produtos',
+      'produtos': '/analitico/produtos',
     };
     
     const key = categoria.toLowerCase();

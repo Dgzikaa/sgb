@@ -34,8 +34,10 @@ import {
   ThumbsUp,
   ThumbsDown,
   MessageSquare,
-  History
+  History,
+  Mic
 } from 'lucide-react';
+import VoiceCommand from '@/components/dashboard/VoiceCommand';
 
 interface Message {
   id: string;
@@ -819,12 +821,22 @@ export default function AgenteChatPage() {
         {/* Input Area */}
         <div className="relative py-4">
           <div className="relative flex items-end gap-3 p-2 rounded-2xl bg-gray-800/80 border border-gray-700/50 backdrop-blur-sm">
+            {/* Voice Command Button */}
+            <VoiceCommand 
+              onCommand={(text) => {
+                setInput(text);
+                // Enviar automaticamente após comando de voz
+                setTimeout(() => handleSend(text), 100);
+              }}
+              isProcessing={isLoading}
+            />
+            
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Pergunte sobre o Zykor..."
+              placeholder="Pergunte sobre o Zykor ou use o microfone..."
               rows={1}
               className="flex-1 bg-transparent text-white placeholder-gray-500 resize-none outline-none px-4 py-3 max-h-32 text-sm"
               style={{ minHeight: '48px' }}
@@ -850,7 +862,8 @@ export default function AgenteChatPage() {
           
           {/* Hint */}
           <p className="text-center text-xs text-gray-600 mt-2">
-            Pressione <kbd className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-400">Enter</kbd> para enviar
+            <Mic className="w-3 h-3 inline mr-1" />
+            Use o microfone ou pressione <kbd className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-400">Enter</kbd> para enviar
           </p>
         </div>
       </div>

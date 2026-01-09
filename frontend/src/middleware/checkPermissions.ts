@@ -98,7 +98,7 @@ export function getRotasPermitidas(userRole: UserRole): string[] {
     return ['*']; // Acesso total
   }
 
-  const rotas: string[] = ['/home', '/minha-conta'];
+  const rotas: string[] = ['/home', '/usuarios/minha-conta', '/minha-conta'];
 
   if (userRole === 'producao') {
     return [

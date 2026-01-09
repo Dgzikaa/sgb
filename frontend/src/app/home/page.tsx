@@ -11,10 +11,12 @@ import {
   Activity,
   TrendingUp,
   PieChart,
-  Wrench
+  Wrench,
+  MessageSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import AgenteDashboard from '@/components/dashboard/AgenteDashboard';
 
 
 
@@ -56,11 +58,19 @@ export default function HomePage() {
       color: 'from-green-500 to-green-600'
     },
     {
+      title: 'Agente IA',
+      description: 'Chat inteligente e insights automáticos',
+      href: '/ferramentas/agente',
+      icon: MessageSquare,
+      color: 'from-purple-500 to-pink-500',
+      badge: 'Novo'
+    },
+    {
       title: 'Analítico',
       description: 'Retrospectiva, clientes, eventos e produtos',
       href: '/analitico',
       icon: PieChart,
-      color: 'from-purple-500 to-purple-600'
+      color: 'from-violet-500 to-purple-600'
     },
     {
       title: 'Ferramentas',
@@ -68,13 +78,6 @@ export default function HomePage() {
       href: '/ferramentas',
       icon: Wrench,
       color: 'from-amber-500 to-orange-500'
-    },
-    {
-      title: 'DRE Operacional',
-      description: 'Demonstrativo detalhado de resultados',
-      href: '/operacional/dre',
-      icon: TrendingUp,
-      color: 'from-indigo-500 to-indigo-600'
     },
     {
       title: 'Configurações',
@@ -119,12 +122,22 @@ export default function HomePage() {
           </div>
         </motion.div>
 
+        {/* Agente Dashboard */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mb-6"
+        >
+          <AgenteDashboard />
+        </motion.div>
+
         {/* Main Content - Grid Full Width */}
         <motion.div 
           className="flex-1"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
         >
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 h-full">
             {quickActions.map((action, index) => (

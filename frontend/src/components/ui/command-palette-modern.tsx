@@ -121,7 +121,7 @@ const defaultCommands: CommandItem[] = [
     category: 'Configurações',
     icon: <User className="w-4 h-4" />,
     keywords: ['perfil', 'conta', 'preferências', 'configurações pessoais'],
-    action: () => window.location.href = '/minha-conta',
+    action: () => window.location.href = '/usuarios/minha-conta',
     shortcut: '⌘P'
   },
   

@@ -35,7 +35,7 @@ const routeMapping: Record<
   '/operacoes': { name: 'Operações' },
   '/operacoes/checklists': { name: 'Checklists' },
   '/operacoes/checklists/checklists-funcionario': { name: 'Meus Checklists' },
-  '/operacoes/receitas': { name: 'Receitas' },
+  '/configuracoes/fichas-tecnicas': { name: 'Fichas Técnicas' },
   '/ferramentas/terminal': { name: 'Terminal de Produção' },
 
   // Relatórios
