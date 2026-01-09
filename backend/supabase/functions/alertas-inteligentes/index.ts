@@ -41,9 +41,14 @@ class AlertasInteligentesService {
   async analisarFaturamento(barId: number): Promise<Alerta[]> {
     const alertas: Alerta[] = []
     const hoje = new Date()
+    const horaAtual = hoje.getHours()
     const ontem = new Date(hoje)
     ontem.setDate(ontem.getDate() - 1)
     const ontemStr = ontem.toISOString().split('T')[0]
+    const hojeStr = hoje.toISOString().split('T')[0]
+    
+    // Horário limite para considerar que o sync deveria ter rodado (7h da manhã)
+    const HORARIO_SYNC = 7
     
     // Buscar evento de ontem
     const { data: eventoOntem } = await this.supabase
@@ -54,6 +59,7 @@ class AlertasInteligentesService {
       .eq('ativo', true)
       .single()
 
+    // Se não tem evento de ontem, não gerar alertas de faturamento
     if (!eventoOntem) {
       return alertas
     }
@@ -61,8 +67,43 @@ class AlertasInteligentesService {
     const faturamento = eventoOntem.real_r || 0
     const meta = eventoOntem.m1_r || 0
     const pax = eventoOntem.cl_real || 0
-
-    // Verificar se bateu a meta
+    
+    // Verificar se os dados foram atualizados hoje (sync rodou)
+    const ultimaAtualizacao = eventoOntem.updated_at ? new Date(eventoOntem.updated_at) : null
+    const dataAtualizacao = ultimaAtualizacao ? ultimaAtualizacao.toISOString().split('T')[0] : null
+    const syncRodouHoje = dataAtualizacao === hojeStr
+    
+    // LÓGICA DE HORÁRIO:
+    // 1. Antes das 7h: Não gerar alertas (sync ainda não deveria ter rodado)
+    // 2. Depois das 7h + sync não rodou: Alertar que sync não executou
+    // 3. Depois das 7h + sync rodou + faturamento = 0: Alertar que não houve faturamento
+    // 4. Depois das 7h + sync rodou + faturamento > 0: Analisar vs meta
+    
+    if (horaAtual < HORARIO_SYNC) {
+      // Antes do horário do sync - não gerar alertas de faturamento
+      return alertas
+    }
+    
+    // Já passou do horário do sync
+    if (!syncRodouHoje && faturamento === 0) {
+      // Sync não rodou hoje e não tem dados
+      alertas.push({
+        tipo: 'aviso',
+        categoria: 'sincronizacao',
+        titulo: '🔄 Sincronização pendente',
+        mensagem: `Os dados de faturamento de ontem (${ontemStr}) ainda não foram sincronizados. Verifique se a integração está funcionando.`,
+        dados: { data: ontemStr, ultimaAtualizacao: dataAtualizacao },
+        acoes_sugeridas: [
+          'Verificar status da integração ContaHub/ContaAzul',
+          'Executar sincronização manual se necessário',
+          'Verificar logs de erro da integração'
+        ],
+        url: '/configuracoes/saude-dados'
+      })
+      return alertas
+    }
+    
+    // Sync rodou ou tem dados - analisar faturamento
     if (meta > 0 && faturamento < meta * 0.8) {
       const percentual = ((faturamento / meta) * 100).toFixed(1)
       alertas.push({
@@ -96,8 +137,8 @@ class AlertasInteligentesService {
       })
     }
 
-    // Verificar ticket médio
-    if (pax > 0) {
+    // Verificar ticket médio (só se tiver dados válidos)
+    if (pax > 0 && faturamento > 0) {
       const ticketMedio = faturamento / pax
       if (ticketMedio < 80) {
         alertas.push({
