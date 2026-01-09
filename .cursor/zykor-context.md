@@ -45,7 +45,7 @@ Capacidade:
 - Restante: em pe
 
 Horario de Funcionamento: 18h - 02h (todos os dias)
-Operacao 2026: TODOS OS DIAS DA SEMANA
+Operacao 2026: TODOS OS DIAS DA SEMANA (novo!)
 
 Generos Musicais: Pagode (78 eventos) e Samba (76 eventos)
 
@@ -188,7 +188,7 @@ Atracoes especiais Janeiro:
 
 ---
 
-## PRODUTOS MAIS VENDIDOS (TOP 15)
+## PRODUTOS MAIS VENDIDOS (TOP 10)
 
 1. Original 600ml - 16.256 un - R$ 266.796
 2. Agua sem Gas 500ml - 15.949 un - R$ 93.932
@@ -272,15 +272,58 @@ Meses FRACOS:
 
 ## INTEGRACOES ATIVAS
 
-| Sistema | Funcao | Status |
-|---------|--------|--------|
-| ContaHub | Faturamento, PAX, Tickets | ATIVO |
-| Nibo | Custos, Pagamentos | ATIVO |
-| Discord | Notificacoes | ATIVO |
-| Gemini | Analise IA | ATIVO |
-| Yuzer | Reservas | INTEGRANDO |
-| Sympla | Eventos/Ingressos | INTEGRANDO |
-| Getin | Lista/Entrada | INTEGRANDO |
+| Sistema | Funcao | Status | Edge Function |
+|---------|--------|--------|---------------|
+| ContaHub | Faturamento, PAX, Tickets | ATIVO | contahub-sync-automatico |
+| Nibo | Custos, Pagamentos | ATIVO | nibo-sync |
+| Discord | Notificacoes | ATIVO | discord-notification |
+| Gemini | Analise IA | ATIVO | agente-ia-analyzer |
+| Yuzer | Reservas | INTEGRANDO | yuzer-sync |
+| Sympla | Eventos/Ingressos | INTEGRANDO | sympla-sync |
+| Getin | Lista/Entrada | INTEGRANDO | getin-sync |
+| ZigPay | Pagamentos/KDS | PLANEJADO | - |
+| Pluggy | Open Finance | PLANEJADO | - |
+| Inter | Banco | PLANEJADO | - |
+
+---
+
+## SISTEMA DE AGENTES IA
+
+### Agentes Implementados:
+
+1. **agente-analise-diaria** (10:00 BRT)
+   - Analisa dados do dia anterior
+   - Compara com ultimas 4 operacoes do mesmo dia
+   - Busca ultimo dia ABERTO (ignora fechados/feriados)
+   - Calcula ROI de atracao
+   - Usa Gemini 2.0 Flash para insights
+   - Fallback enriquecido quando IA indisponivel
+   - Envia para Discord
+
+2. **agente-analise-semanal** (Segunda 08:00 BRT)
+   - Resume a semana anterior
+   - Compara com semana passada
+   - Identifica tendencias
+
+3. **agente-analise-mensal** (Dia 2, 08:00 BRT)
+   - Resume o mes anterior
+   - Compara com mesmo mes ano passado
+   - Analise YoY (Year over Year)
+
+4. **agente-ia-analyzer**
+   - Nucleo central de analise com IA
+   - Base de conhecimento configuravel
+   - Memoria persistente
+   - Deteccao de padroes
+   - Insights categorizados
+
+### Tabelas de Agentes:
+- agente_insights - Insights gerados
+- agente_memoria_vetorial - Memoria do agente
+- agente_padroes_detectados - Padroes encontrados
+- agente_regras_dinamicas - Regras aprendidas
+- agente_feedbacks - Feedbacks recebidos
+- agente_ia_metricas - Metricas de uso
 
 ---
 
@@ -294,10 +337,26 @@ Meses FRACOS:
 | 07:00 | contahub-sync | Sync ContaHub |
 | 07:30 | sync-eventos | Recalculo eventos |
 | 08:00 | alertas-proativos | Alertas manha |
-| 10:00 | agente-analise-diaria | Analise IA |
+| 10:00 | agente-analise-diaria | Analise IA diaria |
 | 10:00 | nibo-sync | Sync Nibo |
 | 18:00 | sync-contagem | Contagem estoque |
 | 20:00 | stockout-sync | Rupturas |
+
+---
+
+## DECISOES ARQUITETURAIS IMPORTANTES
+
+1. **Consolidacao de Funcoes**: Evitar criar novas Edge Functions.
+   Sempre integrar com existentes quando possivel.
+
+2. **Gemini 2.0 Flash**: Modelo de IA atual. Usar header x-goog-api-key.
+   Fallback obrigatorio quando quota esgota.
+
+3. **Dias Fechados**: Filtrar por faturamento > R$1000 para ignorar
+   dias fechados em comparacoes.
+
+4. **Discord como Hub**: Todas as notificacoes vao para Discord.
+   Webhooks separados por tipo.
 
 ---
 
