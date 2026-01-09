@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')
-const GEMINI_MODEL = 'gemini-1.5-flash'
+const GEMINI_MODEL = 'gemini-2.0-flash'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -210,6 +210,34 @@ async function buscarDadosCompletosEvento(supabase: any, barId: number, data: st
   }
 }
 
+// Calcular tendência baseado em série de valores (do mais antigo pro mais recente)
+function calcularTendencia(valores: number[]): 'subindo' | 'caindo' | 'estavel' | 'volatil' {
+  if (valores.length < 2) return 'estavel'
+  
+  const validos = valores.filter(v => v > 0)
+  if (validos.length < 2) return 'estavel'
+  
+  // Calcular variações entre períodos consecutivos
+  const variacoes: number[] = []
+  for (let i = 1; i < validos.length; i++) {
+    const variacao = ((validos[i] - validos[i-1]) / validos[i-1]) * 100
+    variacoes.push(variacao)
+  }
+  
+  const mediaVariacao = variacoes.reduce((a, b) => a + b, 0) / variacoes.length
+  const positivas = variacoes.filter(v => v > 5).length
+  const negativas = variacoes.filter(v => v < -5).length
+  
+  // Se tem muita oscilação, é volátil
+  if (positivas > 0 && negativas > 0 && Math.abs(positivas - negativas) <= 1) {
+    return 'volatil'
+  }
+  
+  if (mediaVariacao > 10) return 'subindo'
+  if (mediaVariacao < -10) return 'caindo'
+  return 'estavel'
+}
+
 function extrairAtracao(nomeEvento: string): string {
   // Remove prefixos comuns e extrai nome da atração
   const prefixos = [
@@ -322,97 +350,183 @@ async function buscarAtracoesAnteriores(supabase: any, barId: number, atracao: s
 // ANÁLISE COM IA (GEMINI)
 // =============================================================================
 
+interface EstatisticasMesmoDia {
+  datas_comparadas: string[]
+  media_faturamento: number
+  media_pax: number
+  melhor: { data_evento: string; real_r: number; nome: string } | null
+  pior: { data_evento: string; real_r: number; nome: string } | null
+  tendencia: 'subindo' | 'caindo' | 'estavel' | 'volatil'
+}
+
 async function gerarAnaliseInteligente(
   dados: DadosCompletosEvento, 
   contexto: ContextoHistorico,
   historicoAtracao: any[],
-  dadosSemanaPassada: DadosCompletosEvento | null
+  dadosSemanaPassada: DadosCompletosEvento | null,
+  estatisticas: EstatisticasMesmoDia
 ): Promise<string> {
   
   if (!GEMINI_API_KEY) {
     console.error('❌ GEMINI_API_KEY não configurada!')
-    return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada)
+    return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada, estatisticas)
   }
   
   console.log('🤖 Gerando análise inteligente com Gemini...')
   
-  const prompt = `Você é um consultor especialista em bares e casas noturnas no Brasil. Analise os dados abaixo e gere insights PROFUNDOS e ACIONÁVEIS.
+  // Calcular métricas derivadas para análise mais profunda
+  const ticketIdeal = 120 // Meta de ticket médio
+  const cmvIdeal = 28 // CMV ideal para bares
+  const margemIdeal = 65 // Margem ideal
+  
+  const gapTicket = ((dados.ticket_medio - ticketIdeal) / ticketIdeal * 100)
+  const gapCMV = dados.cmv_percentual - cmvIdeal
+  const gapMargem = dados.margem_contribuicao - margemIdeal
+  
+  // Eficiência da atração
+  const custoArtPorPax = dados.pax_total > 0 ? dados.custo_artistico / dados.pax_total : 0
+  const faturamentoPorPax = dados.pax_total > 0 ? dados.faturamento_bruto / dados.pax_total : 0
+  const roiAtracao = dados.custo_artistico > 0 ? ((dados.faturamento_bruto - dados.custo_artistico) / dados.custo_artistico * 100) : 0
+  
+  // Comparação com estatísticas históricas
+  const variacaoVsMedia = estatisticas.media_faturamento > 0 
+    ? ((dados.faturamento_bruto - estatisticas.media_faturamento) / estatisticas.media_faturamento * 100) 
+    : 0
+  
+  const prompt = `Você é um consultor SÊNIOR especialista em bares e casas noturnas no Brasil, com 20 anos de experiência. 
+Analise os dados abaixo com PROFUNDIDADE e gere insights que realmente façam diferença no negócio.
 
-## DADOS DO EVENTO (${dados.dia_semana} ${dados.data})
+═══════════════════════════════════════════════════════════════
+📅 ANÁLISE: ${dados.dia_semana.toUpperCase()} ${dados.data}
+🎭 EVENTO: ${dados.nome_evento}
+🎤 ATRAÇÃO: ${dados.atracao_principal}
+═══════════════════════════════════════════════════════════════
 
-**Evento:** ${dados.nome_evento}
-**Atração:** ${dados.atracao_principal}
+## 💰 RESULTADOS FINANCEIROS
 
-**Faturamento:**
-- Bruto: R$ ${dados.faturamento_bruto.toFixed(2)}
-- Bar/Bebidas: R$ ${dados.faturamento_bar.toFixed(2)}
-- Entrada: R$ ${dados.faturamento_entrada.toFixed(2)}
-- Meta do dia: R$ ${contexto.meta_diaria.toFixed(2)} (${contexto.comparacao_meta > 0 ? '+' : ''}${contexto.comparacao_meta.toFixed(1)}% da meta)
+| Métrica | Valor | Meta/Ideal | Gap |
+|---------|-------|------------|-----|
+| Faturamento Bruto | R$ ${dados.faturamento_bruto.toFixed(2)} | R$ ${contexto.meta_diaria.toFixed(2)} | ${contexto.comparacao_meta >= 0 ? '+' : ''}${contexto.comparacao_meta.toFixed(1)}% |
+| Faturamento Bar | R$ ${dados.faturamento_bar.toFixed(2)} | - | ${(dados.faturamento_bar/dados.faturamento_bruto*100).toFixed(1)}% do total |
+| Faturamento Entrada | R$ ${dados.faturamento_entrada.toFixed(2)} | - | ${(dados.faturamento_entrada/dados.faturamento_bruto*100).toFixed(1)}% do total |
 
-**Público:**
-- PAX Total: ${dados.pax_total}
-- Pagantes: ${dados.pax_pagante}
-- Lista: ${dados.pax_lista}
-- Reservas: ${dados.pax_reserva}
+## 👥 PÚBLICO E CONVERSÃO
 
-**Tickets:**
-- Médio: R$ ${dados.ticket_medio.toFixed(2)}
-- Bebida: R$ ${dados.ticket_bebida.toFixed(2)}
-- Entrada: R$ ${dados.ticket_entrada.toFixed(2)}
+| Métrica | Valor | Análise |
+|---------|-------|---------|
+| PAX Total | ${dados.pax_total} | ${dados.pax_total > estatisticas.media_pax ? '✅ Acima da média' : '⚠️ Abaixo da média'} (média: ${estatisticas.media_pax.toFixed(0)}) |
+| Pagantes | ${dados.pax_pagante} | ${(dados.pax_pagante/dados.pax_total*100).toFixed(1)}% do público |
+| Reservas | ${dados.pax_reserva} | Taxa conversão reserva |
 
-**Custos:**
-- Artístico: R$ ${dados.custo_artistico.toFixed(2)} (${dados.percentual_art_sobre_fat.toFixed(1)}% do fat.)
-- Produção: R$ ${dados.custo_producao.toFixed(2)}
-- CMV: ${dados.cmv_percentual.toFixed(1)}%
-- Margem: ${dados.margem_contribuicao.toFixed(1)}%
+## 🎫 TICKETS (EFICIÊNCIA DE CONSUMO)
 
-**Operação:**
-- Hora pico: ${dados.hora_pico_faturamento} (R$ ${dados.faturamento_hora_pico.toFixed(2)})
-- PIX: ${dados.pix_percentual.toFixed(1)}% | Crédito: ${dados.credito_percentual.toFixed(1)}% | Débito: ${dados.debito_percentual.toFixed(1)}%
+| Ticket | Valor | vs Ideal (R$ ${ticketIdeal}) |
+|--------|-------|------------------------------|
+| Médio Total | R$ ${dados.ticket_medio.toFixed(2)} | ${gapTicket >= 0 ? '✅' : '⚠️'} ${gapTicket >= 0 ? '+' : ''}${gapTicket.toFixed(1)}% |
+| Bebida | R$ ${dados.ticket_bebida.toFixed(2)} | - |
+| Entrada | R$ ${dados.ticket_entrada.toFixed(2)} | - |
 
-## CONTEXTO HISTÓRICO
+## 💸 CUSTOS E MARGENS
 
-**Média das últimas 4 ${dados.dia_semana}s:** R$ ${contexto.media_mesmo_dia_4_semanas.toFixed(2)}
-**Tendência:** ${contexto.tendencia_mesmo_dia === 'subindo' ? '📈 Subindo' : contexto.tendencia_mesmo_dia === 'caindo' ? '📉 Caindo' : '➡️ Estável'}
-**Ranking no mês:** ${contexto.posicao_no_ranking_mes}º de ${contexto.total_dias_mes} dias
-**Melhor dia do mês:** ${contexto.melhor_dia_mes.data} (R$ ${contexto.melhor_dia_mes.faturamento.toFixed(2)})
+| Métrica | Valor | Ideal | Status |
+|---------|-------|-------|--------|
+| Custo Artístico | R$ ${dados.custo_artistico.toFixed(2)} | - | ${dados.percentual_art_sobre_fat.toFixed(1)}% do fat. |
+| Custo Produção | R$ ${dados.custo_producao.toFixed(2)} | - | - |
+| CMV | ${dados.cmv_percentual.toFixed(1)}% | ${cmvIdeal}% | ${gapCMV <= 0 ? '✅' : '⚠️'} Gap: ${gapCMV >= 0 ? '+' : ''}${gapCMV.toFixed(1)}pp |
+| Margem | ${dados.margem_contribuicao.toFixed(1)}% | ${margemIdeal}% | ${gapMargem >= 0 ? '✅' : '⚠️'} Gap: ${gapMargem >= 0 ? '+' : ''}${gapMargem.toFixed(1)}pp |
+
+## 🎤 ROI DA ATRAÇÃO
+
+| Métrica | Valor | Interpretação |
+|---------|-------|---------------|
+| Custo por PAX | R$ ${custoArtPorPax.toFixed(2)} | Quanto cada cliente "custou" em atração |
+| Faturamento por PAX | R$ ${faturamentoPorPax.toFixed(2)} | Retorno por cliente |
+| ROI Atração | ${roiAtracao.toFixed(0)}% | ${roiAtracao > 300 ? '🔥 Excelente' : roiAtracao > 150 ? '✅ Bom' : roiAtracao > 50 ? '⚠️ Mediano' : '❌ Ruim'} |
+
+## 💳 MIX DE PAGAMENTO
+
+- PIX: ${dados.pix_percentual.toFixed(1)}%
+- Crédito: ${dados.credito_percentual.toFixed(1)}%
+- Débito: ${dados.debito_percentual.toFixed(1)}%
+
+## 📊 CONTEXTO HISTÓRICO - ÚLTIMAS ${estatisticas.datas_comparadas.length} ${dados.dia_semana.toUpperCase()}S
+
+| Data | Evento | Resultado |
+|------|--------|-----------|
+${estatisticas.datas_comparadas.map(d => `| ${d} | - | - |`).join('\n')}
+
+**Estatísticas:**
+- Média histórica: R$ ${estatisticas.media_faturamento.toFixed(2)}
+- Variação vs média: ${variacaoVsMedia >= 0 ? '+' : ''}${variacaoVsMedia.toFixed(1)}%
+- Tendência: ${estatisticas.tendencia === 'subindo' ? '📈 SUBINDO' : estatisticas.tendencia === 'caindo' ? '📉 CAINDO' : estatisticas.tendencia === 'volatil' ? '📊 VOLÁTIL' : '➡️ ESTÁVEL'}
+- Melhor ${dados.dia_semana} recente: ${estatisticas.melhor?.data_evento || 'N/A'} (R$ ${estatisticas.melhor?.real_r?.toFixed(2) || 0})
+- Pior ${dados.dia_semana} recente: ${estatisticas.pior?.data_evento || 'N/A'} (R$ ${estatisticas.pior?.real_r?.toFixed(2) || 0})
 
 ${dadosSemanaPassada ? `
-## COMPARAÇÃO COM ${dadosSemanaPassada.dia_semana.toUpperCase()} PASSADA
-- Faturamento: R$ ${dadosSemanaPassada.faturamento_bruto.toFixed(2)} → R$ ${dados.faturamento_bruto.toFixed(2)} (${((dados.faturamento_bruto - dadosSemanaPassada.faturamento_bruto) / dadosSemanaPassada.faturamento_bruto * 100).toFixed(1)}%)
-- PAX: ${dadosSemanaPassada.pax_total} → ${dados.pax_total} (${dadosSemanaPassada.pax_total > 0 ? ((dados.pax_total - dadosSemanaPassada.pax_total) / dadosSemanaPassada.pax_total * 100).toFixed(1) : 0}%)
-- Ticket: R$ ${dadosSemanaPassada.ticket_medio.toFixed(2)} → R$ ${dados.ticket_medio.toFixed(2)}
-- Atração anterior: ${dadosSemanaPassada.atracao_principal}
-` : ''}
+## 🔄 COMPARAÇÃO DIRETA: ${dadosSemanaPassada.data} → ${dados.data}
+
+| Métrica | ${dadosSemanaPassada.data} | ${dados.data} | Variação |
+|---------|---------------------------|---------------|----------|
+| Faturamento | R$ ${dadosSemanaPassada.faturamento_bruto.toFixed(2)} | R$ ${dados.faturamento_bruto.toFixed(2)} | ${((dados.faturamento_bruto - dadosSemanaPassada.faturamento_bruto) / dadosSemanaPassada.faturamento_bruto * 100).toFixed(1)}% |
+| PAX | ${dadosSemanaPassada.pax_total} | ${dados.pax_total} | ${dadosSemanaPassada.pax_total > 0 ? ((dados.pax_total - dadosSemanaPassada.pax_total) / dadosSemanaPassada.pax_total * 100).toFixed(1) : 0}% |
+| Ticket | R$ ${dadosSemanaPassada.ticket_medio.toFixed(2)} | R$ ${dados.ticket_medio.toFixed(2)} | ${dadosSemanaPassada.ticket_medio > 0 ? ((dados.ticket_medio - dadosSemanaPassada.ticket_medio) / dadosSemanaPassada.ticket_medio * 100).toFixed(1) : 0}% |
+| Atração | ${dadosSemanaPassada.atracao_principal} | ${dados.atracao_principal} | - |
+` : `
+## ⚠️ SEM COMPARAÇÃO DIRETA
+Não há ${dados.dia_semana} anterior com operação para comparar diretamente.
+`}
 
 ${historicoAtracao.length > 0 ? `
-## HISTÓRICO DESTA ATRAÇÃO (${dados.atracao_principal})
-${historicoAtracao.map(h => `- ${h.data_evento}: R$ ${h.real_r?.toFixed(2) || 0}, ${h.clientes_r || 0} PAX`).join('\n')}
-` : ''}
+## 🎤 HISTÓRICO DA ATRAÇÃO: ${dados.atracao_principal}
 
-## SUA ANÁLISE
+${historicoAtracao.map(h => `| ${h.data_evento} | R$ ${h.real_r?.toFixed(2) || 0} | ${h.clientes_r || 0} PAX |`).join('\n')}
 
-Responda em português brasileiro com:
+Média desta atração: R$ ${(historicoAtracao.reduce((sum, h) => sum + (h.real_r || 0), 0) / historicoAtracao.length).toFixed(2)}
+` : `
+## 🎤 ATRAÇÃO NOVA
+${dados.atracao_principal} não tem histórico anterior nesta casa.
+`}
 
-1. **RESUMO EXECUTIVO** (2-3 frases diretas sobre o resultado do dia)
+═══════════════════════════════════════════════════════════════
+## 🎯 SUA ANÁLISE PROFUNDA
+═══════════════════════════════════════════════════════════════
 
-2. **3 INSIGHTS PRINCIPAIS** (cada um com:)
-   - O que foi observado
-   - Por que isso importa
-   - O que fazer a respeito
+Responda em português brasileiro, formatado para Discord (use **negrito**, emojis, etc):
 
-3. **PONTO DE ATENÇÃO** (se houver algo preocupante)
+### 1. 📋 RESUMO EXECUTIVO (máx 3 linhas)
+Síntese do resultado: foi bom ou ruim? Por quê? O que define esse resultado?
 
-4. **RECOMENDAÇÃO PARA PRÓXIMA ${dados.dia_semana.toUpperCase()}** (ação específica)
+### 2. 🔍 ANÁLISE DE CAUSA-RAIZ
+Para cada ponto abaixo, explique O QUE aconteceu, POR QUE aconteceu, e O QUE FAZER:
 
-Seja DIRETO, ESPECÍFICO e ACIONÁVEL. Nada de frases genéricas.`
+a) **PÚBLICO**: A casa encheu ou não? O mix pagante/lista estava bom?
+b) **CONSUMO**: O ticket bebida estava alto? As pessoas consumiram bem?
+c) **ATRAÇÃO**: Valeu o investimento? O ROI foi bom? A atração atraiu público?
+d) **OPERAÇÃO**: Houve problemas? Fila, stockout, demora no bar?
+
+### 3. ⚠️ ALERTAS CRÍTICOS
+Liste APENAS se houver algo realmente preocupante que precisa de ação imediata.
+
+### 4. 💡 OPORTUNIDADES IDENTIFICADAS
+O que poderia ter sido melhor? Onde está o dinheiro "deixado na mesa"?
+
+### 5. 📈 RECOMENDAÇÕES PARA PRÓXIMA ${dados.dia_semana.toUpperCase()}
+Ações CONCRETAS e ESPECÍFICAS (não genéricas) para melhorar o resultado.
+
+### 6. 🎯 META AJUSTADA
+Baseado nos dados históricos, qual deveria ser a meta realista para a próxima ${dados.dia_semana}?
+
+Seja DIRETO, use DADOS para embasar, e dê insights que REALMENTE ajudem a tomar decisões.`
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_API_KEY || ''
+        },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { 
@@ -427,7 +541,7 @@ Seja DIRETO, ESPECÍFICO e ACIONÁVEL. Nada de frases genéricas.`
     if (!response.ok) {
       const errorText = await response.text()
       console.error('❌ Erro Gemini:', response.status, errorText)
-      return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada)
+      return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada, estatisticas)
     }
     
     const result = await response.json()
@@ -435,7 +549,7 @@ Seja DIRETO, ESPECÍFICO e ACIONÁVEL. Nada de frases genéricas.`
     
     if (!analise) {
       console.error('❌ Resposta Gemini vazia')
-      return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada)
+      return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada, estatisticas)
     }
     
     console.log('✅ Análise Gemini gerada com sucesso')
@@ -443,49 +557,85 @@ Seja DIRETO, ESPECÍFICO e ACIONÁVEL. Nada de frases genéricas.`
     
   } catch (error) {
     console.error('❌ Erro ao chamar Gemini:', error)
-    return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada)
+    return gerarAnaliseFallback(dados, contexto, dadosSemanaPassada, estatisticas)
   }
 }
 
-function gerarAnaliseFallback(dados: DadosCompletosEvento, contexto: ContextoHistorico, semanaPassada: DadosCompletosEvento | null): string {
+function gerarAnaliseFallback(
+  dados: DadosCompletosEvento, 
+  contexto: ContextoHistorico, 
+  semanaPassada: DadosCompletosEvento | null,
+  estatisticas: EstatisticasMesmoDia
+): string {
   const linhas: string[] = []
   
   linhas.push(`📊 **ANÁLISE ${dados.dia_semana.toUpperCase()} ${dados.data}**`)
   linhas.push(`🎭 ${dados.nome_evento}`)
+  linhas.push(`🎤 Atração: ${dados.atracao_principal}`)
   linhas.push('')
   
-  // Resumo
+  // Resumo vs Meta
   const varMeta = contexto.comparacao_meta
   if (varMeta >= 10) {
-    linhas.push(`✅ **Dia ACIMA da meta** (+${varMeta.toFixed(1)}%)`)
+    linhas.push(`✅ **ACIMA DA META** (+${varMeta.toFixed(1)}%)`)
   } else if (varMeta >= -10) {
-    linhas.push(`➡️ **Dia na meta** (${varMeta >= 0 ? '+' : ''}${varMeta.toFixed(1)}%)`)
+    linhas.push(`➡️ **NA META** (${varMeta >= 0 ? '+' : ''}${varMeta.toFixed(1)}%)`)
   } else {
-    linhas.push(`⚠️ **Dia ABAIXO da meta** (${varMeta.toFixed(1)}%)`)
+    linhas.push(`⚠️ **ABAIXO DA META** (${varMeta.toFixed(1)}%)`)
+  }
+  
+  // Resumo vs Histórico
+  const varVsMedia = estatisticas.media_faturamento > 0 
+    ? ((dados.faturamento_bruto - estatisticas.media_faturamento) / estatisticas.media_faturamento * 100) 
+    : 0
+  if (Math.abs(varVsMedia) > 5) {
+    linhas.push(`${varVsMedia >= 0 ? '📈' : '📉'} **vs Média histórica:** ${varVsMedia >= 0 ? '+' : ''}${varVsMedia.toFixed(1)}%`)
   }
   
   linhas.push('')
-  linhas.push(`💰 **Faturamento:** R$ ${dados.faturamento_bruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
-  linhas.push(`👥 **PAX:** ${dados.pax_total} (${dados.pax_pagante} pagantes, ${dados.pax_lista} lista)`)
-  linhas.push(`🎫 **Ticket Médio:** R$ ${dados.ticket_medio.toFixed(2)}`)
-  linhas.push(`🍺 **Ticket Bebida:** R$ ${dados.ticket_bebida.toFixed(2)}`)
+  linhas.push(`**💰 FATURAMENTO**`)
+  linhas.push(`• Bruto: R$ ${dados.faturamento_bruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+  linhas.push(`• Bar: R$ ${dados.faturamento_bar.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${(dados.faturamento_bar/dados.faturamento_bruto*100).toFixed(0)}%)`)
+  linhas.push(`• Entrada: R$ ${dados.faturamento_entrada.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+  
+  linhas.push('')
+  linhas.push(`**👥 PÚBLICO**`)
+  linhas.push(`• PAX: ${dados.pax_total} (${dados.pax_pagante} pagantes)`)
+  linhas.push(`• Reservas: ${dados.pax_reserva}`)
+  
+  linhas.push('')
+  linhas.push(`**🎫 TICKETS**`)
+  linhas.push(`• Médio: R$ ${dados.ticket_medio.toFixed(2)}`)
+  linhas.push(`• Bebida: R$ ${dados.ticket_bebida.toFixed(2)}`)
+  linhas.push(`• Entrada: R$ ${dados.ticket_entrada.toFixed(2)}`)
   
   if (dados.custo_artistico > 0) {
-    linhas.push(`🎤 **Custo Artístico:** R$ ${dados.custo_artistico.toLocaleString('pt-BR')} (${dados.percentual_art_sobre_fat.toFixed(1)}%)`)
+    const roiAtracao = ((dados.faturamento_bruto - dados.custo_artistico) / dados.custo_artistico * 100)
+    linhas.push('')
+    linhas.push(`**🎤 ATRAÇÃO**`)
+    linhas.push(`• Custo: R$ ${dados.custo_artistico.toLocaleString('pt-BR')} (${dados.percentual_art_sobre_fat.toFixed(1)}% do fat.)`)
+    linhas.push(`• ROI: ${roiAtracao.toFixed(0)}% ${roiAtracao > 200 ? '🔥' : roiAtracao > 100 ? '✅' : '⚠️'}`)
   }
   
   linhas.push('')
-  linhas.push(`📈 **Contexto:**`)
-  linhas.push(`- Média últimas 4 ${dados.dia_semana}s: R$ ${contexto.media_mesmo_dia_4_semanas.toLocaleString('pt-BR')}`)
-  linhas.push(`- Tendência: ${contexto.tendencia_mesmo_dia === 'subindo' ? '📈' : contexto.tendencia_mesmo_dia === 'caindo' ? '📉' : '➡️'}`)
-  linhas.push(`- Ranking mês: ${contexto.posicao_no_ranking_mes}º/${contexto.total_dias_mes}`)
-  
-  if (semanaPassada) {
-    const varFat = ((dados.faturamento_bruto - semanaPassada.faturamento_bruto) / semanaPassada.faturamento_bruto * 100)
-    linhas.push('')
-    linhas.push(`📊 **vs ${semanaPassada.dia_semana} passada:**`)
-    linhas.push(`${varFat >= 0 ? '📈' : '📉'} Faturamento: ${varFat >= 0 ? '+' : ''}${varFat.toFixed(1)}%`)
+  linhas.push(`**📊 HISTÓRICO (últimas ${estatisticas.datas_comparadas.length} ${dados.dia_semana}s)**`)
+  linhas.push(`• Média: R$ ${estatisticas.media_faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`)
+  linhas.push(`• Tendência: ${estatisticas.tendencia === 'subindo' ? '📈 Subindo' : estatisticas.tendencia === 'caindo' ? '📉 Caindo' : estatisticas.tendencia === 'volatil' ? '📊 Volátil' : '➡️ Estável'}`)
+  if (estatisticas.melhor) {
+    linhas.push(`• Melhor: ${estatisticas.melhor.data_evento} (R$ ${estatisticas.melhor.real_r.toLocaleString('pt-BR')})`)
   }
+  
+  if (semanaPassada && semanaPassada.faturamento_bruto > 0) {
+    const varFat = ((dados.faturamento_bruto - semanaPassada.faturamento_bruto) / semanaPassada.faturamento_bruto * 100)
+    const varPax = semanaPassada.pax_total > 0 ? ((dados.pax_total - semanaPassada.pax_total) / semanaPassada.pax_total * 100) : 0
+    linhas.push('')
+    linhas.push(`**🔄 vs ${semanaPassada.data} (${semanaPassada.atracao_principal})**`)
+    linhas.push(`• Faturamento: ${varFat >= 0 ? '+' : ''}${varFat.toFixed(1)}%`)
+    linhas.push(`• PAX: ${varPax >= 0 ? '+' : ''}${varPax.toFixed(1)}%`)
+  }
+  
+  linhas.push('')
+  linhas.push(`⚠️ *Análise detalhada indisponível (quota IA esgotada)*`)
   
   return linhas.join('\n')
 }
@@ -554,19 +704,15 @@ serve(async (req) => {
     
     const dataOntem = ontem.toISOString().split('T')[0]
     
-    // Data da semana passada (mesmo dia)
-    const semanaPassada = new Date(ontem.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const dataSemanaPassada = semanaPassada.toISOString().split('T')[0]
-    
     console.log(`🎯 Análise profunda para bar_id=${barId}`)
-    console.log(`📅 Data: ${dataOntem} | Comparação: ${dataSemanaPassada}`)
+    console.log(`📅 Data análise: ${dataOntem}`)
     
     // Conectar ao Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
     
-    // 1. Buscar dados completos do evento
+    // 1. Buscar dados completos do evento de ontem
     const dadosOntem = await buscarDadosCompletosEvento(supabase, barId, dataOntem)
     
     if (!dadosOntem) {
@@ -577,8 +723,55 @@ serve(async (req) => {
       })
     }
     
-    // 2. Buscar dados da semana passada
-    const dadosSemanaPassada = await buscarDadosCompletosEvento(supabase, barId, dataSemanaPassada)
+    // 2. BUSCAR ÚLTIMA OPERAÇÃO DO MESMO DIA DA SEMANA COM FATURAMENTO > 0
+    // Isso evita comparar com dias fechados (ex: 01/01)
+    const diaSemanaNum = ontem.getDay() // 0=Dom, 1=Seg, etc
+    const { data: ultimasOperacoes } = await supabase
+      .from('eventos')
+      .select('data_evento, real_r, nome, cl_real')
+      .eq('bar_id', barId)
+      .lt('data_evento', dataOntem) // Antes de ontem
+      .gt('real_r', 1000) // Só dias com faturamento significativo (> R$ 1000)
+      .order('data_evento', { ascending: false })
+      .limit(30) // Últimos 30 dias com operação
+    
+    // Filtrar para pegar só o mesmo dia da semana
+    const mesmosDiasSemana = ultimasOperacoes?.filter((op: any) => {
+      const dataOp = new Date(op.data_evento + 'T12:00:00Z')
+      return dataOp.getDay() === diaSemanaNum
+    }) || []
+    
+    console.log(`📊 Encontradas ${mesmosDiasSemana.length} ${dadosOntem.dia_semana}s anteriores com operação`)
+    
+    // Pegar a mais recente para comparação direta
+    const ultimaMesmoDia = mesmosDiasSemana[0]
+    let dadosSemanaPassada = null
+    
+    if (ultimaMesmoDia) {
+      console.log(`🔄 Comparando com ${ultimaMesmoDia.data_evento} (última ${dadosOntem.dia_semana} com operação)`)
+      dadosSemanaPassada = await buscarDadosCompletosEvento(supabase, barId, ultimaMesmoDia.data_evento)
+    } else {
+      console.log(`⚠️ Nenhuma ${dadosOntem.dia_semana} anterior encontrada com operação`)
+    }
+    
+    // 3. Calcular estatísticas das últimas 4 operações do mesmo dia
+    const ultimas4 = mesmosDiasSemana.slice(0, 4)
+    const estatisticasMesmoDia = {
+      datas_comparadas: ultimas4.map((op: any) => op.data_evento),
+      media_faturamento: ultimas4.length > 0 
+        ? ultimas4.reduce((sum: number, op: any) => sum + (op.real_r || 0), 0) / ultimas4.length 
+        : 0,
+      media_pax: ultimas4.length > 0 
+        ? ultimas4.reduce((sum: number, op: any) => sum + (op.cl_real || 0), 0) / ultimas4.length 
+        : 0,
+      melhor: ultimas4.length > 0 
+        ? ultimas4.reduce((best: any, op: any) => (!best || op.real_r > best.real_r) ? op : best, null)
+        : null,
+      pior: ultimas4.length > 0 
+        ? ultimas4.reduce((worst: any, op: any) => (!worst || op.real_r < worst.real_r) ? op : worst, null)
+        : null,
+      tendencia: calcularTendencia(ultimas4.map((op: any) => op.real_r).reverse())
+    }
     
     // 3. Buscar contexto histórico
     const contexto = await buscarContextoHistorico(supabase, barId, dataOntem)
@@ -586,8 +779,8 @@ serve(async (req) => {
     // 4. Buscar histórico da atração
     const historicoAtracao = await buscarAtracoesAnteriores(supabase, barId, dadosOntem.atracao_principal)
     
-    // 5. Gerar análise inteligente
-    const analise = await gerarAnaliseInteligente(dadosOntem, contexto, historicoAtracao, dadosSemanaPassada)
+    // 5. Gerar análise inteligente (agora com estatísticas do mesmo dia da semana)
+    const analise = await gerarAnaliseInteligente(dadosOntem, contexto, historicoAtracao, dadosSemanaPassada, estatisticasMesmoDia)
     
     // 6. Enviar para Discord
     const titulo = `🤖 Análise ${dadosOntem.dia_semana} ${dataOntem}`
