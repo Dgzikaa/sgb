@@ -80,7 +80,7 @@ async function buscarDadosCompletosEvento(supabase: any, barId: number, data: st
   const dataObj = new Date(data + 'T12:00:00Z')
   const diaSemana = diasSemana[dataObj.getDay()]
   
-  // 1. EVENTOS_BASE (Yuzer consolidado)
+  // 1. EVENTOS_BASE (dados consolidados)
   const { data: eventoBase } = await supabase
     .from('eventos_base')
     .select('*')
@@ -88,7 +88,7 @@ async function buscarDadosCompletosEvento(supabase: any, barId: number, data: st
     .eq('data_evento', data)
     .single()
   
-  // 2. CONTAHUB_ANALITICO
+  // 2. CONTAHUB_ANALITICO (backup)
   const { data: contahub } = await supabase
     .from('contahub_analitico')
     .select('*')
@@ -96,32 +96,25 @@ async function buscarDadosCompletosEvento(supabase: any, barId: number, data: st
     .eq('data_movimento', data)
     .single()
   
-  // 3. YUZER_PAGAMENTO (detalhes de pagamento)
-  const { data: pagamento } = await supabase
-    .from('yuzer_pagamento')
-    .select('*')
-    .eq('bar_id', barId)
-    .eq('data_evento', data)
-    .single()
-  
-  // 4. YUZER_FATPORHORA (faturamento por hora)
+  // 3. CONTAHUB_FATPORHORA (faturamento por hora)
   const { data: fatHora } = await supabase
-    .from('yuzer_fatporhora')
+    .from('contahub_fatporhora')
     .select('*')
     .eq('bar_id', barId)
-    .eq('data_evento', data)
+    .eq('data_movimento', data)
     .order('faturamento', { ascending: false })
     .limit(1)
   
-  // 5. NIBO_AGENDAMENTOS (custos do dia)
-  const dataFormatada = `${data.substring(8, 10)}/${data.substring(5, 7)}`
+  // 4. NIBO_AGENDAMENTOS (custos do dia - buscar por data no formato DD/MM)
+  const dia = data.substring(8, 10)
+  const mes = data.substring(5, 7)
   const { data: custos } = await supabase
     .from('nibo_agendamentos')
-    .select('valor, categoria_nome')
+    .select('valor, categoria_nome, descricao')
     .eq('bar_id', barId)
-    .or(`descricao.ilike.%${dataFormatada}%,data_vencimento.eq.${data}`)
+    .or(`descricao.ilike.%${dia}/${mes}%,descricao.ilike.%${dia}.${mes}%`)
   
-  // 6. GETIN_RESERVAS (reservas do dia)
+  // 5. GETIN_RESERVAS (reservas do dia)
   const { data: reservas } = await supabase
     .from('getin_reservas')
     .select('id, quantidade_pessoas')
@@ -138,33 +131,46 @@ async function buscarDadosCompletosEvento(supabase: any, barId: number, data: st
   const nomeEvento = eventoBase?.nome || contahub?.nome_evento || 'Operação Normal'
   const atracao = extrairAtracao(nomeEvento)
   
-  // Calcular custos
-  const custoArtistico = custos?.filter((c: any) => 
+  // Calcular custos do Nibo (Atrações e Produção)
+  const custoArtisticoNibo = custos?.filter((c: any) => 
     c.categoria_nome?.toLowerCase().includes('atra') || 
     c.categoria_nome?.toLowerCase().includes('artista') ||
-    c.categoria_nome?.toLowerCase().includes('dj') ||
-    c.categoria_nome?.toLowerCase().includes('banda')
-  ).reduce((sum: number, c: any) => sum + Math.abs(c.valor || 0), 0) || eventoBase?.c_art || 0
+    c.categoria_nome?.toLowerCase().includes('programa')
+  ).reduce((sum: number, c: any) => sum + Math.abs(parseFloat(c.valor) || 0), 0) || 0
 
-  const custoProducao = custos?.filter((c: any) => 
+  const custoProducaoNibo = custos?.filter((c: any) => 
     c.categoria_nome?.toLowerCase().includes('produ')
-  ).reduce((sum: number, c: any) => sum + Math.abs(c.valor || 0), 0) || eventoBase?.c_prod || 0
+  ).reduce((sum: number, c: any) => sum + Math.abs(parseFloat(c.valor) || 0), 0) || 0
   
-  // Calcular PAX
+  // Usar custos do Nibo ou do eventos_base
+  const custoArtistico = custoArtisticoNibo > 0 ? custoArtisticoNibo : parseFloat(eventoBase?.c_art) || 0
+  const custoProducao = custoProducaoNibo > 0 ? custoProducaoNibo : parseFloat(eventoBase?.c_prod) || 0
+  
+  // Calcular PAX de reservas
   const paxReserva = reservas?.reduce((sum: number, r: any) => sum + (r.quantidade_pessoas || 0), 0) || 0
-  const paxTotal = eventoBase?.clientes_r || contahub?.pax_estimado || 0
   
-  // Calcular pagamentos percentuais
-  const fatBruto = pagamento?.faturamento_bruto || eventoBase?.real_r || contahub?.faturamento_bruto || 0
-  const pixPerc = fatBruto > 0 ? ((pagamento?.pix || 0) / fatBruto * 100) : 0
-  const creditoPerc = fatBruto > 0 ? ((pagamento?.credito || 0) / fatBruto * 100) : 0
-  const debitoPerc = fatBruto > 0 ? ((pagamento?.debito || 0) / fatBruto * 100) : 0
-  const dinheiroPerc = fatBruto > 0 ? ((pagamento?.dinheiro || 0) / fatBruto * 100) : 0
+  // DADOS CORRETOS - usando nomes reais das colunas
+  const fatBruto = parseFloat(eventoBase?.real_r) || contahub?.faturamento_bruto || 0
+  const fatBar = parseFloat(eventoBase?.faturamento_bar) || contahub?.faturamento_bar || 0
+  const fatCouvert = parseFloat(eventoBase?.faturamento_couvert) || 0
+  const paxTotal = eventoBase?.cl_real || contahub?.pax_estimado || 0
+  const ticketMedio = parseFloat(eventoBase?.t_medio) || contahub?.ticket_medio || 0
+  const ticketBebida = parseFloat(eventoBase?.tb_real) || 0
+  const ticketEntrada = parseFloat(eventoBase?.te_real) || 0
+  const reservasTot = eventoBase?.res_tot || 0
+  
+  // Percentuais de pagamento (já vem calculados na eventos_base)
+  const pixPerc = parseFloat(eventoBase?.percent_b) || 0  // percent_b = PIX
+  const creditoPerc = parseFloat(eventoBase?.percent_c) || 0  // percent_c = Crédito
+  const debitoPerc = parseFloat(eventoBase?.percent_d) || 0  // percent_d = Débito
+  
+  // Stockout
+  const stockout = parseFloat(eventoBase?.percent_stockout) || 0
   
   // Calcular margem
   const custoTotal = custoArtistico + custoProducao
   const margemContrib = fatBruto > 0 ? ((fatBruto - custoTotal) / fatBruto * 100) : 0
-  const percArtFat = fatBruto > 0 ? (custoArtistico / fatBruto * 100) : 0
+  const percArtFat = fatBruto > 0 ? (custoArtistico / fatBruto * 100) : parseFloat(eventoBase?.percent_art_fat) || 0
   
   return {
     data,
@@ -173,18 +179,18 @@ async function buscarDadosCompletosEvento(supabase: any, barId: number, data: st
     atracao_principal: atracao,
     
     faturamento_bruto: fatBruto,
-    faturamento_liquido: eventoBase?.real_r_liq || pagamento?.valor_liquido || 0,
-    faturamento_bar: eventoBase?.bar_r || contahub?.faturamento_bar || 0,
-    faturamento_entrada: eventoBase?.entrada_r || 0,
+    faturamento_liquido: parseFloat(eventoBase?.faturamento_liquido) || fatBruto * 0.95,
+    faturamento_bar: fatBar,
+    faturamento_entrada: fatCouvert,
     
     pax_total: paxTotal,
-    pax_pagante: eventoBase?.pag_r || 0,
-    pax_lista: eventoBase?.lista_r || 0,
-    pax_reserva: paxReserva,
+    pax_pagante: paxTotal - (eventoBase?.lista_r || 0),
+    pax_lista: 0, // não temos lista separada
+    pax_reserva: reservasTot || paxReserva,
     
-    ticket_medio: eventoBase?.te_r || contahub?.ticket_medio || 0,
-    ticket_bebida: eventoBase?.tb_r || 0,
-    ticket_entrada: eventoBase?.tent_r || 0,
+    ticket_medio: ticketMedio,
+    ticket_bebida: ticketBebida,
+    ticket_entrada: ticketEntrada,
     
     custo_artistico: custoArtistico,
     custo_producao: custoProducao,
@@ -200,7 +206,7 @@ async function buscarDadosCompletosEvento(supabase: any, barId: number, data: st
     pix_percentual: pixPerc,
     credito_percentual: creditoPerc,
     debito_percentual: debitoPerc,
-    dinheiro_percentual: dinheiroPerc
+    dinheiro_percentual: 100 - pixPerc - creditoPerc - debitoPerc
   }
 }
 
