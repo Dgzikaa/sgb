@@ -49,6 +49,36 @@ serve(async (req) => {
       console.log(`\n🏪 Processando bar: ${bar.nome} (ID: ${bar.id})`)
 
       try {
+        // ============================================
+        // 🔄 PRIMEIRO: Recalcular a semana ANTERIOR (que acabou de terminar)
+        // Isso garante que a semana que terminou ontem (domingo) tenha dados finais corretos
+        // ============================================
+        const semanaAnterior = semanaAtual === 1 ? 52 : semanaAtual - 1
+        const anoSemanaAnterior = semanaAtual === 1 ? anoAtual - 1 : anoAtual
+        
+        console.log(`🔙 Recalculando semana anterior: ${semanaAnterior}/${anoSemanaAnterior}`)
+        
+        const { data: semanaAnteriorExiste } = await supabase
+          .from('desempenho_semanal')
+          .select('id')
+          .eq('bar_id', bar.id)
+          .eq('ano', anoSemanaAnterior)
+          .eq('numero_semana', semanaAnterior)
+          .single()
+
+        if (semanaAnteriorExiste) {
+          try {
+            await recalcularDesempenhoSemana(supabase, bar.id, anoSemanaAnterior, semanaAnterior)
+            console.log(`✅ Semana anterior ${semanaAnterior} recalculada com dados finais!`)
+          } catch (errAnterior) {
+            console.error(`⚠️ Erro ao recalcular semana anterior:`, errAnterior)
+          }
+        }
+
+        // ============================================
+        // 🆕 SEGUNDO: Criar/processar a semana ATUAL (que está começando)
+        // ============================================
+        
         // 1. Verificar se semana atual já existe
         const { data: semanaExistente } = await supabase
           .from('desempenho_semanal')
@@ -78,6 +108,7 @@ serve(async (req) => {
           bar_id: bar.id,
           bar_nome: bar.nome,
           semana: semanaAtual,
+          semana_anterior: semanaAnterior,
           ano: anoAtual,
           sucesso: true,
           dados: resultadoRecalculo

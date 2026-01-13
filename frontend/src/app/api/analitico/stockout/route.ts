@@ -9,9 +9,16 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { data_selecionada, bar_id = 3, filtros = [] } = await request.json();
+    const { data_selecionada, bar_id, filtros = [] } = await request.json();
 
     console.log('🔍 API Stockout - Data recebida:', data_selecionada, 'Bar ID:', bar_id, 'Filtros:', filtros);
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!data_selecionada) {
       return NextResponse.json(

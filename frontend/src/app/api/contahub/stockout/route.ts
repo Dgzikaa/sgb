@@ -208,7 +208,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { date, hour = '20:00:00', bar_id = 3 } = body;
+    const { date, hour = '20:00:00', bar_id } = body;
+
+    if (!bar_id) {
+      return NextResponse.json({
+        success: false,
+        error: 'bar_id é obrigatório'
+      }, { status: 400 });
+    }
 
     if (!date) {
       return NextResponse.json({

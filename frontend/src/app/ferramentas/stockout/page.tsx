@@ -165,7 +165,7 @@ const GRUPOS_LOCAIS = {
 
 export default function StockoutPage() {
   const { setPageTitle } = usePageTitle();
-  const { selectedBar } = useBar();
+  const { selectedBar, isLoading: barLoading } = useBar();
 
   const [selectedDate, setSelectedDate] = useState(() => {
     const yesterday = new Date();
@@ -219,10 +219,16 @@ export default function StockoutPage() {
   });
 
   const buscarDadosStockout = async (data: string, filtros: string[] = []) => {
+    // Não buscar se o bar ainda não foi carregado
+    if (!selectedBar?.id) {
+      console.log('⏳ Aguardando bar ser selecionado...');
+      return;
+    }
+    
     setLoading(true);
     
     try {
-      console.log('🔍 Buscando stockout para data:', data, 'bar_id:', selectedBar?.id, 'filtros:', filtros);
+      console.log('🔍 Buscando stockout para data:', data, 'bar_id:', selectedBar.id, 'filtros:', filtros);
       
       const response = await fetch('/api/analitico/stockout', {
         method: 'POST',
@@ -231,7 +237,7 @@ export default function StockoutPage() {
         },
         body: JSON.stringify({
           data_selecionada: data,
-          bar_id: selectedBar?.id || 3,
+          bar_id: selectedBar.id,
           filtros: filtros
         }),
       });
@@ -259,6 +265,12 @@ export default function StockoutPage() {
   };
 
   const buscarDadosPeriodo = async () => {
+    // Não buscar se o bar ainda não foi carregado
+    if (!selectedBar?.id) {
+      console.log('⏳ Aguardando bar ser selecionado...');
+      return;
+    }
+    
     setLoading(true);
     try {
       const response = await fetch('/api/analitico/stockout-historico', {
@@ -269,7 +281,7 @@ export default function StockoutPage() {
         body: JSON.stringify({
           data_inicio: dataInicioDiaria,
           data_fim: dataFimDiaria,
-          bar_id: selectedBar?.id,
+          bar_id: selectedBar.id,
           filtros: filtrosAtivos
         }),
       });
@@ -332,6 +344,12 @@ export default function StockoutPage() {
   };
 
   const buscarHistoricoStockout = async () => {
+    // Não buscar se o bar ainda não foi carregado
+    if (!selectedBar?.id) {
+      console.log('⏳ Aguardando bar ser selecionado...');
+      return;
+    }
+    
     setLoading(true);
     try {
       const response = await fetch('/api/analitico/stockout-historico', {
@@ -342,7 +360,7 @@ export default function StockoutPage() {
         body: JSON.stringify({
           data_inicio: dataInicio,
           data_fim: dataFim,
-          bar_id: selectedBar?.id,
+          bar_id: selectedBar.id,
           filtros: filtrosAtivos
         }),
       });
@@ -423,8 +441,16 @@ export default function StockoutPage() {
     setPageTitle('📦 Controle de Stockout');
   }, [setPageTitle]);
 
-  // Carregar dados automaticamente na primeira renderização
+  // Carregar dados automaticamente quando o bar for selecionado ou mudar
   useEffect(() => {
+    // Não fazer nada se o bar ainda está carregando ou não foi selecionado
+    if (barLoading || !selectedBar?.id) {
+      console.log('⏳ Aguardando bar ser carregado...', { barLoading, selectedBar });
+      return;
+    }
+    
+    console.log('🏪 Bar selecionado:', selectedBar.nome, '(ID:', selectedBar.id, ')');
+    
     if (activeTab === 'diario') {
       if (modoAnalise === 'unica' && selectedDate) {
         console.log('🚀 Carregando dados iniciais para:', selectedDate);
@@ -437,7 +463,7 @@ export default function StockoutPage() {
       buscarHistoricoStockout();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, modoAnalise]);
+  }, [activeTab, modoAnalise, selectedBar?.id, barLoading]);
 
   const formatarData = (data: string) => {
     if (!data || data.includes('a')) return data; // Se já está formatado ou é um range

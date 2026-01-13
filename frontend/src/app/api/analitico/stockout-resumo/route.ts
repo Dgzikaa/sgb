@@ -98,7 +98,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { data_inicio, data_fim, bar_id = 3 } = await request.json();
+    const { data_inicio, data_fim, bar_id } = await request.json();
+
+    if (!bar_id) {
+      return NextResponse.json(
+        { error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     if (!data_inicio || !data_fim) {
       return NextResponse.json(
