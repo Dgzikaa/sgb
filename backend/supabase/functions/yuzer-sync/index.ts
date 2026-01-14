@@ -305,22 +305,8 @@ async function insertYuzerEventos(supabase: any, statsData: any, barId: number) 
   const eventos: any[] = [];
   
   for (const evento of statsData.data) {
-    // Extrair data do nome do evento
-    const regex = /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/;
-    const match = evento.name?.match(regex);
-    
-    let dataInicio = null;
-    let dataFim = null;
-    
-    if (match) {
-      let [, dia, mes, ano] = match;
-      if (ano.length === 2) {
-        ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
-      }
-      const dataEvento = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-      dataInicio = `${dataEvento}T18:00:00.000Z`;
-      dataFim = `${dataEvento}T23:59:59.999Z`;
-    }
+    // Extrair datas do nome do evento (suporta eventos multi-dias)
+    const { dataInicio, dataFim } = extrairDatasDoNomeEvento(evento.name);
     
     eventos.push({
       bar_id: barId,
@@ -352,21 +338,99 @@ async function insertYuzerEventos(supabase: any, statsData: any, barId: number) 
   }
 }
 
-// Função auxiliar para extrair data do nome do evento
-function extrairDataDoNomeEvento(nomeEvento: string): string {
-  const regex = /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/;
-  const match = nomeEvento.match(regex);
+// Função auxiliar para extrair datas do nome do evento (suporta eventos multi-dias)
+// Exemplos suportados:
+// - "Carnaval 01/03 até 04/03/25" -> inicio: 01/03, fim: 04/03
+// - "Evento 01/03 a 04/03/2025" -> inicio: 01/03, fim: 04/03
+// - "Show 15/03/2025" -> inicio e fim: 15/03
+// - "Festival 01-04/03/25" -> inicio: 01/03, fim: 04/03
+function extrairDatasDoNomeEvento(nomeEvento: string): { dataInicio: string | null, dataFim: string | null } {
+  if (!nomeEvento) {
+    return { dataInicio: null, dataFim: null };
+  }
+
+  // Padrão 1: "DD/MM até DD/MM/YYYY" ou "DD/MM a DD/MM/YYYY"
+  const regexPeriodo = /(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?\s*(?:até|a|ate)\s*(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/i;
+  const matchPeriodo = nomeEvento.match(regexPeriodo);
   
-  if (match) {
-    let [, dia, mes, ano] = match;
+  if (matchPeriodo) {
+    let [, diaInicio, mesInicio, anoInicio, diaFim, mesFim, anoFim] = matchPeriodo;
+    
+    // Se não tem ano no início, usa o mesmo do fim
+    if (!anoInicio) {
+      anoInicio = anoFim;
+    }
+    
+    // Normaliza anos de 2 dígitos
+    if (anoInicio.length === 2) {
+      anoInicio = parseInt(anoInicio) < 50 ? `20${anoInicio}` : `19${anoInicio}`;
+    }
+    if (anoFim.length === 2) {
+      anoFim = parseInt(anoFim) < 50 ? `20${anoFim}` : `19${anoFim}`;
+    }
+    
+    const dataInicioStr = `${anoInicio}-${mesInicio.padStart(2, '0')}-${diaInicio.padStart(2, '0')}`;
+    const dataFimStr = `${anoFim}-${mesFim.padStart(2, '0')}-${diaFim.padStart(2, '0')}`;
+    
+    console.log(`📅 Evento multi-dias detectado: ${nomeEvento} -> ${dataInicioStr} até ${dataFimStr}`);
+    
+    return {
+      dataInicio: `${dataInicioStr}T18:00:00.000Z`,
+      dataFim: `${dataFimStr}T23:59:59.999Z`
+    };
+  }
+  
+  // Padrão 2: "DD-DD/MM/YYYY" (ex: "01-04/03/25")
+  const regexDiasRange = /(\d{1,2})\s*[-–]\s*(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/;
+  const matchDiasRange = nomeEvento.match(regexDiasRange);
+  
+  if (matchDiasRange) {
+    let [, diaInicio, diaFim, mes, ano] = matchDiasRange;
     
     if (ano.length === 2) {
       ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
     }
     
-    return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+    const dataInicioStr = `${ano}-${mes.padStart(2, '0')}-${diaInicio.padStart(2, '0')}`;
+    const dataFimStr = `${ano}-${mes.padStart(2, '0')}-${diaFim.padStart(2, '0')}`;
+    
+    console.log(`📅 Evento multi-dias (range) detectado: ${nomeEvento} -> ${dataInicioStr} até ${dataFimStr}`);
+    
+    return {
+      dataInicio: `${dataInicioStr}T18:00:00.000Z`,
+      dataFim: `${dataFimStr}T23:59:59.999Z`
+    };
   }
   
+  // Padrão 3: Data única "DD/MM/YYYY"
+  const regexSimples = /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/;
+  const matchSimples = nomeEvento.match(regexSimples);
+  
+  if (matchSimples) {
+    let [, dia, mes, ano] = matchSimples;
+    
+    if (ano.length === 2) {
+      ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
+    }
+    
+    const dataEvento = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+    
+    return {
+      dataInicio: `${dataEvento}T18:00:00.000Z`,
+      dataFim: `${dataEvento}T23:59:59.999Z`
+    };
+  }
+  
+  // Fallback: sem data encontrada
+  return { dataInicio: null, dataFim: null };
+}
+
+// Função auxiliar para extrair data do nome do evento (mantida para compatibilidade)
+function extrairDataDoNomeEvento(nomeEvento: string): string {
+  const { dataInicio } = extrairDatasDoNomeEvento(nomeEvento);
+  if (dataInicio) {
+    return dataInicio.split('T')[0];
+  }
   // Fallback: usar data atual
   return new Date().toISOString().split('T')[0];
 }
